@@ -412,15 +412,15 @@
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" keyEquivalent="s" id="pxx-59-PXV" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
-                                            <connections>
-                                                <action selector="collectPageToCard:" target="Ady-hI-5gd" id="YjN-Z7-AFg"/>
-                                            </connections>
-                                        </menuItem>
-                                        <menuItem title="Collect Page to card…" tag="4" enabled="NO" alternate="YES" keyEquivalent="s" id="IqJ-4H-Bqz" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Capture Page to Card..." tag="4" enabled="NO" keyEquivalent="s" id="IqJ-4H-Bqz" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
                                             <connections>
                                                 <action selector="collectPageToCard:" target="Ady-hI-5gd" id="vCu-Ik-TRT"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem title="Capture Page to Card..." tag="4" hidden="YES" enabled="NO" keyEquivalent="s" allowsKeyEquivalentWhenHidden="YES" id="BaN-p1-vse" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                            <connections>
+                                                <action selector="collectPageToCard:" target="Ady-hI-5gd" id="buc-nN-dY3"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="24w-bP-3Wy"/>
@@ -472,10 +472,10 @@
                                                             <action selector="resetDatabase:" target="Voe-Tx-rLC" id="BZD-93-Qp0"/>
                                                         </connections>
                                                     </menuItem>
-                                                    <menuItem title="Delete all local notes" id="T1w-pc-FGT">
+                                                    <menuItem title="Delete all local contents" id="T1w-pc-FGT">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
-                                                            <action selector="deleteLocalDocuments:" target="Voe-Tx-rLC" id="RoE-cB-YGe"/>
+                                                            <action selector="deleteLocalContent:" target="Voe-Tx-rLC" id="C4r-KP-XsZ"/>
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="EDR-BD-fNS"/>
@@ -489,6 +489,25 @@
                                                         <modifierMask key="keyEquivalentModifierMask"/>
                                                         <connections>
                                                             <action selector="importNotes:" target="Voe-Tx-rLC" id="5ba-tS-OS3"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem isSeparatorItem="YES" id="tjb-m3-N6g"/>
+                                                    <menuItem title="Import Safari History" id="3xJ-aB-Hsi">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importSafariHistory:" target="Voe-Tx-rLC" id="yBq-S3-5zY"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Import Firefox History" id="ORD-oT-gZt">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importFirefoxHistory:" target="Voe-Tx-rLC" id="ctj-vu-7Yk"/>
+                                                        </connections>
+                                                    </menuItem>
+                                                    <menuItem title="Import Chrome History" id="1up-Ef-3Fj">
+                                                        <modifierMask key="keyEquivalentModifierMask"/>
+                                                        <connections>
+                                                            <action selector="importChromeHistory:" target="Voe-Tx-rLC" id="BAG-iw-5da"/>
                                                         </connections>
                                                     </menuItem>
                                                 </items>
@@ -1124,13 +1143,7 @@
                                         <menuItem isSeparatorItem="YES" id="eqG-OD-aZE"/>
                                         <menuItem title="Recent Cards" id="WLc-C7-aT2">
                                             <modifierMask key="keyEquivalentModifierMask"/>
-                                            <menu key="submenu" title="Recent Cards" id="J7q-IY-RS5">
-                                                <items>
-                                                    <menuItem title="Item" id="tUW-ac-Sxk">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                    </menuItem>
-                                                </items>
-                                            </menu>
+                                            <menu key="submenu" title="Recent Cards" id="J7q-IY-RS5"/>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="yW5-VT-bM3"/>
                                         <menuItem title="Change Card" tag="4" keyEquivalent="D" id="NOl-ax-hus">
@@ -1295,13 +1308,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="748"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="729"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="746"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="727"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="798" height="746"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="727"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1463,7 +1476,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="743" width="788" height="16"/>
+                                    <rect key="frame" x="1" y="712" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">

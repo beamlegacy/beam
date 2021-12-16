@@ -23,5 +23,7 @@ enum PnSViewLocators {
     enum Other: String, CaseIterable, UIElement  {
         case pointFrame = "PointFrame"
         case shootCardPicker = "ShootCardPicker"
+        case shootFrameSelection = "ShootFrameSelection"
+        case shootFrameSelectionLabel = "ShootFrameSelectionLabel"
     }
 }

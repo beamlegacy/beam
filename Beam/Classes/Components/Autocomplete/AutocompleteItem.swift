@@ -129,7 +129,7 @@ struct AutocompleteItem: View {
                         .scaledToFit()
                         .frame(maxWidth: 16, maxHeight: 16)
                 } else {
-                    Icon(name: item.source.iconName, size: 16, color: secondaryTextColor)
+                    Icon(name: item.source.iconName, color: secondaryTextColor)
                         .blendModeLightMultiplyDarkScreen()
                 }
             }
@@ -151,24 +151,25 @@ struct AutocompleteItem: View {
                     .layoutPriority(0)
                 }
 
-                if PreferencesManager.showOmnibarScoreSection, let score = item.score {
+                if PreferencesManager.showOmnibarScoreSection {
                     Spacer()
-                    StyledText(verbatim: " Score: \(score)")
+                    Text(debugString(score: item.score))
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
+                        .layoutPriority(10)
                 }
             }
             .blendModeLightMultiplyDarkScreen()
             Spacer(minLength: 0)
             if item.source == .createCard && allowNewCardShortcut {
                 HStack(spacing: BeamSpacing._20) {
-                    Icon(name: designV2 ? "shortcut-option" : "shortcut-cmd", size: 12, color: cardColor, alignment: .trailing)
-                    Icon(name: "shortcut-return", size: 12, color: cardColor, alignment: .trailing)
+                    Icon(name: designV2 ? "shortcut-option" : "shortcut-cmd", width: 12, color: cardColor, alignment: .trailing)
+                    Icon(name: "shortcut-return", width: 12, color: cardColor, alignment: .trailing)
                 }
                 .opacity(0.5)
                 .blendModeLightMultiplyDarkScreen()
             } else {
-                Icon(name: "shortcut-return", size: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
+                Icon(name: "shortcut-return", width: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
                     .opacity(0.7)
                     .blendModeLightMultiplyDarkScreen()
             }
@@ -191,6 +192,14 @@ struct AutocompleteItem: View {
         }
         .accessibilityElement()
         .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
+    }
+
+    private func debugString(score: Float?) -> String {
+        var debugString = "\(item.source)"
+        if let score = score {
+            debugString += " - Score: \(score)"
+        }
+        return debugString
     }
 }
 

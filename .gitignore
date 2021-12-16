@@ -153,3 +153,4 @@ fastlane/swiftlint.json
 /Beam/Classes/**/*_prod.js
 **/junit.xml
 /Beam/Classes/Components/PointAndShoot/test.http
+BeamCore/Configuration/EnvironmentVariables_generated.swift

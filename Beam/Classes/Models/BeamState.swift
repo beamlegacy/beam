@@ -22,7 +22,17 @@ import Sentry
             EventsTracker.logBreadcrumb(message: "currentNote changed to \(String(describing: currentNote))", category: "BeamState")
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
-                handleNoteDeletion(note)
+                observeNoteDeletion(note)
+            }
+            focusOmniBox = false
+        }
+    }
+
+    @Published var journalNoteToFocus: BeamNote? {
+        didSet {
+            EventsTracker.logBreadcrumb(message: "current journal Note to focus changed to \(String(describing: currentNote))", category: "BeamState")
+            if let note = currentNote {
+                recentsManager.currentNoteChanged(note)
             }
             focusOmniBox = false
         }
@@ -49,6 +59,7 @@ import Sentry
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
+    @Published var focusOmniBoxFromTab: Bool = false
     var useOmniboxV2 = false
 
     @Published var destinationCardIsFocused: Bool = false
@@ -56,6 +67,7 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
 
     @Published var windowIsResizing = false
+    var undraggableWindowRect: CGRect = .zero
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {
@@ -77,6 +89,9 @@ import Sentry
 
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
+
+    var shouldDisableLeadingGutterHover: Bool = false
+
     weak var currentEditor: BeamTextEdit?
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
@@ -186,7 +201,7 @@ import Sentry
 
         guard note != currentNote else { return true }
 
-        note.sources.refreshScores()
+        note.sources.refreshScores {}
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d0)
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d1)
         currentPage = nil
@@ -219,6 +234,7 @@ import Sentry
         }
         backForwardList.push(.journal)
         updateCanGoBackForward()
+        journalNoteToFocus = note
         return true
     }
 
@@ -253,7 +269,16 @@ import Sentry
         return tab
     }
 
-    func createTab(withURL url: URL, originalQuery: String?, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+    /// Create a new browsertab in the current beam window. Will always switch the view mode to `.web`.
+    /// - Parameters:
+    ///   - url: the URL to open.
+    ///   - originalQuery: optional search query to configure the browsing tree with.
+    ///   - setCurrent: optional flag to set created tab as the new focussed tab. Defaults to true.
+    ///   - note: optional BeamNote to set as destination.
+    ///   - rootElement: optional root BeamElement where collected content with be added to.
+    ///   - webView: optional webview to create a new tab with
+    /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
+    @discardableResult func createTab(withURL url: URL, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
@@ -405,7 +430,7 @@ import Sentry
             searchEngine.query = result.text
             // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
             let url = URL(string: searchEngine.searchUrl)!
-            if mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -417,7 +442,7 @@ import Sentry
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
-            if  mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if  mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -430,7 +455,7 @@ import Sentry
         case .createCard:
             navigateToNote(createNoteForQuery(result.text))
         }
-        autocompleteManager.cancelAutocomplete()
+        autocompleteManager.clearAutocompleteResults()
     }
 
     func startQuery() {
@@ -438,8 +463,7 @@ import Sentry
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
         focusOmniBox = false
-        if let index = autocompleteManager.autocompleteSelectedIndex {
-            let result = autocompleteManager.autocompleteResults[index]
+        if let result = autocompleteManager.autocompleteResult(at: autocompleteManager.autocompleteSelectedIndex) {
             autocompleteManager.resetQuery()
             selectAutocompleteResult(result)
             return
@@ -452,12 +476,12 @@ import Sentry
 
         // Logger.shared.logDebug("Start query: \(url)")
 
-        if mode == .web && currentTab != nil && currentTab?.shouldNavigateInANewTab(url: url) != true {
+        if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
             _ = createTab(withURL: url, originalQuery: queryString)
         }
-        autocompleteManager.cancelAutocomplete()
+        autocompleteManager.clearAutocompleteResults()
         autocompleteManager.resetQuery()
         mode = .web
     }
@@ -532,10 +556,11 @@ import Sentry
         }
     }
 
-    func setFocusOmnibox() {
+    func setFocusOmnibox(fromTab: Bool = false) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if mode == .web {
-            if let url = browserTabsManager.currentTab?.url?.absoluteString {
+            focusOmniBoxFromTab = fromTab && useOmniboxV2
+            if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
                 autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
@@ -548,15 +573,17 @@ import Sentry
 
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        autocompleteManager.cancelAutocomplete()
-        autocompleteManager.resetQuery()
-        if mode == .web {
+
+        if !useOmniboxV2 && mode == .web {
+            autocompleteManager.clearAutocompleteResults()
+            autocompleteManager.resetQuery()
             createEmptyTab()
         }
+
         if focusOmniBox {
             autocompleteManager.shakeOmniBox()
         }
-        focusOmniBox = true
+        setFocusOmnibox(fromTab: false)
     }
 
     func resetDestinationCard() {
@@ -567,11 +594,12 @@ import Sentry
     }
 
     private var noteDeletionCancellable: AnyCancellable?
-    func handleNoteDeletion(_ note: BeamNote) {
-        noteDeletionCancellable = note.$deleted.sink { [unowned self] deleted in
+    func observeNoteDeletion(_ note: BeamNote) {
+        noteDeletionCancellable = note.$deleted.sink { [weak self, weak note] deleted in
             guard deleted else { return }
-            noteDeletionCancellable = nil
-            self.navigateToJournal(note: nil)
+            self?.noteDeletionCancellable = nil
+            guard let note = note, self?.mode == .note, self?.currentNote == note else { return }
+            self?.navigateToJournal(note: nil)
 
             UserAlert.showError(message: "The note '\(note.title)' has been deleted.",
                                 informativeText: "Navigating back to the journal.")
@@ -596,13 +624,13 @@ extension BeamState: BrowserTabsManagerDelegate {
     func showNextTab() {
         let wasFocused = focusOmniBox
         browserTabsManager.showNextTab()
-        if wasFocused { setFocusOmnibox() }
+        if wasFocused { setFocusOmnibox(fromTab: true) }
     }
 
     func showPreviousTab() {
         let wasFocused = focusOmniBox
         browserTabsManager.showPreviousTab()
-        if wasFocused { setFocusOmnibox() }
+        if wasFocused { setFocusOmnibox(fromTab: true) }
     }
 
     // MARK: BrowserTabsManagerDelegate

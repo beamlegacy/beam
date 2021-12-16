@@ -28,6 +28,7 @@ public class BeamApplication: SentryCrashExceptionApplication {
 }
 
 @NSApplicationMain
+// swiftlint:disable type_body_length
 class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
@@ -44,6 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     var data: BeamData!
     var cancellableScope = Set<AnyCancellable>()
+    var cancellableImportsScope = Set<AnyCancellable>()
 
     private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     private let defaultWindowSize = CGSize(width: 800, height: 600)
@@ -87,12 +89,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         ContentBlockingManager.shared.setup()
+        //TODO: - Remove when everyone has its local links data moved from old db to grdb
+        moveLinkDB()
         BeamObjectManager.setup()
 
         data = BeamData()
 
         if !isRunningTests {
-            createWindow(frame: nil)
+            createWindow(frame: nil, restoringTabs: true)
         }
 
         // So we remember we're not currently using the default api server
@@ -244,11 +248,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @IBAction func newWindow(_ sender: Any?) {
-        self.createWindow(frame: nil)
+        self.createWindow(frame: nil, restoringTabs: false)
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?) -> BeamWindow {
+    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow {
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
                                 data: data,
@@ -265,7 +269,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.makeKeyAndOrderFront(nil)
         windows.append(window)
         subscribeToStateChanges(for: window.state)
-        if PreferencesManager.restoreLastBeamSession {
+        if PreferencesManager.restoreLastBeamSession, restoringTabs {
             window.reOpenClosedTab(nil)
         }
         return window
@@ -275,6 +279,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
         data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
+        data.clusteringManager.exportSummaryForNextSession()
     }
 
     public func saveCloseTabsCmd(onExit: Bool) {
@@ -309,7 +314,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag {
-            createWindow(frame: nil)
+            createWindow(frame: nil, restoringTabs: true)
         }
 
         return true
@@ -317,7 +322,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationWillFinishLaunching(_ notification: Notification) {
         CoreDataManager.shared.setup()
-        _ = LoggerRecorder.shared
+
         Logger.shared.logDebug("-------------------------( applicationLaunching )-------------------------",
                                 category: .marker)
 
@@ -372,22 +377,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
             // Customize this code block to include application-specific recovery steps.
             let result = sender.presentError(nserror)
-            if result {
-                return .terminateCancel
-            }
-
-            let question = NSLocalizedString("Could not save changes while quitting. Quit anyway?", comment: "Quit without saves error question message")
-            let info = NSLocalizedString("Quitting now will lose any changes you have made since the last successful save", comment: "Quit without saves error question info")
-            let quitButton = NSLocalizedString("Quit anyway", comment: "Quit anyway button title")
-            let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
-            let alert = NSAlert()
-            alert.messageText = question
-            alert.informativeText = info
-            alert.addButton(withTitle: quitButton)
-            alert.addButton(withTitle: cancelButton)
-
-            let answer = alert.runModal()
-            if answer == .alertSecondButtonReturn {
+            if result || cancelQuitAlertForSync() {
                 return .terminateCancel
             }
         }
@@ -404,6 +394,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        if data.importsManager.isImporting, cancelQuitAlertForImports() == true {
+            return .terminateCancel
+        }
+
         syncDataWithBeamObject { _ in
             Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
             RunLoop.main.perform(inModes: [.modalPanel]) {
@@ -413,6 +407,43 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         return .terminateLater
+    }
+
+    private func cancelQuitAlertForImports() -> Bool {
+        let question = NSLocalizedString("We're still importing data", comment: "Quit interrupting import message")
+        let info = NSLocalizedString("Are you sure you want to interrupt the process and quit now? You can always import data from the File → Import menu.",
+                                     comment: "Quit interrupting import info")
+        let quitButton = NSLocalizedString("Quit", comment: "Quit anyway button title")
+        let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
+        let alert = NSAlert()
+        alert.messageText = question
+        alert.informativeText = info
+        alert.addButton(withTitle: quitButton)
+        alert.addButton(withTitle: cancelButton)
+
+        let answer = alert.runModal()
+        if answer == .alertSecondButtonReturn {
+            return true
+        }
+        return false
+    }
+
+    private func cancelQuitAlertForSync() -> Bool {
+        let question = NSLocalizedString("Could not save changes while quitting. Quit anyway?", comment: "Quit without saves error question message")
+        let info = NSLocalizedString("Quitting now will lose any changes you have made since the last successful save", comment: "Quit without saves error question info")
+        let quitButton = NSLocalizedString("Quit anyway", comment: "Quit anyway button title")
+        let cancelButton = NSLocalizedString("Cancel", comment: "Cancel button title")
+        let alert = NSAlert()
+        alert.messageText = question
+        alert.informativeText = info
+        alert.addButton(withTitle: quitButton)
+        alert.addButton(withTitle: cancelButton)
+
+        let answer = alert.runModal()
+        if answer == .alertSecondButtonReturn {
+            return true
+        }
+        return false
     }
 
     // MARK: - Preferences

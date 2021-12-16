@@ -202,6 +202,31 @@ extension AccountManager {
         return nil
     }
 
+    @discardableResult
+    func setUsername(username: String, _ completionHandler: ((Result<String, Error>) -> Void)? = nil) -> URLSessionTask? {
+        do {
+            return try userInfoRequest.setUsername(username: username) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logInfo("Could not set username: \(error.localizedDescription)", category: .network)
+                    completionHandler?(.failure(error))
+                case .success(let infos):
+                    guard let username = infos.me?.username else {
+                        completionHandler?(.failure(APIRequestError.parserError))
+                        return
+                    }
+                    Logger.shared.logInfo("Set username succeeded", category: .network)
+                    Persistence.Authentication.username = username
+                    completionHandler?(.success(username))
+                }
+            }
+        } catch {
+            Logger.shared.logInfo("Could not set username: \(error.localizedDescription)", category: .network)
+            completionHandler?(.failure(error))
+        }
+        return nil
+    }
+
     static func logout() {
         Persistence.cleanUp()
         AppDelegate.main.disconnectWebSockets()

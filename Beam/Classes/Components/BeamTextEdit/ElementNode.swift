@@ -219,60 +219,75 @@ public class ElementNode: Widget {
     override func updateSubLayersLayout() {
         super.updateSubLayersLayout()
         updateSelectionLayer()
+        setPaddings()
     }
 
     func updateSelectionLayer() {
         guard selected else { return }
 
-        let selectionLayerPos = CGPoint(x: Self.indentLayerPosX - contentsPadding.left, y: selectionLayerPosY)
+        let selectionLayerPos = CGPoint(x: Self.indentLayerPosX - childInset, y: selectionLayerPosY)
 
         if selectedAlone {
             selectionLayer.position = selectionLayerPos
             selectionLayer.bounds.size = CGSize(width: selectionLayerWidth,
                                                 height: selectionLayerHeight)
         } else {
-            var spacing: CGFloat = .zero
-            if self.parent as? TextRoot != nil {
-                spacing = PreferencesManager.editorParentSpacing
-                selectionLayer.position = selectionLayerPos
-                selectionLayer.position.x += selectionLayerPosX
-                selectionLayer.position.y -= spacing
-            } else {
-                spacing = PreferencesManager.editorChildSpacing
-                selectionLayer.position = selectionLayerPos
-                selectionLayer.position.x += selectionLayerPosX
-            }
-            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX,
-                                                height: selectionLayerHeight + spacing)
-        }
-    }
+            guard let parent = self.parent else { return }
 
-    var idealSpacingSize: CGFloat {
-        var spacingHeight: CGFloat = .zero
-        var spacing: CGFloat = .zero
-        if self as? TextRoot != nil {
-            spacing = PreferencesManager.editorParentSpacing
-        } else {
-            spacing = PreferencesManager.editorChildSpacing
-        }
-        if self.open {
-            let elementNodeChild = self.children.filter({ $0 as? ElementNode != nil})
-            if elementNodeChild.count > 0 {
-                spacingHeight += spacing * CGFloat(elementNodeChild.count)
-                for c in elementNodeChild {
-                    if let nodeChild = c as? ElementNode {
-                        spacingHeight += nodeChild.idealSpacingSize
-                    }
-                }
+            selectionLayer.position = selectionLayerPos
+            selectionLayer.position.x += selectionLayerPosX
+            selectionLayer.position.y -= parent.childrenSpacing
+            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX,
+                                                height: selectionLayerHeight + parent.childrenSpacing)
+            if !self.children.isEmpty && self.open {
+                selectionLayer.bounds.size.height -= childrenSpacing
             }
         }
-        return spacingHeight
     }
 
     func deepInvalidateText() {
         for c in children {
             guard let c = c as? ElementNode else { continue }
             c.deepInvalidateText()
+        }
+    }
+
+    func setPaddings() {
+        // WARNING
+        // Be extra carefull when changing values
+        //
+        // Padding bottom of Node depending of the nextElement with higher or smaller depth
+        if let nextElement = self.element.nextElement() {
+            var newPadding: CGFloat?
+
+            if self.open {
+                if nextElement.depth > depth, self.parent !== root?.element {
+                    newPadding = nextElement.isHeader ? 2 : 1
+                } else if nextElement.depth < depth {
+                    if nextElement.parent === root?.element {
+                        newPadding = nextElement.isHeader ? 7 : 0
+                    } else {
+                        newPadding = nextElement.isHeader ? 5 : 0
+                    }
+                } else {
+                    newPadding = 0
+                }
+            } else {
+                if self.isHeader {
+                    newPadding = 4
+                } else {
+                    newPadding = 0
+                }
+            }
+
+            if let newPadding = newPadding, contentsPadding.bottom != newPadding {
+                contentsPadding.bottom = newPadding
+            }
+        }
+
+        for child in children {
+            guard let c = child as? ElementNode else { continue }
+            c.setPaddings()
         }
     }
 

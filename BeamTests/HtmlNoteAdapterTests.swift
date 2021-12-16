@@ -253,8 +253,8 @@ class HtmlNoteAdapterTests: XCTestCase {
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
             XCTAssertEqual(results.count, 1)
-            if let embedElement = results.first {
-                XCTAssertEqual(embedElement.kind, .embed(urlString, displayRatio: nil))
+            if let firstResult = results.first {
+                XCTAssertEqual(firstResult.kind, .bullet)
             }
             expectation.fulfill()
         })
@@ -269,9 +269,9 @@ class HtmlNoteAdapterTests: XCTestCase {
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
             XCTAssertEqual(results.count, 1)
-            if let embedElement = results.first {
-                let embedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                XCTAssertEqual(embedElement.kind, .embed(embedUrl, displayRatio: nil))
+            if let embedElement = results.first,
+               let url = URL(string: "https://www.youtube.com/embed/dQw4w9WgXcQ") {
+                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)), displayRatio: nil))
             }
             expectation.fulfill()
         })
@@ -284,9 +284,9 @@ class HtmlNoteAdapterTests: XCTestCase {
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
             XCTAssertEqual(results.count, 1)
-            if let embedElement = results.first {
-                let embedUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ"
-                XCTAssertEqual(embedElement.kind, .embed(embedUrl, displayRatio: nil))
+            if let embedElement = results.first,
+               let url = URL(string: "https://www.youtube.com/embed/dQw4w9WgXcQ") {
+                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)), displayRatio: nil))
             }
             expectation.fulfill()
         })

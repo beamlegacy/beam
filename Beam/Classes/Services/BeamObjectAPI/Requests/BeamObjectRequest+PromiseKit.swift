@@ -60,8 +60,9 @@ extension BeamObjectRequest {
         }
     }
 
-    func delete(_ id: UUID) -> Promise<BeamObject?> {
-        let parameters = BeamObjectIdParameters(id: id)
+    func delete(beamObject: BeamObject) -> Promise<BeamObject> {
+        let parameters = BeamObjectIdParameters(id: beamObject.id,
+                                                beamObjectType: beamObject.beamObjectType)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_beam_object", variables: parameters)
 
         let promise: Promise<DeleteBeamObject> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -78,8 +79,26 @@ extension BeamObjectRequest {
         }
     }
 
-    func deleteAll(beamObjectType: String? = nil) -> Promise<Bool> {
-        let parameters = DeleteAllBeamObjectsParameters(beamObjectType: beamObjectType)
+    func delete<T: BeamObjectProtocol>(object: T) -> Promise<BeamObject?> {
+        let parameters = BeamObjectIdParameters(id: object.beamObjectId,
+                                                beamObjectType: type(of: object).beamObjectType.rawValue)
+        let bodyParamsRequest = GraphqlParameters(fileName: "delete_beam_object", variables: parameters)
+
+        let promise: Promise<DeleteBeamObject> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                authenticatedCall: true)
+
+        return promise.map(on: self.backgroundQueue) {
+            guard let beamObject = $0.beamObject else {
+                throw APIRequestError.parserError
+            }
+
+            try? beamObject.decrypt()
+            return beamObject
+        }
+    }
+
+    func deleteAll(beamObjectType: BeamObjectObjectType? = nil) -> Promise<Bool> {
+        let parameters = DeleteAllBeamObjectsParameters(beamObjectType: beamObjectType?.rawValue)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_beam_objects", variables: parameters)
 
         let promise: Promise<DeleteAllBeamObjects> = performRequest(bodyParamsRequest: bodyParamsRequest,
@@ -136,17 +155,28 @@ extension BeamObjectRequest {
         }
     }
 
-    func fetch(_ beamObjectID: UUID) -> Promise<BeamObject> {
-        fetchWithFile("beam_object", beamObjectID)
+    func fetch<T: BeamObjectProtocol>(object: T) -> Promise<BeamObject> {
+        fetchWithFile(filename: "beam_object",
+                      id: object.beamObjectId,
+                      beamObjectType: type(of: object).beamObjectType.rawValue)
     }
 
-    func fetchMinimalBeamObject(_ beamObjectID: UUID) -> Promise<BeamObject> {
-        fetchWithFile("beam_object_updated_at", beamObjectID)
+    func fetch(beamObject: BeamObject) -> Promise<BeamObject> {
+        fetchWithFile(filename: "beam_object", id: beamObject.id, beamObjectType: beamObject.beamObjectType)
     }
 
-    private func fetchWithFile(_ filename: String,
-                               _ beamObjectID: UUID) -> Promise<BeamObject> {
-        let parameters = BeamObjectIdParameters(id: beamObjectID)
+    func fetchMinimalBeamObject(beamObject: BeamObject) -> Promise<BeamObject> {
+        fetchWithFile(filename: "beam_object_updated_at", id: beamObject.id, beamObjectType: beamObject.beamObjectType)
+    }
+
+    func fetchMinimalBeamObject<T: BeamObjectProtocol>(object: T) -> Promise<BeamObject> {
+        fetchWithFile(filename: "beam_object_updated_at",
+                      id: object.beamObjectId,
+                      beamObjectType: type(of: object).beamObjectType.rawValue)
+    }
+
+    private func fetchWithFile(filename: String, id: UUID, beamObjectType: String) -> Promise<BeamObject> {
+        let parameters = BeamObjectIdParameters(id: id, beamObjectType: beamObjectType)
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
         let promise: Promise<FetchBeamObject> = performRequest(bodyParamsRequest: bodyParamsRequest,

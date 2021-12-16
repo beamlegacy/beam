@@ -40,6 +40,15 @@ class CoreDataManagerTests: QuickSpec {
                     fail("failed creating backup: \(error.localizedDescription)")
                 }
 
+                /*
+                 Importing a backup changes too much things in the underlying core data code, and we have to recreate
+                 objects or else it'll crash.
+                 */
+                sut = CoreDataManager.shared
+                documentManager = DocumentManager(coreDataManager: sut)
+                helper = DocumentManagerTestsHelper(documentManager: documentManager,
+                                                    coreDataManager: CoreDataManager.shared)
+
                 // I use this when I need to copy a new backup and know one of the note's title
 //                print(backupURL)
 //                print(docStruct.title)
@@ -62,7 +71,7 @@ class CoreDataManagerTests: QuickSpec {
 
         describe(".importBackup(url)") {
             let url = Bundle(for: type(of: self)).url(forResource: "BeamExport", withExtension: "sqlite")!
-            let backupStructTitle = "Ergonomic Rubber Shoes gq1t1otFmCEkvAh503Y52GvHlYB4X3a51BEQsseP"
+            let backupStructTitle = "Intelligent Wooden Car 3bX5zUnur4JIEozqVsjaqMxOuq8fH4rkH0UG9sTt"
             var docStruct: DocumentStruct!
             beforeEach {
                 helper.deleteAllDocuments()

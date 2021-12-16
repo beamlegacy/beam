@@ -43,11 +43,6 @@ private let noteEventWeights: [[FrecencyEventType: Float]] = [
     ]
 ]
 
-private func scoreSortValue(score: Float, timeStamp: Date, halfLife: Float) -> Float {
-    guard score != 0.0 else { return -1 * Float.infinity }
-    return log(score) + Float(timeStamp.timeIntervalSinceReferenceDate) * log(2) / halfLife
-}
-
 public enum FrecencyParamKey: Int, CaseIterable, Codable {
     //do not change raw values of existing cases to prevent messing with encoding in db
     case webVisit30d0 = 0
@@ -59,7 +54,7 @@ public enum FrecencyParamKey: Int, CaseIterable, Codable {
 public struct FrecencyParam: Equatable {
     let key: FrecencyParamKey
     let eventWeights: [FrecencyEventType: Float]
-    let halfLife: Float
+    public let halfLife: Float
 }
 
 public let FrecencyParameters: [FrecencyParamKey: FrecencyParam] = [
@@ -73,19 +68,41 @@ public struct FrecencyScore {
     public let id: UUID
     public var lastTimestamp: Date
     public var lastScore: Float
-    public var sortValue: Float
+    public var sortValue: Float!
 
+    private func scoreSortValue(halfLife: Float) -> Float {
+        guard lastScore != 0.0 else { return -1 * Float.infinity }
+        return log(lastScore) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife
+    }
+
+    public init(id: UUID, lastTimestamp: Date, lastScore: Float, halfLife: Float) {
+        self.id = id
+        self.lastTimestamp = lastTimestamp
+        self.lastScore = lastScore
+        self.sortValue = scoreSortValue(halfLife: halfLife)
+    }
     public init(id: UUID, lastTimestamp: Date, lastScore: Float, sortValue: Float) {
         self.id = id
         self.lastTimestamp = lastTimestamp
         self.lastScore = lastScore
         self.sortValue = sortValue
     }
+    public func updated(date: Date, value: Float, halfLife: Float) -> FrecencyScore {
+        if date > lastTimestamp {
+            let duration = date.timeIntervalSince(lastTimestamp)
+            let newValue = timeDecay(duration: Float(duration), halfLife: halfLife) * lastScore + value
+            return FrecencyScore(id: id, lastTimestamp: date, lastScore: newValue, halfLife: halfLife)
+        }
+        let duration = lastTimestamp.timeIntervalSince(date)
+        let newValue = lastScore + value * timeDecay(duration: Float(duration), halfLife: halfLife)
+        return FrecencyScore(id: id, lastTimestamp: lastTimestamp, lastScore: newValue, halfLife: halfLife)
+    }
 }
 
 public protocol FrecencyStorage {
     func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore?
     func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws
+    func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws
 }
 
 public protocol FrecencyScorer {
@@ -107,13 +124,9 @@ public class ExponentialFrecencyScorer: FrecencyScorer {
 
     private func updatedScore(id: UUID, value: Float, date: Date, param: FrecencyParam) -> FrecencyScore {
         guard let score = try? storage.fetchOne(id: id, paramKey: param.key) else {
-            let sortValue: Float = scoreSortValue(score: value, timeStamp: date, halfLife: param.halfLife)
-            return  FrecencyScore(id: id, lastTimestamp: date, lastScore: value, sortValue: sortValue)
+            return  FrecencyScore(id: id, lastTimestamp: date, lastScore: value, halfLife: param.halfLife)
         }
-        let duration = Float(date.timeIntervalSince(score.lastTimestamp))
-        let updatedValue = value + score.lastScore * timeDecay(duration: duration, halfLife: param.halfLife)
-        let sortValue = scoreSortValue(score: updatedValue, timeStamp: date, halfLife: param.halfLife)
-        return FrecencyScore(id: id, lastTimestamp: date, lastScore: updatedValue, sortValue: sortValue)
+        return score.updated(date: date, value: value, halfLife: param.halfLife)
     }
 
     public func update(id: UUID, value: Float, eventType: FrecencyEventType, date: Date, paramKey: FrecencyParamKey) {

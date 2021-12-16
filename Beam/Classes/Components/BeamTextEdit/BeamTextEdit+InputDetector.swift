@@ -279,7 +279,18 @@ extension BeamTextEdit {
             Logger.shared.logInfo("Make quote", category: .ui)
 
             node.cmdManager.deleteText(in: node, for: 0..<level + 1)
-            node.cmdManager.formatText(in: node, for: .quote(level, "", ""), with: nil, for: nil, isActive: false)
+
+            var metadata: SourceMetadata?
+            if let uuid = UUID(uuidString: node.text.text) {
+                metadata = SourceMetadata(local: uuid)
+            } else if let url = URL(string: node.text.text) {
+                metadata = SourceMetadata(remote: url)
+            }
+
+            if let sourcemetadata = metadata {
+                node.cmdManager.formatText(in: node, for: .quote(level, origin: sourcemetadata), with: nil, for: nil, isActive: false)
+            }
+
             self.rootNode?.cursorPosition = 0
         }
         return nil

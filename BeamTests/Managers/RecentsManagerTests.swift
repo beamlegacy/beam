@@ -131,18 +131,22 @@ class RecentsManagerTests: QuickSpec {
                 it("handles deleted notes") {
                     expect(recentsManager.recentNotes.count) == 5
 
-                    guard let note = recentsManager.recentNotes.last else {
+                    guard let note = recentsManager.recentNotes.last, let documentStruct = note.documentStruct else {
                         fail("Last recent notes is nil")
                         return
                     }
 
+                    var cancellable = [AnyCancellable]()
                     waitUntil(timeout: .seconds(10)) { done in
-                        self.documentManager.delete(id: note.id) { _ in
+                        DocumentManager.documentDeleted.receive(on: DispatchQueue(label: "tester")).sink { id in
+                            guard id == documentStruct.id else { return }
                             done()
+                        }.store(in: &cancellable)
+                        self.documentManager.delete(document: documentStruct) { _ in
                         }
                     }
 
-                    expect(recentsManager.recentNotes.count) == 4
+                    expect(recentsManager.recentNotes.count) == 5
                     expect(recentsManager.recentNotes.first { $0.id == note.id }).to(beNil())
                 }
             }

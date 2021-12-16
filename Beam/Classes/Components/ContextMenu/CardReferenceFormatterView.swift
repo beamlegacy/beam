@@ -114,7 +114,7 @@ class CardReferenceFormatterView: FormatterView {
         self.addSubview(hostingView)
         hostView = hostingView
         self.layer?.masksToBounds = false
-        if searchCardContent || initialText != nil {
+        if searchCardContent || initialText != nil || typingPrefix > 1 {
             enableTypingAttributes()
         }
         updateItemsForSearchText(initialText ?? "")

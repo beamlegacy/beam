@@ -106,7 +106,7 @@ extension BeamTextEdit {
 
     internal func toggleQuote() {
         guard let node = focusedWidget as? TextNode else { return }
-        updateFormatterView(with: .quote, kind: .quote(1, node.text.text, node.text.text))
+        updateFormatterView(with: .quote, kind: .quote(1, origin: SourceMetadata(string: node.text.text, title: node.text.text)))
     }
 
     internal func toggleTodo() {

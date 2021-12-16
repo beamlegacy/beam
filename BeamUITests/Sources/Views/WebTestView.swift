@@ -56,7 +56,9 @@ class WebTestView: BaseView {
     @discardableResult
     func openDestinationCard() -> CardTestView {
         button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
-        return CardTestView()
+        let cardView = CardTestView()
+        cardView.waitForCardViewToLoad()
+        return cardView
     }
     
     func getNumberOfTabs() -> Int {
@@ -101,6 +103,18 @@ class WebTestView: BaseView {
         //Important! Counting starts form the next of selected tab
         self.getTabByIndex(index: draggedTabIndexFromSelectedTab).click(forDuration: self.defaultPressDurationSeconds, thenDragTo: self.getTabByIndex(index: destinationTabIndexFromSelectedTab))
         return self
+    }
+    
+    func scrollDown(_ numberOfTimes : Int = 1) {
+        for _ in 1...numberOfTimes {
+            self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: -200)
+        }
+    }
+    
+    func scrollUp(_ numberOfTimes : Int = 1) {
+        for _ in 1...numberOfTimes {
+            self.app.webViews.firstMatch.scroll(byDeltaX: 0, deltaY: 200)
+        }
     }
     
     func isGoogleSearchTabOpened() -> Bool {

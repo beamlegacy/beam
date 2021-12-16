@@ -13,10 +13,10 @@ class ClosedTabDataPersistence {
     private static let savedCloseTabCmdsKey = "savedClosedTabCmds"
     private static let savedTabsKey = "savedTabsKey"
 
-    @UserDefault(key: savedCloseTabCmdsKey, defaultValue: Data(), suiteName: "SavedClosedTabs")
+    @UserDefault(key: savedCloseTabCmdsKey, defaultValue: Data(), suiteName: BeamUserDefaults.savedClosedTabs.suiteName)
     static var savedCloseTabData: Data
 
-    @UserDefault(key: savedTabsKey, defaultValue: Data(), suiteName: "SavedClosedTabs")
+    @UserDefault(key: savedTabsKey, defaultValue: Data(), suiteName: BeamUserDefaults.savedClosedTabs.suiteName)
     static var savedTabsData: Data
 
 }

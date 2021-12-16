@@ -33,6 +33,7 @@ struct ButtonLabelStyle {
     var hoveredBackgroundColor: Color?
     var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
     var disableAnimations = true // Should be replaced by the parent view disabling animations with .animation(nil) when needed.
+    var backgroundCornerRadius: CGFloat = 4
 }
 
 struct ButtonLabel: View {
@@ -94,7 +95,7 @@ struct ButtonLabel: View {
                 customViewBuilder(isHovering, isTouching)
             } else {
                 if let icon = iconName {
-                    Icon(name: icon, size: style.iconSize, color: foregroundColor)
+                    Icon(name: icon, width: style.iconSize, color: foregroundColor)
                 }
                 if let text = text {
                     Text(text)
@@ -103,7 +104,7 @@ struct ButtonLabel: View {
                         .underline(variant == .primary, color: foregroundColor)
                 }
                 if variant == .dropdown {
-                    Icon(name: "editor-breadcrumb_down", size: 8, color: foregroundColor)
+                    Icon(name: "editor-breadcrumb_down", width: 8, color: foregroundColor)
                 }
             }
         }
@@ -113,7 +114,7 @@ struct ButtonLabel: View {
         .if(style.disableAnimations) {
             $0.animation(nil)
         }
-        .cornerRadius(3)
+        .cornerRadius(style.backgroundCornerRadius)
         .onHover { hovering in
             guard defaultState != .disabled else { return }
             isHovering = hovering

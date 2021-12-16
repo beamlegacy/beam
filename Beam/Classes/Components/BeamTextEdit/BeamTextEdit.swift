@@ -87,6 +87,8 @@ public extension CALayer {
         }
     }
 
+    public var enableDelayedInit: Bool
+    var delayedInit = true
     func updateRoot(with note: BeamElement) {
         guard note != rootNode?.element else { return }
 
@@ -94,21 +96,46 @@ public extension CALayer {
         if rootNode != nil {
             scroll(.zero)
         }
-        let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: frame.size))
-        rootNode = root
-        if let window = window {
-            root.contentsScale = window.backingScaleFactor
+
+        let initRootNode: () -> TextRoot = {
+            let root = TextRoot(editor: self, element: note, availableWidth: Self.textNodeWidth(for: self.frame.size))
+            if let window = self.window {
+                root.contentsScale = window.backingScaleFactor
+            }
+
+            return root
         }
 
-        invalidateLayout()
+        let initLayout: (TextRoot) -> Void = { root in
+            root.element
+                .changed
+                .debounce(for: .seconds(1), scheduler: RunLoop.main)
+                .sink { [weak self] change in
+                    guard change.1 == .text || change.1 == .tree else { return }
+                    self?.searchViewModel?.search()
+                }.store(in: &self.noteCancellables)
+            self.delayedInit = false
+            self.rootNode = root
+        }
 
-        root.element
-            .changed
-            .debounce(for: .seconds(1), scheduler: RunLoop.main)
-            .sink { [weak self] change in
-                guard change.1 == .text || change.1 == .tree else { return }
-                self?.searchViewModel?.search()
-            }.store(in: &noteCancellables)
+        if enableDelayedInit, let note = note as? BeamNote {
+            delayedInit = true
+            let rect = nodesRect
+            let refsAndLinks = note.fastLinksAndReferences.compactMap { $0.noteID }
+            BeamNote.loadNotes(refsAndLinks) { _ in
+                DispatchQueue.main.async {
+                    let root = initRootNode()
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        root.setLayout(rect)
+                        DispatchQueue.main.async {
+                            initLayout(root)
+                        }
+                    }
+                }
+            }
+        } else {
+            initLayout(initRootNode())
+        }
     }
 
     private func clearRoot() {
@@ -149,7 +176,10 @@ public extension CALayer {
     private (set) var isResizing = false
     public private (set) var journalMode: Bool
 
-    public init(root: BeamElement, journalMode: Bool) {
+    public override var wantsUpdateLayer: Bool { true }
+
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool) {
+        self.enableDelayedInit = enableDelayedInit
         self.journalMode = journalMode
 
         note = root
@@ -166,7 +196,7 @@ public extension CALayer {
         l.masksToBounds = false
         l.name = Self.mainLayerName
         l.delegate = self
-        // self.wantsLayer = true
+        self.wantsLayer = true
 
         timer = Timer(timeInterval: 1.0 / 60.0, repeats: true) { [unowned self] _ in
             let now = CFAbsoluteTimeGetCurrent()
@@ -176,7 +206,6 @@ public extension CALayer {
                 if let focused = focusedWidget as? ElementNode {
                     focused.updateCursor()
                 }
-
             }
         }
         RunLoop.main.add(timer, forMode: .default)
@@ -380,6 +409,14 @@ public extension CALayer {
 
         currentIndicativeLayoutHeight = 0
         layoutInvalidated = false
+        updateLayout(nodesRect)
+
+        if let stack = superview as? JournalScrollView.StackView {
+            stack.invalidateLayout()
+        }
+    }
+
+    private var nodesRect: NSRect {
         let r = bounds
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         var rect = NSRect()
@@ -391,21 +428,23 @@ public extension CALayer {
             let x = (frame.width - textNodeWidth) * (leadingPercentage / 100)
             rect = NSRect(x: x, y: topOffsetActual + cardTopSpace, width: textNodeWidth, height: r.height)
         }
-        updateLayout(for: rect)
-
-        if let stack = superview as? JournalStackView {
-            stack.invalidateLayout()
-        }
+        return rect
     }
 
-    private func updateLayout(for rect: NSRect) {
+    private func updateLayout(_ rect: NSRect) {
+        guard let rootNode = rootNode else { return }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
-        let workBlock = { [unowned self] in
-            rootNode?.availableWidth = textNodeWidth
+        let workBlock = { [weak self] in
+            guard let self = self else { return }
+            self.doRunBeforeNextLayout()
+
+            rootNode.availableWidth = textNodeWidth
             self.updateCardHearderLayer(rect)
-            rootNode?.setLayout(rect)
+            self.rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
             self.updateLeadingGutterLayout(textRect: rect)
+
+            self.doRunAfterNextLayout()
         }
         if isResizing || shouldDisableAnimationAtNextLayout {
             shouldDisableAnimationAtNextLayout = false
@@ -426,7 +465,7 @@ public extension CALayer {
     var rootNode: TextRoot? {
         didSet {
             guard oldValue != rootNode else { return }
-            invalidateIntrinsicContentSize()
+            invalidateLayout()
         }
     }
 
@@ -502,15 +541,22 @@ public extension CALayer {
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
-        guard !frame.isEmpty, let rootNode = rootNode else {
-            return NSSize(width: 670, height: 30)
+        guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
+            if let root = unpreparedRoot, journalMode {
+                let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
+                let size = root.allVisibleTexts.reduce(0) { partialResult, element in
+                    partialResult + Int(1 + element.1.text.count / 80) * fontSize
+                }
+                return NSSize(width: 670, height: max(300, size))
+            }
+            return NSSize(width: 670, height: 300)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         realContentSize = NSSize(width: textNodeWidth, height: height)
         safeContentSize = realContentSize
-        if enclosingScrollView != nil {
+        if !journalMode {
             safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)
         }
         return safeContentSize
@@ -533,7 +579,7 @@ public extension CALayer {
         guard !inRelayout, !layoutInvalidated else { return }
         layoutInvalidated = true
         invalidateIntrinsicContentSize()
-        if realContentSize.height <= safeContentSize.height {
+        if journalMode || realContentSize.height <= safeContentSize.height {
             // then we are identical, so the system will not call for a relayout
             DispatchQueue.main.async { [weak self] in
                 self?.relayoutRoot()
@@ -541,6 +587,33 @@ public extension CALayer {
         }
 
         invalidate()
+    }
+
+    var toRunBeforeNextLayout = [() -> Void]()
+    var toRunAfterNextLayout = [() -> Void]()
+
+    func runBeforeNextLayout(_ block: @escaping () -> Void) {
+        toRunBeforeNextLayout.append(block)
+    }
+
+    func runAfterNextLayout(_ block: @escaping () -> Void) {
+        toRunAfterNextLayout.append(block)
+    }
+
+    func doRunBeforeNextLayout() {
+        for block in toRunBeforeNextLayout {
+            block()
+        }
+
+        toRunBeforeNextLayout = []
+    }
+
+    func doRunAfterNextLayout() {
+        for block in toRunAfterNextLayout {
+            block()
+        }
+
+        toRunAfterNextLayout = []
     }
 
     public func invalidate() {
@@ -1046,9 +1119,7 @@ public extension CALayer {
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         reBlink()
         rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
-        if self.mouseDownPos != nil {
-            self.mouseDownPos = nil
-        }
+        mouseDownPos = nil
         if event.clickCount == 1 { hideInlineFormatter() }
         self.mouseDownPos = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
@@ -1063,6 +1134,9 @@ public extension CALayer {
     public override func mouseDown(with event: NSEvent) {
         //       window?.makeFirstResponder(self)
         handleMouseDown(event: event)
+        if window?.firstResponder != self {
+            window?.makeFirstResponder(self)
+        }
     }
 
     let scrollXBorder = CGFloat(20)

@@ -134,28 +134,33 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             return
         }
 
-        if (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil {
-            // if we have an existing group matching the id
-            if activeShootGroup != nil, activeShootGroup?.id == groupId {
-                activeShootGroup?.updateTargets(groupId, [target])
-            } else if hasGraceRectAndMouseOverlap(target, href, mouseLocation),
-                      !isLargeTargetArea(target),
-                      !isTypingOnWebView,
-                      activeSelectGroup == nil,
-                      activeShootGroup == nil {
+        // Dismiss group when we won't we creating or updating any ShootGroup
+        guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil else {
+            let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
+            dismissedGroups.append(tempGroup)
+            return
+        }
 
-                activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
-                if let group = self.activeShootGroup,
-                   let sourceUrl = self.page.url {
-                    let text = group.text
-                    self.page.addTextToClusteringManager(text, url: sourceUrl)
-                }
-                throttledHaptic()
-            } else {
-                if !isAltKeyDown {
-                    let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
-                    dismissedGroups.append(tempGroup)
-                }
+        // If we have an existing group matching the id
+        if activeShootGroup != nil, activeShootGroup?.id == groupId {
+            activeShootGroup?.updateTargets(groupId, [target])
+        } else if hasGraceRectAndMouseOverlap(target, href, mouseLocation),
+                  !isLargeTargetArea(target),
+                  !isTypingOnWebView,
+                  activeSelectGroup == nil,
+                  activeShootGroup == nil {
+
+            activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
+            if let group = self.activeShootGroup,
+               let sourceUrl = self.page.url {
+                let text = group.text
+                self.page.addTextToClusteringManager(text, url: sourceUrl)
+            }
+            throttledHaptic()
+        } else {
+            if !isAltKeyDown {
+                let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
+                dismissedGroups.append(tempGroup)
             }
         }
     }
@@ -270,53 +275,48 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         return note
     }
 
-    /// Adds the activeShootGroup to the journal. It will convert the html to beamtext, apply quote styling and download any target images.
+    /// Adds the activeShootGroup to the journal. It will convert the html to beamtext,
+    /// apply quote styling and download any target images.
     /// - Parameters:
-    ///   - noteTitle: title of note to assign to.
+    ///   - targetNote: The note the shootgroup should be added to
+    ///   - group: ShootGroup to add
+    ///   - withSourceBullet: If shoot should be inserted underneath a source bullet
+    ///   - completion:
     ///   - noteText: optional text to add underneath the shoot quote
-    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, completion: @escaping () -> Void) {
+    func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, withSourceBullet: Bool = true, completion: @escaping () -> Void) {
         guard let sourceUrl = page.url else {
             fatalError("Could not find note to update with title \(targetNote.title)")
         }
+
         // Make group mutable
         var shootGroup = group
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
         htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
+            // exit early when failing to collect correctly
+            guard beamElements.count != 0 else {
+                self.showAlert(shootGroup, beamElements, "failed to collect html elements", completion: {
+                    shootGroup.setConfirmation(.failure)
+                    self.showShootConfirmation(group: shootGroup)
+                    completion()
+                })
+                return
+            }
+
             let elements = beamElements.map({ element -> BeamElement in
                 element.query = self.page.originalQuery
 
                 guard element.kind == .bullet else { return element }
-
-                element.kind = .quote(1, sourceUrl.absoluteString, group.href)
+                element.text.addAttributes([.source(SourceMetadata(origin: .remote(sourceUrl), title: page.title))], to: element.text.wholeRange)
                 return element
             })
             // Update shootgroup information
             shootGroup.numberOfElements = elements.count
             shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-            // exit early when failing to collect correctly
-            guard shootGroup.numberOfElements != 0 else {
-                self.showAlert(shootGroup, elements, "failed to collect html elements")
-                shootGroup.setConfirmation(.failure)
-                self.showShootConfirmation(group: shootGroup)
-                completion()
-                return
-            }
-
             // Set Destination note to the current card
-            // Update BrowsingScorer about note submission
             page.setDestinationNote(targetNote, rootElement: targetNote)
-            scorer?.addTextSelection()
-            // TODO: Convert BeamText to BeamElement of quote type
-            // Adds urlId to current card source
-            let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
-            targetNote.sources.add(urlId: urlId, noteId: targetNote.id, type: .user, sessionId: self.data.sessionId, activeSources: data.activeSources)
-            // Updates frecency score of destination note
-            self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d0)
-            self.data.noteFrecencyScorer.update(id: targetNote.id, value: 1.0, eventType: .notePointAndShoot, date: BeamDate.now, paramKey: .note30d1)
             // Add all quotes to source Note
-
-            let addWithSourceBullet = shouldAddWithSourceBullet(elements)
+            let addWithSourceBullet = withSourceBullet ? shouldAddWithSourceBullet(elements) : withSourceBullet
             if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
                 if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
                     // Append NoteText last quote
@@ -331,27 +331,16 @@ class PointAndShoot: WebPageHolder, ObservableObject {
                     destinationElement.removeChild(onlyChild)
                 }
                 elements.forEach({ quote in destinationElement.addChild(quote) })
-                updateShootGroupAfterAddPageToNote(shootGroup: shootGroup, elements: elements, targetNote: targetNote)
 
+                // Add sourceUrl to note sources
+                self.setNoteSources(targetNote: targetNote, sourceUrl: sourceUrl)
+
+                // Show confirmation UI
+                shootGroup.setConfirmation(.success)
+                self.showShootConfirmation(group: shootGroup)
                 completion()
             }
         })
-    }
-
-    private func updateShootGroupAfterAddPageToNote(shootGroup: ShootGroup, elements: [BeamElement], targetNote: BeamNote) {
-        var shootGroup = shootGroup
-        // Complete PNS and clear stored data
-        shootGroup.numberOfElements = elements.count
-        shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-
-        if shootGroup.numberOfElements == 0 {
-            self.showAlert(shootGroup, elements, "numberOfElements is zero")
-            shootGroup.setConfirmation(.failure)
-        } else {
-            shootGroup.setConfirmation(.success)
-        }
-
-        self.showShootConfirmation(group: shootGroup)
     }
 
     /// Draws shoot confirmation
@@ -369,6 +358,39 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             guard let self = self else { return }
             self.shootConfirmationGroup = nil
         }
+    }
+
+    /// Add url to the note's sources
+    /// - Parameters:
+    ///   - targetNote
+    ///   - sourceUrl
+    private func setNoteSources(targetNote: BeamNote, sourceUrl: URL) {
+        // Update BrowsingScorer about note submission
+        scorer?.addTextSelection()
+        // Adds urlId to current card source
+        let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
+        targetNote.sources.add(
+            urlId: urlId,
+            noteId: targetNote.id,
+            type: .user,
+            sessionId: self.data.sessionId,
+            activeSources: data.activeSources
+        )
+        // Updates frecency score of destination note
+        self.data.noteFrecencyScorer.update(
+            id: targetNote.id,
+            value: 1.0,
+            eventType: .notePointAndShoot,
+            date: BeamDate.now,
+            paramKey: .note30d0
+        )
+        self.data.noteFrecencyScorer.update(
+            id: targetNote.id,
+            value: 1.0,
+            eventType: .notePointAndShoot,
+            date: BeamDate.now,
+            paramKey: .note30d1
+        )
     }
 
     /// Clears all stored Point and Shoot session data
@@ -417,6 +439,15 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
         // A single Image should be inserted without source bullet
         if first.kind.isMedia {
+            return false
+        }
+
+        // A single link matching the source bullet link should be inserted without source bullet
+        guard let pageUrl = page.url?.absoluteString else {
+            Logger.shared.logDebug("Could not find page url while checking text links", category: .pointAndShoot)
+            return true
+        }
+        for link in first.text.links where (link == pageUrl) && (first.text.text == page.title) {
             return false
         }
 

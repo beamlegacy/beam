@@ -24,7 +24,7 @@ class CommandsTextTests: QuickSpec {
         beforeEach {
             // Setup a simple node tree
             let note = self.setupAndResetTree()
-            let editor = BeamTextEdit(root: note, journalMode: true)
+            let editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
             editor.prepareRoot()
             rootNode = editor.rootNode!
 
@@ -43,7 +43,7 @@ class CommandsTextTests: QuickSpec {
                 BeamNote.clearCancellables()
 
                 let note = self.setupAndResetTree()
-                editor = BeamTextEdit(root: note, journalMode: true)
+                editor = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: false)
                 editor.prepareRoot()
                 rootNode = editor.rootNode!
 

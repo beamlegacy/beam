@@ -30,34 +30,28 @@ extension PreferencesManager {
     static let showOmnibarScoreSectionDefault = false
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
-    static let spaIndexingDefault = false
     static let omniboxV2IsOnDefault = false
 }
 
 extension PreferencesManager {
-    static var advancedPreferencesContainer = "app_advanced_preferences"
-
-    @UserDefault(key: browsingSessionCollectionIsOnKey, defaultValue: browsingSessionCollectionIsOnDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: browsingSessionCollectionIsOnKey, defaultValue: browsingSessionCollectionIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var browsingSessionCollectionIsOn: Bool
 
-    @UserDefault(key: showTabGrougpingMenuItemKey, defaultValue: showTabGrougpingMenuItemDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: showTabGrougpingMenuItemKey, defaultValue: showTabGrougpingMenuItemDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showTabGrougpingMenuItem: Bool
 
-    @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showDebugSection: Bool
 
-    @UserDefault(key: showOmnibarScoreSectionKey, defaultValue: showOmnibarScoreSectionDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: showOmnibarScoreSectionKey, defaultValue: showOmnibarScoreSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showOmnibarScoreSection: Bool
 
-    @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showPNSView: Bool
 
-    @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var PnsJSIsOn: Bool
 
-    @UserDefault(key: SpaIndexingKey, defaultValue: spaIndexingDefault, suiteName: advancedPreferencesContainer)
-    static var enableSpaIndexing: Bool
-
-    @UserDefault(key: omniboxV2IsOnKey, defaultValue: omniboxV2IsOnDefault, suiteName: advancedPreferencesContainer)
+    @UserDefault(key: omniboxV2IsOnKey, defaultValue: omniboxV2IsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var omniboxV2IsOn: Bool
 }

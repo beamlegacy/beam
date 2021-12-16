@@ -11,6 +11,8 @@ import Foundation
 import BeamCore
 
 struct DestinationNotePicker: View {
+    @Environment(\.isMainWindow) private var isMainWindow
+
     let tab: BrowserTab
     @EnvironmentObject var state: BeamState
     @State var isHovering = false
@@ -23,7 +25,17 @@ struct DestinationNotePicker: View {
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
     private var title: String {
-        state.destinationCardName
+        guard !isEditing else {
+            return state.destinationCardName
+        }
+        if let note = tab.noteController.note {
+            if let date = note.type.journalDate {
+                return BeamDate.journalNoteTitle(for: date, with: .medium)
+            } else {
+                return state.destinationCardName
+            }
+        }
+        return BeamDate.journalNoteTitle(for: BeamDate.now, with: .medium)
     }
     private var placeholder: String {
         let currentNote = tab.noteController.noteOrDefault.title
@@ -43,7 +55,8 @@ struct DestinationNotePicker: View {
     }
 
     private var textColor: BeamColor {
-        isHovering || isMouseDown || isEditing ? BeamColor.Generic.text : BeamColor.LightStoneGray
+        guard isMainWindow else { return BeamColor.AlphaGray }
+        return isHovering || isMouseDown || isEditing ? BeamColor.Generic.text : BeamColor.LightStoneGray
     }
 
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
@@ -62,12 +75,12 @@ struct DestinationNotePicker: View {
             state.destinationCardName = $0
         })
         return ZStack(alignment: .top) {
-            RoundedRectangle(cornerRadius: 4)
+            RoundedRectangle(cornerRadius: 6)
                 .fill(BeamColor.NotePicker.border.swiftUI.opacity(isMouseDown ? 1.0 : 0.0))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 4)
+                    RoundedRectangle(cornerRadius: 6)
                         .strokeBorder(BeamColor.NotePicker.border.swiftUI)
-                        .opacity(isEditing || isHovering ? 1.0 : 0.0)
+                        .opacity(isEditing || isMouseDown ? 1.0 : 0.0)
                 )
                 .frame(minWidth: isEditing ? 230 : 0, maxHeight: boxHeight)
             ZStack(alignment: .topLeading) {

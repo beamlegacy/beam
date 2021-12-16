@@ -29,6 +29,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.create100Notes()
+        case .create10Notes: Self.create10Notes()
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omnibarFillHistory: fillHistory()
@@ -146,6 +147,14 @@ class BeamUITestsMenuGenerator {
         }
     }
 
+    static public func create10Notes() {
+        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.2, futureRatio: 0.1)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save()
+        }
+    }
+
     private func setAutoUpdateToMock() {
         let appDel = AppDelegate.main
         let checker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
@@ -174,8 +183,8 @@ class BeamUITestsMenuGenerator {
     private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String, id: UUID) {
         _ = IndexDocument(source: url, title: title, contents: title)
         try? GRDBDatabase.shared.insertHistoryUrl(urlId: id, url: url, aliasDomain: aliasUrl, title: title, content: title)
-        var frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
-        try? GRDBDatabase.shared.saveFrecencyUrl(&frecency)
+        let frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
+        try? GRDBDatabase.shared.saveFrecencyUrl(frecency)
     }
 
     private func signInWithTestAccount() {

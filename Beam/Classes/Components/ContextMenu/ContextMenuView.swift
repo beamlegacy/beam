@@ -45,7 +45,7 @@ struct ContextMenuItemView: View {
                 if let iconAction = item.iconAction {
                     ButtonLabel(icon: icon, customStyle: .tinyIconStyle, action: iconAction)
                 } else {
-                    Icon(name: icon, size: item.iconSize, color: item.iconColor.swiftUI)
+                    Icon(name: icon, width: item.iconSize, color: item.iconColor.swiftUI)
                 }
             }
         }

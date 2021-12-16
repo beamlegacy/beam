@@ -1,7 +1,8 @@
 import GRDB
 
 struct HistoryUrlRecord {
-    var id: UUID?
+    var urlId: UUID
+    var lastVisitedAt: Date
     var title: String
     var aliasUrl: String
     var url: String
@@ -12,7 +13,8 @@ struct HistoryUrlRecord {
 extension HistoryUrlRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, urlId, url, title, content
+        case urlId, url, title, content
+        case lastVisitedAt = "last_visited_at"
         case aliasUrl = "alias_domain"
     }
 
@@ -26,7 +28,8 @@ extension HistoryUrlRecord: TableRecord {
 extension HistoryUrlRecord: FetchableRecord {
     /// Creates a record from a database row
     init(row: Row) {
-        id = row[Columns.id]
+        urlId = row[Columns.urlId]
+        lastVisitedAt = row[Columns.lastVisitedAt]
         url = row[Columns.url]
         aliasUrl = row[Columns.aliasUrl] ?? ""
         title = row[Columns.title]
@@ -44,18 +47,14 @@ extension HistoryUrlRecord {
     static let content = hasOne(FTS.self, using: ForeignKey(["rowid"], to: ["rowid"]))
 }
 
-extension HistoryUrlRecord: MutablePersistableRecord {
+extension HistoryUrlRecord: PersistableRecord {
     /// The values persisted in the database
     func encode(to container: inout PersistenceContainer) {
-        container[Columns.id] = id
+        container[Columns.urlId] = urlId
         container[Columns.url] = url
         container[Columns.title] = title
         container[Columns.content] = content
         container[Columns.aliasUrl] = aliasUrl
-    }
-
-    // Update auto-incremented id upon successful insertion
-    mutating func didInsert(with rowID: Int64, for column: String?) {
-//        id = rowID
+        container[Columns.lastVisitedAt] = lastVisitedAt
     }
 }

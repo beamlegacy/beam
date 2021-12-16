@@ -44,8 +44,12 @@ struct OmniboxV2Box: View {
         [.today, .note].contains(state.mode)
     }
 
+    private var showPressedState: Bool {
+        autocompleteManager.animateInputingCharacter
+    }
+
     var body: some View {
-        OmniboxV2Box.Background(isPulled: boxIsPulled) {
+        OmniboxV2Box.Background(isPulled: boxIsPulled, isPressingCharacter: showPressedState) {
             VStack(spacing: 0) {
                 HStack(spacing: BeamSpacing._200) {
                     OmniBarSearchField(isEditing: isEditingBinding,
@@ -83,15 +87,6 @@ struct OmniboxV2Box: View {
 
     private func setIsEditing(_ editing: Bool) {
         state.focusOmniBox = editing
-        if editing {
-            if state.mode == .web, let url = browserTabsManager.currentTab?.url?.absoluteString {
-                autocompleteManager.resetQuery()
-                autocompleteManager.searchQuerySelectedRange = url.wholeRange
-                autocompleteManager.setQuery(url, updateAutocompleteResults: false)
-            }
-        } else if state.mode != .web || browserTabsManager.currentTab?.url != nil {
-            autocompleteManager.resetQuery(clearResults: false)
-        }
     }
 }
 
@@ -99,52 +94,71 @@ struct OmniboxV2Box: View {
 /// And sets up transitions.
 struct OmniboxV2Container: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
+    private let boxWidth: CGFloat = 600
+    private let boxMinX: CGFloat = 87
+
     @State private var isFirstLaunchAppear = true
-    @State private var savedTopOffset: CGFloat?
-    private var topOffset: CGFloat {
-        if let savedTopOffset = savedTopOffset {
-            return savedTopOffset
-        }
-        let offset: CGFloat = state.mode == .web && browserTabsManager.currentTab?.url != nil ? 11 : 100
-        DispatchQueue.main.async {
-            savedTopOffset = offset
+    private func boxOffset(with containerGeometry: GeometryProxy) -> CGSize {
+        var offset: CGSize = CGSize(width: 0, height: 100)
+        if state.mode == .web && state.focusOmniBoxFromTab && browserTabsManager.currentTab?.url != nil, let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
+            var x = currentTabUIFrame.midX - boxWidth / 2
+            x = max(boxMinX, x)
+            x = min(containerGeometry.size.width - boxWidth - 11, x)
+            offset = CGSize(width: x, height: 11)
         }
         return offset
+    }
+
+    private var showPressedState: Bool {
+        autocompleteManager.animateInputingCharacter
     }
 
     var body: some View {
         Group {
             if state.focusOmniBox {
-                OmniboxV2Box(isLaunchAppear: isFirstLaunchAppear)
-                    .frame(width: 600)
-                    .padding(.top, topOffset)
-                    .transition(
-                        .asymmetric(
-                            insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.04).delay(0.02))
-                                .combined(with:
-                                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
-                                .combined(with:
-                                                .scale(scale: 0.95).animation(BeamAnimation.spring(stiffness: 480, damping: 34))),
-                            removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.1))
-                                .combined(with:
-                                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
-                                .combined(with:
-                                                .scale(scale: 0.9).animation(BeamAnimation.defaultiOSEasing(duration: 0.25)))
-                        )
-                    )
-                    .onAppear {
-                        guard isFirstLaunchAppear else { return }
-                        DispatchQueue.main.async {
-                            isFirstLaunchAppear = false
+                GeometryReader { proxy in
+                    let offset = boxOffset(with: proxy)
+                    HStack(spacing: 0) {
+                        if offset.width != 0 {
+                            Rectangle().stroke(Color.clear).frame(width: offset.width, height: 1)
+                        } else {
+                            Spacer(minLength: 0)
                         }
+                        OmniboxV2Box(isLaunchAppear: isFirstLaunchAppear)
+                            .frame(width: boxWidth)
+                            .padding(.top, offset.height)
+                        Spacer(minLength: 0)
                     }
-                    .onDisappear {
-                        savedTopOffset = nil
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                .transition(customTranstion)
+                .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
+                .onAppear {
+                    guard isFirstLaunchAppear else { return }
+                    DispatchQueue.main.async {
+                        isFirstLaunchAppear = false
                     }
+                }
             }
         }
+    }
+
+    private var customTranstion: AnyTransition {
+        .asymmetric(
+            insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.04).delay(0.02))
+                .combined(with:
+                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
+                .combined(with:
+                                .scale(scale: 0.95).animation(BeamAnimation.spring(stiffness: 480, damping: 34))),
+            removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.1))
+                .combined(with:
+                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
+                .combined(with:
+                                .scale(scale: 0.9).animation(BeamAnimation.defaultiOSEasing(duration: 0.25)))
+        )
     }
 }
 

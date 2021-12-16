@@ -10,7 +10,6 @@ import Combine
 import Atomics
 
 public protocol BeamNoteDocument {
-    func observeDocumentChange()
     func autoSave()
     var lastChangedElement: BeamElement? { get set }
 }
@@ -18,6 +17,7 @@ public protocol BeamNoteDocument {
 public enum BeamNoteError: Error, Equatable {
     case saveAlreadyRunning
     case unableToCreateDocumentStruct
+    case dataIsEmpty
 }
 
 public struct VisitedPage: Codable, Identifiable {
@@ -189,9 +189,7 @@ public class BeamNote: BeamElement {
         #if DEBUG
         let count = (Self.decodeCount[id] ?? 0) + 1
         Self.decodeCount[id] = count
-        //swiftlint:disable print
-        print("Decoded \(ttl) - \(id) (count = \(count))")
-        //swiftlint:enable print
+        Logger.shared.logDebug("Decoded \(ttl) - \(id) (count = \(count))", category: .noteEditor)
         #endif
     }
 
@@ -261,30 +259,43 @@ public class BeamNote: BeamElement {
     }
 
     public static func getFetchedNote(_ id: UUID) -> BeamNote? {
-        beamCheckMainThread()
+        fetchedLock.readLock()
+        defer { fetchedLock.readUnlock() }
+
         return Self.fetchedNotes[id]?.ref
     }
 
     public func getFetchedNote(_ title: String) -> BeamNote? {
-        beamCheckMainThread()
         return Self.getFetchedNote(title)
     }
 
     public static func getFetchedNote(_ title: String) -> BeamNote? {
-        beamCheckMainThread()
+        fetchedLock.readLock()
+        defer { fetchedLock.readUnlock() }
+
         guard let uid = Self.fetchedNotesTitles[title] else { return nil }
         return Self.getFetchedNote(uid)
     }
 
     public func getFetchedNote(_ id: UUID) -> BeamNote? {
-        beamCheckMainThread()
         return Self.getFetchedNote(id)
+    }
+
+    static public func visitFetchedNotes(_ visitor: @escaping (BeamNote) -> Void) {
+        fetchedLock.readLock()
+        defer { fetchedLock.readUnlock() }
+
+        for noteRef in fetchedNotes.values {
+            guard let note = noteRef.ref else { continue }
+            visitor(note)
+        }
     }
 
     public var pendingSave = ManagedAtomic<Int>(0)
 
     public static func appendToFetchedNotes(_ note: BeamNote) {
-        beamCheckMainThread()
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
         fetchedNotes[note.id] = WeakReference<BeamNote>(note)
         fetchedNotesTitles[note.title] = note.id
         let cancellableKey = cancellableKeyFromNote(note)
@@ -298,15 +309,15 @@ public class BeamNote: BeamElement {
                 guard let note = note as? BeamNoteDocument else { return }
                 note.autoSave()
             }
-        if let note = note as? BeamNoteDocument {
-            note.observeDocumentChange()
-        }
 
         fetchedNotes[note.id] = WeakReference(note)
         fetchedNotesTitles[note.title] = note.id
     }
 
     public static func clearCancellables() {
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
+
         fetchedNotesCancellables.removeAll()
         fetchedNotes.removeAll()
     }
@@ -319,14 +330,18 @@ public class BeamNote: BeamElement {
     }
 
     public static func unload(note: BeamNote) {
-        beamCheckMainThread()
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
+
         fetchedNotesCancellables.removeValue(forKey: cancellableKeyFromNote(note))
         fetchedNotes.removeValue(forKey: note.id)
         fetchedNotesTitles.removeValue(forKey: note.title)
     }
 
     public static func reloadAfterRename(previousTitle: String, note: BeamNote) {
-        beamCheckMainThread()
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
+
         fetchedNotesTitles.removeValue(forKey: cacheKeyFromTitle(previousTitle))
         fetchedNotesTitles[cacheKeyFromTitle(note.title)] = note.id
     }
@@ -343,9 +358,10 @@ public class BeamNote: BeamElement {
     }
 
     public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing")
-    public private(set) static var fetchedNotes: [UUID: WeakReference<BeamNote>] = [:]
-    public private(set) static var fetchedNotesTitles: [String: UUID] = [:]
+    private static var fetchedNotes: [UUID: WeakReference<BeamNote>] = [:]
+    private static var fetchedNotesTitles: [String: UUID] = [:]
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
+    private static var fetchedLock = RWLock()
 
     public func createdByUser() {
         score += 0.1

@@ -38,7 +38,7 @@ struct FileDetail: View {
                             }
                             HStack {
                                 Text("Checksum:").bold()
-                                Text(file.checksum ?? "-")
+                                Text(file.previousChecksum ?? "-")
                                 Spacer()
                             }
                             HStack {
@@ -149,7 +149,7 @@ struct FileDetail: View {
             try BeamFileDBManager.fileDB.remove(uid: file.uid)
 
             if remoteDelete {
-                try fileManager.deleteFromBeamObjectAPI(file.beamObjectId) { result in
+                try fileManager.deleteFromBeamObjectAPI(object: file) { result in
                     switch result {
                     case .success: break
                     case .failure(let error):

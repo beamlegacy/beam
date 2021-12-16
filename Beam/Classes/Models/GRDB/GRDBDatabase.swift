@@ -227,6 +227,35 @@ struct GRDBDatabase {
                 t.column("content")
             }
         }
+        migrator.registerMigration("moveLinkStoreToGRDB") { db in
+            try db.create(table: BeamLinkDB.tableName, ifNotExists: true) { table in
+                table.column("id", .text).notNull().primaryKey().unique(onConflict: .replace)
+                table.column("url", .text).notNull().indexed().unique(onConflict: .replace)
+                table.column("title", .text).collate(.localizedCaseInsensitiveCompare)
+                table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                table.column("deletedAt", .datetime)
+                table.column("previousChecksum", .text)
+            }
+        }
+
+        migrator.registerMigration("BeamElementRecord_databaseId") { db in
+            if try db.tableExists("BeamElementRecord") {
+                try db.execute(sql: "DROP TABLE BeamElementRecord")
+                needsCardReindexing = true
+            }
+
+            try db.create(virtualTable: "BeamElementRecord", ifNotExists: true, using: FTS4()) { t in // or FTS3(), or FTS5()
+                // t.compress = "zip"
+                // t.uncompress = "unzip"
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("uid")
+                t.column("text")
+                t.column("noteId")
+                t.column("databaseId")
+            }
+        }
 
         #if DEBUG
         // Speed up development by nuking the database when migrations change
@@ -260,8 +289,9 @@ extension GRDBDatabase {
         do {
             try dbWriter.write { db in
                 try BeamElementRecord.filter(Column("noteId") == note.id.uuidString).deleteAll(db)
+                let databaseId =  note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString
                 for elem in note.allTexts {
-                    var record = BeamElementRecord(title: note.title, text: elem.1.text, uid: elem.0.uuidString, noteId: note.id.uuidString)
+                    var record = BeamElementRecord(title: note.title, text: elem.1.text, uid: elem.0.uuidString, noteId: note.id.uuidString, databaseId: databaseId)
                     try record.insert(db)
                 }
             }
@@ -284,7 +314,7 @@ extension GRDBDatabase {
         do {
             try dbWriter.write { db in
                 try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
-                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString)
+                var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString)
                 try record.insert(db)
                 try BidirectionalLink.filter(Column("sourceElementId") == element.id && Column("sourceNoteId") == noteId).deleteAll(db)
             }
@@ -299,7 +329,7 @@ extension GRDBDatabase {
         updateIndexedAt(for: note)
     }
 
-    func appendAsync(element: BeamElement) {
+    func appendAsync(element: BeamElement, _ completion: @escaping () -> Void = {}) {
         guard let note = element.note else { return }
         let noteTitle = note.title
         let noteId = note.id
@@ -307,11 +337,11 @@ extension GRDBDatabase {
         let text = element.text.text
         let links = element.internalLinksInSelf
 
-        DispatchQueue.global(qos: .default).async {
+        DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try dbWriter.write { db in
                     try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
-                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString)
+                    var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString)
                     try record.insert(db)
                     try BidirectionalLink.filter(Column("sourceElementId") == elementId && Column("sourceNoteId") == noteId).deleteAll(db)
                 }
@@ -332,15 +362,20 @@ extension GRDBDatabase {
                 Logger.shared.logError("Error while indexing element \(noteTitle) - \(element.id.uuidString): \(error)", category: .search)
             }
             updateIndexedAt(for: note)
+            completion()
         }
     }
 
     func remove(note: BeamNote) throws {
-        let noteId = note.id.uuidString
+        try remove(noteId: note.id)
+    }
+
+    func remove(noteId: UUID) throws {
+        let noteIdString = noteId.uuidString
         _ = try dbWriter.write { db in
-            try BeamElementRecord.filter(Column("noteId") == noteId).deleteAll(db)
+            try BeamElementRecord.filter(Column("noteId") == noteIdString).deleteAll(db)
         }
-        removeIndexedAt(for: note)
+        removeIndexedAt(for: noteId)
     }
 
     func updateIndexedAt(for note: BeamNote) {
@@ -359,14 +394,19 @@ extension GRDBDatabase {
     }
 
     func removeIndexedAt(for note: BeamNote) {
+        removeIndexedAt(for: note.id)
+    }
+
+    func removeIndexedAt(for noteId: UUID) {
+        let noteIdString = noteId.uuidString
         do {
             _ = try dbWriter.write({ db in
                 try BeamNoteIndexingRecord
-                    .filter(BeamNoteIndexingRecord.Columns.noteId == note.id.uuidString)
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == noteIdString)
                     .deleteAll(db)
             })
         } catch {
-            Logger.shared.logError("Error trying to delete note [\(note.id)] indexing date: \(error)", category: .database)
+            Logger.shared.logError("Error trying to delete note [\(noteIdString)] indexing date: \(error)", category: .database)
 
         }
     }
@@ -566,15 +606,20 @@ extension GRDBDatabase {
                         filter: SQLSpecificExpressible? = nil,
                         frencencyParam: FrecencyParamKey) throws -> [SearchResult] {
 
+        let databaseId = Database.defaultDatabase().id.uuidString
         let association = BeamElementRecord.frecency
             .filter(FrecencyNoteRecord.Columns.frecencyKey == frencencyParam)
             .order(FrecencyNoteRecord.Columns.frecencySortScore.desc)
             .forKey("frecency")
         var query: QueryInterfaceRequest<BeamElementRecord>
         if let pattern = pattern {
-            query = BeamElementRecord.matching(pattern).including(optional: association)
+            query = BeamElementRecord
+                .filter(BeamElementRecord.Columns.databaseId == databaseId)
+                .matching(pattern).including(optional: association)
         } else {
-            query = BeamElementRecord.all().including(optional: association)
+            query = BeamElementRecord
+                .filter(BeamElementRecord.Columns.databaseId == databaseId)
+                .including(optional: association)
         }
         if let filter = filter {
             query = query.filter(filter)
@@ -740,7 +785,7 @@ extension GRDBDatabase {
                        prefixLast: Bool = true,
                        enabledFrecencyParam: FrecencyParamKey? = nil,
                        completion: @escaping (Result<[HistorySearchResult], Error>) -> Void) {
-        guard var pattern = FTS3Pattern(matchingAnyTokenIn: query) else {
+        guard var pattern = FTS3Pattern(matchingAllTokensIn: query) else {
             completion(.failure(ReadError.invalidFTSPattern))
             return
         }
@@ -856,9 +901,17 @@ extension GRDBDatabase {
 
     // MARK: - FrecencyUrlRecord
 
-    func saveFrecencyUrl(_ frecencyUrl: inout FrecencyUrlRecord) throws {
+    func saveFrecencyUrl(_ frecencyUrl: FrecencyUrlRecord) throws {
         try dbWriter.write { db in
             try frecencyUrl.save(db)
+        }
+    }
+
+    func save(urlFrecencies: [FrecencyUrlRecord]) throws {
+        try dbWriter.write { db in
+            for frecency in urlFrecencies {
+                try frecency.save(db)
+            }
         }
     }
 
@@ -892,6 +945,15 @@ extension GRDBDatabase {
             try frecencyNote.save(db)
         }
     }
+
+    func save(noteFrecencies: [FrecencyNoteRecord]) throws {
+        try dbWriter.write { db in
+            for frecency in noteFrecencies {
+                try frecency.save(db)
+            }
+        }
+    }
+
     func fetchOneFrecencyNote(noteId: UUID, paramKey: FrecencyParamKey) throws -> FrecencyNoteRecord? {
         try dbReader.read { db in
             return try FrecencyNoteRecord
@@ -900,6 +962,7 @@ extension GRDBDatabase {
                 .fetchOne(db)
         }
     }
+
     func getFrecencyScoreValues(noteIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: Float] {
         var scores = [UUID: Float]()
         let noteIdsStr = noteIds.map { $0.uuidString }
@@ -1005,6 +1068,98 @@ extension GRDBDatabase {
     func deleteBrowsingTrees(ids: [UUID]) throws {
         _ = try dbWriter.write { db in
             try BrowsingTreeRecord.deleteAll(db, ids: ids)
+        }
+    }
+    // MARK: - LinkStore
+    func getLinks(matchingUrl url: String) -> [UUID: Link] {
+        var matchingLinks = [UUID: Link]()
+        try? dbReader.read { db in
+            try Link.filter(Column("url").like("%\(url)%"))
+                .fetchAll(db)
+                .forEach { matchingLinks[$0.id] = $0 }
+        }
+        return matchingLinks
+    }
+
+    func getTopScoredLinks(matchingUrl url: String, frecencyParam: FrecencyParamKey, limit: Int = 10) -> [LinkWithFrecency] {
+        let association = Link.frecencyScores
+            .filter(FrecencyUrlRecord.Columns.frecencyKey == frecencyParam)
+            .order(FrecencyUrlRecord.Columns.frecencySortScore.desc)
+            .forKey("frecency")
+        var query: QueryInterfaceRequest<Link>
+        query = Link
+            .filter(Column("url").like("%.\(url)%") || Column("url").like("%/\(url)%"))
+            .including(optional: association)
+            .limit(limit)
+        return (try? dbReader.read { db in
+            try LinkWithFrecency.fetchAll(db, query)
+        }) ?? []
+    }
+
+    func getOrCreateIdFor(url: String, title: String?) -> UUID {
+        (try? dbReader.read { db in
+            try Link.filter(Column("url") == url).fetchOne(db)?.id
+        }) ?? visit(url: url, title: title).id
+    }
+
+    func insert(links: [Link]) throws {
+        try dbWriter.write { db in
+            for var link in links {
+                try link.insert(db)
+            }
+        }
+    }
+
+    func linkFor(id: UUID) -> Link? {
+        try? dbReader.read { db in
+            try Link.filter(Column("id") == id).fetchOne(db)
+        }
+    }
+
+    func linkFor(url: String) -> Link? {
+        try? dbReader.read { db in
+            try Link.filter(Column("url") == url).fetchOne(db)
+        }
+    }
+
+    func visit(url: String, title: String? = nil) -> Link {
+        guard var link = linkFor(url: url) else {
+            // The link doesn't exist, create it and return the id
+            var link = Link(url: url, title: title)
+            _ = try? dbWriter.write { db in
+                try link.insert(db)
+            }
+            return link
+        }
+
+        // otherwise let's update the title and the updatedAt
+        link.title = title
+        link.updatedAt = BeamDate.now
+        _ = try? dbWriter.write { db in
+            try link.update(db, columns: [Column("updateAt"), Column("title")])
+        }
+        return link
+    }
+
+    func deleteAll() throws {
+        _ = try dbWriter.write { db in
+            try Link.deleteAll(db)
+        }
+    }
+
+    func allLinks(updatedSince: Date?) throws -> [Link] {
+        guard let updatedSince = updatedSince
+        else {
+            return try dbReader.read { db in try Link.fetchAll(db) }
+        }
+        return try dbReader.read { db in
+            try Link.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
+        }
+    }
+
+    func getLinks(ids: [UUID]) throws -> [Link] {
+        try dbReader.read { db in
+            try Link.filter(keys: ids).fetchAll(db)
         }
     }
 }

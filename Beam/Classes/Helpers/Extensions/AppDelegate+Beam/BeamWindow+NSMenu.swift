@@ -60,7 +60,7 @@ extension BeamWindow {
             guard var beamWindow = AppDelegate.main.windows.first,
                     let command = windowCommands[windowCommand] else { continue }
             if windowCommand > 0 {
-                beamWindow = AppDelegate.main.createWindow(frame: nil)
+                beamWindow = AppDelegate.main.createWindow(frame: nil, restoringTabs: false)
             }
             beamWindow.state.cmdManager.appendToDone(command: command)
 
@@ -97,11 +97,11 @@ extension BeamWindow {
     }
 
     @IBAction func openLocation(_ sender: Any?) {
-        state.setFocusOmnibox()
+        state.setFocusOmnibox(fromTab: true)
     }
 
     @IBAction func openDocument(_ sender: Any?) {
-        state.setFocusOmnibox()
+        state.startNewSearch()
     }
 
     @IBAction func showCardSelector(_ sender: Any?) {
@@ -170,6 +170,12 @@ extension BeamWindow {
 
     @IBAction func collectPageToCard(_ sender: Any?) {
         state.browserTabsManager.currentTab?.collectTab()
+    }
+
+    @IBAction func openRecentNote(_ sender: NSMenuItem) {
+        let recentsNotes = state.recentsManager.recentNotes
+        guard let id = recentsNotes.first(where: { $0.title == sender.title })?.id else { return }
+        state.navigateToNote(id: id)
     }
 
     // MARK: - Web Navigation

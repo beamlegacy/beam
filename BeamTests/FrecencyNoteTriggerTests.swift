@@ -54,7 +54,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
     class FakeBeamWebViewConfiguration: BeamWebViewConfiguration {
             var id = UUID()
             func addCSS(source: String, when: WKUserScriptInjectionTime) {}
-            func addJS(source: String, when: WKUserScriptInjectionTime) {}
+            func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool) {}
             func obfuscate(str: String) -> String { return "" }
         }
 

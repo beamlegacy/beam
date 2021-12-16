@@ -208,7 +208,7 @@ struct AllCardsPageContentView: View {
                         .font(BeamFont.regular(size: 20).swiftUI)
                         .foregroundColor(BeamColor.Niobium.swiftUI)
                         .padding(.leading, 35)
-                    Icon(name: "editor-breadcrumb_down", size: 8, color: BeamColor.LightStoneGray.swiftUI)
+                    Icon(name: "editor-breadcrumb_down", width: 8, color: BeamColor.LightStoneGray.swiftUI)
                 }
                 .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
                     showGlobalContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil), allowImports: true)

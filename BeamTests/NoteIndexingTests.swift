@@ -46,7 +46,7 @@ class noteIndexingTests: XCTestCase {
         // Now we have two notes that should be ok to tinker with
         expect(try GRDBDatabase.shared.countBidirectionalLinks()) == 0
         // The root element of each note should be there:
-        expect(try GRDBDatabase.shared.countIndexedElements()) == 2
+        expect(try GRDBDatabase.shared.countIndexedElements()) == 0
 
         // Now add some contents in the notes
         let element1_1 = BeamElement("this is some text that references a note: \(title2) let's see if we can detect it.")
@@ -64,7 +64,7 @@ class noteIndexingTests: XCTestCase {
         // I expect that no link as been added:
         expect(try GRDBDatabase.shared.countBidirectionalLinks()) == 0
         // However there should be 4 indexed elements now:
-        expect(try GRDBDatabase.shared.countIndexedElements()) == 4
+        expect(try GRDBDatabase.shared.countIndexedElements()) == 2
 
         expect(note1.references.count) == 0
         expect(note2.references.count) == 1

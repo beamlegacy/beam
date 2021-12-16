@@ -5,11 +5,13 @@ enum BeamObjectManagerError: Error {
     case notAuthenticated
     case multipleErrors([Error])
     case invalidChecksum(BeamObject)
+    case invalidChecksums([BeamObject])
     case decodingError(BeamObject)
     case encodingError
     case invalidObjectType(BeamObject, BeamObject)
     case beamObjectAPIDisabled
     case fetchError
+    case nestedTooDeep
 }
 
 extension BeamObjectManagerError: LocalizedError {
@@ -23,6 +25,8 @@ extension BeamObjectManagerError: LocalizedError {
             return "Multiple errors: \(errors)"
         case .invalidChecksum(let object):
             return "Invalid Checksum \(object.id)"
+        case .invalidChecksums(let objects):
+            return "Invalid Checksums \(objects.map { $0.id })"
         case .decodingError(let object):
             return "Decoding Error \(object)"
         case .encodingError:
@@ -33,6 +37,8 @@ extension BeamObjectManagerError: LocalizedError {
             return "invalidObjectType local: \(localObject) remote: \(remoteObject)"
         case .fetchError:
             return "Fetching error"
+        case .nestedTooDeep:
+            return "Nested too deep"
         }
     }
 }

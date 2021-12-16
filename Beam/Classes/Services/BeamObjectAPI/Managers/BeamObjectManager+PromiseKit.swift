@@ -66,8 +66,13 @@ extension BeamObjectManager {
         var beamObjects: [BeamObject]
 
         do {
+            let checksums = BeamObjectChecksum.previousChecksums(objects: objects)
+
             beamObjects = try objects.map {
-                try BeamObject($0, T.beamObjectTypeName)
+                let result = try BeamObject(object: $0)
+                result.previousChecksum = checksums[$0.beamObjectId]
+
+                return result
             }
         } catch {
             return Promise(error: error)
@@ -76,23 +81,10 @@ extension BeamObjectManager {
         let promise: Promise = request.saveAll(beamObjects)
         // TODO: add a way to cancel request
 
-        return promise.map(on: backgroundQueue) { remoteBeamObjects in
-            // Note: we can't decode the remote `BeamObject` as that would require to fetch all details back from
-            // the API when saving (it needs `data`). Instead we use the objects passed within the method attribute,
-            // and set their `previousChecksum`
-            // We'll use `copy()` when it's faster and doesn't encode/decode
+        return promise.map(on: backgroundQueue) { _ in
+            try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
 
-            // Caller will need to store those previousCheckum into its data storage, we must return it
-            let savedObjects: [T] = try beamObjects.map {
-                var remoteObject: T = try $0.decodeBeamObject()
-                remoteObject.previousChecksum = remoteBeamObjects.first(where: {
-                    $0.id == remoteObject.beamObjectId
-                })?.dataChecksum
-
-                return remoteObject
-            }
-
-            return savedObjects
+            return objects
         }.recover { error -> Promise<[T]> in
             switch error {
             case APIRequestError.beamObjectInvalidChecksum:
@@ -129,7 +121,7 @@ extension BeamObjectManager {
             return Promise(error: error)
         }
 
-        var goodObjects: [T] = extractGoodObjects(objects, conflictedObject, remoteBeamObjects)
+        let goodObjects: [T] = extractGoodObjects(objects, conflictedObject, remoteBeamObjects)
 
         var fetchedObject: T?
         do {
@@ -141,19 +133,21 @@ extension BeamObjectManager {
 
         switch self.conflictPolicyForSave {
         case .replace:
-            if let fetchedObject = fetchedObject {
-                conflictedObject = manageConflict(conflictedObject, fetchedObject)
-            } else {
-                conflictedObject.previousChecksum = nil
+            do {
+                if let fetchedObject = fetchedObject {
+                    conflictedObject = manageConflict(conflictedObject, fetchedObject)
+                    try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
+                } else {
+                    try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
+                }
+            } catch {
+                return Promise(error: error)
             }
 
             let promise: Promise<T> = saveToAPI(conflictedObject)
 
-            return promise.map(on: backgroundQueue) { newSavedObject in
-                conflictedObject.checksum = newSavedObject.checksum
-                conflictedObject.previousChecksum = newSavedObject.checksum
-                goodObjects.append(conflictedObject)
-                return goodObjects
+            return promise.map(on: backgroundQueue) { _ in
+                return goodObjects + [conflictedObject]
             }
         case .fetchRemoteAndError:
             let error = BeamObjectManagerObjectError<T>.invalidChecksum([conflictedObject],
@@ -190,9 +184,9 @@ extension BeamObjectManager {
             objectErrorIds.contains($0.beamObjectId.uuidString.lowercased())
         }
 
-        var goodObjects: [T] = extractGoodObjects(objects, objectErrorIds, remoteBeamObjects)
+        let goodObjects: [T] = extractGoodObjects(objects, objectErrorIds, remoteBeamObjects)
 
-        let fetchObjectsPromise: Promise<[T]> = fetchObjects(conflictedObjects)
+        let fetchObjectsPromise: Promise<[T]> = fetchObjects(conflictedObjects, storePreviousChecksum: conflictPolicyForSave == .replace)
 
         return fetchObjectsPromise.then(on: backgroundQueue) { fetchedConflictedObjects -> Promise<[T]> in
             switch self.conflictPolicyForSave {
@@ -205,26 +199,17 @@ extension BeamObjectManager {
                     })
 
                     if let fetchedObject = fetchedObject {
+                        try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
                         return self.manageConflict(conflictedObject, fetchedObject)
-                    } else {
-                        var fixedConflictedObject: T = try conflictedObject.copy()
-                        fixedConflictedObject.previousChecksum = nil
-                        return fixedConflictedObject
                     }
+
+                    try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
+                    return conflictedObject
                 }
 
                 let promise: Promise<[T]> = self.saveToAPI(toSaveObjects)
-                let result: Promise<[T]> = promise.map(on: self.backgroundQueue) { savedObjects in
-                    let toSaveObjectsWithChecksum: [T] = toSaveObjects.map {
-                        var toSaveObject = $0
-                        let savedObject = savedObjects.first(where: { $0.beamObjectId == toSaveObject.beamObjectId })
-                        toSaveObject.previousChecksum = savedObject?.checksum
-
-                        return toSaveObject
-                    }
-                    goodObjects.append(contentsOf: toSaveObjectsWithChecksum)
-
-                    return goodObjects
+                let result: Promise<[T]> = promise.map(on: self.backgroundQueue) { _ in
+                    return goodObjects + toSaveObjects
                 }
 
                 return result
@@ -237,31 +222,42 @@ extension BeamObjectManager {
         }
     }
 
-    func fetchObjects<T: BeamObjectProtocol>(_ objects: [T]) -> Promise<[T]> {
-        fetchBeamObjects(objects.map { $0.beamObjectId }).map(on: backgroundQueue) { remoteBeamObjects in
-            try self.beamObjectsToObjects(remoteBeamObjects)
+    func fetchObjects<T: BeamObjectProtocol>(_ objects: [T], storePreviousChecksum: Bool = false) -> Promise<[T]> {
+        fetchBeamObjects(objects: objects).map(on: backgroundQueue) { remoteBeamObjects in
+            if storePreviousChecksum {
+                try BeamObjectChecksum.savePreviousChecksums(beamObjects: remoteBeamObjects)
+            }
+            let result: [T] = try self.beamObjectsToObjects(remoteBeamObjects)
+            return result
         }
     }
 
     /// Fetch all remote objects
     func fetchAllObjects<T: BeamObjectProtocol>() -> Promise<[T]> {
-        fetchBeamObjects(T.beamObjectTypeName).map(on: backgroundQueue) { remoteBeamObjects in
+        fetchBeamObjects(beamObjectType: T.beamObjectType.rawValue).map(on: backgroundQueue) { remoteBeamObjects in
             try self.beamObjectsToObjects(remoteBeamObjects)
         }
     }
 
-    internal func fetchBeamObjects(_ beamObjects: [BeamObject]) -> Promise<[BeamObject]> {
+    internal func fetchBeamObjects<T: BeamObjectProtocol>(objects: [T]) -> Promise<[BeamObject]> {
+        let request = BeamObjectRequest()
+
+        return request.fetchAll(ids: objects.map { $0.beamObjectId },
+                                beamObjectType: T.beamObjectType.rawValue)
+    }
+
+    internal func fetchBeamObjects(beamObjects: [BeamObject]) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
 
         return request.fetchAll(ids: beamObjects.map { $0.id })
     }
 
-    internal func fetchBeamObjects(_ ids: [UUID]) -> Promise<[BeamObject]> {
+    internal func fetchBeamObjects(ids: [UUID]) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
         return request.fetchAll(ids: ids)
     }
 
-    internal func fetchBeamObjects(_ beamObjectType: String) -> Promise<[BeamObject]> {
+    internal func fetchBeamObjects(beamObjectType: String) -> Promise<[BeamObject]> {
         let request = BeamObjectRequest()
         return request.fetchAll(beamObjectType: beamObjectType)
     }
@@ -274,27 +270,31 @@ extension BeamObjectManager {
         var beamObject: BeamObject
 
         do {
-            beamObject = try BeamObject(object, T.beamObjectTypeName)
+            beamObject = try BeamObject(object: object)
         } catch { return Promise(error: error) }
+
+        beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)
 
         let request = BeamObjectRequest()
         let promise: Promise = request.save(beamObject)
 
-        return promise.map(on: backgroundQueue) { remoteBeamObject in
+        return promise.map(on: backgroundQueue) { _ in
             // Note: we can't decode the remote `BeamObject` as that would require to fetch all details back from
             // the API when saving (it needs `data`). Instead we use the objects passed within the method attribute,
             // and set their `previousChecksum`
 
+            try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+
             // We'll use `copy()` when it's faster and doesn't encode/decode
-            var savedObject: T = try beamObject.decodeBeamObject()
-            savedObject.previousChecksum = remoteBeamObject.dataChecksum
+            let savedObject: T = try beamObject.decodeBeamObject()
             return savedObject
         }.recover(on: backgroundQueue) { error -> Promise<T> in
-            self.saveToAPIFailure(object, error)
+            self.saveToAPIFailure(object, beamObject, error)
         }
     }
 
     internal func saveToAPIFailure<T: BeamObjectProtocol>(_ object: T,
+                                                          _ beamObject: BeamObject,
                                                           _ error: Error) -> Promise<T> {
         Logger.shared.logError("Could not save \(object): \(error.localizedDescription)",
                                category: .beamObjectNetwork)
@@ -304,31 +304,30 @@ extension BeamObjectManager {
             return Promise(error: error)
         }
 
-        Logger.shared.logWarning("Invalid Checksum. Local previousChecksum: \(object.previousChecksum ?? "-")",
+        Logger.shared.logWarning("Invalid Checksum. Local previousChecksum: \(beamObject.previousChecksum ?? "-")",
                                  category: .beamObjectNetwork)
 
         do {
             var fetchedObject: T?
             do {
                 fetchedObject = try fetchObject(object)
-            } catch APIRequestError.notFound { }
+            } catch APIRequestError.notFound {
+                try BeamObjectChecksum.deletePreviousChecksum(object: object)
+            }
             var conflictedObject: T = try object.copy()
-
-            Logger.shared.logWarning("Remote object checksum: \(fetchedObject?.checksum ?? "-")",
-                                   category: .beamObjectNetwork)
 
             switch self.conflictPolicyForSave {
             case .replace:
                 if let fetchedObject = fetchedObject {
                     conflictedObject = manageConflict(conflictedObject, fetchedObject)
+                    try BeamObjectChecksum.savePreviousChecksum(object: fetchedObject)
                 } else {
-                    conflictedObject.previousChecksum = nil
+                    try BeamObjectChecksum.deletePreviousChecksum(object: conflictedObject)
                 }
 
                 let promise: Promise<T> = saveToAPI(conflictedObject)
 
-                return promise.map(on: backgroundQueue) { newSavedObject in
-                    conflictedObject.previousChecksum = newSavedObject.checksum
+                return promise.map(on: backgroundQueue) { _ in
                     return conflictedObject
                 }
             case .fetchRemoteAndError:
@@ -342,34 +341,34 @@ extension BeamObjectManager {
         }
     }
 
-    func fetchObject<T: BeamObjectProtocol>(_ object: T) -> Promise<T> {
-        let promise: Promise = fetchBeamObject(object.beamObjectId)
+    func fetchObject<T: BeamObjectProtocol>(object: T) -> Promise<T> {
+        let promise: Promise = fetchBeamObject(object: object)
 
         return promise.map(on: backgroundQueue) { remoteBeamObject in
             // Check if you have the same IDs for 2 different object types
-            guard remoteBeamObject.beamObjectType == T.beamObjectTypeName else {
-                throw BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectTypeName)")
+            guard remoteBeamObject.beamObjectType == T.beamObjectType.rawValue else {
+                throw BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectType)")
             }
 
             return try remoteBeamObject.decodeBeamObject()
         }
     }
 
-    func fetchObjectUpdatedAt<T: BeamObjectProtocol>(_ object: T) -> Promise<Date?> {
-        fetchMinimalBeamObject(object.beamObjectId).map(on: backgroundQueue) { remoteBeamObject in
+    func fetchObjectUpdatedAt<T: BeamObjectProtocol>(object: T) -> Promise<Date?> {
+        fetchMinimalBeamObject(object: object).map(on: backgroundQueue) { remoteBeamObject in
             // Check if you have the same IDs for 2 different object types
-            guard remoteBeamObject.beamObjectType == T.beamObjectTypeName else {
-                throw BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectTypeName)")
+            guard remoteBeamObject.beamObjectType == T.beamObjectType.rawValue else {
+                throw BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectType)")
             }
             return remoteBeamObject.updatedAt
         }
     }
 
-    func fetchObjectChecksum<T: BeamObjectProtocol>(_ object: T) -> Promise<String?> {
-        fetchMinimalBeamObject(object.beamObjectId).map(on: backgroundQueue) { remoteBeamObject in
+    func fetchObjectChecksum<T: BeamObjectProtocol>(object: T) -> Promise<String?> {
+        fetchMinimalBeamObject(object: object).map(on: backgroundQueue) { remoteBeamObject in
             // Check if you have the same IDs for 2 different object types
-            guard remoteBeamObject.beamObjectType == T.beamObjectTypeName else {
-                throw BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectTypeName)")
+            guard remoteBeamObject.beamObjectType == T.beamObjectType.rawValue else {
+                throw BeamObjectManagerDelegateError.runtimeError("returned object \(remoteBeamObject) is not a \(T.beamObjectType)")
             }
             return remoteBeamObject.dataChecksum
         }
@@ -383,15 +382,18 @@ extension BeamObjectManager {
             return Promise(error: BeamObjectManagerError.notAuthenticated)
         }
 
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
+
+        beamObjects.forEach {
+            $0.previousChecksum = checksums[$0.id]
+        }
+
         let request = BeamObjectRequest()
         let promise: Promise = request.saveAll(beamObjects)
 
         return promise.map(on: backgroundQueue) { updateBeamObjects in
-            updateBeamObjects.map {
-                let result = $0.copy()
-                result.previousChecksum = $0.dataChecksum
-                return result
-            }
+            try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
+            return updateBeamObjects
         }.recover(on: backgroundQueue) { error -> Promise<[BeamObject]> in
             self.saveToAPIBeamObjectsFailure(beamObjects, error)
         }
@@ -412,8 +414,7 @@ extension BeamObjectManager {
              objects into `remoteObjects` to resend them back in the completion handler
              */
 
-            guard let updateBeamObjects = updateBeamObjects as? BeamObjectRequest.UpdateBeamObjects,
-                  let remoteBeamObjects = updateBeamObjects.beamObjects else {
+            guard let updateBeamObjects = updateBeamObjects as? BeamObjectRequest.UpdateBeamObjects else {
                 return Promise(error: error)
             }
 
@@ -422,16 +423,8 @@ extension BeamObjectManager {
                 return Promise(error: error)
             }
 
-            // Set `checksum` on the objects who were saved successfully as this will be used later
-            var remoteFilteredBeamObjects: [BeamObject] = beamObjects.compactMap {
-                if beamObject.id == $0.id { return nil }
-
-                let remoteObject = $0
-                remoteObject.dataChecksum = remoteBeamObjects.first(where: {
-                    $0.id == remoteObject.id
-                })?.dataChecksum
-
-                return remoteObject
+            let goodObjects = beamObjects.filter {
+                beamObject.id != $0.id
             }
 
             // APIRequestError.beamObjectInvalidChecksum is only raised when having 1 object
@@ -439,9 +432,10 @@ extension BeamObjectManager {
             let promise: Promise<BeamObject> = fetchAndReturnErrorBasedOnConflictPolicy(beamObject)
             return promise.then(on: backgroundQueue) {
                 self.saveToAPI($0)
-            }.map(on: self.backgroundQueue) { remoteFilteredBeamObject in
-                remoteFilteredBeamObjects.append(remoteFilteredBeamObject)
-                return remoteFilteredBeamObjects
+            }.map(on: self.backgroundQueue) { _ in
+                try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+            }.map(on: self.backgroundQueue) { _ in
+                return goodObjects + [beamObject]
             }
         case APIRequestError.apiErrors(let errorable):
             guard let errors = errorable.errors else { break }
@@ -457,7 +451,7 @@ extension BeamObjectManager {
 
     /// Fetch remote object, and based on policy will either return the object with remote checksum, or return and error containing the remote object
     internal func fetchAndReturnErrorBasedOnConflictPolicy(_ beamObject: BeamObject) -> Promise<BeamObject> {
-        let promise: Promise<BeamObject> = fetchBeamObject(beamObject)
+        let promise: Promise<BeamObject> = fetchBeamObject(beamObject: beamObject)
 
         return promise.then(on: backgroundQueue) { remoteBeamObject -> Promise<BeamObject> in
             // This happened during tests, but could happen again if you have the same IDs for 2 different objects
@@ -465,12 +459,10 @@ extension BeamObjectManager {
                 throw BeamObjectManagerError.invalidObjectType(beamObject, remoteBeamObject)
             }
 
-            /*
-             We fetched the remote beam object, we set `previousChecksum` to the remote checksum
-             */
-
             switch self.conflictPolicyForSave {
             case .replace:
+
+                try BeamObjectChecksum.savePreviousChecksum(beamObject: remoteBeamObject)
                 let newBeamObject = self.manageConflict(beamObject, remoteBeamObject)
                 return .value(newBeamObject)
             case .fetchRemoteAndError:
@@ -481,14 +473,13 @@ extension BeamObjectManager {
              We tried fetching the remote beam object but it doesn't exist, we set `previousChecksum` to `nil`
              */
             if case APIRequestError.notFound = error {
-                let newBeamObject = beamObject.copy()
-                newBeamObject.previousChecksum = nil
+                try BeamObjectChecksum.deletePreviousChecksum(beamObject: beamObject)
 
                 switch self.conflictPolicyForSave {
                 case .replace:
-                    return .value(newBeamObject)
+                    return .value(beamObject)
                 case .fetchRemoteAndError:
-                    throw BeamObjectManagerError.invalidChecksum(newBeamObject)
+                    throw BeamObjectManagerError.invalidChecksum(beamObject)
                 }
             }
             throw error
@@ -522,10 +513,9 @@ extension BeamObjectManager {
         let request = BeamObjectRequest()
         let promise: Promise = request.save(beamObject)
 
-        return promise.map(on: backgroundQueue) { updateBeamObject in
-            let savedBeamObject = updateBeamObject.copy()
-            savedBeamObject.previousChecksum = updateBeamObject.dataChecksum
-            return savedBeamObject
+        return promise.map(on: backgroundQueue) { _ in
+            try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+            return beamObject
         }.recover(on: backgroundQueue) { error -> Promise<BeamObject> in
             // Early return except for checksum issues.
             guard case APIRequestError.beamObjectInvalidChecksum = error else {
@@ -544,36 +534,44 @@ extension BeamObjectManager {
                                          category: .beamObjectNetwork)
                 Logger.shared.logWarning("Overwriting local object with remote checksum",
                                          category: .beamObjectNetwork)
+                try BeamObjectChecksum.savePreviousChecksum(beamObject: newBeamObject)
                 return self.saveToAPI(newBeamObject)
             }
         }
     }
 
-    internal func fetchBeamObject(_ beamObject: BeamObject) -> Promise<BeamObject> {
+    internal func fetchBeamObject(beamObject: BeamObject) -> Promise<BeamObject> {
         let request = BeamObjectRequest()
-        return request.fetch(beamObject.id)
+        return request.fetch(beamObject: beamObject)
     }
 
-    internal func fetchBeamObject(_ id: UUID) -> Promise<BeamObject> {
+    internal func fetchBeamObject<T: BeamObjectProtocol>(object: T) -> Promise<BeamObject> {
         let request = BeamObjectRequest()
-        return request.fetch(id)
+        return request.fetch(object: object)
     }
 
-    internal func fetchMinimalBeamObject(_ id: UUID) -> Promise<BeamObject> {
+    internal func fetchMinimalBeamObject(beamObject: BeamObject) -> Promise<BeamObject> {
         let request = BeamObjectRequest()
-        return request.fetchMinimalBeamObject(id)
+        return request.fetchMinimalBeamObject(beamObject: beamObject)
     }
 
-    func delete(_ id: UUID, raise404: Bool = false) -> Promise<BeamObject?> {
+    internal func fetchMinimalBeamObject<T: BeamObjectProtocol>(object: T) -> Promise<BeamObject> {
+        let request = BeamObjectRequest()
+        return request.fetchMinimalBeamObject(object: object)
+    }
+
+    func delete(beamObject: BeamObject, raise404: Bool = false) -> Promise<BeamObject?> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(error: BeamObjectManagerError.notAuthenticated)
         }
 
         let request = BeamObjectRequest()
 
-        return request.delete(id)
-            .map(on: backgroundQueue) { beamObject -> BeamObject? in beamObject }
-            .recover(on: backgroundQueue) { error -> Promise<BeamObject?> in
+        return request.delete(beamObject: beamObject)
+            .map(on: backgroundQueue) { _ in
+                try BeamObjectChecksum.deletePreviousChecksum(beamObject: beamObject)
+                return beamObject
+            }.recover(on: backgroundQueue) { error -> Promise<BeamObject?> in
             if raise404 || !BeamError.isNotFound(error) {
                 return .value(nil)
             }
@@ -581,7 +579,26 @@ extension BeamObjectManager {
         }
     }
 
-    func deleteAll(_ beamObjectType: String? = nil) -> Promise<Bool> {
+    func delete<T: BeamObjectProtocol>(object: T, raise404: Bool = false) -> Promise<T?> {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            return Promise(error: BeamObjectManagerError.notAuthenticated)
+        }
+
+        let request = BeamObjectRequest()
+
+        return request.delete(object: object)
+            .map(on: backgroundQueue) { _ in
+                try BeamObjectChecksum.deletePreviousChecksum(object: object)
+                return object
+            }.recover(on: backgroundQueue) { error -> Promise<T?> in
+                if raise404 || !BeamError.isNotFound(error) {
+                    return .value(nil)
+                }
+                throw error
+            }
+    }
+
+    func deleteAll(_ beamObjectType: BeamObjectObjectType? = nil) -> Promise<Bool> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(error: BeamObjectManagerError.notAuthenticated)
         }

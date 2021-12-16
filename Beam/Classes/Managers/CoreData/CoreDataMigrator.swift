@@ -75,9 +75,12 @@ class CoreDataMigrator: CoreDataMigratorProtocol {
     private func migrationStepsForStore(at storeURL: URL, toVersion destinationVersion: CoreDataMigrationVersion) -> [CoreDataMigrationStep] {
         guard let metadata = NSPersistentStoreCoordinator.metadata(at: storeURL),
               let sourceVersion = CoreDataMigrationVersion.compatibleVersionForStoreMetadata(metadata) else {
-            Logger.shared.logError("unknown store version at URL \(storeURL)", category: .coredata)
-            return []
-        }
+                  if FileManager.default.fileExists(atPath: storeURL.path) {
+                      Logger.shared.logError("Unknown store version at URL \(storeURL)", category: .coredata)
+                  }
+
+                  return []
+              }
 
         return migrationSteps(fromSourceVersion: sourceVersion, toDestinationVersion: destinationVersion)
     }

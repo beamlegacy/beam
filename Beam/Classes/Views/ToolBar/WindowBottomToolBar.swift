@@ -28,8 +28,8 @@ struct WindowBottomToolBar: View {
     private var buttonsHeight: CGFloat { barHeight - verticalPadding * 2 }
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
-        GlobalCenteringContainer(enabled: true, containerGeometry: containerGeometry) {
-            RecentsListView(currentNote: currentNote)
+        GlobalCenteringContainer(containerGeometry: containerGeometry) {
+            CardSwitcher(currentNote: currentNote)
                 .environmentObject(state.recentsManager)
         }
         .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
@@ -39,14 +39,16 @@ struct WindowBottomToolBar: View {
         GeometryReader { geo in
             HStack {
                 SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
+                    .padding(.leading, 7)
+                    .offset(x: 0, y: -6)
                 Spacer(minLength: 20)
-                if [.today, .note].contains(state.mode) {
+                if !state.useOmniboxV2 && [.today, .note].contains(state.mode) {
                     recentsStack(containerGeometry: geo)
                         .frame(height: buttonsHeight)
                     Spacer(minLength: 20)
                 }
                 HStack {
-                    if state.mode != .page {
+                    if !state.useOmniboxV2 && state.mode != .page {
                         ButtonLabel("All Cards") {
                             state.navigateToPage(WindowPage.allCardsWindowPage)
                         }
@@ -57,14 +59,16 @@ struct WindowBottomToolBar: View {
                         .environmentObject(state.noteMediaPlayerManager)
                 }
                 .fixedSize(horizontal: true, vertical: false)
-                .padding(.trailing, BeamSpacing._50)
+                .padding(.trailing, BeamSpacing._70)
             }
-            .padding(.vertical, BeamSpacing._50)
+            .padding(.vertical, BeamSpacing._70)
             .frame(height: barHeight)
-            .background(
-                BeamColor.Generic.background.swiftUI
-                    .shadow(color: BeamColor.ToolBar.shadowTop.swiftUI, radius: 0, x: 0, y: -0.5)
-            )
+            .if(!state.useOmniboxV2) {
+                $0.background(
+                    BeamColor.Generic.background.swiftUI
+                        .shadow(color: BeamColor.ToolBar.shadowTop.swiftUI, radius: 0, x: 0, y: -0.5)
+                )
+            }
             .frame(maxWidth: .infinity)
         }
         .frame(height: barHeight)
@@ -106,6 +110,12 @@ private struct BottomToolBarTrailingIconView: View {
                         window?.makeKey()
                     }
                     .accessibility(identifier: "HelpButton")
+                    .background(
+                        Circle()
+                            .foregroundColor(BeamColor.Generic.background.swiftUI)
+                            .frame(width: 16, height: 16)
+                            .offset(x: -0.5)
+                    )
                     .overlay(
                         Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
                             .frame(width: 16, height: 16)

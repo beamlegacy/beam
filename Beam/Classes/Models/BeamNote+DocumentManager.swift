@@ -18,7 +18,10 @@ extension BeamNote: BeamNoteDocument {
             // of having all content on a single line to save space
             encoder.outputFormatting = [.prettyPrinted, .withoutEscapingSlashes]
             let data = try encoder.encode(self)
-
+            #if DEBUG
+            // an empty BeamNote encoded to JSon is at lease 250 bytes
+            assert(data.count > 250, "data should encode a full note, it shouldn't be empty (trying to create a documentStruct out of \(self)")
+            #endif
             guard var docStruct = documentStructLight else { return nil }
             docStruct.data = data
             return docStruct
@@ -48,55 +51,48 @@ extension BeamNote: BeamNoteDocument {
                               journalDate: type.journalDateString)
     }
 
-    public func observeDocumentChange() {
-        beamCheckMainThread()
-        let documentManager = DocumentManager()
-        guard activeDocumentCancellables.isEmpty else {
-            Logger.shared.logError("BeamNote already has change observer", category: .document)
+    static func updateNote(_ documentStruct: DocumentStruct) {
+        guard documentStruct.deletedAt == nil else {
+            purgeDeletedNode(documentStruct.id)
             return
         }
-        guard let docStruct = documentStructLight else { return }
 
-        Logger.shared.logInfo("Observe changes for note \(titleAndId)", category: .document)
-        activeDocumentCancellables = []
-        activeDocumentCancellables.append(documentManager.onDocumentChange(docStruct) { [unowned self] doc in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+        guard let note = Self.getFetchedNote(documentStruct.id) else {
+            return
+        }
 
-                self.updateAttempts += 1
-                /*
-                 When receiving updates for a new document, we don't check the version
-                 */
-                if self.version.load(ordering: .relaxed) >= doc.version, self.id == doc.id {
-                    Logger.shared.logDebug("\(self.titleAndId) observer skipped \(doc.version) (must be > \(self.version.load(ordering: .relaxed)))",
-                                           category: .documentNotification)
-                    return
-                }
+        note.updateAttempts += 1
+        /*
+         When receiving updates for a new document, we don't check the version
+         */
+        if note.version.load(ordering: .relaxed) >= documentStruct.version, note.id == documentStruct.id {
+            Logger.shared.logDebug("\(note.titleAndId) observer skipped \(documentStruct.version) (must be > \(note.version.load(ordering: .relaxed)))",
+                                   category: .documentNotification)
+            return
+        }
 
-                changePropagationEnabled = false
-                defer {
-                    changePropagationEnabled = true
-                }
+        note.changePropagationEnabled = false
+        defer {
+            note.changePropagationEnabled = true
+        }
 
-                Logger.shared.logDebug("onDocumentChange received for \(doc.titleAndId)",
-                                       category: .documentNotification)
+        Logger.shared.logDebug("updateNote received for \(documentStruct.titleAndId)",
+                               category: .documentNotification)
 
-                updateWithDocumentStruct(doc)
-            }
-        })
+        note.updateWithDocumentStruct(documentStruct)
+    }
 
-        activeDocumentCancellables.append(documentManager.onDocumentDelete(docStruct) { [unowned self] _ in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
+    static func purgeDeletedNode(_ id: UUID) {
+        beamCheckMainThread()
+        guard let note = Self.getFetchedNote(id) else {
+            return
+        }
 
-                self.deleted = true
-                Self.unload(note: self)
-                for note in Self.fetchedNotes {
-                    note.value.ref?.updateNoteNamesInInternalLinks(recursive: true)
-                }
-
-            }
-        })
+        try? GRDBDatabase.shared.remove(noteId: id)
+        unload(note: note)
+        Self.visitFetchedNotes {
+            $0.updateNoteNamesInInternalLinks(recursive: true)
+        }
     }
 
     func updateWithDocumentStruct(_ docStruct: DocumentStruct, file: StaticString = #file, line: UInt = #line) {
@@ -144,7 +140,15 @@ extension BeamNote: BeamNoteDocument {
         Self.reloadAfterRename(previousTitle: previousTitle, note: self)
         indexContents()
         Logger.shared.logInfo("Rename \(previousTitle) to \(title) [\(id)]", category: .document)
-        AppDelegate.main.data.renamedNote = (id, previousTitle, title)
+//        AppDelegate.main.data.renamedNote = (id, previousTitle, title)
+
+        _ = syncedSave()
+
+        for link in links {
+            guard let element = link.element else { continue }
+            element.updateNoteNamesInInternalLinks(recursive: true)
+            _ = element.note?.syncedSave()
+        }
     }
 
     public func indexContents() {
@@ -197,6 +201,16 @@ extension BeamNote: BeamNoteDocument {
             Logger.shared.logError("Unable to find active document struct \(titleAndId)", category: .document)
             saving.store(false, ordering: .relaxed)
             completion?(.failure(BeamNoteError.unableToCreateDocumentStruct))
+            return
+        }
+
+        #if DEBUG
+        assert(!documentStruct.data.isEmpty)
+        #endif
+
+        guard !documentStruct.data.isEmpty else {
+            Logger.shared.logInfo("BeamNote '\(titleAndId)' save error: empty data", category: .document)
+            completion?(.failure(BeamNoteError.dataIsEmpty))
             return
         }
 
@@ -265,7 +279,7 @@ extension BeamNote: BeamNoteDocument {
                             dump(documentStruct)
 
                             // We delete the passed documentStruct as it conflicts with existing
-                            DocumentManager().delete(id: documentStruct.id) { _ in
+                            DocumentManager().delete(document: documentStruct) { _ in
                                 DispatchQueue.main.async {
                                     self.updateWithDocumentStruct(existingDocument)
                                     self.savedVersion.store(existingDocument.version, ordering: .relaxed)
@@ -354,17 +368,17 @@ extension BeamNote: BeamNoteDocument {
         if decodeChildren == false {
             decoder.userInfo[BeamElement.recursiveCoding] = false
         }
-        if let previousData = documentStruct.previousData {
-            let note = try decoder.decode(BeamNote.self, from: previousData)
-            note.version.store(documentStruct.version, ordering: .relaxed)
-            note.databaseId = documentStruct.databaseId
-            note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
-            note.updateDate = documentStruct.updatedAt
-            note.deleted = documentStruct.deletedAt != nil
 
-            return note
-        }
-        return nil
+        guard let previousData = BeamObjectChecksum.sentData(object: documentStruct) else { return nil }
+
+        let note = try decoder.decode(BeamNote.self, from: previousData)
+        note.version.store(documentStruct.version, ordering: .relaxed)
+        note.databaseId = documentStruct.databaseId
+        note.savedVersion.store(note.version.load(ordering: .relaxed), ordering: .relaxed)
+        note.updateDate = documentStruct.updatedAt
+        note.deleted = documentStruct.deletedAt != nil
+
+        return note
     }
 
     public static func fetch(title: String,
@@ -423,7 +437,6 @@ extension BeamNote: BeamNoteDocument {
                              decodeChildren: Bool = true) -> BeamNote? {
         let documentManager = DocumentManager()
         if keepInMemory {
-            beamCheckMainThread()
             // Is the note in the cache?
             if let note = getFetchedNote(id) {
                 return note
@@ -459,6 +472,29 @@ extension BeamNote: BeamNoteDocument {
             }
         }
     }
+
+    public static func fetchJournalsFrom(date: String) -> [BeamNote] {
+        beamCheckMainThread()
+        let documentManager = DocumentManager()
+        documentManager.checkThread()
+        do {
+            let todayInt = JournalDateConverter.toInt(from: date)
+
+            return try documentManager.fetchAll(filters: [.type(.journal), .nonFutureJournalDate(todayInt)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id) })
+        } catch { return [] }
+    }
+
+    public static func fetchJournalsBefore(count: Int, date: String) -> [BeamNote] {
+        beamCheckMainThread()
+        let documentManager = DocumentManager()
+        documentManager.checkThread()
+        do {
+            let dateInt = JournalDateConverter.toInt(from: date)
+
+            return try documentManager.fetchAll(filters: [.type(.journal), .beforeJournalDate(dateInt), .limit(count)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id) })
+        } catch { return [] }
+    }
+
     static private func insertDefaultFrecency(noteId: UUID) {
         AppDelegate.main.data.noteFrecencyScorer.update(id: noteId, value: 1.0, eventType: .noteCreate, date: BeamDate.now, paramKey: .note30d0)
         AppDelegate.main.data.noteFrecencyScorer.update(id: noteId, value: 1.0, eventType: .noteCreate, date: BeamDate.now, paramKey: .note30d1)
@@ -665,5 +701,11 @@ extension BeamNote: BeamNoteDocument {
         }
 
         return strs
+    }
+
+    static public func loadNotes(_ ids: [UUID], _ completion: @escaping ([BeamNote]) -> Void) {
+        DispatchQueue.global(qos: .userInitiated).async {
+            completion(ids.compactMap { BeamNote.fetch(id: $0, keepInMemory: true, decodeChildren: true) })
+        }
     }
 }

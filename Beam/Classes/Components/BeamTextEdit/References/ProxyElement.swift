@@ -11,6 +11,7 @@ import Combine
 
 class ProxyElement: BeamElement {
     var proxy: BeamElement
+    override public var isProxy: Bool { true }
 
     override var text: BeamText {
         didSet {

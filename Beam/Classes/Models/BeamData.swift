@@ -21,7 +21,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         return _todaysNote!
     }
     @Published var journal: [BeamNote] = []
-
     @Published var noteCount = 0
     @Published var lastChangedElement: BeamElement?
     @Published var lastIndexedElement: BeamElement?
@@ -36,6 +35,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     var cookies: HTTPCookieStorage
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
+    var importsManager: ImportsManager = ImportsManager()
     lazy var calendarManager: CalendarManager = {
         let cm = CalendarManager()
         observeCalendarManager(cm)
@@ -100,8 +100,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     static var idToTitle: [UUID: String] = [:]
     static var titleToId: [String: UUID] = [:]
 
-    var linkDB: BeamLinkDB
-
     //swiftlint:disable:next function_body_length
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
@@ -124,38 +122,24 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             waitTimeOut: 2.0
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
-        linkDB = BeamLinkDB(path: BeamData.linkDBPath)
-
         super.init()
 
         let documentManager = DocumentManager()
+
         BeamNote.idForNoteNamed = { title, includeDeletedNotes in
-            guard let id = Self.titleToId[title] else {
-                guard let doc = documentManager.loadDocumentByTitle(title: title),
-                      includeDeletedNotes || doc.deletedAt == nil
-                else { return nil }
-                let id = doc.id
-                Self.titleToId[title] = id
-                Self.idToTitle[id] = title
-                return id
-            }
+            guard let doc = documentManager.loadDocumentByTitle(title: title),
+                  includeDeletedNotes || doc.deletedAt == nil
+            else { return nil }
+            let id = doc.id
             return id
         }
         BeamNote.titleForNoteId = { id, includeDeletedNotes in
-            guard let title = Self.idToTitle[id] else {
-                guard let doc = documentManager.loadDocumentById(id: id),
-                      includeDeletedNotes || doc.deletedAt == nil
-                else { return nil }
-                let title = doc.title
-                Self.updateTitleIdNoteMapping(noteId: id, currentName: nil, newName: title)
-                return title
-            }
+            guard let doc = documentManager.loadDocumentById(id: id),
+                  includeDeletedNotes || doc.deletedAt == nil
+            else { return nil }
+            let title = doc.title
             return title
         }
-
-        $renamedNote.dropFirst().sink { (noteId, previousName, newName) in
-            Self.updateTitleIdNoteMapping(noteId: noteId, currentName: previousName, newName: newName)
-        }.store(in: &scope)
 
         setupSubscribers()
         resetPinnedTabs()
@@ -168,13 +152,16 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     private func setupSubscribers() {
         $lastChangedElement.sink { [weak self] element in
             guard let self = self, let element = element else { return }
-            GRDBDatabase.shared.appendAsync(element: element)
-            self.lastIndexedElement = element
-            if let note = element.note,
-               note.type == .note,
-               let changed = note.lastChangeType,
-               changed == .text {
-                self.clusteringManager.noteToAdd = note
+            GRDBDatabase.shared.appendAsync(element: element) {
+                DispatchQueue.main.async {
+                    self.lastIndexedElement = element
+                    if let note = element.note,
+                       note.type == .note,
+                       let changed = note.lastChangeType,
+                       changed == .text || changed == .tree {
+                        self.clusteringManager.noteToAdd = note
+                    }
+                }
             }
         }.store(in: &scope)
 
@@ -187,7 +174,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
                 self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title)
+                _ = LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title)
             }
 
             // Update history record
@@ -217,7 +204,50 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         NotificationCenter.default.addObserver(self, selector: #selector(calendarDayDidChange(notification:)),
                                                name: NSNotification.Name.NSCalendarDayChanged, object: nil)
+
+        DocumentManager.documentSaved.receive(on: DispatchQueue.main)
+            .sink { [weak self] documentStruct in
+                guard let self = self else { return }
+
+                // All notes go through this publisher
+                BeamNote.updateNote(documentStruct)
+                Self.noteUpdated.send(documentStruct)
+                switch documentStruct.documentType {
+                case .note:
+                    break
+                case .journal:
+                    // Only send journal updates to this one
+                    Self.journalNoteUpdated.send(documentStruct)
+
+                    // Also update the journal if a note was added or removed and it's not in the future
+                    if let journalDateString = documentStruct.journalDate, let journalDate = BeamNoteType.dateFormater.date(from: journalDateString), journalDate <= BeamDate.now {
+                        let contained = self.journal.contains(where: { $0.id == documentStruct.id })
+                        let added = documentStruct.deletedAt == nil && !contained
+                        let removed = documentStruct.deletedAt != nil && contained
+
+                        if added {
+                            if !self.journal.contains(where: { $0.id == documentStruct.id }),
+                               let index = self.journal.firstIndex(where: { journalDate > ($0.type.journalDate ?? BeamDate.now) }),
+                               let note = BeamNote.fetch(id: documentStruct.id) {
+                                self.journal.insert(note, at: index)
+                            }
+                        } else if removed {
+                            if let index = self.journal.firstIndex(where: { $0.id == documentStruct.id }) {
+                                self.journal.remove(at: index)
+                            }
+                        }
+                    }
+                }
+            }.store(in: &scope)
+
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { id in
+                BeamNote.purgeDeletedNode(id)
+            }.store(in: &scope)
     }
+
+    static let noteUpdated = PassthroughSubject<DocumentStruct, Never>()
+    static let journalNoteUpdated = PassthroughSubject<DocumentStruct, Never>()
 
     func allWindowsDidClose() {
         resetPinnedTabs()
@@ -251,23 +281,49 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
     func setupJournal(firstSetup: Bool = false) {
         journalCancellables = []
+        journal.removeAll()
         let note  = BeamNote.fetchOrCreateJournalNote(date: BeamDate.now)
         observeJournal(note: note)
         journal.append(note)
         _todaysNote = note
-        updateJournal(with: 2, and: journal.count, fetchEvents: !firstSetup)
+        loadMorePastJournalNotes(count: 1, fetchEvents: !firstSetup)
     }
 
-    func updateJournal(with limit: Int = 0, and fetchOffset: Int = 0, fetchEvents: Bool = true) {
+    func loadMorePastJournalNotes(count: Int, fetchEvents: Bool) {
         isFetching = true
-        let _journal = BeamNote.fetchNotesWithType(type: .journal, limit, fetchOffset).compactMap { $0.type.isJournal && !$0.type.isFutureJournal ? $0 : nil }
+        guard let earliest = journal.last,
+              let earliestDateString = earliest.type.journalDateString
+        else {
+            Logger.shared.logError("Unable to find ealiest journal note or date", category: .general)
+            return
+        }
+
+        var date = earliestDateString
+        var _journal = [BeamNote]()
+        // Try to find a journal note that is earlier that the last entry and that is not empty
+        repeat {
+            _journal = BeamNote.fetchJournalsBefore(count: count, date: date)
+            date = _journal.last?.type.journalDateString ?? ""
+        } while (!_journal.isEmpty && (_journal.last?.shouldAppearInJournal != true))
+
+        appendToJournal(_journal, fetchEvents: fetchEvents)
+    }
+
+    func loadJournalUpTo(date: String) {
+        let _journal = BeamNote.fetchJournalsFrom(date: date).compactMap({ $0.shouldAppearInJournal ? $0 : nil })
+        appendToJournal(_journal, fetchEvents: true)
+    }
+
+    func appendToJournal(_ _journal: [BeamNote], fetchEvents: Bool) {
         for note in _journal {
             observeJournal(note: note)
-            if fetchEvents, let journalDate = note.type.journalDate, !note.isEntireNoteEmpty() {
+            if fetchEvents, let journalDate = note.type.journalDate {
                 loadEvents(for: note.id, for: journalDate)
             }
         }
-        journal.append(contentsOf: _journal)
+        let newJournal = journal + _journal
+        let sorted = Set(newJournal).sorted { ($0.type.journalDate ?? Date.distantPast) > ($1.type.journalDate ?? Date.distantPast) }
+        journal = sorted
     }
 
     func updateNoteCount() {
@@ -326,6 +382,16 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         })
     }
 
+    public func clearCookiesAndCache() {
+        HTTPCookieStorage.shared.cookies?.forEach(HTTPCookieStorage.shared.deleteCookie)
+
+        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), completionHandler: { records in
+            records.forEach { record in
+                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
+            }
+        })
+    }
+
     func setup(webView: WKWebView) {
         let configuration = webView.configurationWithoutMakingCopy
         for cookie in cookies.cookies ?? [] {
@@ -349,20 +415,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
-    }
-}
-
-extension BeamData {
-    static func updateTitleIdNoteMapping(noteId: UUID, currentName: String?, newName: String?) {
-        if let currentName = currentName {
-            Self.titleToId.removeValue(forKey: currentName)
-        }
-        if let newName = newName {
-            Self.titleToId[newName] = noteId
-            Self.idToTitle[noteId] = newName
-        } else {
-            Self.idToTitle.removeValue(forKey: noteId)
-        }
     }
 }
 

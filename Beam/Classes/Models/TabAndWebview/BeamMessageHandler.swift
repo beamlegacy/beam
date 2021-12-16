@@ -11,13 +11,15 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
     let jsFileName: String
     let cssFileName: String?
     let jsCodePosition: WKUserScriptInjectionTime
+    let forMainFrameOnly: Bool
 
-    init(config: BeamWebViewConfiguration, messages: T.Type, jsFileName: String, cssFileName: String? = nil, jsCodePosition: WKUserScriptInjectionTime = .atDocumentEnd) {
+    init(config: BeamWebViewConfiguration, messages: T.Type, jsFileName: String, cssFileName: String? = nil, jsCodePosition: WKUserScriptInjectionTime = .atDocumentEnd, forMainFrameOnly: Bool = false) {
         self.config = config
         self.messages = messages
         self.jsFileName = jsFileName
         self.cssFileName = cssFileName
         self.jsCodePosition = jsCodePosition
+        self.forMainFrameOnly = forMainFrameOnly
     }
 
     func register(to config: WKWebViewConfiguration) {
@@ -35,7 +37,7 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
             config.addCSS(source: cssCode, when: .atDocumentEnd)
         }
         let jsCode = loadFile(from: jsFileName, fileType: "js")
-        config.addJS(source: jsCode, when: jsCodePosition)
+        config.addJS(source: jsCode, when: jsCodePosition, forMainFrameOnly: forMainFrameOnly)
     }
 
     func unregister(from webView: WKWebView) {

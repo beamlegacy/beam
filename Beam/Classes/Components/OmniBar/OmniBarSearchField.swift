@@ -50,10 +50,7 @@ struct OmniBarSearchField: View {
     }
 
     private var selectedAutocompleteResult: AutocompleteResult? {
-        if let autocompleteIndex = autocompleteManager.autocompleteSelectedIndex, autocompleteIndex < autocompleteManager.autocompleteResults.count, autocompleteIndex >= 0 {
-            return autocompleteManager.autocompleteResults[autocompleteIndex]
-        }
-        return nil
+        return autocompleteManager.autocompleteResult(at: autocompleteManager.autocompleteSelectedIndex)
     }
 
     private var favicon: NSImage? {
@@ -63,6 +60,10 @@ struct OmniBarSearchField: View {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { (image) in
                 icon = image
             }
+        } else if state.focusOmniBoxFromTab,
+                  let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
+                  let favicon = tab.favIcon {
+            icon = favicon
         }
         return icon
     }
@@ -101,18 +102,20 @@ struct OmniBarSearchField: View {
     }
     var body: some View {
         HStack(spacing: designV2 ? BeamSpacing._120 : BeamSpacing._80) {
-            if let icon = favicon {
-                Image(nsImage: icon)
-                    .resizable()
-                    .scaledToFit()
-                    .opacity(shouldShowWebHost ? 0 : 1.0)
-                    .frame(width: shouldShowWebHost ? 0 : 16)
-                    .transition(.identity)
-            } else if let iconName = leadingIconName {
-                Icon(name: iconName, size: 16, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
-                    .opacity(shouldShowWebHost ? 0 : 1.0)
-                    .frame(width: shouldShowWebHost ? 0 : 16)
-                    .transition(.identity)
+            if designV2 || !state.useOmniboxV2 {
+                if let icon = favicon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .opacity(shouldShowWebHost ? 0 : 1.0)
+                        .frame(width: shouldShowWebHost ? 0 : 16)
+                        .transition(.identity)
+                } else if let iconName = leadingIconName {
+                    Icon(name: iconName, color: (designV2 ? BeamColor.LightStoneGray : textColor).swiftUI)
+                        .opacity(shouldShowWebHost ? 0 : 1.0)
+                        .frame(width: shouldShowWebHost ? 0 : 16)
+                        .transition(.identity)
+                }
             }
             ZStack(alignment: .leading) {
                 Group {
@@ -120,11 +123,10 @@ struct OmniBarSearchField: View {
                         HStack(spacing: 0) {
                             let hasText = !textFieldText.wrappedValue.isEmpty
                             Text(hasText ? textFieldText.wrappedValue : "Search Beam or the web")
+                                .lineLimit(1)
                                 .font(textFont.swiftUI)
                                 .foregroundColor(hasText ? textColor.swiftUI : BeamColor.Generic.placeholder.swiftUI)
-                            if !shouldCenter || currentDisplayMode == .web {
-                                Spacer(minLength: 0)
-                            }
+                            Spacer(minLength: 0)
                         }
                     } else {
                         BeamTextField(
@@ -253,7 +255,7 @@ struct OmniBarSearchField: View {
                 autocompleteManager.resetQuery()
             }
         } else {
-            autocompleteManager.cancelAutocomplete()
+            autocompleteManager.clearAutocompleteResults()
         }
     }
 }

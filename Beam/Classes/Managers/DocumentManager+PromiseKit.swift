@@ -14,7 +14,7 @@ extension DocumentManager {
             .then(on: backgroundQueue) { _ -> Promise<DocumentStruct> in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    let document: Document = try documentManager.create(id: id, title: title)
+                    let document: Document = try documentManager.create(id: id, title: title, deletedAt: nil)
                     return .value(documentManager.parseDocumentBody(document))
                 }
             }
@@ -26,7 +26,7 @@ extension DocumentManager {
                 let documentManager = DocumentManager()
                 return documentManager.context.performAndWait {
                     do {
-                        let document = try documentManager.fetchOrCreateWithTitle(title)
+                        let document: Document = try documentManager.fetchOrCreate(title, deletedAt: nil)
                         return .value(documentManager.parseDocumentBody(document))
                     } catch {
                         return Promise<DocumentStruct>(error: error)
@@ -53,7 +53,7 @@ extension DocumentManager {
 
                     guard !cancelme else { throw PMKError.cancelled }
 
-                    let document = try documentManager.fetchOrCreateWithId(documentStruct.id)
+                    let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
                     document.update(documentStruct)
                     document.data = documentStruct.data
                     document.updated_at = BeamDate.now
@@ -74,9 +74,7 @@ extension DocumentManager {
 
                     try documentManager.saveContext()
 
-                    // Ping others about the update
                     let savedDocumentStruct = DocumentStruct(document: document)
-                    self.notificationDocumentUpdate(savedDocumentStruct)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled else {
@@ -122,30 +120,27 @@ extension DocumentManager {
         return deleteAllFromBeamObjectAPI()
     }
 
-    func delete(id: UUID, _ networkDelete: Bool = true) -> Promise<Bool> {
-        Self.cancelPreviousThrottledAPICall(id)
+    func delete(document: DocumentStruct, _ networkDelete: Bool = true) -> Promise<Bool> {
+        Self.cancelPreviousThrottledAPICall(document.id)
 
         return coreDataManager.background()
             .then(on: backgroundQueue) { context -> Promise<Bool> in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    guard let document = try? documentManager.fetchWithId(id) else {
+                    guard let cdDocument = try? documentManager.fetchWithId(document.id) else {
                         throw DocumentManagerError.idNotFound
                     }
 
-                    if let database = try? Database.fetchWithId(context, document.database_id) {
+                    if let database = try? Database.fetchWithId(context, cdDocument.database_id) {
                         database.updated_at = BeamDate.now
                     } else {
                         // We should always have a connected database
                         Logger.shared.logError("No connected database", category: .document)
                     }
 
-                    let documentStruct = DocumentStruct(document: document)
-                    document.delete(documentManager.context)
-
+                    let documentStruct = DocumentStruct(document: cdDocument)
+                    documentManager.context.delete(cdDocument)
                     try documentManager.saveContext()
-
-                    self.notificationDocumentDelete(documentStruct)
 
                     guard AuthenticationManager.shared.isAuthenticated,
                           Configuration.networkEnabled,
@@ -153,7 +148,7 @@ extension DocumentManager {
                         return .value(false)
                     }
 
-                    return self.deleteFromBeamObjectAPI(id)
+                    return self.deleteFromBeamObjectAPI(objects: [documentStruct])
                 }
             }
     }
@@ -191,8 +186,6 @@ extension DocumentManager {
     }
 
     func saveOnApi(_ documentStruct: DocumentStruct) -> Promise<Bool> {
-        var documentStruct = documentStruct.copy()
-        documentStruct.previousChecksum = documentStruct.beamObjectPreviousChecksum
         let document_id = documentStruct.id
         let promise: Promise<DocumentStruct> = self.saveOnBeamObjectAPI(documentStruct)
         return promise.then(on: backgroundQueue) { _ -> Promise<Bool> in

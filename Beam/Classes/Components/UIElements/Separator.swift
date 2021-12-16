@@ -10,6 +10,7 @@ import SwiftUI
 struct Separator: View {
     var horizontal: Bool = false
     var hairline: Bool = false
+    var rounded: Bool = false
     var color: BeamColor = BeamColor.Generic.separator
 
     static let height: CGFloat = 1.0
@@ -28,7 +29,7 @@ struct Separator: View {
     }
 
     var body: some View {
-        Rectangle()
+        RoundedRectangle(cornerRadius: rounded ? 1 : 0)
             .fill(color.swiftUI)
             .frame(width: width, height: height)
     }

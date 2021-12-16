@@ -67,12 +67,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             expect(matches[0].url) == "https://macg.co"
         }
 
-        // Prefix match on last token - anyToken match
-        searchHistory(db, query: "max pho") { matches in
+        // Prefix match on last token - allTokens match
+        searchHistory(db, query: "maximum pho") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
-        searchHistory(db, query: "max nothing") { matches in
+        searchHistory(db, query: "max pho") { matches in
             expect(matches.count) == 0
         }
 
@@ -98,12 +98,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
 
         // Check frecency record is retrieved
         do {
-            var frecency = FrecencyUrlRecord(urlId: urlIds[0],
+            let frecency = FrecencyUrlRecord(urlId: urlIds[0],
                                              lastAccessAt: Date(timeIntervalSince1970: 0),
                                              frecencyScore: 0.42,
                                              frecencySortScore: 0,
                                              frecencyKey: .webVisit30d0)
-            try db.saveFrecencyUrl(&frecency)
+            try db.saveFrecencyUrl(frecency)
             // Match urlId = 0, and check frecency record
             searchHistory(db, query: "Monterey") { matches in
                 expect(matches.count) == 1
@@ -138,12 +138,12 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
             (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.webReadingTime30d0),
         ] {
-            var frecency = FrecencyUrlRecord(urlId: f.urlId,
+            let frecency = FrecencyUrlRecord(urlId: f.urlId,
                                              lastAccessAt: f.lastAccessAt,
                                              frecencyScore: Float(f.frecencyScore),
                                              frecencySortScore: Float(f.frecencySortScore),
                                              frecencyKey: f.frecencyKey)
-            try db.saveFrecencyUrl(&frecency)
+            try db.saveFrecencyUrl(frecency)
         }
 
         // Retrieve search results with frecency sort on .visit30d0
@@ -252,8 +252,8 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
 
         // Match on the note title - return all note children
         matches = db.search(matchingAllTokensIn: "bar note").map { $0.uid }
-        expect(matches.count) == 5
-        expect(matches) == [note.id] + note.children.map { $0.id }
+        expect(matches.count) == 4
+        expect(matches) == note.children.map { $0.id }
     }
 
     func testMatchingAnyTokensIn() throws {
@@ -273,8 +273,8 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
 
         // Match on the note title - return all note children
         matches = db.search(matchingAnyTokenIn: "bar note").map { $0.uid }
-        expect(matches.count) == 5
-        expect(matches) == [note.id] + note.children.map { $0.id }
+        expect(matches.count) == 4
+        expect(matches) == note.children.map { $0.id }
     }
 
     func testMatchingPhrase() throws {
@@ -288,7 +288,7 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
         // Match on the note title - return all note children
         let matches = db.search(matchingAllTokensIn: "bar note", maxResults: 1).map { $0.uid }
         expect(matches.count) == 1
-        expect(matches) == [note.id]
+        expect(matches) == [note.children.first?.id]
     }
 
     func testClear() throws {
@@ -304,7 +304,7 @@ class GRDBDatabaseBeamElementTests: XCTestCase {
     func testRemove() throws {
         var matches = db.search(matchingAllTokensIn: "tata").map { $0.uid }
         expect(matches.count) == 1
-        expect(self.db.elementsCount) == 5
+        expect(self.db.elementsCount) == 4
 
         try db.remove(note: note)
         expect(self.db.elementsCount) == 0

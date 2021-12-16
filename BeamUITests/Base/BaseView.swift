@@ -156,4 +156,33 @@ class BaseView {
     func isSafariAutoCompleteOpen() -> Bool {
         return textField("SafariPlatformSupportAutoCompleteWindow").exists
     }
+    
+    @discardableResult
+    func zoomIn(numberOfTimes: Int) -> BaseView {
+        for _ in 1...numberOfTimes {
+            app.typeKey("+", modifierFlags: .command)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func zoomOut(numberOfTimes: Int) -> BaseView {
+        for _ in 1...numberOfTimes {
+            app.typeKey("-", modifierFlags: .command)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func clickStartOfTextAndDragTillEnd(textIdentifier: String, elementToPerformAction: XCUIElement) -> BaseView {
+        //let child = elementToPerformAction.staticTexts[textIdentifier]
+        let start = elementToPerformAction.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0.1))
+        let end = elementToPerformAction.coordinate(withNormalizedOffset: CGVector(dx: 1.1, dy: 0.9))
+        start.click(forDuration: 1, thenDragTo: end)
+        return self
+    }
+    
+    func getCenterOfElement(element: XCUIElement) -> XCUICoordinate {
+        return element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
+    }
 }

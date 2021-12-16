@@ -28,8 +28,9 @@ class CardPublishTests: BaseTest {
     func testPublishCard() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
         let cardNameToBeCreated = "Card publish"
-        let journalView = launchApp()
-        UITestsMenuBar().logout()
+        let journalView = JournalTestView()
+        launchAppWithArgument(uiTestModeLaunchArgument)
+        //UITestsMenuBar().logout()
         UITestsMenuBar().signInApp()
         
         testRailPrint("Given I create \(cardNameToBeCreated) card")

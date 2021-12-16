@@ -13,8 +13,8 @@ class ResizableNode: ElementNode {
 
     var canBeResized = true {
         didSet {
-            if !canBeResized, let handle = layers["handle"], let handleLayer = handle.layer as? CAShapeLayer {
-                handleLayer.removeFromSuperlayer()
+            if !canBeResized {
+                removeLayer("handle")
             } else {
                 setupResizeHandleLayer()
             }
@@ -22,12 +22,13 @@ class ResizableNode: ElementNode {
         }
     }
 
-    ///The main element's size (image or video)
+    ///The main element's real size (image or video)
     var resizableElementContentSize = CGSize.zero
 
     var isResizing = false
 
     @OptionalClamped<Double>(0.0...1.0) var desiredWidthRatio = nil
+    @OptionalClamped<Double>(0.0...1.0) var desiredHeightRatio = nil
 
     var initialDragImageSize: CGSize?
     var initialDragImageGlobalPosition: NSPoint?
@@ -43,17 +44,29 @@ class ResizableNode: ElementNode {
         if let ratio = desiredWidthRatio {
             computedWidth = computeWidth(with: contentsWidth * CGFloat(ratio))
         } else {
-            computedWidth = computeWidth(with: nil)
+            computedWidth = computeWidth(with: contentsWidth)
         }
         let width = computedWidth.isNaN ? 0 : computedWidth
-        let computedHeight = (width / resizableElementContentSize.width) * resizableElementContentSize.height
+        var computedHeight = (width / resizableElementContentSize.width) * resizableElementContentSize.height
+        // swiftlint:disable:next empty_enum_arguments
+        if case .embed(_, _, _) = element.kind {
+            if let ratio = desiredHeightRatio {
+                // scale embed by ratio when both height and width are defined
+                computedHeight = width * CGFloat(ratio)
+            } else {
+                // fix height in place when no height is defined
+                computedHeight = resizableElementContentSize.height
+            }
+        }
         let height = computedHeight.isNaN ? 0 : computedHeight
         return NSSize(width: width, height: height)
     }
 
     override var hover: Bool {
         didSet {
-            if let handle = layers["handle"], let handleLayer = handle.layer as? CAShapeLayer {
+            if let handle = layers["handle"],
+               let handleLayer = handle.layer as? CAShapeLayer {
+                guard !isResizing else { return }
                 handleLayer.opacity = hover ? 1.0 : 0.0
             }
             invalidate()
@@ -163,10 +176,18 @@ class ResizableNode: ElementNode {
 
     private func updateElementRatio() {
         switch element.kind {
-        case .image(let uid, _):
-            element.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(resizableElementContentSize.height), width: Int(resizableElementContentSize.width), displayRatio: desiredWidthRatio))
-        case .embed(let source, _):
-            element.kind = .embed(source, displayRatio: desiredWidthRatio)
+        case .image(let uid, let sourceMetadata, _):
+            element.kind = .image(
+                uid,
+                origin: sourceMetadata,
+                displayInfos: MediaDisplayInfos(
+                    height: Int(resizableElementContentSize.height),
+                    width: Int(resizableElementContentSize.width),
+                    displayRatio: desiredWidthRatio
+                )
+            )
+        case .embed(let url, let sourceMetadata, _):
+            element.kind = .embed(url, origin: sourceMetadata, displayRatio: desiredWidthRatio)
         default:
             break
         }

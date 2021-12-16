@@ -17,6 +17,12 @@
 
 @interface WKWebView ()
 - (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
+
+-(CGFloat)_topContentInset;
+-(void)_setTopContentInset:(CGFloat)inset;
+
+-(BOOL)_automaticallyAdjustsContentInsets;
+-(void)_setAutomaticallyAdjustsContentInsets:(BOOL)enabled;
 @end
 #endif
 

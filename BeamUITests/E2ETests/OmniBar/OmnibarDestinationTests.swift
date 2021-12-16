@@ -28,7 +28,8 @@ class OmnibarDestinationTests: BaseTest {
         _ = journalView.createCardViaOmnibarSearch(cardNameToBeCreated).waitForCardViewToLoad()
     }
     
-    func testTodayCardDisplayedByDefault() {
+    func testTodayCardDisplayedByDefault() throws {
+        try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
         testRailPrint("Given I clean the DB and create a card named: \(cardNameToBeCreated)")
         helper.cleanupDB(logout: false)
@@ -88,7 +89,8 @@ class OmnibarDestinationTests: BaseTest {
         XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
     }
     
-    func testFocusDestinationCardUsingShortcut() {
+    func testFocusDestinationCardUsingShortcut() throws {
+        try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
         testRailPrint("Given I clean the DB and create a card named: \(cardNameToBeCreated)")
         helper.cleanupDB(logout: false)

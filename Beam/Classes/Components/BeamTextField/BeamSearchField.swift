@@ -31,7 +31,7 @@ struct BeamSearchField: View {
                             .frame(width: proxy.size.width, height: proxy.size.height)
                 )
                 HStack {
-                    Icon(name: "field-search", size: 16, color: BeamColor.Generic.placeholder.swiftUI)
+                    Icon(name: "field-search", color: BeamColor.Generic.placeholder.swiftUI)
                         .frame(width: 16)
                         .opacity(0.8)
                         .padding(.leading, 6.5)
@@ -46,16 +46,10 @@ struct BeamSearchField: View {
                         .disableAutocorrection(true)
                     if !searchStr.isEmpty {
                         Button(action: {
-                                searchStr = ""
+                            searchStr = ""
                         }, label: {
-                            Icon(name: "tool-clear_xs", size: 16, color: BeamColor.Generic.placeholder.swiftUI)
-//                            Image(systemName: "xmark.circle.fill")
-//                                .resizable()
-//                                .scaledToFit()
-//                                .aspectRatio(contentMode: .fit)
-//                                .frame(width: 12, height: 12)
+                            Icon(name: "tool-clear_xs", color: BeamColor.Generic.placeholder.swiftUI)
                                 .padding(.trailing, 6.5)
-//                                .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                         })
                         .buttonStyle(PlainButtonStyle())
                         .opacity(xMarkIsHovered ? 1 : 0.6)

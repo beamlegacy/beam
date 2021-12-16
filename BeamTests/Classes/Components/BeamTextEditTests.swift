@@ -23,7 +23,7 @@ class BeamTextEditTests: XCTestCase {
 
         note = BeamNote(title: "BeamTextEditTests")
         data = BeamData()
-        editor = BeamTextEdit(root: note, journalMode: false)
+        editor = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: false)
         editor.data = data
         editor.prepareRoot()
     }
