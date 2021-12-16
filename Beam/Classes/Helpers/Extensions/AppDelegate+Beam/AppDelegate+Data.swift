@@ -3,8 +3,71 @@ import Cocoa
 import BeamCore
 
 extension AppDelegate {
-    @IBAction func deleteLocalDocuments(_ sender: Any) {
-        deleteDocumentsAndDatabases(includedRemote: false)
+    @IBAction func deleteLocalContent(_ sender: Any) {
+        // Clustering Orphaned file
+        do {
+            try data.clusteringOrphanedUrlManager.clear()
+        } catch {
+            UserAlert.showError(message: "Could not delete Clustering Orphaned file", error: error)
+            return
+        }
+
+        // Link Store
+        do {
+            try LinkStore.shared.deleteAll()
+        } catch {
+            UserAlert.showError(message: "Could not delete LinkStore", error: error)
+            return
+        }
+
+        // GRDB
+        do {
+            try GRDBDatabase.shared.clear()
+        } catch {
+            UserAlert.showError(message: "Could not delete GRDB Databases", error: error)
+            return
+        }
+
+        // TopDomain
+        do {
+            try TopDomainDatabase.shared.clear()
+        } catch {
+            UserAlert.showError(message: "Could not delete TopDomains", error: error)
+            return
+        }
+
+        // BeamFile
+        do {
+            try BeamFileDBManager.shared.clear()
+        } catch {
+            UserAlert.showError(message: "Could not delete BeamFiles", error: error)
+            return
+        }
+
+        // CoreData Logger
+        LoggerRecorder.shared.deleteAll(nil)
+
+        // UserDefaults
+        BeamUserDefaultsManager.clear()
+        StandardStorable<Any>.clear()
+
+        // Favicon Cache
+        FaviconProvider.shared.clear()
+
+        // Cookies && Cache
+        data.clearCookiesAndCache()
+
+        // Passwords
+        PasswordManager.shared.realDeleteAll(includedRemote: false) { result in
+            switch result {
+            case .failure(let error):
+                UserAlert.showError(message: "Could not delete Passwords", error: error)
+                return
+            case .success:
+                // Documents && Databases
+                self.deleteDocumentsAndDatabases(includedRemote: false)
+            }
+        }
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
@@ -12,6 +75,7 @@ extension AppDelegate {
     }
 
     private func deleteDocumentsAndDatabases(includedRemote: Bool) {
+        // Documents and Databases
         documentManager.deleteAll(includedRemote: includedRemote) { result in
             switch result {
             case .failure(let error):
@@ -25,7 +89,7 @@ extension AppDelegate {
                         UserAlert.showError(message: "Could not delete databases",
                                             error: error)
                     case .success:
-                        UserAlert.showMessage(message: "All documents and databases deleted. Beam must exit now.",
+                        UserAlert.showMessage(message: "All the local data has been deleted. Beam must exit now.",
                                               buttonTitle: "Exit now")
                         NSApplication.shared.terminate(nil)
                     }

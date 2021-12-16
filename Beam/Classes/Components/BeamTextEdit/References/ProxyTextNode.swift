@@ -31,15 +31,24 @@ class ProxyTextNode: TextNode, ProxyNode {
                       self.editor != nil,
                       self.isInNodeProviderTree
                 else { return }
-                self.children = newChildren.compactMap({ e -> ProxyTextNode? in
+                self.children = newChildren.compactMap({ e -> Widget? in
                     let ref = self.nodeFor(e, withParent: self)
                     ref.parent = self
-                    return ref as? ProxyTextNode
+                    return ref
                 })
 
                 self.invalidateRendering()
                 self.updateChildrenVisibility()
         }.store(in: &scope)
+    }
+
+    // MARK: TextConfig and Paddings
+    override var config: TextConfig {
+        var config = TextConfig()
+        if !isLink {
+            config.color = BeamColor.Editor.reference.staticColor
+        }
+        return config
     }
 
     override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
@@ -82,5 +91,12 @@ class ProxyTextNode: TextNode, ProxyNode {
 
     override var mainLayerName: String {
         "ProxyTextNode - \(element.id.uuidString) (from note \(element.note?.title ?? "???"))"
+    }
+
+    override func onUnfocus() {
+        if let linkSection = firstParentWithType(LinksSection.self) {
+            linkSection.updateLinkedReferences(links: linkSection.links)
+        }
+        super.onUnfocus()
     }
 }

@@ -16,7 +16,7 @@ protocol WebPage: AnyObject, Scorable {
     var originalQuery: String? { get }
     var userTypedDomain: URL? { get set }
     var title: String { get }
-    var url: URL? { get }
+    var url: URL? { get set }
     var hasError: Bool { get set }
     var responseStatusCode: Int { get set }
 

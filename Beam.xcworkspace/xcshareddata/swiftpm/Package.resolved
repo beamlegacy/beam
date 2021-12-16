@@ -24,7 +24,7 @@
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
           "branch": null,
-          "revision": "f3efaf164b6401c049715b21af2850023298e802",
+          "revision": "7ffe3aa440779fcceda8f33588217328e38c3786",
           "version": null
         }
       },
@@ -92,6 +92,15 @@
         }
       },
       {
+        "package": "FaviconFinder",
+        "repositoryURL": "https://github.com/will-lumley/FaviconFinder.git",
+        "state": {
+          "branch": null,
+          "revision": "f62aeb293fcc8e6a399e9e8e0d152d42e7167b1f",
+          "version": "3.2.0"
+        }
+      },
+      {
         "package": "FileCheck",
         "repositoryURL": "https://github.com/llvm-swift/FileCheck.git",
         "state": {
@@ -125,6 +134,15 @@
           "branch": null,
           "revision": "32b2923e890df320906e64cbd0faca22a8bfda14",
           "version": "5.12.0"
+        }
+      },
+      {
+        "package": "INI",
+        "repositoryURL": "https://github.com/bouke/ini.git",
+        "state": {
+          "branch": null,
+          "revision": "60b7887c6f4051e5cb76b5faa0a7d6db510ddcb0",
+          "version": "1.2.0"
         }
       },
       {
@@ -258,8 +276,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "fa1ba77bd74a227875a585a8ee569f330564926b",
-          "version": "7.5.0"
+          "revision": "a68422852a7695a6ebb427a7d9ec5c1deae12fa4",
+          "version": "7.6.1"
         }
       },
       {

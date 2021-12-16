@@ -10,9 +10,14 @@ import SwiftUI
 struct SearchInContentView: View {
 
     @ObservedObject var viewModel: SearchViewModel
+    @EnvironmentObject var state: BeamState
     @Environment(\.colorScheme) var colorScheme
 
-    private let backgroundColor: Color = Color(.windowBackgroundColor)
+    private let cornerRadius: CGFloat = 10
+    private let strokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
+
+    private let backgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
+    private let shadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.16), darkColor: .From(color: .black, alpha: 0.7))
     private let searchFieldFont = BeamFont.regular(size: 13).nsFont
     private let searchFieldTextColor = BeamColor.Niobium.nsColor
     private let resultsTextFont = BeamFont.regular(size: 11).swiftUI
@@ -41,22 +46,27 @@ struct SearchInContentView: View {
         .padding(.trailing, 10)
         .padding(.leading, 12)
         .padding(.vertical, 8)
-        .frame(width: 320, height: 32)
+        .frame(width: 320, height: 36)
         .background(backgroundView)
+        .accessibilityIdentifier("search-field")
     }
 
     private var backgroundView: some View {
-        RoundedRectangle(cornerRadius: 6)
-            .foregroundColor(colorScheme == .light ? .white : BeamColor.Nero.swiftUI)
-            .shadow(color: Color.black.opacity(0.17), radius: 10, x: 0, y: 3)
+        ZStack {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(strokeColor.swiftUI, lineWidth: 1)
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .foregroundColor(backgroundColor.swiftUI)
+                .shadow(color: shadowColor.swiftUI, radius: 13, x: 0, y: 11)
+        }
     }
 
     private var title: String {
         switch viewModel.context {
         case .card:
-            return "Find on Card"
+            return "Find on \(state.currentNote?.title ?? "Card")"
         case .web:
-            return "Find on Page"
+            return "Find on \(state.browserTabsManager.currentTab?.title ?? "Page")"
         }
     }
 

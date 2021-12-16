@@ -38,10 +38,12 @@ struct CalendarPickerView: View {
                     ButtonLabel(model.currentMonth, variant: .dropdown) {
                         showMonthContextMenu(geometryProxy: geometry)
                     }
+                    .accessibilityIdentifier("date-picker-month")
                     Spacer(minLength: 0)
                     ButtonLabel(model.currentYear, variant: .dropdown) {
                         showYearContextMenu(geometryProxy: geometry)
                     }
+                    .accessibilityIdentifier("date-picker-year")
                 }
             }
             ButtonLabel(icon: "nav-forward") {

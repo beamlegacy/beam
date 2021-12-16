@@ -58,7 +58,7 @@ class TextFrameTests: XCTestCase {
 
         let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
                                                             ranges: text.ranges,
-                                                            fontSize: fontSize,
+                                                            fontSize: fontSize, fontColor: .white,
                                                             searchedRanges: [])
         let asBuilder = BeamTextAttributedStringBuilder()
         attributedString = asBuilder.build(config: config)
@@ -151,7 +151,7 @@ class TextFrameTests: XCTestCase {
 
         let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
                                                             ranges: text.ranges,
-                                                            fontSize: fontSize,
+                                                            fontSize: fontSize, fontColor: .white,
                                                             searchedRanges: [])
         let asBuilder = BeamTextAttributedStringBuilder()
         attributedString = asBuilder.build(config: config)

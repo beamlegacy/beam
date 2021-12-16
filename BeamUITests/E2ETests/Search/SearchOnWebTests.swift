@@ -17,28 +17,28 @@ class SearchOnWebTests: BaseTest {
         
         helper.openTestPage(page: .page2)
         testRailPrint("Then by default search field is unavailable")
-        XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchFieldWeb.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("When I use CMD+F")
         searchView.triggerSearchField()
         testRailPrint("Then search field appears. Search result options do not exist")
-        XCTAssertTrue(searchView.getWebSearchField().waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
 
         testRailPrint("When I search for letter")
-        searchView.typeInSearchField("i", isWebSearch: true)
+        searchView.typeInSearchField("i")
         testRailPrint("Then search result options appear")
         XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         
         testRailPrint("Then can I close search field via x icon")
         searchView.closeSearchField()
-        XCTAssertFalse(searchView.getWebSearchField().waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertFalse(searchView.getSearchFieldElement().waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("Then I can reopen search field again")
         searchView.triggerSearchField()
-        XCTAssertTrue(searchView.getWebSearchField().waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: implicitWaitTimeout))
     }
     
     func testSearchResultsCounter() {
@@ -50,12 +50,12 @@ class SearchOnWebTests: BaseTest {
         
         testRailPrint("When I search for available letter in text")
         searchView.triggerSearchField()
-        searchView.typeInSearchField("i", isWebSearch: true)
+        searchView.typeInSearchField("i")
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/66"))
         
         testRailPrint("When I add char to the search keyword")
-        searchView.typeInSearchField("-", isWebSearch: true)
+        searchView.typeInSearchField("-")
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/5"))
         
@@ -70,7 +70,7 @@ class SearchOnWebTests: BaseTest {
         XCTAssertTrue(searchView.assertResultsCounterNumber("5/5"))
         
         testRailPrint("When I add char to the search keyword to have no results")
-        searchView.typeInSearchField("#", isWebSearch: true)
+        searchView.typeInSearchField("#")
         testRailPrint("Then I see not found result")
         XCTAssertTrue(searchView.assertResultsCounterNumber(SearchViewLocators.StaticTexts.emptySearchResult.accessibilityIdentifier))
         
@@ -129,20 +129,20 @@ class SearchOnWebTests: BaseTest {
         
         testRailPrint("When I search for \(firstSearch)")
         searchView.triggerSearchField()
-        searchView.typeInSearchField(firstSearch, isWebSearch: true)
+        searchView.typeInSearchField(firstSearch)
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: firstSearch)))
         
         testRailPrint("When I search for \(secondSearch)")
         searchView.typeKeyboardKey(.space)
-        searchView.typeInSearchField(additionalWord, isWebSearch: true)
+        searchView.typeInSearchField(additionalWord)
         testRailPrint("Then I see correct number of results")
         XCTAssertEqual(searchView.app.staticTexts.matching(identifier: secondSearch).count, 0)
         
         testRailPrint("When correct the search to \(thirdSearch)")
         searchView.typeKeyboardKey(.delete, 6)
         searchView.typeKeyboardKey(.leftArrow, 6)
-        searchView.getWebSearchField().typeText(additionalWord)
+        searchView.getSearchFieldElement().typeText(additionalWord)
         searchView.typeKeyboardKey(.space)
         
         testRailPrint("Then I see correct number of results")
@@ -163,7 +163,7 @@ class SearchOnWebTests: BaseTest {
         
         testRailPrint("When I search for \(firstSearch)")
         searchView.triggerSearchField()
-        searchView.typeInSearchField(firstSearch, isWebSearch: true)
+        searchView.typeInSearchField(firstSearch)
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: expectedFirstResult)))
         
@@ -173,7 +173,7 @@ class SearchOnWebTests: BaseTest {
         
         testRailPrint("When I reopen and search for \(secondSearch)")
         searchView.triggerSearchField()
-        searchView.typeInSearchField(secondSearch, isWebSearch: true)
+        searchView.typeInSearchField(secondSearch)
         testRailPrint("Then I see correct number of results")
         XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: expectedSecondResult)))
     }

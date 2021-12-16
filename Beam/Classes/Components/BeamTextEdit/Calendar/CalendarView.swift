@@ -32,6 +32,9 @@ class CalendarGutterViewModel: ObservableObject {
 struct CalendarView: View {
     @State var isHoveringConnect = false
     @State var isHoveringNotConnect = false
+
+    @EnvironmentObject var state: BeamState
+
     @ObservedObject var viewModel: CalendarGutterViewModel
 
     private var transitionInOutHiddenView: AnyTransition {
@@ -75,6 +78,7 @@ struct CalendarView: View {
                     }.transition(transitionInOutHiddenView)
                 }
             }.onHover { isHovering in
+                guard !state.shouldDisableLeadingGutterHover else { return }
                 withAnimation {
                     isHoveringConnect = isHovering
                 }
@@ -122,8 +126,13 @@ struct CalendarView: View {
         let model = MeetingModalView.ViewModel(meetingName: meeting.name, startTime: meeting.startTime,
                                                attendees: meeting.attendees,
                                                onFinish: { meeting in
-            if let meeting = meeting, let note = state?.data.todaysNote {
-                self.addMeeting(meeting, to: note)
+            if let meeting = meeting, let todaysNote = state?.data.todaysNote {
+                if meeting.startTime != BeamDate.now {
+                    let meetingDateNote = BeamNote.fetch(journalDate: meeting.startTime)
+                    self.addMeeting(meeting, to: meetingDateNote ?? todaysNote)
+                } else {
+                    self.addMeeting(meeting, to: todaysNote)
+                }
             }
             state?.overlayViewModel.modalView = nil
         })
@@ -137,7 +146,9 @@ struct CalendarView: View {
             let meetingNote = BeamNote.fetchOrCreate(title: meeting.name)
             meetingAttributes = [.internalLink(meetingNote.id)]
         }
-        text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
+        if !meeting.name.isEmpty {
+            text.insert(meeting.name, at: 0, withAttributes: meetingAttributes)
+        }
 
         if !meeting.attendees.isEmpty {
             let prefix = "Meeting with "
@@ -154,10 +165,12 @@ struct CalendarView: View {
                     position += separator.count
                 }
             }
-            text.insert(" for ", at: position, withAttributes: [])
+            if !meeting.name.isEmpty {
+                text.insert(" for ", at: position, withAttributes: [])
+            }
         }
-        if let lastBeamElementText = note.children.last?.text, lastBeamElementText.isEmpty {
-            note.children.last?.text = text
+        if let element = note.children.last, element.text.isEmpty {
+            element.text = text
         } else {
             note.insert(BeamElement(text), after: note.children.last)
         }

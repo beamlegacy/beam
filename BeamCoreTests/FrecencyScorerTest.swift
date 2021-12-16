@@ -27,6 +27,9 @@ class FrecencyScorerTest: XCTestCase {
                 data[paramKey] = [urlId: score]
             }
         }
+        func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+            for score in scores { try save(score: score, paramKey: paramKey) }
+        }
     }
 
     var fakeStorage = FakeFrecencyStorage()
@@ -50,6 +53,22 @@ class FrecencyScorerTest: XCTestCase {
         XCTAssertEqual(score?.sortValue,
                        log(value) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife,
                        file: file, line: line)
+    }
+    func testScoreObject() {
+        let id = UUID()
+        let now = BeamDate.now
+        let halfLife: Float = 10
+        let after = now + Double(halfLife)
+        let before = now - Double(halfLife)
+        let score = FrecencyScore(id: id, lastTimestamp: now, lastScore: 2, halfLife: halfLife)
+        //updated with a future event
+        let updatedFuture = score.updated(date: after, value: 5, halfLife: halfLife)
+        XCTAssertEqual(updatedFuture.lastTimestamp, after)
+        XCTAssertEqual(updatedFuture.lastScore, 2 / 2 + 5)
+        //updated with a past event
+        let updatedPast = score.updated(date: before, value: 6, halfLife: halfLife)
+        XCTAssertEqual(updatedPast.lastTimestamp, now)
+        XCTAssertEqual(updatedPast.lastScore, 2 + 6 / 2)
     }
 
     /// Test frecency score computation and insertion.
@@ -82,5 +101,37 @@ class FrecencyScorerTest: XCTestCase {
         // checking that sorting key works for a 0 score
         scorer.update(id: urlIds[2], value: 0, eventType: .webLinkActivation, date: now, paramKey: .webVisit30d0)
         try expectFrecencyScoreInStorage((urlIds[2], .webVisit30d0), value: 0, lastTimestamp: now, halfLife: halfLife)
+    }
+
+    func testBatchScorer() throws {
+        func checkStore(store: FrecencyStorage, paramKey: FrecencyParamKey, urlId: UUID, expectedValue: Float, expectedDate: Date) throws {
+            let score = try XCTUnwrap(try? store.fetchOne(id: urlId, paramKey: paramKey))
+            XCTAssertEqual(score.lastScore, expectedValue)
+            XCTAssertEqual(score.lastTimestamp, expectedDate)
+
+        }
+        let halfLife = Float(10.0)
+        let now = BeamDate.now
+        let frecencyParameters: [FrecencyParamKey: FrecencyParam] = [
+            .webVisit30d0: FrecencyParam(key: .webVisit30d0, eventWeights: [:], halfLife: halfLife)
+        ]
+        let store = FakeFrecencyStorage()
+        let urlIds = [UUID(), UUID()]
+        let score = FrecencyScore(id: urlIds[0], lastTimestamp: now, lastScore: 2, halfLife: halfLife)
+        try store.save(score: score, paramKey: .webVisit30d0)
+        try store.save(score: score, paramKey: .webReadingTime30d0)
+        let scorer = BatchFrecencyUpdater(frencencyStore: store, params: frecencyParameters)
+
+        scorer.add(urlId: urlIds[0], date: now + Double(halfLife))
+        scorer.add(urlId: urlIds[1], date: now)
+        scorer.add(urlId: urlIds[1], date: now - Double(halfLife))
+        scorer.saveAll()
+
+        //case 0: metrics other than visitCount are not touched
+        try checkStore(store: store, paramKey: .webReadingTime30d0, urlId: urlIds[0], expectedValue: 2, expectedDate: now)
+        //case 1: metric of url already in db
+        try checkStore(store: store, paramKey: .webVisit30d0, urlId: urlIds[0], expectedValue: 2, expectedDate: now + Double(halfLife))
+        //case 2: metric of newly met url
+        try checkStore(store: store, paramKey: .webVisit30d0, urlId: urlIds[1], expectedValue: 1.5, expectedDate: now)
     }
 }

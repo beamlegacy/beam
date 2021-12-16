@@ -88,7 +88,7 @@ struct MeetingsListView: View {
                                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                                     Spacer(minLength: 0)
                                     if isSelected {
-                                        Icon(name: "shortcut-return", size: 12, color: BeamColor.LightStoneGray.swiftUI)
+                                        Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
                                     }
                                 }
                                 .font(BeamFont.regular(size: 13).swiftUI)

@@ -40,7 +40,7 @@ struct DocumentDetail: View {
                             }
                             HStack {
                                 Text("Beam Object Checksum:").bold()
-                                Text(document.beam_object_previous_checksum ?? "-")
+                                Text(DocumentStruct(document: document).previousChecksum ?? "-")
                                 Spacer()
                             }
                             HStack {
@@ -107,11 +107,11 @@ struct DocumentDetail: View {
                             Spacer()
 
                             VStack(alignment: HorizontalAlignment.leading) {
-                                Text(document.beam_api_checksum?.uppercased() ?? "No MD5")
+                                Text(DocumentStruct(document: document).previousChecksum?.uppercased() ?? "No MD5")
                                     .font(.caption)
                                     .fontWeight(.light)
                                     .background(Color.white)
-                                Text(document.beam_api_data?.asString ?? "No ancestor data")
+                                Text(DocumentStruct(document: document).previousSavedObject?.data.asString ?? "No ancestor data")
                                     .font(.caption)
                                     .fontWeight(.light)
                                     .background(Color.white)
@@ -170,7 +170,7 @@ struct DocumentDetail: View {
     }
 
     private func delete(_ remoteDelete: Bool = true) {
-        documentManager.delete(id: document.id, remoteDelete) { _ in }
+        documentManager.delete(document: DocumentStruct(document: document), remoteDelete) { _ in }
     }
 
     private func softDelete() {

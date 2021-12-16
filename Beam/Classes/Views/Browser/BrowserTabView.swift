@@ -24,6 +24,7 @@ struct BrowserTabView: View {
     var isSelected: Bool = false
     var isDragging: Bool = false
     var allowHover: Bool = true
+    var designV2: Bool = false
     var onClose: (() -> Void)?
 
     private var displayHoverStyle: Bool {
@@ -82,7 +83,7 @@ struct BrowserTabView: View {
                         .frame(width: iconSize, height: iconSize)
                 } else {
                     let iconSize: CGFloat = tab.isLoading ? 12 : 16
-                    Icon(name: "field-web", size: iconSize, color: foregroundColor)
+                    Icon(name: "field-web", width: iconSize, color: foregroundColor)
                 }
             }
         }
@@ -170,10 +171,14 @@ struct BrowserTabView: View {
 
     private var backgroundAndBorderView: some View {
         BrowserTabView.BackgroundView(isSelected: isSelected, isHovering: displayHoverStyle)
+            .if(designV2 && !isDragging) {
+                $0.opacity(isSelected ? 0.5 : 0)
+            }
             .overlay(Separator(hairline: true, color: separatorColor)
                         .padding(.vertical, CGFloat(isSelected ? 0 : 7)),
                      alignment: .trailing)
             .shadow(color: BeamColor.ToolBar.shadowBottom.swiftUI.opacity(isDragging ? 1 : 0), radius: 8, x: 0, y: 2)
+
     }
 
     // MARK: Main View
@@ -289,8 +294,9 @@ struct BrowserTabView_Previews: PreviewProvider {
             }
             Rectangle().fill(Color.red)
                 .frame(width: 1, height: 280)
-        }.padding()
-            .frame(width: 360)
-            .background(BeamColor.Beam.swiftUI)
+        }
+        .padding()
+        .frame(width: 360)
+        .background(BeamColor.Generic.background.swiftUI)
     }
 }

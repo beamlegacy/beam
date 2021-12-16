@@ -21,17 +21,15 @@ class ProxyImageNode: ImageNode, ProxyNode {
         element.$children
             .receive(on: DispatchQueue.main)
             .sink { [unowned self] newChildren in
-                self.children = newChildren.compactMap({ e -> ProxyTextNode? in
+                self.children = newChildren.compactMap({ e -> Widget? in
                     let ref = nodeFor(e, withParent: self)
                     ref.parent = self
-                    return ref as? ProxyTextNode
+                    return ref
                 })
 
                 self.invalidateRendering()
                 updateChildrenVisibility()
             }.store(in: &scope)
-        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: 10, right: 0)
-
     }
 
     // MARK: - Setup UI

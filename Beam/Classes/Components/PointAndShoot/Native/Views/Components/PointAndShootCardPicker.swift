@@ -20,7 +20,7 @@ struct PointAndShootCardPicker: View {
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     var focusOnAppear = true
-    var onComplete: ((_ targetNote: BeamNote?, _ note: String?) -> Void)?
+    var onComplete: ((_ targetNote: BeamNote?, _ note: String?, _ completion: @escaping () -> Void) -> Void)?
 
     @State private var autocompleteModel = DestinationNoteAutocompleteList.Model()
 
@@ -148,14 +148,14 @@ struct PointAndShootCardPicker: View {
                 // MARK: - Icon
                 if isEditingCardName && (currentCardName != nil || cardSearchField.isEmpty) {
                     if !completed {
-                        Icon(name: "shortcut-return", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                        Icon(name: "shortcut-return", width: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .transition(AnyTransition.opacity.animation(.easeInOut(duration: 0.15)))
                             .onTapGesture {
                                 onFinishEditing()
                             }
                     } else if let group = completedGroup {
                         let confirmationIcon = group.confirmation == .success ? "collect-generic" : "tool-close"
-                        Icon(name: confirmationIcon, size: 16, color: BeamColor.Generic.text.swiftUI)
+                        Icon(name: confirmationIcon, width: 16, color: BeamColor.Generic.text.swiftUI)
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.15).delay(0.05)))
                             .onTapGesture {
                                 if group.confirmation != .failure {
@@ -199,7 +199,7 @@ struct PointAndShootCardPicker: View {
 
                     // MARK: - Icon
                     if isEditingNote {
-                        Icon(name: "shortcut-return", size: 12, color: BeamColor.Generic.placeholder.swiftUI)
+                        Icon(name: "shortcut-return", width: 12, color: BeamColor.Generic.placeholder.swiftUI)
                             .animation(nil)
                             .onTapGesture {
                                 onFinishEditing()
@@ -342,12 +342,11 @@ extension PointAndShootCardPicker {
 extension PointAndShootCardPicker {
     private func onCancelEditing() {
         guard !completed else { return }
-        onComplete?(nil, nil)
+        onComplete?(nil, nil, {})
     }
     // MARK: - onFinishEditing
     private func onFinishEditing(_ withCommand: Bool = false) {
         guard !completed else { return }
-        shootCompleted = true
         // Select search result
         if withCommand {
             selectSearchResult(withCommand)
@@ -356,11 +355,15 @@ extension PointAndShootCardPicker {
         if !withCommand,
            let date = autocompleteModel.getDateForCardReplacementJournalNote(cardSearchField) {
             let note = fetchOrCreateJournalNote(date: date)
-            onComplete?(note, addNoteField)
+            onComplete?(note, addNoteField, {
+                shootCompleted = true
+            })
         } else {
             let cardName = getFinalCardName(withCommand)
             let note = fetchOrCreateNote(named: cardName)
-            onComplete?(note, addNoteField)
+            onComplete?(note, addNoteField, {
+                shootCompleted = true
+            })
         }
     }
 
@@ -426,7 +429,7 @@ extension PointAndShootCardPicker {
 
 extension PointAndShootCardPicker {
     // MARK: - onComplete
-    func onComplete(perform action: @escaping (_ targetNote: BeamNote?, _ note: String?) -> Void ) -> Self {
+    func onComplete(perform action: @escaping (_ targetNote: BeamNote?, _ note: String?, _ completion: @escaping () -> Void) -> Void ) -> Self {
         var copy = self
         copy.onComplete = action
         return copy

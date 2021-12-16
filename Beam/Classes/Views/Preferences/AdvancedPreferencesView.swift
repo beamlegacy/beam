@@ -32,7 +32,6 @@ struct AdvancedPreferencesView: View {
     @State var showOmnibarScoreSection = PreferencesManager.showOmnibarScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
-    @State var enableSpaIndexing = PreferencesManager.enableSpaIndexing
     @State var omniboxV2IsOn = PreferencesManager.omniboxV2IsOn
 
     // Database
@@ -332,14 +331,6 @@ struct AdvancedPreferencesView: View {
                     OmnibarScoreSectionCheckbox
                 }
 
-                Preferences.Section(bottomDivider: true) {
-                    Text("Enable SPAs History Indexing (eg: YouTube)")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                } content: {
-                    SpaIndexingSectionCheckbox
-                }
-
                 Preferences.Section(bottomDivider: false) {
                     Text("Enable Point and Shoot view")
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -387,6 +378,9 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "Create 100 random notes") {
                     Create100RandomNotes
+                }
+                Preferences.Section(title: "Create 10 random notes") {
+                    Create10RandomNotes
                 }
             }.onAppear {
                 observeDefaultDatabase()
@@ -468,17 +462,6 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([showOmnibarScoreSection].publisher.first()) {
                 PreferencesManager.showOmnibarScoreSection = $0
-            }
-    }
-
-    private var SpaIndexingSectionCheckbox: some View {
-        return Toggle(isOn: $enableSpaIndexing) {
-            Text("Enabled")
-        }.toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([enableSpaIndexing].publisher.first()) {
-                PreferencesManager.enableSpaIndexing = $0
             }
     }
 
@@ -675,6 +658,14 @@ struct AdvancedPreferencesView: View {
             BeamUITestsMenuGenerator.create100Notes()
         }, label: {
             Text("Create 100 Random notes")
+        })
+    }
+
+    private var Create10RandomNotes: some View {
+        Button(action: {
+            BeamUITestsMenuGenerator.create10Notes()
+        }, label: {
+            Text("Create 10 Random notes")
         })
     }
 

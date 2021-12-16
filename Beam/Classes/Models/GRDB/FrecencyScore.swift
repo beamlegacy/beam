@@ -38,7 +38,7 @@ extension FrecencyUrlRecord: FetchableRecord {
     }
 }
 
-extension FrecencyUrlRecord: MutablePersistableRecord {
+extension FrecencyUrlRecord: PersistableRecord {
     /// The values persisted in the database
     public func encode(to container: inout PersistenceContainer) {
         container[Columns.urlId] = urlId
@@ -101,12 +101,24 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
     }
 
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
-        var record = FrecencyUrlRecord(urlId: score.id,
+        let record = FrecencyUrlRecord(urlId: score.id,
                                        lastAccessAt: score.lastTimestamp,
                                        frecencyScore: score.lastScore,
                                        frecencySortScore: score.sortValue,
                                        frecencyKey: paramKey)
-        try GRDBDatabase.shared.saveFrecencyUrl(&record)
+        try GRDBDatabase.shared.saveFrecencyUrl(record)
+    }
+    public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+        let records = scores.map { score in
+            FrecencyUrlRecord(
+                urlId: score.id,
+                lastAccessAt: score.lastTimestamp,
+                frecencyScore: score.lastScore,
+                frecencySortScore: score.sortValue,
+                frecencyKey: paramKey
+            )
+        }
+        try GRDBDatabase.shared.save(urlFrecencies: records)
     }
 }
 
@@ -133,4 +145,17 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
                                        frecencyKey: paramKey)
         try GRDBDatabase.shared.saveFrecencyNote(record)
     }
+    public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+        let records = scores.map { score in
+            FrecencyNoteRecord(
+                noteId: score.id,
+                lastAccessAt: score.lastTimestamp,
+                frecencyScore: score.lastScore,
+                frecencySortScore: score.sortValue,
+                frecencyKey: paramKey
+            )
+        }
+        try GRDBDatabase.shared.save(noteFrecencies: records)
+    }
+
 }

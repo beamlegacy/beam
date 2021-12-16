@@ -54,6 +54,24 @@
             ReferencedContainer = "container:Beam.xcodeproj">
          </BuildableReference>
       </CodeCoverageTargets>
+      <TestPlans>
+         <TestPlanReference
+            reference = "container:BeamTestPlans/BeamTests.xctestplan"
+            default = "YES">
+         </TestPlanReference>
+         <TestPlanReference
+            reference = "container:BeamTestPlans/BeamUITests-Thread2.xctestplan">
+         </TestPlanReference>
+         <TestPlanReference
+            reference = "container:BeamTestPlans/BeamUITests-Thread3.xctestplan">
+         </TestPlanReference>
+         <TestPlanReference
+            reference = "container:BeamTestPlans/BeamUITests-Thread4.xctestplan">
+         </TestPlanReference>
+         <TestPlanReference
+            reference = "container:BeamTestPlans/BeamUITests-Thread1.xctestplan">
+         </TestPlanReference>
+      </TestPlans>
       <Testables>
          <TestableReference
             skipped = "NO">
@@ -82,7 +100,8 @@
             </BuildableReference>
          </TestableReference>
          <TestableReference
-            skipped = "NO">
+            skipped = "NO"
+            parallelizable = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "965A78472514F149009980D4"
@@ -90,6 +109,14 @@
                BlueprintName = "BeamUITests"
                ReferencedContainer = "container:Beam.xcodeproj">
             </BuildableReference>
+            <SkippedTests>
+               <Test
+                  Identifier = "BaseTest">
+               </Test>
+               <Test
+                  Identifier = "WaitHelper">
+               </Test>
+            </SkippedTests>
             <LocationScenarioReference
                identifier = "com.apple.dt.IDEFoundation.CurrentLocationScenarioIdentifier"
                referenceType = "1">

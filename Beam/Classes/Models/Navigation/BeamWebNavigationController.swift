@@ -38,23 +38,63 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
-    func navigatedTo(url: URL, webView: WKWebView, replace: Bool) {
+    func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
+        //If the webview is loading, we should not index the content.
+        //We will be called by the webView delegate at the end of the loading
+        guard !webView.isLoading else {
+            return
+        }
+
+        //Only register navigation if the page was successfully loaded
+        guard self.page.responseStatusCode == 200 else { return }
+
         let isLinkActivation = !isNavigatingFromSearchBar && !replace
         isNavigatingFromSearchBar = false
+
         self.page.navigatedTo(url: url, title: webView.title, reason: isLinkActivation ? .navigation : .loading)
+
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case let .success(read):
-                guard self.page.responseStatusCode == 200 else { return }
-                self.browsingTree.navigateTo(url: url.absoluteString, title: read.title, startReading: self.page.isActiveTab(),
-                                             isLinkActivation: isLinkActivation, readCount: read.content.count)
-                self.page.appendToIndexer?(url, read)
-                try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
+
+                //This is ugly, and should be refactored using new async syntax when possible
+                // But it's needed to try to index the good content when navigating from JS
+                if fromJS {
+                    let reIndexDelay = 4
+                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(reIndexDelay)) {
+                        Readability.read(webView) { [weak self] result2 in
+                            switch result2 {
+                            case let .success(read2):
+                                if read2 != read, let webViewURL = self?.webView?.url, webViewURL == url {
+                                    self?.indexVisit(url: url, isLinkActivation: isLinkActivation, read: read2)
+                                } else {
+                                    self?.indexVisit(url: url, isLinkActivation: isLinkActivation, read: read)
+                                }
+                            case let .failure(error):
+                                Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
+                                self?.indexVisit(url: url, isLinkActivation: isLinkActivation)
+                            }
+                        }
+                    }
+                } else {
+                    self.indexVisit(url: url, isLinkActivation: isLinkActivation, read: read)
+                }
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
+                self.browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: self.page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: 0)
             }
         }
+    }
+
+    private func indexVisit(url: URL, isLinkActivation: Bool, read: Readability? = nil) {
+
+        //Alway index the visit, event if we were not able to read the content
+        self.browsingTree.navigateTo(url: url.absoluteString, title: read?.title ?? webView?.title, startReading: self.page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
+
+        guard let read = read else { return }
+        self.page.appendToIndexer?(url, read)
+        try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
     }
 
     private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {
@@ -128,7 +168,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             }
             page.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
         } else {
-            if let response = navigationResponse.response as? HTTPURLResponse {
+            if let response = navigationResponse.response as? HTTPURLResponse, webView.url == response.url {
                 page.responseStatusCode = response.statusCode
             }
             decisionHandler(.allow)
@@ -165,7 +205,31 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         }
     }
 
-    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) { }
+    func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
+        guard let webviewUrl = webView.url else {
+            return // webview probably failed to load
+        }
+        if webviewUrl.isDomain {
+            page.userTypedDomain = webviewUrl
+        }
+        if BeamURL(webviewUrl).isErrorPage {
+            let beamSchemeUrl = BeamURL(webviewUrl)
+            page.url = beamSchemeUrl.originalURLFromErrorPage
+
+            if let extractedCode = BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "code"),
+               let errorCode = Int(extractedCode),
+               let errorUrl = page.url {
+                page.errorPageManager = .init(errorCode, webView: webView,
+                                         errorUrl: errorUrl,
+                                         defaultLocalizedDescription: BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "localizedDescription"))
+            }
+        } else {
+            page.url = webviewUrl
+        }
+        page.leave()
+        (page as? BrowserTab)?.updateFavIcon(fromWebView: false, cacheOnly: true)
+
+    }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         guard let url = webView.url else { return }

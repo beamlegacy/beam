@@ -8,6 +8,9 @@
 import SwiftUI
 
 struct PointAndShootView: View {
+    static let defaultPickerSize = CGSize(width: 300, height: 80)
+    static let smallPickerSize = CGSize(width: 300, height: 42)
+
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     @ObservedObject var pns: PointAndShoot
     @State private var isConfirmation: Bool = false
@@ -68,6 +71,7 @@ struct PointAndShootView: View {
 
                     RoundedRectangle(cornerRadius: isRect ? padding : 20, style: .continuous)
                         .fill(background)
+                        .accessibility(identifier: "PointFrame")
                         .animation(.easeInOut(duration: 0.2), value: background)
                         .scaleEffect(scale)
                         .animation(.spring(response: 0.2, dampingFraction: 0.5, blendDuration: 0.2), value: scale)
@@ -95,7 +99,6 @@ struct PointAndShootView: View {
                         })
                         .pointAndShootFrameOffset(pns, target: target)
                         .allowsHitTesting(!pns.isAltKeyDown)
-                        .accessibility(identifier: "PointFrame")
                 }
             } else {
                 // MARK: - Selecting
@@ -116,18 +119,20 @@ struct PointAndShootView: View {
 
         // MARK: - ShootConfirmation
         if let group = pns.activeShootGroup ?? pns.shootConfirmationGroup {
-            let size =  pns.shootConfirmationGroup == nil ? CGSize(width: 300, height: 80) : CGSize(width: 300, height: 42)
+            let size =  pns.shootConfirmationGroup == nil ? Self.defaultPickerSize : Self.smallPickerSize
             PointAndShootCardPickerPositioning(group: pns.translateAndScaleGroup(group), cardPickerSize: size) {
                 FormatterViewBackground {
                     PointAndShootCardPicker(completedGroup: pns.shootConfirmationGroup, allowAnimation: $allowAnimation)
-                        .onComplete { (targetNote, note) in
+                        .onComplete { (targetNote, note, completion) in
                             if let targetNote = targetNote,
                                let shootGroup = pns.activeShootGroup {
-                                pns.addShootToNote(targetNote: targetNote, withNote: note, group: shootGroup, completion: {})
-                                self.offset = 10
-                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
-                                    self.offset = 0
-                                }
+                                pns.addShootToNote(targetNote: targetNote, withNote: note, group: shootGroup, completion: {
+                                    completion()
+                                    self.offset = 10
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+                                        self.offset = 0
+                                    }
+                                })
                             } else {
                                 pns.dismissShoot()
                             }

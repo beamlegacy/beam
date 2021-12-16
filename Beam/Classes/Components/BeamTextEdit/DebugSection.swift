@@ -118,10 +118,8 @@ class DebugSection: Widget {
     }
 
     private func setupDebugInfoLayer() {
-        let documentManager = DocumentManager()
         let nodeDatabaseId = self.note.documentStruct?.databaseId.uuidString ?? "-"
-        let localDocument = try? documentManager.fetchWithId(self.note.id)
-        let previousChecksum = localDocument?.beam_object_previous_checksum ?? "-"
+        let previousChecksum = self.note.documentStruct?.previousChecksum ?? "-"
 
         let defaultDatabaseId = DatabaseManager.defaultDatabase.id.uuidString
         let databaseTextColor = nodeDatabaseId == defaultDatabaseId ? BeamColor.Generic.text.nsColor : BeamColor.Shiraz.nsColor
@@ -161,6 +159,20 @@ class DebugSection: Widget {
         }, hovered: { [unowned self] hovered in
             self.layers["previousChecksum"]?.layer.backgroundColor = hovered ? BeamColor.Generic.textSelection.cgColor : NSColor.clear.cgColor
         }), origin: CGPoint(x: 0, y: 90))
+    }
+
+    public func setupContinueWidget(with notes: [BeamNote], and link: Link?) {
+        let hasNotes = !notes.isEmpty
+        let notesStr: String = notes.map({ $0.title }).joined(separator: " ")
+        let continueNotesLayer = Layer.text(named: "continueNotes", "Continue to Notes: \(notesStr)", color: BeamColor.Generic.text.nsColor, size: 12)
+        if hasNotes {
+            addLayer(continueNotesLayer, origin: CGPoint(x: 0, y: 110))
+        }
+
+        if let linkTitle = link?.title, let linkUrl = link?.url {
+            let continueLinksLayer = Layer.text(named: "continueLinks", "Continue to Link: \(linkTitle) \(linkUrl)", color: BeamColor.Generic.text.nsColor, size: 12)
+            addLayer(continueLinksLayer, origin: CGPoint(x: 0, y: hasNotes ? 130 : 110))
+        }
     }
 
     override func updateSubLayersLayout() {

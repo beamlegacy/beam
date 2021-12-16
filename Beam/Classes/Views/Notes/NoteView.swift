@@ -20,6 +20,7 @@ struct NoteView: View {
     var note: BeamNote
     var containerGeometry: GeometryProxy
     var onStartEditing: (() -> Void)?
+    var topInset: CGFloat
     var leadingPercentage: CGFloat
     var centerText: Bool
     var initialFocusedState: NoteEditFocusedState?
@@ -56,6 +57,7 @@ struct NoteView: View {
                     self.searchViewModel = search
                 },
                 topOffset: headerHeight,
+                scrollViewTopInset: topInset,
                 footerHeight: 60,
                 leadingPercentage: leadingPercentage,
                 centerText: centerText,
@@ -70,7 +72,7 @@ struct NoteView: View {
             .accessibility(identifier: "noteView")
             .animation(nil)
         }
-        .overlay(searchView)
+        .overlay(searchView, alignment: .top)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(BeamColor.Generic.background.swiftUI)
         .onReceive(Just(note)) { newNote in
@@ -93,17 +95,15 @@ struct NoteView: View {
     @ViewBuilder var searchView: some View {
         if let search = self.searchViewModel {
             GeometryReader { proxy in
-                VStack {
-                    HStack(alignment: .top, spacing: 12) {
-                        Spacer()
-                        SearchInContentView(viewModel: search)
-                            .padding(.top, 10)
-                        SearchLocationView(viewModel: search, height: proxy.size.height)
-                            .frame(width: 8)
-                            .padding(.trailing, 10)
-                    }
+                HStack(alignment: .top, spacing: 12) {
                     Spacer()
+                    SearchInContentView(viewModel: search)
+                        .padding(.top, 10)
+                    SearchLocationView(viewModel: search, height: proxy.size.height)
+                        .frame(width: 8)
+                        .padding(.trailing, 10)
                 }
+                .padding(.top, topInset)
             }
         }
     }

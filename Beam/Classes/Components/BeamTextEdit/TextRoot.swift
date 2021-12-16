@@ -24,7 +24,7 @@ public struct TextConfig {
     var editable: Bool = true
     var keepCursorMidScreen = false //true
 
-    var color = BeamColor.Generic.text.nsColor
+    var color = BeamColor.Generic.text.staticColor
     var disabledColor = NSColor.disabledControlTextColor
     var cursorColor = BeamColor.Generic.cursor.nsColor
     var selectionColor = BeamColor.Generic.textSelection.nsColor
@@ -180,13 +180,29 @@ public class TextRoot: ElementNode {
         childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
-            topSpacerWidget = SpacerWidget(parent: self, spacerType: .top, availableWidth: availableWidth - childInset)
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeLinks, availableWidth: availableWidth - childInset)
             linksSection = LinksSection(parent: self, note: note, availableWidth: availableWidth - childInset)
-            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .middle, availableWidth: availableWidth - childInset)
+            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeReferences, availableWidth: availableWidth - childInset)
             referencesSection = ReferencesSection(parent: self, note: note, availableWidth: availableWidth - childInset)
             bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom, availableWidth: availableWidth - childInset)
             if PreferencesManager.showDebugSection {
                 debugSection = DebugSection(parent: self, note: note, availableWidth: availableWidth - childInset)
+
+                if let isTodaysNote = self.note?.isTodaysNote, isTodaysNote {
+                    var continueToNotes = [BeamNote]()
+                    var continueToLink: Link?
+                    if let continueToPageId = self.editor?.data?.clusteringManager.continueToPage {
+                        continueToLink = LinkStore.linkFor(continueToPageId)
+                    }
+
+                    if let continueToNotesId = self.editor?.data?.clusteringManager.continueToNotes {
+                        for noteId in continueToNotesId {
+                            guard let note = BeamNote.fetch(id: noteId) else { continue }
+                            continueToNotes.append(note)
+                        }
+                    }
+                    debugSection?.setupContinueWidget(with: continueToNotes, and: continueToLink)
+                }
             }
         }
         updateTextChildren(elements: element.children)

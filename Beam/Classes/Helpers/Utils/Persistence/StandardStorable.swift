@@ -39,4 +39,11 @@ struct StandardStorable<T> {
             }
         }
     }
+
+    static func clear() {
+        let store = UserDefaults(suiteName: Configuration.env) ?? UserDefaults.standard
+        store.dictionaryRepresentation().keys.forEach { key in
+            store.removeObject(forKey: key)
+        }
+    }
 }

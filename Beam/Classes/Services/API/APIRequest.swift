@@ -6,10 +6,26 @@ import Vinyl
 // swiftlint:disable file_length
 
 class BeamURLSession {
-    static var shared = URLSession.shared
+    static var shared = URLSession(configuration: URLSessionConfiguration.default,
+                                   delegate: BeamURLSessionDelegate(),
+                                   delegateQueue: nil)
     static var shouldNotBeVinyled = false
     static func reset() {
-        Self.shared = URLSession.shared
+        Self.shared = URLSession(configuration: URLSessionConfiguration.default,
+                                 delegate: BeamURLSessionDelegate(),
+                                 delegateQueue: nil)
+    }
+}
+
+class BeamURLSessionDelegate: NSObject, URLSessionDelegate {
+    public func urlSession(_ session: URLSession,
+                           didReceive challenge: URLAuthenticationChallenge,
+                           completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
+        if let trust = challenge.protectionSpace.serverTrust {
+            completionHandler(.useCredential, URLCredential(trust: trust))
+        } else {
+            completionHandler(.useCredential, nil)
+        }
     }
 }
 

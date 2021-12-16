@@ -10,17 +10,13 @@ import Combine
 
 // Minimal object for the purpose of testing and storing during tests
 struct MyRemoteObject: BeamObjectProtocol {
-    static var beamObjectTypeName = "my_remote_object"
+    static var beamObjectType = BeamObjectObjectType.myRemoteObject
 
     var beamObjectId = UUID()
 
     var createdAt = BeamDate.now
     var updatedAt = BeamDate.now
     var deletedAt: Date?
-
-    var previousChecksum: String?
-    var previousData: Data?
-    var checksum: String?
 
     var title: String?
 
@@ -50,8 +46,6 @@ extension MyRemoteObject {
                        createdAt: createdAt,
                        updatedAt: updatedAt,
                        deletedAt: deletedAt,
-                       previousChecksum: previousChecksum,
-                       checksum: checksum,
                        title: title)
     }
 }

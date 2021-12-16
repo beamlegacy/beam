@@ -41,7 +41,9 @@ extension BeamTextEdit {
         guard let calendarManager = state?.data.calendarManager, !calendarManager.connectedSources.isEmpty else { return nil }
         let viewModel = CalendarGutterViewModel(calendarManager: calendarManager, noteId: self.note.id)
         let gutter = GutterContainerView(frame: NSRect.zero, isLeading: true, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType.calendarGutterView(viewModel: viewModel))
-        self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        DispatchQueue.main.async {
+            self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        }
         return gutter
     }
 
@@ -50,7 +52,9 @@ extension BeamTextEdit {
         var gutterFrame = CGRect.zero
         gutterFrame.origin = CGPoint(x: 0, y: textRect.minY)
         gutterFrame.size = CGSize(width: gutterFrame.minX + textRect.minX, height: containerSize.height - gutterFrame.minY)
-        leadingGutter?.frame = gutterFrame
+        DispatchQueue.main.async { [weak self] in
+            self?.leadingGutter?.frame = gutterFrame
+        }
     }
 
     func updateCalendarLeadingGutter(for noteId: UUID) {
@@ -69,7 +73,9 @@ extension BeamTextEdit {
 
     private func setupTrailingGutter() -> GutterContainerView {
         let gutter = GutterContainerView(frame: NSRect.zero, isLeading: false)
-        self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        DispatchQueue.main.async {
+            self.addSubview(gutter, positioned: .above, relativeTo: nil)
+        }
         return gutter
     }
 
@@ -78,6 +84,8 @@ extension BeamTextEdit {
         var gutterFrame = CGRect.zero
         gutterFrame.origin = CGPoint(x: textRect.maxX, y: 0)
         gutterFrame.size = CGSize(width: containerSize.width - gutterFrame.minX, height: containerSize.height - gutterFrame.minY)
-        trailingGutter?.frame = gutterFrame
+        DispatchQueue.main.async { [weak self] in
+            self?.trailingGutter?.frame = gutterFrame
+        }
     }
 }

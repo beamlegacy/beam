@@ -9,6 +9,7 @@ import Foundation
 
 protocol EmbedNodeWebPageDelegate: AnyObject {
     func embedNodeDidUpdateMediaController(_ controller: MediaPlayerController?)
+    func embedNodeDelegateCallback(size: CGSize)
 }
 
 class EmbedNodeWebPage: WebPageBaseImpl {

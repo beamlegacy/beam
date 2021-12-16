@@ -20,7 +20,7 @@ class BreadCrumb: Widget {
     var selectedCrumb: Int?
     var container: Layer?
 
-    var proxyTextNode: ProxyTextNode?
+    var proxyNode: ProxyNode?
     var sourceNote: BeamNote
 
     override var open: Bool {
@@ -37,7 +37,7 @@ class BreadCrumb: Widget {
     }
 
     private var currentNote: BeamNote?
-    private var currentLinkedRefNode: ProxyTextNode?
+    private var currentLinkedRefNode: ProxyNode?
     private var firstBreadcrumbText = ""
     private var breadcrumbPlaceholder = "..."
 
@@ -55,14 +55,14 @@ class BreadCrumb: Widget {
         self.proxy = ProxyElement(for: element)
         super.init(parent: parent, nodeProvider: NodeProviderImpl(proxy: true), availableWidth: availableWidth)
 
-        self.crumbChain = computeCrumbChain(from: element)
+        crumbChain = computeCrumbChain(from: element)
 
         if isInNodeProviderTree {
             let node = nodeFor(element, withParent: self)
-            if let ref = node as? ProxyTextNode {
+            if let ref = node as? ProxyNode {
                 ref.open = element.children.isEmpty // Yes, this is intentional
-                self.proxyTextNode = ref
-                self.currentLinkedRefNode = ref
+                proxyNode = ref
+                currentLinkedRefNode = ref
             } else {
                 Logger.shared.logError("Couldn't create a proxy text node for \(element) (node: \(node)", category: .noteEditor)
             }
@@ -70,15 +70,20 @@ class BreadCrumb: Widget {
             Logger.shared.logError("Trying to init a breadCrumb on a dead branch of the document tree for \(element). Bailing out", category: .noteEditor)
         }
 
-        guard let note = self.crumbChain.first as? BeamNote else { return }
+        guard let note = crumbChain.first as? BeamNote else { return }
 
         currentNote = note
-        self.crumbChain.removeFirst()
+        crumbChain.removeFirst()
 
         setupLayers(with: note)
         selectCrumb(crumbChain.count - 1)
-        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 1 : 2, right: 0)
-        self.childrenPadding = NSEdgeInsets(top: 2, left: 7, bottom: 3 + containerPadding, right: 0)
+        contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 1 : 2, right: 0)
+        childrenPadding = NSEdgeInsets(top: 2, left: 7, bottom: 3 + containerPadding, right: 0)
+
+        proxy.proxy.treeChanged.receive(on: DispatchQueue.main).sink { [weak self] _ in
+            self?.update()
+        }.store(in: &scope)
+        assert(editor != nil)
     }
 
     func setupLayers(with note: BeamNote) {
@@ -103,7 +108,7 @@ class BreadCrumb: Widget {
             linkContentLayer,
                 activated: {[weak self] in
                     guard let self = self else { return }
-                    self.converReferenceToLink(self.proxy.text.text)
+                    self.convertReferenceToLink()
                 },
                 hovered: { [weak self] isHover in
                     guard let self = self else { return }
@@ -144,6 +149,29 @@ class BreadCrumb: Widget {
         return chain.reversed()
     }
 
+    func update() {
+        crumbChain.removeAll()
+        updateCrumbchain()
+        resetCrumbLayers()
+        createCrumbLayers()
+        invalidateLayout()
+    }
+
+    func resetCrumbLayers() {
+        for i in crumbLayers.indices {
+            removeLayer(breadcrumbLayerName(for: i))
+            removeLayer(breadcrumbChevronLayerName(for: i))
+        }
+
+        crumbLayers = []
+        crumbArrowLayers = []
+    }
+
+    func updateCrumbchain() {
+        crumbChain = computeCrumbChain(from: proxy.proxy)
+        crumbChain.removeFirst()
+    }
+
     func createCrumbLayers() {
         guard crumbChain.count > 1 else { return }
 
@@ -152,19 +180,19 @@ class BreadCrumb: Widget {
             createBreadcrumbArrowLayer(index: index)
         }
 
-        selectCrumb(crumbLayers.count)
+        selectCrumb(crumbChain.count - 1)
     }
 
     func selectCrumb(_ index: Int) {
         selectedCrumb = index
         let crumb = crumbChain[index]
-        guard let ref = nodeFor(crumb, withParent: self) as? ProxyTextNode else { return }
+        guard let ref = nodeFor(crumb, withParent: self) as? ProxyNode else { return }
 
         currentLinkedRefNode = ref
 
         for i in index ..< crumbChain.count {
             let crumb = crumbChain[i]
-            guard let ref = nodeFor(crumb, withParent: self) as? ProxyTextNode else { return }
+            guard let ref = nodeFor(crumb, withParent: self) as? ProxyNode else { return }
             if crumbChain.last?.id != crumb.id {
                 ref.unfold()
             }
@@ -184,15 +212,14 @@ class BreadCrumb: Widget {
         let startXPositionBreadcrumb: CGFloat = 10
         var position = CGPoint(x: startXPositionBreadcrumb, y: breadCrumbYPosition)
 
-        for index in 0 ..< crumbChain.count - 1 {
+        for index in 0 ..< crumbLayers.count {
             let crumb = crumbChain[index]
             let crumbLayer = crumbLayers[index]
             let arrowLayer = crumbArrowLayers[index]
 
-            let note = crumb as? BeamNote
-            let text: String = index == selectedCrumb ? breadcrumbPlaceholder : note?.title ?? crumb.text.text
+            let text: String = index == selectedCrumb ? breadcrumbPlaceholder : crumbTextFor(element: crumb)
 
-            crumbLayer.string = text.capitalized
+            crumbLayer.string = text
 
             let textFrame = crumbLayer.preferredFrameSize()
             let textWidth = min(textFrame.width, maxBreadCrumbWidth)
@@ -217,14 +244,30 @@ class BreadCrumb: Widget {
         }
     }
 
+    func crumbTextFor(element: BeamElement) -> String {
+        if element.kind.isMedia {
+            switch element.kind {
+            case let .image(_, origin: data, displayInfos: _):
+                return data?.title ?? "img"
+            case let .embed(url, origin: data, displayRatio: _):
+                return data?.title ?? url.hostname ?? "embed"
+            default:
+                return "media"
+            }
+        }
+
+        let note = element as? BeamNote
+        let text = note?.title ?? element.text.text
+        return text.isEmpty ? "empty" : text.capitalized
+    }
+
     func createBreadcrumLayer(index: Int) {
         let crumblayer = CATextLayer()
 
         let crumb = crumbChain[index]
-        let note = crumb as? BeamNote
-        let text: String = note?.title ?? crumb.text.text
+        let text: String = crumbTextFor(element: crumb)
 
-        crumblayer.string = text.capitalized
+        crumblayer.string = text
         crumblayer.truncationMode = .end
         crumblayer.contentsScale = contentsScale
 
@@ -264,14 +307,10 @@ class BreadCrumb: Widget {
         crumbArrowLayers.append(chevron.layer)
     }
 
-    func converReferenceToLink(_ text: String) {
-        guard let rootNote = editor?.note.note else { return }
-
-        text.ranges(of: rootNote.title, options: .caseInsensitive).forEach { range in
-            let start = text.position(at: range.lowerBound)
-            let end = text.position(at: range.upperBound)
-            self.proxy.makeInternalLink(start..<end)
-        }
+    func convertReferenceToLink() {
+        guard let note = root?.note else { return }
+        proxy.proxy.text.makeLinksToNoteExplicit(forNote: note.title)
+        _ = proxy.note?.syncedSave()
     }
 
     var showCrumbs: Bool {
@@ -287,7 +326,7 @@ class BreadCrumb: Widget {
         return crumbsHeight
     }
 
-    var actionLinkLayerheight: CGFloat { crumbsHeight + self.contentsPadding.bottom - 1 }
+    var actionLinkLayerheight: CGFloat { crumbsHeight + contentsPadding.bottom - 1 }
     override func updateLayout() {
         super.updateLayout()
         CATransaction.disableAnimations {
@@ -318,7 +357,7 @@ class BreadCrumb: Widget {
     }
 
     var isLink: Bool {
-        proxyTextNode?.isLink ?? false
+        proxyNode?.isLink ?? false
     }
 
     var isReference: Bool {

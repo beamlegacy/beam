@@ -158,16 +158,15 @@ extension AutocompleteManager {
 
     private func autocompleteLinkStoreResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
-            let links = LinkStore.shared.getLinks(matchingUrl: query)
-            let scores = GRDBDatabase.shared.getFrecencyScoreValues(urlIds: Array(links.keys), paramKey: AutocompleteManager.urlFrecencyParamKey)
-            let results = links.map { (urlId, link) -> AutocompleteResult in
-                let url = URL(string: link.url)
-                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? link.url
+            let scoredLinks = GRDBDatabase.shared.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6)
+            let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
+                let url = URL(string: scoredLink.link.url)
+                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? scoredLink.link.url
                 return AutocompleteResult(text: text, source: .url, url: url,
-                                          information: link.title, completingText: query,
-                                          score: scores[urlId])
+                                          information: scoredLink.link.title, completingText: query,
+                                          score: scoredLink.frecency?.frecencySortScore)
             }.sorted(by: >)
-            self.logIntermediate(step: "HistoryTittle", stepShortName: "HT", results: results)
+            self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results)
             promise(.success(results))
         }
     }

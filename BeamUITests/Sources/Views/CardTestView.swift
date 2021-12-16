@@ -11,6 +11,7 @@ import XCTest
 class CardTestView: BaseView {
     
     var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
+    var cardTitleStatic: XCUIElement { return staticText(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
 
     @discardableResult
     func waitForCardViewToLoad() -> Bool {
@@ -23,7 +24,11 @@ class CardTestView: BaseView {
     }
     
     func getCardTitle() -> String {
-        return getElementStringValue(element: cardTitle)
+        return self.getElementStringValue(element: cardTitle)
+    }
+    
+    func getCardStaticTitle() -> String {
+        return self.getElementStringValue(element: cardTitleStatic)
     }
     
     func clickDeleteButton() -> AlertTestView {
@@ -62,15 +67,15 @@ class CardTestView: BaseView {
     }
     
     func getNumberOfVisibleNotes() -> Int {
-        return getCardNotesForVisiblePart().count
+        return self.getCardNotesForVisiblePart().count
     }
     
     func getCardNoteValueByIndex(_ index: Int) -> String {
-        return getCardNoteElementByIndex(index).value as? String ?? errorFetchStringValue
+        return self.getCardNoteElementByIndex(index).value as? String ?? errorFetchStringValue
     }
     
     func getCardNoteElementByIndex(_ index: Int) -> XCUIElement {
-        return getCardNotesForVisiblePart()[index]
+        return self.getCardNotesForVisiblePart()[index]
     }
     
     @discardableResult
@@ -87,11 +92,33 @@ class CardTestView: BaseView {
     }
     
     func getNumberOfImageNotes() -> Int {
-        return getImageNotes().count
+        return self.getImageNotes().count
     }
     
-    func getImageNotes() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier)
+    func getImageNotes() -> [XCUIElement] {
+        return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getImageNoteByIndex(noteIndex: Int) -> XCUIElement {
+        return self.getImageNotes()[noteIndex]
+    }
+    
+    func getNotesExpandButtons() -> [XCUIElement] {
+        return app.windows.buttons.matching(identifier:  CardViewLocators.Buttons.expandButton.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getNotesExpandButtonsCount() -> Int {
+        return self.getNotesExpandButtons().count
+    }
+    
+    func getNoteExpandButtonByIndex(noteIndex: Int) -> XCUIElement {
+        return self.getNotesExpandButtons()[noteIndex]
+    }
+    
+    @discardableResult
+    func clickNoteExpandButtonByIndex(noteIndex: Int) -> CardTestView {
+        self.getNoteExpandButtonByIndex(noteIndex: noteIndex).coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1)).tap()
+        return self
     }
     
     func getLinksNames() -> [XCUIElement] {
@@ -103,19 +130,19 @@ class CardTestView: BaseView {
     }
     
     func getLinksNamesNumber() -> Int {
-        return getLinksNames().count
+        return self.getLinksNames().count
     }
     
     func getLinkContentByIndex(_ index: Int) -> String {
-        return getElementStringValue(element: getLinksContent()[index])
+        return self.getElementStringValue(element: getLinksContent()[index])
     }
     
     func getLinkNameByIndex(_ index: Int) -> String {
-        return getLinksNames()[index].title
+        return self.getLinksNames()[index].title
     }
     
     func getLinksContentNumber() -> Int {
-        return getLinksContent().count
+        return self.getLinksContent().count
     }
     
     func getReferences() -> [XCUIElement] {
@@ -136,7 +163,7 @@ class CardTestView: BaseView {
     
     @discardableResult
     func openLinkByIndex(_ index: Int) -> CardTestView {
-        getLinksNames()[index].tapInTheMiddle()
+        self.getLinksNames()[index].tapInTheMiddle()
         return self
     }
     
@@ -172,7 +199,7 @@ class CardTestView: BaseView {
     }
     
     func getCountOfDisclosureTriangles() -> Int {
-        return getDisclosureTriangles().count
+        return self.getDisclosureTriangles().count
     }
     
     @discardableResult
@@ -187,23 +214,23 @@ class CardTestView: BaseView {
     }
     
     func getBlockRefByIndex(_ index: Int) -> XCUIElement {
-        return getBlockRefs().element(boundBy: index)
+        return self.getBlockRefs().element(boundBy: index)
     }
     
     func getNumberOfBlockRefs() -> Int {
-        return getBlockRefs().count
+        return self.getBlockRefs().count
     }
     
     func blockReferenceMenuActionTrigger(_ action: CardViewLocators.StaticTexts, blockRefNumber: Int = 1) {
         XCUIElement.perform(withKeyModifiers: .control) {
-            getBlockRefs().element(boundBy: blockRefNumber - 1).tapInTheMiddle()
+            self.getBlockRefs().element(boundBy: blockRefNumber - 1).tapInTheMiddle()
         }
         staticText(action.accessibilityIdentifier).clickOnExistence()
     }
     
     @discardableResult
     func removeBlockRef(blockRefNumber: Int = 1) -> CardTestView {
-        blockReferenceMenuActionTrigger(.blockRefRemove, blockRefNumber: blockRefNumber)
+        self.blockReferenceMenuActionTrigger(.blockRefRemove, blockRefNumber: blockRefNumber)
         return self
     }
     
@@ -211,5 +238,10 @@ class CardTestView: BaseView {
     func addTestRef(_ referenceText: String) -> CardTestView {
         app.typeText("((\(referenceText))\r")
         return self
+    }
+    
+    func triggerContextMenu(key: String) -> ContextMenuTestView {
+        app.typeText("/")
+        return ContextMenuTestView(key: key)
     }
 }

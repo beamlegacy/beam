@@ -44,6 +44,7 @@ enum DocumentFilter {
     case title(String)
     case titleMatch(String)
     case journalDate(Int64)
+    case beforeJournalDate(Int64)
     case nonFutureJournalDate(Int64)
     case type(DocumentType)
     case nonDeleted ///< filter out deleted notes (the default if nothing is explicitely requested)
@@ -92,31 +93,9 @@ public class DocumentManager: NSObject {
         context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
 
         super.init()
-
-        // Used to debug CD issues
-        //observeCoredataNotification()
     }
 
     // MARK: Coredata Updates
-    private var cancellables = [AnyCancellable]()
-    private func observeCoredataNotification() {
-        NotificationCenter.default
-            .publisher(for: Notification.Name.NSManagedObjectContextObjectsDidChange)
-            .sink { [weak self] notification in
-                guard let self = self else { return }
-                self.printObjects(notification)
-            }
-            .store(in: &cancellables)
-    }
-
-    private func notificationsToDocuments(_ notification: Notification) -> [Document] {
-        if let updatedObjects = notification.userInfo?[NSUpdatedObjectsKey] as? Set<NSManagedObject>, !updatedObjects.isEmpty {
-            return updatedObjects.compactMap { $0 as? Document }
-        }
-
-        return []
-    }
-
     @objc func managedObjectContextObjectsDidChange(_ notification: Notification) {
         printObjects(notification)
     }
@@ -154,13 +133,14 @@ public class DocumentManager: NSObject {
     func loadById(id: UUID) -> DocumentStruct? {
         checkThread()
         guard let document = try? self.fetchWithId(id) else { return nil }
+
         return parseDocumentBody(document)
     }
 
-    func fetchOrCreate(title: String) -> DocumentStruct? {
+    func fetchOrCreate(_ title: String, id: UUID = UUID(), deletedAt: Date?) -> DocumentStruct? {
         checkThread()
         do {
-            let document = try fetchOrCreateWithTitle(title)
+            let document: Document = try fetchOrCreate(title, id: id, deletedAt: deletedAt)
             return parseDocumentBody(document)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
@@ -233,9 +213,10 @@ public class DocumentManager: NSObject {
     func loadDocumentsWithType(type: DocumentType, _ limit: Int, _ fetchOffset: Int) -> [DocumentStruct] {
         checkThread()
         do {
-            return try fetchWithTypeAndLimit(type,
-                                             limit,
-                                             fetchOffset).compactMap { (document) -> DocumentStruct? in
+            let today = BeamNoteType.titleForDate(BeamDate.now)
+            let todayInt = JournalDateConverter.toInt(from: today)
+
+            return try fetchAll(filters: [.type(type), .nonFutureJournalDate(todayInt), .limit(limit), .offset(fetchOffset)], sortingKey: .journal(false)).compactMap { (document) -> DocumentStruct? in
                 parseDocumentBody(document)
             }
         } catch { return [] }
@@ -291,10 +272,14 @@ public class DocumentManager: NSObject {
         } catch { return [] }
     }
 
-    func loadAllWithLimit(_ limit: Int = 4, sortingKey: SortingKey? = nil) -> [DocumentStruct] {
+    func loadAllWithLimit(_ limit: Int = 4, sortingKey: SortingKey? = nil, type: DocumentType? = nil) -> [DocumentStruct] {
         checkThread()
+        var filters: [DocumentFilter] = [.limit(limit)]
+        if let type = type {
+            filters.append(.type(type))
+        }
         do {
-            return try fetchAll(filters: [.limit(limit)], sortingKey: sortingKey).compactMap { document -> DocumentStruct? in
+            return try fetchAll(filters: filters, sortingKey: sortingKey).compactMap { document -> DocumentStruct? in
             parseDocumentBody(document)
                 }
         } catch { return [] }
@@ -318,11 +303,8 @@ public class DocumentManager: NSObject {
                        deletedAt: document.deleted_at,
                        data: document.data ?? Data(),
                        documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
-                       previousData: document.beam_api_data,
-                       previousChecksum: document.beam_api_checksum,
                        version: document.version,
                        isPublic: document.is_public,
-                       beamObjectPreviousChecksum: document.beam_object_previous_checksum,
                        journalDate: document.document_type == DocumentType.journal.rawValue ? JournalDateConverter.toString(from: document.journal_day) : nil
         )
     }
@@ -330,7 +312,8 @@ public class DocumentManager: NSObject {
     /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
     private func mergeWithLocalChanges(_ document: Document, _ input2: Data) -> Bool {
         checkThread()
-        guard let beam_api_data = document.beam_api_data,
+        let documentStruct = DocumentStruct(document: document)
+        guard let beam_api_data = documentStruct.previousSavedObject?.data,
               let input1 = document.data else {
             return false
         }
@@ -356,13 +339,20 @@ public class DocumentManager: NSObject {
                                category: .documentDebug)
 
         document.data = newData
-        document.beam_api_data = input2
         return true
     }
 
-    func mergeDocumentWithNewData(_ document: Document, _ documentStruct: DocumentStruct) -> Bool {
+    func mergeDocumentWithNewData(_ document: Document, _ remoteDocumentStruct: DocumentStruct) -> Bool {
         checkThread()
-        guard mergeWithLocalChanges(document, documentStruct.data) else {
+
+        // If the local data is equal to what was previously saved (hasLocalChanges), we have no local motification.
+        // We can just use the remote document and store it as our new local document.
+        guard DocumentStruct(document: document).hasLocalChanges else {
+            Logger.shared.logDebug("Document has no local change", category: .documentMerge)
+            return false
+        }
+
+        guard mergeWithLocalChanges(document, remoteDocumentStruct.data) else {
             // Local version could not be merged with remote version
             Logger.shared.logWarning("Document has local change but could not merge", category: .documentMerge)
             NotificationCenter.default.post(name: .apiDocumentConflict,
@@ -387,7 +377,6 @@ public class DocumentManager: NSObject {
             document.database_id == documentStruct.databaseId &&
             document.document_type == documentStruct.documentType.rawValue &&
             document.deleted_at?.intValue == documentStruct.deletedAt?.intValue &&
-            document.beam_object_previous_checksum == documentStruct.previousChecksum &&
             document.id == documentStruct.id
     }
 
@@ -411,9 +400,10 @@ public class DocumentManager: NSObject {
     @discardableResult
     func saveContext(file: StaticString = #file, line: UInt = #line) throws -> Bool {
         checkThread()
-        Logger.shared.logDebug("DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
+        Logger.shared.logDebug("\(self) DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
 
         guard context.hasChanges else {
+            Logger.shared.logDebug("DocumentManager.saveContext: no changes!", category: .document)
             return false
         }
 
@@ -425,9 +415,18 @@ public class DocumentManager: NSObject {
         Self.savedCount += 1
 
         do {
+            let inserted = context.insertedObjects.compactMap { ($0 as? Document)?.documentStruct }
+            let updated = context.updatedObjects.compactMap { ($0 as? Document)?.documentStruct }
+            let saved = Set(inserted + updated)
+            let deleted = context.deletedObjects.compactMap { ($0 as? Document)?.id }
+
             let localTimer = BeamDate.now
             try CoreDataManager.save(context)
             Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
+
+            saved.forEach(Self.documentSaved.send)
+            deleted.forEach(Self.documentDeleted.send)
+
             return true
         } catch let error as NSError {
             switch error.code {
@@ -555,35 +554,6 @@ public class DocumentManager: NSObject {
         }
     }
 
-    // MARK: notifications
-    func notificationDocumentUpdate(_ documentStruct: DocumentStruct) {
-        let userInfo: [AnyHashable: Any] = [
-            "updatedDocuments": [documentStruct],
-            "deletedDocuments": []
-        ]
-
-        Logger.shared.logDebug("Posting notification .documentUpdate for \(documentStruct.titleAndId)",
-                               category: .documentNotification)
-
-        NotificationCenter.default.post(name: .documentUpdate,
-                                        object: self,
-                                        userInfo: userInfo)
-    }
-
-    func notificationDocumentDelete(_ documentStruct: DocumentStruct) {
-        let userInfo: [AnyHashable: Any] = [
-            "updatedDocuments": [],
-            "deletedDocuments": [documentStruct]
-        ]
-
-        Logger.shared.logDebug("Posting notification .documentUpdate for deleted \(documentStruct.titleAndId)",
-                               category: .documentNotification)
-
-        NotificationCenter.default.post(name: .documentUpdate,
-                                        object: self,
-                                        userInfo: userInfo)
-    }
-
     // MARK: Shared
     // swiftlint:disable function_body_length
     func saveAndThrottle(_ documentStruct: DocumentStruct,
@@ -645,16 +615,22 @@ public class DocumentManager: NSObject {
             Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): calling fetchWithId",
                                    category: .documentNetwork)
 
-            guard let updatedDocument = try? documentManager.fetchWithId(documentStruct.id) else {
+            var updatedDocument: Document?
+            documentManager.saveDocumentQueue.sync {
+                updatedDocument = try? documentManager.fetchWithId(documentStruct.id)
+            }
+
+            guard let updatedDocument = updatedDocument else {
                 Logger.shared.logWarning("Network task for \(documentStruct.titleAndId): document disappeared (deleted?), isCancelled: \(networkTask.isCancelled)",
                                          category: .coredata)
                 networkCompletion?(.failure(DocumentManagerError.localDocumentNotFound))
                 return
             }
-            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): called fetchWithId. previousChecksum \(updatedDocument.beam_object_previous_checksum ?? "-")",
-                                   category: .documentNetwork)
 
             let saveObject = DocumentStruct(document: updatedDocument)
+
+            Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): called fetchWithId. previousChecksum \(saveObject.previousChecksum ?? "-")",
+                                   category: .documentNetwork)
 
             Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): calling network with \(updatedDocument.titleAndId) (refreshed object)",
                                    category: .documentNetwork)
@@ -697,115 +673,22 @@ public class DocumentManager: NSObject {
     }
 }
 
-extension DocumentManager {
-    public override var description: String { "Beam.DocumentManager" }
-}
-
 // MARK: - updates
 extension DocumentManager {
-    /// Use this to have updates when the underlaying CD object `Document` changes
-    func onDocumentChange(_ documentStruct: DocumentStruct,
-                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
-        Logger.shared.logDebug("onDocumentChange called for \(documentStruct.titleAndId)", category: .documentNotification)
-
-        var documentId = documentStruct.id
-        let cancellable = NotificationCenter.default
-            .publisher(for: .documentUpdate)
-            .sink { notification in
-                let documentManager = DocumentManager()
-                guard let updatedDocuments = notification.userInfo?["updatedDocuments"] as? [DocumentStruct] else {
-                    return
-                }
-
-                for document in updatedDocuments {
-
-                    /*
-                     I used to prevent calling `completionHandler` when that condition was true:
-
-                     `if let documentManager = notification.object as? DocumentManager, documentManager == self { return }`
-
-                     to avoid the same DocumentManager to return its own saved update.
-
-                     But we have legit scenarios when such is happening, for example when there is an API conflict,
-                     and the manager fetch, merge and resave that merged object.
-
-                     We need the UI to be updated about such to reflect the merge.
-                     */
-
-                    if document.title == documentStruct.title &&
-                        document.databaseId == documentStruct.databaseId &&
-                        document.id != documentId {
-
-                        /*
-                         When a document is deleted and overwritten because of a title conflict, we want to let
-                         the editor know to update the editor UI with the new document.
-
-                         However when going on the "see all notes" debug window, and forcing a document refresh,
-                         we don't want the editor UI to change.
-                         */
-
-                        guard let coreDataDocument = try? documentManager.fetchWithId(documentId) else {
-                            Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
-                                                   category: .documentNotification)
-                            documentId = document.id
-                            completionHandler(document)
-                            return
-                        }
-
-                        if documentStruct.deletedAt == nil, coreDataDocument.deleted_at != documentStruct.deletedAt {
-                            Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) (new id)",
-                                                   category: .documentNotification)
-                            documentId = document.id
-                            completionHandler(document)
-                        } else {
-                            Logger.shared.logDebug("onDocumentChange: no notification for \(document.titleAndId) (new id)",
-                                                   category: .documentNotification)
-                        }
-                    } else if document.id == documentId {
-                        Logger.shared.logDebug("onDocumentChange for \(document.titleAndId)",
-                                               category: .documentNotification)
-                        completionHandler(document)
-                    } else if document.title == documentStruct.title {
-                        Logger.shared.logDebug("onDocumentChange for \(document.titleAndId) but not detected. Called with \(documentStruct.titleAndId), {\(documentId)}",
-                                               category: .documentNotification)
-                    }
-                }
-            }
-        return cancellable
-    }
-
-    func onDocumentDelete(_ documentStruct: DocumentStruct,
-                          completionHandler: @escaping (DocumentStruct) -> Void) -> AnyCancellable {
-        Logger.shared.logDebug("onDocumentDelete called for \(documentStruct.titleAndId)", category: .documentDebug)
-
-        let cancellable = NotificationCenter.default
-            .publisher(for: .documentUpdate)
-            .sink { notification in
-                // Skip notification coming from this manager
-                if let documentManager = notification.object as? DocumentManager, documentManager == self {
-                    return
-                }
-
-                if let deletedDocuments = notification.userInfo?["deletedDocuments"] as? [DocumentStruct] {
-                    for document in deletedDocuments where document.id == documentStruct.id {
-                        Logger.shared.logDebug("notification for \(document.titleAndId)", category: .document)
-                        try? GRDBDatabase.shared.remove(noteTitled: document.title)
-                        completionHandler(document)
-                    }
-                }
-            }
-        return cancellable
-    }
+    /// This publisher is triggered anytime we store a document in the DB. Note that it also happens when softDeleting a note
+    static let documentSaved = PassthroughSubject<DocumentStruct, Never>()
+    /// This publisher is triggered anytime we are completely removing a note from the DB. Soft delete do NOT call it though.
+    static let documentDeleted = PassthroughSubject<UUID, Never>()
 }
 
 // For tests
 extension DocumentManager {
-    func create(title: String) -> DocumentStruct? {
+    func create(title: String, deletedAt: Date?) -> DocumentStruct? {
         checkThread()
         var result: DocumentStruct?
 
         do {
-            let document: Document = try create(id: UUID(), title: title)
+            let document: Document = try create(id: UUID(), title: title, deletedAt: deletedAt)
             result = parseDocumentBody(document)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .coredata)
@@ -860,6 +743,9 @@ extension DocumentManager {
                 predicates.append(NSPredicate(format: "title CONTAINS[cd] %@", title as CVarArg))
             case let .journalDate(journalDate):
                 predicates.append(NSPredicate(format: "journal_day == %d",
+                                              journalDate))
+            case let .beforeJournalDate(journalDate):
+                predicates.append(NSPredicate(format: "journal_day < %d",
                                               journalDate))
             case let .nonFutureJournalDate(journalDate):
                 predicates.append(NSPredicate(format: "journal_day <= \(journalDate)"))
@@ -932,13 +818,14 @@ extension DocumentManager {
         }
     }
 
-    func create(id: UUID, title: String? = nil) throws -> Document {
+    func create(id: UUID, title: String? = nil, deletedAt: Date?) throws -> Document {
         checkThread()
         let document = Document(context: context)
         document.id = id
         document.database_id = DatabaseManager.defaultDatabase.id
         document.version = 0
         document.document_type = DocumentType.note.rawValue
+        document.deleted_at = deletedAt
         if let title = title {
             document.title = title
         }
@@ -1028,40 +915,31 @@ extension DocumentManager {
 
     func fetchWithId(_ id: UUID) throws -> Document? {
         checkThread()
+
         return try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
     }
 
-    func fetchOrCreateWithId(_ id: UUID) throws -> Document {
+    func fetchOrCreate(_ id: UUID, title: String, deletedAt: Date?) throws -> Document {
         checkThread()
-        let document = try ((try? fetchWithId(id)) ?? (try create(id: id)))
+        let document = try ((try? fetchWithId(id)) ?? (try create(id: id, title: title, deletedAt: deletedAt)))
+        return document
+    }
+
+    func fetchOrCreate(_ title: String, id: UUID? = nil, deletedAt: Date?) throws -> Document {
+        checkThread()
+        let document = try ((try? fetchWithTitle(title)) ?? (try create(id: id ?? UUID(), title: title, deletedAt: deletedAt)))
         return document
     }
 
     func fetchWithTitle(_ title: String) throws -> Document? {
         checkThread()
-        return try fetchFirst(filters: [.title(title)], sortingKey: .title(true))
-    }
-
-    func fetchOrCreateWithTitle(_ title: String) throws -> Document {
-        checkThread()
-        return try ((try? fetchFirst(filters: [.title(title)])) ?? (try create(id: UUID(), title: title)))
+        return try fetchFirst(filters: [.title(title), .nonDeleted], sortingKey: .title(true))
     }
 
     func fetchWithJournalDate(_ date: String) -> Document? {
         checkThread()
         let date = JournalDateConverter.toInt(from: date)
         return try? fetchFirst(filters: [.journalDate(date)])
-    }
-
-    func fetchWithTypeAndLimit(_ type: DocumentType,
-                               _ limit: Int,
-                               _ fetchOffset: Int) throws -> [Document] {
-        checkThread()
-
-        let today = BeamNoteType.titleForDate(BeamDate.now)
-        let todayInt = JournalDateConverter.toInt(from: today)
-
-        return try fetchAll(filters: [.type(type), .nonFutureJournalDate(todayInt), .limit(limit), .offset(fetchOffset)], sortingKey: .journal(false))
     }
 
     func fetchAllWithTitleMatch(title: String,

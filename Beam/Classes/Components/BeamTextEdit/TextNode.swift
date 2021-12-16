@@ -222,7 +222,7 @@ public class TextNode: ElementNode {
         AppDelegate.main.data.$renamedNote.dropFirst().sink { [unowned self] (noteId, previousName, newName) in
             Logger.shared.logInfo("Note '\(previousName)' renamed to '\(newName)' [\(noteId)]")
             if self.elementText.internalLinks.contains(noteId) {
-               self.unproxyElement.updateNoteNamesInInternalLinks()
+               self.unproxyElement.updateNoteNamesInInternalLinks(recursive: true)
             }
         }.store(in: &scope)
     }
@@ -499,9 +499,9 @@ public class TextNode: ElementNode {
 
             switch elementKind {
             case .heading(1):
-                size.height += PreferencesManager.editorHeaderOneSize
+                size.height -= PreferencesManager.editorHeaderOneSize
             case .heading(2):
-                size.height += PreferencesManager.editorHeaderTwoSize
+                size.height -= PreferencesManager.editorHeaderTwoSize
             default:
                 size.height -= 5
             }
@@ -616,7 +616,7 @@ public class TextNode: ElementNode {
             return handleRightMouseDown(mouseInfo: mouseInfo)
         }
 
-        if contentsFrame.contains(mouseInfo.position) {
+        if contentsFrame.containsY(mouseInfo.position) {
 
             let clickPos = positionAt(point: mouseInfo.position)
 

@@ -64,6 +64,11 @@ export interface BeamResizeInfo {
   height: number
 }
 
+export interface BeamEmbedContentSize {
+  width: number
+  height: number
+}
+
 export class BeamRect extends BeamSize {
   constructor(public x: number, public y: number, width: number, height: number) {
     super(width, height)
@@ -104,6 +109,7 @@ export interface BeamCrypto {
 }
 
 export interface BeamWindow<M = MessageHandlers> extends BeamEventTarget {
+  matchMedia(arg0: string)
   crypto: BeamCrypto
   frameElement: any
   frames: BeamWindow[]
@@ -181,6 +187,8 @@ export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
 export type BeamDOMRect = DOMRect
 
 export interface BeamNode extends BeamEventTarget {
+  offsetHeight: number
+  offsetWidth: number
   textContent: string
   nodeName: string
   nodeType: BeamNodeType

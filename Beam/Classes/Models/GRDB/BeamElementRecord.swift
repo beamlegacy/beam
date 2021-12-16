@@ -17,6 +17,7 @@ struct BeamElementRecord {
     var text: String
     var uid: String
     var noteId: String // Added noteId
+    var databaseId: String
     static let frecency = hasOne(FrecencyNoteRecord.self, key: "frecency", using: FrecencyNoteRecord.BeamElementForeignKey)
     }
 
@@ -24,7 +25,7 @@ struct BeamElementRecord {
 extension BeamElementRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, title, text, uid, noteId
+        case id, title, text, uid, noteId, databaseId
     }
 }
 
@@ -37,6 +38,7 @@ extension BeamElementRecord: FetchableRecord {
         text = row[Columns.text]
         uid = row[Columns.uid]
         noteId = row[Columns.noteId]
+        databaseId = row[Columns.databaseId]
     }
 }
 
@@ -49,6 +51,7 @@ extension BeamElementRecord: MutablePersistableRecord {
         container[Columns.text] = text
         container[Columns.uid] = uid
         container[Columns.noteId] = noteId
+        container[Columns.databaseId] = databaseId
     }
 
     // Update auto-incremented id upon successful insertion

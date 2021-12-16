@@ -7,7 +7,7 @@ protocol WebNavigationController {
        - url: The navigated URL
        - webView: The webview that navigated.
      */
-    func navigatedTo(url: URL, webView: WKWebView, replace: Bool)
+    func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool)
 
     /*
      The current page is being loaded.

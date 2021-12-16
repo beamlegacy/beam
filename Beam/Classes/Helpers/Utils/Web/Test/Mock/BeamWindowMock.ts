@@ -51,6 +51,9 @@ export abstract class BeamWindowMock<M> extends BeamEventTargetMock implements B
     this.location = location
     this.visualViewport.scale = 1
   }
+  matchMedia(arg0: string) {
+    throw new Error("Method not implemented.")
+  }
   crypto = new BeamCryptoMock()
   frameElement: any
   frames: any

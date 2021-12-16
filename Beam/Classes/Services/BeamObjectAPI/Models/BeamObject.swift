@@ -4,7 +4,7 @@ import BeamCore
 
 /// Anything to be stored as BeamObject should implement this protocol.
 protocol BeamObjectProtocol: Codable {
-    static var beamObjectTypeName: String { get }
+    static var beamObjectType: BeamObjectObjectType { get }
 
     var beamObjectId: UUID { get set }
 
@@ -12,11 +12,41 @@ protocol BeamObjectProtocol: Codable {
     var updatedAt: Date { get set }
     var deletedAt: Date? { get set }
 
-    // IMPORTANT: make sure you list in `enum CodingKeys: String, CodingKey` what you want
-    // to store as `BeamObject` and not include `previousChecksum` and `checksum`
-    var previousChecksum: String? { get set }
-    var checksum: String? { get set }
     func copy() throws -> Self
+
+    var description: String { get }
+    var hasLocalChanges: Bool { get }
+    var previousSavedObject: Self? { get }
+    var previousChecksum: String? { get }
+    func checksum() throws -> String
+}
+
+extension BeamObjectProtocol {
+    public var description: String {
+        "<BeamObjectProtocol: \(beamObjectId) [\(Self.beamObjectType.rawValue)]>"
+    }
+
+    var hasLocalChanges: Bool {
+        let previousChecksum = BeamObjectChecksum.previousChecksum(object: self)
+
+        return (try? BeamObject(self))?.dataChecksum != previousChecksum
+    }
+
+    var previousSavedObject: Self? {
+        try? BeamObjectChecksum.previousSavedObject(object: self)
+    }
+
+    var previousChecksum: String? {
+        BeamObjectChecksum.previousChecksum(object: self)
+    }
+
+    func checksum() throws -> String {
+        guard let result = try BeamObject(self).dataChecksum else {
+            assert(false)
+            return ""
+        }
+        return result
+    }
 }
 
 /// Used to store data on the BeamObject Beam API.
@@ -34,6 +64,9 @@ class BeamObject: Codable {
     var privateKeySignature: String?
 
     var id: UUID
+
+    private var encoded: Bool = false
+    private var encrypted: Bool = false
 
     public var debugDescription: String {
         "<BeamObject: \(id) [\(beamObjectType)]>"
@@ -67,6 +100,28 @@ class BeamObject: Codable {
         self.beamObjectType = beamObjectType
     }
 
+    init<T: BeamObjectProtocol>(object: T) throws {
+        id = object.beamObjectId
+        beamObjectType = type(of: object).beamObjectType.rawValue
+
+        createdAt = object.createdAt
+        updatedAt = object.updatedAt
+        deletedAt = object.deletedAt
+
+        try encodeObject(object)
+    }
+
+    init<T: BeamObjectProtocol>(_ object: T) throws {
+        id = object.beamObjectId
+        beamObjectType = type(of: object).beamObjectType.rawValue
+
+        createdAt = object.createdAt
+        updatedAt = object.updatedAt
+        deletedAt = object.deletedAt
+
+        try encodeObject(object)
+    }
+
     init<T: BeamObjectProtocol>(_ object: T, _ type: String) throws {
         id = object.beamObjectId
         beamObjectType = type
@@ -75,7 +130,6 @@ class BeamObject: Codable {
         updatedAt = object.updatedAt
         deletedAt = object.deletedAt
 
-        previousChecksum = object.previousChecksum
         try encodeObject(object)
 
         // Used when going deep in debug
@@ -112,6 +166,7 @@ class BeamObject: Codable {
 
         result.previousChecksum = previousChecksum
         result.dataChecksum = dataChecksum
+        result.encrypted = encrypted
         return result
     }
 
@@ -125,19 +180,20 @@ class BeamObject: Codable {
         do {
             decodedObject = try Self.decoder.decode(T.self, from: data)
         } catch {
-            Logger.shared.logError("Error decoding \(self.beamObjectType) beamObject: \(error.localizedDescription)",
+            Logger.shared.logError("Error decoding \(self.beamObjectType) error: \(error.localizedDescription)",
                                    category: .beamObject)
+            Logger.shared.logError(data.asString ?? "Can't output data", category: .beamObject)
             dump(data.asString)
             throw error
         }
 
         decodedObject.beamObjectId = id
-        decodedObject.checksum = dataChecksum
 
         // Don't use `createdAt` and `updatedAt` as those might be changed on the API side, only trust the encrypted signed
         // ones from internal data
-//      decodedObject.createdAt = createdAt ?? decodedObject.createdAt
-//      decodedObject.updatedAt = updatedAt ?? decodedObject.updatedAt
+        // decodedObject.createdAt = createdAt ?? decodedObject.createdAt
+        // decodedObject.updatedAt = updatedAt ?? decodedObject.updatedAt
+
         decodedObject.deletedAt = deletedAt ?? decodedObject.deletedAt
 
         return decodedObject
@@ -145,9 +201,11 @@ class BeamObject: Codable {
 
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
         let localTimer = BeamDate.now
+        assert(!encoded)
 
         let jsonData = try Self.encoder.encode(object)
 
+        encoded = true
         data = jsonData
         dataChecksum = jsonData.SHA256
 
@@ -169,12 +227,7 @@ class BeamObject: Codable {
         }
 
         do {
-            var result = try Self.decoder.decode(T.self, from: data)
-
-            // Checksum is used to check *after* we encoded the string, so it's not embedded in that encoded string and
-            // I reinject it here so whatever is using beam objects can check for previous checksum if needed.
-            result.checksum = dataChecksum
-            return result
+            return try Self.decoder.decode(T.self, from: data)
         } catch {
             Logger.shared.logError("Couldn't decode object \(T.self): \(self)",
                                    category: .beamObject)
@@ -234,9 +287,13 @@ extension BeamObject {
             Logger.shared.logError("\(type(of: error)): \(error) \(error.localizedDescription)", category: .encryption)
             throw error
         }
+
+        encrypted = false
     }
 
     func encrypt() throws {
+        assert(!encrypted)
+
         guard let clearData = data else { return }
 
         if Configuration.env == "test",
@@ -248,6 +305,7 @@ extension BeamObject {
             throw BeamObjectError.noData
         }
 
+        encrypted = true
         data = encryptedClearData
         privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
     }

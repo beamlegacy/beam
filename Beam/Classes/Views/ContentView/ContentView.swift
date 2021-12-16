@@ -12,22 +12,25 @@ struct ContentView: View {
     @EnvironmentObject var onboardingManager: OnboardingManager
 
     @State private var contentIsScrolled = false
-    private var showOmnibarBorder: Bool {
+    private var isToolbarAboveContent: Bool {
         contentIsScrolled && [.note, .today].contains(state.mode)
     }
 
     var mainAppContent: some View {
         GeometryReader { geometry in
             VStack(spacing: 0) {
-                OmniBar(isAboveContent: showOmnibarBorder)
-                    .environmentObject(state.autocompleteManager)
-                    .zIndex(10)
                 ModeView(containerGeometry: geometry, contentIsScrolled: $contentIsScrolled)
-                if shouldDisplayBottomBar {
+                    .frame(maxWidth: .infinity)
+                    .overlay(OmniboxV2Toolbar(isAboveContent: isToolbarAboveContent), alignment: .top)
+                    .overlay(shouldDisplayBottomBar && state.useOmniboxV2 ?
+                             WindowBottomToolBar()
+                                .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2))) : nil, alignment: .bottom)
+                if shouldDisplayBottomBar && !state.useOmniboxV2 {
                     WindowBottomToolBar()
                         .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2)))
                 }
-            }.overlay(
+            }
+            .overlay(
                 state.useOmniboxV2 ?
                 OmniboxV2Container()
                     .environmentObject(state.autocompleteManager)
@@ -56,6 +59,7 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
         }
+        .environment(\.isMainWindow, state.windowIsMain)
     }
 
     private var shouldDisplayBottomBar: Bool {
@@ -74,5 +78,16 @@ struct ContentView: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+    }
+}
+
+// MARK: - Main Window environment value
+private struct IsMainWindowEnvironmentKey: EnvironmentKey {
+    static let defaultValue = false
+}
+extension EnvironmentValues {
+    var isMainWindow: Bool {
+        get { self[IsMainWindowEnvironmentKey.self] }
+        set { self[IsMainWindowEnvironmentKey.self] = newValue }
     }
 }

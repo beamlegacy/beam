@@ -7,6 +7,5 @@ extension Notification.Name {
     static let networkForbidden = Notification.Name("networkForbidden")
     static let apiDocumentConflict = Notification.Name("apiDocumentConflict")
     static let defaultDatabaseUpdate = Notification.Name("defaultDatabaseUpdate")
-    static let documentUpdate = Notification.Name("documentUpdate")
     static let loggerInsert = Notification.Name("loggerInsert")
 }

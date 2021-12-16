@@ -18,7 +18,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var debug = false
     var currentFrameInDocument = NSRect()
     var nodeProvider: NodeProvider?
-    var hasValidNodeProvider: Bool { nodeProvider?.holder != nil }
+    var hasValidNodeProvider: Bool { nodeProvider?.holder?.editor != nil }
     var isInNodeProviderTree: Bool { hasValidNodeProvider || (parent?.isInNodeProviderTree ?? false) }
     var isTreeBoundary: Bool { nodeProvider != nil }
 
@@ -30,6 +30,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             invalidate()
             invalidateLayout()
         }
+    }
+
+    func runBeforeNextLayout(_ block: @escaping () -> Void) {
+        editor?.runBeforeNextLayout(block)
+    }
+
+    func runAfterNextLayout(_ block: @escaping () -> Void) {
+        editor?.runAfterNextLayout(block)
     }
 
     var selected: Bool = false {
@@ -61,21 +69,28 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     var selfVisible = true {
         didSet {
-            invalidateLayout()
-            updateLayersVisibility()
-            invalidateRendering()
+            updateVisible()
         }
     }
 
     var visible = true {
         didSet {
-            updateChildrenVisibility()
-            updateLayersVisibility()
-            invalidateRendering()
+            updateVisible()
         }
     }
 
+    func updateVisible() {
+        runAfterNextLayout {
+            self.updateLayersVisibility()
+        }
+        invalidateLayout()
+        invalidateRendering()
+    }
+
+    var disableAnimationsForNextLayout = true
+
     func updateLayersVisibility() {
+        disableAnimationsForNextLayout = layer.isHidden
         layer.isHidden = !visible || !selfVisible
         for l in layers where l.value.layer.superlayer == editor?.layer {
             l.value.layer.isHidden = !visible || !selfVisible
@@ -268,6 +283,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if parent == nil && oldValue?.root?.focusedWidget === self {
                 oldValue?.root?.focusedWidget = nil
             }
+
+            if parent != nil {
+                updateChildrenVisibility()
+            }
+
             _root = nil
         }
     }
@@ -300,6 +320,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             node = p
         }
         return parents
+    }
+
+    func firstParentWithType<ParentType>(_ type: ParentType.Type) -> ParentType? {
+        allParents.first(where: { $0 as? ParentType != nil }) as? ParentType
     }
 
     var firstVisibleParent: Widget? {
@@ -419,19 +443,30 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var inInitialLayout: Bool {
         initialLayout || (editor?.frame.isEmpty ?? true)
     }
+
+    var shouldDisableActions: Bool {
+        inInitialLayout || layer.isHidden || layer.frame.isEmpty || disableAnimationsForNextLayout
+    }
     final func setLayout(_ frame: NSRect) {
         self.frame = frame
         defer {
             needLayout = false
             initialLayout = false
+            disableAnimationsForNextLayout = false
         }
 
-        if inInitialLayout {
+        let disableActions = shouldDisableActions
+        if disableActions {
             CATransaction.begin()
             CATransaction.setDisableActions(true)
         }
+
         layer.bounds = contentsFrame
         layer.position = CGPoint(x: frameInDocument.origin.x + contentsFrame.origin.x, y: frameInDocument.origin.y + contentsFrame.origin.y)
+
+        if disableActions {
+            CATransaction.commit()
+        }
 
         layer.backgroundColor = debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
 
@@ -445,11 +480,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             invalidate() // invalidate before change
             currentFrameInDocument = frame
             invalidate()  // invalidate after the change
-        }
-
-        if inInitialLayout {
-            updateLayersVisibility()
-            CATransaction.commit()
         }
     }
 
@@ -511,6 +541,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let newActions = [
             kCAOnOrderIn: NSNull(),
             kCAOnOrderOut: NSNull(),
+            kCATransition: NSNull(),
             "sublayers": NSNull(),
             "contents": NSNull(),
             "bounds": NSNull()
@@ -618,6 +649,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         let isVisible = visible && open
         for c in children {
             c.visible = isVisible
+            editor?.addToMainLayer(c.layer)
             c.updateChildrenVisibility()
         }
     }
@@ -669,6 +701,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         children.removeAll { w -> Bool in
             w === child
         }
+        guard child.parent == self else { return }
         child.removeFromSuperlayer(recursive: true)
 
         updateRemovedChild(child: child)
@@ -718,23 +751,24 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     internal var layers: [String: Layer] = [:]
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
-        layer.widget = self
-        layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
+        CATransaction.disableAnimations {
+            layer.widget = self
+            layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
 
-        layer.layer.deepContentsScale = self.layer.contentsScale
+            layer.layer.deepContentsScale = self.layer.contentsScale
 
-        if global {
-            editor?.addToMainLayer(layer.layer)
-            layer.layer.isHidden = !inVisibleBranch
-        } else if layer.layer.superlayer == nil {
-            self.layer.addSublayer(layer.layer)
-            assert(layer.layer.superlayer == self.layer)
+            if global {
+                editor?.addToMainLayer(layer.layer)
+                layer.layer.isHidden = !inVisibleBranch
+            } else if layer.layer.superlayer == nil {
+                self.layer.addSublayer(layer.layer)
+                assert(layer.layer.superlayer == self.layer)
 
-            layer.setAccessibilityParent(self)
-//            layer.setAccessibilityFrameInParentSpace(layer.frame)
+                layer.setAccessibilityParent(self)
+            }
+
+            self.layers[layer.name] = layer
         }
-
-        layers[layer.name] = layer
     }
 
     func removeLayer(_ layer: Layer) {
@@ -742,6 +776,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func removeLayer(_ name: String) {
+        guard let l = layers[name] else { return }
+        l.layer.removeFromSuperlayer()
         layers.removeValue(forKey: name)
     }
 
@@ -755,7 +791,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
-        guard inVisibleBranch else { return nil }
+        guard visible, inVisibleBranch else { return nil }
 
         clickedLayer = nil
         for layer in layers.values.reversed() where !layer.layer.isHidden {
@@ -783,7 +819,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
 //        Logger.shared.logDebug("dispatch down: \(mouseInfo.position)")
-        if mouseDown(mouseInfo: mouseInfo) {
+        if visible, mouseDown(mouseInfo: mouseInfo) {
             return self
         }
 
@@ -791,10 +827,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func dispatchMouseUp(mouseInfo: MouseInfo) -> Widget? {
-        guard inVisibleBranch else { return nil }
+        guard visible, inVisibleBranch else { return nil }
         guard let mouseHandler = root?.mouseHandler else { return nil }
 
-        if mouseHandler.handleMouseUp(mouseInfo: mouseInfo) {
+        if visible, mouseHandler.handleMouseUp(mouseInfo: mouseInfo) {
             return mouseHandler
         }
 
@@ -976,8 +1012,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         var p = parent
         var n: Widget?
         while n == nil && p != nil {
-            n = p!.nextSibbling()
-            p = p!.parent
+            n = p?.nextSibbling()
+            p = p?.parent
         }
 
         if n != nil && n !== self {

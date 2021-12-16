@@ -22,8 +22,6 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    static var privacyPreferencesContainer = "app_privacy_preferences"
-
     // MARK: - Global ON/OFF of AdBlocker
     static var isfilterGroupsEnabled: Bool {
         get {
@@ -39,13 +37,13 @@ extension PreferencesManager {
         }
     }
 
-    @UserDefault(key: adsFilterKey, defaultValue: adsFilterDefault, suiteName: privacyPreferencesContainer)
+    @UserDefault(key: adsFilterKey, defaultValue: adsFilterDefault, suiteName: BeamUserDefaults.privacyPreferences.suiteName)
     static var isAdsFilterEnabled: Bool
 
-    @UserDefault(key: privacyFilterKey, defaultValue: privacyFilterDefault, suiteName: privacyPreferencesContainer)
+    @UserDefault(key: privacyFilterKey, defaultValue: privacyFilterDefault, suiteName: BeamUserDefaults.privacyPreferences.suiteName)
     static var isPrivacyFilterEnabled: Bool
 
-    @UserDefault(key: annoyanceFilterKey, defaultValue: annoyanceFilterDefault, suiteName: privacyPreferencesContainer)
+    @UserDefault(key: annoyanceFilterKey, defaultValue: annoyanceFilterDefault, suiteName: BeamUserDefaults.privacyPreferences.suiteName)
     static var isAnnoyancesFilterEnabled: Bool
 
     static var isSocialMediaFilterEnabled: Bool {

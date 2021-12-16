@@ -18,6 +18,11 @@ protocol Collapsable: AnyObject {
     var mediaURL: URL? { get }
 
     var lottieView: AnimationView? { get set }
+    var tokenColor: CGColor { get }
+    var textColor: BeamColor { get }
+
+    //The position for the content layer
+    var contentPosition: CGPoint { get }
 
     func setupCollapsedLayer(title: String, thumbnailLayer: Layer?, or thumbnailImage: NSImage?)
     func setupCollapseExpandLayer()
@@ -29,15 +34,34 @@ protocol Collapsable: AnyObject {
 
 extension Collapsable where Self: ElementNode {
 
+    var tokenColor: CGColor {
+        guard isCollapsed else { return NSColor.clear.cgColor }
+        let tokenColor = mediaURL != nil ? BeamColor.Editor.linkActiveBackground.cgColor : BeamColor.Editor.tokenNoLinkActiveBackground.cgColor
+        return tokenColor
+    }
+
+    var textColor: BeamColor {
+        let activeTextColor = mediaURL != nil ? BeamColor.Editor.linkActive : BeamColor.Editor.link
+        return isFocused ? activeTextColor : BeamColor.Editor.link
+    }
+
+    var contentPosition: CGPoint {
+        CGPoint(x: contentsLead, y: isCollapsed ? contentsTop + 7 : contentsTop)
+    }
+
     func setupCollapsedLayer(title: String, thumbnailLayer: Layer?, or thumbnailImage: NSImage?) {
         guard isCollapsed else {
             return
         }
-
         let initialColor = BeamColor.Editor.link.nsColor
-        let thumbnailLayer = thumbnailLayer ?? Layer.image(named: "thumbnail", image: thumbnailImage!, size: CGSize(width: 16, height: 16))
+
+        let thumbnailWidth = 16.0
+        let thumbnailLayer = thumbnailLayer ?? Layer.image(named: "thumbnail", image: thumbnailImage!, size: CGSize(width: thumbnailWidth, height: thumbnailWidth))
+        thumbnailLayer.frame.size = CGSize(width: thumbnailWidth, height: thumbnailWidth)
+        thumbnailLayer.frame.origin = contentPosition
+
         let text = Layer.text(named: "collapsed-text", title, color: initialColor, size: PreferencesManager.editorFontSize)
-        text.layer.opacity = 0
+        text.frame.origin =  CGPoint(x: thumbnailLayer.layer.position.x + thumbnailWidth + 6, y: 0)
 
         if mediaURL != nil {
             let linkImageLayer = CALayer()
@@ -58,16 +82,16 @@ extension Collapsable where Self: ElementNode {
             return false
         }
 
-        text.hovered = { hover in
-            guard let collapsedText = self.layers["collapsed-text"], let textLayer = collapsedText.layer as? CATextLayer else { return }
-            textLayer.string = self.buildCollapsedTitle(mouseInteractionType: hover ? .hovered : .unknown)
+        text.hovered = { [weak self] hover in
+            guard let self = self, let collapsedText = self.layers["collapsed-text"], let textLayer = collapsedText.layer as? CATextLayer else { return }
+            textLayer.string = self.buildCollapsedTitle(mouseInteractionType: hover && !self.isFocused ? .hovered : .unknown)
         }
 
-        addLayer(thumbnailLayer, origin: CGPoint(x: thumbnailLayer.layer.frame.width, y: 0))
-        addLayer(text, origin: CGPoint(x: thumbnailLayer.layer.position.x + thumbnailLayer.layer.frame.width + 6, y: 0))
-
-        text.layer.opacity = 1
-    }
+        if thumbnailLayer.layer.superlayer == nil {
+            addLayer(thumbnailLayer, origin: CGPoint(x: thumbnailLayer.layer.frame.width, y: 0))
+        }
+        addLayer(text, origin: CGPoint(x: thumbnailLayer.layer.position.x + thumbnailWidth + 6, y: 0))
+}
 
     func setupCollapseExpandLayer() {
 
@@ -103,10 +127,10 @@ extension Collapsable where Self: ElementNode {
         }
 
         let mouseInteraction = MouseInteraction(type: mouseInteractionType ?? .unknown, range: NSRange(location: 0, length: text.count))
-        let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: PreferencesManager.editorFontSize, markedRange: nil, searchedRanges: [], mouseInteraction: mouseInteraction)
+        let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: PreferencesManager.editorFontSize, fontColor: BeamColor.Generic.text.staticColor, markedRange: nil, searchedRanges: [], mouseInteraction: mouseInteraction)
 
-        let buildedString = builder.build(config: config)
-        return buildedString
+        let builtString = builder.build(config: config).addAttributes([.foregroundColor: textColor.cgColor])
+        return builtString
     }
 
     private func buildLottieLayer() -> CALayer? {
@@ -131,7 +155,7 @@ extension Collapsable where Self: ElementNode {
 
     private func buildCollapseExpandTextLayer(color: BeamColor) -> CATextLayer {
 
-        let title = isCollapsed ? "To Expanded" : "To Link"
+        let title = isCollapsed ? "To Expanded" : collapsedTitle
         let textLayer = CATextLayer()
         textLayer.string = title
         textLayer.foregroundColor = color.cgColor
@@ -171,7 +195,6 @@ extension Collapsable where Self: ElementNode {
                   let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer else { return }
             textLayer.opacity = isHover ? 1.0 : 0.0
             let hoverColor = isHover ? BeamColor.Editor.collapseExpandButtonHover : BeamColor.Editor.collapseExpandButton
-
             textLayer.foregroundColor = hoverColor.cgColor
             self?.setLottieViewColor(color: hoverColor.nsColor)
             self?.isHoverCollapseExpandButton = isHover
@@ -188,25 +211,41 @@ extension Collapsable where Self: ElementNode {
 
     func layoutCollapseExpand(contentLayer: CALayer) {
         if let textLayer = layers["collapsed-text"]?.layer as? CATextLayer {
-            textLayer.string = buildCollapsedTitle(mouseInteractionType: nil)
-            textLayer.frame.origin = CGPoint(x: contentLayer.position.x + contentLayer.frame.width + 6, y: contentLayer.frame.midY - textLayer.frame.height / 2)
-            let size = textLayer.preferredFrameSize()
-            textLayer.frame.size = size
-            if let arrow = textLayer.sublayers?.first {
-                let arrowWidth = arrow.frame.width
-                arrow.frame.origin = CGPoint(x: size.width - arrowWidth, y: -1)
+
+            let text = buildCollapsedTitle(mouseInteractionType: nil)
+            let boundingRect = text.boundingRect(with: NSSize(width: contentsWidth, height: 0), options: .usesLineFragmentOrigin)
+            textLayer.string = text
+            let origin = CGPoint(x: contentLayer.position.x + contentLayer.frame.width + 6, y: contentLayer.frame.minY)
+            textLayer.frame.origin = origin
+
+            let frame = TextFrame.create(string: text, atPosition: origin, textWidth: contentsWidth, singleLineHeightFactor: nil, maxHeight: nil)
+
+            textLayer.truncationMode = .end
+            textLayer.isWrapped = true
+            textLayer.frame.size = boundingRect.size
+
+            if let arrow = textLayer.sublayers?.first,
+               let lastLine = frame.lines.last {
+                let caretsCount = frame.carets.count
+                let imageCarret = frame.carets[caretsCount - 2]
+
+                arrow.frame.origin = CGPoint(x: imageCarret.offset.x - lastLine.frame.origin.x, y: imageCarret.offset.y - 11)
             }
         }
 
         if let expandButtonLayer = layers["global-expand"]?.layer,
            let textLayer = expandButtonLayer.sublayers?.first(where: {$0 is CATextLayer}) as? CATextLayer {
-            let margin: CGFloat = 15.0
-            expandButtonLayer.frame.origin = CGPoint(x: availableWidth + margin, y: contentsTop + 10)
+            let margin: CGFloat = 11.0
+            expandButtonLayer.frame.origin = CGPoint(x: availableWidth + childInset + margin, y: contentsTop + 10)
 
-            let title = isCollapsed ? "to Image" : "to Link"
+            let title = isCollapsed ? "to Image" : collapsedTitle
             textLayer.string = title
             let size = textLayer.preferredFrameSize()
             textLayer.frame.size = size
         }
+    }
+
+    var collapsedTitle: String {
+        return mediaURL != nil ? "to Link" : "Collapse"
     }
 }

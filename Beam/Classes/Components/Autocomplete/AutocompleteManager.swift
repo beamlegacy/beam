@@ -19,6 +19,7 @@ class AutocompleteManager: ObservableObject {
 
     private var textChangeIsFromSelection = false
     private var replacedProposedText: String?
+    private var autocompleteResultsAreFromEmptyQuery = false
 
     @Published var searchQuerySelectedRange: Range<Int>?
     @Published var autocompleteResults = [AutocompleteResult]()
@@ -101,6 +102,7 @@ class AutocompleteManager: ObservableObject {
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
+                self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.autocompleteResults = finalResults
                 if !isRemovingCharacters {
                     self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText)
@@ -186,9 +188,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func resetAutocompleteSelection(resetText: Bool) {
-        if resetText, let currentSelectedIndex = autocompleteSelectedIndex,
-           currentSelectedIndex < autocompleteResults.count {
-            let previousResult = autocompleteResults[currentSelectedIndex]
+        if resetText, let previousResult = autocompleteResult(at: autocompleteSelectedIndex) {
             setQuery(previousResult.completingText ?? "", updateAutocompleteResults: false)
         }
         searchQuerySelectedRange = nil
@@ -204,6 +204,11 @@ class AutocompleteManager: ObservableObject {
 // MARK: - Public methods
 extension AutocompleteManager {
 
+    func autocompleteResult(at index: Int?) -> AutocompleteResult? {
+        guard let index = index, index >= 0 && index < autocompleteResults.count else { return nil }
+        return autocompleteResults[index]
+    }
+
     func selectPreviousAutocomplete() {
         if let i = autocompleteSelectedIndex {
             let newIndex = i - 1
@@ -212,7 +217,7 @@ extension AutocompleteManager {
             } else {
                 resetAutocompleteSelection(resetText: true)
             }
-        } else {
+        } else if autocompleteResults.count > 0 {
             autocompleteSelectedIndex = (-1).clampInLoop(0, autocompleteResults.count - 1)
         }
     }
@@ -220,7 +225,7 @@ extension AutocompleteManager {
     func selectNextAutocomplete() {
         if let i = autocompleteSelectedIndex {
             autocompleteSelectedIndex = (i + 1).clampInLoop(0, autocompleteResults.count - 1)
-        } else {
+        } else if autocompleteResults.count > 0 {
             autocompleteSelectedIndex = 0
         }
     }
@@ -228,7 +233,7 @@ extension AutocompleteManager {
     func handleLeftRightCursorMovement(_ cursorMovement: CursorMovement) -> Bool {
         switch cursorMovement {
         case .right:
-            if let selectedIndex = autocompleteSelectedIndex, let url = autocompleteResults[selectedIndex].url, searchQuery != url.urlStringWithoutScheme {
+            if let url = autocompleteResult(at: autocompleteSelectedIndex)?.url, searchQuery != url.urlStringWithoutScheme {
                 let newQuery = url.scheme?.contains("http") == true ? url.urlStringWithoutScheme : url.absoluteString
                 setQuery(newQuery, updateAutocompleteResults: false)
             }
@@ -249,16 +254,17 @@ extension AutocompleteManager {
         resetAutocompleteSelection(resetText: false)
     }
 
-    func cancelAutocomplete() {
+    func clearAutocompleteResults() {
         resetAutocompleteSelection()
         autocompleteResults = []
+        autocompleteResultsAreFromEmptyQuery = false
         stopCurrentCompletionWork()
     }
 
-    func resetQuery(clearResults: Bool = true) {
+    func resetQuery() {
         setQuery("", updateAutocompleteResults: false)
-        if clearResults {
-            autocompleteResults = []
+        if !autocompleteResultsAreFromEmptyQuery {
+            clearAutocompleteResults()
         }
         stopCurrentCompletionWork()
     }
@@ -309,12 +315,13 @@ extension AutocompleteManager {
 
     // MARK: - Animations
     func shakeOmniBox() {
-        let animation = Animation.interpolatingSpring(stiffness: 500, damping: 16)
-        withAnimation(animation) {
+        let animationIn = BeamAnimation.easeIn(duration: 0.08)
+        let animationOut = BeamAnimation.defaultiOSEasing(duration: 0.3)
+        withAnimation(animationIn) {
             animateInputingCharacter = true
         }
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(150))) { [weak self] in
-            withAnimation(animation) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(80)) { [weak self] in
+            withAnimation(animationOut) {
                 self?.animateInputingCharacter = false
             }
         }

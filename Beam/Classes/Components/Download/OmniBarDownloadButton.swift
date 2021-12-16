@@ -24,32 +24,31 @@ struct OmniBarDownloadButton: View {
         self.action = action
     }
 
+    private var previewFractionCompleted: CGFloat?
+    fileprivate init(downloadManager: BeamDownloadManager, previewFraction: CGFloat, action: @escaping () -> Void) {
+        self.init(downloadManager: downloadManager, action: action)
+        self.previewFractionCompleted = previewFraction
+    }
+
     var body: some View {
-        Button(action: action, label: {
-            VStack(spacing: 0) {
-                Icon(name: ongoingDownload ? "nav-downloads" : "nav-downloads_done", size: 20, color: foregroundColor)
-                if ongoingDownload {
-                    LinearProgressView(progress: downloadManager.fractionCompleted)
-                        .frame(width: 16)
-                }
-            }
-        })
-        .accessibility(identifier: "")
-        .buttonStyle(RoundRectButtonStyle())
-        .frame(width: 32, height: 32)
-        .contentShape(Rectangle())
-        .animation(Animation.default.delay(0.2), value: ongoingDownload)
-        .onHover { h in
-            self.isHovering = h
-        }
+        OmniboxV2ToolbarButton(icon: hasOngoingDownload ? "nav-downloads" : "nav-downloads_done",
+                               customIconSize: hasOngoingDownload ? CGSize(width: 20, height: 20) : nil,
+                               action: action)
+            .overlay(!hasOngoingDownload ?  nil :
+                        LinearProgressView(progress: previewFractionCompleted ?? downloadManager.fractionCompleted)
+                        .frame(width: 16).padding(.bottom, 2),
+                     alignment: .bottom
+            )
+            .accessibility(identifier: "downloads")
+            .animation(Animation.default.delay(0.2), value: hasOngoingDownload)
     }
 
     var foregroundColor: Color {
         return isHovering ? activeContentColor : contentColor
     }
 
-    var ongoingDownload: Bool {
-        downloadManager.ongoingDownload
+    var hasOngoingDownload: Bool {
+        downloadManager.ongoingDownload || previewFractionCompleted != nil
     }
 }
 
@@ -57,10 +56,9 @@ struct OmniBarDownloadButton_Previews: PreviewProvider {
     static var previews: some View {
         let noDownloadsManager = BeamDownloadManager()
         let downloadsManager = BeamDownloadManager()
-        downloadsManager.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols.dmg")!, headers: [:], suggestedFileName: nil)
         return Group {
             OmniBarDownloadButton(downloadManager: noDownloadsManager, action: {})
-            OmniBarDownloadButton(downloadManager: downloadsManager, action: {})
+            OmniBarDownloadButton(downloadManager: downloadsManager, previewFraction: 0.7, action: {})
         }
     }
 }

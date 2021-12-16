@@ -22,8 +22,6 @@ struct BeamFileRecord: Equatable, Hashable {
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
-    var previousChecksum: String?
-    var checksum: String?
 }
 
 // SQL generation
@@ -45,7 +43,6 @@ extension BeamFileRecord: FetchableRecord {
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
-        previousChecksum = row[Columns.previousChecksum]
         size = data.count
     }
 }
@@ -65,12 +62,11 @@ extension BeamFileRecord: MutablePersistableRecord {
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
-        container[Columns.previousChecksum] = previousChecksum
     }
 }
 
 extension BeamFileRecord: BeamObjectProtocol {
-    static var beamObjectTypeName: String = "file"
+    static var beamObjectType = BeamObjectObjectType.file
 
     var beamObjectId: UUID {
         get {
@@ -110,7 +106,7 @@ extension BeamFileRecord: BeamObjectProtocol {
     }
 
     func copy() throws -> BeamFileRecord {
-        BeamFileRecord(name: name, uid: uid, data: data, type: type, size: size, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt, previousChecksum: previousChecksum)
+        BeamFileRecord(name: name, uid: uid, data: data, type: type, size: size, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }
 
@@ -165,8 +161,7 @@ class BeamFileDB: BeamFileStorage {
                         size: data.count,
                         createdAt: BeamDate.now,
                         updatedAt: BeamDate.now,
-                        deletedAt: nil,
-                        previousChecksum: nil)
+                        deletedAt: nil)
                     try fileRecord.insert(db)
                 }
             }
@@ -284,9 +279,8 @@ class BeamFileDBManager: BeamFileStorage {
         try self.refreshFromBeamObjectAPI(file, true) { result in
             switch result {
             case .success(let remoteFile):
-                if var remoteFile = remoteFile {
+                if let remoteFile = remoteFile {
                     do {
-                        remoteFile.previousChecksum = remoteFile.checksum
                         try Self.fileDB.insert(files: [remoteFile])
                     } catch {
                         networkCompletion?(.failure(error))
@@ -316,15 +310,6 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
 
     func allObjects(updatedSince: Date?) throws -> [BeamFileRecord] {
         try Self.fileDB.allRecords(updatedSince)
-    }
-
-    func checksumsForIds(_ ids: [UUID]) throws -> [UUID: String] {
-        let values: [(UUID, String)] = try Self.fileDB.fetchWithIds(ids).compactMap {
-            guard let previousChecksum = $0.previousChecksum else { return nil }
-            return ($0.beamObjectId, previousChecksum)
-        }
-
-        return Dictionary(uniqueKeysWithValues: values)
     }
 
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -371,23 +356,6 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
                 Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }
-    }
-
-    func persistChecksum(_ objects: [BeamFileRecord]) throws {
-        Logger.shared.logDebug("Saved \(objects.count) \(Self.BeamObjectType) checksums",
-                               category: .fileNetwork)
-
-        var files: [BeamFileRecord] = []
-        for updateObject in objects {
-            // TODO: make faster with a `fetchWithIds(ids: [UUID])`
-            guard var file = try? Self.fileDB.fetchWithBeamObjectId(id: updateObject.beamObjectId) else {
-                throw BeamFileDBManagerError.localFileNotFound
-            }
-
-            file.previousChecksum = updateObject.previousChecksum
-            files.append(file)
-        }
-        try Self.fileDB.insert(files: files)
     }
 
     func manageConflict(_ object: BeamFileRecord,

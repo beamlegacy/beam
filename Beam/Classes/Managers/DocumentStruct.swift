@@ -2,7 +2,7 @@ import Foundation
 import BeamCore
 
 struct DocumentStruct: BeamObjectProtocol {
-    static var beamObjectTypeName: String { "document" }
+    static var beamObjectType = BeamObjectObjectType.document
 
     var id: UUID = .null
     var databaseId: UUID
@@ -12,12 +12,8 @@ struct DocumentStruct: BeamObjectProtocol {
     var deletedAt: Date?
     var data: Data
     var documentType: DocumentType
-    var previousData: Data?
-    var previousChecksum: String?
     var version: Int64 = 0
     var isPublic: Bool = false
-    var checksum: String?
-    var beamObjectPreviousChecksum: String?
 
     var beamObjectId: UUID {
         get { id }
@@ -43,15 +39,11 @@ struct DocumentStruct: BeamObjectProtocol {
 
             return true
         } catch {
-            Logger.shared.logError("Can't decode DocumenStruct \(titleAndId)", category: .document)
+            Logger.shared.logError("Can't decode DocumenStruct \(titleAndId): \(error.localizedDescription)",
+                                   category: .document)
         }
 
         return false
-    }
-
-    mutating func clearPreviousData() {
-        previousData = nil
-        previousChecksum = nil
     }
 
     func copy() -> DocumentStruct {
@@ -130,12 +122,9 @@ extension DocumentStruct {
         self.title = document.title
         self.documentType = DocumentType(rawValue: document.document_type) ?? .note
         self.data = document.data ?? Data()
-        self.previousData = document.beam_api_data
-        self.previousChecksum = document.beam_api_checksum
         self.version = document.version
         self.isPublic = document.is_public
         self.databaseId = document.database_id
-        self.beamObjectPreviousChecksum = document.beam_object_previous_checksum
         self.journalDate = documentType == .journal ? JournalDateConverter.toString(from: document.journal_day) : nil
     }
 
@@ -147,12 +136,9 @@ extension DocumentStruct {
         self.title = documentStruct.title
         self.documentType = documentStruct.documentType
         self.data = documentStruct.data
-        self.previousData = documentStruct.previousData
-        self.previousChecksum = documentStruct.previousChecksum
         self.version = documentStruct.version
         self.isPublic = documentStruct.isPublic
         self.databaseId = documentStruct.databaseId
-        self.beamObjectPreviousChecksum = documentStruct.beamObjectPreviousChecksum
         self.journalDate = documentStruct.journalDate
     }
 }
@@ -178,4 +164,10 @@ extension DocumentStruct: Equatable {
 
 extension DocumentStruct: Hashable {
 
+}
+
+extension Document {
+    var documentStruct: DocumentStruct {
+        DocumentStruct(document: self)
+    }
 }

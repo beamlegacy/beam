@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import Nimble
 @testable import Beam
 @testable import BeamCore
 
@@ -96,6 +97,7 @@ class NoteSourceTests: XCTestCase {
         sources.remove(urlId: secondUrlId, noteId: noteId, isUserSourceProtected: false, activeSources: activeSources)
         XCTAssertEqual(sources.count, 0)
     }
+    
     func testRemoveWithSessionId() throws {
         let firstUrlId = UUID()
         let secondUrlId = UUID()
@@ -114,6 +116,7 @@ class NoteSourceTests: XCTestCase {
     }
 
     func testSourcesScoreRefresh() throws {
+        try XCTSkipIf(true, "Skipped due to Flakiness BE-2615")
         let dataSet: [(String, Int?)] = [
             //url, textAddCount
             ("http://www.red.com", 1),
@@ -134,10 +137,13 @@ class NoteSourceTests: XCTestCase {
         }
         
         //After sync, if the score exists, the longTermScores are filled
-        let expectation = self.expectation(description: "Score Refresh")
-        sources.refreshScores(scoreStore: scoreStore) { expectation.fulfill() }
-        waitForExpectations(timeout: 1, handler: nil)
-
+        sources.refreshScores(scoreStore: scoreStore)
+        for row in dataSet {
+            let id = LinkStore.getOrCreateIdFor(row.0)
+            if row.1 != nil {
+                expect(self.sources.get(urlId: id)?.longTermScore).toEventuallyNot(beNil())
+            }
+        }
         for row in dataSet {
             let id = LinkStore.getOrCreateIdFor(row.0)
             let source = try XCTUnwrap(sources.get(urlId: id))
@@ -150,8 +156,8 @@ class NoteSourceTests: XCTestCase {
         }
     }
 
-    
     func testSourceSort() throws {
+        try XCTSkipIf(true, "Skipped due Flakiness BE-2615")
         let now = BeamDate.now
         let oneDay = Double(24.0 * 60.0 * 60.0)
         let yesterday = now - oneDay
@@ -183,10 +189,11 @@ class NoteSourceTests: XCTestCase {
             sources.add(urlId: id, noteId: noteId, type: row.2, date: row.3, sessionId: sessionId, activeSources: activeSources)
         }
         //syncing note sources scores with db
-        let expectation = self.expectation(description: "Score Refresh")
-        sources.refreshScores(scoreStore: scoreStore) { expectation.fulfill() }
-        waitForExpectations(timeout: 1, handler: nil)
-        
+        sources.refreshScores(scoreStore: scoreStore)
+        for urlId in sources.urlIds {
+            expect(self.sources.get(urlId: urlId)?.longTermScore).toEventuallyNot(beNil())
+        }
+
         //sorting sources (in case of ties, user sources are shown first an then sorted by scores)
         var sortedUrlIds = sources.sortedByDomain().map { $0.urlId }
         var expectedSortedIds: [UUID] = [1, 3, 2, 0].map(indexToUrlId)

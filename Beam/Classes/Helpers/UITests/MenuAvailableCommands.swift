@@ -32,6 +32,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case populateDBWithJournal = "Populate Journal"
     case insertTextInCurrentNote = "Insert Text in Current Note"
     case create100Notes = "Create 100 Random Notes"
+    case create10Notes = "Create 10 Random Notes"
     case setAutoUpdateToMock = "Set Autoupdate to Mock"
     case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
     case populatePasswordsDB = "Populate Passwords Database"

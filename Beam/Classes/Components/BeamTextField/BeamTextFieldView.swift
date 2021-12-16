@@ -19,6 +19,18 @@ class BeamTextFieldViewFieldEditor: NSTextView {
         guard disableAutomaticScrollOnType == false else { return }
         super.scrollRangeToVisible(range)
     }
+
+    override func paste(_ sender: Any?) {
+        let pasteboard = NSPasteboard.general
+
+        guard let pasteboardItem = pasteboard.pasteboardItems?.first,
+              let text = pasteboardItem.string(forType: .string) else {
+            super.paste(sender)
+            return
+        }
+        let cleanText = text.components(separatedBy: .newlines).joined(separator: " ")
+        insertText(cleanText, replacementRange: selectedRange())
+    }
 }
 
 protocol BeamNSTextFieldProtocol {

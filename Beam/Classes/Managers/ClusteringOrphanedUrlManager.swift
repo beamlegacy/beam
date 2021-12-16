@@ -75,4 +75,10 @@ class ClusteringOrphanedUrlManager {
         let destination = to.appendingPathComponent("beam_clustering_orphaned_urls-\(BeamDate.now).csv")
         _ = fileManager.secureCopyItem(at: savePath, to: destination)
     }
+
+    func clear() throws {
+        if fileManager.fileExists(atPath: self.savePath.path) {
+            try fileManager.removeItem(atPath: self.savePath.path)
+        }
+    }
 }

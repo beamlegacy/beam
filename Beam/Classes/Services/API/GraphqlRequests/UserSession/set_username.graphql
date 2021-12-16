@@ -1,0 +1,10 @@
+mutation UpdateMe($username: String) {
+  updateMe(input: {username: $username}) {
+    me {
+      username
+    }
+    errors {
+      message
+    }
+  }
+}

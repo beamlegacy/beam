@@ -165,7 +165,7 @@ class PasswordOverlayController: WebPageHolder {
         guard let webView = (page as? BrowserTab)?.webView,
               let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true, storedInPresenter: true)
         else { return }
-        var updatedRect = webView.convert(location, to: nil)
+        var updatedRect = convertRect(location, relativeTo: webView)
         updatedRect.origin.y += location.height
         passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromTopLeft: true)
         passwordMenuWindow = passwordWindow
@@ -192,6 +192,12 @@ class PasswordOverlayController: WebPageHolder {
         currentPasswordManagerViewModel = nil
     }
 
+    private func convertRect(_ rect: CGRect, relativeTo webView: WKWebView) -> CGRect {
+        var rect = webView.convert(rect, to: nil)
+        rect.origin.y -= webView.topContentInset
+        return rect
+    }
+
     func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
         webViewScrollPosition.x = x
         webViewScrollPosition.y = y
@@ -211,7 +217,7 @@ class PasswordOverlayController: WebPageHolder {
             if let frame = frame {
                 DispatchQueue.main.async { [unowned self] in
                     var position = self.page.webView.convert(frame.origin, to: nil)
-                    position.y -= menuWindow.frame.size.height
+                    position.y -= menuWindow.frame.size.height + self.page.webView.topContentInset
                     self.passwordMenuPosition = position
                     menuWindow.setOrigin(self.passwordMenuPosition)
                     // TODO: update width
