@@ -66,7 +66,6 @@
 		0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DD0DACB2681C9630005339A /* GRDBDatabase.swift */; };
 		0DEE978D2642965600AB95AE /* GRDBDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */; };
 		0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DF3376C26948BAB0024C504 /* String+SliceTests.swift */; };
-		1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */; };
 		3303E0EA26F8C91100E175AC /* RestAPIServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3303E0E926F8C91100E175AC /* RestAPIServer.swift */; };
 		3303E0EC26F8DC3F00E175AC /* PublicNote.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3303E0EB26F8DC3F00E175AC /* PublicNote.swift */; };
 		3303E0FC26FA221400E175AC /* UserInfoRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3303E0FB26FA221400E175AC /* UserInfoRequest.swift */; };
@@ -433,17 +432,7 @@
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
 		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
-		8A0DFAB327551E3D0044515B /* EmbedNodeUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA027551E3D0044515B /* EmbedNodeUIMock.ts */; };
-		8A0DFAB427551E3D0044515B /* EmbedNode.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA227551E3D0044515B /* EmbedNode.ts */; };
-		8A0DFAB527551E3D0044515B /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA327551E3D0044515B /* jest.config.js */; };
-		8A0DFAB627551E3D0044515B /* EmbedNodeUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA427551E3D0044515B /* EmbedNodeUI_native.ts */; };
-		8A0DFAB727551E3D0044515B /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA527551E3D0044515B /* webpack.config.js */; };
-		8A0DFAB827551E3D0044515B /* EmbedNodeUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA627551E3D0044515B /* EmbedNodeUI.ts */; };
-		8A0DFABA27551E3D0044515B /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA827551E3D0044515B /* package.json */; };
 		8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA927551E3D0044515B /* EmbedNode_prod.js */; };
-		8A0DFABC27551E3D0044515B /* .eslintrc.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAA27551E3D0044515B /* .eslintrc.js */; };
-		8A0DFABD27551E3D0044515B /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAB27551E3D0044515B /* tsconfig.json */; };
-		8A0DFABE27551E3D0044515B /* EmbedNodeUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAC27551E3D0044515B /* EmbedNodeUI_web.ts */; };
 		8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAD27551E3D0044515B /* EmbedNode.js */; };
 		8A0DFAC127551E950044515B /* EmbedNodeMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC027551E950044515B /* EmbedNodeMessageHandler.swift */; };
 		8A0DFAC327551F600044515B /* EmbedNodeWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC227551F600044515B /* EmbedNodeWebViewConfiguration.swift */; };
@@ -458,9 +447,6 @@
 		8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */; };
 		8A4801AD26A1EBBF008F33FE /* PointAndShoot+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */; };
 		8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A50A53326E1035E0094BA97 /* BeamElementJoinTests.swift */; };
-		8A5BC63A2733EFEF008E22D2 /* BeamNode.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A5BC6372733EFEF008E22D2 /* BeamNode.test.ts */; };
-		8A5BC63B2733EFEF008E22D2 /* Native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A5BC6382733EFEF008E22D2 /* Native.test.ts */; };
-		8A5BC63C2733EFEF008E22D2 /* PNSWindowMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A5BC6392733EFEF008E22D2 /* PNSWindowMock.ts */; };
 		8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
@@ -482,11 +468,11 @@
 		8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */; };
 		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
 		8AB7DFA526AAEDB30033C747 /* PointAndShootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB7DFA426AAEDB30033C747 /* PointAndShootView.swift */; };
+		8AB94F632769EFEF00F62241 /* HtmlVisitor+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB94F622769EFEF00F62241 /* HtmlVisitor+Helpers.swift */; };
 		8ABC6517274FB3160068166E /* BeamText+Sources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC6516274FB3160068166E /* BeamText+Sources.swift */; };
 		8ABC6519274FD7230068166E /* SourceMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC6518274FD7230068166E /* SourceMetadata.swift */; };
 		8ABC651B274FD7AE0068166E /* BeamText+SourcesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC651A274FD7AE0068166E /* BeamText+SourcesTests.swift */; };
 		8ABC651D274FE08E0068166E /* SourceMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC651C274FE08E0068166E /* SourceMetadataTests.swift */; };
-		8AC2EFD6266F86F500049005 /* yarn.lock in Resources */ = {isa = PBXBuildFile; fileRef = 8AC2EFD1266F86F500049005 /* yarn.lock */; };
 		8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */; };
 		8AC2EFDD266F8A1400049005 /* PointAndShootShootingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */; };
 		8AC2EFDF266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */; };
@@ -497,31 +483,9 @@
 		8AD2632326F485190074D673 /* HtmlVisitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632226F485190074D673 /* HtmlVisitorTests.swift */; };
 		8AD2632A26F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */; };
 		8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */; };
-		8AD2635E26F4A0480074D673 /* PointAndShootUI_native.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634026F4A0480074D673 /* PointAndShootUI_native.test.ts */; };
-		8AD2636226F4A0480074D673 /* PointAndShootUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634426F4A0480074D673 /* PointAndShootUIMock.ts */; };
-		8AD2636326F4A0480074D673 /* PointAndShoot.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634526F4A0480074D673 /* PointAndShoot.test.ts */; };
-		8AD2636526F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634826F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench */; };
-		8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634A26F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts */; };
-		8AD2636826F4A0480074D673 /* UITests-Alerts.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634C26F4A0480074D673 /* UITests-Alerts.html */; };
-		8AD2636926F4A0480074D673 /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634D26F4A0480074D673 /* UITests-2.html */; };
-		8AD2636A26F4A0480074D673 /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634E26F4A0480074D673 /* UITests-3.html */; };
-		8AD2636B26F4A0480074D673 /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634F26F4A0480074D673 /* video.mov */; };
-		8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635026F4A0480074D673 /* UITests-4.html */; };
-		8AD2636D26F4A0480074D673 /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635126F4A0480074D673 /* UITests-Password.html */; };
-		8AD2636E26F4A0480074D673 /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635226F4A0480074D673 /* UITests-Media.html */; };
-		8AD2636F26F4A0480074D673 /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635326F4A0480074D673 /* audio.mp3 */; };
-		8AD2637026F4A0480074D673 /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635426F4A0480074D673 /* Beam.css */; };
-		8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635526F4A0480074D673 /* UITests-Playground.html */; };
-		8AD2637226F4A0480074D673 /* beam-logo-test.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635626F4A0480074D673 /* beam-logo-test.png */; };
-		8AD2637326F4A0480074D673 /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635726F4A0480074D673 /* UITests-1.html */; };
 		8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */; };
-		8ADD05FC2729657D004C3EC9 /* WebPositions.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05EE2729657D004C3EC9 /* WebPositions.ts */; };
 		8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05EF2729657D004C3EC9 /* WebPositions_prod.js */; };
-		8ADD05FE2729657D004C3EC9 /* WebPositionsUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05F02729657D004C3EC9 /* WebPositionsUI_native.ts */; };
-		8ADD05FF2729657D004C3EC9 /* WebPositionsUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05F22729657D004C3EC9 /* WebPositionsUIMock.ts */; };
 		8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05F42729657D004C3EC9 /* WebPositions.js */; };
-		8ADD06072729657D004C3EC9 /* WebPositionsUI_web.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05FA2729657D004C3EC9 /* WebPositionsUI_web.ts */; };
-		8ADD06082729657D004C3EC9 /* WebPositionsUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05FB2729657D004C3EC9 /* WebPositionsUI.ts */; };
 		8ADD060A27296E00004C3EC9 /* WebPositionsMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */; };
 		8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */; };
 		8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7C3275A66DF0081B6B5 /* SupportedEmbedDomains.swift */; };
@@ -531,6 +495,30 @@
 		8AF4F7D1275A67750081B6B5 /* EmbedContentCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7D0275A67750081B6B5 /* EmbedContentCache.swift */; };
 		8AF4F7D3275A67960081B6B5 /* EmbedContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7D2275A67960081B6B5 /* EmbedContent.swift */; };
 		8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */ = {isa = PBXBuildFile; fileRef = 8AF61F13267BA292006DD5C2 /* RBAllowlistEntry.m */; };
+		8AFE834F276B248B00D4B560 /* UITests-4.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635026F4A0480074D673 /* UITests-4.html */; };
+		8AFE8350276B248B00D4B560 /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635326F4A0480074D673 /* audio.mp3 */; };
+		8AFE8351276B248B00D4B560 /* UITests-Playground.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635526F4A0480074D673 /* UITests-Playground.html */; };
+		8AFE8352276B248B00D4B560 /* beam-logo-test.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635626F4A0480074D673 /* beam-logo-test.png */; };
+		8AFE8353276B248B00D4B560 /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635426F4A0480074D673 /* Beam.css */; };
+		8AFE8354276B248B00D4B560 /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635126F4A0480074D673 /* UITests-Password.html */; };
+		8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635726F4A0480074D673 /* UITests-1.html */; };
+		8AFE8356276B248B00D4B560 /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634D26F4A0480074D673 /* UITests-2.html */; };
+		8AFE8357276B248B00D4B560 /* UITests-Alerts.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634C26F4A0480074D673 /* UITests-Alerts.html */; };
+		8AFE8358276B248B00D4B560 /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634F26F4A0480074D673 /* video.mov */; };
+		8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634E26F4A0480074D673 /* UITests-3.html */; };
+		8AFE835A276B248B00D4B560 /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635226F4A0480074D673 /* UITests-Media.html */; };
+		8AFE835B276B249000D4B560 /* UITests-4.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635026F4A0480074D673 /* UITests-4.html */; };
+		8AFE835C276B249000D4B560 /* audio.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635326F4A0480074D673 /* audio.mp3 */; };
+		8AFE835D276B249000D4B560 /* UITests-Playground.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635526F4A0480074D673 /* UITests-Playground.html */; };
+		8AFE835E276B249000D4B560 /* beam-logo-test.png in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635626F4A0480074D673 /* beam-logo-test.png */; };
+		8AFE835F276B249000D4B560 /* Beam.css in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635426F4A0480074D673 /* Beam.css */; };
+		8AFE8360276B249000D4B560 /* UITests-Password.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635126F4A0480074D673 /* UITests-Password.html */; };
+		8AFE8361276B249000D4B560 /* UITests-1.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635726F4A0480074D673 /* UITests-1.html */; };
+		8AFE8362276B249000D4B560 /* UITests-2.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634D26F4A0480074D673 /* UITests-2.html */; };
+		8AFE8363276B249000D4B560 /* UITests-Alerts.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634C26F4A0480074D673 /* UITests-Alerts.html */; };
+		8AFE8364276B249000D4B560 /* video.mov in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634F26F4A0480074D673 /* video.mov */; };
+		8AFE8365276B249000D4B560 /* UITests-3.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2634E26F4A0480074D673 /* UITests-3.html */; };
+		8AFE8366276B249000D4B560 /* UITests-Media.html in Resources */ = {isa = PBXBuildFile; fileRef = 8AD2635226F4A0480074D673 /* UITests-Media.html */; };
 		9609AF502617159B00322141 /* URL+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418173BD2581251600317ED8 /* URL+Beam.swift */; };
 		960A57E4264C84BD0061E8D2 /* ProxyElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E3264C84BD0061E8D2 /* ProxyElement.swift */; };
 		960A57E6264C851E0061E8D2 /* ProxyImageNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 960A57E5264C851E0061E8D2 /* ProxyImageNode.swift */; };
@@ -988,30 +976,19 @@
 		BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67971FD6352F46D77E3BE /* WebNoteController.swift */; };
 		BAA674265355DDF432FE4B7A /* WebNavigationMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */; };
 		BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670FA9720D0BD2011EC10 /* PointAndShootCardPicker.swift */; };
-		BAA675AE9C103046AC022CBA /* .sassrc in Resources */ = {isa = PBXBuildFile; fileRef = BAA679E2DF3556E0E444844D /* .sassrc */; };
-		BAA675FD3D04C5100F11FF68 /* BeamNavigation.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA675569456FA12DA1FE45F /* BeamNavigation.ts */; };
-		BAA676CC6D40AAD13AA19B2A /* BeamTypes.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67665F74CAB7F75D9E89B /* BeamTypes.ts */; };
 		BAA676DF0484BA2E4D6CECDF /* BeamWebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */; };
 		BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6755F00C445E4C93AF3AA /* Scorable.swift */; };
 		BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67E198CBE7B676642992F /* PointAndShoot.swift */; };
-		BAA678D1C511EC1CD440D39B /* BeamElementHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA67F956840E0DD3B5D7B53 /* BeamElementHelper.ts */; };
-		BAA67935127F5C704ED1B29A /* BeamKeyEvent.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA677845191D6AEE1F31718 /* BeamKeyEvent.ts */; };
 		BAA679844CE644AE293FDA04 /* BrowsingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678DCBD094131A9BC96F2 /* BrowsingSession.swift */; };
 		BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E5952B4D5130248886 /* BeamDownloadManager.swift */; };
-		BAA679B295647FBEBBA187A4 /* BeamDOMRectList.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA670DBC71408CEE5FDEC5A /* BeamDOMRectList.ts */; };
 		BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */; };
 		BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */; };
 		BAA67A6498E4E69779855E19 /* DownloadManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67555219BDD4CBD252C60 /* DownloadManagerTest.swift */; };
 		BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67D3D273F24009F3AE570 /* BrowsingScorer.swift */; };
 		BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67837448460D14C798F73 /* WebNavigationController.swift */; };
 		BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67A3C749F22077F5B7194 /* DownloadManager.swift */; };
-		BAA67AEAB5F02CF0D106321F /* BeamHTMLCollection.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA676FA04FDC60F63E9A342 /* BeamHTMLCollection.ts */; };
-		BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */; };
-		BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */; };
 		BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */; };
 		BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */; };
-		BAA67C841553BDE705F061CE /* BeamNavigation.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA6777F95A0A3714A2FE21D /* BeamNavigation.test.ts */; };
-		BAA67C93BB2CDDDD22791FA2 /* Frames.test.ts in Resources */ = {isa = PBXBuildFile; fileRef = BAA674EC8D9B3E2517A4F0F9 /* Frames.test.ts */; };
 		BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D8E6A58A6836DA2794 /* PointAndShootTest.swift */; };
 		BAA67C9D53B68FDB60AD6844 /* SearchEngineTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67BB2F54210479C1DB836 /* SearchEngineTest.swift */; };
 		BAA67CB7B8DE8FC709C996B3 /* PasswordManagerElements.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */; };
@@ -1019,7 +996,6 @@
 		BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CDE485E5E7774A978D2 /* LoggingMessageHandler.swift */; };
 		BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */; };
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
-		BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */ = {isa = PBXBuildFile; fileRef = BAA67EA80CD97EDF95F98D66 /* Beam.scss */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
@@ -1668,6 +1644,7 @@
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
 		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
 		8AB7DFA426AAEDB30033C747 /* PointAndShootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootView.swift; sourceTree = "<group>"; };
+		8AB94F622769EFEF00F62241 /* HtmlVisitor+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HtmlVisitor+Helpers.swift"; sourceTree = "<group>"; };
 		8ABC6516274FB3160068166E /* BeamText+Sources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+Sources.swift"; sourceTree = "<group>"; };
 		8ABC6518274FD7230068166E /* SourceMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceMetadata.swift; sourceTree = "<group>"; };
 		8ABC651A274FD7AE0068166E /* BeamText+SourcesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+SourcesTests.swift"; sourceTree = "<group>"; };
@@ -3853,6 +3830,7 @@
 			children = (
 				418171752581107C00317ED8 /* HtmlNoteAdapter.swift */,
 				8AA2431726E63C0D002A553A /* HtmlVisitor.swift */,
+				8AB94F622769EFEF00F62241 /* HtmlVisitor+Helpers.swift */,
 			);
 			path = HtmlConverter;
 			sourceTree = "<group>";
@@ -5487,114 +5465,77 @@
 			buildActionMask = 2147483647;
 			files = (
 				BAA672842544E82A5782C2A7 /* BeamWindowDecorator.js in Resources */,
-				8ADD06082729657D004C3EC9 /* WebPositionsUI.ts in Resources */,
-				8A0DFAB727551E3D0044515B /* webpack.config.js in Resources */,
 				8AC643D1271DA9FC00DDC899 /* navigation_prod.js in Resources */,
 				8A0DFACE2756497A0044515B /* EmbedNode.css in Resources */,
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
+				8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
-				8ADD05FE2729657D004C3EC9 /* WebPositionsUI_native.ts in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
-				8A0DFAB327551E3D0044515B /* EmbedNodeUIMock.ts in Resources */,
-				8A5BC63C2733EFEF008E22D2 /* PNSWindowMock.ts in Resources */,
-				8A5BC63A2733EFEF008E22D2 /* BeamNode.test.ts in Resources */,
-				8ADD05FC2729657D004C3EC9 /* WebPositions.ts in Resources */,
-				8A5BC63B2733EFEF008E22D2 /* Native.test.ts in Resources */,
-				8AD2636B26F4A0480074D673 /* video.mov in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
-				8AD2636E26F4A0480074D673 /* UITests-Media.html in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
 				022843372617C4C3001C062E /* OverrideConsole.js in Resources */,
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
 				5224CD4C2685FF8C00D4179E /* delete_beam_object.graphql in Resources */,
-				8AD2636D26F4A0480074D673 /* UITests-Password.html in Resources */,
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
-				8ADD05FF2729657D004C3EC9 /* WebPositionsUIMock.ts in Resources */,
-				8AD2636526F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.bench in Resources */,
-				8A0DFAB427551E3D0044515B /* EmbedNode.ts in Resources */,
 				7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
-				8AD2636326F4A0480074D673 /* PointAndShoot.test.ts in Resources */,
+				8AFE8350276B248B00D4B560 /* audio.mp3 in Resources */,
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
-				8A0DFAB827551E3D0044515B /* EmbedNodeUI.ts in Resources */,
 				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
-				8AD2636F26F4A0480074D673 /* audio.mp3 in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
+				8AFE834F276B248B00D4B560 /* UITests-4.html in Resources */,
 				75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */,
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
+				8AFE8358276B248B00D4B560 /* video.mov in Resources */,
 				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
-				8AD2637326F4A0480074D673 /* UITests-1.html in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
+				8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
-				8AD2636926F4A0480074D673 /* UITests-2.html in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */,
+				8AFE8351276B248B00D4B560 /* UITests-Playground.html in Resources */,
+				8AFE8356276B248B00D4B560 /* UITests-2.html in Resources */,
 				A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */,
+				8AFE8352276B248B00D4B560 /* beam-logo-test.png in Resources */,
 				5224CD762685FFFC00D4179E /* beam_object_updated_at.graphql in Resources */,
 				8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */,
-				8AD2637126F4A0480074D673 /* UITests-Playground.html in Resources */,
 				A52A559327592E9A002D0C99 /* Inter-Bold.otf in Resources */,
-				8ADD06072729657D004C3EC9 /* WebPositionsUI_web.ts in Resources */,
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
-				8A0DFAB527551E3D0044515B /* jest.config.js in Resources */,
 				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
-				8A0DFABA27551E3D0044515B /* package.json in Resources */,
-				8A0DFABC27551E3D0044515B /* .eslintrc.js in Resources */,
-				8AC2EFD6266F86F500049005 /* yarn.lock in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
+				8AFE8353276B248B00D4B560 /* Beam.css in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
-				8A0DFABE27551E3D0044515B /* EmbedNodeUI_web.ts in Resources */,
-				8AD2636826F4A0480074D673 /* UITests-Alerts.html in Resources */,
 				8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */,
-				8AD2637226F4A0480074D673 /* beam-logo-test.png in Resources */,
 				A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */,
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
+				8AFE8354276B248B00D4B560 /* UITests-Password.html in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
-				8AD2636226F4A0480074D673 /* PointAndShootUIMock.ts in Resources */,
-				8AD2636A26F4A0480074D673 /* UITests-3.html in Resources */,
+				8AFE835A276B248B00D4B560 /* UITests-Media.html in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
 				8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */,
-				8AD2637026F4A0480074D673 /* Beam.css in Resources */,
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
-				8AD2635E26F4A0480074D673 /* PointAndShootUI_native.test.ts in Resources */,
-				BAA67EC2B781F8A78CD5A6B0 /* Beam.scss in Resources */,
-				BAA67B51C8D9DBD6FE5327B6 /* mixins.scss in Resources */,
-				8AD2636C26F4A0480074D673 /* UITests-4.html in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
-				8A0DFAB627551E3D0044515B /* EmbedNodeUI_native.ts in Resources */,
 				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
-				BAA675AE9C103046AC022CBA /* .sassrc in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
 				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */,
-				BAA67B681D12191FE57E7807 /* PopupUI_web.scss in Resources */,
-				8AD2636726F4A0480074D673 /* PointAndShootUI_native-Benchmark.test.ts in Resources */,
+				8AFE8357276B248B00D4B560 /* UITests-Alerts.html in Resources */,
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
-				1A560C30E74FFFB97685C043 /* PointAndShootHelper.ts in Resources */,
 				A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */,
-				BAA676CC6D40AAD13AA19B2A /* BeamTypes.ts in Resources */,
-				BAA67C93BB2CDDDD22791FA2 /* Frames.test.ts in Resources */,
-				BAA67935127F5C704ED1B29A /* BeamKeyEvent.ts in Resources */,
-				BAA67AEAB5F02CF0D106321F /* BeamHTMLCollection.ts in Resources */,
-				BAA679B295647FBEBBA187A4 /* BeamDOMRectList.ts in Resources */,
-				BAA678D1C511EC1CD440D39B /* BeamElementHelper.ts in Resources */,
-				BAA675FD3D04C5100F11FF68 /* BeamNavigation.ts in Resources */,
-				BAA67C841553BDE705F061CE /* BeamNavigation.test.ts in Resources */,
-				8A0DFABD27551E3D0044515B /* tsconfig.json in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5629,6 +5570,18 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8AFE835B276B249000D4B560 /* UITests-4.html in Resources */,
+				8AFE8362276B249000D4B560 /* UITests-2.html in Resources */,
+				8AFE835E276B249000D4B560 /* beam-logo-test.png in Resources */,
+				8AFE8365276B249000D4B560 /* UITests-3.html in Resources */,
+				8AFE8361276B249000D4B560 /* UITests-1.html in Resources */,
+				8AFE835F276B249000D4B560 /* Beam.css in Resources */,
+				8AFE835C276B249000D4B560 /* audio.mp3 in Resources */,
+				8AFE8363276B249000D4B560 /* UITests-Alerts.html in Resources */,
+				8AFE835D276B249000D4B560 /* UITests-Playground.html in Resources */,
+				8AFE8364276B249000D4B560 /* video.mov in Resources */,
+				8AFE8360276B249000D4B560 /* UITests-Password.html in Resources */,
+				8AFE8366276B249000D4B560 /* UITests-Media.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -5709,6 +5662,7 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "PATH=${PATH}:/opt/homebrew/bin:/usr/local/bin\nif which swiftlint >/dev/null; then\n  swiftlint --lenient\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		521FEC702604F1FF009000F9 /* Copy Vinyl Cassettes */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -6576,6 +6530,7 @@
 				873528BA27342F85005E7CBC /* BrowserHistoryImporter.swift in Sources */,
 				DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */,
 				BAA673C9223F304A166B92D5 /* WebNoteController.swift in Sources */,
+				8AB94F632769EFEF00F62241 /* HtmlVisitor+Helpers.swift in Sources */,
 				A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */,
 				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,
 				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
