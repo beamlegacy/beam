@@ -27,7 +27,8 @@ class ReferencesSection: LinksSection {
     }
 
     override var links: [BeamNoteReference] { note.fastReferences }
-
+    override var sectionTypeName: StaticString { "ReferenceSection" }
+    
     /// This overriden implementation of setupSectionMode does a late init.
     override func setupSectionMode() {
         self.createLinkAllLayer()

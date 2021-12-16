@@ -24,6 +24,7 @@ class LinksSection: Widget {
     var titles: [UUID: RefNoteTitle] = [:]
 
     var openChildrenDefault: Bool { true }
+    var sign: SignPostId!
 
     override var open: Bool {
         didSet {
@@ -31,9 +32,19 @@ class LinksSection: Widget {
         }
     }
 
+    // signposts names:
+    struct Signs {
+        static let updateLinkedReferences: StaticString = "LinkSection.updateLinkedReferences"
+        static let updateLinkedReferencesEvaluateSource: StaticString = "LinkSection.updateLinkedReferencesEvaluateSource"
+        static let firstInit: StaticString = "LinkSection.firstInit"
+        static let setupUI: StaticString = "LinkSection.setupUI"
+    }
+
     init(parent: Widget, note: BeamNote, availableWidth: CGFloat?) {
         self.note = note
         super.init(parent: parent, availableWidth: availableWidth)
+        self.sign = BeamTextEdit.signPost.createId(object: self)
+        sign.begin(Signs.firstInit)
 
         selfVisible = false
         visible = false
@@ -42,6 +53,9 @@ class LinksSection: Widget {
     }
 
     func setupUI(openChildren: Bool) {
+        sign.begin(Signs.setupUI)
+        defer { sign.end(Signs.setupUI) }
+
         let chevron = ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
             self.open = value
             guard let root = self.parent as? TextRoot else { return }
@@ -101,11 +115,22 @@ class LinksSection: Widget {
 
     var currentReferences = [BeamNoteReference]()
 
+    var sectionTypeName: StaticString { "LinkSection" }
     var initialUpdate = true
+    //swiftlint:disable:next function_body_length
+
+    //swiftlint:disable:next function_body_length
     func updateLinkedReferences(links: [BeamNoteReference]) {
+        os_signpost(.begin, log: sign.log, name: Signs.updateLinkedReferences, signpostID: sign.id, "%{public}s", note.titleAndId)
+        defer { sign.end(Signs.updateLinkedReferences) }
+
         let sectionName = String(describing: Self.self)
         Logger.shared.logInfo("\(sectionName).updateLinkedReferences[\(note.title)] \(links.count) incoming", category: .noteEditor)
         defer {
+            if initialUpdate {
+                sign.end(Signs.firstInit)
+            }
+
             initialUpdate = false
         }
 
@@ -119,14 +144,22 @@ class LinksSection: Widget {
 
         // BeamNote by itself don't contain any text so there is no reason to count it as a reference:
         for noteReference in allLinks where noteReference.elementID != noteReference.noteID {
+            os_signpost(.begin, log: sign.log, name: Signs.updateLinkedReferencesEvaluateSource, signpostID: sign.id, "%{public}s / %{public}s", noteReference.noteID.uuidString, noteReference.elementID.uuidString)
+
             let noteID = noteReference.noteID
-            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else { continue }
+            guard let breadCrumb = root?.getBreadCrumb(for: noteReference) else {
+                sign.end(Signs.updateLinkedReferencesEvaluateSource)
+                continue
+            }
 
             // Prepare title children:
             guard let refTitleWidget = try? titles[noteID]
                     ?? newrefs[noteID]
                     ?? RefNoteTitle(parent: self, noteId: noteID, availableWidth: availableWidth - childInset)
-            else { continue }
+            else {
+                sign.end(Signs.updateLinkedReferencesEvaluateSource)
+                continue
+            }
             newrefs[noteID] = refTitleWidget
             toRemove.remove(refTitleWidget)
 
@@ -137,6 +170,7 @@ class LinksSection: Widget {
             } else {
                 refTitleWidget.removeChild(breadCrumb)
             }
+            sign.end(Signs.updateLinkedReferencesEvaluateSource)
         }
 
         titles = newrefs
