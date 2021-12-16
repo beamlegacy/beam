@@ -152,7 +152,7 @@ public extension CALayer {
         noteCancellables.removeAll()
         safeContentSize = .zero
         realContentSize = .zero
-        invalidateIntrinsicContentSize()
+        invalidateLayout()
     }
 
     private var noteCancellables = [AnyCancellable]()
@@ -411,10 +411,6 @@ public extension CALayer {
         currentIndicativeLayoutHeight = 0
         layoutInvalidated = false
         updateLayout(nodesRect)
-
-        if let stack = superview as? JournalScrollView.StackView {
-            stack.invalidateLayout()
-        }
     }
 
     private var nodesRect: NSRect {
@@ -474,9 +470,7 @@ public extension CALayer {
     var focusedWidget: Widget? {
         get { rootNode?.focusedWidget }
         set {
-            invalidate()
             rootNode?.focusedWidget = newValue
-            invalidate()
         }
     }
     var mouseHandler: Widget? {
@@ -586,8 +580,6 @@ public extension CALayer {
                 self?.relayoutRoot()
             }
         }
-
-        invalidate()
     }
 
     var toRunBeforeNextLayout = [() -> Void]()
@@ -615,10 +607,6 @@ public extension CALayer {
         }
 
         toRunAfterNextLayout = []
-    }
-
-    public func invalidate() {
-        setNeedsDisplay(bounds)
     }
 
     // Text Input from AppKit:
@@ -655,7 +643,6 @@ public extension CALayer {
     public override func becomeFirstResponder() -> Bool {
         blinkPhase = true
         hasFocus = true
-        invalidate()
         if focusedWidget == nil {
             focusedWidget = rootNode?.children.first(where: { widget in
                 widget as? ElementNode != nil
