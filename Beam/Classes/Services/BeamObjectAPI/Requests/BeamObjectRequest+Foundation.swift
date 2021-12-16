@@ -515,15 +515,6 @@ extension BeamObjectRequest {
         request.httpMethod = "GET"
         request.allHTTPHeaderFields = headers
 
-        // We want to send the `Bearer` token to our hosts only
-        if let host = url.host,
-           let accessToken = AuthenticationManager.shared.accessToken {
-            request.setValue("Bearer " + accessToken,
-                             forHTTPHeaderField: "Authorization")
-        } else {
-            assert(false)
-        }
-
         let session = BeamURLSession.shared
         let localTimer = BeamDate.now
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
