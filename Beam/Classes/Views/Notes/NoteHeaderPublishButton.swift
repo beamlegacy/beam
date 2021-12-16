@@ -88,11 +88,11 @@ struct NoteHeaderPublishButton: View {
                                 .opacity(displayCheckIcon ? 1 : 0)
                             LottieView(name: "editor-publish", playing: animateLottie,
                                        color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
-                                       loopMode: .loop, speed: 2)
+                                       loopMode: .loop, speed: 1)
                                 .opacity(displayCheckIcon || isPublic ? 0 : 1)
                             LottieView(name: "editor-unpublish", playing: animateLottie,
                                        color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
-                                       loopMode: .loop, speed: 2)
+                                       loopMode: .loop, speed: 1)
                                 .opacity(displayCheckIcon || !isPublic ? 0 : 1)
                         }
                         .frame(width: 16, height: 16)

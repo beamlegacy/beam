@@ -24,6 +24,7 @@ struct ModeView: View {
                 EnhancedWebView(tab: tab).clipped()
             }
         }
+        .onAppear { contentIsScrolled = false }
         .transition(.webContentTransition(state.windowIsResizing))
     }
 
