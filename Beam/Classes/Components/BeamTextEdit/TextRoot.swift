@@ -170,10 +170,6 @@ public class TextRoot: ElementNode {
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
-    override func onInvalidated() {
-        editor?.invalidate()
-    }
-
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
         super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false), availableWidth: availableWidth)
 

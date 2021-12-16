@@ -136,8 +136,10 @@ class ScrollViewContentWatcher: NSObject {
 
         // Update journal when scrollview is close to the end
         let offset = documentView.frame.maxY -  bounds.maxY
-        if offset < spaceBeforeLoadingMoreData * bounds.height {
-            loadMore()
+        if offset < documentView.frame.maxY - spaceBeforeLoadingMoreData * bounds.height {
+            DispatchQueue.main.async { [weak self] in
+                self?.loadMore()
+            }
         }
         onScroll?(clipView.bounds.origin)
     }
