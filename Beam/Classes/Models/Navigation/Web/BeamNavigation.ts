@@ -59,14 +59,11 @@ export class BeamNavigation {
     const stateUrl = args[2]
     if (stateUrl) {
       const location = this.win.location
-      const origin = this.win.origin
       const href = location.href
-      const url = stateUrl.indexOf(origin) < 0 ? origin + stateUrl : stateUrl // TODO: Check stateUrl is same origin
       const type = e.type
       this.win.webkit.messageHandlers.nav_locationChanged.postMessage({
         href,
-        type,
-        url
+        type
       })
     }
   }
