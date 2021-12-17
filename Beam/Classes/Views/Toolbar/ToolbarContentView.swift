@@ -97,7 +97,7 @@ struct ToolbarContentView: View {
                 ToolbarModeSwitcher(modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)
             }
         }
-        .padding(.trailing, 14)
+        .padding(.trailing, BeamSpacing._140)
     }
 
     var body: some View {
@@ -106,10 +106,10 @@ struct ToolbarContentView: View {
                 leftFieldActions
                 if state.mode == .web {
                     tabs(containerGeometry: containerGeometry)
-                        .padding(.horizontal, 14)
+                        .padding(.horizontal, BeamSpacing._100)
                 } else {
                     cardSwitcherView(containerGeometry: containerGeometry)
-                        .padding(.horizontal, 14)
+                        .padding(.horizontal, BeamSpacing._140)
                 }
                 rightActionsView(containerGeometry: containerGeometry)
             }
