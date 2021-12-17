@@ -19,8 +19,8 @@ class ReferencesTests: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I create 2 cards")
-        journalView.createCardViaOmnibarSearch(cardName1)
-        let cardView = journalView.createCardViaOmnibarSearch(cardName2)
+        journalView.createCardViaOmniboxSearch(cardName1)
+        let cardView = journalView.createCardViaOmniboxSearch(cardName2)
         
         testRailPrint("Then I reference card 2 to card 1")
         cardView.createReference(cardName1)

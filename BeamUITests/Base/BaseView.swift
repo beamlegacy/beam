@@ -94,18 +94,18 @@ class BaseView {
     
     //Omni bar search field is accessible from any view
     @discardableResult
-    func clickOmniBarSearchField() -> OmniBarTestView {
-        let omnibarView = OmniBarTestView()
-        omnibarView.getOmniBarSearchField().click()
-        return omnibarView
+    func clickOmniBoxSearchField() -> OmniBoxTestView {
+        let omniboxView = OmniBoxTestView()
+        omniboxView.getOmniBoxSearchField().click()
+        return omniboxView
     }
     
     @discardableResult
-    func searchInOmniBar(_ searchText: String, _ typeReturnButton: Bool) -> WebTestView {
-        populateOmnibarWith(searchText)
+    func searchInOmniBox(_ searchText: String, _ typeReturnButton: Bool) -> WebTestView {
+        populateOmniboxWith(searchText)
         if typeReturnButton {
             typeKeyboardKey(.enter)
-            _ = button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+            _ = button(OmniBoxLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
         }
         return WebTestView()
     }
@@ -115,18 +115,21 @@ class BaseView {
     }
         
     @discardableResult
-    func populateOmnibarWith(_ text: String) -> OmniBarTestView {
-        let omniSearchField = searchField(OmniBarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+    func populateOmniboxWith(_ text: String) -> OmniBoxTestView {
+        let omniSearchField = searchField(OmniBoxLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+        if !omniSearchField.exists {
+            shortcutsHelper.shortcutActionInvoke(action: .openLocation)
+        }
         omniSearchField.tapInTheMiddle()
         omniSearchField.clear()
         omniSearchField.typeText(text)
-        WaitHelper().waitForStringValueEqual(text, OmniBarTestView().getOmniBarSearchField(), minimumWaitTimeout)
-        return OmniBarTestView()
+        WaitHelper().waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), minimumWaitTimeout)
+        return OmniBoxTestView()
     }
     
     @discardableResult
     func openWebsite(_ url: String) -> WebTestView {
-        _ = populateOmnibarWith(url)
+        _ = populateOmniboxWith(url)
         self.typeKeyboardKey(.enter)
         return WebTestView()
     }

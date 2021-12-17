@@ -303,7 +303,7 @@ class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
         }
         // NSTitlebarAccessoryViewController steal mouseDown events
         // But we need them for the view placed below the title bar
-        // See touch down state of omnibar buttons
+        // See touch down state of toolbar buttons
         self.parent?.mouseDown(with: event)
     }
 }

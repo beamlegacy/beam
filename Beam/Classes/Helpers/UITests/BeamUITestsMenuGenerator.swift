@@ -32,7 +32,7 @@ class BeamUITestsMenuGenerator {
         case .create10Notes: Self.create10Notes()
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
-        case .omnibarFillHistory: fillHistory()
+        case .omniboxFillHistory: fillHistory()
         case .signInWithTestAccount: signInWithTestAccount()
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()

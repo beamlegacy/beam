@@ -43,7 +43,7 @@ struct JournalScrollView: NSViewRepresentable {
             scrollView.contentInsets = NSEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
         }
         // Initial document view
-        let journalStackView = StackView(state: state, safeTop: OmniboxV2Toolbar.height, onStartEditing: { self.isEditing = true }, verticalSpace: 10,
+        let journalStackView = StackView(state: state, safeTop: Toolbar.height, onStartEditing: { self.isEditing = true }, verticalSpace: 10,
                                                 topOffset: Self.firstNoteTopOffset(forProxy: proxy))
         journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
         scrollView.documentView = journalStackView

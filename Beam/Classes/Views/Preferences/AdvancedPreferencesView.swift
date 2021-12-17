@@ -29,10 +29,9 @@ struct AdvancedPreferencesView: View {
     @State var pnsJSIsOn = PreferencesManager.PnsJSIsOn
     @State var browsingSessionCollectionIsOn = PreferencesManager.browsingSessionCollectionIsOn
     @State var showDebugSection = PreferencesManager.showDebugSection
-    @State var showOmnibarScoreSection = PreferencesManager.showOmnibarScoreSection
+    @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
-    @State var omniboxV2IsOn = PreferencesManager.omniboxV2IsOn
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -324,11 +323,11 @@ struct AdvancedPreferencesView: View {
                 }
 
                 Preferences.Section(bottomDivider: true) {
-                    Text("Show frecency / score in Omnibar")
+                    Text("Show frecency / score in Omnibox")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
-                    OmnibarScoreSectionCheckbox
+                    OmniboxScoreSectionCheckbox
                 }
 
                 Preferences.Section(bottomDivider: false) {
@@ -351,13 +350,6 @@ struct AdvancedPreferencesView: View {
                     CrashButton
                     CopyAccessToken
                     ResetOnboarding
-                }
-                Preferences.Section(bottomDivider: true) {
-                    Text("Enable Omnibox V2")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                } content: {
-                    OmniboxV2EnabledCheckbox
                 }
                 Preferences.Section(title: "State Restoration Enabled", bottomDivider: true) {
                     StateRestorationEnabledButton
@@ -421,17 +413,6 @@ struct AdvancedPreferencesView: View {
             }
     }
 
-    private var OmniboxV2EnabledCheckbox: some View {
-        return Toggle(isOn: $omniboxV2IsOn) {
-            Text("Enabled")
-        }.toggleStyle(CheckboxToggleStyle())
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([omniboxV2IsOn].publisher.first()) {
-                PreferencesManager.omniboxV2IsOn = $0
-            }
-    }
-
     private var BrowsingSessionCollectionCheckbox: some View {
         return Toggle(isOn: $browsingSessionCollectionIsOn) {
             Text("Enabled")
@@ -454,14 +435,14 @@ struct AdvancedPreferencesView: View {
             }
     }
 
-    private var OmnibarScoreSectionCheckbox: some View {
-        return Toggle(isOn: $showOmnibarScoreSection) {
+    private var OmniboxScoreSectionCheckbox: some View {
+        return Toggle(isOn: $showOmniboxScoreSection) {
             Text("Enabled")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([showOmnibarScoreSection].publisher.first()) {
-                PreferencesManager.showOmnibarScoreSection = $0
+            .onReceive([showOmniboxScoreSection].publisher.first()) {
+                PreferencesManager.showOmniboxScoreSection = $0
             }
     }
 
