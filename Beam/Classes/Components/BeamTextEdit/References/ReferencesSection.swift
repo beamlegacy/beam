@@ -90,8 +90,8 @@ class ReferencesSection: LinksSection {
 
                 self.linkActionLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
             })
-
         guard let linkLayer = linkLayer else { return }
+        linkLayer.setAccessibilityIdentifier("link-all-references-button")
         addLayer(linkLayer)
     }
 

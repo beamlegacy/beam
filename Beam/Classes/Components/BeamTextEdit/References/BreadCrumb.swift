@@ -117,6 +117,7 @@ class BreadCrumb: Widget {
             )
         updateLinkLayerState()
         guard let actionLayer = actionLayer else { return }
+        actionLayer.setAccessibilityIdentifier("link-reference-button")
         addLayer(actionLayer)
 
         createCrumbLayers()
