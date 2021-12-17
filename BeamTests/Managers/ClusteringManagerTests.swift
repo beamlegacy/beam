@@ -100,7 +100,7 @@ class ClusteringManagerTests: XCTestCase {
         // Navigate to first page, no parent
         tree.navigateTo(url: informations[0].url.string, title: nil, startReading: false, isLinkActivation: false, readCount: 400)
         nodes.append(tree.current)
-        informations[0].currentTabTree = tree
+        informations[0].tabTree = tree
         informations[0].parentBrowsingNode = nodes[0]
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
@@ -108,7 +108,7 @@ class ClusteringManagerTests: XCTestCase {
         // Navigate to second page from first page
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(tree.current)
-        informations[1].currentTabTree = tree
+        informations[1].tabTree = tree
         informations[1].parentBrowsingNode = nodes[1]
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
@@ -118,19 +118,20 @@ class ClusteringManagerTests: XCTestCase {
         let newTabTree = BrowsingTree(nil)
         newTabTree.navigateTo(url: informations[2].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(newTabTree.current)
-        informations[2].currentTabTree = newTabTree
-        informations[2].parentBrowsingNode = nodes[2]
+        informations[2].tabTree = newTabTree
+        informations[2].currentTabTree = tree
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[2]).0) == nodes[3]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[2]).1) == nodes[2]?.link
 
-        // Go back on the original tree, then open a new page
+        // Go back on the original tree, then open a new page in new tab
         tree.goBack()
         tree.openLinkInNewTab()
         let anotherNewTabTree = BrowsingTree(nil)
         anotherNewTabTree.navigateTo(url: informations[3].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(anotherNewTabTree.current)
-        informations[3].currentTabTree = anotherNewTabTree
-        informations[3].parentBrowsingNode = nodes[1]
+        informations[3].tabTree = anotherNewTabTree
+        informations[3].currentTabTree = tree
+        self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3])
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }
@@ -144,7 +145,7 @@ class ClusteringManagerTests: XCTestCase {
         var nodes = [tree.current]
         tree.navigateTo(url: informations[0].url.string, title: documents[0].title, startReading: false, isLinkActivation: false, readCount: 400)
         nodes.append(tree.current)
-        informations[0].currentTabTree = tree
+        informations[0].tabTree = tree
         informations[0].parentBrowsingNode = nodes[0]
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
@@ -153,7 +154,7 @@ class ClusteringManagerTests: XCTestCase {
         // Navigate to second page from first page
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(tree.current)
-        informations[1].currentTabTree = tree
+        informations[1].tabTree = tree
         informations[1].parentBrowsingNode = nodes[1]
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
