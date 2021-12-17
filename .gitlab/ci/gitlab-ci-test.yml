@@ -67,7 +67,7 @@ UITestThread1:
   dependencies: []
   stage: test
   artifacts:
-    expire_in: 7d
+    expire_in: 4d
     when: always
     paths:
       - cobertura.xml
@@ -105,7 +105,7 @@ UITestThread2:
   dependencies: []
   stage: test
   artifacts:
-    expire_in: 7d
+    expire_in: 4d
     when: always
     paths:
       - cobertura.xml
@@ -143,7 +143,7 @@ UITestThread3:
   dependencies: []
   stage: test
   artifacts:
-    expire_in: 7d
+    expire_in: 4d
     when: always
     paths:
       - cobertura.xml
@@ -181,7 +181,7 @@ UITestThread4:
   dependencies: []
   stage: test
   artifacts:
-    expire_in: 7d
+    expire_in: 4d
     when: always
     paths:
       - cobertura.xml
