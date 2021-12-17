@@ -185,4 +185,12 @@ class BaseView {
     func getCenterOfElement(element: XCUIElement) -> XCUICoordinate {
         return element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
     }
+    
+    @discardableResult
+    func openCardFromRecentsList(cardTitleToOpen: String) -> CardTestView {
+        let cardView = CardTestView()
+        cardView.staticText(cardTitleToOpen).clickOnExistence()
+        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardTitleToOpen), "\(cardTitleToOpen) card is failed to load")
+        return cardView
+    }
 }
