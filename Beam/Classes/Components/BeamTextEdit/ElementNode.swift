@@ -219,7 +219,7 @@ public class ElementNode: Widget {
     override func updateSubLayersLayout() {
         super.updateSubLayersLayout()
         updateSelectionLayer()
-        setPaddings()
+        setBottomPaddings()
     }
 
     func updateSelectionLayer() {
@@ -252,42 +252,38 @@ public class ElementNode: Widget {
         }
     }
 
-    func setPaddings() {
+    func setBottomPaddings(withDefault: CGFloat = 0) {
         // WARNING
         // Be extra carefull when changing values
         //
         // Padding bottom of Node depending of the nextElement with higher or smaller depth
-        if let nextElement = self.element.nextElement() {
-            var newPadding: CGFloat?
+        if let nextElement = element.nextElement() {
+            var newPadding: CGFloat = withDefault
 
             if self.open {
-                if nextElement.depth > depth, self.parent !== root?.element {
-                    newPadding = nextElement.isHeader ? 2 : 1
+                if nextElement.depth > depth, parent !== root?.element {
+                    newPadding += nextElement.isHeader ? 2 : 1
                 } else if nextElement.depth < depth {
                     if nextElement.parent === root?.element {
-                        newPadding = nextElement.isHeader ? 7 : 0
+                        newPadding += nextElement.isHeader ? 7 : 0
                     } else {
-                        newPadding = nextElement.isHeader ? 5 : 0
+                        newPadding += nextElement.isHeader ? 5 : 0
                     }
-                } else {
-                    newPadding = 0
                 }
             } else {
-                if self.isHeader {
+                if isHeader {
                     newPadding = 4
-                } else {
-                    newPadding = 0
                 }
             }
 
-            if let newPadding = newPadding, contentsPadding.bottom != newPadding {
+            if contentsPadding.bottom != newPadding {
                 contentsPadding.bottom = newPadding
             }
         }
 
         for child in children {
             guard let c = child as? ElementNode else { continue }
-            c.setPaddings()
+            c.setBottomPaddings()
         }
     }
 
