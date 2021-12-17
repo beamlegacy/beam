@@ -86,7 +86,6 @@ class WaitHelper: XCTestCase {
         return waitFor(PredicateFormat.doesntHaveKeyboardFocus.rawValue, element)
     }
     
-    
     enum PredicateFormat: String {
         case isEnabled = "isEnabled == true"
         case isHittable = "isHittable == true"
