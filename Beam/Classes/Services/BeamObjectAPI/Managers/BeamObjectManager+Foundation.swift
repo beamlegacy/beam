@@ -13,17 +13,20 @@ extension BeamObjectManager {
 
         try fetchAllByChecksumsFromAPI { result in
             switch result {
-            case .failure:
+            case .failure(let error):
+                Logger.shared.logDebug("syncAllFromAPI: \(error.localizedDescription)",
+                                       category: .beamObjectNetwork,
+                                       localTimer: localTimer)
                 completion?(result)
             case .success:
-                Logger.shared.logDebug("Calling saveAllToAPI, called FetchAllFromAPI",
+                Logger.shared.logDebug("syncAllFromAPI: Calling saveAllToAPI, called FetchAllFromAPI",
                                        category: .beamObjectNetwork,
                                        localTimer: localTimer)
 
                 do {
                     localTimer = BeamDate.now
                     let objectsCount = try self.saveAllToAPI()
-                    Logger.shared.logDebug("Called saveAllToAPI, saved \(objectsCount) objects",
+                    Logger.shared.logDebug("syncAllFromAPI: Called saveAllToAPI, saved \(objectsCount) objects",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
 
@@ -139,6 +142,8 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
+        let localTimer = BeamDate.now
+
         try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt) { result in
             switch result {
             case .failure(let error):
@@ -149,10 +154,16 @@ extension BeamObjectManager {
                 // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
                 // If not doing a delta sync, we don't as we want to update local document as `deleted`
                 guard lastReceivedAt == nil || !beamObjects.isEmpty else {
-                    Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
+                    Logger.shared.logDebug("fetchAllByChecksumsFromAPI: 0 beam object fetched.",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
                     completion(.success(true))
                     return
                 }
+
+                Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(beamObjects.count) beam object fetched.",
+                                       category: .beamObjectNetwork,
+                                       localTimer: localTimer)
 
                 do {
                     let changedObjects = try self.parseFilteredObjectChecksums(self.filteredObjects(beamObjects))
