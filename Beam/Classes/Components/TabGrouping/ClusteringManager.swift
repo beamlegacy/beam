@@ -172,57 +172,59 @@ class ClusteringManager: ObservableObject {
         guard tabToIndex.isPinnedTab == false else {
             return (nil, nil)
         }
-        var id = tabToIndex.currentTabTree?.current.link
-        var parentId = tabToIndex.parentBrowsingNode?.link
+        let id = tabToIndex.tabTree?.current.link
+        var parentId: UUID?
         var parentTimeStamp = Date.distantPast
-        switch tabToIndex.currentTabTree?.origin {
+        // Check the case where a link is opened from a note
+        switch tabToIndex.tabTree?.origin {
         case .linkFromNote(let noteName):
-            if let root = tabToIndex.currentTabTree?.root,
+            if let root = tabToIndex.tabTree?.root,
                tabToIndex.parentBrowsingNode?.id == root.id,
                let id = id,
                let note = BeamNote.fetch(title: noteName) {
                 note.sources.add(urlId: id, noteId: note.id, type: .user, sessionId: self.sessionId, activeSources: self.activeSources)
-                self.addNote(note: note)
+                if note.type == .note {
+                    self.addNote(note: note)
+                }
+                return (id, nil)
             }
         default:
             break
         }
-        if let parent = tabToIndex.parentBrowsingNode,
-           let lastEventType = parent.events.last?.type {
-            if let lastEventTime = parent.events.last?.date {
-                parentTimeStamp = lastEventTime
+        // When not opening a link from a note, start with the case of opening a link in a new tab
+        if let currentTabId = tabToIndex.currentTabTree?.current.link,
+           currentTabId != id, // The tab to be added is not the active one
+           let parentOpenId = tabToIndex.currentTabTree?.current.link,
+           let current = tabToIndex.currentTabTree?.current.events.last?.type,
+           current == .openLinkInNewTab { // The last event of the active tab is to open a link in a new tab
+            parentId = parentOpenId
+        } else { // A simple link opening in the same tab
+            if let parent = tabToIndex.parentBrowsingNode,
+               let lastEventType = parent.events.last?.type,
+               lastEventType == .navigateToLink { // TODO: Consider adding  || lastEventType == .exitForward || lastEventType == .exitBackward
+                parentId = tabToIndex.parentBrowsingNode?.link
+                parentTimeStamp = parent.events.last?.date ?? Date.distantPast
+            } else if let parent = tabToIndex.parentBrowsingNode,
+                      let root = tabToIndex.tabTree?.root,
+                      parent.id == root.id,
+                      let previousTabTree = tabToIndex.previousTabTree,
+                      let lastEventTypePreviousTree = previousTabTree.current.events.last?.type,
+                      lastEventTypePreviousTree == .openLinkInNewTab {
+                parentId = previousTabTree.current.link
+                parentTimeStamp = previousTabTree.current.events.last?.date ?? parentTimeStamp
             }
-            if lastEventType == .searchBarNavigation || lastEventType == .exitForward || lastEventType == .exitBackward {
-                parentId = nil
-            }
-        }
-        if let children = tabToIndex.currentTabTree?.current.children {
-            for child in children {
-                if let lastEventType = child.events.last?.type,
-                   let lastEventTime = child.events.last?.date,
-                   lastEventType == .exitBackward,
-                   lastEventTime > parentTimeStamp {
-                    parentTimeStamp = lastEventTime
-                    parentId = nil
-                    // TODO: Reconsider the relation implied by the back button
-                    // when it is 100% reliable. (probably should stay the same)
+            if let children = tabToIndex.tabTree?.current.children {
+                for child in children {
+                    if let lastEventType = child.events.last?.type,
+                       let lastEventTime = child.events.last?.date,
+                       lastEventType == .exitBackward,
+                       lastEventTime > parentTimeStamp {
+                        parentTimeStamp = lastEventTime
+                        parentId = child.link
+                    }
                 }
             }
         }
-        // By definition, when opening a link in a new tab the link either
-        // has no children or their events are farther in the past
-        if let current = tabToIndex.currentTabTree?.current.events.last?.type,
-           current == .openLinkInNewTab,
-           let tabTree = tabToIndex.tabTree?.current.link {
-            parentId = id
-            id = tabTree
-        }
-        if let previousTabTree = tabToIndex.previousTabTree,
-           let type = previousTabTree.current.events.last?.type,
-           type == .openLinkInNewTab {
-            parentId = previousTabTree.current.link
-        }
-
         // The following is only here in order to save groups based on navigation, remove before release:
         if let id = id,
            self.findPageGroupForID(pageID: id, pageGroups: self.navigationBasedPageGroups) == nil {
@@ -235,7 +237,7 @@ class ClusteringManager: ObservableObject {
         }
         return (id, parentId)
     }
-
+    
     // swiftlint:disable:next cyclomatic_complexity
     func addPage(id: UUID, parentId: UUID?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
@@ -279,16 +281,16 @@ class ClusteringManager: ObservableObject {
                         self.sendRanking = false
                     }
                     self.logForClustering(result: result.pageGroups, changeCandidate: false)
+                    // After adding the second page, add notes from previous sessions
+                    if self.initialiseNotes {
+                        let notes = DocumentManager().loadAllWithLimit(10, sortingKey: .updatedAt(false), type: .note).compactMap {
+                            BeamNote.fetch(id: $0.id)
+                        }
+                        for note in notes {
+                            self.addNote(note: note, addToNextSummary: false)
+                        }
+                    }
                 }
-            }
-        }
-        // After adding the second page, add notes from previous sessions
-        if self.initialiseNotes {
-            let notes = DocumentManager().loadAllWithLimit(10, sortingKey: .updatedAt(false), type: .note).compactMap {
-                BeamNote.fetch(id: $0.id)
-            }
-            for note in notes {
-                self.addNote(note: note, addToNextSummary: false)
             }
         }
     }
