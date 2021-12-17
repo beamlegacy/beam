@@ -102,10 +102,10 @@ struct BrowserTabBar: View {
                         onTabClose(tab, fromContextMenu: true)
                     }
                     Button("Close Other Tabs") {
-                        state.closeAllTabsButCurrent()
+                        state.closeAllTabsButTab(at: index)
                     }.disabled(tabs.allSatisfy({ $0.isPinned }) || tabs.count <= 1)
                     Button("Close Tabs to the Right") {
-                        state.closeTabsToTheRight()
+                        state.closeTabsToTheRight(of: index)
                     }.disabled(index + 1 >= tabs.count || tabs.allSatisfy({ $0.isPinned }))
                 }
             if index == dragModel.draggingOverIndex && index > dragStartIndex {
