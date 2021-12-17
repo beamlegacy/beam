@@ -288,6 +288,14 @@ class CardTestView: BaseView {
         return ContextMenuTestView(key: key)
     }
     
+    func isImageNoteCollapsed(noteIndex: Int) -> Bool {
+        return getImageNoteByIndex(noteIndex: noteIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
+    func getImageNoteCollapsedTitle(noteIndex: Int) -> String {
+        return getImageNoteByIndex(noteIndex: noteIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].firstMatch.title
+    }
+    
     func waitForCardToOpen(cardTitle: String) -> Bool {
         return WaitHelper().waitForStringValueEqual(cardTitle, self.cardTitle, implicitWaitTimeout)
     }
