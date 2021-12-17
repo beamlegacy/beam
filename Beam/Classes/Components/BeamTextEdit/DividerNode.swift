@@ -33,6 +33,10 @@ public class DividerNode: ElementNode {
     private var focusLayer: CALayer?
     private var lastApperance: NSAppearance?
 
+    override func setBottomPaddings(withDefault: CGFloat) {
+        super.setBottomPaddings(withDefault: 17)
+    }
+
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
         setupDivider()

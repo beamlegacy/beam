@@ -32,6 +32,10 @@ class EmbedNode: ResizableNode {
         return url
     }
 
+    override func setBottomPaddings(withDefault: CGFloat) {
+        super.setBottomPaddings(withDefault: 14)
+    }
+
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
 

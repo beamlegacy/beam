@@ -49,6 +49,10 @@ class ImageNode: ResizableNode {
         setupImage(width: availableWidth ?? fallBackWidth)
     }
 
+    override func setBottomPaddings(withDefault: CGFloat) {
+        super.setBottomPaddings(withDefault: 14)
+    }
+
     private func setupImage(width: CGFloat) {
         var uid = UUID.null
         switch element.kind {
