@@ -38,16 +38,16 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case populatePasswordsDB = "Populate Passwords Database"
     case showWebViewCount = "Show Number of WebView in Memory"
 
-    // Omnibar setup
-    case omnibarFillHistory = "Fill History with Results"
+    // Omnibox setup
+    case omniboxFillHistory = "Fill History with Results"
 
     var group: UITestMenuGroup? {
         switch self {
         case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia,
              .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground:
             return .loadHTMLPage
-        case .omnibarFillHistory:
-            return .omnibarSetup
+        case .omniboxFillHistory:
+            return .omniboxSetup
         default:
             return nil
         }
@@ -63,5 +63,5 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 
 public enum UITestMenuGroup: String, CaseIterable {
     case loadHTMLPage = "Load UITest HTML Page"
-    case omnibarSetup = "Omnibar Setup"
+    case omniboxSetup = "Omnibox Setup"
 }

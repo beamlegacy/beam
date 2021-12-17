@@ -13,7 +13,7 @@ class SignInSucessfullyTests: BaseTest {
     func testSignInGoogle() throws {
         try XCTSkipIf(true, "Skipped so far, until we can clean cookies")
         let journalView = launchApp()
-        journalView.searchInOmniBar("gmail", true)
+        journalView.searchInOmniBox("gmail", true)
         testRailPrint("Then I sucessfully sign in Google")
         XCTAssertTrue(PasswordManagerHelper().signInGoogle(), "Failed to sign in")
     }
@@ -21,7 +21,7 @@ class SignInSucessfullyTests: BaseTest {
     func testSignInFacebook() throws {
         try XCTSkipIf(true, "Skipped so far, until we can clean cookies")
         let journalView = launchApp()
-        journalView.searchInOmniBar("https://www.facebook.com/login/", true)
+        journalView.searchInOmniBox("https://www.facebook.com/login/", true)
     }
     
     

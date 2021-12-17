@@ -3,7 +3,7 @@ import BeamCore
 
 enum NoteElementAddReason {
     /**
-     Page was loaded as the result of a new address typed in the omnibar for instance.
+     Page was loaded as the result of a new address typed in the omnibox for instance.
      */
     case loading
 

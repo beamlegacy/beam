@@ -20,7 +20,7 @@ class CardEditTests: BaseTest {
                                                 
         testRailPrint("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         testRailPrint("When I delete \(numberOfLetterToBeDeleted) letters from the title")
         cardView.makeCardTitleEditable()
@@ -47,10 +47,10 @@ class CardEditTests: BaseTest {
         
         testRailPrint("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         testRailPrint("When I delete last letter from the title")
-        journalView.searchInOmniBar(cardTwoNameToBeCreated, false)
+        journalView.searchInOmniBox(cardTwoNameToBeCreated, false)
         WebTestView().selectCreateCard(cardTwoNameToBeCreated)
         cardView.makeCardTitleEditable()
         cardView.typeKeyboardKey(.delete)
@@ -65,7 +65,7 @@ class CardEditTests: BaseTest {
         
         testRailPrint("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         testRailPrint("When I try to delete \(cardNameToBeCreated) and cancel it")
         cardView
             .clickDeleteButton()
@@ -101,7 +101,7 @@ class CardEditTests: BaseTest {
         testRailPrint("Then I'm redirected to the source page when clicking on the icon")
         cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).tapInTheMiddle()
         XCTAssertEqual(webView.getNumberOfTabs(), 2)
-        let webPageUrl = OmniBarTestView().getSearchFieldValue()
+        let webPageUrl = webView.getTabUrlAtIndex(index: 1)
         XCTAssertTrue(webPageUrl.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageUrl)")
     }
     

@@ -134,6 +134,8 @@ extension BeamColor {
                                                               darkColor: .From(color: .black), darkAlpha: 0.8)
         static let hoveredShadow = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.07,
                                                        darkColor: .From(color: .black), darkAlpha: 0.4)
+        static let separatorColor = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8,
+                                                        darkColor: .Mercury, darkAlpha: 0.3)
     }
 }
 

@@ -29,17 +29,19 @@ class HelpAndFeedbackTests: BaseTest {
         
         testRailPrint("When I open Bug report")
         let webView = journalView.openHelpMenu().openBugReport()
+        let omnibox = OmniBoxTestView()
         testRailPrint("Then a tab with \(expectedCannyLink) is opened")
         XCTAssertEqual(webView.getNumberOfTabs(), 1)
-        let omnibar = OmniBarTestView()
-        XCTAssertEqual(omnibar.getSearchFieldValue(), expectedCannyLink)
+        let firstTabURL = webView.getTabUrlAtIndex(index: 0)
+        XCTAssertTrue(firstTabURL.hasPrefix(expectedCannyLink), "Actual web url is \(firstTabURL)")
         
         testRailPrint("When I open Feature request")
-        omnibar.navigateToCardViaPivotButton()
+        omnibox.navigateToCardViaPivotButton()
         journalView.openHelpMenu().openFeatureRequest()
         testRailPrint("Then a tab with \(expectedCannyLink) is opened")
         XCTAssertEqual(webView.getNumberOfTabs(), 2)
-        XCTAssertEqual(omnibar.getSearchFieldValue(), expectedCannyLink)
+        let secondTabURL = webView.getTabUrlAtIndex(index: 1)
+        XCTAssertTrue(secondTabURL.hasPrefix(expectedCannyLink), "Actual web url is \(secondTabURL)")
     }
     
     func testHelpShortcutsView() {

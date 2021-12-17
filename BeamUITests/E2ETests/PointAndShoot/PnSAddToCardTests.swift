@@ -42,7 +42,7 @@ class PnSAddToCardTests: BaseTest {
         
         print("Then it is successfully added to the card")
         XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(todaysDateInCardTitleFormat))
-        OmniBarTestView().navigateToCardViaPivotButton()
+        OmniBoxTestView().navigateToCardViaPivotButton()
         journalView.waitForJournalViewToLoad()
         let cardNotes = CardTestView().getCardNotesForVisiblePart()
         
@@ -67,7 +67,7 @@ class PnSAddToCardTests: BaseTest {
         print("Then it is successfully added to the card")
         // Commented out as far as it is too unreliable
         //XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(cardNameToBeCreated))
-        OmniBarTestView().navigateToCardViaPivotButton()
+        OmniBoxTestView().navigateToCardViaPivotButton()
         let cardView = CardTestView()
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
@@ -82,7 +82,7 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
         print("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         print("Given I open Test page")
         helper.openTestPage(page: .page3)
@@ -93,7 +93,7 @@ class PnSAddToCardTests: BaseTest {
         
         print("Then it is successfully added to the card")
         XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        OmniBarTestView().navigateToCardViaPivotButton()
+        OmniBoxTestView().navigateToCardViaPivotButton()
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
         
@@ -115,7 +115,7 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
         print("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         print("Given I open Test page")
         helper.openTestPage(page: .page3)
@@ -126,7 +126,7 @@ class PnSAddToCardTests: BaseTest {
         pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, noteText)
         
         print("Then it is successfully added to the card")
-        OmniBarTestView().navigateToCardViaPivotButton()
+        OmniBoxTestView().navigateToCardViaPivotButton()
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
         XCTAssertTrue(cardNotes.count == 3 || cardNotes.count == 4) //CI specific issue handling
@@ -138,7 +138,7 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         helper.tapCommand(.resizeSquare1000)
         print("Given I create \(cardNameToBeCreated) card")
-        journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         testRailPrint("Then I successfully collect gif")
         helper.openTestPage(page: .page2)
@@ -165,7 +165,7 @@ class PnSAddToCardTests: BaseTest {
         pnsView.addToTodayCard(itemToCollect)
 
         testRailPrint("Then switch to journal")
-        let cardView = OmniBarTestView().navigateToCardViaPivotButton()
+        let cardView = OmniBoxTestView().navigateToCardViaPivotButton()
         journalView.waitForJournalViewToLoad()
 
         testRailPrint("Then the note contains video link")
@@ -196,7 +196,7 @@ class PnSAddToCardTests: BaseTest {
         testRailPrint("Then Failed to collect message appears")
         pnsView.passFailedToCollectPopUpAlert()
         XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        OmniBarTestView().navigateToCardViaPivotButton()
+        OmniBoxTestView().navigateToCardViaPivotButton()
         journalView.waitForJournalViewToLoad()
 
         testRailPrint("Then the note is still empty")
@@ -227,14 +227,6 @@ class PnSAddToCardTests: BaseTest {
         XCTAssertEqual(cardNotes.count, 2)
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), expectedNoteText)
-        
-        testRailPrint("When I try to collect full page for empty tab")
-        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-        shortcutsHelper.shortcutActionInvoke(action: .newTab)
-        shortcutsHelper.shortcutActionInvoke(action: .collectFullPage)
-        
-        testRailPrint("Then collect page doesn't appear")
-        XCTAssertFalse(pnsView.waitForCollectPopUpAppear(), "Collect pop-up appeared for an empty page")
     }
     
     func testAddLinksToJournalInOrder() {
@@ -412,23 +404,23 @@ class PnSAddToCardTests: BaseTest {
     
     
     func testOpensShootCardPickerWithoutNavigatingPage() {
-       //"opens ShootCardPicker and not navigate the page"
-       let journalView = launchApp()
-       let helper = BeamUITestsHelper(journalView.app)
-       let omnibarHelper = OmniBarUITestsHelper(journalView.app)
-       
-       testRailPrint("Given I open a test page")
-       helper.openTestPage(page: .page1)
-       
-       testRailPrint("Then I'm not redireceted after pointing a URL")
-       // Press option once to enable pointing mode
-       XCUIElement.perform(withKeyModifiers: .option) {
-           sleep(1)
-           // get the url before clicking
-           let beforeUrl = OmniBarTestView().getSearchFieldValue()
-           webView.staticText("I-Beam").clickOnExistence()
-           // compare with url after clicking
-           XCTAssertTrue(waitHelper.waitForStringValueEqual(beforeUrl, omnibarHelper.searchField))
+        //"opens ShootCardPicker and not navigate the page"
+        let journalView = launchApp()
+        let helper = BeamUITestsHelper(journalView.app)
+        let webView = WebTestView()
+
+        testRailPrint("Given I open a test page")
+        helper.openTestPage(page: .page1)
+
+        testRailPrint("Then I'm not redireceted after pointing a URL")
+        // Press option once to enable pointing mode
+        XCUIElement.perform(withKeyModifiers: .option) {
+            sleep(1)
+            // get the url before clicking
+            let beforeUrl = webView.getTabUrlAtIndex(index: 0)
+            webView.staticText("I-Beam").clickOnExistence()
+            // compare with url after clicking
+            XCTAssertEqual(beforeUrl, webView.getTabUrlAtIndex(index: 0))
         }
     }
     

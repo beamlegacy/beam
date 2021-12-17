@@ -110,22 +110,22 @@ class EditorShortcutsTests: BaseTest {
         let testHelper = BeamUITestsHelper(webView.app)
         let journalView = launchApp()
         testRailPrint("Given I create \(card1) card")
-        //TBD replace creation by omnibar to craetion by Destination cards search
+        //TBD replace creation by omnibox to craetion by Destination cards search
         webView.searchForCardByTitle(card1)
-        journalView.createCardViaOmnibarSearch(card1)
+        journalView.createCardViaOmniboxSearch(card1)
         
         testRailPrint("When I search in web and switch to card view")
-        journalView.searchInOmniBar(testHelper.randomSearchTerm(), true)
+        journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
         helper.shortcutActionInvoke(action: .switchBetweenCardWeb)
         let cardView = CardTestView()
         testRailPrint("Then the destination card is remained \(card1)")
         XCTAssertEqual(cardView.getCardTitle(), card1)
         
         testRailPrint("Given I create \(card2) card")
-        journalView.createCardViaOmnibarSearch(card2)
+        journalView.createCardViaOmniboxSearch(card2)
         
         testRailPrint("When I search in web and switch to card view")
-        journalView.searchInOmniBar(testHelper.randomSearchTerm(), true)
+        journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
         helper.shortcutActionInvoke(action: .switchBetweenCardWeb)
         testRailPrint("Then the destination card is remained \(card2)")
         XCTAssertEqual(cardView.getCardTitle(), card2)

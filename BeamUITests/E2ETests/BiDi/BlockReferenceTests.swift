@@ -85,8 +85,8 @@ class BlockReferenceTests: BaseTest {
     
     @discardableResult
     func createBlockRefForTwoCards(_ view: JournalTestView, _ cardName1: String, _ cardName2: String) -> String {
-        view.createCardViaOmnibarSearch(cardName1)
-        view.createCardViaOmnibarSearch(cardName2)
+        view.createCardViaOmniboxSearch(cardName1)
+        view.createCardViaOmniboxSearch(cardName2)
         let helper = BeamUITestsHelper(view.app)
         helper.tapCommand(.insertTextInCurrentNote)
         

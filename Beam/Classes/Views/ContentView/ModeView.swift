@@ -16,7 +16,7 @@ struct ModeView: View {
     @Binding var contentIsScrolled: Bool
 
     @State private var transitionModel = ModeTransitionModel()
-    private let cardScrollViewTopInset: CGFloat = OmniboxV2Toolbar.height
+    private let cardScrollViewTopInset: CGFloat = Toolbar.height
 
     private var webContent: some View {
         ZStack(alignment: .top) {

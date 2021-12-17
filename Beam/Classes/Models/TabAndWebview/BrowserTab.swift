@@ -253,7 +253,7 @@ import Promises
        - browsingTreeOrigin:
        - note: The destination note to add elements to.
        - rootElement: The root element to add elements to.
-           Will be nil if you created a new tab from omniBar for instance.
+           Will be nil if you created a new tab from omnibox for instance.
            Will be the origin text element if you created the tab using Cmd+Enter.
        - id:
        - webView:

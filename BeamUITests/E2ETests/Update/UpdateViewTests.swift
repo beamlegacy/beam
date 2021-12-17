@@ -31,10 +31,10 @@ class UpdateViewTests: BaseTest {
         testRailPrint("Given I enable Update for the app")
         helper.tapCommand(.setAutoUpdateToMock)
         XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        journalView.createCardViaOmnibarSearch("Update")
+        journalView.createCardViaOmniboxSearch("Update")
         testRailPrint("Then it is visible in card view")
         XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-        let allCardsView = OmniBarTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+        let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
         testRailPrint("Then it is visible in All cards view")
         XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
     }
