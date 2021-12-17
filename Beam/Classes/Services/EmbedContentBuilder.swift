@@ -27,11 +27,7 @@ struct EmbedContentBuilder {
     }
 
     init() {
-        strategies = [EmbedContentLocalStrategy()]
-        if AuthenticationManager.shared.isAuthenticated {
-            // for now the embed api is only available to logged in users
-            strategies.append(EmbedContentAPIStrategy())
-        }
+        strategies = [EmbedContentLocalStrategy(), EmbedContentAPIStrategy()]
     }
 
     private func cachedEmbed(for url: URL) -> EmbedContent? {

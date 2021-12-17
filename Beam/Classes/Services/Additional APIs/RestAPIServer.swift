@@ -64,8 +64,14 @@ class RestAPIServer {
             }
         }
 
+        /// Authentication required for all request types except .embed and .providers requests
         var requiresAuthentication: Bool {
-            return true
+            switch self {
+            case .embed(url: _), .providers:
+                return false
+            default:
+                return true
+            }
         }
 
         var httpMethod: String {
@@ -227,6 +233,7 @@ class RestAPIServer {
             }
             urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
+        urlRequest.setValue("native.beamapp.co", forHTTPHeaderField: "Origin")
 
         urlRequest.httpMethod = request.httpMethod
         if let (body, contentType) = try request.bodyParameters() {
