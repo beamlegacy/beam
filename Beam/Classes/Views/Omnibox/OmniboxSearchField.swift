@@ -113,6 +113,7 @@ struct OmniboxSearchField: View {
                         modifierFlagsPressed = event.modifierFlags
                     }
                 )
+                    .frame(maxHeight: .infinity)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "OmniboxSearchField")
                 if let subtitle = resultSubtitle, !textFieldText.wrappedValue.isEmpty {

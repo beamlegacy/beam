@@ -152,6 +152,7 @@ struct TabView: View {
                 HStack(spacing: iconSpacing) {
                     iconNextToTitle
                     Text(tab.url?.urlStringWithoutScheme ?? tab.title)
+                        .allowsHitTesting(false)
                         .accessibility(identifier: "browserTabURL")
                 }
                 .transition(centerViewTransition(foregroundHoverStyle: true))
@@ -160,6 +161,7 @@ struct TabView: View {
                     iconNextToTitle
                     Text(tab.title)
                         .accessibility(identifier: "browserTabTitle")
+                        .allowsHitTesting(false)
                     if isSingleTab && !isHovering && audioIsPlaying {
                         audioView
                     }
@@ -177,6 +179,7 @@ struct TabView: View {
                             }
                             Text(tab.title)
                                 .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
+                                .allowsHitTesting(false)
                                 .accessibility(identifier: "browserTabTitle")
                         }
                     }, alignment: .leading)

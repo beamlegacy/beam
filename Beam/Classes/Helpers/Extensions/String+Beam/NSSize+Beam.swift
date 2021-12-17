@@ -7,8 +7,8 @@
 
 import Foundation
 
-public extension NSSize {
-    func rounded() -> NSSize {
-        return NSSize(width: width.rounded(.awayFromZero), height: height.rounded(.awayFromZero))
+public extension CGSize {
+    func rounded(_ rule: FloatingPointRoundingRule = .awayFromZero) -> CGSize {
+        return CGSize(width: width.rounded(rule), height: height.rounded(rule))
     }
 }
