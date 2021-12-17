@@ -55,14 +55,14 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openDestinationCard() -> CardTestView {
-        button(OmniBarLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
+        button(OmniBoxLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
         let cardView = CardTestView()
         cardView.waitForCardViewToLoad()
         return cardView
     }
     
-    func getNumberOfTabs() -> Int {
-        return getTabs().count
+    func getNumberOfTabs(wait: Bool = true) -> Int {
+        return getTabs(wait: wait).count
     }
 
     func getNumberOfWebViewInMemory() -> Int {
@@ -79,22 +79,27 @@ class WebTestView: BaseView {
     func getTabByIndex(index: Int) -> XCUIElement {
         getTabs().element(boundBy: index)
     }
-    
-    func getTabs() -> XCUIElementQuery {
-        _ = group(WebViewLocators.Images.browserTabBar.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
-        return app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier)
+
+    func getTabUrlAtIndex(index: Int) -> String {
+        let tab = getTabByIndex(index: index)
+        getCenterOfElement(element: tab).hover()
+        return tab.staticTexts[WebViewLocators.Tabs.tabURL.accessibilityIdentifier].firstMatch.value as? String ?? errorFetchStringValue
     }
-    
-    @discardableResult
-    func openTab() -> WebTestView {
-        image(WebViewLocators.Buttons.newTabButton.accessibilityIdentifier).click()
-        return self
+
+    private let tabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")
+    func getAnyTab() -> XCUIElement {
+        app.groups.matching(tabPredicate).firstMatch
+    }
+    func getTabs(wait: Bool = true) -> XCUIElementQuery {
+        if wait {
+            _ = getAnyTab().waitForExistence(timeout: implicitWaitTimeout)
+        }
+        return app.groups.matching(tabPredicate)
     }
     
     @discardableResult
     func closeTab() -> WebTestView {
-        app.groups.matching(identifier:WebViewLocators.Images.browserTabBar.accessibilityIdentifier).firstMatch.hover()
-        app.images.matching(identifier: WebViewLocators.Buttons.closeTabButton.accessibilityIdentifier).firstMatch.click()
+        shortcutsHelper.shortcutActionInvoke(action: .closeTab)
         return self
     }
     

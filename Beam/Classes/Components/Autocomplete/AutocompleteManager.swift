@@ -30,7 +30,6 @@ class AutocompleteManager: ObservableObject {
     }
 
     @Published var animateInputingCharacter = false
-    @Published var animatedQuery: String?
     let beamData: BeamData
 
     private let searchEngineCompleter: Autocompleter
@@ -324,18 +323,6 @@ extension AutocompleteManager {
             withAnimation(animationOut) {
                 self?.animateInputingCharacter = false
             }
-        }
-    }
-
-    func animateDirectQuery(with text: String?) {
-        guard text != nil else {
-            self.animatedQuery = nil
-            return
-        }
-        var transaction = Transaction(animation: .interpolatingSpring(stiffness: 380, damping: 20))
-        transaction.disablesAnimations = true
-        withTransaction(transaction) {
-            self.animatedQuery = text
         }
     }
 }

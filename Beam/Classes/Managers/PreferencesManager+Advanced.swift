@@ -12,11 +12,10 @@ extension PreferencesManager {
     static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
     static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
     static let showDebugSectionKey = "showDebugSection"
-    static let showOmnibarScoreSectionKey = "showOmnibarScoreSection"
+    static let showOmniboxScoreSectionKey = "showOmnibarScoreSection"
     static let showPNSKey = "showPNSview"
     static let PnsJSIsOnKey = "PnsJSIsOn"
     static let SpaIndexingKey = "SpaIndexing"
-    static let omniboxV2IsOnKey = "OmniboxV2IsOn"
 }
 
 // MARK: - Default Values
@@ -27,10 +26,9 @@ extension PreferencesManager {
     static let browsingSessionCollectionIsOnDefault = false
     static let showTabGrougpingMenuItemDefault = false
     static let showDebugSectionDefault = false
-    static let showOmnibarScoreSectionDefault = false
+    static let showOmniboxScoreSectionDefault = false
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
-    static let omniboxV2IsOnDefault = false
 }
 
 extension PreferencesManager {
@@ -43,15 +41,12 @@ extension PreferencesManager {
     @UserDefault(key: showDebugSectionKey, defaultValue: showDebugSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showDebugSection: Bool
 
-    @UserDefault(key: showOmnibarScoreSectionKey, defaultValue: showOmnibarScoreSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var showOmnibarScoreSection: Bool
+    @UserDefault(key: showOmniboxScoreSectionKey, defaultValue: showOmniboxScoreSectionDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var showOmniboxScoreSection: Bool
 
     @UserDefault(key: showPNSKey, defaultValue: showPNSDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var showPNSView: Bool
 
     @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var PnsJSIsOn: Bool
-
-    @UserDefault(key: omniboxV2IsOnKey, defaultValue: omniboxV2IsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
-    static var omniboxV2IsOn: Bool
 }

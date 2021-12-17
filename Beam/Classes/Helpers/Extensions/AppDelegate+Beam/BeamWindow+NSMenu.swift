@@ -104,10 +104,6 @@ extension BeamWindow {
         state.startNewSearch()
     }
 
-    @IBAction func showCardSelector(_ sender: Any?) {
-        state.destinationCardIsFocused = true
-    }
-
     @IBAction func muteCurrentTab(_ sender: Any?) {
         if let currentTabIsPlaying = state.browserTabsManager.currentTab?.mediaPlayerController?.isPlaying, currentTabIsPlaying {
             state.browserTabsManager.currentTab?.mediaPlayerController?.isMuted = true

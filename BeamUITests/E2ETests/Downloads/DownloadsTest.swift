@@ -17,14 +17,14 @@ class DownloadsTest: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I start downloading process using \(downloadLink) link")
-        journalView.searchInOmniBar(downloadLink, true)
-        let omniBarView = OmniBarTestView()
-        let downloadsView = omniBarView.openDownloadsView()
+        journalView.searchInOmniBox(downloadLink, true)
+        let omniBoxView = OmniBoxTestView()
+        let downloadsView = omniBoxView.openDownloadsView()
         
         testRailPrint("Then downloads view shows corerctlabels and buttons")
         if !downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) {
-            journalView.searchInOmniBar(downloadLink, true)
-            omniBarView.openDownloadsView()
+            journalView.searchInOmniBox(downloadLink, true)
+            omniBoxView.openDownloadsView()
         }
         XCTAssertTrue(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.closeDownloadButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
@@ -43,7 +43,7 @@ class DownloadsTest: BaseTest {
         downloadsView.button(DownloadViewLocators.Buttons.resumeDownloadButton.accessibilityIdentifier).click()
         downloadsView.button(DownloadViewLocators.Buttons.closeDownloadButton.accessibilityIdentifier).click()
         testRailPrint("Then download button exists")
-        XCTAssertTrue(omniBarView.button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)*/
+        XCTAssertTrue(omniBoxView.button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)*/
     }
     
     func testClearDownload() throws {
@@ -51,14 +51,14 @@ class DownloadsTest: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I start downloading process using \(downloadLink) link")
-        journalView.searchInOmniBar(downloadLink, true)
-        let omniBarView = OmniBarTestView()
-        let downloadsView = omniBarView.openDownloadsView()
+        journalView.searchInOmniBox(downloadLink, true)
+        let omniBoxView = OmniBoxTestView()
+        let downloadsView = omniBoxView.openDownloadsView()
         
         testRailPrint("When I stop downloading process")
         if !downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) {
-            journalView.searchInOmniBar(downloadLink, true)
-            omniBarView.openDownloadsView()
+            journalView.searchInOmniBox(downloadLink, true)
+            omniBoxView.openDownloadsView()
         }
         downloadsView.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).click()
         
@@ -69,8 +69,8 @@ class DownloadsTest: BaseTest {
         downloadsView.staticText(DownloadViewLocators.Buttons.clearButton.accessibilityIdentifier).click()
         
         testRailPrint("Then Downloads option is unavailable anymore")
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.notExists.rawValue, omniBarView.button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier))
+        WaitHelper().waitFor(WaitHelper.PredicateFormat.notExists.rawValue, omniBoxView.button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier))
         XCTAssertFalse(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).exists)
-        XCTAssertFalse(omniBarView.button(OmniBarLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)
+        XCTAssertFalse(omniBoxView.button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)
     }
 }

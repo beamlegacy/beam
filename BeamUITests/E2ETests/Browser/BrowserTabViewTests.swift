@@ -36,15 +36,8 @@ class BrowserTabViewTests: BaseTest {
         testRailPrint("Then 1 tab is opened")
         XCTAssertEqual(webView.getNumberOfTabs(), 1)
         XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
-
-        testRailPrint("When I open tab using + icon")
-        webView.openTab()
-        
-        testRailPrint("Then 2 tabs are available")
-        XCTAssertEqual(webView.getNumberOfTabs(), 2)
         
         testRailPrint("When I close tabs")
-        webView.closeTab()
         webView.closeTab()
         XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
 

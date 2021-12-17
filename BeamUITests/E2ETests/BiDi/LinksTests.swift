@@ -22,8 +22,8 @@ class LinksTests: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I create 2 cards")
-        journalView.createCardViaOmnibarSearch(cardName1)
-        let cardView = journalView.createCardViaOmnibarSearch(cardName2)
+        journalView.createCardViaOmniboxSearch(cardName1)
+        let cardView = journalView.createCardViaOmniboxSearch(cardName2)
         
         testRailPrint("Then I link card 2 to card 1")
         cardView.createBiDiLink(cardName1).openBiDiLink(0)

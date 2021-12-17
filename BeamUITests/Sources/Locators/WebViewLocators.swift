@@ -10,7 +10,6 @@ import Foundation
 enum WebViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case newTabButton = "tool-new"
         case closeTabButton = "tabs-close_xs"
         case destinationCard = "DestinationNoteTitle"
     }
@@ -19,8 +18,10 @@ enum WebViewLocators {
         case destinationCardSearchField = "DestinationNoteSearchField"
     }
     
-    enum Images: String, CaseIterable, UIElement {
-        case browserTabBar = "browserTabBarView"
+    enum Tabs: String, CaseIterable, UIElement {
+        case tabPrefix = "browserTab-"
+        case tabURL = "browserTabURL"
+        case tabTitle = "browserTabTitle"
     }
     
     enum Other: String, CaseIterable, UIElement {

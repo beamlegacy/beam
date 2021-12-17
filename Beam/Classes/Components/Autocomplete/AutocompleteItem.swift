@@ -18,7 +18,6 @@ struct AutocompleteItem: View {
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
     var additionalLeadingPadding: CGFloat = 0
-    var designV2 = false
 
     @State private var isTouchDown = false
 
@@ -71,7 +70,7 @@ struct AutocompleteItem: View {
         switch item.source {
         case .history, .url:
             return subtitleLinkColor
-        case .createCard where designV2:
+        case .createCard:
             return defaultTextColor
         default:
             return colorPalette.informationTextColor.swiftUI
@@ -100,7 +99,7 @@ struct AutocompleteItem: View {
     }
 
     var mainText: String {
-        if designV2 && item.source == .createCard {
+        if item.source == .createCard {
             return "New Card:"
         }
         if isUrlWithTitle, let information = item.information {
@@ -110,7 +109,7 @@ struct AutocompleteItem: View {
     }
 
     var secondaryText: String? {
-        if designV2 && item.source == .createCard {
+        if item.source == .createCard {
             return " " + item.text
         } else if isUrlWithTitle {
             return " – \(item.text)"
@@ -121,7 +120,7 @@ struct AutocompleteItem: View {
     }
 
     var body: some View {
-        HStack(spacing: designV2 ? BeamSpacing._120 : BeamSpacing._80) {
+        HStack(spacing: BeamSpacing._120) {
             if displayIcon {
                 if let icon = favicon {
                     Image(nsImage: icon)
@@ -151,7 +150,7 @@ struct AutocompleteItem: View {
                     .layoutPriority(0)
                 }
 
-                if PreferencesManager.showOmnibarScoreSection {
+                if PreferencesManager.showOmniboxScoreSection {
                     Spacer()
                     Text(debugString(score: item.score))
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -163,7 +162,7 @@ struct AutocompleteItem: View {
             Spacer(minLength: 0)
             if item.source == .createCard && allowNewCardShortcut {
                 HStack(spacing: BeamSpacing._20) {
-                    Icon(name: designV2 ? "shortcut-option" : "shortcut-cmd", width: 12, color: cardColor, alignment: .trailing)
+                    Icon(name: "shortcut-option", width: 12, color: cardColor, alignment: .trailing)
                     Icon(name: "shortcut-return", width: 12, color: cardColor, alignment: .trailing)
                 }
                 .opacity(0.5)
@@ -175,11 +174,11 @@ struct AutocompleteItem: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, designV2 ? BeamSpacing._100 : BeamSpacing._80)
-        .padding(.horizontal, designV2 ? BeamSpacing._80 : BeamSpacing._120)
+        .padding(.vertical, BeamSpacing._100)
+        .padding(.horizontal, BeamSpacing._80)
         .padding(.leading, additionalLeadingPadding)
         .background(backgroundColor)
-        .cornerRadius(designV2 ? 6 : 0)
+        .cornerRadius(6)
         .onTouchDown { t in
             isTouchDown = t && !disabled
         }
@@ -217,7 +216,6 @@ extension AutocompleteItem {
 }
 
 struct AutocompleteItem_Previews: PreviewProvider {
-    static let designV2 = true
     static let items = [
         AutocompleteResult(text: "James Dean", source: .createCard, information: "New Card"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
@@ -229,8 +227,8 @@ struct AutocompleteItem_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.0) { index, item in
-                AutocompleteItem(item: item, selected: index == selectedIndex, designV2: designV2)
-                    .frame(width: 300, height: designV2 ? 36 : 32)
+                AutocompleteItem(item: item, selected: index == selectedIndex)
+                    .frame(width: 300, height: 36)
             }
         }.padding(.vertical)
     }

@@ -38,7 +38,7 @@ class CardCreationTests: BaseTest {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
         testRailPrint("When I create \(cardNameToBeCreated) a card from Webview cards search results")
-        let webView = journalView.searchInOmniBar(cardNameToBeCreated, true)
+        let webView = journalView.searchInOmniBox(cardNameToBeCreated, true)
         webView.searchForCardByTitle(cardNameToBeCreated)
         XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationCardElement()), "Destination card is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationCardElement().value))")
         let cardView = webView.openDestinationCard()
@@ -64,8 +64,8 @@ class CardCreationTests: BaseTest {
     func testCreateCardOmniboxSearch() {
         let journalView = launchApp()
         
-        testRailPrint("When I create \(cardNameToBeCreated) a card from Omnibar search results")
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        testRailPrint("When I create \(cardNameToBeCreated) a card from Omnibox search results")
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
@@ -78,13 +78,13 @@ class CardCreationTests: BaseTest {
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString )
     }
     
-    func testCreateCardOmniboxCmdEnter() {
+    func testCreateCardOmniboxOptionEnter() {
         let journalView = launchApp()
         
-        testRailPrint("When I create \(cardNameToBeCreated) a card from Omnibar search results via CMD+Enter")
-        journalView.searchInOmniBar(cardNameToBeCreated, false)
+        testRailPrint("When I create \(cardNameToBeCreated) a card from Omnibox search results via Option+Enter")
+        journalView.searchInOmniBox(cardNameToBeCreated, false)
         _ = journalView.app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: implicitWaitTimeout)
-        journalView.app.typeKey("\r", modifierFlags: .command)
+        journalView.app.typeKey("\r", modifierFlags: .option)
         
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         let cardView = CardTestView()

@@ -36,8 +36,8 @@ class JournalTestView: BaseView {
     }
     
     @discardableResult
-    func createCardViaOmnibarSearch(_ cardNameToBeCreated: String) -> CardTestView {
-        return self.searchInOmniBar(cardNameToBeCreated, false).selectCreateCard(cardNameToBeCreated)
+    func createCardViaOmniboxSearch(_ cardNameToBeCreated: String) -> CardTestView {
+        return self.searchInOmniBox(cardNameToBeCreated, false).selectCreateCard(cardNameToBeCreated)
     }
     
     @discardableResult

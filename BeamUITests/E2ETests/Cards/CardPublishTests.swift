@@ -35,7 +35,7 @@ class CardPublishTests: BaseTest {
         
         testRailPrint("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
                                                                         
         testRailPrint("Then the card is private by default")
         XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
@@ -61,7 +61,7 @@ class CardPublishTests: BaseTest {
         
         testRailPrint("Given I create \(cardNameToBeCreated) card")
         //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmnibarSearch(cardNameToBeCreated)
+        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         testRailPrint("When I publish and then unpublish the card")
         cardView.publishCard()
