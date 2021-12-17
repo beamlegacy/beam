@@ -178,7 +178,7 @@ extension BeamObjectManagerDelegate {
     }
 
     func refreshFromBeamObjectAPI(object: BeamObjectType,
-                                  forced: Bool = false) -> PromiseKit.Promise<BeamObjectType?> {
+                                  forced: Bool = false) -> Promise<BeamObjectType?> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(error: APIRequestError.notAuthenticated)
         }
