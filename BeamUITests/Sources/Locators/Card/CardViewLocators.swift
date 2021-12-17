@@ -21,13 +21,15 @@ enum CardViewLocators {
         case copyCardLinkButton = "editor-url_link"
         case linksSection = "LinksSection"
         case referencesSection = "ReferencesSection"
-        case linkButton = "link"
-        case linkAllButton = "linkAllLayer"
+        case linkButton = "link-reference-button"
+        case linkAllButton = "link-all-references-button"
         case deleteCardButton = "editor-delete"
         case publishCardButton = "NoteHeaderPublishButton"
         case linkNamesButton = "cardTitleLayer"
         case sourceButton = "source"
         case expandButton = "global-expand"
+        case linkReferenceCounterTitle = "sectionTitle"
+        case breadcrumbTitle = "breadcrumb0"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
@@ -53,7 +55,10 @@ enum CardViewLocators {
         case linksRefsLabel = "ProxyTextNode"
         case linksRefsTitle = "RefNoteTitle"
         case blockReference = "BlockReferenceNode"
-        
+    }
+    
+    enum OtherElements: String, CaseIterable, UIElement {
+        case breadCrumb = "BreadCrumb"
     }
     
 }
