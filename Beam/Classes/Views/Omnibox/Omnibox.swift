@@ -10,6 +10,8 @@ import BeamCore
 
 struct Omnibox: View {
 
+    static let defaultHeight: CGFloat = 46
+
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
@@ -56,7 +58,7 @@ struct Omnibox: View {
                     OmniboxSearchField(isEditing: isEditingBinding,
                                        modifierFlagsPressed: $modifierFlagsPressed,
                                        enableAnimations: false)
-                        .frame(height: 46)
+                        .frame(height: Self.defaultHeight)
                         .frame(maxWidth: .infinity)
                     if !autocompleteManager.searchQuery.isEmpty {
                         OmniboxClearButton()
@@ -70,7 +72,7 @@ struct Omnibox: View {
                             Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                             .blendModeLightMultiplyDarkScreen(),
                          alignment: .bottom)
-                .frame(height: 46, alignment: .top)
+                .frame(height: Self.defaultHeight, alignment: .top)
                 if shouldShowAutocompleteResults {
                     AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
                 }

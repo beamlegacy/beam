@@ -134,6 +134,19 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         self.setTrafficLightsLayout()
     }
 
+    private var _isMovable = true
+    override var isMovable: Bool {
+        get {
+            if let currentEvent = NSApp.currentEvent, currentEvent.type == .leftMouseDown, !allowsWindowDragging(with: currentEvent) {
+                return false
+            }
+            return _isMovable
+        }
+        set {
+            _isMovable = newValue
+        }
+    }
+
     // MARK: - Animations
     /// This methods creates a CALayer and animates it from the mouse current position to the position of the downloadButton of the window
     /// It should be trigerred when a file download starts
@@ -288,17 +301,8 @@ extension BeamWindow {
 // MARK: - Title Bar
 class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
 
-    private func allowWindowDragging(with event: NSEvent) -> Bool {
-        if let window = self.view.window as? BeamWindow,
-           window.state.mode == .web && window.state.undraggableWindowRect != .zero &&
-           window.state.undraggableWindowRect.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: window)) {
-            return false
-        }
-        return true
-    }
-
     override func mouseDown(with event: NSEvent) {
-        if allowWindowDragging(with: event) {
+        if (self.view.window as? BeamWindow)?.allowsWindowDragging(with: event) != false {
             super.mouseDown(with: event)
         }
         // NSTitlebarAccessoryViewController steal mouseDown events
@@ -309,6 +313,24 @@ class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
 }
 
 extension BeamWindow {
+    fileprivate func allowsWindowDragging(with event: NSEvent) -> Bool {
+        if state.mode == .web && state.focusOmniBox && state.focusOmniBoxFromTab, let searchField = self.firstResponder as? BeamTextFieldViewFieldEditor {
+            let omniboxFrame = omniboxFrameFromSearchField(searchField)
+            return !omniboxFrame.contains(event.locationInWindow)
+        } else if state.mode == .web && state.undraggableWindowRect != .zero &&
+            state.undraggableWindowRect.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: self)) {
+            return false
+        }
+        return true
+    }
+
+    private func omniboxFrameFromSearchField(_ searchField: BeamTextFieldViewFieldEditor) -> CGRect {
+        let minHeight = Omnibox.defaultHeight
+        var frame = searchField.frame
+        frame = frame.insetBy(dx: 0, dy: (frame.height - minHeight) / 2)
+        return searchField.convert(frame, to: nil)
+    }
+
     private func setupWindowButtons() {
         trafficLights = [
             standardWindowButton(.closeButton),
