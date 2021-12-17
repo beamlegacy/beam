@@ -19,9 +19,9 @@ class AllCardsDeleteTests: BaseTest {
         let journalView = self.restartApp()
         
         testRailPrint("Given I create 2 cards")
-        journalView.createCardViaOmnibarSearch(cardName1)
-        journalView.createCardViaOmnibarSearch(cardName2)
-        let allCardsView = OmniBarTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+        journalView.createCardViaOmniboxSearch(cardName1)
+        journalView.createCardViaOmniboxSearch(cardName2)
+        let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
         //Workaround for a random issue where Today's card duplicates are created
         //main thing is to make sure there are some multiple cards available for deletion
         XCTAssertTrue(allCardsView.getNumberOfCards() >= 3)
@@ -38,9 +38,9 @@ class AllCardsDeleteTests: BaseTest {
         
         let indexOfCard = 1
         testRailPrint("Given I create 2 cards")
-        journalView.createCardViaOmnibarSearch(cardName1)
-        journalView.createCardViaOmnibarSearch(cardName2)
-        let allCardsView = OmniBarTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+        journalView.createCardViaOmniboxSearch(cardName1)
+        journalView.createCardViaOmniboxSearch(cardName2)
+        let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
         //Workaround for a random issue where Today's card duplicates are created
         //main thing is to make sure there are some multiple cards available for deletion
         let cardsBeforeDeletion = allCardsView.getNumberOfCards()

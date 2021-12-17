@@ -20,7 +20,7 @@ class LoginPasswordAutocompleteTests: BaseTest {
         let helper = PasswordManagerHelper()
         BeamUITestsHelper(journalView.app).tapCommand(.resizeSquare1000)
         testRailPrint("When I open Facebook login page ")
-        let webView = journalView.searchInOmniBar(facebookPage, true)
+        let webView = journalView.searchInOmniBox(facebookPage, true)
         XCTAssertTrue(handleWebsiteIsNotOpened(webView), "Google page is still opened")
         XCTAssertTrue(handleFacebookCookiesPopup(webView), "facebook cookies pop-up blocks the web page")
         let emailField = webView.textField("Email or Phone Number")
@@ -62,7 +62,7 @@ class LoginPasswordAutocompleteTests: BaseTest {
         
         testRailPrint("Given I populate passwords and load a test page")
         UITestsMenuBar().populatePasswordsDB()
-        OmniBarUITestsHelper(journalView.app).tapCommand(.loadUITestPagePassword)
+        OmniBoxUITestsHelper(journalView.app).tapCommand(.loadUITestPagePassword)
         let helper = PasswordManagerHelper()
         let passwordPage = UITestPagePasswordManager()
         

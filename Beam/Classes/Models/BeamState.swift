@@ -60,7 +60,6 @@ import Sentry
     @Published var isFullScreen: Bool = false
     @Published var focusOmniBox: Bool = true
     @Published var focusOmniBoxFromTab: Bool = false
-    var useOmniboxV2 = false
 
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
@@ -407,21 +406,8 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "startQuery \(node)", category: "BeamState")
         let query = node.currentSelectionWithFullSentences()
         guard !query.isEmpty, let url = urlFor(query: query) else { return }
-
-        let completeQuery = { [unowned self] in
-            self.createTabFromNode(node, withURL: url)
-            self.mode = .web
-        }
-        if animated {
-            autocompleteManager.animateDirectQuery(with: query)
-            let animationDuration = 300
-            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(animationDuration))) { [unowned self] in
-                autocompleteManager.animateDirectQuery(with: nil)
-                completeQuery()
-            }
-        } else {
-            completeQuery()
-        }
+        self.createTabFromNode(node, withURL: url)
+        self.mode = .web
     }
 
     private func selectAutocompleteResult(_ result: AutocompleteResult) {
@@ -489,7 +475,6 @@ import Sentry
 
     override public init() {
         data = AppDelegate.main.data
-        useOmniboxV2 = PreferencesManager.omniboxV2IsOn
         super.init()
         setup(data: data)
 
@@ -508,7 +493,6 @@ import Sentry
 
     required public init(from decoder: Decoder) throws {
         data = AppDelegate.main.data
-        useOmniboxV2 = PreferencesManager.omniboxV2IsOn
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -560,7 +544,7 @@ import Sentry
     func setFocusOmnibox(fromTab: Bool = false) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if mode == .web {
-            focusOmniBoxFromTab = fromTab && useOmniboxV2
+            focusOmniBoxFromTab = fromTab
             if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
                 autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
@@ -574,13 +558,6 @@ import Sentry
 
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-
-        if !useOmniboxV2 && mode == .web {
-            autocompleteManager.clearAutocompleteResults()
-            autocompleteManager.resetQuery()
-            createEmptyTab()
-        }
-
         if focusOmniBox {
             autocompleteManager.shakeOmniBox()
         }
@@ -623,15 +600,11 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
 
     func showNextTab() {
-        let wasFocused = focusOmniBox
         browserTabsManager.showNextTab()
-        if wasFocused { setFocusOmnibox(fromTab: true) }
     }
 
     func showPreviousTab() {
-        let wasFocused = focusOmniBox
         browserTabsManager.showPreviousTab()
-        if wasFocused { setFocusOmnibox(fromTab: true) }
     }
 
     // MARK: BrowserTabsManagerDelegate
@@ -650,11 +623,7 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
     func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?) {
         resetDestinationCard()
-        if areTabsVisible(for: browserTabsManager), let tab = currentTab, tab.url == nil {
-            setFocusOmnibox()
-        } else {
-            focusOmniBox = false
-        }
+        focusOmniBox = false
     }
 
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {

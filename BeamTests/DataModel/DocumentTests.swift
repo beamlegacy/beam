@@ -57,7 +57,7 @@ class DocumentTests: QuickSpec {
 
         describe(".fetchWithTitle()") {
             // Checks https://linear.app/beamapp/issue/BE-1116/sqlcore-crash-in-documentfetchfirst-when-typing-/-in-omnibar
-            // Typing `\` in Omnibar used to crash
+            // Typing `\` in Omnibox used to crash
             it("doesn't crash with \\") {
                 expect {
                     try sut.fetchWithTitle("\\")

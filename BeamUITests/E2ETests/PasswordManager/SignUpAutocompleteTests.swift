@@ -20,7 +20,7 @@ class SignUpAutocompleteTests: BaseTest {
         let helper = PasswordManagerHelper()
         let journalView = launchApp()
         BeamUITestsHelper(journalView.app).tapCommand(.resizeSquare1000)
-        let webView = journalView.searchInOmniBar(wikiSignUpPage, true)
+        let webView = journalView.searchInOmniBox(wikiSignUpPage, true)
         XCTAssertTrue(handleWebsiteIsNotOpened(webView), "Google page is still opened")
         webView.staticText("Create account").tapInTheMiddle()
         _ = webView.secureTextField(placeholderField1).waitForExistence(timeout: implicitWaitTimeout)

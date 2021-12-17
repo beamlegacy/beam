@@ -51,6 +51,7 @@ class ShortcutsHelper {
         case cut
         case search
         case openPreferences
+        case openLocation
         case showJournal
         case showAllCards
         case instantSearch
@@ -97,6 +98,7 @@ class ShortcutsHelper {
         case .cut: invokeCMDKey("x")
         case .search: invokeCMDKey("f")
         case .openPreferences: invokeCMDKey(",")
+        case .openLocation: invokeCMDKey("l")
         case .showJournal: invokeCMDShiftKey("j")
         case .showAllCards: invokeCMDShiftKey("h")
         case .instantSearch: invokeCMDKey(.return)

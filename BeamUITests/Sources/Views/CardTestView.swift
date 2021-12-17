@@ -89,7 +89,7 @@ class CardTestView: BaseView {
     }
     
     func navigateToWebView() {
-        button(OmniBarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        button(OmniBoxLocators.Buttons.openWebButton.accessibilityIdentifier).click()
     }
     
     func getNumberOfImageNotes() -> Int {

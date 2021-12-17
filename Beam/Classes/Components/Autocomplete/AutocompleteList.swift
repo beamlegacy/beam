@@ -13,25 +13,23 @@ struct AutocompleteList: View {
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutocompleteResult]
     var modifierFlagsPressed: NSEvent.ModifierFlags?
-    var designV2 = false
 
     @State private var hoveredItemIndex: Int?
 
     var body: some View {
         VStack(spacing: 0) {
             ForEach(elements) { i in
-                if designV2 && i.source == .createCard {
-                    Separator(horizontal: true)
+                if i.source == .createCard {
+                    Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
+                        .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
                 }
                 AutocompleteItem(item: i, selected: isSelectedItem(i),
                                  colorPalette: i.source == .createCard ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
-                                    AutocompleteItem.defaultColorPalette,
-                                 additionalLeadingPadding: designV2 ? 0 : BeamSpacing._40,
-                                 designV2: designV2)
-                    .frame(height: designV2 ? 36 : 32)
-                    .padding(.horizontal, designV2 ? BeamSpacing._60 : 0)
+                                    AutocompleteItem.defaultColorPalette)
+                    .frame(height: 36)
+                    .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
                             selectedIndex = indexFor(item: i)
@@ -48,15 +46,13 @@ struct AutocompleteList: View {
                     }
             }
         }
-        .padding(.vertical, designV2 ? BeamSpacing._60 : 0)
+        .padding(.vertical, BeamSpacing._60)
         .animation(nil)
         .frame(maxWidth: .infinity, alignment: .top)
     }
 
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
-        if designV2 && modifierFlagsPressed?.contains(.option) == true {
-            return item.source == .createCard
-        } else if !designV2 && modifierFlagsPressed?.contains(.command) == true {
+        if modifierFlagsPressed?.contains(.option) == true {
             return item.source == .createCard
         } else if let i = selectedIndex, i < elements.count, elements[i] == item {
             return true
@@ -83,6 +79,6 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "result.com", source: .url),
         AutocompleteResult(text: "My Own Card", source: .createCard)]
     static var previews: some View {
-        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil, designV2: true)
+        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
     }
 }
