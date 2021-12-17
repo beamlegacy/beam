@@ -70,7 +70,7 @@ class CloseTab: WebCommand {
 
         if let i = context.browserTabsManager.tabs.firstIndex(of: tab) {
             self.tabIndex = i
-
+            
             context.browserTabsManager.tabs.remove(at: i)
             context.browserTabsManager.removeTabFromGroup(tabId: tab.id)
 
