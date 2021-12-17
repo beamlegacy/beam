@@ -16,6 +16,7 @@ struct Configuration {
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
     static private(set) var topDomainDBMaxSize = 10000
+    static private(set) var beamObjectDataOnSeparateCall = false
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
 
@@ -27,7 +28,7 @@ struct Configuration {
 
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
-    static private(set) var apiHostnameDefault = "https://api.beamapp.co"
+    static private(set) var apiHostnameDefault = "https://api.beamapp.co" // "http://api.beam.lvh.me"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
     static private var apiHostnameKey = "apiHostname"

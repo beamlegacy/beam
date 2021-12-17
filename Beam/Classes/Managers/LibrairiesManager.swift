@@ -37,7 +37,7 @@ extension LibrariesManager {
                                        category: .sentry)
                 return event
             }
-            options.debug = true
+            options.debug = false
             options.tracesSampleRate = 1.0
             options.releaseName = Information.appVersionAndBuild
         }

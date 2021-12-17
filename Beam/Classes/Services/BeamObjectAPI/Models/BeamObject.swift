@@ -58,6 +58,7 @@ class BeamObject: Codable {
     var receivedAt: Date?
 
     var data: Data?
+    var dataUrl: String?
     var dataChecksum: String?
     var previousChecksum: String?
     var privateKeySignature: String?
@@ -88,6 +89,7 @@ class BeamObject: Codable {
         case deletedAt
         case receivedAt
         case data
+        case dataUrl = "dataUrl"
         case dataChecksum = "checksum"
         case previousChecksum
         case privateKeySignature
@@ -198,6 +200,7 @@ class BeamObject: Codable {
     }
 
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
+        let localTimer = BeamDate.now
         assert(!encoded)
 
         let jsonData = try Self.encoder.encode(object)
@@ -205,6 +208,13 @@ class BeamObject: Codable {
         encoded = true
         data = jsonData
         dataChecksum = jsonData.SHA256
+
+        let timeDiff = BeamDate.now.timeIntervalSince(localTimer)
+        if timeDiff > 1.0 {
+            Logger.shared.logError("Slow BeamObject encoding, data size: \(jsonData.count)",
+                                   category: .beamObject,
+                                   localTimer: localTimer)
+        }
     }
 
     func decode<T: BeamObjectProtocol>() -> T? {

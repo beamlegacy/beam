@@ -21,10 +21,11 @@ class UserInfoRequestTests: QuickSpec {
         let nonAvailableUsername = "beam"
 
         beforeEach {
-            BeamTestsHelper.login()
             availableUsername = String("UIRTests-\(UUID())".prefix(29))
             sut = UserInfoRequest()
+            BeamTestsHelper.logout()
             beamHelper.beginNetworkRecording()
+            BeamTestsHelper.login()
         }
 
         afterEach {

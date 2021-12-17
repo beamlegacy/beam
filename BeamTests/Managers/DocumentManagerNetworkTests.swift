@@ -179,7 +179,7 @@ class DocumentManagerNetworkTests: QuickSpec {
                 helper.deleteDocumentStruct(docStruct)
             }
 
-            context("when remote has the same updatedAt") {
+            context("when remote has the same checksum") {
                 beforeEach {
                     docStruct = self.createStruct("Doc 1", "995d94e1-e0df-4eca-93e6-8778984bcd18", helper)
                     helper.saveRemotely(docStruct)

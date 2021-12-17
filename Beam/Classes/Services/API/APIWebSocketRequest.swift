@@ -143,6 +143,7 @@ class APIWebSocketRequest: APIRequest {
 
                         do {
                             try beamObject.decrypt()
+                            try beamObject.setTimestamps()
                             completionHandler(.success(beamObject))
                         } catch {
                             completionHandler(.failure(error))

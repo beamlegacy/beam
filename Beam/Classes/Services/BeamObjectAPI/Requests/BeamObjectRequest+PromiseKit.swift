@@ -74,6 +74,7 @@ extension BeamObjectRequest {
             }
 
             try? beamObject.decrypt()
+            try? beamObject.setTimestamps()
             return beamObject
         }
     }

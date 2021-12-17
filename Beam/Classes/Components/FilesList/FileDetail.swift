@@ -9,6 +9,7 @@ struct FileDetail: View {
     @State private var cancellable: DatabaseCancellable?
     @State private var refreshing = false
     @State private var deleted = false
+    @State private var saving = false
 
     private let fileManager = BeamFileDBManager()
     private let formatter = ByteCountFormatter()
@@ -196,20 +197,28 @@ struct FileDetail: View {
 
     private var SaveButton: some View {
         Button(action: {
-            do {
-                try fileManager.saveOnBeamObjectAPI(file) { result in
-                    switch result {
-                    case .success: break
-                    case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+            let backgroundQueue = DispatchQueue(label: "FileDetail BeamObjectManager backgroundQueue", qos: .userInitiated)
+
+            backgroundQueue.async {
+                do {
+                    saving = true
+
+                    try fileManager.saveOnBeamObjectAPI(file) { result in
+                        saving = false
+
+                        switch result {
+                        case .success: break
+                        case .failure(let error):
+                            Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                        }
                     }
+                } catch {
+                    Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
                 }
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
             }
         }, label: {
             Text("Save").frame(minWidth: 100)
-        }).disabled(deleted)
+        }).disabled(deleted || saving)
     }
 
     private var LocalDeleteButton: some View {

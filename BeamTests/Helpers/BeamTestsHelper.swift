@@ -39,7 +39,7 @@ class BeamTestsHelper {
         let recordingMode = RecordingMode.missingVinyl(recordingPath: fullFilename)
         let configuration = TurntableConfiguration(matchingStrategy: .trackOrder,
                                                    recordingMode: ProcessInfo.processInfo.environment["CI_JOB_ID"] != nil ? .none : recordingMode)
-        turntable = Turntable(vinylName: fullFilename, turntableConfiguration: configuration)
+        turntable = Turntable(vinylName: fullFilename, turntableConfiguration: configuration, urlSession: BeamURLSession.shared)
 
         BeamURLSession.shared = turntable!
         APIRequest.clearNetworkCallsFiles()

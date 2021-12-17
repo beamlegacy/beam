@@ -32,6 +32,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             sut.registerOnBeamObjectManager()
 
             try? MyRemoteObjectManager.deleteAll()
+            try? BeamObjectChecksum.deleteAll()
 
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
@@ -87,6 +88,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                                     expect(remoteObject?.updatedAt) == date
                                     expect(object1.updatedAt) == dateFormatter.date(from: fixedDate)
+                                    expect(remoteObject?.title) == object1.title
 
                                     done()
                                 }
@@ -95,7 +97,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             expect(APIRequest.callsCount - networkCalls) == 2
 
                             let expectedNetworkCalls = ["beam_object_updated_at",
-                                                        "beam_object"]
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object"]
 
                             expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                         }
@@ -181,7 +183,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                                 expect(APIRequest.callsCount - networkCalls) == 1
 
-                                let expectedNetworkCalls = ["beam_object"]
+                                let expectedNetworkCalls = [Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object"]
 
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
@@ -716,10 +718,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     BeamDate.travel(2)
 
                     // Create 1 conflicted object
-                    object1.title = newTitle1
+                    object1.title = "fake"
                     object1.updatedAt = BeamDate.now
                     MyRemoteObjectManager.store[object1.beamObjectId] = object1
                     try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                    object1.title = newTitle1
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
                 }
 
                 context("with replace policy") {
@@ -740,7 +745,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -771,7 +776,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -802,7 +807,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -843,7 +848,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -880,7 +885,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -917,7 +922,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -960,8 +965,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                     // Create 2 conflicted objects
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
+                    object1.title = "fake"
+                    object2.title = "fake"
 
                     object1.updatedAt = BeamDate.now
                     object2.updatedAt = BeamDate.now
@@ -971,6 +976,12 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                     try? BeamObjectChecksum.savePreviousChecksum(object: object1)
                     try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                    object1.title = newTitle1
+                    object2.title = newTitle2
+
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
                 }
 
                 context("with replace policy") {
@@ -991,7 +1002,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -1083,7 +1094,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                             waitUntil(timeout: .seconds(10)) { done in
                                 do {
-                                    _ = try sut.saveAllOnBeamObjectApi() { result in
+                                    _ = try sut.saveAllOnBeamObjectApi { result in
                                         expect { try result.get() }.toNot(throwError())
 
                                         done()
@@ -1094,7 +1105,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -1228,9 +1239,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                     BeamDate.travel(2)
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
-                    object3.title = newTitle3
+                    object1.title = "fake"
+                    object2.title = "fake"
+                    object3.title = "fake"
 
                     object1.updatedAt = BeamDate.now
                     object2.updatedAt = BeamDate.now
@@ -1243,6 +1254,14 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     try? BeamObjectChecksum.savePreviousChecksum(object: object1)
                     try? BeamObjectChecksum.savePreviousChecksum(object: object2)
                     try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                    object1.title = newTitle1
+                    object2.title = newTitle2
+                    object3.title = newTitle3
+
+                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                    MyRemoteObjectManager.store[object3.beamObjectId] = object3
                 }
 
                 context("with replace policy") {
@@ -1263,7 +1282,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -1353,9 +1372,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("saves all objects") {
                             let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(60)) { done in
                                 do {
-                                    _ = try sut.saveAllOnBeamObjectApi() { result in
+                                    _ = try sut.saveAllOnBeamObjectApi { result in
                                         expect { try result.get() }.toNot(throwError())
 
                                         done()
@@ -1366,7 +1385,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -1913,10 +1932,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             let group = DispatchGroup()
 
                             group.enter()
-                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { _ in group.leave() }
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], force: true) { _ in group.leave() }
 
                             group.enter()
-                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                            _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3], force: true) { result in
                                 expect { try result.get() }.toNot(throwError())
 
                                 group.leave()
@@ -1963,9 +1982,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     BeamDate.travel(2)
 
                     // Create 1 conflicted object
-                    object1.title = newTitle1
+                    object1.title = "fake"
                     object1.updatedAt = BeamDate.now
                     try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                    object1.title = newTitle1
                 }
 
                 context("with replace policy") {
@@ -1986,7 +2007,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2035,7 +2056,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2082,7 +2103,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_object"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2140,7 +2161,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2195,7 +2216,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2244,7 +2265,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_object",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2299,14 +2320,17 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     // Create 2 conflicted objects
                     BeamDate.travel(2)
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
+                    object1.title = "fake"
+                    object2.title = "fake"
 
                     object1.updatedAt = BeamDate.now
                     object2.updatedAt = BeamDate.now
 
                     try? BeamObjectChecksum.savePreviousChecksum(object: object1)
                     try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                    object1.title = newTitle1
+                    object2.title = newTitle2
                 }
 
                 context("with replace policy") {
@@ -2327,7 +2351,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2487,7 +2511,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2674,9 +2698,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                     BeamDate.travel(2)
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
-                    object3.title = newTitle3
+                    object1.title = "fake"
+                    object2.title = "fake"
+                    object3.title = "fake"
 
                     object1.updatedAt = BeamDate.now
                     object2.updatedAt = BeamDate.now
@@ -2685,6 +2709,10 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     try? BeamObjectChecksum.savePreviousChecksum(object: object1)
                     try? BeamObjectChecksum.savePreviousChecksum(object: object2)
                     try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                    object1.title = newTitle1
+                    object2.title = newTitle2
+                    object3.title = newTitle3
                 }
 
                 context("with replace policy") {
@@ -2705,7 +2733,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -2788,6 +2816,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
                         }
                     }
+
                     context("Promises") {
                         it("saves all objects with their new content") {
                             let networkCalls = APIRequest.callsCount
@@ -2866,7 +2895,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
+                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
                                                         "update_beam_objects"]
 
                             expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -3371,11 +3400,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                                 group.enter()
 
-                                _ = try sut.saveOnBeamObjectAPI(object) { _ in group.leave() }
+                                _ = try sut.saveOnBeamObjectAPI(object, force: true) { _ in group.leave() }
 
                                 group.enter()
 
-                                _ = try sut.saveOnBeamObjectAPI(object) { result in
+                                _ = try sut.saveOnBeamObjectAPI(object, force: true) { result in
                                     expect { try result.get() }.toNot(throwError())
 
                                     group.leave()
@@ -3428,7 +3457,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
 
                                 let expectedNetworkCalls = ["update_beam_object",
-                                                            "beam_object",
+                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                             "update_beam_object"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -3473,7 +3502,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
 
                                 let expectedNetworkCalls = ["update_beam_object",
-                                                            "beam_object",
+                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                             "update_beam_object"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -3516,7 +3545,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
 
                                 let expectedNetworkCalls = ["update_beam_object",
-                                                            "beam_object",
+                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                             "update_beam_object"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -3570,7 +3599,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
 
                                 let expectedNetworkCalls = ["update_beam_object",
-                                                            "beam_object",
+                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                             "update_beam_objects"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -3623,7 +3652,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
 
                                 let expectedNetworkCalls = ["update_beam_object",
-                                                            "beam_object",
+                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                             "update_beam_objects"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
@@ -3674,7 +3703,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 }
 
                                 let expectedNetworkCalls = ["update_beam_object",
-                                                            "beam_object",
+                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                                                             "update_beam_objects"]
 
                                 expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
