@@ -19,9 +19,10 @@ class CardTestView: BaseView {
             .waitForExistence(timeout: implicitWaitTimeout)
     }
     
+    /*Deprecated 
     func openEditorOptions() {
         image(CardViewLocators.Buttons.editorOptions.accessibilityIdentifier).click()
-    }
+    }*/
     
     func getCardTitle() -> String {
         return self.getElementStringValue(element: cardTitle)
@@ -129,7 +130,7 @@ class CardTestView: BaseView {
         return app.windows.buttons.matching(identifier: CardViewLocators.Buttons.linkNamesButton.accessibilityIdentifier).allElementsBoundByIndex
     }
     
-    func getLinksContent() -> [XCUIElement] {
+    func getLinksContentElement() -> [XCUIElement] {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier).allElementsBoundByIndex
     }
     
@@ -138,7 +139,11 @@ class CardTestView: BaseView {
     }
     
     func getLinkContentByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element: getLinksContent()[index])
+        return self.getElementStringValue(element: getLinksContentElement()[index])
+    }
+    
+    func getLinkContentElementByIndex(_ index: Int) -> XCUIElement {
+        return getLinksContentElement()[index]
     }
     
     func getLinkNameByIndex(_ index: Int) -> String {
@@ -146,7 +151,7 @@ class CardTestView: BaseView {
     }
     
     func getLinksContentNumber() -> Int {
-        return self.getLinksContent().count
+        return self.getLinksContentElement().count
     }
     
     func getReferences() -> [XCUIElement] {
@@ -189,6 +194,26 @@ class CardTestView: BaseView {
         return self
     }
     
+    func assertLinksCounterTitle(expectedNumber: Int) {
+        let linksPostfix = expectedNumber == 1 ? " Link" : " Links"
+        XCTAssertEqual("\(expectedNumber)\(linksPostfix)", getLinksCounterElement().title, "\(getLinksCounterElement().title) is not equal to expected \(expectedNumber) number")
+    }
+    
+    func assertReferenceCounterTitle(expectedNumber: Int) {
+        let referencesPostfix = expectedNumber == 1 ? " Reference" : " References"
+        XCTAssertEqual("\(expectedNumber)\(referencesPostfix)", getReferencesCounterElement().title, "\(getReferencesCounterElement().title) is not equal to expected \(expectedNumber) number")
+    }
+    
+    func getReferencesCounterElement() -> XCUIElement {
+        _ = otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: minimumWaitTimeout)
+        return otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
+    }
+    
+    func getLinksCounterElement() -> XCUIElement {
+        _ = otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: minimumWaitTimeout)
+        return otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
+    }
+    
     @discardableResult
     func clickDisclosureTriangleByIndex(_ index: Int = 0) -> CardTestView {
         let element = getDisclosureTriangles().element(boundBy: index)
@@ -208,8 +233,22 @@ class CardTestView: BaseView {
     
     @discardableResult
     func expandReferenceSection() -> CardTestView {
-        otherElement(AllCardsViewLocators.Others.referenceSection.accessibilityIdentifier).tapInTheMiddle()
+        self.getRefereceSectionCounterElement().tapInTheMiddle()
         return self
+    }
+    
+    @discardableResult
+    func linkAllReferences() -> CardTestView {
+        button(CardViewLocators.Buttons.linkAllButton.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
+    func doesReferenceSectionExist() -> Bool {
+        return self.getRefereceSectionCounterElement().waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
+    func getRefereceSectionCounterElement() -> XCUIElement {
+        return otherElement(AllCardsViewLocators.Others.referenceSection.accessibilityIdentifier)
     }
     
     func getBlockRefs() -> XCUIElementQuery {
@@ -247,5 +286,25 @@ class CardTestView: BaseView {
     func triggerContextMenu(key: String) -> ContextMenuTestView {
         app.typeText("/")
         return ContextMenuTestView(key: key)
+    }
+    
+    func waitForCardToOpen(cardTitle: String) -> Bool {
+        return WaitHelper().waitForStringValueEqual(cardTitle, self.cardTitle, implicitWaitTimeout)
+    }
+    
+    func getBreadCrumbElements() -> [XCUIElement] {
+        return otherElement(CardViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func waitForBreadcrumbs() -> Bool {
+        return otherElement(CardViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: minimumWaitTimeout)
+    }
+    
+    func getBreadCrumbElementsNumber() -> Int {
+        return self.getBreadCrumbElements().count
+    }
+    
+    func getBreadCrumbTitleByIndex(_ index: Int) -> String {
+        return self.getBreadCrumbElements()[index].title
     }
 }
