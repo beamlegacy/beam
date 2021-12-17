@@ -104,6 +104,11 @@ struct TabsListView: View {
         }
     }
 
+    private let tabTransition = AnyTransition.asymmetric(insertion: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
+                                                            .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05).delay(0.1))),
+                                                         removal: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
+                                                            .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05))))
+
     private func renderTab(_ tab: BrowserTab, index: Int, selectedIndex: Int, isSingle: Bool,
                            canScroll: Bool, widthProvider: TabsWidthProvider, centeringAdjustment: CGFloat = 0) -> some View {
         let selected = isSelected(tab)
@@ -152,10 +157,7 @@ struct TabsListView: View {
         .id(id)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(id)
-        .transition(.asymmetric(insertion: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
-                                    .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05).delay(0.1))),
-                                removal: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
-                                    .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05)))))
+        .transition(tabTransition)
     }
 
     var body: some View {
@@ -251,16 +253,16 @@ struct TabsListView: View {
                 )
             }
             .onChange(of: geometry.size) { _ in
-                updateDraggableWindowRect(with: geometry, tabsSections: tabsSections)
+                updateDraggableWindowRect(with: geometry, otherTabsCount: tabsSections.otherTabs.count)
             }
-            .onChange(of: tabsSections.otherTabs.count) { _ in
-                updateDraggableWindowRect(with: geometry, tabsSections: tabsSections)
+            .onChange(of: tabsSections.otherTabs.count) { newValue in
+                updateDraggableWindowRect(with: geometry, otherTabsCount: newValue)
             }
             .onAppear {
-                updateDraggableWindowRect(with: geometry, tabsSections: tabsSections)
+                updateDraggableWindowRect(with: geometry, otherTabsCount: tabsSections.otherTabs.count)
             }
             .onDisappear {
-                updateDraggableWindowRect(with: nil, tabsSections: tabsSections)
+                updateDraggableWindowRect(with: nil, otherTabsCount: tabsSections.otherTabs.count)
             }
             .onPreferenceChange(CurrentTabGlobalFrameKey.self) {
                 guard !isDraggingATab else { return }
@@ -270,8 +272,8 @@ struct TabsListView: View {
     }
 
     // MARK: - Actions
-    private func updateDraggableWindowRect(with geometry: GeometryProxy?, tabsSections: TabsSections) {
-        guard let geometry = geometry, tabsSections.otherTabs.count > 1 else {
+    private func updateDraggableWindowRect(with geometry: GeometryProxy?, otherTabsCount: Int) {
+        guard let geometry = geometry, otherTabsCount > 1 else {
             state.undraggableWindowRect = .zero
             return
         }

@@ -268,7 +268,7 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
     }
 
     override var intrinsicContentSize: NSSize {
-        let superSize = super.intrinsicContentSize
+        let superSize = super.intrinsicContentSize.rounded(.up)
         guard shouldUseIntrinsicContentSize else {
             return superSize
         }
@@ -369,7 +369,7 @@ class BeamNSSecureTextField: NSSecureTextField, BeamNSTextFieldProtocol {
     }
 
     override var intrinsicContentSize: NSSize {
-        let superSize = super.intrinsicContentSize
+        let superSize = super.intrinsicContentSize.rounded(.up)
         guard shouldUseIntrinsicContentSize else {
             return superSize
         }
