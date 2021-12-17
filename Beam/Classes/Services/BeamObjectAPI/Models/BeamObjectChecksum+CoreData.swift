@@ -143,6 +143,14 @@ extension BeamObjectChecksum {
         try CoreDataManager.save(context)
     }
 
+    static func deletePreviousChecksums(beamObjects: [BeamObject]) throws {
+        Logger.shared.logDebug("Deleting previous checksums for \(beamObjects)", category: .beamObject)
+
+        for beamObject in beamObjects {
+            try deletePreviousChecksum(beamObject: beamObject)
+        }
+    }
+
     static func deletePreviousChecksums<T: BeamObjectProtocol>(objects: [T]) throws {
         for object in objects {
             try deletePreviousChecksum(object: object)

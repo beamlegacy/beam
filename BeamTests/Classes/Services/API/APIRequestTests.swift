@@ -6,6 +6,8 @@ import Promises
 import PromiseKit
 
 @testable import Beam
+@testable import BeamCore
+
 class APIRequestTests: QuickSpec {
     var sut: APIRequest!
 
@@ -23,7 +25,6 @@ class APIRequestTests: QuickSpec {
         let email = Configuration.testAccountEmail
         let variables = ForgotPasswordParameters(email: email)
         let bodyParamsRequest = GraphqlParameters(fileName: "forgot_password", variables: variables)
-        let backgroundQueue = DispatchQueue(label: "APIRequestTests backgroundQueue", qos: .default)
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
@@ -90,7 +91,7 @@ class APIRequestTests: QuickSpec {
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.done(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                        promise.done { (forgotPassword: ForgotPassword) in
                             expect(forgotPassword.success).to(beTrue())
                             done()
                         }
@@ -114,10 +115,10 @@ class APIRequestTests: QuickSpec {
                         let promise: PromiseKit.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.done(on: backgroundQueue) { _ in
+                        promise.done { _ in
                             fail("shouldn't be called")
                         }
-                        .catch(on: backgroundQueue) { error in
+                        .catch { error in
                             expect((error as NSError).code) == NSURLErrorCannotFindHost
                             done()
                         }
@@ -137,7 +138,7 @@ class APIRequestTests: QuickSpec {
                         let promise: Promises.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                        promise.then { (forgotPassword: ForgotPassword) in
                             expect(forgotPassword.success).to(beTrue())
                             done()
                         }
@@ -161,10 +162,10 @@ class APIRequestTests: QuickSpec {
                         let promise: Promises.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)
-                        promise.then(on: backgroundQueue) { (forgotPassword: ForgotPassword) in
+                        promise.then { (forgotPassword: ForgotPassword) in
                             fail("shouldn't be called")
                         }
-                        .catch(on: backgroundQueue) { error in
+                        .catch { error in
                             expect((error as NSError).code) == NSURLErrorCannotFindHost
                             done()
                         }

@@ -192,8 +192,10 @@ extension BeamObjectManagerDelegate {
             }
         }
 
-        return objectManager.fetchObjectUpdatedAt(object: object).then(on: backgroundQueue) { updatedAt -> Promise<BeamObjectType?> in
-            guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
+        return objectManager.fetchObjectChecksum(object: object).then(on: backgroundQueue) { remoteChecksum -> Promise<BeamObjectType?> in
+            let beamObject = try BeamObject(object)
+
+            guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
                 return .value(nil)
             }
 

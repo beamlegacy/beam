@@ -10,7 +10,13 @@ extension BeamObjectManagerDelegate {
 
         self.willSaveAllOnBeamObjectApi()
 
+        let localTimer = BeamDate.now
+
         let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+
+        Logger.shared.logDebug("\(Self.BeamObjectType.beamObjectType.rawValue) manager returned \(toSaveObjects.count) objects",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
 
         guard !toSaveObjects.isEmpty else {
             completion(.success((0, nil)))
@@ -29,6 +35,7 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     // swiftlint:disable:next function_body_length
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType],
+                              force: Bool = false,
                               deep: Int = 0,
                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
@@ -66,7 +73,7 @@ extension BeamObjectManagerDelegate {
         var networkTask: APIRequest?
 
         do {
-            networkTask = try objectManager.saveToAPI(objects) { result in
+            networkTask = try objectManager.saveToAPI(objects, force: force) { result in
                 switch result {
                 case .failure(let error):
                     self.saveOnBeamObjectsAPIError(objects: objects,
@@ -238,7 +245,7 @@ extension BeamObjectManagerDelegate {
             }
         }
 
-        return try objectManager.fetchObjectUpdatedAt(object) { result in
+        return try objectManager.fetchObjectChecksum(object) { result in
             switch result {
             case .failure(let error):
                 if case APIRequestError.notFound = error {
@@ -249,15 +256,17 @@ extension BeamObjectManagerDelegate {
                 }
 
                 completion(.failure(error))
-            case .success(let updatedAt):
-                guard let updatedAt = updatedAt, updatedAt > object.updatedAt else {
-                    completion(.success(nil))
-                    BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-                    semaphore.signal()
-                    return
-                }
-
+            case .success(let remoteChecksum):
                 do {
+                    let beamObject = try BeamObject(object)
+
+                    guard let remoteChecksum = remoteChecksum, remoteChecksum != beamObject.dataChecksum else {
+                        completion(.success(nil))
+                        BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
+                        semaphore.signal()
+                        return
+                    }
+
                     _ = try objectManager.fetchObject(object) { result in
                         switch result {
                         case .failure(let error): completion(.failure(error))
@@ -288,6 +297,7 @@ extension BeamObjectManagerDelegate {
 
     @discardableResult
     func saveOnBeamObjectAPI(_ object: BeamObjectType,
+                             force: Bool = false,
                              _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
@@ -316,7 +326,7 @@ extension BeamObjectManagerDelegate {
         var networkTask: APIRequest?
 
         do {
-            networkTask = try objectManager.saveToAPI(object) { result in
+            networkTask = try objectManager.saveToAPI(object, force: force) { result in
                 switch result {
                 case .failure(let error):
                     self.saveOnBeamObjectAPIError(object: object,
@@ -412,7 +422,7 @@ extension BeamObjectManagerDelegate {
                 }
             }
 
-            try self.saveOnBeamObjectsAPI(mergedObjects, deep: deep + 1) { result in
+            try self.saveOnBeamObjectsAPI(mergedObjects, force: true, deep: deep + 1) { result in
                 switch result {
                 case .failure(let error):
                     completion(.failure(error))

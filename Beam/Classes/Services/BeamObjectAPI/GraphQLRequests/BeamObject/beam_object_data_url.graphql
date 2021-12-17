@@ -1,0 +1,12 @@
+query beamObject($id: ID!) {
+  beamObject(id: $id) {
+    id
+    dataUrl
+    checksum
+    type
+    createdAt
+    updatedAt
+    deletedAt
+    privateKeySignature
+  }
+}

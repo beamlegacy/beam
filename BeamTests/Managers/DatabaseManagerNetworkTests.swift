@@ -370,7 +370,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    let expectedNetworkCalls = ["beam_objects"]
+                    let expectedNetworkCalls = [Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects"]
                     expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                     expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
 
