@@ -11,7 +11,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
         try documentManager.saveDocumentQueue.sync {
             for updateObject in objects {
-                guard let documentCoreData = try documentManager.fetchWithId(updateObject.id) else {
+                guard let documentCoreData = try documentManager.fetchWithId(updateObject.id, includeDeleted: false) else {
                     throw DocumentManagerError.localDocumentNotFound
                 }
 
@@ -109,7 +109,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
                                       !conflictedDocuments.compactMap({ $0.isEmpty }).contains(false) {
                                 // local conflicted documents are empty, deleting them
                                 for localConflictedDocument in conflictedDocuments {
-                                    guard let localConflictedDocumentCD = try? fetchWithId(localConflictedDocument.id) else { continue }
+                                    guard let localConflictedDocumentCD = try? fetchWithId(localConflictedDocument.id, includeDeleted: false) else { continue }
 
                                     // We already saved this document, we must propagate its deletion
                                     if BeamObjectChecksum.previousChecksum(object: document) != nil {

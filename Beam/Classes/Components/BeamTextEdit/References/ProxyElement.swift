@@ -51,6 +51,7 @@ class ProxyElement: BeamElement {
     init(for element: BeamElement) {
         self.proxy = element
         super.init(proxy.text)
+        changePropagationEnabled = false
 
         proxy.$children
             .sink { [unowned self] newChildren in
@@ -81,6 +82,7 @@ class ProxyElement: BeamElement {
                 updating = true; defer { updating = false }
                 updateDate = newValue
             }.store(in: &scope)
+        changePropagationEnabled = true
     }
 
     func updateProxyChildren(_ newChildren: [BeamElement]) {

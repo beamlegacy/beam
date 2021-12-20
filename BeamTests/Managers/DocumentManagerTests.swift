@@ -115,13 +115,13 @@ class DocumentManagerTests: QuickSpec {
                      I had issues with multiple context not propagating changes between them, I use the following
                      lines to ensure it works for basic scenarios.
                      */
-                    guard let savedDocStruct = sut.loadById(id: docStruct.id) else {
+                    guard let savedDocStruct = sut.loadById(id: docStruct.id, includeDeleted: false) else {
                         fail("No coredata instance")
                         return
                     }
                     expect(savedDocStruct.data) == docStruct.data
 
-                    guard let cdDocStruct = try? sut.fetchWithId(docStruct.id) else {
+                    guard let cdDocStruct = try? sut.fetchWithId(docStruct.id, includeDeleted: false) else {
                         fail("No coredata instance")
                         return
                     }
@@ -368,7 +368,7 @@ class DocumentManagerTests: QuickSpec {
                 var docStruct = helper.createDocumentStruct()
                 docStruct = helper.saveLocally(docStruct)
 
-                let document = sut.loadById(id: docStruct.id)
+                let document = sut.loadById(id: docStruct.id, includeDeleted: false)
                 expect(document).toNot(beNil())
                 expect(document?.title).to(equal(docStruct.title))
                 expect(document?.data).to(equal(docStruct.data))
@@ -482,10 +482,10 @@ class DocumentManagerTests: QuickSpec {
 
                     expect(count).to(equal(0))
 
-                    var document = try? sut.fetchWithId(docStruct.id)
+                    var document = try? sut.fetchWithId(docStruct.id, includeDeleted: true)
                     expect(document?.deleted_at).toNot(beNil())
 
-                    document = try? sut.fetchWithId(docStruct2.id)
+                    document = try? sut.fetchWithId(docStruct2.id, includeDeleted: true)
                     expect(document?.deleted_at).toNot(beNil())
                 }
             }

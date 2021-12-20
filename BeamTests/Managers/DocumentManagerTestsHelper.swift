@@ -247,7 +247,7 @@ class DocumentManagerTestsHelper {
         ancestorDocStruct.data = ancestor.asData
         ancestorDocStruct = saveLocallyAndRemotely(ancestorDocStruct)
 
-        var localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+        var localDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
         expect(localDocStruct.data) == ancestor.asData
         expect(localDocStruct.previousSavedObject?.data) == ancestor.asData
         expect(try BeamObjectChecksum.previousSavedObject(object: localDocStruct)) == ancestorDocStruct
@@ -266,7 +266,7 @@ class DocumentManagerTestsHelper {
             expect(BeamObjectChecksum.previousChecksum(object: localDocStruct)) == (try BeamObject(ancestorDocStruct)).dataChecksum
         }
 
-        localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+        localDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
         expect(localDocStruct.data) == ancestor.asData
 
         if let newLocal = newLocal {
@@ -277,11 +277,11 @@ class DocumentManagerTestsHelper {
             localDocStruct.data = newLocal.asData
             localDocStruct = saveLocally(localDocStruct)
 
-            localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+            localDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
             expect(localDocStruct.data) == newLocal.asData
         }
 
-        localDocStruct = documentManager.loadById(id: ancestorDocStruct.id)!
+        localDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
 
         try BeamObjectChecksum.savePreviousChecksum(object: ancestorDocStruct)
 

@@ -126,6 +126,9 @@ public class BeamNote: BeamElement {
     public init(title: String) {
         self.title = Self.validTitle(fromTitle: title)
         super.init()
+        changePropagationEnabled = false
+        defer { changePropagationEnabled = true }
+
         self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
         checkHasNote()
@@ -135,6 +138,9 @@ public class BeamNote: BeamElement {
         self.title = BeamDate.journalNoteTitle(for: journalDate)
         self.type = BeamNoteType.journalForDate(journalDate)
         super.init()
+        changePropagationEnabled = false
+        defer { changePropagationEnabled = true }
+
         self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
         checkHasNote()
@@ -163,6 +169,9 @@ public class BeamNote: BeamElement {
         }
 
         try super.init(from: decoder)
+        changePropagationEnabled = false
+        defer { changePropagationEnabled = true }
+
         self.sign = Self.signPost.createId(object: self)
         if container.contains(.sources) {
             do {
@@ -188,17 +197,7 @@ public class BeamNote: BeamElement {
         }
         open = true
         checkHasNote()
-
-        #if DEBUG
-        let count = (Self.decodeCount[id] ?? 0) + 1
-        Self.decodeCount[id] = count
-        Logger.shared.logDebug("Decoded \(ttl) - \(id) (count = \(count))", category: .noteEditor)
-        #endif
     }
-
-    #if DEBUG
-    static var decodeCount = [UUID: Int]()
-    #endif
 
     override public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
@@ -360,7 +359,7 @@ public class BeamNote: BeamElement {
         return true
     }
 
-    public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing")
+    public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing", attributes: .concurrent)
     private static var fetchedNotes: [UUID: WeakReference<BeamNote>] = [:]
     private static var fetchedNotesTitles: [String: UUID] = [:]
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]

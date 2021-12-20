@@ -51,9 +51,14 @@ extension BeamNote: BeamNoteDocument {
                               journalDate: type.journalDateString)
     }
 
+    static var purgingNotes = Set<UUID>()
     static func updateNote(_ documentStruct: DocumentStruct) {
         guard documentStruct.deletedAt == nil else {
-            purgeDeletedNode(documentStruct.id)
+            if !purgingNotes.contains(documentStruct.id) {
+                purgeDeletedNode(documentStruct.id)
+            } else {
+                purgingNotes.remove(documentStruct.id)
+            }
             return
         }
 
@@ -88,10 +93,20 @@ extension BeamNote: BeamNoteDocument {
             return
         }
 
-        try? GRDBDatabase.shared.remove(noteId: id)
         unload(note: note)
-        Self.visitFetchedNotes {
-            $0.updateNoteNamesInInternalLinks(recursive: true)
+
+        note.links.map({ $0.noteID }).forEach { id in
+            guard let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false) else { return }
+            note.recursiveChangePropagationEnabled = false
+            note.updateNoteNamesInInternalLinks(recursive: true)
+            _ = note.syncedSave()
+            note.recursiveChangePropagationEnabled = true
+        }
+
+        do {
+            try GRDBDatabase.shared.remove(noteId: note.id)
+        } catch {
+            Logger.shared.logError("Impossible to remove all notes from indexing: \(error)", category: .search)
         }
     }
 
@@ -153,13 +168,13 @@ extension BeamNote: BeamNoteDocument {
 
     public func indexContents() {
         beamCheckMainThread()
-        sign.begin(Signs.indexContents)
+        sign.begin(Signs.indexContents, titleAndId)
         try? GRDBDatabase.shared.append(note: self)
         sign.end(Signs.indexContents)
     }
 
     public func syncedSave() -> Bool {
-        sign.begin(Signs.syncedSave)
+        sign.begin(Signs.syncedSave, titleAndId)
         var saved = false
         let semaphore = DispatchSemaphore(value: 0)
         save { result in
@@ -184,7 +199,7 @@ extension BeamNote: BeamNoteDocument {
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     public func save(completion: ((Result<Bool, Error>) -> Void)? = nil) {
         beamCheckMainThread()
-        sign.begin(Signs.save)
+        sign.begin(Signs.save, titleAndId)
         guard !saving.load(ordering: .relaxed) && version.load(ordering: .relaxed) == savedVersion.load(ordering: .relaxed) else {
             Logger.shared.logWarning("Waiting for last save: \(title) {\(id)} - saved version \(savedVersion.load(ordering: .relaxed)) / current \(version.load(ordering: .relaxed))",
                                      category: .document)
@@ -397,7 +412,7 @@ extension BeamNote: BeamNoteDocument {
                              decodeChildren: Bool = true) -> BeamNote? {
         beamCheckMainThread()
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchTitle)
+        sign.begin(Signs.fetchTitle, title)
         defer {
             sign.end(Signs.fetchTitle)
         }
@@ -427,7 +442,7 @@ extension BeamNote: BeamNoteDocument {
                              decodeChildren: Bool = true) -> BeamNote? {
         beamCheckMainThread()
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchJournalDate)
+        sign.begin(Signs.fetchJournalDate, journalDate.description)
         defer {
             sign.end(Signs.fetchJournalDate)
         }
@@ -455,16 +470,17 @@ extension BeamNote: BeamNoteDocument {
     }
 
     public static func fetch(id: UUID,
-                             keepInMemory: Bool = true,
+                             includeDeleted: Bool,
+                             keepInMemory: Bool = true, fetchFromMemory: Bool = true,
                              decodeChildren: Bool = true) -> BeamNote? {
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchId)
+        sign.begin(Signs.fetchId, id.uuidString)
         defer {
             sign.end(Signs.fetchId)
         }
 
         let documentManager = DocumentManager()
-        if keepInMemory {
+        if keepInMemory || fetchFromMemory {
             // Is the note in the cache?
             if let note = getFetchedNote(id) {
                 return note
@@ -472,7 +488,7 @@ extension BeamNote: BeamNoteDocument {
         }
 
         // Is the note in the document store?
-        guard let doc = documentManager.loadDocumentById(id: id) else {
+        guard let doc = documentManager.loadDocumentById(id: id, includeDeleted: includeDeleted) else {
             return nil
         }
 
@@ -509,7 +525,7 @@ extension BeamNote: BeamNoteDocument {
     public static func fetchJournalsFrom(date: String) -> [BeamNote] {
         beamCheckMainThread()
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchJournalsFromDate)
+        sign.begin(Signs.fetchJournalsFromDate, date)
         defer {
             sign.end(Signs.fetchJournalsFromDate)
         }
@@ -519,13 +535,13 @@ extension BeamNote: BeamNoteDocument {
         do {
             let todayInt = JournalDateConverter.toInt(from: date)
 
-            return try documentManager.fetchAll(filters: [.type(.journal), .nonFutureJournalDate(todayInt)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id) })
+            return try documentManager.fetchAll(filters: [.type(.journal), .nonFutureJournalDate(todayInt)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id, includeDeleted: false) })
         } catch { return [] }
     }
 
     public static func fetchJournalsBefore(count: Int, date: String) -> [BeamNote] {
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchJournalsBefore)
+        sign.begin(Signs.fetchJournalsBefore, date)
         defer {
             sign.end(Signs.fetchJournalsBefore)
         }
@@ -535,7 +551,7 @@ extension BeamNote: BeamNoteDocument {
         do {
             let dateInt = JournalDateConverter.toInt(from: date)
 
-            return try documentManager.fetchAll(filters: [.type(.journal), .beforeJournalDate(dateInt), .limit(count)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id) })
+            return try documentManager.fetchAll(filters: [.type(.journal), .beforeJournalDate(dateInt), .limit(count)], sortingKey: .journal(false)).compactMap({ Self.fetch(id: $0.id, includeDeleted: false) })
         } catch { return [] }
     }
 
@@ -547,7 +563,7 @@ extension BeamNote: BeamNoteDocument {
     // Beware that this function crashes whatever note with that title in the cache
     public static func create(title: String) -> BeamNote {
         let sign = Self.signPost.createId()
-        sign.begin(Signs.createTitle)
+        sign.begin(Signs.createTitle, title)
         defer {
             sign.end(Signs.createTitle)
         }
@@ -565,7 +581,7 @@ extension BeamNote: BeamNoteDocument {
 
     public static func create(journalDate: Date) -> BeamNote {
         let sign = Self.signPost.createId()
-        sign.begin(Signs.createJournalDate)
+        sign.begin(Signs.createJournalDate, journalDate.description)
         defer {
             sign.end(Signs.createJournalDate)
         }
@@ -588,7 +604,7 @@ extension BeamNote: BeamNoteDocument {
 
     public static func fetchOrCreate(title: String) -> BeamNote {
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchOrCreate)
+        sign.begin(Signs.fetchOrCreate, title)
         defer {
             sign.end(Signs.fetchOrCreate)
         }
@@ -604,7 +620,7 @@ extension BeamNote: BeamNoteDocument {
 
     public static func fetchOrCreateJournalNote(date: Date) -> BeamNote {
         let sign = Self.signPost.createId()
-        sign.begin(Signs.fetchOrCreateJournal)
+        sign.begin(Signs.fetchOrCreateJournal, date.description)
         defer {
             sign.end(Signs.fetchOrCreateJournal)
         }
@@ -623,6 +639,7 @@ extension BeamNote: BeamNoteDocument {
             AppDelegate.main.data?.lastChangedElement
         }
         set {
+            guard changePropagationEnabled else { return }
             AppDelegate.main.data?.lastChangedElement = newValue
         }
     }
@@ -669,7 +686,7 @@ extension BeamNote: BeamNoteDocument {
         let documentManager = DocumentManager()
         var rebuilt = [String]()
         for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
-            if let note = BeamNote.fetch(id: id) {
+            if let note = BeamNote.fetch(id: id, includeDeleted: false) {
                 _ = note.syncedSave()
                 rebuilt.append("rebuilt note '\(note.title)' [\(note.id)]")
                 rebuilt.append(contentsOf: note.validateLinks(fix: true))
@@ -686,7 +703,7 @@ extension BeamNote: BeamNoteDocument {
         let documentManager = DocumentManager()
         var all = [String]()
         for id in documentManager.allDocumentsIds(includeDeletedNotes: false) {
-            if let note = BeamNote.fetch(id: id) {
+            if let note = BeamNote.fetch(id: id, includeDeleted: false) {
                 let str = "validating \(note.title) - [\(note.id)]"
                 all.append(str)
                 //swiftlint:disable:next print
@@ -781,13 +798,15 @@ extension BeamNote: BeamNoteDocument {
         let sign = Self.signPost.createId()
         sign.begin(Signs.loadNotes)
         DispatchQueue.global(qos: .userInitiated).async {
-            completion(ids.compactMap { BeamNote.fetch(id: $0, keepInMemory: true, decodeChildren: true) })
+            completion(ids.compactMap { BeamNote.fetch(id: $0, includeDeleted: false, keepInMemory: true, decodeChildren: true) })
             sign.end(Signs.loadNotes)
         }
     }
 
     struct Signs {
         static let indexContents: StaticString = "indexContents"
+        static let indexContentsReferences: StaticString = "indexContents.references"
+        static let indexContentsLinks: StaticString = "indexContents.links"
         static let syncedSave: StaticString = "syncedSave"
         static let save: StaticString = "save"
         static let fetchTitle: StaticString = "fetchTitle"

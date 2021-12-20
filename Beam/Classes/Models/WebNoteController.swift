@@ -139,7 +139,7 @@ class WebNoteController: Encodable, Decodable {
     required public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         if let id = try? container.decode(UUID.self, forKey: .note),
-           let fetchedNote = BeamNote.fetch(id: id) {
+           let fetchedNote = BeamNote.fetch(id: id, includeDeleted: false) {
             note = fetchedNote
             let rootId = try? container.decode(UUID.self, forKey: .rootElement)
             _rootElement = fetchedNote.findElement(rootId ?? fetchedNote.id) ?? fetchedNote.children.first!

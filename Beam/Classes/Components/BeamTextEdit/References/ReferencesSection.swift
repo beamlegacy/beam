@@ -28,12 +28,11 @@ class ReferencesSection: LinksSection {
 
     override var links: [BeamNoteReference] { note.fastReferences }
     override var sectionTypeName: StaticString { "ReferenceSection" }
-    
+
     /// This overriden implementation of setupSectionMode does a late init.
     override func setupSectionMode() {
         self.createLinkAllLayer()
-        updateHeading(note.fastReferences.count)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now()) { [weak self] in
             guard let self = self else { return }
             self.doSetupSectionMode()
         }
@@ -47,9 +46,14 @@ class ReferencesSection: LinksSection {
             }.store(in: &scope)
     }
 
+    override func updateInitialHeading() {
+        let refs = note.fastReferences
+        updateHeading(refs.count)
+    }
+
     override func updateHeading(_ count: Int) {
         sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", count)
-        selfVisible = !children.isEmpty
+        selfVisible = count != 0
         visible = selfVisible
         sectionTitleLayer.isHidden = !selfVisible
         separatorLayer.isHidden = !selfVisible

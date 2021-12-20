@@ -122,7 +122,7 @@ extension DocumentManager {
             .then(on: backgroundQueue) { context -> Promise<Bool> in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
-                    guard let cdDocument = try? documentManager.fetchWithId(document.id) else {
+                    guard let cdDocument = try? documentManager.fetchWithId(document.id, includeDeleted: true) else {
                         throw DocumentManagerError.idNotFound
                     }
 

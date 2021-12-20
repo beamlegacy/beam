@@ -54,7 +54,7 @@ extension BeamTextEdit {
             guard let self = self, let node = node else { return }
             if searchCardContent, let elementId = elementId {
                 self.onFinishSelectingBlockRef(in: node, noteId: noteId, elementId: elementId, range: targetRange, prefix: prefix, suffix: suffix)
-            } else if let title = BeamNote.fetch(id: noteId)?.title {
+            } else if let title = BeamNote.fetch(id: noteId, includeDeleted: false)?.title {
                 self.onFinishSelectingLinkRef(in: node, title: title, range: targetRange, prefix: prefix, suffix: suffix)
             }
         }, onCreateNoteHandler: { [weak self] title in

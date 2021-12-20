@@ -135,8 +135,8 @@ class ScrollViewContentWatcher: NSObject {
         documentView.updateScrollingFrames()
 
         // Update journal when scrollview is close to the end
-        let offset = documentView.frame.maxY -  bounds.maxY
-        if offset < documentView.frame.maxY - spaceBeforeLoadingMoreData * bounds.height {
+        let offset = bounds.minY
+        if offset > documentView.frame.maxY - spaceBeforeLoadingMoreData * bounds.height {
             DispatchQueue.main.async { [weak self] in
                 self?.loadMore()
             }

@@ -34,7 +34,7 @@ extension BrowserHistoryImporter {
 
     func importHistory() throws {
         let url = try historyDatabaseURL()
-        guard let url = url else {
+        guard url != nil else {
             throw BrowserHistoryImporterError.noDatabaseURL
         }
         try historyDatabaseURL().map { url in

@@ -23,8 +23,8 @@ class NoteAutoSaveService: ObservableObject {
         $noteToSaveChanged
             .dropFirst()
             .sink { [unowned self] _ in
-            self.saveNotes()
-        }.store(in: &scope)
+                self.saveNotes()
+            }.store(in: &scope)
     }
 
     deinit {

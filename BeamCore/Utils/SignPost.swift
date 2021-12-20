@@ -7,9 +7,6 @@
 
 import Foundation
 import os.signpost
-@_exported import os
-@_exported import os.log
-import _SwiftOSOverlayShims
 
 public struct SignPost {
     var log: OSLog
@@ -46,27 +43,27 @@ public struct SignPost {
     }
 
     // With parameters:
-    public func begin(_ name: StaticString, id: SignPostId? = nil, _ format: StaticString) {
+    public func begin(_ name: StaticString, id: SignPostId? = nil, _ message: String) {
         if let id = id {
-            os_signpost(.begin, log: log, name: name, signpostID: id.id, format)
+            os_signpost(.begin, log: log, name: name, signpostID: id.id, "%{public}s", message)
         } else {
-            os_signpost(.begin, log: log, name: name, format)
+            os_signpost(.begin, log: log, name: name, "%{public}s", message)
         }
     }
 
-    public func end(_ name: StaticString, id: SignPostId? = nil, _ format: StaticString) {
+    public func end(_ name: StaticString, id: SignPostId? = nil, _ message: String) {
         if let id = id {
-            os_signpost(.end, log: log, name: name, signpostID: id.id, format)
+            os_signpost(.end, log: log, name: name, signpostID: id.id, "%{public}s", message)
         } else {
-            os_signpost(.end, log: log, name: name, format)
+            os_signpost(.end, log: log, name: name, "%{public}s", message)
         }
     }
 
-    public func event(_ name: StaticString, id: SignPostId? = nil, _ format: StaticString) {
+    public func event(_ name: StaticString, id: SignPostId? = nil, _ message: String) {
         if let id = id {
-            os_signpost(.event, log: log, name: name, signpostID: id.id, format)
+            os_signpost(.event, log: log, name: name, signpostID: id.id, "%{public}s", message)
         } else {
-            os_signpost(.event, log: log, name: name, format)
+            os_signpost(.event, log: log, name: name, "%{public}s", message)
         }
     }
 }
@@ -106,5 +103,17 @@ public struct SignPostId {
 
     public func event(_ name: StaticString, _ format: StaticString) {
         os_signpost(.event, log: log, name: name, signpostID: id, format)
+    }
+
+    public func begin(_ name: StaticString, _ message: String) {
+        os_signpost(.begin, log: log, name: name, signpostID: id, "%{public}s", message)
+    }
+
+    public func end(_ name: StaticString, _ message: String) {
+        os_signpost(.end, log: log, name: name, signpostID: id, "%{public}s", message)
+    }
+
+    public func event(_ name: StaticString, _ message: String) {
+        os_signpost(.event, log: log, name: name, signpostID: id, "%{public}s", message)
     }
 }
