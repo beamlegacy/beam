@@ -33,7 +33,7 @@ protocol WebPage: AnyObject, Scorable {
     var webPositions: WebPositions? { get }
 
     @discardableResult
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?>
+    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?) -> Promise<Any?>
 
     // MARK: Note handling
     func addToNote(allowSearchResult: Bool, inSourceBullet: Bool) -> BeamElement?
@@ -92,20 +92,21 @@ class WebPageHolder: NSObject, WebPageRelated {
 // MARK: - Default WebPage methods implementations
 extension WebPage {
 
-    func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
+    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil) -> Promise<Any?> {
         Promise<Any?> { [unowned self] fulfill, reject in
             var command = jsCode
             if let configuration = webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
                 let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
                 command = configuration.obfuscate(str: parameterized)
             }
-            webView.evaluateJavaScript(command) { (result, error: Error?) in
-                if error == nil {
-                    Logger.shared.logInfo("(\(command) succeeded: \(String(describing: result))", category: .javascript)
-                    fulfill(result)
-                } else {
+            webView.evaluateJavaScript(command, in: frameInfo, in: WKContentWorld.page) { result in
+                switch result {
+                case .failure(let error):
                     Logger.shared.logError("(\(command) failed: \(String(describing: error))", category: .javascript)
-                    reject(error!)
+                    reject(error)
+                case .success(let response):
+                    Logger.shared.logInfo("(\(command) succeeded: \(String(describing: response))", category: .javascript)
+                    fulfill(response)
                 }
             }
         }
