@@ -88,7 +88,7 @@ struct SmallUpdateIndicatorView: View {
     }
 
     func updateInstalledMessage(timerExpired: Bool) -> String {
-        timerExpired ? "Update installed… Click to relaunch" : "Update installed."
+        timerExpired ? "Update installed. Restarting…" : "Update installed."
     }
 
     private var buttonLabelStyle: ButtonLabelStyle {
@@ -97,7 +97,8 @@ struct SmallUpdateIndicatorView: View {
                                 activeForegroundColor: BeamColor.Niobium.swiftUI,
                                 backgroundColor: BeamColor.Generic.background.swiftUI,
                                 hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
-                                activeBackgroundColor: BeamColor.Mercury.swiftUI)
+                                activeBackgroundColor: BeamColor.Mercury.swiftUI,
+                                leadingPaddingAdjustment: 4)
     }
 
     private var beamStyle: ReleaseNoteView.ReleaseNoteViewStyle {
@@ -112,7 +113,7 @@ struct SmallUpdateIndicatorView: View {
     }
 
     private func showReleaseNoteWindow(with release: AppRelease, geometry: GeometryProxy, hideButtonOnClose: Bool = false) {
-        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow()
+        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
         let releaseNoteView = ReleaseNoteView(release: release, closeAction: {
             if hideButtonOnClose {
                 withAnimation {
@@ -122,7 +123,8 @@ struct SmallUpdateIndicatorView: View {
             window?.close()
         }, beforeInstallAction: {
             window?.close()
-        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle).cornerRadius(6)
+        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle)
+            .cornerRadius(10)
 
         let frame = geometry.safeTopLeftGlobalFrame(in: window?.parent)
         var origin = CGPoint(x: frame.minX + 7, y: frame.minY - 6)

@@ -104,7 +104,7 @@ struct HelpAndFeedbackMenuView: View {
             }
         }.frame(width: Self.menuWidth)
         .background(backgroundColor)
-        .cornerRadius(6)
+        .cornerRadius(10)
     }
 
     private var backgroundColor: Color {

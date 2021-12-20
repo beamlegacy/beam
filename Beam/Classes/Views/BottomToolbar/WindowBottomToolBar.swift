@@ -74,7 +74,7 @@ private struct BottomToolBarTrailingIconView: View {
             } else {
                 GeometryReader { proxy in
                     ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2)) {
-                        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow()
+                        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
                         let view = HelpAndFeedbackMenuView(window: window)
                             .environmentObject(state)
                         let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)

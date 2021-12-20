@@ -114,8 +114,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         } else {
             self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
         }
-        self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
-        self.versionChecker.allReleaseNotesURL = URL(string: "https://beamapp.co")
 
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
@@ -143,9 +141,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 
         setupSubscribers()
         resetPinnedTabs()
-        self.versionChecker.customPreinstall = {
-            self.backup()
-        }
+        configureAutoUpdate()
     }
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
@@ -429,6 +425,17 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
 
         try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
+    }
+
+    private func configureAutoUpdate() {
+
+        self.versionChecker.allowAutoDownload = PreferencesManager.isAutoUpdateOn
+        self.versionChecker.customPreinstall = {
+            self.backup()
+        }
+        self.versionChecker.logMessage = { logMessage in
+            Logger.shared.logInfo(logMessage, category: .autoUpdate)
+        }
     }
 }
 
