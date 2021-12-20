@@ -28,8 +28,8 @@ struct TabsListView: View {
 
     @StateObject private var viewModel = ViewModel()
     private class ViewModel: ObservableObject {
-        var currentTapTriggeredAction = false
         var currentDragDidChangeCurrentTab = false
+        var lastTouchWasOnUnselectedTab: Bool = false
         var singleTabCenteringAdjustment: CGFloat = 0
     }
 
@@ -126,19 +126,17 @@ struct TabsListView: View {
                 separator.opacity(hideSeparator ? 0 : 1)
             }
             TabView(tab: tab, isSelected: selected, isPinned: tab.isPinned, isSingleTab: isSingle,
-                             isDragging: isTheDraggedTab, disableAnimations: isAnimatingDrop, onClose: {
-                    onTabClose(at: index)
-                }, onCopy: {
-                    onTabCopy(at: index)
-                }, onToggleMute: {
-                    onTabToggleMute(at: index)
-                })
+                    isDragging: isTheDraggedTab, disableAnimations: isAnimatingDrop,
+                    onTouchDown: { onTabTouched(at: index) },
+                    onTap: { onTabTapped(at: index) },
+                    onClose: { onTabClose(at: index) },
+                    onCopy: { onTabCopy(at: index)},
+                    onToggleMute: { onTabToggleMute(at: index) })
                 .frame(width: isTheDraggedTab ? 0 : widthProvider.widthForTab(selected: selected, pinned: tab.isPinned) - centeringAdjustment)
                 .opacity(isTheDraggedTab ? 0 : 1)
                 .onHover { h in
                     if h { hoveredIndex = index }
                 }
-                .simultaneousGesture(TapGesture().onEnded { onTabTap(at: index) })
                 .background(!selected ? nil : GeometryReader { prxy in
                     Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil))
                 })
@@ -283,30 +281,27 @@ struct TabsListView: View {
         state.undraggableWindowRect = frame
     }
 
-    private func onTabTap(at index: Int) {
-        guard !isDraggingATab else { return }
-        DispatchQueue.main.async {
-            guard !viewModel.currentTapTriggeredAction else {
-                viewModel.currentTapTriggeredAction = false
-                return
-            }
-            if selectedIndex != index {
-                state.browserTabsManager.currentTab = tabs[index]
-            } else {
-                state.setFocusOmnibox(fromTab: true)
-            }
+    private func onTabTouched(at index: Int) {
+        guard !isDraggingATab, selectedIndex != index else {
+            viewModel.lastTouchWasOnUnselectedTab = false
+            return
         }
+        viewModel.lastTouchWasOnUnselectedTab = true
+        state.browserTabsManager.currentTab = tabs[index]
+    }
+
+    private func onTabTapped(at index: Int) {
+        guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
+        state.setFocusOmnibox(fromTab: true)
     }
 
     private func onTabClose(at index: Int, fromContextMenu: Bool = false) {
-        viewModel.currentTapTriggeredAction = true
         state.closedTab(index, allowClosingPinned: fromContextMenu)
     }
 
     private func onTabCopy(at index: Int) {
         guard index < tabs.count else { return }
         let tab = tabs[index]
-        viewModel.currentTapTriggeredAction = true
         copyTabAddress(tab)
     }
 
@@ -327,7 +322,6 @@ struct TabsListView: View {
         guard index < tabs.count else { return }
         let tab = tabs[index]
         tab.mediaPlayerController?.toggleMute()
-        viewModel.currentTapTriggeredAction = true
     }
 
     typealias TabsSections = (pinnedTabs: [BrowserTab], otherTabs: [BrowserTab])
@@ -466,9 +460,6 @@ extension TabsListView {
     }
 
     fileprivate func dragGestureOnEnded(gestureValue: DragGesture.Value) {
-        defer {
-            viewModel.currentTapTriggeredAction = false
-        }
         guard let currentTab = currentTab,
               let dragStartIndex = self.dragModel.dragStartIndex,
               let firstGestureValue = firstDragGestureValue,
@@ -477,7 +468,7 @@ extension TabsListView {
         if timeSinceStart < 0.05 {
             // it was just a quick tap
             self.dragModel.cleanAfterDrag()
-            if !viewModel.currentDragDidChangeCurrentTab && !viewModel.currentTapTriggeredAction {
+            if !viewModel.currentDragDidChangeCurrentTab {
                 state.setFocusOmnibox(fromTab: true)
             }
         } else {
