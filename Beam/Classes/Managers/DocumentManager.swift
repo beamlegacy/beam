@@ -130,9 +130,9 @@ public class DocumentManager: NSObject {
     }
 
     // MARK: CoreData Load
-    func loadById(id: UUID) -> DocumentStruct? {
+    func loadById(id: UUID, includeDeleted: Bool) -> DocumentStruct? {
         checkThread()
-        guard let document = try? self.fetchWithId(id) else { return nil }
+        guard let document = try? self.fetchWithId(id, includeDeleted: includeDeleted) else { return nil }
 
         return parseDocumentBody(document)
     }
@@ -189,9 +189,9 @@ public class DocumentManager: NSObject {
         }
     }
 
-    func loadDocumentById(id: UUID) -> DocumentStruct? {
+    func loadDocumentById(id: UUID, includeDeleted: Bool) -> DocumentStruct? {
         checkThread()
-        guard let document = try? fetchWithId(id) else { return nil }
+        guard let document = try? fetchWithId(id, includeDeleted: includeDeleted) else { return nil }
         return parseDocumentBody(document)
     }
 
@@ -424,8 +424,18 @@ public class DocumentManager: NSObject {
             try CoreDataManager.save(context)
             Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
 
-            saved.forEach(Self.documentSaved.send)
-            deleted.forEach(Self.documentDeleted.send)
+            let dispatchNotifications: (UUID) -> Bool = { id in
+                guard let note = BeamNote.getFetchedNote(id) else { return true }
+                return note.changePropagationEnabled
+            }
+
+            for noteSaved in saved where dispatchNotifications(noteSaved.id) {
+                Self.documentSaved.send(noteSaved)
+            }
+
+            for noteDeleted in deleted where dispatchNotifications(noteDeleted) {
+                Self.documentDeleted.send(noteDeleted)
+            }
 
             return true
         } catch let error as NSError {
@@ -545,7 +555,7 @@ public class DocumentManager: NSObject {
         // If document is deleted, we don't need to check version uniqueness
         guard document.deleted_at == nil else { return }
 
-        let existingDocument = try? fetchWithId(document.id)
+        let existingDocument = try? fetchWithId(document.id, includeDeleted: false)
 
         if let existingVersion = existingDocument?.version, existingVersion >= newVersion {
             let errString = "\(document.title): coredata version: \(existingVersion) should be < newVersion: \(newVersion)"
@@ -617,7 +627,7 @@ public class DocumentManager: NSObject {
 
             var updatedDocument: Document?
             documentManager.saveDocumentQueue.sync {
-                updatedDocument = try? documentManager.fetchWithId(documentStruct.id)
+                updatedDocument = try? documentManager.fetchWithId(documentStruct.id, includeDeleted: false)
             }
 
             guard let updatedDocument = updatedDocument else {
@@ -913,15 +923,16 @@ extension DocumentManager {
         return try fetchAll(filters: [.nonDeleted, .ids(ids)])
     }
 
-    func fetchWithId(_ id: UUID) throws -> Document? {
+    func fetchWithId(_ id: UUID, includeDeleted: Bool) throws -> Document? {
         checkThread()
 
-        return try fetchFirst(filters: [.id(id), .includeDeleted, .allDatabases])
+        let filters: [DocumentFilter] = includeDeleted ? [.id(id), .includeDeleted, .allDatabases] : [.id(id), .allDatabases]
+        return try fetchFirst(filters: filters)
     }
 
     func fetchOrCreate(_ id: UUID, title: String, deletedAt: Date?) throws -> Document {
         checkThread()
-        let document = try ((try? fetchWithId(id)) ?? (try create(id: id, title: title, deletedAt: deletedAt)))
+        let document = try ((try? fetchWithId(id, includeDeleted: false)) ?? (try create(id: id, title: title, deletedAt: deletedAt)))
         return document
     }
 

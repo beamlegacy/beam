@@ -237,7 +237,7 @@ class ClusteringManager: ObservableObject {
         }
         return (id, parentId)
     }
-    
+
     // swiftlint:disable:next cyclomatic_complexity
     func addPage(id: UUID, parentId: UUID?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
@@ -284,7 +284,7 @@ class ClusteringManager: ObservableObject {
                     // After adding the second page, add notes from previous sessions
                     if self.initialiseNotes {
                         let notes = DocumentManager().loadAllWithLimit(10, sortingKey: .updatedAt(false), type: .note).compactMap {
-                            BeamNote.fetch(id: $0.id)
+                            BeamNote.fetch(id: $0.id, includeDeleted: false)
                         }
                         for note in notes {
                             self.addNote(note: note, addToNextSummary: false)

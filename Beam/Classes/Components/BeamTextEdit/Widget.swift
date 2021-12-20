@@ -376,6 +376,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.editor = parent.editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
+        layer.isHidden = true
         selectionLayer = CALayer()
         super.init()
         setupWidget()
@@ -389,6 +390,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.editor = editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
+        layer.isHidden = true
         selectionLayer = CALayer()
         self.availableWidth = availableWidth ?? 1
         super.init()
@@ -658,25 +660,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     /// updateRendering() must be overloaded to update the rendering of a widget and return the new height of its contents. It should not modify any layout information
     func updateRendering() -> CGFloat {
         0
-    }
-
-    var childrenIdealSize: NSRect {
-        guard open else { return NSRect() }
-        var rect = NSRect()
-        var firstNode = true
-        for c in children {
-            if !firstNode {
-                rect.size.height += childrenSpacing
-            }
-
-            let ideal = c.idealSize
-            rect.size.height += ideal.height
-            rect.size.width = max(rect.width, ideal.width)
-            firstNode = false
-        }
-
-        rect.size.height += childrenPadding.top + childrenPadding.bottom
-        return rect
     }
 
     // MARK: - Methods Widget

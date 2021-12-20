@@ -94,13 +94,6 @@ public class TextNode: ElementNode {
         self.layers["text"]
     }
 
-    override var open: Bool {
-        didSet {
-            guard !inInitialLayout, element.open != open else { return }
-            element.open = open
-        }
-    }
-
     var placeholder = BeamText() {
         didSet {
             guard oldValue != text || text.isEmpty else { return }

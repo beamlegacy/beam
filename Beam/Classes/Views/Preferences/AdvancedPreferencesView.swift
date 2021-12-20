@@ -283,7 +283,7 @@ struct AdvancedPreferencesView: View {
                         manager
                             .allDocumentsIds(includeDeletedNotes: true)
                             .forEach {
-                                let note = BeamNote.fetch(id: $0, keepInMemory: false)
+                                let note = BeamNote.fetch(id: $0, includeDeleted: false, keepInMemory: false)
                                 note?.save { _ in }
                             }
                     }, label: {
@@ -642,6 +642,22 @@ struct AdvancedPreferencesView: View {
         })
     }
 
+    private var Create100NormalNotes: some View {
+        Button(action: {
+            BeamUITestsMenuGenerator.create100NormalNotes()
+        }, label: {
+            Text("Create 100 Random notes")
+        })
+    }
+
+    private var Create100JournalNotes: some View {
+        Button(action: {
+            BeamUITestsMenuGenerator.create100JournalNotes()
+        }, label: {
+            Text("Create 100 Random notes")
+        })
+    }
+
     private var Create10RandomNotes: some View {
         Button(action: {
             BeamUITestsMenuGenerator.create10Notes()
@@ -650,6 +666,21 @@ struct AdvancedPreferencesView: View {
         })
     }
 
+    private var Create10NormalNotes: some View {
+        Button(action: {
+            BeamUITestsMenuGenerator.create10NormalNotes()
+        }, label: {
+            Text("Create 10 Random notes")
+        })
+    }
+
+    private var Create10JournalNotes: some View {
+        Button(action: {
+            BeamUITestsMenuGenerator.create10JournalNotes()
+        }, label: {
+            Text("Create 10 Random notes")
+        })
+    }
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {

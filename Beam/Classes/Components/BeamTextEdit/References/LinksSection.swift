@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import AppKit
 import BeamCore
+import os.signpost
 
 extension BeamNote {
     var sortingDate: Date { type.journalDate ?? creationDate }
@@ -46,10 +47,9 @@ class LinksSection: Widget {
         self.sign = BeamTextEdit.signPost.createId(object: self)
         sign.begin(Signs.firstInit)
 
-        selfVisible = false
-        visible = false
         setupUI(openChildren: openChildrenDefault)
         setupSectionMode()
+        updateInitialHeading()
     }
 
     func setupUI(openChildren: Bool) {
@@ -82,6 +82,11 @@ class LinksSection: Widget {
     }
 
     var links: [BeamNoteReference] { note.links }
+
+    func updateInitialHeading() {
+        let refs = note.links
+        updateHeading(refs.count)
+    }
 
     /// This method is doing the actual work of setting up the links section. It is used both by LinksSection and ReferencesSection
     final func doSetupSectionMode() {
@@ -117,7 +122,6 @@ class LinksSection: Widget {
 
     var sectionTypeName: StaticString { "LinkSection" }
     var initialUpdate = true
-    //swiftlint:disable:next function_body_length
 
     //swiftlint:disable:next function_body_length
     func updateLinkedReferences(links: [BeamNoteReference]) {
@@ -153,7 +157,8 @@ class LinksSection: Widget {
             }
 
             // Prepare title children:
-            guard let refTitleWidget = try? titles[noteID]
+            guard   BeamNote.fetch(id: noteID, includeDeleted: false) != nil,
+                    let refTitleWidget = try? titles[noteID]
                     ?? newrefs[noteID]
                     ?? RefNoteTitle(parent: self, noteId: noteID, availableWidth: availableWidth - childInset)
             else {
