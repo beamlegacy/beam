@@ -246,6 +246,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             .sink { id in
                 self.signpost.begin("documentDeleted")
                 defer { self.signpost.end("documentDeleted") }
+                if let index = self.journal.firstIndex(where: { $0.id == id }) {
+                    self.journal.remove(at: index)
+                }
                 BeamNote.purgeDeletedNode(id)
             }.store(in: &scope)
     }
@@ -320,7 +323,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func loadJournalUpTo(date: String) {
-        let _journal = BeamNote.fetchJournalsFrom(date: date).compactMap({ $0.shouldAppearInJournal ? $0 : nil })
+        let _journal = BeamNote.fetchJournalsFrom(date: date)
         appendToJournal(_journal, fetchEvents: true)
     }
 
