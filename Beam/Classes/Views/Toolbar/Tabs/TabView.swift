@@ -24,6 +24,8 @@ struct TabView: View {
     var isSingleTab: Bool = false
     var isDragging: Bool = false
     var disableAnimations: Bool = false
+    var onTouchDown: (() -> Void)?
+    var onTap: (() -> Void)?
     var onClose: (() -> Void)?
     var onCopy: (() -> Void)?
     var onToggleMute: (() -> Void)?
@@ -110,6 +112,7 @@ struct TabView: View {
     private var faviconView: some View {
         TabFaviconView(favIcon: tab.favIcon, isLoading: tab.isLoading,
                                 estimatedLoadingProgress: tab.estimatedLoadingProgress, disableAnimations: isDragging)
+            .allowsHitTesting(false)
     }
 
     private var closeIcon: some View {
@@ -130,6 +133,7 @@ struct TabView: View {
         }
     }
 
+    // swiftlint:disable:next function_body_length
     private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
         ZStack {
             let isHovering = isEnabled && (isHovering || isDragging)
@@ -145,8 +149,7 @@ struct TabView: View {
                         Text(tab.url?.urlStringWithoutScheme ?? tab.title)
                         Text(tab.title)
                     }
-                }.opacity(0)
-                .accessibility(hidden: true)
+                }.opacity(0).accessibility(hidden: true)
             }
             if showForegroundHoverStyle {
                 HStack(spacing: iconSpacing) {
@@ -273,8 +276,14 @@ struct TabView: View {
                         // Using Capsule as background instead of Capsule's label property because we have different gestures (drag/click) + paddings
                         // and they don't play well with the rendering updates of the capsule label with parameters.
                         ToolbarCapsuleButton(isSelected: false, isForeground: isSelected && (!isSingleTab || isDragging),
-                                               tabStyle: true, lonelyStyle: isSingleTab,
-                                               label: { _, _ in Group { } }, action: nil)
+                                             tabStyle: true, lonelyStyle: isSingleTab,
+                                             label: { _, _ in Group { } }, action: nil)
+                            .onTouchDown { down in
+                                if down { onTouchDown?() }
+                            }
+                            .simultaneousGesture(TapGesture().onEnded {
+                                onTap?()
+                            })
                     )
                     .if(isDragging) {
                         $0.opacity(0.9).scaleEffect(1.07)
