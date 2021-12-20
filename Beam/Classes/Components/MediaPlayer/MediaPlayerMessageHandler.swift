@@ -14,7 +14,7 @@ class MediaPlayerMessageHandler: BeamMessageHandler<MediaPlayerMessages> {
         super.init(config: config, messages: MediaPlayerMessages.self, jsFileName: "MediaPlayer")
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = MediaPlayerMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message '\(messageName)' for media message handler", category: .web)
             return
@@ -33,6 +33,7 @@ class MediaPlayerMessageHandler: BeamMessageHandler<MediaPlayerMessages> {
             controller.isMuted = muted
             controller.isPiPSupported = pipSupported
             controller.isInPiP = isInPip
+            controller.frameInfo = frameInfo
             webPage.mediaPlayerController = controller
         }
     }

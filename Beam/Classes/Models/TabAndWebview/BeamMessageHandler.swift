@@ -47,7 +47,7 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
         }
     }
 
-    func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         fatalError("onMessage must be overridden in subclass")
     }
 
@@ -67,7 +67,7 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
             return
         }
 
-        onMessage(messageName: message.name, messageBody: message.body, from: beamWebPage)
+        onMessage(messageName: message.name, messageBody: message.body, from: beamWebPage, frameInfo: message.frameInfo)
     }
 
     func destroy(for webView: WKWebView) {

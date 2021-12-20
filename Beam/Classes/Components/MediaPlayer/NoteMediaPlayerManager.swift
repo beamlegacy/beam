@@ -32,9 +32,9 @@ class NoteMediaPlayerManager: ObservableObject {
         return item?.webview
     }
 
-    func addNotePlaying(note: BeamNote, elementId: UUID, webView: BeamWebView? = nil) {
+    func addNotePlaying(note: BeamNote, elementId: UUID, webView: BeamWebView? = nil, url: URL) {
         playings.append(
-            NoteMediaPlaying(note: note, elementId: elementId, webview: webView, page: webView?.page, originalURL: webView?.url)
+            NoteMediaPlaying(note: note, elementId: elementId, webview: webView, page: webView?.page, originalURL: url)
         )
     }
 

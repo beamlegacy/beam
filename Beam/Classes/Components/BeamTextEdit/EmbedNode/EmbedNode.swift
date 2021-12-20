@@ -60,9 +60,11 @@ class EmbedNode: ResizableNode {
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
         var webView: BeamWebView?
+        var isReusedWebview = false
         if let note = editor?.note as? BeamNote {
             webView = mediaPlayerManager?.playingWebViewForNote(note: note, elementId: elementId, url: sourceURL)
             webPage = webView?.page as? EmbedNodeWebPage
+            isReusedWebview = webView != nil
         }
 
         if webView == nil {
@@ -80,10 +82,11 @@ class EmbedNode: ResizableNode {
             webView.navigationDelegate = self
             webView.wantsLayer = true
             webView.allowsMagnification = true
-            let webFrame = NSRect(x: 0, y: 0, width: 150, height: 150)
+            let webFrame = CGRect(x: 0, y: 0, width: 150, height: 150)
             embedView.frame = webFrame
-            webView.frame = NSRect(origin: .zero, size: webFrame.size)
+            webView.frame = CGRect(origin: .zero, size: webFrame.size)
             webView.autoresizingMask = [.width, .height]
+            embedView.alphaValue = 0
             embedView.addSubview(webView)
             editor?.addSubview(embedView)
         }
@@ -97,13 +100,14 @@ class EmbedNode: ResizableNode {
 
         updateResizableElementContentSize(with: embedContent)
         setupLoader()
-        updateEmbedContent()
+        updateEmbedContent(updateWebview: !isReusedWebview)
     }
 
     deinit {
         let nodeStillOwnsTheWebView = webPage?.delegate as? EmbedNode == self
         if nodeStillOwnsTheWebView || webPage?.delegate == nil {
             webView?.removeFromSuperview()
+            embedView.removeFromSuperview()
         }
     }
 
@@ -152,22 +156,23 @@ class EmbedNode: ResizableNode {
         }
     }
 
-    private func updateEmbedContent() {
+    private func updateEmbedContent(updateWebview: Bool) {
         guard let sourceURL = sourceURL else { return }
 
         embedCancellables.removeAll()
         let builder = EmbedContentBuilder()
         if let embedContent = builder.embeddableContent(for: sourceURL) {
             self.embedContent = embedContent
-            self.loadEmbedContentInWebView(embedContent)
+            if updateWebview {
+                self.loadEmbedContentInWebView(embedContent)
+            }
         } else {
             isLoadingEmbed = true
             builder.embeddableContentAsync(for: sourceURL)
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] completion in
                     switch completion {
-                    // swiftlint:disable:next empty_enum_arguments
-                    case .failure(_):
+                    case .failure:
                         Logger.shared.logError("Embed Node couldn't load content for \(sourceURL.absoluteString)", category: .embed)
                     case .finished:
                         break
@@ -176,7 +181,9 @@ class EmbedNode: ResizableNode {
                     self?.embedCancellables.removeAll()
                 } receiveValue: { [weak self] embedContent in
                     self?.embedContent = embedContent
-                    self?.loadEmbedContentInWebView(embedContent)
+                    if updateWebview {
+                        self?.loadEmbedContentInWebView(embedContent)
+                    }
                 }.store(in: &embedCancellables)
         }
     }
@@ -221,6 +228,7 @@ class EmbedNode: ResizableNode {
         let embedFrame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
         DispatchQueue.main.async { [weak self] in
             self?.embedView.frame = embedFrame
+            self?.embedView.alphaValue = r == .zero ? 0 : 1
         }
     }
 
@@ -301,7 +309,7 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
               let mediaManager = mediaPlayerManager,
               let url = self.sourceURL else { return }
         if controller?.isPlaying == true {
-            mediaManager.addNotePlaying(note: note, elementId: elementId, webView: webView)
+            mediaManager.addNotePlaying(note: note, elementId: elementId, webView: webView, url: url)
         } else {
             mediaManager.stopNotePlaying(note: note, elementId: elementId, url: url)
         }
