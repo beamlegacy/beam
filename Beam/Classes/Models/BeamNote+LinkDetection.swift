@@ -10,7 +10,7 @@ import BeamCore
 
 public extension BeamNote {
     var shouldAppearInJournal: Bool {
-        return !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty
+        return !deleted && (isTodaysNote || !isEntireNoteEmpty() || !fastLinksAndReferences.isEmpty)
     }
 
     var mentionsCount: Int {

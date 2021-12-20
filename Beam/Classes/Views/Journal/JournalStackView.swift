@@ -7,6 +7,7 @@
 
 import Foundation
 import BeamCore
+import Combine
 
 class JournalSimpleStackView: NSView {
     public var verticalSpace: CGFloat
@@ -17,6 +18,7 @@ class JournalSimpleStackView: NSView {
 
     var notes: [BeamNote] = []
     var views: [BeamNote: BeamTextEdit] = [:]
+    var scope: [AnyCancellable] = []
 
     override var wantsUpdateLayer: Bool { true }
 
@@ -30,6 +32,18 @@ class JournalSimpleStackView: NSView {
         self.translatesAutoresizingMaskIntoConstraints = false
         self.layer?.backgroundColor = BeamColor.Generic.background.cgColor
         self.wantsLayer = true
+
+        observeNotesChanges()
+    }
+
+    func observeNotesChanges() {
+        // automatically rescan the journal when the notes change:
+        AppDelegate.main.data.$lastIndexedElement
+            .throttle(for: 2, scheduler: RunLoop.current, latest: true)
+            .sink { [weak self] _ in
+                guard let self = self else { return }
+                self.setNotes(self.notes, focussingOn: nil, force: true)
+            }.store(in: &scope)
     }
 
     required init?(coder: NSCoder) {
@@ -115,7 +129,7 @@ class JournalSimpleStackView: NSView {
         return NSSize(width: width, height: height)
     }
 
-    public func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?) {
+    public func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
         let sortedNotes = notes.sorted(by: { lhs, rhs in
             guard let j1 = lhs.type.journalDate,
                   let j2 = rhs.type.journalDate else { return false }
@@ -131,22 +145,36 @@ class JournalSimpleStackView: NSView {
             }
         }
 
-        guard self.notes != sortedNotes else {
+        guard force || self.notes != sortedNotes else {
             return
         }
         self.notes = sortedNotes
 
         let noteSet = Set(notes)
-        for (note, view) in views {
-            // Remove the notes that are there any more:
-            if !noteSet.contains(note) {
+
+        for note in noteSet {
+            // Remove the notes that are not there any more:
+            if note.shouldAppearInJournal {
+                addNote(note)
+                countChanged = true
+            } else {
+                guard let view = views[note] else { continue }
                 view.removeFromSuperview()
+                views.removeValue(forKey: note)
                 countChanged = true
             }
         }
 
-        for note in self.notes where note.shouldAppearInJournal || note.isTodaysNote {
-            addNote(note)
+        let viewsCopy = views
+        for tuple in viewsCopy {
+            let note = tuple.key
+            // Remove the notes that are not there any more:
+            if !noteSet.contains(note) {
+                let view = tuple.value
+                view.removeFromSuperview()
+                views.removeValue(forKey: note)
+                countChanged = true
+            }
         }
 
         if countChanged {
