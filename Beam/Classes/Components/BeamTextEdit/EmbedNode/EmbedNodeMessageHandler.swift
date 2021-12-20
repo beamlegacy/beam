@@ -21,7 +21,7 @@ class EmbedNodeMessageHandler: BeamMessageHandler<EmbedNodeMessages> {
         super.init(config: config, messages: EmbedNodeMessages.self, jsFileName: "EmbedNode_prod", cssFileName: "EmbedNode", jsCodePosition: .atDocumentStart, forMainFrameOnly: true)
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = EmbedNodeMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message '\(messageName)' for logging message handler", category: .web)
             return

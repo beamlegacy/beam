@@ -82,7 +82,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     windowFrameBounds
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should contain 1 frameInfo")
@@ -152,7 +153,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         // Send windowFrame event
         self.webPositionsMessageHandler.onMessage(
@@ -172,7 +174,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         XCTAssertEqual(positions.framesInfo.count, 2, "webPositions should contain 2 frameInfos")
@@ -248,7 +251,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         // Send iframe event
@@ -270,7 +274,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         XCTAssertEqual(positions.framesInfo.count, 2, "webPositions should contain 2 frameInfos")
@@ -353,7 +358,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         //
         // Send frameBounds "iFrame1"
@@ -385,7 +391,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         //
         // Send onLoad "windowHref"
@@ -406,7 +413,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         //
         // ASSERTS
@@ -499,7 +507,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         // Send iframe1 event
@@ -531,7 +540,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         // Send iframe3 event
@@ -551,7 +561,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
@@ -642,7 +653,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         // Send iframe1 event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
@@ -673,7 +685,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         // Send windowFrame event
         self.webPositionsMessageHandler.onMessage(
@@ -693,7 +706,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
 
@@ -761,7 +775,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     windowFrameBounds
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should contain 1 frameInfos")
         // Send windowFrame scroll event
@@ -775,7 +790,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 200
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should still contain 1 frameInfos")
         let expectedWindowFrameInfo = WebPositions.FrameInfo(
@@ -838,7 +854,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         // Send iframe1 event
         // Note: The height and width might be a bit smaller (±2px) from what the parent sends
@@ -869,7 +886,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         // Send windowFrame event
         self.webPositionsMessageHandler.onMessage(
@@ -889,7 +907,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
         // Send windowFrame scroll event
@@ -903,7 +922,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 200
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         self.webPositionsMessageHandler.onMessage(
@@ -916,7 +936,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 330
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         self.webPositionsMessageHandler.onMessage(
@@ -929,7 +950,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 30
             ],
-            from: self.pns.page
+            from: self.pns.page,
+            frameInfo: nil
         )
 
         let expectedWindowFrameInfo = WebPositions.FrameInfo(

@@ -20,7 +20,7 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = PasswordMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message \(messageName) for password message handler", category: .web)
             return

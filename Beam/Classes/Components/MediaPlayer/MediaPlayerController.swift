@@ -25,6 +25,7 @@ struct MediaPlayerController: WebPageRelated {
     var isMuted = false
     var isPiPSupported = true
     var isInPiP = false
+    var frameInfo: WKFrameInfo?
 
     init(page: WebPage) {
         _page = page
@@ -37,12 +38,12 @@ struct MediaPlayerController: WebPageRelated {
     mutating func setMuted(_ muted: Bool) {
         if isMuted != muted {
             isMuted = muted
-            page.executeJS("media_toggleMute()", objectName: JSObjectName)
+            page.executeJS("media_toggleMute()", objectName: JSObjectName, frameInfo: frameInfo)
         }
     }
 
     mutating func togglePiP() {
         isInPiP = !isInPiP
-        page.executeJS("media_togglePictureInPicture()", objectName: JSObjectName)
+        page.executeJS("media_togglePictureInPicture()", objectName: JSObjectName, frameInfo: frameInfo)
     }
 }

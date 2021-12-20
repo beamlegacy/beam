@@ -62,7 +62,7 @@ class GeolocationMessageHandler: BeamMessageHandler<GeolocationMessages>, CLLoca
         webView?.evaluateJavaScript("navigator.geolocation.helper.error(1, 'App does not have location permission');")
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = GeolocationMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message '\(messageName)' for Geolocation message handler", category: .web)
             return
