@@ -96,7 +96,7 @@ extension DocumentManager {
                          we force and refresh that object manually...
                          */
                         self.context.performAndWait {
-                            if let localStoredDocument = try? self.fetchWithId(documentStruct.id) {
+                            if let localStoredDocument = try? self.fetchWithId(documentStruct.id, includeDeleted: true) {
                                 self.context.refresh(localStoredDocument, mergeChanges: false)
 
                                 #if DEBUG
@@ -108,7 +108,7 @@ extension DocumentManager {
                         }
 
                         #if DEBUG
-                        if let localStoredDocumentStruct = documentManager.loadById(id: documentStruct.id) {
+                        if let localStoredDocumentStruct = documentManager.loadById(id: documentStruct.id, includeDeleted: true) {
                             dump(localStoredDocumentStruct)
                             assert(localStoredDocumentStruct.data == document.data)
                         } else {
@@ -233,7 +233,7 @@ extension DocumentManager {
                  Don't use performAndWait as it creates a DEADLOCK
                  */
                 self.context.perform {
-                    if let localStoredDocument = try? self.fetchWithId(documentStruct.id) {
+                    if let localStoredDocument = try? self.fetchWithId(documentStruct.id, includeDeleted: true) {
                         self.context.refresh(localStoredDocument, mergeChanges: false)
                     }
                 }
@@ -341,13 +341,13 @@ extension DocumentManager {
     // MARK: -
     // MARK: Delete
 
-    func softDelete(ids: [UUID], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+    func softDelete(ids: [UUID], clearData: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         var errors: [Error] = []
         var goodObjects: [DocumentStruct] = []
         backgroundQueue.async {
             let documentManager = DocumentManager()
             for id in ids {
-                guard let document = try? documentManager.fetchWithId(id) else {
+                guard let document = try? documentManager.fetchWithId(id, includeDeleted: false) else {
                     errors.append(DocumentManagerError.idNotFound)
                     continue
                 }
@@ -363,6 +363,10 @@ extension DocumentManager {
                 documentStruct.deletedAt = BeamDate.now
 
                 document.deleted_at = documentStruct.deletedAt
+                if clearData {
+                    documentStruct.data = Data()
+                    document.data = Data()
+                }
                 goodObjects.append(documentStruct)
             }
 
@@ -420,7 +424,7 @@ extension DocumentManager {
         backgroundQueue.async {
             let documentManager = DocumentManager()
             for document in documents {
-                guard let cdDocument: Document = try? documentManager.fetchWithId(document.id) else {
+                guard let cdDocument: Document = try? documentManager.fetchWithId(document.id, includeDeleted: true) else {
                     errors.append(DocumentManagerError.idNotFound)
                     continue
                 }

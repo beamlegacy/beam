@@ -345,7 +345,7 @@ class BreadCrumb: Widget {
         }
 
         if open {
-            let childrenHeight = childrenIdealSize.size.height + crumbsHeight - childrenPadding.bottom - childrenPadding.top - contentsPadding.bottom - contentsPadding.top
+            let childrenHeight = idealChildrenSize.height + crumbsHeight - childrenPadding.bottom - childrenPadding.top - contentsPadding.bottom - contentsPadding.top
             CATransaction.disableAnimations {
                 guard let container = container else { return }
                 container.frame = NSRect(x: 0, y: -2, width: availableWidth + containerPadding, height: childrenHeight + containerPadding)

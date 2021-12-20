@@ -26,32 +26,62 @@ class DeleteDocument: DocumentCommand {
     }
 
     override func run(context: DocumentManager?, completion: ((Bool) -> Void)?) {
-        var noteLinks: [BeamNoteReference]?
+        let signpost = SignPost("DeleteDocumentCommand")
+        signpost.begin("run")
+        defer {
+            signpost.end("run")
+        }
+        var notesToUpdate = Set<UUID>()
 
-        let callback = {
-            DispatchQueue.main.async {
-                noteLinks?.forEach { ref in
-                    ref.note?.updateNoteNamesInInternalLinks(recursive: true)
-                }
+        documents = allDocuments ? (context?.loadAll() ?? []) : documentIds.compactMap { context?.loadById(id: $0, includeDeleted: false) }
+        BeamNote.purgingNotes = BeamNote.purgingNotes.union(Set(documents.map { $0.id }))
+
+        let removeNotesFromIndex: ([UUID]) -> Void = { ids in
+            do {
+                try GRDBDatabase.shared.removeNotes(ids)
+            } catch {
+                Logger.shared.logError("Impossible to remove all notes from indexing: \(error)", category: .search)
             }
         }
 
         if allDocuments {
-            documents = context?.loadAll() ?? []
+            let ids = documents.map { $0.id }
+            removeNotesFromIndex(ids)
 
-            context?.softDelete(ids: documents.map { $0.id }) { _ in
-                callback()
+            context?.softDelete(ids: ids) { _ in
                 completion?(true)
             }
         } else {
-            documents = documentIds.compactMap { context?.loadById(id: $0) }
-            noteLinks = saveDocumentsLinks()
+            saveDocumentsLinks().forEach { notesToUpdate.insert($0.noteID) }
             unpublishNotes(in: documents)
 
+            for id in documentIds {
+                guard let note = BeamNote.getFetchedNote(id) else { continue }
+                note.recursiveChangePropagationEnabled = false
+            }
+
             context?.softDelete(ids: documentIds) { _ in
-                callback()
                 completion?(true)
             }
+
+            removeNotesFromIndex(documentIds)
+
+            for id in documentIds {
+                guard let note = BeamNote.getFetchedNote(id) else { continue }
+                note.recursiveChangePropagationEnabled = true
+            }
+        }
+
+        DispatchQueue.main.async {
+            signpost.begin("update note names")
+            notesToUpdate.forEach { id in
+                guard let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false) else { return }
+                note.recursiveChangePropagationEnabled = false
+                note.updateNoteNamesInInternalLinks(recursive: true)
+                _ = note.syncedSave()
+                note.recursiveChangePropagationEnabled = true
+            }
+            signpost.end("update note names")
         }
     }
 
@@ -79,12 +109,13 @@ class DeleteDocument: DocumentCommand {
         var noteLinks = [BeamNoteReference]()
         var refsMapping = [UUID: Set<UUID>]()
         documents.forEach { doc in
-            if let note = BeamNote.fetch(id: doc.id) {
-                let links = note.links
-                if !links.isEmpty {
-                    noteLinks.append(contentsOf: links)
-                    refsMapping[doc.id] = Set(links.map { $0.noteID })
-                }
+            let links = (try? GRDBDatabase.shared.fetchLinks(toNote: doc.id).map({ bidiLink in
+                BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
+            })) ?? []
+
+            if !links.isEmpty {
+                noteLinks.append(contentsOf: links)
+                refsMapping[doc.id] = Set(links.map { $0.noteID })
             }
         }
         savedReferences = refsMapping
@@ -93,7 +124,7 @@ class DeleteDocument: DocumentCommand {
 
     private func restoreNoteReferences() {
         documents.forEach { doc in
-            guard let storedRefs = savedReferences?[doc.id], !storedRefs.isEmpty, let note = BeamNote.fetch(id: doc.id)
+            guard let storedRefs = savedReferences?[doc.id], !storedRefs.isEmpty, let note = BeamNote.fetch(id: doc.id, includeDeleted: true)
             else { return }
             note.references.forEach { ref in
                 ref.element?.text.makeLinksToNoteExplicit(forNote: note.title)

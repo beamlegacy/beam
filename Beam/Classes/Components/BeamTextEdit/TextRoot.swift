@@ -193,7 +193,7 @@ public class TextRoot: ElementNode {
 
                     if let continueToNotesId = self.editor?.data?.clusteringManager.continueToNotes {
                         for noteId in continueToNotesId {
-                            guard let note = BeamNote.fetch(id: noteId) else { continue }
+                            guard let note = BeamNote.fetch(id: noteId, includeDeleted: false) else { continue }
                             continueToNotes.append(note)
                         }
                     }
@@ -285,7 +285,7 @@ public class TextRoot: ElementNode {
     private var breadCrumbs: [BeamNoteReference: ReferencingBreadCrumb] = [:]
     func getBreadCrumb(for noteReference: BeamNoteReference) -> BreadCrumb? {
         guard let breadCrumb = breadCrumbs[noteReference]?.breadCrumb else {
-            guard let referencingNote = BeamNote.fetch(id: noteReference.noteID), !referencingNote.deleted else { return nil }
+            guard let referencingNote = BeamNote.fetch(id: noteReference.noteID, includeDeleted: false), !referencingNote.deleted else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
             let breadCrumb = BreadCrumb(parent: self, sourceNote: referencingNote, element: referencingElement, availableWidth: availableWidth - childInset)
             breadCrumbs[noteReference] = ReferencingBreadCrumb(breadCrumb: breadCrumb, note: referencingNote)

@@ -42,7 +42,7 @@ struct WindowBottomToolBar: View {
                     .padding(.leading, 7)
                     .offset(x: 0, y: -6)
                 Spacer(minLength: 20)
-                HStack {                    
+                HStack {
                     BottomToolBarTrailingIconView()
                         .environmentObject(state.noteMediaPlayerManager)
                 }

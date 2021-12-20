@@ -188,7 +188,7 @@ import Sentry
     @discardableResult func navigateToNote(id: UUID, elementId: UUID? = nil, unfold: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) id \(id) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
-        guard let note = BeamNote.fetch(id: id) else {
+        guard let note = BeamNote.fetch(id: id, includeDeleted: false) else {
             return false
         }
         return navigateToNote(note, elementId: elementId, unfold: unfold)

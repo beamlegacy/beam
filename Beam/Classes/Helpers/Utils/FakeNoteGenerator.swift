@@ -14,7 +14,7 @@ class FakeNoteGenerator {
     var count: Int
     var journalRatio: Float
     var futureRatio: Float
-    var maxSentencesPerBullet: Int = 20
+    var maxSentencesPerBullet: Int = 5
     var maxRootBullets: Int = 8
 
     let faker = Faker(locale: "en-US")
@@ -64,7 +64,7 @@ class FakeNoteGenerator {
         let index = Int.random(in: 0..<count)
         let note = notes[index]
         let linkId = note.id
-        if Float.random(in: 0..<1) < 0.5 {
+        if Float.random(in: 0..<1) < 0.05 {
             return BeamText(text: note.title, attributes: [.internalLink(linkId)])
         }
         return BeamText(text: note.title + " ")
