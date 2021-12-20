@@ -36,24 +36,21 @@ struct WindowBottomToolBar: View {
     }
 
     var body: some View {
-        GeometryReader { geo in
+        HStack {
+            SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
+                .padding(.leading, 7)
+                .offset(x: 0, y: -6)
+            Spacer(minLength: 20)
             HStack {
-                SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
-                    .padding(.leading, 7)
-                    .offset(x: 0, y: -6)
-                Spacer(minLength: 20)
-                HStack {
-                    BottomToolBarTrailingIconView()
-                        .environmentObject(state.noteMediaPlayerManager)
-                }
-                .fixedSize(horizontal: true, vertical: false)
-                .padding(.trailing, BeamSpacing._70)
+                BottomToolBarTrailingIconView()
+                    .environmentObject(state.noteMediaPlayerManager)
             }
-            .padding(.vertical, BeamSpacing._70)
-            .frame(height: barHeight)
-            .frame(maxWidth: .infinity)
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(.trailing, BeamSpacing._70)
         }
+        .padding(.vertical, BeamSpacing._70)
         .frame(height: barHeight)
+        .frame(maxWidth: .infinity)
     }
 }
 
