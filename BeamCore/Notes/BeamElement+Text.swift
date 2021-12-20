@@ -19,6 +19,17 @@ public extension BeamElement {
         return [(id, text)] + childrenText
     }
 
+    var allTextElements: [BeamElement] {
+        let childrenText = children.reduce([]) { value, element -> [BeamElement] in
+            value + element.allTextElements
+        }
+        if self as? BeamNote != nil {
+            return childrenText
+        }
+
+        return [self] + childrenText
+    }
+
     var allVisibleTexts: [(UUID, BeamText)] {
         let childrenText = open ? children.reduce([]) { value, element -> [(UUID, BeamText)] in
             value + element.allTexts

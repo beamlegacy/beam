@@ -51,7 +51,7 @@ public extension BeamNote {
             let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
             guard result.noteId != self.id else { return nil }
             guard verifyMatch else { return noteRef }
-            guard  let note = BeamNote.fetch(id: result.noteId),
+            guard  let note = BeamNote.fetch(id: result.noteId, includeDeleted: false),
                   let element = note.findElement(result.uid),
                   element.hasReferenceToNote(named: titleToMatch)
             else { return nil }
@@ -101,7 +101,7 @@ public extension BeamElement {
 
 public extension BeamNoteReference {
     var note: BeamNote? {
-        BeamNote.fetch(id: noteID)
+        BeamNote.fetch(id: noteID, includeDeleted: false)
     }
 
     var element: BeamElement? {

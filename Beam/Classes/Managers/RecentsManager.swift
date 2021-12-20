@@ -38,7 +38,7 @@ class RecentsManager: ObservableObject {
         recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, sortingKey: .updatedAt(false)).compactMap {
             // Maybe we could `instancateNote` automatically, to avoid refetching the CD object in `fetch`?
             // try? BeamNote.instanciateNote(documentManager, $0)
-            BeamNote.fetch(id: $0.id)
+            BeamNote.fetch(id: $0.id, includeDeleted: false)
         }
     }
 

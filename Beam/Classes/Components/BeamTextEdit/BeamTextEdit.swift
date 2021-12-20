@@ -564,14 +564,15 @@ public extension CALayer {
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
+            let minHeight = 184
             if let root = unpreparedRoot, journalMode {
                 let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                return NSSize(width: 670, height: max(300, size))
+                return NSSize(width: 670, height: max(minHeight, size))
             }
-            return NSSize(width: 670, height: 300)
+            return NSSize(width: 670, height: minHeight)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
@@ -603,6 +604,7 @@ public extension CALayer {
         invalidateIntrinsicContentSize()
         if journalMode || realContentSize.height <= safeContentSize.height {
             // then we are identical, so the system will not call for a relayout
+            superview?.invalidateIntrinsicContentSize()
             DispatchQueue.main.async { [weak self] in
                 self?.relayoutRoot()
             }

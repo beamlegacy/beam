@@ -397,7 +397,7 @@ private class NoteTableViewItem: TableViewItem {
     }
 
     func getNote() -> BeamNote? {
-        note ?? BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: false)
+        note ?? BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: false)
     }
 
     override func isEqual(_ object: Any?) -> Bool {

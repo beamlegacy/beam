@@ -29,7 +29,11 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.create100Notes()
+        case .create100NormalNotes: Self.create100NormalNotes()
+        case .create100JournalNotes: Self.create100JournalNotes()
         case .create10Notes: Self.create10Notes()
+        case .create10NormalNotes: Self.create10NormalNotes()
+        case .create10JournalNotes: Self.create10JournalNotes()
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omniboxFillHistory: fillHistory()
@@ -147,8 +151,40 @@ class BeamUITestsMenuGenerator {
         }
     }
 
+    static public func create100NormalNotes() {
+        let generator = FakeNoteGenerator(count: 100, journalRatio: 0.0, futureRatio: 0.0)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save()
+        }
+    }
+
+    static public func create100JournalNotes() {
+        let generator = FakeNoteGenerator(count: 100, journalRatio: 1.0, futureRatio: 0.05)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save()
+        }
+    }
+
     static public func create10Notes() {
-        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.2, futureRatio: 0.1)
+        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.2, futureRatio: 0.05)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save()
+        }
+    }
+
+    static public func create10NormalNotes() {
+        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.0, futureRatio: 0.0)
+        generator.generateNotes()
+        for note in generator.notes {
+            note.save()
+        }
+    }
+
+    static public func create10JournalNotes() {
+        let generator = FakeNoteGenerator(count: 10, journalRatio: 1.0, futureRatio: 0.05)
         generator.generateNotes()
         for note in generator.notes {
             note.save()

@@ -65,7 +65,7 @@ extension AppDelegate {
 
     func exportNote(id: UUID, baseURL: URL? = nil, toFile fileUrl: URL? = nil) {
         assert((baseURL == nil) != (fileUrl == nil))
-        if let note = BeamNote.fetch(id: id, keepInMemory: false, decodeChildren: true) {
+        if let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: true) {
             guard let doc = note.documentStruct else {
                 return
             }

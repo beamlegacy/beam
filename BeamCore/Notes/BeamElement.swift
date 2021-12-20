@@ -343,17 +343,24 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     public init() {
+        defer { changePropagationEnabled = true }
+        updateTextStats()
     }
 
     public init(_ text: String) {
+        defer { changePropagationEnabled = true }
         self.text = BeamText(text: text, attributes: [])
+        updateTextStats()
     }
 
     public init(_ text: BeamText) {
+        defer { changePropagationEnabled = true }
         self.text = text
+        updateTextStats()
     }
 
     public required init(from decoder: Decoder) throws {
+        defer { changePropagationEnabled = true }
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let recursive = decoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
@@ -602,15 +609,27 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     public let changed = PassthroughSubject<(BeamElement, ChangeType), Never>()
     public let treeChanged = PassthroughSubject<(BeamElement), Never>()
     public private(set) var lastChangeType: ChangeType?
-    open var changePropagationEnabled = true
+    open var changePropagationEnabled = false
+    public var recursiveChangePropagationEnabled: Bool {
+        get {
+            changePropagationEnabled
+        }
+        set {
+            changePropagationEnabled = newValue
+            for c in children {
+                c.recursiveChangePropagationEnabled = newValue
+            }
+        }
+    }
     public enum ChangeType {
         case text, meta, tree
     }
     open func change(_ type: ChangeType) {
-        guard changePropagationEnabled else { return }
         updateDate = BeamDate.now
         lastChangeType = type
-        changed.send((self, type))
+        if changePropagationEnabled {
+            changed.send((self, type))
+        }
 
         if type == .text || type == .tree {
             updateTextStats()
@@ -621,10 +640,11 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     open func childChanged(_ child: BeamElement, _ type: ChangeType) {
-        guard changePropagationEnabled else { return }
         updateDate = BeamDate.now
         lastChangeType = type
-        changed.send((child, type))
+        if changePropagationEnabled {
+            changed.send((child, type))
+        }
         if type == .text || type == .tree {
             updateTextStats()
         }
@@ -890,7 +910,7 @@ extension BeamElement {
         return ElementTextStats(wordsCount: wordsCount)
     }
 
-    private func updateTextStats() {
+    func updateTextStats() {
         let wordsCount = self.calculateWordsCount()
         textStats.wordsCount = wordsCount
     }

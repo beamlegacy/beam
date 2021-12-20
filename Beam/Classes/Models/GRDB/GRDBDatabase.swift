@@ -284,27 +284,36 @@ extension GRDBDatabase {
     // MARK: - BeamNote / BeamElement
     func append(note: BeamNote) throws {
         // only reindex note if needed:
-        guard shouldReindex(note: note) else { return }
+        let pivotDate = lastIndexingFor(note: note)
+        guard note.updateDate > pivotDate else { return }
 
-        do {
-            try dbWriter.write { db in
-                try BeamElementRecord.filter(Column("noteId") == note.id.uuidString).deleteAll(db)
-                let databaseId =  note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString
-                for elem in note.allTexts {
-                    var record = BeamElementRecord(title: note.title, text: elem.1.text, uid: elem.0.uuidString, noteId: note.id.uuidString, databaseId: databaseId)
-                    try record.insert(db)
+        let databaseId =  note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString
+        let noteTitle = note.title
+        let noteIdStr = note.id.uuidString
+        let records = note.allTextElements.map { BeamElementRecord(title: noteTitle, text: $0.text.text, uid: $0.id.uuidString, noteId: noteIdStr, databaseId: databaseId) }
+        let links = note.internalLinks
+
+        BeamNote.indexingQueue.async {
+            note.sign.begin(BeamNote.Signs.indexContentsReferences)
+            do {
+                try dbWriter.write { db in
+                    try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == note.id.uuidString).deleteAll(db)
+                    try BidirectionalLink.filter(BidirectionalLink.Columns.sourceNoteId == note.id).deleteAll(db)
+                    for var record in records {
+                        try record.save(db)
+                    }
                 }
+            } catch {
+                Logger.shared.logError("Error while indexing note \(note.title): \(error)", category: .search)
             }
-        } catch {
-            Logger.shared.logError("Error while indexing note \(note.title): \(error)", category: .search)
-            throw error
-        }
+            note.sign.end(BeamNote.Signs.indexContentsReferences)
 
-        for link in note.internalLinks {
-            appendLink(link)
-        }
+            note.sign.begin(BeamNote.Signs.indexContentsLinks)
+            appendLinks(links)
+            note.sign.end(BeamNote.Signs.indexContentsLinks)
 
-        updateIndexedAt(for: note)
+            updateIndexedAt(for: note)
+        }
     }
 
     func append(element: BeamElement) throws {
@@ -313,10 +322,10 @@ extension GRDBDatabase {
         let noteId = note.id
         do {
             try dbWriter.write { db in
-                try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
+                try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteId.uuidString && BeamElementRecord.Columns.uid == element.id.uuidString).deleteAll(db)
                 var record = BeamElementRecord(id: nil, title: noteTitle, text: element.text.text, uid: element.id.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString)
                 try record.insert(db)
-                try BidirectionalLink.filter(Column("sourceElementId") == element.id && Column("sourceNoteId") == noteId).deleteAll(db)
+                try BidirectionalLink.filter(BidirectionalLink.Columns.sourceElementId == element.id && BidirectionalLink.Columns.sourceNoteId == noteId).deleteAll(db)
             }
 
             for link in element.internalLinksInSelf {
@@ -340,10 +349,10 @@ extension GRDBDatabase {
         DispatchQueue.global(qos: .userInitiated).async {
             do {
                 try dbWriter.write { db in
-                    try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
+                    try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteId.uuidString && BeamElementRecord.Columns.uid == element.id.uuidString).deleteAll(db)
                     var record = BeamElementRecord(id: nil, title: noteTitle, text: text, uid: elementId.uuidString, noteId: noteId.uuidString, databaseId: note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString)
                     try record.insert(db)
-                    try BidirectionalLink.filter(Column("sourceElementId") == elementId && Column("sourceNoteId") == noteId).deleteAll(db)
+                    try BidirectionalLink.filter(BidirectionalLink.Columns.sourceElementId == elementId && BidirectionalLink.Columns.sourceNoteId == noteId).deleteAll(db)
                 }
 
                 for link in links {
@@ -373,9 +382,24 @@ extension GRDBDatabase {
     func remove(noteId: UUID) throws {
         let noteIdString = noteId.uuidString
         _ = try dbWriter.write { db in
-            try BeamElementRecord.filter(Column("noteId") == noteIdString).deleteAll(db)
+            try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteIdString).deleteAll(db)
+            try BidirectionalLink.filter(BidirectionalLink.Columns.sourceNoteId == noteId).deleteAll(db)
         }
         removeIndexedAt(for: noteId)
+    }
+
+    func removeNotes(_ noteIds: [UUID]) throws {
+        _ = try dbWriter.write { db in
+            for id in noteIds {
+                let idString = id.uuidString
+                try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == idString).deleteAll(db)
+                try BidirectionalLink.filter(BidirectionalLink.Columns.sourceNoteId == id).deleteAll(db)
+                try BidirectionalLink.filter(BidirectionalLink.Columns.linkedNoteId == id).deleteAll(db)
+                try BeamNoteIndexingRecord
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == idString)
+                    .deleteAll(db)
+            }
+        }
     }
 
     func updateIndexedAt(for note: BeamNote) {
@@ -435,16 +459,39 @@ extension GRDBDatabase {
         return result
     }
 
+    func lastIndexingFor(note: BeamNote) -> Date {
+        do {
+            return try dbReader.read({ db in
+                let dates = try BeamNoteIndexingRecord
+                    .filter(BeamNoteIndexingRecord.Columns.noteId == note.id.uuidString)
+                    .fetchAll(db)
+                guard dates.count <= 1 else {
+                    Logger.shared.logError("There should only be one BeamNoteIndexingRecord instance for note [\(note.id)] but there are \(dates.count)", category: .database)
+                    return Date.distantPast
+                }
+
+                guard let date = dates.first else {
+                    return Date.distantPast
+                }
+
+                return date.indexedAt
+            })
+        } catch {
+            Logger.shared.logError("Error trying to find if note [\(note.id)] should be reindexed: \(error)", category: .database)
+        }
+        return Date.distantPast
+    }
+
     func remove(noteTitled: String) throws {
         _ = try dbWriter.write { db in
-            try BeamElementRecord.filter(Column("title") == noteTitled).deleteAll(db)
+            try BeamElementRecord.filter(BeamElementRecord.Columns.title == noteTitled).deleteAll(db)
         }
     }
 
     func remove(element: BeamElement) throws {
         guard let noteId = element.note?.id else { return }
         _ = try dbWriter.write { db in
-            try BeamElementRecord.filter(Column("noteId") == noteId.uuidString && Column("uid") == element.id.uuidString).deleteAll(db)
+            try BeamElementRecord.filter(BeamElementRecord.Columns.noteId == noteId.uuidString && BeamElementRecord.Columns.uid == element.id.uuidString).deleteAll(db)
         }
     }
 
@@ -678,7 +725,7 @@ extension GRDBDatabase {
         }
         var filter: SQLSpecificExpressible?
         if let excludeElements = excludeElements {
-            filter = !excludeElements.map { $0.uuidString }.contains(Column("uid"))
+            filter = !excludeElements.map { $0.uuidString }.contains(BeamElementRecord.Columns.uid)
         }
         do {
             return try dbReader.read { db in
@@ -699,7 +746,7 @@ extension GRDBDatabase {
         }
         var filter: SQLSpecificExpressible?
         if let excludeElements = excludeElements {
-            filter = !excludeElements.map { $0.uuidString }.contains(Column("uid"))
+            filter = !excludeElements.map { $0.uuidString }.contains(BeamElementRecord.Columns.uid)
         }
         do {
             return try dbReader.read { db in
@@ -857,24 +904,28 @@ extension GRDBDatabase {
 
     // BidirectionalLinks:
     func appendLink(_ link: BidirectionalLink) {
-        appendLink(fromNote: link.sourceNoteId, element: link.sourceElementId, toNote: link.linkedNoteId)
+        appendLinks([link])
+    }
+
+    func appendLinks(_ links: [BidirectionalLink]) {
+        do {
+            try dbWriter.write { db in
+                for var link in links {
+                    try BidirectionalLink
+                        .filter(BidirectionalLink.Columns.sourceNoteId == link.sourceNoteId)
+                        .filter(BidirectionalLink.Columns.sourceElementId == link.sourceElementId)
+                        .filter(BidirectionalLink.Columns.linkedNoteId == link.linkedNoteId)
+                        .deleteAll(db)
+                    try link.save(db)
+                }
+            }
+        } catch {
+            Logger.shared.logError("Unable to save links in database: \(error)", category: .search)
+        }
     }
 
     func appendLink(fromNote: UUID, element: UUID, toNote: UUID) {
-        do {
-            try dbWriter.write { db in
-                var link = BidirectionalLink(sourceNoteId: fromNote, sourceElementId: element, linkedNoteId: toNote)
-                try BidirectionalLink
-                    .filter(Column("linkedNoteId") == toNote
-                        && Column("sourceNoteId") == fromNote
-                        && Column("sourceElementId") == element)
-                    .deleteAll(db)
-                try link.insert(db)
-                Logger.shared.logInfo("Append link \(fromNote):\(element) - \(toNote)", category: .search)
-            }
-        } catch {
-            Logger.shared.logError("Error while appending link \(fromNote):\(element) - \(toNote): \(error)", category: .search)
-        }
+        appendLinks([BidirectionalLink(sourceNoteId: fromNote, sourceElementId: element, linkedNoteId: toNote)])
     }
 
     func removeLink(fromNote: UUID, element: UUID, toNote: UUID) {
@@ -893,7 +944,7 @@ extension GRDBDatabase {
         return try dbWriter.read({ db in
 //            let all = try BidirectionalLink.fetchAll(db)
             let found = try BidirectionalLink
-                .filter(Column("linkedNoteId") == noteId)
+                .filter(BidirectionalLink.Columns.linkedNoteId == noteId)
                 .fetchAll(db)
             return found
         })
