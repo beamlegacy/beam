@@ -52,7 +52,7 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .leading, relatedBy: .equal, toItem: scrollView.contentView, attribute: .leading, multiplier: 1.0, constant: 0))
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .trailing, relatedBy: .equal, toItem: scrollView.contentView, attribute: .trailing, multiplier: 1.0, constant: 0))
 
-        journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus)
+        journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
         context.coordinator.watchScrollViewBounds(scrollView)
         return scrollView
@@ -65,7 +65,7 @@ struct JournalScrollView: NSViewRepresentable {
         if state.data.newDay {
             state.data.reloadJournal()
         }
-        journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus)
+        journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
     }
 
