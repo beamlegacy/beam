@@ -109,7 +109,7 @@ struct DownloaderView: View {
         }
         .frame(width: Self.width)
         .background(BeamColor.Generic.background.swiftUI)
-        .cornerRadius(6)
+        .cornerRadius(10)
         .alert(item: $downloader.showAlertFileNotFoundForDownload, content: { download in
             Alert(title: Text("Beam can’t show the file “\(download.fileSystemURL.lastPathComponent)” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
                 downloader.clearFileDownload(download)

@@ -34,6 +34,7 @@ struct ButtonLabelStyle {
     var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
     var disableAnimations = true // Should be replaced by the parent view disabling animations with .animation(nil) when needed.
     var backgroundCornerRadius: CGFloat = 4
+    var leadingPaddingAdjustment: CGFloat = 0
 }
 
 struct ButtonLabel: View {
@@ -108,7 +109,8 @@ struct ButtonLabel: View {
                 }
             }
         }
-        .padding(.horizontal, style.horizontalPadding)
+        .padding(.leading, style.horizontalPadding - style.leadingPaddingAdjustment)
+        .padding(.trailing, style.horizontalPadding)
         .padding(.vertical, style.verticalPadding)
         .background(backgroundColor)
         .if(style.disableAnimations) {
