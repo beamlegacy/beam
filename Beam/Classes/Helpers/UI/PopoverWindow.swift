@@ -11,23 +11,31 @@ import SwiftUI
 /// Use this class if you need a NSWindow that can close itself once it looses key status, if it hasn't been moved.
 class PopoverWindow: NSWindow {
 
+    static let customShadowPadding: CGFloat = 40
+    private let strokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
+    private let shadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.16), darkColor: .From(color: .black, alpha: 0.7))
+
     private(set) var didMove = false
     private var moveNotificationToken: NSObjectProtocol?
 
     private var _canBecomeKey: Bool
     private var _canBecomeMain: Bool
-    init(canBecomeKey: Bool = true, canBecomeMain: Bool) {
+    private var _useBeamShadow: Bool
+
+    init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false) {
         _canBecomeKey = canBecomeKey
         _canBecomeMain = canBecomeMain
+        _useBeamShadow = useBeamShadow
         super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
     }
 
-    override func setContentSize(_ size: NSSize) {
-        super.setContentSize(size)
-    }
-
     func setOrigin(_ point: CGPoint, fromTopLeft: Bool = false) {
-        if let originScreen = self.parent?.convertPoint(toScreen: point) {
+        if var originScreen = self.parent?.convertPoint(toScreen: point) {
+            if _useBeamShadow {
+                originScreen.y += fromTopLeft ? Self.customShadowPadding : -Self.customShadowPadding
+                originScreen.x -= Self.customShadowPadding
+            }
+
             if fromTopLeft {
                 self.setFrameTopLeftPoint(originScreen)
             } else {
@@ -37,7 +45,7 @@ class PopoverWindow: NSWindow {
     }
 
     func setView<Content>(content: Content) where Content: View {
-        self.contentView = NSHostingView(rootView: content)
+        self.contentView = NSHostingView(rootView: updateViewIfNeeded(content))
     }
 
     func setView<Content>(with view: Content, at origin: NSPoint, fromTopLeft: Bool = false) where Content: View {
@@ -100,6 +108,22 @@ class PopoverWindow: NSWindow {
         removeMoveObserver()
     }
 
+    override var hasShadow: Bool {
+        get {
+            if _useBeamShadow {
+                return false
+            }
+            return super.hasShadow
+        }
+
+        set {
+            if _useBeamShadow {
+                super.hasShadow = false
+            }
+            super.hasShadow = newValue
+        }
+    }
+
     private func addMoveObserver() -> NSObjectProtocol {
         return NotificationCenter.default.addObserver(forName: .init("NSWindowDidMoveNotification"), object: self, queue: .main) { [weak self] _ in
             self?.didMove = true
@@ -131,5 +155,9 @@ class PopoverWindow: NSWindow {
 
     override func performClose(_ sender: Any?) {
         self.close()
+    }
+
+    private func updateViewIfNeeded<Content>(_ view: Content)  -> some View where Content: View {
+        view.if(_useBeamShadow, transform: { $0.background(RoundedRectangle(cornerRadius: 10.0).stroke(strokeColor.swiftUI, lineWidth: 1)).shadow(color: self.shadowColor.swiftUI, radius: 15, x: 0, y: 12).padding(Self.customShadowPadding) })
     }
 }
