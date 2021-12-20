@@ -18,7 +18,7 @@ class WebViewFocusMessageHandler: BeamMessageHandler<WebViewFocusMessages> {
         super.init(config: config, messages: WebViewFocusMessages.self, jsFileName: "WebViewFocusHandling")
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         guard let receivedMessage = WebViewFocusMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message \(messageName) for WebViewFocus message handler", category: .web)
             return

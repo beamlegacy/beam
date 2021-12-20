@@ -14,7 +14,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
         super.init(config: config, messages: NavigationMessages.self, jsFileName: "navigation_prod")
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = NavigationMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message '\(messageName)' for navigation message handler", category: .web)
             return
@@ -37,7 +37,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
             guard let navigationController = webPage.navigationController else { return }
             let replace: Bool = type == "replaceState" ? true : false
             navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace, fromJS: true)
-            _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil)
+            _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
         }
     }
 }

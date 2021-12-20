@@ -33,7 +33,7 @@ class WebPositionsMessageHandler: BeamMessageHandler<WebPositionsMessages> {
         super.init(config: config, messages: WebPositionsMessages.self, jsFileName: "WebPositions_prod")
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         do {
             guard let webPositions = webPage.webPositions else {
                 throw WebPositionsError("webPositions is required")

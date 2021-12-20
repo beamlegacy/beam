@@ -14,7 +14,7 @@ class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
         super.init(config: config, messages: LogMessages.self, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
     }
 
-    override func onMessage(messageName: String, messageBody: Any?, from: WebPage) {
+    override func onMessage(messageName: String, messageBody: Any?, from: WebPage, frameInfo: WKFrameInfo?) {
         guard let messageKey = LogMessages(rawValue: messageName) else {
             Logger.shared.logError("Unsupported message '\(messageName)' for logging message handler", category: .web)
             return
