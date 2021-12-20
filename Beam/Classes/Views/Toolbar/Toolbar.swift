@@ -17,10 +17,15 @@ struct Toolbar: View {
     @Environment(\.colorScheme) private var colorScheme
 
     var isAboveContent = false
-    @State private var allowTransparentBackground = true
+
+    @StateObject private var viewModel = ViewModel()
+    private class ViewModel: ObservableObject {
+        @Published var allowTransparentBackground = true
+        var backgroundVisibilityDispatchItem: DispatchWorkItem?
+    }
 
     private let webOverlayTransition = AnyTransition.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
-                                                                removal: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15)))
+                                                                removal: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15).delay(0.25)))
     private let notwebOverlayTransition = AnyTransition.asymmetric(insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15)),
                                                                    removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
     private let overlayOpacity = PreferencesManager.editorToolbarOverlayOpacity
@@ -40,7 +45,6 @@ struct Toolbar: View {
                         .transition(notwebOverlayTransition)
                     Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparator)
                         .transition(notwebOverlayTransition)
-                        .opacity(isAboveContent ? 1 : 0)
                 }
             } else {
                 BeamColor.ToolBar.backgroundInactiveWindow.swiftUI
@@ -56,35 +60,36 @@ struct Toolbar: View {
         .background(
             VisualEffectView(material: .headerView)
                 .overlay(blurOverlay)
-                .opacity(!allowTransparentBackground || isAboveContent ? 1 : 0)
+                .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
         )
         .zIndex(10)
         .onChange(of: mode) { [mode] newMode in
             updateBackgroundVisibility(mode: newMode, previousMode: mode)
         }
         .onAppear {
-            allowTransparentBackground = mode != .web
+            viewModel.allowTransparentBackground = mode != .web
         }
     }
 
-    private let backgroundTransitionAnimation = BeamAnimation.easeInOut(duration: 0.1)
-
     private func updateBackgroundVisibility(mode: Mode, previousMode: Mode) {
         guard previousMode != mode else { return }
+        viewModel.backgroundVisibilityDispatchItem?.cancel()
         if mode == .web {
             if isAboveContent {
-                allowTransparentBackground = false
+                viewModel.allowTransparentBackground = false
             } else {
                 withAnimation(BeamAnimation.easeInOut(duration: 0.05)) {
-                    allowTransparentBackground = false
+                    viewModel.allowTransparentBackground = false
                 }
             }
         } else if previousMode == .web {
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(250)) {
-                withAnimation(backgroundTransitionAnimation) {
-                    allowTransparentBackground = true
+            let workItem = DispatchWorkItem { [weak viewModel] in
+                withAnimation(BeamAnimation.easeInOut(duration: 0.1)) {
+                    viewModel?.allowTransparentBackground = true
                 }
             }
+            viewModel.backgroundVisibilityDispatchItem = workItem
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(250), execute: workItem)
         }
     }
 }
