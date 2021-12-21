@@ -118,11 +118,11 @@ struct OnboardingView: View {
                     GlobalCenteringContainer(containerGeometry: proxy) {
                         HStack(spacing: 0) {
                             Text("Terms and Conditions").onTapGesture {
-                                openExternalURL("https://front.beamapp.co/terms", title: "Terms and Conditions")
+                                openExternalURL(Configuration.beamTermsConditionsLink, title: "Terms and Conditions")
                             }
                             Text(" • ")
                             Text("Privacy Policy").onTapGesture {
-                                openExternalURL("https://front.beamapp.co/privacy", title: "Privacy Policy")
+                                openExternalURL(Configuration.beamPrivacyPolicyLink, title: "Privacy Policy")
                             }
                         }
                     }
