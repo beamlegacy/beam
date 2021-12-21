@@ -94,6 +94,8 @@ class AutocompleteManager: ObservableObject {
             [getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)]
         }
 
+        Logger.shared.logInfo("------------------- ✳️ Start of autocomplete for \(receivedQueryString) -------------------", category: .autocompleteManager)
+
         Publishers.MergeMany(publishers).collect()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] publishersResults in
@@ -111,17 +113,21 @@ class AutocompleteManager: ObservableObject {
 
     private func logAutocompleteResultFinished(for searchText: String, finalResults: [AutocompleteResult], startedAt: DispatchTime) {
         if !finalResults.isEmpty {
-            Logger.shared.logDebug("-- Autosuggest results for `\(searchText)` --", category: .autocompleteManager)
+            Logger.shared.logDebug("------------------- Autosuggest results for `\(searchText)` -------------------", category: .autocompleteManager)
             for result in finalResults {
                 Logger.shared.logDebug("\(String(describing: result))", category: .autocompleteManager)
             }
         }
         let (elapsedTime, timeUnit) = startedAt.endChrono()
-        Logger.shared.logInfo("autocomplete results in \(elapsedTime) \(timeUnit)", category: .autocompleteManager)
+        Logger.shared.logInfo("------------------- ✅ End of autocomplete. results in \(elapsedTime) \(timeUnit) -------------------", category: .autocompleteManager)
     }
 
-    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], limit: Int = 10) {
-        Logger.shared.logDebug("-------------\(step)-------------------", category: .autocompleteManager)
+    static func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], limit: Int = 10, startedAt: DispatchTime) {
+
+        let (elapsedTime, timeUnit) = startedAt.endChrono()
+        Logger.shared.logDebug("-------------------\(step)-------------------", category: .autocompleteManager)
+        Logger.shared.logDebug("------------------- Took \(elapsedTime) \(timeUnit)-------------------", category: .autocompleteManager)
+
         for res in results.prefix(limit) {
             Logger.shared.logDebug("\(stepShortName): \(String(describing: res))", category: .autocompleteManager)
         }
