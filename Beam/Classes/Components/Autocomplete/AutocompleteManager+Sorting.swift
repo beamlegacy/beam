@@ -35,6 +35,7 @@ extension AutocompleteManager {
                              topDomainResults: [AutocompleteResult],
                              searchEngineResults: [AutocompleteResult],
                              createCardResults: [AutocompleteResult]) -> [AutocompleteResult] {
+        let start = DispatchTime.now()
         let historyResultsTruncated = Array(historyResults.prefix(6))
 
         // but prioritize title match over content match ?
@@ -46,7 +47,7 @@ extension AutocompleteManager {
         sortableResults.append(contentsOf: notesResultsTruncated)
 
         sortableResults.sort(by: >)
-        Self.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResults)
+        Self.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResults, startedAt: start)
 
         if let topDomain = topDomainResults.first {
             if let firstResult = sortableResults.first,
