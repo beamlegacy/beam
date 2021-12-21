@@ -31,16 +31,29 @@ extension BeamText {
         self.init()
         append(attributedString.string)
 
-        if let ranges = text.urlRangesInside() {
-            ranges.forEach { range in
+        let linkRanges = attributedString.getLinks()
+        linkRanges.forEach { linkRange in
+            let range = linkRange.value
+            let r = range.lowerBound..<range.upperBound
+            let (isValid, url) = linkRange.key.validUrl()
+            if isValid {
+                self.addAttributes([.link(url)], to: r)
+            }
+        }
+        if let urlRanges = text.urlRangesInside() {
+            urlRanges.forEach { range in
                 let r = range.lowerBound..<range.upperBound
                 let linkStr: String = self.extract(range: r).text
+                if let existingLinkRange = linkRanges[linkStr], existingLinkRange == range {
+                    return
+                }
                 let (isValid, url) = linkStr.validUrl()
                 if isValid {
                     self.addAttributes([.link(url)], to: r)
                 }
             }
         }
+
         let boldRanges = attributedString.getRangesOfFont(for: .bold)
         for range in boldRanges {
             let r = range.lowerBound..<range.upperBound
@@ -50,16 +63,6 @@ extension BeamText {
         for range in emphasisRanges {
             let r = range.lowerBound..<range.upperBound
             self.addAttributes([.emphasis], to: r)
-        }
-
-        let linkRanges = attributedString.getLinks()
-        for linkRange in linkRanges {
-            let range = linkRange.value
-            let r = range.lowerBound..<range.upperBound
-            let (isValid, url) = linkRange.key.validUrl()
-            if isValid {
-                self.addAttributes([.link(url)], to: r)
-            }
         }
     }
 
