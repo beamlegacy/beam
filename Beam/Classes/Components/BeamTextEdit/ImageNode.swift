@@ -127,10 +127,13 @@ class ImageNode: ResizableNode {
             imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
         }
 
-        imageLayer.mouseDown = { [weak self] _ -> Bool in
+        imageLayer.mouseDown = { [weak self] mouseInfo -> Bool in
             guard let self = self else { return false }
             if self.isCollapsed {
                 self.isCollapsed = false
+                return true
+            } else if mouseInfo.event.clickCount == 2 {
+                self.isCollapsed = true
                 return true
             }
             return false
