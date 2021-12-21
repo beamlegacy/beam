@@ -12,8 +12,8 @@ import BeamCore
 extension AutocompleteManager {
     typealias AutocompletePublisherSourceResults = (source: AutocompleteResult.Source, results: [AutocompleteResult])
 
-    private func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult]) {
-        Self.logIntermediate(step: step, stepShortName: stepShortName, results: results)
+    private func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], startedAt: DispatchTime) {
+        Self.logIntermediate(step: step, stepShortName: stepShortName, results: results, startedAt: startedAt)
     }
 
     func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
@@ -67,6 +67,7 @@ extension AutocompleteManager {
 
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
+            let start = DispatchTime.now()
             let documentManager = DocumentManager()
             documentManager.documentsWithTitleMatch(title: query) { result in
                 switch result {
@@ -78,7 +79,7 @@ extension AutocompleteManager {
                         AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
                     }.sorted(by: >).prefix(6)
                     let autocompleteResultsArray = Array(autocompleteResults)
-                    self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray)
+                    self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
                     promise(.success(autocompleteResultsArray))
                 }
             }
@@ -87,6 +88,7 @@ extension AutocompleteManager {
 
     private func autocompleteNotesContentsResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
+            let start = DispatchTime.now()
             GRDBDatabase.shared.search(matchingAllTokensIn: query, maxResults: 10, frecencyParam: AutocompleteManager.noteFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
@@ -100,7 +102,7 @@ extension AutocompleteManager {
                         return AutocompleteResult(text: result.title, source: .note(noteId: result.noteId, elementId: result.uid),
                                                   completingText: query, uuid: result.uid, score: result.frecency?.frecencySortScore)
                     }
-                    self.logIntermediate(step: "NoteContent", stepShortName: "NC", results: autocompleteResults)
+                    self.logIntermediate(step: "NoteContent", stepShortName: "NC", results: autocompleteResults, startedAt: start)
                     promise(.success(autocompleteResults))
                 }
             }
@@ -109,6 +111,7 @@ extension AutocompleteManager {
 
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
+            let start = DispatchTime.now()
             GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
@@ -122,7 +125,7 @@ extension AutocompleteManager {
                         return AutocompleteResult(text: result.title, source: .history,
                                                   url: url, information: information, completingText: query, score: result.frecency?.frecencySortScore)
                     }
-                    self.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults)
+                    self.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults, startedAt: start)
                     promise(.success(autocompleteResults))
                 }
             }
@@ -158,6 +161,7 @@ extension AutocompleteManager {
 
     private func autocompleteLinkStoreResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
+            let start = DispatchTime.now()
             let scoredLinks = GRDBDatabase.shared.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6)
             let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
                 let url = URL(string: scoredLink.link.url)
@@ -166,7 +170,7 @@ extension AutocompleteManager {
                                           information: scoredLink.link.title, completingText: query,
                                           score: scoredLink.frecency?.frecencySortScore)
             }.sorted(by: >)
-            self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results)
+            self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results, startedAt: start)
             promise(.success(results))
         }
     }
@@ -188,6 +192,7 @@ extension AutocompleteManager {
 
     private func autocompleteTopDomainResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
+            let start = DispatchTime.now()
             TopDomainDatabase.shared.search(withPrefix: query) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
@@ -197,7 +202,7 @@ extension AutocompleteManager {
                         return
                     }
                     let ac = AutocompleteResult(text: url.absoluteString, source: .topDomain, url: url, completingText: query)
-                    self.logIntermediate(step: "TopDomain", stepShortName: "TD", results: [ac])
+                    self.logIntermediate(step: "TopDomain", stepShortName: "TD", results: [ac], startedAt: start)
                     promise(.success([ac]))
                 }
             }
@@ -206,6 +211,7 @@ extension AutocompleteManager {
 
     private func autocompleteSearchEngineResults(for searchText: String, searchEngine: Autocompleter) -> Future<[AutocompleteResult], Error> {
         Future { promise in
+            let start = DispatchTime.now()
             var promiseReturnedAlready = false
 
             searchEngine.complete(query: searchText)
@@ -218,7 +224,7 @@ extension AutocompleteManager {
                     return
                 }
                 promiseReturnedAlready = true
-                self.logIntermediate(step: "SearchEngine", stepShortName: "SE", results: results)
+                    self.logIntermediate(step: "SearchEngine", stepShortName: "SE", results: results, startedAt: start)
                 promise(.success(results))
             }.store(in: &self.searchRequestsCancellables)
 
@@ -246,6 +252,7 @@ extension AutocompleteManager {
     // MARK: - Empty Query Suggestions
     private func defaultSuggestionsNotesResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
+            let start = DispatchTime.now()
             let documentManager = DocumentManager()
             let limit = 3
             let documentStructs = documentManager.loadAllWithLimit(limit, sortingKey: .updatedAt(false))
@@ -255,7 +262,7 @@ extension AutocompleteManager {
                 AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id])
             }.sorted(by: >).prefix(limit)
             let autocompleteResultsArray = Array(autocompleteResults)
-            self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray)
+            self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray, startedAt: start)
             promise(.success(autocompleteResultsArray))
         }
     }
