@@ -108,7 +108,7 @@ struct HelpAndFeedbackMenuView: View {
     }
 
     private var backgroundColor: Color {
-        BeamColor.Generic.background.swiftUI
+        BeamColor.Generic.secondaryBackground.swiftUI
     }
 }
 

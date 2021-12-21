@@ -11,6 +11,7 @@ extension BeamColor {
 
     enum Generic {
         static let background = BeamColor.Custom(named: "WindowBackgroundColor")
+        static let secondaryBackground = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
         static let text = BeamColor.Niobium
         static let subtitle = BeamColor.LightStoneGray
         static let placeholder = BeamColor.AlphaGray
