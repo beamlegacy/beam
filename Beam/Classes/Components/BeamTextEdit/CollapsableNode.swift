@@ -61,6 +61,7 @@ extension Collapsable where Self: ElementNode {
         thumbnailLayer.frame.origin = contentPosition
 
         let text = Layer.text(named: "collapsed-text", title, color: initialColor, size: PreferencesManager.editorFontSize)
+        text.cursor = .pointingHand
         text.frame.origin =  CGPoint(x: thumbnailLayer.layer.position.x + thumbnailWidth + 6, y: 0)
 
         if mediaURL != nil {
@@ -130,7 +131,7 @@ extension Collapsable where Self: ElementNode {
         let mouseInteraction = MouseInteraction(type: mouseInteractionType ?? .unknown, range: NSRange(location: 0, length: text.count))
         let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: PreferencesManager.editorFontSize, fontColor: BeamColor.Generic.text.staticColor, markedRange: nil, searchedRanges: [], mouseInteraction: mouseInteraction)
 
-        let builtString = builder.build(config: config).addAttributes([.foregroundColor: textColor.cgColor])
+        let builtString = builder.build(config: config).addAttributes([.foregroundColor: textColor.cgColor]).addAttributes([.font: BeamFont.medium(size: 14).nsFont])
         return builtString
     }
 
@@ -161,7 +162,7 @@ extension Collapsable where Self: ElementNode {
         textLayer.string = title
         textLayer.foregroundColor = color.cgColor
         textLayer.fontSize = 12
-        textLayer.font = BeamFont.regular(size: 12).nsFont
+        textLayer.font = BeamFont.medium(size: 12).nsFont
         textLayer.frame.size = textLayer.preferredFrameSize()
         textLayer.opacity = isHoverCollapseExpandButton ? 1.0 : 0.0
 
@@ -219,7 +220,6 @@ extension Collapsable where Self: ElementNode {
             textLayer.string = text
             let origin = CGPoint(x: contentLayer.position.x + contentLayer.frame.width + 6, y: contentLayer.frame.minY)
             textLayer.frame.origin = origin
-
             let frame = TextFrame.create(string: text, atPosition: origin, textWidth: contentsWidth, singleLineHeightFactor: nil, maxHeight: nil)
 
             textLayer.truncationMode = .end
