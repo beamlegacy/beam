@@ -92,6 +92,7 @@ class WebPageHolder: NSObject, WebPageRelated {
 // MARK: - Default WebPage methods implementations
 extension WebPage {
 
+    @discardableResult
     func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil) -> Promise<Any?> {
         Promise<Any?> { [unowned self] fulfill, reject in
             var command = jsCode

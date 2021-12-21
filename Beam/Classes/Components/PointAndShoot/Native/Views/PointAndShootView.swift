@@ -136,6 +136,9 @@ struct PointAndShootView: View {
                             } else {
                                 pns.dismissShoot()
                             }
+                            if let currentTab = browserTabsManager.currentTab {
+                                currentTab.webviewWindow?.makeFirstResponder(currentTab.webView)
+                            }
                         }
                 }
             }
