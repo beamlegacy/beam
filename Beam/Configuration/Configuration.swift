@@ -24,6 +24,9 @@ struct Configuration {
 
     static private(set) var testPrivateKey = "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0="
 
+    static let beamPrivacyPolicyLink = "https://beamapp.co/privacy"
+    static let beamTermsConditionsLink = "https://beamapp.co/tos"
+
     static var shouldDeleteEmptyDatabase = true
 
     // Runtime configuration
