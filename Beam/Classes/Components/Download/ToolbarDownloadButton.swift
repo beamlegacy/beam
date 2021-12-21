@@ -32,11 +32,11 @@ struct ToolbarDownloadButton: View {
 
     var body: some View {
         ToolbarButton(icon: hasOngoingDownload ? "nav-downloads" : "nav-downloads_done",
-                               customIconSize: hasOngoingDownload ? CGSize(width: 20, height: 20) : nil,
                                action: action)
             .overlay(!hasOngoingDownload ?  nil :
-                        LinearProgressView(progress: previewFractionCompleted ?? downloadManager.fractionCompleted)
-                        .frame(width: 16).padding(.bottom, 2),
+                        LinearProgressView(progress: previewFractionCompleted ?? downloadManager.fractionCompleted, height: 2.0)
+                        .frame(width: 16)
+                        .padding(.bottom, 5),
                      alignment: .bottom
             )
             .accessibility(identifier: "downloads")
