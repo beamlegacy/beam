@@ -40,7 +40,7 @@ struct AboutPreferencesView_Previews: PreviewProvider {
 struct BeamAboutSection: View {
     private var TermsAndConditionsButton: some View {
         Button {
-
+            PreferencesManager.openLink(url: URL(string: Configuration.beamTermsConditionsLink))
         } label: {
             (Text("Terms & Conditions") + Text(Image("editor-url").renderingMode(.template)))
                 .underline()
@@ -50,7 +50,7 @@ struct BeamAboutSection: View {
 
     private var PrivacyPolicyButton: some View {
         Button {
-
+            PreferencesManager.openLink(url: URL(string: Configuration.beamPrivacyPolicyLink))
         } label: {
             (Text("Privacy Policy") + Text(Image("editor-url").renderingMode(.template)))
                 .underline()
