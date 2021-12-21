@@ -41,7 +41,7 @@ struct DownloadCell: View {
                     .foregroundColor(BeamColor.Niobium.swiftUI)
                 if let task = download.downloadTask,
                    task.state == .running {
-                    LinearProgressView(progress: download.progress)
+                    LinearProgressView(progress: download.progress, height: 3.0)
                 }
                 Text(detailString)
                     .animation(.none)
