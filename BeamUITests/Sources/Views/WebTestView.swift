@@ -90,6 +90,7 @@ class WebTestView: BaseView {
     func getAnyTab() -> XCUIElement {
         app.groups.matching(tabPredicate).firstMatch
     }
+    
     func getTabs(wait: Bool = true) -> XCUIElementQuery {
         if wait {
             _ = getAnyTab().waitForExistence(timeout: implicitWaitTimeout)
