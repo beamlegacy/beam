@@ -28,7 +28,8 @@ protocol WebPage: AnyObject, Scorable {
     var passwordOverlayController: PasswordOverlayController? { get }
     var mediaPlayerController: MediaPlayerController? { get set }
 
-    var pointAndShootAllowed: Bool { get }
+    var pointAndShootInstalled: Bool { get }
+    var pointAndShootEnabled: Bool { get }
     var pointAndShoot: PointAndShoot? { get }
     var webPositions: WebPositions? { get }
 

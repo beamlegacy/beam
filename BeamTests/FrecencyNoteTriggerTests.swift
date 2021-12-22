@@ -74,7 +74,8 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var scrollX: CGFloat = .zero
         var scrollY: CGFloat = .zero
         var originalQuery: String?
-        var pointAndShootAllowed: Bool = false
+        var pointAndShootInstalled: Bool = false
+        var pointAndShootEnabled: Bool = false
         var hasError: Bool = false
         var responseStatusCode: Int = 200
 
