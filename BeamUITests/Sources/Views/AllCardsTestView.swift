@@ -59,7 +59,7 @@ class AllCardsTestView: BaseView {
     func addNewCard(_ cardName: String) -> AllCardsTestView {
         XCTContext.runActivity(named: "Create a card named '\(cardName)' using + icon") {_ in
             tableTextField(AllCardsViewLocators.TextFields.newCardField.accessibilityIdentifier).doubleClick()
-            app.typeText(cardName)
+            app.typeText(" " + cardName) //Workaround for CI that skips chars in the end
             tableImage(AllCardsViewLocators.Buttons.newCardButton.accessibilityIdentifier).click()
             return self
         }
@@ -87,6 +87,20 @@ class AllCardsTestView: BaseView {
     @discardableResult
     func openFirstCard() -> CardTestView {
         app.windows.tables.staticTexts[AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
+        return CardTestView()
+    }
+    
+    @discardableResult
+    func openCardByName(cardTitle: String) -> CardTestView {
+        var elementFound = false
+        self.getCardsNamesElements().forEach{ element in
+            if getElementStringValue(element: element) == cardTitle {
+                element.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
+                elementFound = true
+                return
+            }
+        }
+        XCTAssertTrue(elementFound, "\(cardTitle) was not found in All Cards list")
         return CardTestView()
     }
     
