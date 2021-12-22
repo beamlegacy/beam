@@ -359,7 +359,7 @@ public class BeamNote: BeamElement {
         return true
     }
 
-    public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing", attributes: .concurrent)
+    public static var indexingQueue = DispatchQueue(label: "BeamNoteIndexing", attributes: .concurrent, target: DispatchQueue.global())
     private static var fetchedNotes: [UUID: WeakReference<BeamNote>] = [:]
     private static var fetchedNotesTitles: [String: UUID] = [:]
     private static var fetchedNotesCancellables: [UUID: Cancellable] = [:]
