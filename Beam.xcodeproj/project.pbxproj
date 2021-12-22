@@ -420,6 +420,10 @@
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
+		8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768565C27709210002A8069 /* BrowserPasswordImporter.swift */; };
+		8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566327709413002A8069 /* ChromiumPasswordImporter.swift */; };
+		876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */; };
+		876856692770E239002A8069 /* ChromiumLoginData.db in Resources */ = {isa = PBXBuildFile; fileRef = 876856682770E239002A8069 /* ChromiumLoginData.db */; };
 		8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */; };
 		8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */; };
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
@@ -1590,6 +1594,10 @@
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
+		8768565C27709210002A8069 /* BrowserPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPasswordImporter.swift; sourceTree = "<group>"; };
+		8768566327709413002A8069 /* ChromiumPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordImporter.swift; sourceTree = "<group>"; };
+		876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordDecryptionTests.swift; sourceTree = "<group>"; };
+		876856682770E239002A8069 /* ChromiumLoginData.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = ChromiumLoginData.db; sourceTree = "<group>"; };
 		8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserHistoryImport.swift"; sourceTree = "<group>"; };
 		8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredPasswordCell.swift; sourceTree = "<group>"; };
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
@@ -2458,6 +2466,7 @@
 		0DC6E2DA26A02B0E00BD2E2A /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				876856672770E1D4002A8069 /* BrowserPasswordImport */,
 				DA113A7C2760F77D006B20AF /* BrowserHistoryImport */,
 				0DC6E2DB26A02B5900BD2E2A /* topdomains_test.txt */,
 			);
@@ -3739,8 +3748,18 @@
 			children = (
 				877888D1269C743F00D703F0 /* CSVParser.swift */,
 				8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */,
+				8768565C27709210002A8069 /* BrowserPasswordImporter.swift */,
+				8768566327709413002A8069 /* ChromiumPasswordImporter.swift */,
 			);
 			path = Passwords;
+			sourceTree = "<group>";
+		};
+		876856672770E1D4002A8069 /* BrowserPasswordImport */ = {
+			isa = PBXGroup;
+			children = (
+				876856682770E239002A8069 /* ChromiumLoginData.db */,
+			);
+			path = BrowserPasswordImport;
 			sourceTree = "<group>";
 		};
 		8775C5DD2613202900A26CAC /* PasswordManagerMenu */ = {
@@ -4188,6 +4207,7 @@
 			isa = PBXGroup;
 			children = (
 				DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */,
+				876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */,
 				DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */,
 				DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */,
 				DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */,
@@ -5578,6 +5598,7 @@
 			files = (
 				0DC6E2E926A0A4DB00BD2E2A /* topdomains_test.txt in Resources */,
 				DA22536527623C2900041D41 /* safariHistory.db-shm in Resources */,
+				876856692770E239002A8069 /* ChromiumLoginData.db in Resources */,
 				5281B09425C99D3300DF66D9 /* 2_local.json in Resources */,
 				DA22536B2762426E00041D41 /* firefoxPlaces.db in Resources */,
 				5281B08A25C998E700DF66D9 /* 1_ancestor.json in Resources */,
@@ -6494,6 +6515,7 @@
 				A570D32E27591C27003B239D /* ReadSizeViewModifier.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
 				A570D2F227583BD4003B239D /* TabsListView.swift in Sources */,
+				8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
 				525C235125BAFC6B001B9625 /* Merge.swift in Sources */,
 				52DB02642716D07900F3881D /* AppDelegate+Log.swift in Sources */,
@@ -6538,6 +6560,7 @@
 				BAA67A72C76AE25BF2FC60BD /* BrowsingScorer.swift in Sources */,
 				A54A45332767972A00B9AE1B /* UserInfoRequest+PromiseKit.swift in Sources */,
 				BAA67259A3927FBE4C92280B /* BrowsingTreeScorer.swift in Sources */,
+				8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */,
 				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,
 				5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
@@ -6618,6 +6641,7 @@
 				032562CC26051D4D006513E4 /* RBFilterGroupTests.m in Sources */,
 				520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */,
 				A075AB0F268F5C9400FC85B1 /* BeamDataFolderTests.swift in Sources */,
+				876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */,
 				5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */,
 				9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */,
 				524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */,
