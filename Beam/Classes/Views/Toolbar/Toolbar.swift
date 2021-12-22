@@ -57,18 +57,21 @@ struct Toolbar: View {
         ToolbarContentView()
             .environmentObject(state.autocompleteManager)
             .zIndex(11)
-        .background(
-            VisualEffectView(material: .headerView)
-                .overlay(blurOverlay)
-                .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
-        )
-        .zIndex(10)
-        .onChange(of: mode) { [mode] newMode in
-            updateBackgroundVisibility(mode: newMode, previousMode: mode)
-        }
-        .onAppear {
-            viewModel.allowTransparentBackground = mode != .web
-        }
+            .background(ClickCatchingView(onTap: { _ in }, onDoubleTap: { _ in
+                state.associatedWindow?.zoom(nil)
+            }))
+            .background(
+                VisualEffectView(material: .headerView)
+                    .overlay(blurOverlay)
+                    .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
+            )
+            .zIndex(10)
+            .onChange(of: mode) { [mode] newMode in
+                updateBackgroundVisibility(mode: newMode, previousMode: mode)
+            }
+            .onAppear {
+                viewModel.allowTransparentBackground = mode != .web
+            }
     }
 
     private func updateBackgroundVisibility(mode: Mode, previousMode: Mode) {
