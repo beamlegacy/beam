@@ -103,8 +103,9 @@ import Promises
 
     var originMode: Mode
 
-    var pointAndShootAllowed: Bool {
-        true
+    var pointAndShootInstalled: Bool = true
+    var pointAndShootEnabled: Bool {
+        state?.focusOmniBox != true
     }
 
     var allowsPictureInPicture: Bool {
@@ -521,6 +522,13 @@ import Promises
 
         webView.navigationDelegate = beamNavigationController
         webView.uiDelegate = uiDelegateController
+
+        state?.$focusOmniBox.sink { [weak self] value in
+            guard value else { return }
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
+                self?.pointAndShoot?.dismissShoot()
+            }
+        }.store(in: &scope)
     }
 
     func cancelObservers() {

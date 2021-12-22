@@ -26,7 +26,8 @@ class WebPageBaseImpl: WebPage {
 
     var frame: NSRect = .zero
     var originalQuery: String?
-    var pointAndShootAllowed: Bool = false
+    var pointAndShootInstalled: Bool = false
+    var pointAndShootEnabled: Bool = false
 
     var title: String = ""
     var url: URL?
