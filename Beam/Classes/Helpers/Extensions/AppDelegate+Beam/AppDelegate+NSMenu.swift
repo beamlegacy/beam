@@ -152,10 +152,9 @@ class WebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
     }
 }
 
-class LoadedWebviewRelatedMenuItem: NSMenuItem, MenuItemCustomValidation {
-    func validateForState(_ state: BeamState?, window: NSWindow?) -> Bool {
-        return state?.mode == .web &&
-            state?.browserTabsManager.currentTab != nil
+class LoadedWebviewRelatedMenuItem: WebviewRelatedMenuItem {
+    override func validateForState(_ state: BeamState?, window: NSWindow?) -> Bool {
+        return super.validateForState(state, window: window)
         && state?.browserTabsManager.currentTab?.url != nil
         && !(state?.browserTabsManager.currentTab?.isLoading ?? true)
     }

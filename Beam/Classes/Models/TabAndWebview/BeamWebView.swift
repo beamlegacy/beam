@@ -61,8 +61,9 @@ class BeamWebView: WKWebView {
         allowsLinkPreview = true
         allowsMagnification = true
 
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [unowned self] event in
-            optionKeyToggle(event.modifierFlags)
+        monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+            guard let self = self, self.page != nil else { return event }
+            self.optionKeyToggle(event.modifierFlags)
             return event
         }
         #if TEST || DEBUG
@@ -75,11 +76,11 @@ class BeamWebView: WKWebView {
     }
 
     deinit {
-        guard let monitor = monitor else { return }
-        NSEvent.removeMonitor(monitor)
         #if TEST || DEBUG
             Self.aliveWebViewsCount -= 1
         #endif
+        guard let monitor = monitor else { return }
+        NSEvent.removeMonitor(monitor)
     }
 
     required init?(coder: NSCoder) {

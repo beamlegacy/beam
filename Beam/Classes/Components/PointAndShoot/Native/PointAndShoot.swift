@@ -48,20 +48,25 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     @Published var isTypingOnWebView: Bool = false
     @Published var mouseLocation: NSPoint = NSPoint()
 
+    private var isEnabled: Bool {
+        !isTypingOnWebView && page.pointAndShootEnabled
+    }
+
     override var page: WebPage {
         get {
             super.page
         }
         set {
             super.page = newValue
-            self.page.webView.optionKeyToggle = { key in
+            self.page.webView.optionKeyToggle = { [weak self] key in
+                guard let self = self else { return }
                 self.refresh(self.mouseLocation, key)
             }
-            self.page.webView.mouseClickChange = { (mousePos) in
-                self.handleMouseClick(mousePos)
+            self.page.webView.mouseClickChange = { [weak self] (mousePos) in
+                self?.handleMouseClick(mousePos)
             }
-            self.page.webView.mouseMoveTriggeredChange = { (mousePos, modifier) in
-                self.refresh(mousePos, modifier)
+            self.page.webView.mouseMoveTriggeredChange = { [weak self] (mousePos, modifier) in
+                self?.refresh(mousePos, modifier)
             }
         }
     }
@@ -85,8 +90,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - modifier: Array of modifier keys used in event
     func refresh(_ mousePos: NSPoint, _ modifier: NSEvent.ModifierFlags) {
         self.mouseLocation = mousePos
+        guard isEnabled else { return }
         isAltKeyDown = modifier.contains(.option)
-
         // refresh event contains option key, and we have a active selection + activeSelectGroup
         if modifier.contains(.option),
            let group = self.activeSelectGroup,
@@ -106,8 +111,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
     /// Set activePointGroup with target. Updating the activePointGroup will update the UI directly.
     func point(_ target: Target, _ text: String, _ href: String) {
+        guard isEnabled else { return }
         guard activeShootGroup == nil else { return }
-        guard !isTypingOnWebView else { return }
 
         if isAltKeyDown {
             if let group = activePointGroup,
@@ -127,6 +132,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
     func pointShoot(_ groupId: String, _ target: Target, _ text: String, _ href: String) {
+        guard isEnabled else { return }
         guard !targetIsDismissed(groupId), !hasActiveSelection else { return }
 
         if targetIsCollected(groupId) {
@@ -172,9 +178,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Target rects to draw
     ///   - href: href of frame
     func select(_ groupId: String, _ targets: [Target], _ text: String, _ href: String) {
-        guard !isTypingOnWebView, !targets.isEmpty else {
-            return
-        }
+        guard isEnabled, !targets.isEmpty else { return }
         // Check if the incomming group is already collected
         if targetIsCollected(groupId) {
             collect(groupId, targets, text, href)
@@ -223,6 +227,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Parameters:
     ///   - group: Group to be converted
     func selectShoot(_ group: ShootGroup) {
+        guard isEnabled else { return }
         guard !targetIsDismissed(group.id) else {
             return
         }
@@ -231,7 +236,6 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             collect(group.id, group.targets, group.text, group.href)
             return
         }
-        guard !isTypingOnWebView else { return }
         var group = group
         group.updateSelectionPath()
         activeShootGroup = group
@@ -248,8 +252,8 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - targets: Set of targets to draw
     ///   - href: Url of frame targets are located in
     func collect(_ groupId: String, _ targets: [Target], _ text: String, _ href: String) {
+        guard isEnabled else { return }
         guard targets.count > 0 else { return }
-        guard !isTypingOnWebView else { return }
 
         // Keep shootConfirmationGroup position when scrolling
         if shootConfirmationGroup != nil {
