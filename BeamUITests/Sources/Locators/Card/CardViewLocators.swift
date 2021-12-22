@@ -62,4 +62,8 @@ enum CardViewLocators {
         case breadCrumb = "BreadCrumb"
     }
     
+    enum Splitters: String, CaseIterable, UIElement {
+        case noteDivider = "DividerNode"
+    }
+    
 }

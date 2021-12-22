@@ -39,4 +39,32 @@ class SlashMenuTests: BaseTest {
         "\(cardTestView.getCardStaticTitle()) is incorrect comparing to \(localDateFormat) OR \(ciDateFormat)")
     }
     
+    func testNoteDividerCreation() {
+        let row1Text = "row 1"
+        let row2Text = "row 2"
+        launchApp()
+        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+        
+        testRailPrint("Given I populate 2 notes accordingly with texts: \(row1Text) & \(row2Text)")
+        AllCardsTestView()
+            .openFirstCard()
+            .typeInCardNoteByIndex(noteIndex: 0, text: row1Text)
+            .typeKeyboardKey(.enter)
+        cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: row2Text)
+            .getCardNoteElementByIndex(0)
+            .tapInTheMiddle()
+        
+        testRailPrint("When I add divider item between 2 rows")
+        cardTestView.typeKeyboardKey(.space)
+        cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
+            .clickItem(item: .dividerItem)
+        
+        testRailPrint("Then divider appears in the card area")
+        XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertEqual(cardTestView.getNumberOfVisibleNotes(), 3)
+        XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), row1Text + " ")
+        XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), emptyString)
+        XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), row2Text)
+    }
+    
 }

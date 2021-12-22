@@ -38,6 +38,10 @@ class BaseView {
         return app.windows.searchFields[element]
     }
     
+    func splitter(_ element: String) -> XCUIElement {
+        return app.windows.splitters[element]
+    }
+    
     func secureTextField(_ element: String) -> XCUIElement {
         return app.windows.secureTextFields[element]
     }

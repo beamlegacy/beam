@@ -36,6 +36,7 @@
         "SignInTests",
         "SignUpAutocompleteTests",
         "SlashMenuTests",
+        "TextEditorContextViewTests",
         "UpdateViewTests",
         "WaitHelper",
         "WebsiteAuthTest",
