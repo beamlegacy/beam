@@ -27,7 +27,7 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
                 return
             }
             guard let pointAndShoot = webPage.pointAndShoot else { throw PointAndShootError("webPage should have a pointAndShoot component") }
-            guard webPage.pointAndShootAllowed == true else { throw PointAndShootError("Point and shoot is not allowed on this page") }
+            guard webPage.pointAndShootInstalled == true else { throw PointAndShootError("Point and shoot is not installed on this page") }
             guard let dict = messageBody as? [String: AnyObject],
                   let href = dict["href"] as? String else {
                 throw PointAndShootError("href payload is incorrect")

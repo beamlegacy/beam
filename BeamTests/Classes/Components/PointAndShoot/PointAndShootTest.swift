@@ -10,7 +10,8 @@ import Combine
 class TestWebPage: WebPage {
     var events: [String] = []
     private(set) var originalQuery: String?
-    private(set) var pointAndShootAllowed: Bool = true
+    private(set) var pointAndShootInstalled: Bool = true
+    private(set) var pointAndShootEnabled: Bool = true
     private(set) var title: String = "PNS MockPage"
     static let urlStr = "https://webpage.com"
     var url: URL? = URL(string: urlStr)
