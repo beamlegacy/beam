@@ -357,6 +357,7 @@ struct AdvancedPreferencesView: View {
 
                 Preferences.Section(title: "Passwords", bottomDivider: true) {
                     PasswordCSVImporter
+                    PasswordBraveImporter
                     PasswordsDBDrop
                 }
                 Preferences.Section(title: "Reindex notes contents") {
@@ -605,6 +606,31 @@ struct AdvancedPreferencesView: View {
             }
         }, label: {
             Text("Import Passwords CSV File")
+        })
+    }
+
+    private var PasswordBraveImporter: some View {
+        Button(action: {
+            let importer = ChromiumPasswordImporter(browser: .brave)
+            importer.passwordsPublisher
+                .sink(receiveCompletion: { completion in
+                    switch completion {
+                    case .finished:
+                        Logger.shared.logInfo("Finished importing Brave Browser passwords", category: .browserImport)
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .browserImport)
+                    }
+                }, receiveValue: { record in
+                    if let hostname = record.item.url.minimizedHost, let password = String(data: record.item.password, encoding: .utf8) {
+                        PasswordManager.shared.save(hostname: hostname, username: record.item.username, password: password)
+                    } else {
+                        Logger.shared.logError("Password could not be imported for \(record.item.username) at \(record.item.url)", category: .browserImport)
+                    }
+                })
+                .store(in: &cancellables)
+            try? importer.importPasswords()
+        }, label: {
+            Text("Import Passwords from Brave Browser")
         })
     }
 
