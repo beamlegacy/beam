@@ -8,6 +8,10 @@
 import Foundation
 
 /// NSMenu bar methods handling
+///
+/// :warning: be careful when naming these method, if the storyboard points to firstResponder:methodName but the actual first responder (text field, webview, etc.)
+/// has a method with that exact name, it will be called instead of the window's implementation.
+/// Sometimes it can be a desired effect, sometimes not.
 extension BeamWindow {
     @IBAction func showPreviousTab(_ sender: Any?) {
         state.showPreviousTab()
@@ -140,23 +144,23 @@ extension BeamWindow {
     }
 
     // MARK: Web loading
-    @IBAction func stopLoading(_ sender: Any) {
+    @IBAction func stopLoadingPage(_ sender: Any) {
         state.browserTabsManager.currentTab?.webView.stopLoading()
     }
 
-    @IBAction func reload(_ sender: Any) {
+    @IBAction func reloadPage(_ sender: Any) {
         state.browserTabsManager.reloadCurrentTab()
     }
 
-    @IBAction func resetZoom(_ sender: Any) {
+    @IBAction func resetPageZoom(_ sender: Any) {
         state.browserTabsManager.currentTab?.webView.zoomReset()
     }
 
-    @IBAction func zoomIn(_ sender: Any) {
+    @IBAction func zoomPageIn(_ sender: Any) {
         state.browserTabsManager.currentTab?.webView.zoomIn()
     }
 
-    @IBAction func zoomOut(_ sender: Any) {
+    @IBAction func zoomPageOut(_ sender: Any) {
         state.browserTabsManager.currentTab?.webView.zoomOut()
     }
 

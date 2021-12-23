@@ -1076,28 +1076,28 @@
                                     <items>
                                         <menuItem title="Stop" tag="4" keyEquivalent="." id="VKe-84-02R" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="stopLoading:" target="Ady-hI-5gd" id="gVj-cq-iUJ"/>
+                                                <action selector="stopLoadingPage:" target="Ady-hI-5gd" id="6uD-Da-ll9"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Reload Page" tag="4" keyEquivalent="r" id="fwX-73-9bH" userLabel="Reload Page" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
-                                                <action selector="reload:" target="Ady-hI-5gd" id="laU-LK-ORh"/>
+                                                <action selector="reloadPage:" target="Ady-hI-5gd" id="plv-jQ-yBR"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="gwE-Ei-91l"/>
                                         <menuItem title="Actual Size" tag="4" keyEquivalent="0" id="sRD-PD-0pk">
                                             <connections>
-                                                <action selector="resetZoom:" target="Ady-hI-5gd" id="WOS-GY-FtI"/>
+                                                <action selector="resetPageZoom:" target="Ady-hI-5gd" id="Njd-wX-x6L"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Zoom In" tag="4" keyEquivalent="+" id="KIP-BY-goS">
                                             <connections>
-                                                <action selector="zoomIn:" target="Ady-hI-5gd" id="QAh-Iz-Efj"/>
+                                                <action selector="zoomPageIn:" target="Ady-hI-5gd" id="QYC-Hx-JDa"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem title="Zoom Out" tag="4" keyEquivalent="-" id="Rhl-Ui-Pg1">
                                             <connections>
-                                                <action selector="zoomOut:" target="Ady-hI-5gd" id="s1X-bM-fCG"/>
+                                                <action selector="zoomPageOut:" target="Ady-hI-5gd" id="EHY-LV-c1g"/>
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="jze-PA-szA"/>
