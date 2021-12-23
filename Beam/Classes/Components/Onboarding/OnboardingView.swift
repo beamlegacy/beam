@@ -45,7 +45,7 @@ struct OnboardingView: View {
                         .offset(x: 0, y: stepOffset[.imports] ?? 0)
                         .opacity(stepOpacity[.imports] ?? 1)
                 default:
-                    OnboardingWelcomeView { nextStep in
+                    OnboardingWelcomeView(welcoming: !model.onlyLogin) { nextStep in
                         model.advanceToNextStep(nextStep)
                     }
                     .offset(x: 0, y: stepOffset[.welcome] ?? 0)

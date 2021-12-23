@@ -45,7 +45,7 @@ class BeamUITestsMenuGenerator {
     }
 
     var documentManager = DocumentManager()
-    var googleCalendarService = GoogleCalendarService()
+    var googleCalendarService = GoogleCalendarService(accessToken: nil, refreshToken: nil)
 
     private func logout() {
         AccountManager.logout()

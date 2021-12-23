@@ -13,7 +13,7 @@ class CalendarGutterViewModel: ObservableObject {
     @Published var calendarManager: CalendarManager
     var noteId: UUID
     var isConnected: Bool {
-        calendarManager.isConnected(calendarService: .googleCalendar)
+        calendarManager.connectedSources.count > 0
     }
     @Published var meetings: [Meeting] = []
     var scope = Set<AnyCancellable>()
