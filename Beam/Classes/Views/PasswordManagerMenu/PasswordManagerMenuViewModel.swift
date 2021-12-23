@@ -249,7 +249,7 @@ class PasswordGeneratorViewModel: ObservableObject {
     }
 
     private func clicked() {
-        Logger.shared.logDebug("Clicked on generated password", category: .passwordManager)
+        Logger.shared.logDebug("Clicked on generated password", category: .passwordManagerInternal)
         delegate?.fillNewPassword(suggestion, dismiss: false)
     }
 
