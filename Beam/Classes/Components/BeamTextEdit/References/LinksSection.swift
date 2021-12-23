@@ -25,10 +25,19 @@ class LinksSection: Widget {
     var titles: [UUID: RefNoteTitle] = [:]
 
     var openChildrenDefault: Bool { true }
+    var openedOnce: Bool = false {
+        didSet {
+            guard openedOnce && !oldValue else { return }
+
+            self.updateLinkedReferences(links: self.links)
+        }
+    }
+
     var sign: SignPostId!
 
     override var open: Bool {
         didSet {
+            openedOnce = openedOnce || open
             self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 0, right: 0)
         }
     }
@@ -110,7 +119,9 @@ class LinksSection: Widget {
                 self.updateLinkedReferences(links: updatedLinks)
             }.store(in: &scope)
 
-        self.updateLinkedReferences(links: self.links)
+        if openChildrenDefault || openedOnce {
+            self.updateLinkedReferences(links: self.links)
+        }
     }
 
     /// This method is overriden in ReferencesSection to properly handle reference:
