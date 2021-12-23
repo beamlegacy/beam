@@ -355,13 +355,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let self = self else { return }
             self.reloadAllEvents()
         }.store(in: &scope)
-
-        calendarManager.$didAllowSource.dropFirst().sink { [weak self] didAllowSource in
-            guard let self = self else { return }
-            if didAllowSource {
-                self.reloadAllEvents()
-            }
-        }.store(in: &scope)
     }
 
     func reloadAllEvents() {

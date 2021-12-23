@@ -2,36 +2,62 @@ import SwiftUI
 import Preferences
 import BeamCore
 import OAuthSwift
+import Combine
 
 let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .accounts, title: "Account", imageName: "preferences-account") {
-    AccountsView(googleCalendarNeedsPermission: AppDelegate.main.data.calendarManager.connectedSources.first(where: {$0.name == CalendarServices.googleCalendar.rawValue})?.inNeedOfPermission ?? true)
+    AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
+}
+
+class AccountsViewModel: ObservableObject {
+    @ObservedObject var calendarManager: CalendarManager
+    @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyLogin: true)
+    @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
+    @Published var accountsCalendar: [AccountCalendar] = []
+
+    var scope = Set<AnyCancellable>()
+
+    init(calendarManager: CalendarManager) {
+        self.calendarManager = calendarManager
+
+        onboardingManager.$needsToDisplayOnboard.sink { [weak self] result in
+            if !result {
+                AppDelegate.main.closeOnboardingWindow()
+                self?.isloggedIn = AuthenticationManager.shared.isAuthenticated
+            }
+        }.store(in: &scope)
+
+        calendarManager.$connectedSources.sink { [weak self] sources in
+            guard let self = self, !sources.isEmpty else {
+                self?.accountsCalendar.removeAll()
+                return
+            }
+            for source in sources {
+                AppDelegate.main.data.calendarManager.getInformation(for: source) { accountCalendar in
+                    if !self.accountsCalendar.contains(where: { $0.sourceId == source.id }) {
+                        self.accountsCalendar.append(accountCalendar)
+                    }
+                }
+            }
+        }.store(in: &scope)
+    }
 }
 
 /*
 The main view of “Accounts” preference pane.
 */
-
 // swiftlint:disable:next type_body_length
 struct AccountsView: View {
-    #if DEBUG
-    @State private var email: String = Persistence.Authentication.email ?? ""
-    @State private var password: String = Persistence.Authentication.password ?? ""
-    #else
-    @State private var email: String = Persistence.Authentication.email ?? ""
-    @State private var password: String = ""
-    #endif
     @State private var enableLogging: Bool = true
-    @State private var loggedIn: Bool = AccountManager().loggedIn
     @State private var errorMessage: Error!
     @State private var loading: Bool = false
-    @State private var identities: [IdentityType] = []
-    @State var googleCalendarNeedsPermission: Bool
 
     @State private var showingChangeEmailSheet: Bool = false
     @State private var showingChangePasswordSheet: Bool = false
 
     @State var encryptionKeyIsHover = false
     @State var encryptionKeyIsCopied = false
+
+    @ObservedObject var viewModel: AccountsViewModel
 
     let transition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
                                               removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08)))
@@ -41,200 +67,146 @@ struct AccountsView: View {
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section {
+            Preferences.Section(bottomDivider: false, verticalAlignment: .firstTextBaseline) {
                 Text("Account:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .frame(width: 250, alignment: .trailing)
             } content: {
-                if loggedIn {
-                    VStack(alignment: .leading) {
-                        // TODO: This need to be changed later on for the username
-                        Text(email)
-                            .font(BeamFont.regular(size: 13).swiftUI)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(height: 16)
-                        Text(email)
-                            .font(BeamFont.regular(size: 11).swiftUI)
-                            .foregroundColor(BeamColor.Corduroy.swiftUI)
-                            .frame(height: 13)
-
-                        LogoutButton
-                            .padding(.bottom, 5)
-
-                        EncryptionKeyView
-                        #if DEBUG
-                        RefreshTokenButton
-                        #endif
-                    }
+                if viewModel.isloggedIn {
+                    accountLoggedInView
                 } else {
-                    VStack(alignment: .leading) {
-                        AccountCredentialsView(email: $email,
-                                               password: $password,
-                                               loggedIn: $loggedIn,
-                                               loading: $loading)
-                        HStack(spacing: 10) {
-                            SignUpButton
-                            SignInButton
-                        }
-                        VStack(alignment: .leading) {
-                            GoogleSignInButton
-                            GithubSignInButton
-                        }
-                    }
-                    VStack {
-                        Text("Join Beam to publish your cards and sync your graphs between your devices")
-                            .lineLimit(2)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .multilineTextAlignment(.leading)
-                            .font(BeamFont.regular(size: 11).swiftUI)
-                            .foregroundColor(BeamColor.Corduroy.swiftUI)
-                    }.frame(width: 211, height: 26, alignment: .leading)
+                    accountLoggedOffView
                 }
             }
-        }.onAppear(perform: {
-            self.fetchIdentities()
-
-            // Fetch Safari credentials if not already logged in
-            guard !self.loggedIn else { return }
-
-            /*
-             This is not implemented due to Apple limitations
-            accountManager.fetchSafariCredentials { (username, password) in
-                if let username = username, !username.isEmpty { self.email = username }
-                if let password = password, !password.isEmpty { self.password = password }
+            Preferences.Section(title: "") {
+                Spacer(minLength: 26).frame(maxHeight: 26)
             }
-             */
-        })
-        if loggedIn {
-            Preferences.Container(contentWidth: contentWidth) {
-                Preferences.Section(bottomDivider: true) {
-                    Text("Connect:")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        .frame(width: 250, alignment: .trailing)
-                } content: {
-                    VStack(alignment: .leading) {
-                        if let googleIdendity = identities.first(where: {$0.provider == "google"}) {
-                            HStack {
-                                disconnectButton(googleIdendity)
-                                if googleCalendarNeedsPermission {
-                                    AskGooglePermission
+            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
+                Text("Calendars & Contacts:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
+                VStack(alignment: .leading) {
+                    if viewModel.accountsCalendar.isEmpty {
+                        connectGoogleCalendarView
+                    } else {
+                        VStack(alignment: .leading) {
+                            VStack(alignment: .leading) {
+                                ForEach(viewModel.accountsCalendar) { account in
+                                    GoogleAccountView(viewModel: viewModel, account: account) {
+                                        viewModel.calendarManager.disconnect(from: .googleCalendar, sourceId: account.sourceId)
+                                        viewModel.accountsCalendar.removeAll(where: { $0 === account })
+                                    }
                                 }
-                            }
-                            if googleCalendarNeedsPermission {
-                                Text("Click on the Give Permissions button to give Beam access to your Google Calendar & Contacts.")
+                            }.padding(.bottom, 20)
+
+                            Button(action: {
+                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in
+                                }
+                            }, label: {
+                                // TODO: loc
+                                Text("Connect Another Google Account...")
+                                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                    .frame(width: 236)
+                                    .padding(.top, -4)
+                            })
+                            VStack {
+                                Text("Connect with Google to import your Calendar & Contacts and easily take meeting notes.")
+                                    .font(BeamFont.regular(size: 11).swiftUI)
+                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
                                     .lineLimit(2)
                                     .fixedSize(horizontal: false, vertical: true)
                                     .multilineTextAlignment(.leading)
-                                    .font(BeamFont.regular(size: 11).swiftUI)
-                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-                                    .frame(width: 354, height: 26, alignment: .leading)
-                            }
-                        } else {
-                            GoogleSignInButton
-                        }
-                        if let githubIdendity = identities.first(where: {$0.provider == "github"}) {
-                            disconnectButton(githubIdendity)
-                        } else {
-                            GithubSignInButton
+                            }.frame(width: 297, height: 26, alignment: .leading)
                         }
                     }
                 }
-                Preferences.Section(bottomDivider: false) {
-                    Text("Manage:")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        .frame(width: 250, alignment: .trailing)
-                } content: {
-                    VStack(alignment: .leading) {
-                        Button(action: {
-                            showingChangeEmailSheet.toggle()
-                        }, label: {
-                            // TODO: loc
-                            Text("Change Email Address...")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                .frame(width: 148)
-                        }).sheet(isPresented: $showingChangeEmailSheet) {
-                            ChangeCredentialsView(changeCredentialsType: .email)
-                                .frame(width: 485, height: 151, alignment: .center)
-                        }
-                        Button(action: {
-                            showingChangePasswordSheet.toggle()
-                        }, label: {
-                            // TODO: loc
-                            Text("Change Password...")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                .frame(width: 121)
-                        }).sheet(isPresented: $showingChangePasswordSheet) {
-                            ChangeCredentialsView(changeCredentialsType: .password)
-                                .frame(width: 485, height: 198, alignment: .center)
-                        }
-                    }.padding(.bottom, 20)
+            }
 
-                    VStack(alignment: .leading) {
-                        Button(action: {
-                            promptDeleteAllGraphAlert()
-                        }, label: {
-                            // TODO: loc
-                            Text("Delete All Graphs...")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                .frame(width: 116)
-                        })
-                        Text("All your cards will be deleted and cannot be recovered.")
-                            .font(BeamFont.regular(size: 11).swiftUI)
-                            .foregroundColor(BeamColor.Corduroy.swiftUI)
-                            .frame(width: 286, alignment: .leading)
-                            .padding(.bottom, 20)
-
-                        Button(action: {
-                            promptDeleteAccountActionAlert()
-                        }, label: {
-                            // TODO: loc
-                            Text("Delete Account...")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                .frame(width: 105)
-                        })
-                        VStack {
-                            Text("Your account, all your graphs and all your cards will be deleted and cannot be recovered.")
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .multilineTextAlignment(.leading)
-                                .font(BeamFont.regular(size: 11).swiftUI)
-                                .foregroundColor(BeamColor.Corduroy.swiftUI)
-                        }.frame(width: 286, height: 26, alignment: .leading)
+            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
+                Text("Encryption key:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+                    .if(!viewModel.isloggedIn) { view in
+                        view.hidden()
                     }
+            } content: {
+                if viewModel.isloggedIn {
+                    EncryptionKeyView
+                    #if DEBUG
+                    RefreshTokenButton
+                    #endif
+                }
+            }
+
+            Preferences.Section(bottomDivider: false, verticalAlignment: .firstTextBaseline) {
+                Text("Manage:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+                    .if(!viewModel.isloggedIn) { view in
+                        view.hidden()
+                    }
+            } content: {
+                if viewModel.isloggedIn {
+                    manageAccountView
                 }
             }
         }
 	}
 
-    @State private var showingSignUpAlert = false
-    private var SignUpButton: some View {
-        Button(action: {
-            self.loading = true
-            accountManager.signUp(email, password) { result in
-                self.loading = false
-                switch result {
-                case .failure(let error):
-                    errorMessage = error
-                    showingSignUpAlert = true
-                    Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
-                case .success:
-                    Logger.shared.logInfo("signUp succeeded", category: .network)
-                    self.fetchIdentities()
-                }
-            }
-        }, label: {
-            // TODO: loc
-            Text("Sign Up...")
+    private var accountLoggedInView: some View {
+        VStack(alignment: .leading) {
+            Text(AuthenticationManager.shared.username ?? "Username not defined")
+                .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 63)
+                .frame(height: 16)
+            LogoutButton
+        }
+    }
+
+    private var accountLoggedOffView: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                AppDelegate.main.showOnboardingWindow(model: viewModel.onboardingManager)
+            }, label: {
+                Text("Connect to Beam...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 208, height: 20)
+                    .padding(.top, -4)
         })
-        .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
-        .alert(isPresented: $showingSignUpAlert) {
-            Alert(title: Text("Error"),
-                  message: Text(errorMessage.localizedDescription))
+                .padding(.bottom, 6)
+            VStack {
+                Text("Connect to Beam to publish your cards and sync your notes between your devices.")
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.leading)
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.frame(width: 238, height: 26, alignment: .leading)
+        }
+    }
+
+    private var connectGoogleCalendarView: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in
+                }
+            }, label: {
+                // TODO: loc
+                Text("Connect Google Calendar...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 208)
+                    .padding(.top, -4)
+            })
+            VStack {
+                Text("Import your Calendar and Contacts and easily take meeting notes.")
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.frame(width: 344, height: 26, alignment: .leading)
         }
     }
 
@@ -246,7 +218,7 @@ struct AccountsView: View {
                 switch result {
                 case .failure(let error):
                     errorMessage = error
-                    showingSignInAlert = true
+                    UserAlert.showError(message: "Error", error: error)
                     Logger.shared.logInfo("Could not refresh token: \(error.localizedDescription)", category: .network)
                 case .success(let success):
                     Logger.shared.logInfo("Refresh Token succeeded: \(success)", category: .network)
@@ -257,107 +229,45 @@ struct AccountsView: View {
             Text("Refresh Token").frame(minWidth: 100)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
         })
-        .disabled(!loggedIn)
-        .alert(isPresented: $showingSignInAlert) {
-            Alert(title: Text("Error"), message: Text(errorMessage.localizedDescription))
-        }
+        .disabled(!viewModel.isloggedIn)
+
     }
 
-    @State private var showingSignInAlert = false
-    private var SignInButton: some View {
-        Button(action: {
-            self.loading = true
-            accountManager.signIn(email: email, password: password, completionHandler: { result in
-                self.loading = false
-                loggedIn = AccountManager().loggedIn
-                switch result {
-                case .failure(let error):
-                    errorMessage = error
-                    showingSignInAlert = true
-                    Logger.shared.logInfo("Could not sign in: \(error.localizedDescription)", category: .network)
-                case .success:
-                    Logger.shared.logInfo("sign in succeeded", category: .network)
-                    self.fetchIdentities()
-                }
+    private var manageAccountView: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                promptDeleteAllGraphAlert()
+            }, label: {
+                // TODO: loc
+                Text("Delete Database...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 132)
+                    .padding(.top, -4)
             })
-        }, label: {
-            // TODO: loc
-            Text("Sign In...")
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(width: 56)
-        })
-        .disabled(loggedIn || loading || email.isEmpty || password.isEmpty)
-        .alert(isPresented: $showingSignInAlert) {
-            #if DEBUG
-            Alert(title: Text("Error"),
-                  message: Text("Invalid password or email with: \(errorMessage.localizedDescription)"))
-            #else
-            Alert(title: Text("Error"),
-                  message: Text("Invalid password or email"))
-            #endif
-        }
-    }
+            Text("All your cards will be deleted and cannot be recovered.")
+                .font(BeamFont.regular(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                .frame(width: 286, alignment: .leading)
+                .padding(.bottom, 20)
 
-    private var GoogleSignInButton: some View {
-        GoogleButton<Text>(buttonType: loggedIn ? .connect : .signin, onClick: {
-            loading = true
-        }, onConnect: {
-            loggedIn = AccountManager().loggedIn
-            fetchIdentities()
-            loading = false
-            //FIXME: move this to AccountManager
-            AppDelegate.main.data.calendarManager.connect(calendarService: .googleCalendar)
-        }, onFailure: {
-            loading = false
-        }).disabled(loading)
-    }
+            Button(action: {
+                promptDeleteAccountActionAlert()
+            }, label: {
+                // TODO: loc
+                Text("Delete Account...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 132)
+                    .padding(.top, -4)
 
-    private var AskGooglePermission: some View {
-        Button {
-            AppDelegate.main.data.calendarManager.requestAccess(from: .googleCalendar) { isConnected in
-                // TODO: Handle error with alert maybe
-                googleCalendarNeedsPermission = !isConnected
-            }
-        } label: {
-            Text("Give Permissions...")
-        }
-    }
-
-    private var GithubSignInButton: some View {
-        GithubButton(buttonType: loggedIn ? .connect : .signin, onClick: {
-            loading = true
-        }, onConnect: {
-            loggedIn = AccountManager().loggedIn
-            fetchIdentities()
-            loading = false
-        }, onFailure: {
-            loading = false
-        }).disabled(loading)
-    }
-
-    @State private var showingForgotPasswordAlert = false
-    private var ForgotPasswordButton: some View {
-        Button(action: {
-            self.loading = true
-            accountManager.forgotPassword(email: email) { result in
-                self.loading = false
-                switch result {
-                case .failure(let error):
-                    errorMessage = error
-                    showingForgotPasswordAlert = true
-                    Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
-                case .success:
-                    Logger.shared.logInfo("forgot Password succeeded", category: .network)
-                }
-            }
-        }, label: {
-            // TODO: loc
-            Text("Forgot Password").frame(minWidth: 100)
-        })
-        .disabled(loggedIn || loading || email.isEmpty)
-        .alert(isPresented: $showingForgotPasswordAlert) {
-            Alert(title: Text("Error"),
-                  message: Text(errorMessage.localizedDescription))
+            })
+            VStack {
+                Text("Your account, your database and all your cards will be deleted and cannot be recovered.")
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.leading)
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }.frame(width: 286, height: 26, alignment: .leading)
         }
     }
 
@@ -368,8 +278,9 @@ struct AccountsView: View {
             // TODO: loc
             Text("Sign Out...")
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-        }).disabled(!loggedIn)
-            .frame(width: 83, height: 20, alignment: .center)
+                .frame(width: 146, height: 20, alignment: .center)
+                .padding(.top, -4)
+        })
     }
 
     private var EncryptionKeyView: some View {
@@ -418,42 +329,6 @@ struct AccountsView: View {
         }
     }
 
-    private func disconnectButton(_ identity: IdentityType) -> some View {
-        guard let id = identity.id else { return AnyView(EmptyView()) }
-
-        return AnyView(Button(action: {
-            IdentityRequest().delete(id).then { _ in
-                if identity.provider == IdentityRequest.Provider.google.rawValue {
-                    Persistence.Authentication.googleAccessToken = nil
-                    Persistence.Authentication.googleRefreshToken = nil
-                }
-                self.fetchIdentities()
-                AppDelegate.main.data.calendarManager.disconnect(calendarService: .googleCalendar)
-            }
-        }, label: {
-            if let provider = identity.provider {
-                Text("Disconnect \(provider.prefix(1).capitalized + provider.dropFirst())...")
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 126)
-            } else {
-                Text("Disconnect...")
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 126)
-            }
-        }).disabled(!loggedIn))
-    }
-
-    private func fetchIdentities() {
-        guard AuthenticationManager.shared.isAuthenticated else { return }
-
-        email = Persistence.Authentication.email ?? ""
-        password = Persistence.Authentication.password ?? ""
-
-        IdentityRequest().fetchAll().then { identities in
-            self.identities = identities
-        }
-    }
-
     private func promptLogoutAlert() {
         let alert = NSAlert()
         alert.messageText = "Are you sure you want to sign out from your Beam account?"
@@ -463,73 +338,87 @@ struct AccountsView: View {
         guard let window = AccountsPreferenceViewController.view.window else { return }
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
-            self.identities = []
             AccountManager.logout()
-            #if !DEBUG
-            password = ""
-            #endif
-            loggedIn = AccountManager().loggedIn
+            viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated
         }
     }
 
     // TODO: Implement when endpoint is ready
     private func promptDeleteAllGraphAlert() {
-        let alert = NSAlert()
-        alert.messageText = "Are you sure you want to delete all your graphs?"
-        alert.informativeText = "All your cards will be deleted and cannot be recovered."
-        alert.addButton(withTitle: "Delete")
-        alert.addButton(withTitle: "Cancel")
-        alert.alertStyle = .warning
-        guard let window = AccountsPreferenceViewController.view.window else { return }
-        alert.beginSheetModal(for: window) { response in
-            guard response == .alertFirstButtonReturn else { return }
-            // TODO: Implement
+        UserAlert.showMessage(message: "Are you sure you want to delete all your graphs?",
+                              informativeText: "All your cards will be deleted and cannot be recovered.",
+                              buttonTitle: "Delete",
+                              secondaryButtonTitle: "Cancel") {
+            // TODO: Implement when endpoint is ready
         }
     }
 
     // TODO: Implement when endpoint is ready
     private func promptDeleteAccountActionAlert() {
-        let alert = NSAlert()
-        alert.messageText = "Are you sure you want to delete your Beam account?"
-        alert.informativeText = "Your account, all your graphs and all your cards will be deleted and cannot be recovered."
-        alert.addButton(withTitle: "Delete")
-        alert.addButton(withTitle: "Cancel")
-        alert.alertStyle = .warning
-        guard let window = AccountsPreferenceViewController.view.window else { return }
-        alert.beginSheetModal(for: window) { response in
-            guard response == .alertFirstButtonReturn else { return }
+        UserAlert.showMessage(message: "Are you sure you want to delete your Beam account?",
+                              informativeText: "Your account, all your graphs and all your cards will be deleted and cannot be recovered.",
+                              buttonTitle: "Delete",
+                              secondaryButtonTitle: "Cancel") {
             // TODO: Implement when endpoint is ready
         }
     }
 }
 
-struct AccountCredentialsView: View {
-    @Binding var email: String
-    @Binding var password: String
-    @Binding var loggedIn: Bool
-    @Binding var loading: Bool
+struct GoogleAccountView: View {
+    @ObservedObject var viewModel: AccountsViewModel
+    var account: AccountCalendar
+    var onDisconnect: (() -> Void)?
 
     var body: some View {
-        // TODO: loc
-        TextField("johnnyappleseed@apple.com", text: $email)
-            .textContentType(.username)
-            .disabled(loggedIn || loading)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .frame(maxWidth: 200)
-            .frame(width: 161, alignment: .leading)
-        SecureField("Enter your password", text: $password)
-            .textContentType(.password)
-            .disabled(loggedIn || loading)
-            .textFieldStyle(RoundedBorderTextFieldStyle())
-            .frame(maxWidth: 200)
-            .frame(width: 161, alignment: .leading)
+        VStack(alignment: .leading) {
+            HStack {
+                Text(account.name)
+                    .frame(width: 227, alignment: .leading)
+                    .padding(.trailing, 12)
+                if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
+                    Button {
+                        onDisconnect?()
+                        viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in}
+                    } label: {
+                        Text("Fix Permissions...")
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                            .frame(width: 125)
+                            .padding(.top, -4)
+                    }
+                } else {
+                    Button {
+                        UserAlert.showMessage(message: "Are you sure you want to disconnect your Google account?",
+                                              informativeText: "You’ll need to add it again to sync your Google Calendars and Contacts.",
+                                              buttonTitle: "Disconnect",
+                                              secondaryButtonTitle: "Cancel") {
+                            onDisconnect?()
+                        }
+                    } label: {
+                        Text("Disconnect")
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                            .frame(width: 99)
+                            .padding(.top, -4)
+                    }
+                }
+            }.padding(.bottom, -5)
+            if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
+                Text("Fix permissions to sync...")
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Shiraz.swiftUI)
+            } else {
+                Text("\(account.nbrOfCalendar) calendars, 0 contacts synced")
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }
+
+        }
     }
 }
 
 struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
-        AccountsView(googleCalendarNeedsPermission: true)
-        AccountsView(googleCalendarNeedsPermission: false)
+        AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
+        AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
 
     }
     // swiftlint:disable:next file_length
