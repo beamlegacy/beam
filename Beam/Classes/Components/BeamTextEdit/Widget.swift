@@ -1162,7 +1162,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         var widgets: [Widget] = []
 
         for child in children where child.visible {
-            widgets.append(child)
+            if child.selfVisible && !child.frame.isEmpty {
+                widgets.append(child)
+            }
             widgets += child.allVisibleChildren
         }
 
