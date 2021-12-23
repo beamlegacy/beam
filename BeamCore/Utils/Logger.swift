@@ -37,6 +37,7 @@ public enum LogCategory: String, CaseIterable {
     case webSocket
     case passwordsDB
     case passwordManager
+    case passwordManagerInternal
     case passwordNetwork
     case fileNetwork
     case linkNetwork
@@ -74,7 +75,7 @@ public final class Logger {
     // If you want to change this for you and uncluter your console logs, add into `.envrc.private`:
     // export HIDE_CATEGORIES="web documentDebug javascript pointAndShoot coredataDebug"
     // it will overwrite this `hideCategories`
-    private var hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager, .autocompleteManager, .favIcon]
+    private var hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager, .autocompleteManager, .favIcon, .passwordManagerInternal]
 
     private let hideLumberCategories: [LogCategory] = [.documentDebug]
 

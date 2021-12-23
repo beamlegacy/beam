@@ -388,15 +388,15 @@ final class WebAutocompleteContext {
         let fieldIds: [String]
         if fieldsWithAutocompleteAttribute.count == 0 {
             let untaggedFields = fields.filter { autocompleteRules.allowUntaggedField($0, inPageContainingPasswordField: pageContainsPasswordField) }
-            Logger.shared.logDebug("Untagged candidates: \(untaggedFields.map { $0.debugDescription })", category: .passwordManager)
+            Logger.shared.logDebug("Untagged candidates: \(untaggedFields.map { $0.debugDescription })", category: .passwordManagerInternal)
             fieldIds = update(withUntagged: untaggedFields)
         } else {
             // If any field has a known autocomplete attribute, we can NOT safely assume all fields participating in autocomplete do.
             let candidateFields = fields.filter { autocompleteRules.allowTaggedField($0, inPageContainingPasswordField: pageContainsPasswordField) }
-            Logger.shared.logDebug("Tagged candidates: \(candidateFields.map { $0.debugDescription })", category: .passwordManager)
+            Logger.shared.logDebug("Tagged candidates: \(candidateFields.map { $0.debugDescription })", category: .passwordManagerInternal)
             fieldIds = update(withTagged: candidateFields)
         }
-        Logger.shared.logDebug("Autocomplete groups: \(autocompleteGroups)", category: .passwordManager)
+        Logger.shared.logDebug("Autocomplete groups: \(autocompleteGroups)", category: .passwordManagerInternal)
         return fieldIds
     }
 
@@ -439,7 +439,7 @@ final class WebAutocompleteContext {
 
     private func update(withTagged fields: [DOMInputElement]) -> [String] {
         autocompleteFields = getAutocompleteFields(fields)
-        Logger.shared.logDebug("Autocomplete Fields: \(autocompleteFields)", category: .passwordManager)
+        Logger.shared.logDebug("Autocomplete Fields: \(autocompleteFields)", category: .passwordManagerInternal)
         let fieldGroups = getAutocompleteGroups(fields) // FIXME: for some strange reason getAutocompleteGroups() ignores fields, and used autocompleteFields
         let addedIds = fieldGroups.keys.filter { autocompleteGroups[$0] == nil }
         autocompleteGroups = fieldGroups
