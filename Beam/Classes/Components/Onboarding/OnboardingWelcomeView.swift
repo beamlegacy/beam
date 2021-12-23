@@ -9,6 +9,7 @@ import SwiftUI
 import BeamCore
 
 struct OnboardingWelcomeView: View {
+    var welcoming: Bool
     var finish: OnboardingView.StepFinishCallback
     @State private var isLoadingDataStartTime: Date?
 
@@ -39,7 +40,7 @@ struct OnboardingWelcomeView: View {
                 OnboardingView.LoadingView()
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
-                OnboardingView.TitleText(title: "Welcome to Beam")
+                OnboardingView.TitleText(title: welcoming ? "Welcome to Beam" : "Connect to Beam")
                 VStack(spacing: BeamSpacing._100) {
                     GoogleButton(buttonType: .signin, onClick: nil, onConnect: onSigninDone, onDataSync: onDataSyncDone, onFailure: onGoogleSigninError, label: { _ in
                         ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280)
@@ -56,15 +57,17 @@ struct OnboardingWelcomeView: View {
                         .font(BeamFont.regular(size: 10).swiftUI)
                         .foregroundColor(BeamColor.AlphaGray.swiftUI)
                 }
-                HStack {
-                    Separator(horizontal: true)
-                    Text("or")
-                        .font(BeamFont.regular(size: 10).swiftUI)
-                        .foregroundColor(BeamColor.AlphaGray.swiftUI)
-                    Separator(horizontal: true)
-                }
-                ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 12).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
-                    finish(nil)
+                if welcoming {
+                    HStack {
+                        Separator(horizontal: true)
+                        Text("or")
+                            .font(BeamFont.regular(size: 10).swiftUI)
+                            .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                        Separator(horizontal: true)
+                    }
+                    ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 12).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                        finish(nil)
+                    }
                 }
             }
         }
@@ -95,6 +98,8 @@ struct OnboardingWelcomeView: View {
 
 struct OnboardingWelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingWelcomeView { _ in }
+        OnboardingWelcomeView(welcoming: true) { _ in }
+        OnboardingWelcomeView(welcoming: false) { _ in }
+
     }
 }

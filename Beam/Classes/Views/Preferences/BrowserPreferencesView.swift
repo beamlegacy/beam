@@ -10,10 +10,26 @@ import Preferences
 import Combine
 
 let BrowserPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .browser, title: "Browser", imageName: "preferences-browser") {
-    BrowserPreferencesView()
+    BrowserPreferencesView(viewModel: BrowserPreferencesViewModel())
+}
+
+class BrowserPreferencesViewModel: ObservableObject {
+    @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyImport: true)
+
+    var scope = Set<AnyCancellable>()
+
+    init() {
+        onboardingManager.$needsToDisplayOnboard.sink { result in
+            if !result {
+                AppDelegate.main.closeOnboardingWindow()
+            }
+        }.store(in: &scope)
+    }
 }
 
 struct BrowserPreferencesView: View {
+    @ObservedObject var viewModel: BrowserPreferencesViewModel
+
     private let contentWidth: Double = PreferencesManager.contentWidth
 
     var body: some View {
@@ -33,7 +49,7 @@ struct BrowserPreferencesView: View {
             Preferences.Section(bottomDivider: true) {
                 Text("Bookmarks & Settings:")
             } content: {
-                BookmarksSection()
+                BookmarksSection(viewModel: viewModel)
             }
 
             Preferences.Section(bottomDivider: true) {
@@ -61,7 +77,7 @@ struct BrowserPreferencesView: View {
 
 struct BrowserPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        BrowserPreferencesView()
+        BrowserPreferencesView(viewModel: BrowserPreferencesViewModel())
     }
 }
 
@@ -127,19 +143,12 @@ struct SearchEngineSection: View {
 }
 
 struct BookmarksSection: View {
+    var viewModel: BrowserPreferencesViewModel
+
     var body: some View {
         VStack(alignment: .leading) {
             Button {
-                let openPanel = NSOpenPanel()
-                openPanel.canChooseFiles = true
-                openPanel.canChooseDirectories = false
-                openPanel.canDownloadUbiquitousContents = false
-                openPanel.allowsMultipleSelection = true
-                openPanel.allowedFileTypes = ["csv", "txt"]
-                openPanel.title = "Import your bookmarks, passwords and history from other browsers"
-                openPanel.begin { _ in
-                    // TODO: Implement the import
-                }
+                AppDelegate.main.showOnboardingWindow(model: viewModel.onboardingManager)
             } label: {
                 Text("Import...")
                     .font(BeamFont.regular(size: 13).swiftUI)

@@ -21,18 +21,21 @@ enum CalendarServices: String {
 
     var scope: String? {
         switch self {
-        case .googleCalendar: return "https://www.googleapis.com/auth/calendar.readonly"
+        case .googleCalendar: return "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.readonly"
         }
     }
 }
 
 protocol CalendarService {
+    var id: UUID { get }
     var name: String { get }
     var scope: String? { get }
     var inNeedOfPermission: Bool { get }
 
     func requestAccess(completionHandler: @escaping (Bool) -> Void)
     func getMeetings(for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void)
+    func getCalendars(completionHandler: @escaping (Result<[MeetingCalendar]?, CalendarError>) -> Void)
+    func getUserEmail(completionHandler: @escaping (Result<String, CalendarError>) -> Void)
 }
 
 class CalendarManager: ObservableObject {
@@ -40,63 +43,78 @@ class CalendarManager: ObservableObject {
     let calendarQueue = DispatchQueue(label: "calendarQueue")
     @Published var connectedSources: [CalendarService] = []
     @Published var meetingsForNote = [BeamNote.ID: [Meeting]]()
-    @Published var didAllowSource: Bool = false
 
     init() { }
 
     private var didLazyInitConnectedSources = false
+
     func lazyInitConnectedSources() {
         guard !didLazyInitConnectedSources else { return }
         didLazyInitConnectedSources = true
-        if Persistence.Authentication.googleAccessToken != nil && Persistence.Authentication.googleRefreshToken != nil {
-            let googleCalendar = GoogleCalendarService()
-            self.connectedSources.append(googleCalendar)
+
+        if let googleTokensStr = Persistence.Authentication.googleCalendarTokens,
+           let googleTokens = GoogleTokenUtility.objectifyOauth(str: googleTokensStr) {
+            for (googleAccessToken, googleRefreshToken)  in googleTokens {
+                let googleCalendar = GoogleCalendarService(accessToken: googleAccessToken, refreshToken: googleRefreshToken)
+                self.connectedSources.append(googleCalendar)
+            }
         }
     }
 
     func isConnected(calendarService: CalendarServices) -> Bool {
-        guard AuthenticationManager.shared.isAuthenticated else { return false }
         lazyInitConnectedSources()
-        guard let connectedSource = connectedSources.first(where: { $0.name == calendarService.rawValue }), !connectedSource.inNeedOfPermission else {
+        guard !connectedSources.isEmpty else {
             return false
         }
         return true
-    }
-
-    func connect(calendarService: CalendarServices) {
-        lazyInitConnectedSources()
-        switch calendarService {
-        case .googleCalendar:
-            let googleCalendar = GoogleCalendarService()
-            googleCalendar.inNeedOfPermission = true
-            self.connectedSources.append(googleCalendar)
-        }
-    }
-
-    func disconnect(calendarService: CalendarServices) {
-        lazyInitConnectedSources()
-        switch calendarService {
-        case .googleCalendar:
-            self.connectedSources = self.connectedSources.filter({$0.name != calendarService.rawValue})
-        }
     }
 
     func requestAccess(from calendarService: CalendarServices, completionHandler: @escaping (Bool) -> Void) {
         lazyInitConnectedSources()
         switch calendarService {
         case .googleCalendar:
-            let googleCalendar = GoogleCalendarService()
+            let googleCalendar = GoogleCalendarService(accessToken: nil, refreshToken: nil)
             googleCalendar.requestAccess { [weak self] connected in
                 guard let self = self else { return }
                 if connected {
-                    if let connectedSource = self.connectedSources.first(where: { $0.name == calendarService.rawValue }) as? GoogleCalendarService {
-                        connectedSource.inNeedOfPermission = false
-                        self.didAllowSource = true
-                    } else {
-                        self.connectedSources.append(googleCalendar)
-                    }
+                    self.connectedSources.append(googleCalendar)
                 }
                 completionHandler(connected)
+            }
+        }
+    }
+
+    func getInformation(for source: CalendarService, completionHandler: @escaping (AccountCalendar) -> Void) {
+        source.getUserEmail { result in
+            switch result {
+            case .success(let email):
+                source.getCalendars { result in
+                    switch result {
+                    case .success(let meetingsCalendar):
+                        completionHandler(AccountCalendar(sourceId: source.id,
+                                                          name: email,
+                                                          nbrOfCalendar: meetingsCalendar?.count ?? 0,
+                                                          meetingCalendar: meetingsCalendar))
+                    case .failure: break
+                    }
+                }
+            case .failure: break
+            }
+        }
+    }
+
+    func disconnect(from calendarService: CalendarServices, sourceId: UUID) {
+        switch calendarService {
+        case .googleCalendar:
+            guard let googleCalendarService = self.connectedSources.first(where: { $0.id == sourceId }) as? GoogleCalendarService,
+                  let accessToken = googleCalendarService.accessToken,
+                  let googleCalendarTokensStr = Persistence.Authentication.googleCalendarTokens,
+                  var googleCalendarTokens = GoogleTokenUtility.objectifyOauth(str: googleCalendarTokensStr) else { return }
+
+            if let idx = connectedSources.firstIndex(where: { $0.id == sourceId }) {
+                googleCalendarTokens.removeValue(forKey: accessToken)
+                Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleCalendarTokens)
+                connectedSources.remove(at: idx)
             }
         }
     }
@@ -114,14 +132,13 @@ class CalendarManager: ObservableObject {
                     case .success(let meetings):
                         guard let sourceMeetings = meetings else { return }
                         allMeetings.append(contentsOf: sourceMeetings)
-                    case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .eventCalendar)
+                    case .failure: break
                     }
                 }
             }
             dispatchGroup.notify(queue: .main) {
                 completionHandler(allMeetings)
-             }
+            }
         }
     }
 }
