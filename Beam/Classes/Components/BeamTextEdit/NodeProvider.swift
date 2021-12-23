@@ -70,9 +70,9 @@ class NodeProviderImpl: NodeProvider {
         }
 
         // BreadCrumbs can't create TextNodes, only ProxyTextNodes
+        let width = withParent.availableWidth - withParent.childInset
         let node: ElementNode = proxy ?
             {
-                let width = withParent.availableWidth - withParent.childInset
                 guard let note = element as? BeamNote else {
                     switch element.kind {
                     case .image:
@@ -91,7 +91,6 @@ class NodeProviderImpl: NodeProvider {
             }()
             :
             {
-                let width = withParent.availableWidth - withParent.childInset
                 guard let note = element as? BeamNote else {
                     guard element.note == nil || element.note == holder?.root?.note else {
                         return ProxyTextNode(parent: withParent, element: element, availableWidth: width)
