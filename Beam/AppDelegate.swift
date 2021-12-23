@@ -355,6 +355,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
+    var onboardingWindow: OnboardingWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

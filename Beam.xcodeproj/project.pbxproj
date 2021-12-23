@@ -659,6 +659,9 @@
 		A04E849525DD1CEF0066CD44 /* InsertText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04E849425DD1CEF0066CD44 /* InsertText.swift */; };
 		A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */; };
 		A050049F25DAEE73009CFEB6 /* ProgressIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */; };
+		A05123CA27708D88009B81CF /* MeetingCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05123C927708D88009B81CF /* MeetingCalendar.swift */; };
+		A05123D927720F00009B81CF /* AccountCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05123D827720F00009B81CF /* AccountCalendar.swift */; };
+		A05123DB27722842009B81CF /* GoogleTokenUtility.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05123DA27722842009B81CF /* GoogleTokenUtility.swift */; };
 		A055CE7A274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = A055CE79274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift */; };
 		A05ADF3F264D67D3002DF91A /* PasswordsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */; };
 		A05ADF6C264D8C34002DF91A /* OverlayViewCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */; };
@@ -678,6 +681,8 @@
 		A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */; };
 		A07F243A269D9624008918B0 /* PreferencesManager+Privacy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */; };
 		A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */; };
+		A08C7FA1276CA3D60006B386 /* AppDelegate+Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08C7FA0276CA3D60006B386 /* AppDelegate+Onboarding.swift */; };
+		A08C7FA8276CA4130006B386 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */; };
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
 		A09FBA612705AD44009E44F7 /* CheckboxButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */; };
@@ -1833,6 +1838,9 @@
 		A04E849425DD1CEF0066CD44 /* InsertText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertText.swift; sourceTree = "<group>"; };
 		A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteAutoSaveService.swift; sourceTree = "<group>"; };
 		A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressIndicator.swift; sourceTree = "<group>"; };
+		A05123C927708D88009B81CF /* MeetingCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingCalendar.swift; sourceTree = "<group>"; };
+		A05123D827720F00009B81CF /* AccountCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountCalendar.swift; sourceTree = "<group>"; };
+		A05123DA27722842009B81CF /* GoogleTokenUtility.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleTokenUtility.swift; sourceTree = "<group>"; };
 		A055CE79274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClosedTabDataPersistence.swift; sourceTree = "<group>"; };
 		A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsDB.swift; sourceTree = "<group>"; };
 		A05ADF6B264D8C34002DF91A /* OverlayViewCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayViewCenter.swift; sourceTree = "<group>"; };
@@ -1852,6 +1860,8 @@
 		A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultStorable.swift; sourceTree = "<group>"; };
 		A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Privacy.swift"; sourceTree = "<group>"; };
 		A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeCredentialsView.swift; sourceTree = "<group>"; };
+		A08C7FA0276CA3D60006B386 /* AppDelegate+Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Onboarding.swift"; sourceTree = "<group>"; };
+		A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
 		A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxButtonStyle.swift; sourceTree = "<group>"; };
@@ -2748,6 +2758,7 @@
 		4181716B2581107C00317ED8 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				A05123D027708D8D009B81CF /* Meetings */,
 				A58645DD26FB10BD00D7FF86 /* TabAndWebview */,
 				96C5FE3B268F4CF300889B5E /* Geolocation */,
 				0DD0DAC22681C6EB0005339A /* GRDB */,
@@ -3091,6 +3102,7 @@
 				A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */,
 				3343794227037578004EF5A4 /* BeamWindow+Search.swift */,
 				DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */,
+				A08C7FA0276CA3D60006B386 /* AppDelegate+Onboarding.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -4335,6 +4347,15 @@
 			path = Commands;
 			sourceTree = "<group>";
 		};
+		A05123D027708D8D009B81CF /* Meetings */ = {
+			isa = PBXGroup;
+			children = (
+				A05123D827720F00009B81CF /* AccountCalendar.swift */,
+				A05123C927708D88009B81CF /* MeetingCalendar.swift */,
+			);
+			path = Meetings;
+			sourceTree = "<group>";
+		};
 		A07C01362705ECFC00D91750 /* GoogleCalendar */ = {
 			isa = PBXGroup;
 			children = (
@@ -4342,6 +4363,7 @@
 				A0614EE9270B382400C38F82 /* GoogleCalendar.swift */,
 				A0614EEB270B383000C38F82 /* GoogleEvent.swift */,
 				A0EFCFF427162499004A7C7B /* CalendarManager.swift */,
+				A05123DA27722842009B81CF /* GoogleTokenUtility.swift */,
 			);
 			path = GoogleCalendar;
 			sourceTree = "<group>";
@@ -4497,6 +4519,7 @@
 				A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */,
 				A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */,
 				A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */,
+				A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -6230,6 +6253,7 @@
 				8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */,
 				529599FB272718E300F3F843 /* APIRequest+Promises.swift in Sources */,
 				A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */,
+				A05123CA27708D88009B81CF /* MeetingCalendar.swift in Sources */,
 				52B17AB62624422800CB4728 /* DatabasesContentView.swift in Sources */,
 				529826A62641A46E00E9448C /* GoogleButton.swift in Sources */,
 				A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */,
@@ -6400,11 +6424,13 @@
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
 				52019A6526DE2ECD005E8278 /* BeamObjectManager+Tests.swift in Sources */,
 				9634DD91264B203E0065383E /* ShapeLayer.swift in Sources */,
+				A05123D927720F00009B81CF /* AccountCalendar.swift in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */,
 				96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */,
 				A5C2023B2761FDA2008BB2FB /* TabFaviconView.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
+				A05123DB27722842009B81CF /* GoogleTokenUtility.swift in Sources */,
 				75A1E5BA271D98F1000824B1 /* ExternalDeeplinkHandler.swift in Sources */,
 				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,
 				416C09F3259C919200AF2903 /* CATransaction+Beam.swift in Sources */,
@@ -6590,6 +6616,7 @@
 				52019A6D26DE42C9005E8278 /* DocumentManager+PromiseKit.swift in Sources */,
 				BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */,
 				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
+				A08C7FA1276CA3D60006B386 /* AppDelegate+Onboarding.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
 				BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */,
 				A0614EEC270B383000C38F82 /* GoogleEvent.swift in Sources */,
@@ -6611,6 +6638,7 @@
 				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,
 				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
 				A5A2D53727394F55003D0925 /* ActionableButton+Gradient.swift in Sources */,
+				A08C7FA8276CA4130006B386 /* OnboardingWindow.swift in Sources */,
 				BAA67AB22C0A91EBCA6D7BB7 /* WebNavigationController.swift in Sources */,
 				3303E0EA26F8C91100E175AC /* RestAPIServer.swift in Sources */,
 				A519F06E2721A4A400BB42E2 /* ImageCodableWrapper.swift in Sources */,

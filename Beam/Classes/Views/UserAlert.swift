@@ -1,6 +1,10 @@
 import Foundation
 
 class UserAlert {
+    static func showMessage(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil, buttonAction: (() -> Void)? = nil) {
+        showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle, secondaryButtonTitle: secondaryButtonTitle, buttonAction: buttonAction)
+    }
+
     static func showMessage(message: String, informativeText: String? = nil, buttonTitle: String? = nil) {
         showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle)
     }
@@ -13,10 +17,10 @@ class UserAlert {
         showAlert(message: message ?? "Error", informativeText: error.localizedDescription, style: .critical)
     }
 
-    static private func showAlert(message: String, informativeText: String? = nil, buttonTitle: String? = nil, style: NSAlert.Style = .informational) {
+    static private func showAlert(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil, buttonAction: (() -> Void)? = nil, style: NSAlert.Style = .informational) {
         let call = {
             let alert = NSAlert()
-            alert.alertStyle = .critical
+            alert.alertStyle = style
 
             alert.messageText = message
 
@@ -27,7 +31,13 @@ class UserAlert {
             if let buttonTitle = buttonTitle {
                 alert.addButton(withTitle: buttonTitle)
             }
-            alert.runModal()
+            if let secondaryButtonTitle = secondaryButtonTitle {
+                alert.addButton(withTitle: secondaryButtonTitle)
+            }
+            let modalResult = alert.runModal()
+            if modalResult.rawValue == 1000 {
+                buttonAction?()
+            }
         }
 
         if Thread.isMainThread {

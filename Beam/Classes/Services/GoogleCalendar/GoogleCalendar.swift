@@ -7,6 +7,10 @@
 
 import Foundation
 
+class GoogleAccount: Codable {
+    var email: String
+}
+
 class GoogleCalendarList: Codable {
     let calendars: [GoogleCalendar]
 
@@ -26,9 +30,9 @@ class GoogleCalendar: Codable {
     var summary: String
     var description: String?
 
-    init(id: String, summary: String) {
+    init(id: String, summary: String, description: String?) {
         self.id = id
         self.summary = summary
+        self.description = description
     }
-
 }
