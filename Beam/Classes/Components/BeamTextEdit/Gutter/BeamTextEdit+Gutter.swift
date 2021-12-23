@@ -38,7 +38,7 @@ extension BeamTextEdit {
     }
 
     private func setupLeadingGutter() -> GutterContainerView? {
-        guard let calendarManager = state?.data.calendarManager, !calendarManager.connectedSources.isEmpty else { return nil }
+        guard let calendarManager = state?.data.calendarManager else { return nil }
         let viewModel = CalendarGutterViewModel(calendarManager: calendarManager, noteId: self.note.id)
         let gutter = GutterContainerView(frame: NSRect.zero, isLeading: true, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType.calendarGutterView(viewModel: viewModel))
         DispatchQueue.main.async {

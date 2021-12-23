@@ -8,7 +8,7 @@
 import SwiftUI
 import Preferences
 
-let CardsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .cards, title: "Cards", imageName: "preferences-cards") {
+let CardsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .cards, title: "Notes", imageName: "preferences-cards") {
     CardsPreferencesView()
 }
 

@@ -40,9 +40,12 @@ class OnboardingManager: ObservableObject {
     @Published private(set) var currentStep: OnboardingStep
     @Published var actions = [StepAction]()
     var currentStepIsFromHistory = false
+    var onlyLogin: Bool = false
+    var onlyImport: Bool = false
+
     private(set) var stepsHistory = [OnboardingStep]()
 
-    init() {
+    init(onlyLogin: Bool = false, onlyImport: Bool = false) {
         var needsToDisplayOnboard = Configuration.env != "test" && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
@@ -56,9 +59,13 @@ class OnboardingManager: ObservableObject {
                 step = OnboardingStep(type: .welcome)
             }
         }
+        if onlyImport {
+            step = OnboardingStep(type: .imports)
+        }
         self.needsToDisplayOnboard = needsToDisplayOnboard
         currentStep = step ?? OnboardingStep(type: .welcome)
         Persistence.Authentication.hasSeenOnboarding = true
+        self.onlyLogin = onlyLogin
     }
 
     func resetOnboarding() {
@@ -99,10 +106,10 @@ class OnboardingManager: ObservableObject {
             if AuthenticationManager.shared.isAuthenticated && AuthenticationManager.shared.username == nil {
                 return OnboardingStep(type: .profile)
             } else {
-                return OnboardingStep(type: .imports)
+                return onlyLogin ? nil : OnboardingStep(type: .imports)
             }
         case .profile:
-            return OnboardingStep(type: .imports)
+            return onlyLogin ? nil : OnboardingStep(type: .imports)
         case .imports:
             return nil
         default:

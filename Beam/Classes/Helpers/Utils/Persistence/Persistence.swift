@@ -12,8 +12,7 @@ enum Persistence {
         @KeychainStorable("authentication.email") static var email: String?
         @KeychainStorable("authentication.password") static var password: String?
 
-        @KeychainStorable("authentication.google.accessToken") static var googleAccessToken: String?
-        @KeychainStorable("authentication.google.refreshToken") static var googleRefreshToken: String?
+        @KeychainStorable("authentication.google.tokens") static var googleCalendarTokens: String?
 
         //For now, we just store the username in-memory.
         //This have to change when we can have a better sync of it, to ensure it's always in sync with the backend
@@ -71,8 +70,7 @@ enum Persistence {
         Persistence.Authentication.userId = nil
         Persistence.Authentication.email = nil
         Persistence.Authentication.password = nil
-        Persistence.Authentication.googleAccessToken = nil
-        Persistence.Authentication.googleRefreshToken = nil
+        Persistence.Authentication.googleCalendarTokens = nil
         Sync.cleanUp()
     }
 }
