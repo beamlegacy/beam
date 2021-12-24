@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct BeamTextField: NSViewRepresentable {
 
@@ -111,25 +112,39 @@ struct BeamTextField: NSViewRepresentable {
         }
 
         coordinator.firstResponderSetterBlock?.cancel()
-        let firstResponderSetterBlock = DispatchWorkItem { [unowned coordinator] in
-            // Force focus on textField
-            let isCurrentlyFirstResponder = textField.isFirstResponder
-            let wasEditing = coordinator.lastUpdateWasEditing
-            if isEditing && !isCurrentlyFirstResponder {
-                view.becomeFirstResponder()
-            } else if !isEditing && isCurrentlyFirstResponder {
-                view.resignFirstResponder()
-                // If no other field is a first responder, we can safely clear the window's responder.
-                // Otherwise the cursor is not completely removed from the field.
-                view.window?.makeFirstResponder(nil)
-            } else if !isEditing && wasEditing {
-                view.resignFirstResponder()
-                view.invalidateIntrinsicContentSize()
-            }
-            coordinator.lastUpdateWasEditing = isEditing
+        coordinator.windowObservers.removeAll()
+        let firstResponderSetterBlock = DispatchWorkItem { [weak coordinator, weak view] in
+            guard let view = view, let coordinator = coordinator else { return }
+            updateFirstResponderBlock(view: view, coordinator: coordinator)
         }
         coordinator.firstResponderSetterBlock = firstResponderSetterBlock
         DispatchQueue.main.async(execute: firstResponderSetterBlock)
+    }
+
+    private func updateFirstResponderBlock(view: Self.NSViewType, coordinator: Coordinator) {
+        guard let textField = view as? BeamNSTextFieldProtocol else { return }
+        // Force focus on textField
+        let isCurrentlyFirstResponder = textField.isFirstResponder
+        let wasEditing = coordinator.lastUpdateWasEditing
+        if isEditing && !isCurrentlyFirstResponder {
+            if let window = view.window {
+                window.makeFirstResponder(view)
+            } else {
+                // Text field didn't have a window yet. Let's wait for the new window to make first responder.
+                view.publisher(for: \.window).receive(on: DispatchQueue.main).sink { newWindow in
+                    newWindow?.makeFirstResponder(view)
+                }.store(in: &coordinator.windowObservers)
+            }
+        } else if !isEditing && isCurrentlyFirstResponder {
+            view.resignFirstResponder()
+            // If no other field is a first responder, we can safely clear the window's responder.
+            // Otherwise the cursor is not completely removed from the field.
+            view.window?.makeFirstResponder(nil)
+        } else if !isEditing && wasEditing {
+            view.resignFirstResponder()
+            view.invalidateIntrinsicContentSize()
+        }
+        coordinator.lastUpdateWasEditing = isEditing
     }
 
     private func updateSelectedRange(_ view: Self.NSViewType, range: NSRange) {
@@ -145,6 +160,7 @@ struct BeamTextField: NSViewRepresentable {
         var lastUpdateWasEditing = false
         var lastSelectedRange: Range<Int>?
         var firstResponderSetterBlock: DispatchWorkItem?
+        var windowObservers = Set<AnyCancellable>()
         private var automaticScrollSetterBlock: DispatchWorkItem?
         var modifierFlagsPressed: NSEvent.ModifierFlags?
 
