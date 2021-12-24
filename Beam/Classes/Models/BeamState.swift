@@ -282,7 +282,8 @@ import Sentry
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
+            guard self?.focusOmniBox == false, let tab = tab else { return }
             tab.webviewWindow?.makeFirstResponder(tab.webView)
         }
         return tab
@@ -549,9 +550,12 @@ import Sentry
                 autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
-            } else {
+            } else if !autocompleteManager.searchQuery.isEmpty || autocompleteManager.autocompleteResults.isEmpty {
                 autocompleteManager.resetQuery()
+                autocompleteManager.getEmptyQuerySuggestions()
             }
+        } else if autocompleteManager.searchQuery.isEmpty && autocompleteManager.autocompleteResults.isEmpty {
+            autocompleteManager.getEmptyQuerySuggestions()
         }
         focusOmniBox = true
     }

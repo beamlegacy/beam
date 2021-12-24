@@ -653,7 +653,7 @@ import Promises
         // bring back the focus to where it was
         refocusDispatchItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
-            guard let webView = self?.webView, self?.isActiveTab() == true else { return }
+            guard let webView = self?.webView, self?.isActiveTab() == true, self?.state?.focusOmniBox == false else { return }
             webView.window?.makeFirstResponder(webView)
             webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
         }
