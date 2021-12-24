@@ -18,13 +18,12 @@ struct Omnibox: View {
 
     var isLaunchAppear = false
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
-    @State private var localIsEditing: Bool = false // to focus after animations
 
     private var enableAnimations: Bool {
         !state.windowIsResizing
     }
     private var isEditing: Bool {
-        state.focusOmniBox && localIsEditing
+        state.focusOmniBox
     }
     private var isEditingBinding: Binding<Bool> {
         Binding<Bool>(get: {
@@ -81,23 +80,9 @@ struct Omnibox: View {
         .fixedSize(horizontal: false, vertical: true)
         .animation(BeamAnimation.easeInOut(duration: 0.3), value: autocompleteManager.autocompleteResults)
         .animation(BeamAnimation.easeInOut(duration: 0.3), value: autocompleteManager.searchQuery.isEmpty)
-        .onAppear {
-            if !isLaunchAppear && autocompleteManager.searchQuery.isEmpty {
-                autocompleteManager.getEmptyQuerySuggestions()
-            }
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50)) {
-                localIsEditing = state.focusOmniBox
-            }
-        }
-        .onChange(of: state.focusOmniBox) { newValue in
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(50)) {
-                localIsEditing = newValue
-            }
-        }
     }
 
     private func setIsEditing(_ editing: Bool) {
-        localIsEditing = editing
         state.focusOmniBox = editing
     }
 }
@@ -160,14 +145,14 @@ struct OmniboxContainer: View {
 
     private var customTranstion: AnyTransition {
         .asymmetric(
-            insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.04).delay(0.02))
+            insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.06))
                 .combined(with:
-                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
+                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.1)))
                 .combined(with:
-                                .scale(scale: 0.95).animation(BeamAnimation.spring(stiffness: 480, damping: 34))),
+                                .scale(scale: 0.96).animation(BeamAnimation.easeInOut(duration: 0.1))),
             removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.1))
                 .combined(with:
-                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
+                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.1)))
                 .combined(with:
                                 .scale(scale: 0.9).animation(BeamAnimation.defaultiOSEasing(duration: 0.25)))
         )
