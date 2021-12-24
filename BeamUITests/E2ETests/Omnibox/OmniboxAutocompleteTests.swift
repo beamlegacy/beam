@@ -94,24 +94,24 @@ class OmniboxAutocompleteTests: BaseTest {
         testRailPrint("Then I see selection is cleared")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText + oneLetterToAdd + anotherOneLetterToAdd, omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
-        
+
         testRailPrint("When I press delete")
         omniboxView.typeKeyboardKey(.delete)
         testRailPrint("Then I see selection is cancelled")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText + oneLetterToAdd, omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
-        
+
         testRailPrint("When I type a letter to make search text reasonable")
         omniboxView.getOmniBoxSearchField().typeText("e")
         testRailPrint("Then I see selection available")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-        
+
         testRailPrint("When I move to end of search text via right arrow")
         omniboxView.typeKeyboardKey(.rightArrow)
         testRailPrint("Then I see selection is unavailable")
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
-        
+
         testRailPrint("When I type a letter to make search text reasonable")
         omniboxView.getOmniBoxSearchField().typeText("s")
         testRailPrint("Then I see search text: \(searchText + "s")")

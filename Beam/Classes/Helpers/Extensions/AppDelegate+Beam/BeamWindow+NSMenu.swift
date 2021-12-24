@@ -101,7 +101,11 @@ extension BeamWindow {
     }
 
     @IBAction func openLocation(_ sender: Any?) {
-        state.setFocusOmnibox(fromTab: true)
+        if state.focusOmniBox && (state.mode != .web || state.focusOmniBoxFromTab) {
+            state.focusOmniBox = false
+        } else {
+            state.setFocusOmnibox(fromTab: true)
+        }
     }
 
     @IBAction func openDocument(_ sender: Any?) {
