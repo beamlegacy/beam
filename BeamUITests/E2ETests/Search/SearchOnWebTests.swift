@@ -119,19 +119,19 @@ class SearchOnWebTests: BaseTest {
     func testSearchResultsHighlights() {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        let firstSearch = "ready"
-        let additionalWord = "Video"
+        let firstSearch = "test"
+        let additionalWord = "Confirm"
         let secondSearch = firstSearch + " " + additionalWord
         let thirdSearch = additionalWord + " " + firstSearch
         
         testRailPrint("Given I open a test page")
-        helper.openTestPage(page: .media)
+        helper.openTestPage(page: .alerts)
         
         testRailPrint("When I search for \(firstSearch)")
         searchView.triggerSearchField()
         searchView.typeInSearchField(firstSearch)
         testRailPrint("Then I see correct number of results")
-        XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: firstSearch)))
+        XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: firstSearch)))
         
         testRailPrint("When I search for \(secondSearch)")
         searchView.typeKeyboardKey(.space)
@@ -140,8 +140,8 @@ class SearchOnWebTests: BaseTest {
         XCTAssertEqual(searchView.app.staticTexts.matching(identifier: secondSearch).count, 0)
         
         testRailPrint("When correct the search to \(thirdSearch)")
-        searchView.typeKeyboardKey(.delete, 6)
-        searchView.typeKeyboardKey(.leftArrow, 6)
+        searchView.typeKeyboardKey(.delete, additionalWord.count + 1)
+        searchView.typeKeyboardKey(.leftArrow, firstSearch.count)
         searchView.getSearchFieldElement().typeText(additionalWord)
         searchView.typeKeyboardKey(.space)
         
@@ -153,19 +153,19 @@ class SearchOnWebTests: BaseTest {
     func testSearchKeywordCaseSensitivityAndSearchAfterReopen() {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        let firstSearch = "ReAdy"
-        let secondSearch = "vIDEo"
+        let firstSearch = "buTTOn"
+        let secondSearch = "cLIcK"
         let expectedFirstResult = firstSearch.lowercased()
-        let expectedSecondResult = "Video"
+        let expectedSecondResult = "Click"
         
         testRailPrint("Given I open a test page")
-        helper.openTestPage(page: .media)
+        helper.openTestPage(page: .alerts)
         
         testRailPrint("When I search for \(firstSearch)")
         searchView.triggerSearchField()
         searchView.typeInSearchField(firstSearch)
         testRailPrint("Then I see correct number of results")
-        XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: expectedFirstResult)))
+        XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: expectedFirstResult)))
         
         testRailPrint("Then I see no highlight on the web page after I close the search field")
         searchView.closeSearchField()
@@ -175,6 +175,6 @@ class SearchOnWebTests: BaseTest {
         searchView.triggerSearchField()
         searchView.typeInSearchField(secondSearch)
         testRailPrint("Then I see correct number of results")
-        XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: searchView.app.staticTexts.matching(identifier: expectedSecondResult)))
+        XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: expectedSecondResult)))
     }
 }
