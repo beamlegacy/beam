@@ -310,7 +310,7 @@ class PnSAddToCardTests: BaseTest {
         // click at middle of searchText to focus on page
         center.click()
 
-        let identifierForPositionsAssertion = PnSViewLocators.Other.pointFrame.accessibilityIdentifier
+//        let identifierForPositionsAssertion = PnSViewLocators.Other.pointFrame.accessibilityIdentifier
         // Hold option to enable point mode
         testRailPrint("TBD")
         XCUIElement.perform(withKeyModifiers: .option) {
