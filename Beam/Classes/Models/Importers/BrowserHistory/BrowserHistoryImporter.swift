@@ -21,6 +21,7 @@ struct BrowserHistoryResult {
 }
 
 protocol BrowserHistoryImporter {
+    var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>? { get set }
     var publisher: AnyPublisher<BrowserHistoryResult, Error> { get }
     func historyDatabaseURL() throws -> URL?
     func importHistory(from databaseURL: URL) throws
@@ -42,7 +43,7 @@ extension BrowserHistoryImporter {
                 do {
                     try importHistory(from: url)
                 } catch {
-                    Logger.shared.logError("Import failed with error: \(error)", category: .browserImport)
+                    currentSubject?.send(completion: .failure(error))
                 }
             }
         }

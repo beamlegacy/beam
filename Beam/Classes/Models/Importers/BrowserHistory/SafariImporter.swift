@@ -45,7 +45,7 @@ final class SafariImporter: BrowserHistoryImporter {
         case countNotAvailable
     }
 
-    private var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
+    var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
 
     var publisher: AnyPublisher<BrowserHistoryResult, Error> {
         let subject = currentSubject ?? PassthroughSubject<BrowserHistoryResult, Error>()
