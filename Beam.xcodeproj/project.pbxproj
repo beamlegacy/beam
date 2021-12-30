@@ -416,7 +416,7 @@
 		873528BC27343871005E7CBC /* SafariImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528BB27343871005E7CBC /* SafariImporter.swift */; };
 		873528BE2735335F005E7CBC /* FirefoxImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528BD2735335F005E7CBC /* FirefoxImporter.swift */; };
 		873528C127354295005E7CBC /* INI in Frameworks */ = {isa = PBXBuildFile; productRef = 873528C027354295005E7CBC /* INI */; };
-		873528C327354B96005E7CBC /* ChromeImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528C227354B96005E7CBC /* ChromeImporter.swift */; };
+		873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
@@ -758,6 +758,7 @@
 		A519F0672721A25000BB42E2 /* Cache.swift in Sources */ = {isa = PBXBuildFile; fileRef = A519F0662721A25000BB42E2 /* Cache.swift */; };
 		A519F06E2721A4A400BB42E2 /* ImageCodableWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A519F06D2721A4A400BB42E2 /* ImageCodableWrapper.swift */; };
 		A519F0732721A68100BB42E2 /* CacheTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A519F0722721A68100BB42E2 /* CacheTests.swift */; };
+		A51C4C262771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51C4C252771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift */; };
 		A51ED9A72608D0CD00CA99E5 /* ContextMenuFormatterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */; };
 		A51F555227329829002C5584 /* EmbedContentBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51F555127329829002C5584 /* EmbedContentBuilder.swift */; };
 		A51F55612733333D002C5584 /* EmbedContentBuilderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A51F55602733333D002C5584 /* EmbedContentBuilderTests.swift */; };
@@ -1598,7 +1599,7 @@
 		873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserHistoryImporter.swift; sourceTree = "<group>"; };
 		873528BB27343871005E7CBC /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
 		873528BD2735335F005E7CBC /* FirefoxImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirefoxImporter.swift; sourceTree = "<group>"; };
-		873528C227354B96005E7CBC /* ChromeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromeImporter.swift; sourceTree = "<group>"; };
+		873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumHistoryImporter.swift; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
@@ -1929,6 +1930,7 @@
 		A519F0662721A25000BB42E2 /* Cache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cache.swift; sourceTree = "<group>"; };
 		A519F06D2721A4A400BB42E2 /* ImageCodableWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageCodableWrapper.swift; sourceTree = "<group>"; };
 		A519F0722721A68100BB42E2 /* CacheTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CacheTests.swift; sourceTree = "<group>"; };
+		A51C4C252771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingImportsPasswordInstructions.swift; sourceTree = "<group>"; };
 		A51ED9A62608D0CD00CA99E5 /* ContextMenuFormatterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContextMenuFormatterView.swift; sourceTree = "<group>"; };
 		A51F555127329829002C5584 /* EmbedContentBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentBuilder.swift; sourceTree = "<group>"; };
 		A51F55602733333D002C5584 /* EmbedContentBuilderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentBuilderTests.swift; sourceTree = "<group>"; };
@@ -3756,7 +3758,7 @@
 				873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */,
 				873528BB27343871005E7CBC /* SafariImporter.swift */,
 				873528BD2735335F005E7CBC /* FirefoxImporter.swift */,
-				873528C227354B96005E7CBC /* ChromeImporter.swift */,
+				873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */,
 			);
 			path = BrowserHistory;
 			sourceTree = "<group>";
@@ -4517,6 +4519,7 @@
 				A52596EA273EB8FB004B27E4 /* OnboardingManager.swift */,
 				A52596E4273EB83B004B27E4 /* OnboardingWelcomeView.swift */,
 				A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */,
+				A51C4C252771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift */,
 				A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */,
 				A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */,
 				A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */,
@@ -6178,7 +6181,7 @@
 				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
 				52019A7126DE4718005E8278 /* DocumentManager+Promises.swift in Sources */,
-				873528C327354B96005E7CBC /* ChromeImporter.swift in Sources */,
+				873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				8A0DFAC327551F600044515B /* EmbedNodeWebViewConfiguration.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
@@ -6464,6 +6467,7 @@
 				8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
+				A51C4C262771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift in Sources */,
 				87D53559272608D700163D9B /* SuggestPasswordCell.swift in Sources */,
 				A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */,
 				A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */,

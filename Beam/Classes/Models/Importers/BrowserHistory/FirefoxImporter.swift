@@ -105,7 +105,7 @@ final class FirefoxImporter: BrowserHistoryImporter {
         return try defaultHistoryDatabase(firefoxDirectory: firefoxDirectory)
     }
 
-    private var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
+    var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
 
     var publisher: AnyPublisher<BrowserHistoryResult, Error> {
         let subject = currentSubject ?? PassthroughSubject<BrowserHistoryResult, Error>()
