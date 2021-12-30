@@ -22,7 +22,7 @@ extension AppDelegate {
     }
 
     @IBAction func importChromeHistory(_ sender: Any) {
-        let importer = ChromeImporter()
+        let importer = ChromiumHistoryImporter(browser: .chrome)
         importHistory(using: importer)
     }
 

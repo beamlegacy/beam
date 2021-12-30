@@ -123,8 +123,8 @@ final class ChromiumPasswordImporter {
     }
 
     static func decryptedPassword(for encryptedPassword: Data, using symmetricKey: Data) throws -> Data {
-        let headerData = encryptedPassword[0..<3] // should be "v10"
-        guard String(data: headerData, encoding: .utf8) == "v10" else {
+        guard let headerData = encryptedPassword.count > 3 ? encryptedPassword[0..<3] : nil, // should be "v10"
+              String(data: headerData, encoding: .utf8) == "v10" else {
             throw Error.unknownPasswordHeader
         }
         let ivData = Data(repeating: 0x20, count: 16)

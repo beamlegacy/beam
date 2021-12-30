@@ -15,7 +15,7 @@ class BrowserHistoryImportTest: XCTestCase {
         let bundle = Bundle(for: type(of: self))
         var subscriptions = Set<AnyCancellable>()
         let historyURL = try XCTUnwrap(bundle.url(forResource: "chromeHistory", withExtension: "db"))
-        let importer = ChromeImporter()
+        let importer = ChromiumHistoryImporter(browser: .chrome)
         let expectation = XCTestExpectation(description: "Chrome import finished")
         var results = [BrowserHistoryResult]()
         importer.publisher.sink(
