@@ -7,13 +7,14 @@
 
 import SwiftUI
 import BeamCore
+import Combine
 
 struct OnboardingImportsView: View {
     @Binding var actions: [OnboardingManager.StepAction]
     var finish: OnboardingView.StepFinishCallback?
 
-    @State private var checkHistory = false
-    @State private var checkPassword = false
+    @State private var checkHistory = true
+    @State private var checkPassword = true
     @State private var isLoading = false
 
     @State var availableSources: [ImportSource] = [.safari, .passwordsCSV]
@@ -30,6 +31,12 @@ struct OnboardingImportsView: View {
             }
         }
         .frame(width: 16, height: 16, alignment: .center)
+    }
+
+    @StateObject private var viewModel = ViewModel()
+    private class ViewModel: ObservableObject {
+        var importCancellable: AnyCancellable?
+        var finishWorkItem: DispatchWorkItem?
     }
 
     @State private var showNativePickerAfterAnimation = false
@@ -71,36 +78,42 @@ struct OnboardingImportsView: View {
     }
 
     private var passwordCSVContent: some View {
-        VStack(alignment: .leading, spacing: BeamSpacing._100) {
-            Text("Export your passwords from other browsers or password manager as a CSV file.")
-            Text("Click the Import Passwords button and select the CSV file.")
-        }
-        .frame(alignment: .top)
+        OnboardingImportsPasswordInstructions(source: selectedSource,
+                                              selectedURL: $passwordImportURL,
+                                              panelOpener: { title, completion in
+            openFilePanel(title: title, completion: completion)
+        })
     }
 
     private var browsersContent: some View {
         VStack(alignment: .leading, spacing: BeamSpacing._100) {
-            HStack(spacing: BeamSpacing._40) {
-                CheckboxView(checked: $checkPassword.onChange({ newValue in
-                    if newValue {
-                        importPasswords()
-                    } else {
-                        passwordImportURL = nil
-                    }
+            if selectedSource.supportsHistoryImport {
+                HStack(spacing: BeamSpacing._40) {
+                    CheckboxView(checked: $checkHistory.onChange({ _ in
+                        updateActions()
+                    }))
+                    Text("History")
+                }.onTapGesture {
+                    checkHistory.toggle()
                     updateActions()
-                }))
-                Text("Passwords")
-            }.onTapGesture {
-                importPasswords()
+                }
             }
-            HStack(spacing: BeamSpacing._40) {
-                CheckboxView(checked: $checkHistory.onChange({ _ in
-                    updateActions()
-                }))
-                Text("History")
-            }.onTapGesture {
-                checkHistory.toggle()
-                updateActions()
+            VStack(alignment: .leading, spacing: BeamSpacing._100) {
+                HStack(spacing: BeamSpacing._40) {
+                    CheckboxView(checked: $checkPassword)
+                    Text("Passwords")
+                }.onTapGesture {
+                    checkPassword = true
+                }
+                if !selectedSource.supportsAutomaticPasswordImport {
+                    OnboardingImportsPasswordInstructions(source: selectedSource,
+                                                          selectedURL: $passwordImportURL,
+                                                          panelOpener: { title, completion in
+                        openFilePanel(title: title, completion: completion)
+                    })
+                        .padding(.leading, BeamSpacing._120)
+                        .opacity(checkPassword ? 1 : 0)
+                }
             }
         }
     }
@@ -141,10 +154,20 @@ struct OnboardingImportsView: View {
             updateAvailableSources()
             updateActions()
         }
+        .onChange(of: checkPassword) { newValue in
+            if newValue {
+                updateActions()
+            } else {
+                passwordImportURL = nil
+            }
+        }
+        .onChange(of: passwordImportURL) { _ in
+            updateActions()
+        }
         .onChange(of: selectedSource) { _ in
-            checkPassword = false
+            checkPassword = true
             passwordImportURL = nil
-            checkHistory = false
+            checkHistory = true
             updateActions()
         }
     }
@@ -154,16 +177,23 @@ struct OnboardingImportsView: View {
     }
     private let skipActionId = UUID()
     private let importActionId = UUID()
+
+    private var shoudlEnableImportButton: Bool {
+        if checkPassword {
+            return passwordImportURL != nil || selectedSource.supportsAutomaticPasswordImport
+        } else {
+            return checkHistory
+        }
+    }
+
     private func updateActions() {
         if isLoading {
             actions = []
             return
         }
-        let importEnable = selectedSource == .passwordsCSV || passwordImportURL != nil || checkHistory
-        let importTitle = selectedSource == .passwordsCSV ? "Import Passwords" : "Import"
         actions = [
             .init(id: skipActionId, title: "Skip", enabled: true, secondary: true),
-            .init(id: importActionId, title: importTitle, enabled: importEnable) {
+            .init(id: importActionId, title: "Import", enabled: shoudlEnableImportButton) {
                 startImports()
                 return false
             }
@@ -173,14 +203,6 @@ struct OnboardingImportsView: View {
 
 // MARK: - Imports Actions
 extension OnboardingImportsView {
-
-    private func importPasswords() {
-        openFilePanel(title: "Select a csv file exported from \(selectedSource.rawValue)") { url in
-            passwordImportURL = url
-            checkPassword = url != nil
-            updateActions()
-        }
-    }
 
     private func openFilePanel(title: String, completion: @escaping (URL?) -> Void) {
         let openPanel = NSOpenPanel()
@@ -196,32 +218,50 @@ extension OnboardingImportsView {
         }
     }
 
-    private func startImports(directPasswordsCSVURL: URL? = nil) {
-        if selectedSource == .passwordsCSV && directPasswordsCSVURL == nil {
-            openFilePanel(title: "Select a csv file exported") { url in
-                guard let url = url else { return }
-                startImports(directPasswordsCSVURL: url)
-            }
-            return
-        }
-        guard !isLoading && (passwordImportURL != nil || checkHistory || directPasswordsCSVURL != nil) else { return }
+    private func startImports() {
+        guard !isLoading && shoudlEnableImportButton else { return }
         isLoading = true
         updateActions()
-        let startTime = BeamDate.now
-        if let passwordURL = passwordImportURL ?? directPasswordsCSVURL {
-            do {
-                try PasswordImporter.importPasswords(fromCSV: passwordURL)
-            } catch {
-                Logger.shared.logError("Error importing passwords \(String(describing: error))", category: .passwordManager)
+        let importsManager = AppDelegate.main.data.importsManager
+        if checkPassword {
+            if selectedSource.supportsAutomaticPasswordImport, let passwordImporter = selectedSource.passwordImporter {
+                importsManager.startBrowserPasswordImport(from: passwordImporter)
+            } else if let passwordURL = passwordImportURL {
+                importsManager.startBrowserPasswordImport(from: passwordURL)
             }
         }
         if checkHistory, let importer = selectedSource.historyImporter {
-            AppDelegate.main.data.importsManager.startBrowserHistoryImport(from: importer)
+            importsManager.startBrowserHistoryImport(from: importer)
         }
-        let delay = Int(max(0, 2 + startTime.timeIntervalSinceNow.rounded(.up)))
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delay)) {
-            finish?(nil)
+        waitForImporterToFinish(importsManager)
+    }
+
+    private func waitForImporterToFinish(_ importsManager: ImportsManager) {
+        // show the loading view at least 2s, at most 10s
+        let forceFinishAfter: Int
+        if importsManager.isImporting {
+            let cancellable = importsManager.$isImporting.first { $0 == false }.sink { _ in
+                sendFinish()
+            }
+            viewModel.importCancellable = cancellable
+            forceFinishAfter = 10 // at most 10s
+        } else {
+            forceFinishAfter = 2 // at least 2s
         }
+        let workItem = DispatchWorkItem {
+            guard isLoading else { return }
+            sendFinish()
+        }
+        viewModel.finishWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(forceFinishAfter), execute: workItem)
+    }
+
+    private func sendFinish() {
+        viewModel.finishWorkItem?.cancel()
+        viewModel.finishWorkItem = nil
+        viewModel.importCancellable?.cancel()
+        viewModel.importCancellable = nil
+        finish?(nil)
     }
 }
 
@@ -249,49 +289,99 @@ extension OnboardingImportsView {
 
     enum ImportSource: String, CaseIterable, Identifiable {
         var id: String { rawValue }
-
         case safari = "Safari"
+        case safariOld = "Safari 14 and earlier" // Safari 15.0 is the first to introduce an "Export" button in the password view.
         case chrome = "Google Chrome"
         case firefox = "Mozilla Firefox"
+        case brave = "Brave Browser"
         case passwordsCSV = "Passwords CSV File"
 
         var icon: String {
             switch self {
-            case .safari, .chrome, .firefox:
+            case .safari, .safariOld, .chrome, .firefox, .brave:
                 return "field-web"
             case .passwordsCSV:
                 return "autofill-password_xs"
             }
         }
 
-        var appURL: URL? {
+        private var bundleIdentifier: String? {
             switch self {
-            case .safari:
-                return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.apple.safari")
+            case .safari, .safariOld:
+                return "com.apple.safari"
             case .chrome:
-                return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "com.google.Chrome")
+                return "com.google.Chrome"
             case .firefox:
-                return NSWorkspace.shared.urlForApplication(withBundleIdentifier: "org.mozilla.firefox")
+                return "org.mozilla.firefox"
+            case .brave:
+                return "com.brave.Browser"
             case .passwordsCSV:
                 return nil
             }
         }
+        var appURL: URL? {
+            guard let bundleIdentifier = bundleIdentifier else { return nil }
+            return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier)
+        }
 
+        private var bundleVersionInfoKey: String { "CFBundleShortVersionString" }
         var isAvailable: Bool {
             switch self {
             case .passwordsCSV:
                 return true
-            case .safari, .chrome, .firefox:
+            case .chrome, .firefox, .brave:
                 return appURL != nil
+            case .safari, .safariOld:
+                guard let url = appURL,
+                      let versionString = Bundle(path: url.path)?.infoDictionary?[bundleVersionInfoKey] as? NSString
+                      else { return false }
+                let version = versionString.floatValue
+                if self == .safari && (version >= 15.0 || version == 0.0) {
+                    return true
+                } else if self == .safariOld && version < 15.0 {
+                    return true
+                }
+                return false
+            }
+        }
+
+        var supportsHistoryImport: Bool {
+            switch self {
+            case .safari, .safariOld, .firefox, .chrome, .brave:
+                return true
+            case .passwordsCSV:
+                return false
+            }
+        }
+
+        var supportsAutomaticPasswordImport: Bool {
+            switch self {
+            case .chrome, .brave:
+                return true
+            case .safari, .safariOld, .firefox, .passwordsCSV:
+                return false
+            }
+        }
+
+        var passwordImporter: BrowserPasswordImporter? {
+            switch self {
+            case .chrome:
+                return ChromiumPasswordImporter(browser: .chrome)
+            case .brave:
+                return ChromiumPasswordImporter(browser: .brave)
+            case .firefox, .safari, .safariOld, .passwordsCSV:
+                return nil
             }
         }
 
         var historyImporter: BrowserHistoryImporter? {
             switch self {
-            case .safari:
+            case .safari, .safariOld:
                 return SafariImporter()
             case .chrome:
-                return ChromeImporter()
+                return ChromiumHistoryImporter(browser: .chrome)
+            case .brave:
+                return ChromiumHistoryImporter(browser: .brave)
             case .firefox:
                 return FirefoxImporter()
             case .passwordsCSV:
