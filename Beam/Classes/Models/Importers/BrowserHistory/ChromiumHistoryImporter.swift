@@ -1,5 +1,5 @@
 //
-//  ChromeImporter.swift
+//  ChromiumHistoryImporter.swift
 //  Beam
 //
 //  Created by Frank Lefebvre on 13/08/2021.
@@ -37,7 +37,7 @@ import GRDB
  CREATE TABLE content_annotations (visit_id INTEGER PRIMARY KEY,floc_protected_score DECIMAL(3, 2),categories VARCHAR,page_topics_model_version INTEGER,annotation_flags INTEGER DEFAULT 0 NOT NULL);
  */
 
-struct ChromeHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
+struct ChromiumHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
     var timestamp: Date
     var title: String?
     var url: URL
@@ -61,12 +61,12 @@ struct ChromeHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
     }
 }
 
-final class ChromeImporter: BrowserHistoryImporter {
+final class ChromiumHistoryImporter: BrowserHistoryImporter {
     enum ImportError: Error {
         case countNotAvailable
     }
 
-    private var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
+    var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
 
     var publisher: AnyPublisher<BrowserHistoryResult, Error> {
         let subject = currentSubject ?? PassthroughSubject<BrowserHistoryResult, Error>()
@@ -74,10 +74,16 @@ final class ChromeImporter: BrowserHistoryImporter {
         return subject.eraseToAnyPublisher()
     }
 
+    private var browser: ChromiumBrowserInfo
+
+    init(browser: ChromiumBrowserInfo) {
+        self.browser = browser
+    }
+
     func historyDatabaseURL() throws -> URL? {
         let applicationSupportDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Application Support")
-        let chromeDirectory = applicationSupportDirectory.appendingPathComponent("Google").appendingPathComponent("Chrome").appendingPathComponent("Default")
-        return try SandboxEscape.endorsedURL(for: chromeDirectory.appendingPathComponent("History"))
+        let chromiumDirectory = applicationSupportDirectory.appendingPathComponent(browser.databaseDirectory).appendingPathComponent("Default")
+        return try SandboxEscape.endorsedURL(for: chromiumDirectory.appendingPathComponent("History"))
     }
 
     func importHistory(from databaseURL: URL) throws {
@@ -88,7 +94,7 @@ final class ChromeImporter: BrowserHistoryImporter {
                     throw ImportError.countNotAvailable
                 }
                 // visit_time is number of microseconds since 1601-01-01
-                let rows = try ChromeHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title FROM visits v JOIN urls u ON v.url = u.id ORDER BY v.visit_time ASC")
+                let rows = try ChromiumHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title FROM visits v JOIN urls u ON v.url = u.id ORDER BY v.visit_time ASC")
                 while let row = try rows.next() {
                     currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
                 }
