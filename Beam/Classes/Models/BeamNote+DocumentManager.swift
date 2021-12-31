@@ -662,14 +662,14 @@ extension BeamNote: BeamNoteDocument {
         try? GRDBDatabase.shared.clearElements()
         try? GRDBDatabase.shared.clearBidirectionalLinks()
         try? GRDBDatabase.shared.clearNoteIndexingRecord()
-        let allTitles = DocumentManager().allDocumentsTitles(includeDeletedNotes: false)
-        for title in allTitles {
-            if let note = BeamNote.fetch(title: title) {
+        let allIds = DocumentManager().allDocumentsIds(includeDeletedNotes: false)
+        for id in allIds {
+            if let note = BeamNote.fetch(id: id, includeDeleted: false) {
                 note.indexContents()
             }
         }
 
-        log.append("After reindexing \(allTitles.count) notes, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
+        log.append("After reindexing \(allIds.count) notes, DB contains \((try? GRDBDatabase.shared.countBidirectionalLinks()) ?? -1) bidirectional links from \((try? GRDBDatabase.shared.countIndexedElements()) ?? -1) indexed elements")
 
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
