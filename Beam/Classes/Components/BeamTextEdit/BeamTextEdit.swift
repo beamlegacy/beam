@@ -1270,6 +1270,18 @@ public extension CALayer {
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
         let preciseViews = rootNode.getWidgetsAt(point, point, ignoreX: false)
+
+#if DEBUG
+        //swiftlint:disable print
+        if event.modifierFlags.contains(.control) {
+            print("Widgets:")
+            for handler in preciseViews {
+                print("\t\(handler) - \(handler.description)")
+            }
+        }
+        //swiftlint:enable print
+#endif
+
         let cursors = preciseViews.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
         cursor.set()
@@ -1379,7 +1391,7 @@ public extension CALayer {
         let tabs = String.tabs(level)
         var strs = [String]()
         for (i, l) in (layer.sublayers ?? []).enumerated() {
-            strs.append("\(tabs)\(i) - '\(l.name ?? "unnamed")' - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
+            strs.append("\(tabs)\(i) - '\(l.name ?? "unnamed")' - \(String(describing: l)) - pos \(l.position) - bounds \(l.bounds) \(l.isHidden ? "[HIDDEN]" : "")")
             strs.append(contentsOf: dumpSubLayers(l, level + 1))
         }
         return strs
