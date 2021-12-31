@@ -22,21 +22,22 @@ public class ImportsManager: NSObject, ObservableObject {
         let id = UUID()
         do {
             let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: GRDBUrlFrecencyStorage())
-            let cancellable = importer.publisher.sink(receiveCompletion: { [weak frecencyUpdater, weak self] completion in
+            let cancellable = importer.publisher.sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    frecencyUpdater?.saveAll()
+                    frecencyUpdater.saveAll()
                     Logger.shared.logInfo("Import History finished successfully", category: .browserImport)
                 case .failure(let error):
                     Logger.shared.logError("Import History failed with error: \(error)", category: .browserImport)
                 }
-                self?.cancellableScope.removeValue(forKey: id)
-            }, receiveValue: { [weak frecencyUpdater] result in
-                let absoluteString = result.item.url.absoluteString
+                self.cancellableScope.removeValue(forKey: id)
+            }, receiveValue: { result in
+                guard let url = result.item.url else { return }
+                let absoluteString = url.absoluteString
                 let title = result.item.title
                 let urlId = LinkStore.shared.getOrCreateIdFor(url: absoluteString, title: title)
-                frecencyUpdater?.add(urlId: urlId, date: result.item.timestamp)
-                Logger.shared.logDebug("\(result.item.timestamp): \(result.item.title ?? "---") [\(result.item.url)] (total count: \(result.itemCount))")
+                frecencyUpdater.add(urlId: urlId, date: result.item.timestamp)
+                Logger.shared.logDebug("\(result.item.timestamp): \(result.item.title ?? "---") [\(url)] (total count: \(result.itemCount))")
             })
             cancellableScope[id] = cancellable
             try importer.importHistory()
