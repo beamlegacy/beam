@@ -454,7 +454,7 @@ public class ElementNode: Widget {
 
     override func dumpWidgetTree(_ level: Int = 0) -> [String] {
         let tabs = String.tabs(level)
-        var strs = ["\(tabs)\(String(describing: Self.self)) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")"]
+        var strs = ["\(tabs)\(String(describing: Self.self)) - \(String(describing: self))) frame(\(frame)) \(layers.count) layers - element id: \(element.id) [\(elementText.text)]\(layer.superlayer == nil ? " DETTACHED" : "") \(needLayout ? "NeedLayout":"")"]
         for c in children {
             strs.append(contentsOf: c.dumpWidgetTree(level + 1))
         }
