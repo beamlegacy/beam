@@ -47,7 +47,7 @@ public extension BeamNote {
     }
 
     private func referencesMatching(_ titleToMatch: String, id idToMatch: UUID, verifyMatch: Bool) -> [BeamNoteReference] {
-        GRDBDatabase.shared.search(matchingPhrase: titleToMatch).compactMap { result -> BeamNoteReference? in
+        GRDBDatabase.shared.search(matchingPhrase: titleToMatch, column: BeamElementRecord.Columns.text).compactMap { result -> BeamNoteReference? in
             let noteRef = BeamNoteReference(noteID: result.noteId, elementID: result.uid)
             guard result.noteId != self.id else { return nil }
             guard verifyMatch else { return noteRef }
