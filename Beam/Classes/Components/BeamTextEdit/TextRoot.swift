@@ -173,16 +173,17 @@ public class TextRoot: ElementNode {
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
         super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false), availableWidth: availableWidth)
 
+        childInset = 0
         childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
-            topSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeLinks, availableWidth: availableWidth - childInset)
-            linksSection = LinksSection(parent: self, note: note, availableWidth: availableWidth - childInset)
-            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeReferences, availableWidth: availableWidth - childInset)
-            referencesSection = ReferencesSection(parent: self, note: note, availableWidth: availableWidth - childInset)
-            bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom, availableWidth: availableWidth - childInset)
+            topSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeLinks, availableWidth: childAvailableWidth)
+            linksSection = LinksSection(parent: self, note: note, availableWidth: childAvailableWidth)
+            middleSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeReferences, availableWidth: childAvailableWidth)
+            referencesSection = ReferencesSection(parent: self, note: note, availableWidth: childAvailableWidth)
+            bottomSpacerWidget = SpacerWidget(parent: self, spacerType: .bottom, availableWidth: childAvailableWidth)
             if PreferencesManager.showDebugSection {
-                debugSection = DebugSection(parent: self, note: note, availableWidth: availableWidth - childInset)
+                debugSection = DebugSection(parent: self, note: note, availableWidth: childAvailableWidth)
 
                 if let isTodaysNote = self.note?.isTodaysNote, isTodaysNote {
                     var continueToNotes = [BeamNote]()
@@ -217,8 +218,6 @@ public class TextRoot: ElementNode {
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
         }
-
-        childInset = 0
 
         referencesSection?.open = false
 
@@ -287,7 +286,7 @@ public class TextRoot: ElementNode {
         guard let breadCrumb = breadCrumbs[noteReference]?.breadCrumb else {
             guard let referencingNote = BeamNote.fetch(id: noteReference.noteID, includeDeleted: false), !referencingNote.deleted else { return nil }
             guard let referencingElement = referencingNote.findElement(noteReference.elementID) else { return nil }
-            let breadCrumb = BreadCrumb(parent: self, sourceNote: referencingNote, element: referencingElement, availableWidth: availableWidth - childInset)
+            let breadCrumb = BreadCrumb(parent: self, sourceNote: referencingNote, element: referencingElement, availableWidth: childAvailableWidth)
             breadCrumbs[noteReference] = ReferencingBreadCrumb(breadCrumb: breadCrumb, note: referencingNote)
             return breadCrumb
         }

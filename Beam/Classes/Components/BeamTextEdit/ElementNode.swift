@@ -176,14 +176,14 @@ public class ElementNode: Widget {
 
     // MARK: - Initializer
 
-    init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+    init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat) {
         self.element = element
         super.init(parent: parent, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupElementNode()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+    init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat) {
         self.element = element
 
         super.init(editor: editor, nodeProvider: nodeProvider, availableWidth: availableWidth)

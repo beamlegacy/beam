@@ -22,14 +22,14 @@ class BrowsingNodeWidget: Widget {
             return
         }
         self.children = children.map({ node -> BrowsingNodeWidget in
-            BrowsingNodeWidget(parent: self, browsingNode: node, recursive: recursive, availableWidth: availableWidth - childInset)
+            BrowsingNodeWidget(parent: self, browsingNode: node, recursive: recursive, availableWidth: childAvailableWidth)
         })
 
         layers["chevron"]?.layer.isHidden = self.children.isEmpty
         invalidateLayout()
     }
 
-    init(parent: Widget, browsingNode: BrowsingNode, recursive: Bool, availableWidth: CGFloat?) {
+    init(parent: Widget, browsingNode: BrowsingNode, recursive: Bool, availableWidth: CGFloat) {
         self.recursive = recursive
         self.browsingNode = browsingNode
 
@@ -76,7 +76,7 @@ class BrowsingNodeWidget: Widget {
 class BrowsingLinkWidget: Widget {
     var link: ScoredLink
 
-    init(parent: Widget, link: ScoredLink, availableWidth: CGFloat?) {
+    init(parent: Widget, link: ScoredLink, availableWidth: CGFloat) {
         self.link = link
         super.init(parent: parent, availableWidth: availableWidth)
 

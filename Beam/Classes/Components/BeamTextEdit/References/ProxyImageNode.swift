@@ -14,7 +14,7 @@ class ProxyImageNode: ImageNode, ProxyNode {
 
     // MARK: - Initializer
 
-    override init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+    override init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         guard let proxyElement = parent.proxyFor(element) else { fatalError("Can't create a ProxyImageNode without a proxy provider in the parent chain") }
         super.init(parent: parent, element: proxyElement, availableWidth: availableWidth)
 
