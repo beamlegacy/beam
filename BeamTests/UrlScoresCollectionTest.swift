@@ -19,8 +19,8 @@ class UrlScoresCollectionTest: XCTestCase {
             changes(score)
             data[urlId] = score
         }
-        func getMany(urlIds: [UUID]) -> [LongTermUrlScore] {
-            return []
+        func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore] {
+            return [:]
         }
     }
     
