@@ -453,7 +453,7 @@ class ClusteringManager: ObservableObject {
             }
         }
         let allVisitedPages = self.clusteredPagesId.flatMap({ $0 })
-        let allLongTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: allVisitedPages)
+        let allLongTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: allVisitedPages).values
         let allScores = allLongTermScores.enumerated().map { longTermScore -> Float in
             if let frecency = try? self.frecencyFetcher.fetchOne(id: allVisitedPages[longTermScore.offset], paramKey: .webVisit30d0)?.lastScore {
                 return longTermScore.element.score() / frecency

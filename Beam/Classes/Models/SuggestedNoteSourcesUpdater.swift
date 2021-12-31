@@ -10,9 +10,13 @@ import BeamCore
 typealias UpdateSources = [UUID: Set<UUID>]
 
 public class SuggestedNoteSourceUpdater {
-    var oldUrlGroups: [[UUID]] = [[]]
-    var oldNoteGroups: [[UUID]] = [[]]
-    var oldActiveSources = [UUID: [UUID]]() // Per note, all of its active sources (if any)
+    struct UpdateInstructions {
+        var sourcesToAdd: UpdateSources
+        var sourcesToRemove: UpdateSources
+        var allSources: UpdateSources
+    }
+
+    var oldAllSources = UpdateSources()
     // TODO: When uploading active sources from database, make sure to initialise  the updater with it
     private var sessionId: UUID
     private let myQueue = DispatchQueue(label: "sourceSuggestionQueue")
@@ -53,6 +57,63 @@ public class SuggestedNoteSourceUpdater {
         return []
     }
 
+    /// For a given clustering, calculate all sources to be suggested for each note at that moment
+    ///
+    /// - Parameters:
+    ///   - urlGroups: list of lists of pages (each list represents one group)
+    ///   - noteGroups: list of lists of notes (each list represents one group, corresponding to the urlGroups by location)
+    ///   - activeSources: A dictionary of all notes that have active sources to a list of these active sources
+    /// - Returns:
+    /// A snapshot of all sources to be present as suggestions for each note
+    func allSourcesPerNote(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]]) -> UpdateSources {
+        var allSources = [UUID: Set<UUID>]()
+        for noteGroup in noteGroups.enumerated() {
+            for note in noteGroup.element {
+                allSources[note] = Set(urlGroups[noteGroup.offset])
+                if let activeSourcesForNote = activeSources[note] {
+                    for activeSource in activeSourcesForNote {
+                        let urlGroupToAdd = self.groupFromPage(pageId: activeSource, urlGroups: urlGroups)
+                        allSources[note] = allSources[note]?.union(Set(urlGroupToAdd))
+                    }
+                    allSources[note] = allSources[note]?.subtracting(activeSourcesForNote) // No need to suggest an active source for the note
+                }
+            }
+        }
+        // Take care of the case of an active source for a note that is not itself included in clustering
+        let notesNotIncluded = Set(activeSources.keys).subtracting(Set(allSources.keys))
+        for note in notesNotIncluded {
+            if let activeSourcesForNote = activeSources[note] {
+                for activeSource in activeSourcesForNote {
+                    let urlGroupToAdd = self.groupFromPage(pageId: activeSource, urlGroups: urlGroups)
+                    allSources[note] = (allSources[note] ?? Set([])).union(Set(urlGroupToAdd))
+                }
+                allSources[note] = allSources[note]?.subtracting(activeSourcesForNote)
+            }
+        }
+        return allSources
+    }
+
+    // swiftlint:disable:next large_tuple
+    func createUpdateInstructions(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]]) -> UpdateInstructions? {
+        var sourcesToAdd: [UUID: Set<UUID>] = [:]
+        var sourcesToRemove: [UUID: Set<UUID>] = [:]
+        let allSources = self.allSourcesPerNote(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)
+        let allNotes = Set(self.oldAllSources.keys).union(allSources.keys)
+        for note in allNotes {
+            let allSourcesForNote = allSources[note] ?? Set([])
+            let allOldSourcesForNote = self.oldAllSources[note] ?? Set([])
+            let sourcesToAddForNote = allSourcesForNote.subtracting(allOldSourcesForNote)
+            let sourcesToRemoveForNote = allOldSourcesForNote.subtracting(allSourcesForNote)
+            if sourcesToAddForNote.count > 0 {
+                sourcesToAdd[note] = sourcesToAddForNote
+            }
+            if sourcesToRemoveForNote.count > 0 {
+                sourcesToRemove[note] = sourcesToRemoveForNote
+            }
+        }
+        return UpdateInstructions(sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove, allSources: allSources)
+    }
+
     /// Given a new grouping (both pages and notes seperately, both devided into groups), create instructions
     /// of sources (pages) that are to be removed and sources (pages) that are to be added as suggestions for
     /// each of the notes.
@@ -60,65 +121,10 @@ public class SuggestedNoteSourceUpdater {
     /// - Parameters:
     ///   - urlGroups: list of lists of pages (each list represents one group)
     ///   - noteGroups: list of lists of notes (each list represents one group, corresponding to the urlGroups by location)
+    ///   - activeSources: A dictionary of all notes that have active sources to a list of these active sources
     /// - Returns:
     ///   - sourcesToAdd: A dictionary from noteId to a list of pageId's, representing sources that are to be added
     ///   - sourcesToRemove: A dictionary from notId to a list of pageId's, representing sources that are to be removed
-    func createUpdateInstructions(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]]) -> (sourcesToAdd: UpdateSources, sourcesToRemove: UpdateSources)? {
-        var sourcesToAdd: [UUID: Set<UUID>] = [:]
-        var sourcesToRemove: [UUID: Set<UUID>] = [:]
-
-        // Adding and removing notes do to them going into or out of a common group with the note itself
-        let noteToGroupOld = noteToGroup(noteGroups: self.oldNoteGroups)
-        for noteGroup in noteGroups.enumerated() {
-            for noteId in noteGroup.element {
-                if let noteOldGroup = noteToGroupOld[noteId] {
-                    let oldSources = Set(self.oldUrlGroups[noteOldGroup])
-                    let newSources = Set(urlGroups[noteGroup.offset])
-                    sourcesToAdd[noteId] = newSources.subtracting(oldSources)
-                    sourcesToRemove[noteId] = oldSources.subtracting(newSources)
-                } else {
-                    sourcesToAdd[noteId] = Set(urlGroups[noteGroup.offset])
-                }
-            }
-        }
-
-        // Adding and removing sources due to active sources
-        let noteToGroupNew = noteToGroup(noteGroups: noteGroups)
-        for noteId in activeSources.keys {
-            for pageId in activeSources[noteId] ?? [] {
-                let newGroup = self.groupFromPage(pageId: pageId, urlGroups: urlGroups)
-                let oldGroup = self.groupFromPage(pageId: pageId, urlGroups: self.oldUrlGroups)
-                var sourcesToAddForNote = Set([UUID]())
-                if let oldActiveSourcesForNote = self.oldActiveSources[noteId],
-                   oldActiveSourcesForNote.contains(pageId) {
-                    sourcesToAddForNote = Set(newGroup).subtracting(Set(oldGroup))
-                } else {
-                    sourcesToAddForNote = Set(newGroup).subtracting(Set(activeSources[noteId] ?? []))
-                    // If it is a new acrive source for the note, add all of the group
-                }
-                var doNotRemove = Set(self.oldUrlGroups.joined()).subtracting(Set(urlGroups.joined())) // Pages that appeared before and no longer appear should not be removed, as they were deleted
-                if let groupIndex = noteToGroupNew[noteId] {
-                    doNotRemove = doNotRemove.union(Set(urlGroups[groupIndex]))
-                    //Do not remove pages - despite splitting with an active source, they're in the same group as the note itself
-                }
-                var sourcesToRemoveForNote = Set(oldGroup).subtracting(Set(newGroup))
-                sourcesToRemoveForNote = sourcesToRemoveForNote.subtracting(Set(doNotRemove))
-                sourcesToAdd[noteId] = Set(sourcesToAdd[noteId] ?? []).union(sourcesToAddForNote)
-                sourcesToRemove[noteId] = Set(sourcesToRemove[noteId] ?? []).union(sourcesToRemoveForNote)
-            }
-        }
-
-        // Not removing pages which, despite seperating with the note or with an active source, are still with an(other) active source in the same group
-        for noteId in sourcesToRemove.keys {
-            var pagesInGroupWithActive = [UUID]()
-            for activeSourceId in activeSources[noteId] ?? [] {
-                pagesInGroupWithActive += groupFromPage(pageId: activeSourceId, urlGroups: urlGroups)
-            }
-            sourcesToRemove[noteId] = Set(sourcesToRemove[noteId] ?? []).subtracting(Set(pagesInGroupWithActive))
-        }
-        return (sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove)
-    }
-
     func getSimilarityForSuggestion(suggestionPageId: UUID, noteId: UUID, activeSources: [UUID: [UUID]], similarities: [UUID: [UUID: Double]]) -> Double? {
         var finalSimilarity: Double?
         finalSimilarity = similarities[noteId]?[suggestionPageId]
@@ -137,14 +143,15 @@ public class SuggestedNoteSourceUpdater {
     ///   - sourcesToRemove: A dictionary from notId to a list of pageId's, representing sources that are to be removed
     private func addAndRemoveFromNotes(sourcesToAdd: UpdateSources, sourcesToRemove: UpdateSources, activeSources: [UUID: [UUID]], similarities: [UUID: [UUID: Double]]) {
         let allNotes = Array(Set(sourcesToRemove.keys).union(Set(sourcesToAdd.keys)))
+        let allPages = Array(Set(sourcesToAdd.values.flatMap { $0 }))
+        let allLongTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: allPages)
         for noteId in allNotes {
             DispatchQueue.main.async {
                 if let note = BeamNote.fetch(id: noteId, includeDeleted: false) {
                     if let addPagesToNote = sourcesToAdd[noteId] {
                         note.sources.refreshScores {
                             for pageId in addPagesToNote {
-                                let longTermScores = self.LongTermUrlScoreStoreProtocol.getMany(urlIds: [pageId])
-                                let longTermScore = longTermScores.count > 0 ? longTermScores[0] : nil
+                                let longTermScore = allLongTermScores[pageId]
                                 let frecency = try? self.frecencyFetcher.fetchOne(id: pageId, paramKey: .webVisit30d0)
                                 let similarity = self.getSimilarityForSuggestion(suggestionPageId: pageId, noteId: noteId, activeSources: activeSources, similarities: similarities)
                                 DispatchQueue.main.async {
@@ -170,16 +177,13 @@ public class SuggestedNoteSourceUpdater {
     ///   - urlGroups: list of lists of pages (each list represents one group)
     ///   - noteGroups: list of lists of notes (each list represents one group)
     public func update(urlGroups: [[UUID]], noteGroups: [[UUID]], activeSources: [UUID: [UUID]] = [UUID: [UUID]](), similarities: [UUID: [UUID: Double]]) {
-        guard urlGroups != oldUrlGroups || noteGroups != oldNoteGroups else { return }
         myQueue.async {
-            guard let (sourcesToAdd, sourcesToRemove) = self.createUpdateInstructions(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources) else { return }
+            guard let updateInstructions = self.createUpdateInstructions(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources) else { return }
 
-            self.addAndRemoveFromNotes(sourcesToAdd: sourcesToAdd, sourcesToRemove: sourcesToRemove, activeSources: activeSources, similarities: similarities)
+            self.addAndRemoveFromNotes(sourcesToAdd: updateInstructions.sourcesToAdd, sourcesToRemove: updateInstructions.sourcesToRemove, activeSources: activeSources, similarities: similarities)
 
             DispatchQueue.main.async {
-                self.oldUrlGroups = urlGroups
-                self.oldNoteGroups = noteGroups
-                self.oldActiveSources = activeSources
+                self.oldAllSources = updateInstructions.allSources
             }
         }
     }
