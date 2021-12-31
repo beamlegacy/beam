@@ -36,16 +36,16 @@ class EmbedNode: ResizableNode {
         super.setBottomPaddings(withDefault: 14)
     }
 
-    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
 
-        setupEmbed(availableWidth: availableWidth ?? fallBackWidth)
+        setupEmbed(availableWidth: availableWidth)
     }
 
-    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
         super.init(editor: editor, element: element, availableWidth: availableWidth)
 
-        setupEmbed(availableWidth: availableWidth ?? fallBackWidth)
+        setupEmbed(availableWidth: availableWidth)
     }
 
     func setupEmbed(availableWidth: CGFloat) {

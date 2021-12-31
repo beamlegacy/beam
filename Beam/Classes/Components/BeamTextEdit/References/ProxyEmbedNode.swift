@@ -14,7 +14,7 @@ class ProxyEmbedNode: EmbedNode, ProxyNode {
 
     // MARK: - Initializer
 
-    override init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+    override init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         // We must create a fake element if we're building on a dead branch of the document tree, it will just disapear soon without breaking.
         let proxyElement = parent.proxyFor(element) ?? BeamElement()
         super.init(parent: parent, element: proxyElement, availableWidth: availableWidth)

@@ -138,7 +138,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func updateAddedChild(child: Widget) {
         child.parent = self
-        child.availableWidth = availableWidth - childInset
+        child.availableWidth = childAvailableWidth
         child.contentsScale = contentsScale
         editor?.addToMainLayer(child.layer)
         for l in child.layers where l.value.layer.superlayer == nil {
@@ -166,7 +166,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         // Then make sure everything is correctly on screen
         for c in children {
             c.parent = self
-            c.availableWidth = availableWidth - childInset
+            c.availableWidth = childAvailableWidth
             editor?.addToMainLayer(c.layer)
             for l in c.layers where l.value.layer.superlayer == nil {
                 editor?.addToMainLayer(l.value.layer)
@@ -371,7 +371,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     // MARK: - Initializer
-    init(parent: Widget, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+    init(parent: Widget, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat) {
         self.parent = parent
         self.editor = parent.editor
         self.nodeProvider = nodeProvider
@@ -380,19 +380,19 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         selectionLayer = CALayer()
         super.init()
         setupWidget()
-        self.availableWidth = availableWidth ?? (parent.availableWidth - parent.childInset)
+        self.availableWidth = availableWidth
 
         setupAccessibility()
     }
 
     // this version should only be used by TextRoot
-    init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+    init(editor: BeamTextEdit, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat) {
         self.editor = editor
         self.nodeProvider = nodeProvider
         layer = CALayer()
         layer.isHidden = true
         selectionLayer = CALayer()
-        self.availableWidth = availableWidth ?? 1
+        self.availableWidth = availableWidth
         super.init()
         setupWidget()
     }
@@ -490,6 +490,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var childInset: CGFloat = 18 { didSet { invalidateRendering() } }
+    var childAvailableWidth: CGFloat { availableWidth - childInset }
 
     var padding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around the Widget + its children
     var contentsPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around this widget's contents
