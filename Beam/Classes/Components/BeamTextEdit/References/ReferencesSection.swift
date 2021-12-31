@@ -116,6 +116,6 @@ class ReferencesSection: LinksSection {
     }
 
     override var mainLayerName: String {
-        return "LinkSection"
+        return "ReferencesSection"
     }
 }
