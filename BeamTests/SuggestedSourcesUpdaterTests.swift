@@ -35,38 +35,69 @@ class SuggestedNoteSourceUpdaterTests: XCTestCase {
         expect(self.updater.groupFromPage(pageId: self.pageIDs[6], urlGroups: urlGroups)) == [self.pageIDs[6]]
     }
 
-    func testCreateUpdateInstructionsWithoutActiveSources() throws {
-        updater.oldUrlGroups = [[self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]], [self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]], [self.pageIDs[6]]]
+    func testAllSourcesForNote() throws {
         let noteId1 = UUID()
         let noteId2 = UUID()
         let noteId3 = UUID()
-        updater.oldNoteGroups = [[noteId1, noteId2], [], [noteId3]]
+        let activeSources: [UUID: [UUID]] = [noteId1: [self.pageIDs[6]], noteId3: [self.pageIDs[1], self.pageIDs[6]]]
+        let allSources = updater.allSourcesPerNote(urlGroups: [[self.pageIDs[0], self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3], self.pageIDs[4]], [self.pageIDs[5], self.pageIDs[6]]], noteGroups: [[noteId1], [noteId2], []], activeSources: activeSources)
+        expect(allSources[noteId1]) == Set([self.pageIDs[0], self.pageIDs[1], self.pageIDs[5]])
+        expect(allSources[noteId2]) == Set([self.pageIDs[2], self.pageIDs[3], self.pageIDs[4]])
+        expect(allSources[noteId3]) == Set([self.pageIDs[0], self.pageIDs[5]])
+    }
+    
+    func testCreateUpdateInstructionsWithoutActiveSources() throws {
+        let noteId1 = UUID()
+        let noteId2 = UUID()
+        let noteId3 = UUID()
+        updater.oldAllSources = [noteId1: Set([self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]]),
+                                noteId2: Set([self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]]),
+                                noteId3: Set([self.pageIDs[6]])]
 
-        if let (sourcesToAdd, sourcesToRemove) = updater.createUpdateInstructions(urlGroups: [[self.pageIDs[0], self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]], [self.pageIDs[6]]], noteGroups: [[noteId1], [noteId2], [noteId3]], activeSources: [UUID: [UUID]]()) {
-            expect(sourcesToAdd[noteId1]) == []
-            expect(Set(sourcesToAdd[noteId2] ?? [])) == Set([self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]])
-            expect(sourcesToAdd[noteId3]) == []
-            expect(Set(sourcesToRemove[noteId1] ?? [])) == Set([self.pageIDs[2]])
-            expect(Set(sourcesToRemove[noteId2] ?? [])) == Set([self.pageIDs[0], self.pageIDs[1]])
-            expect(sourcesToRemove[noteId3]) == []
-        } else { fail("sourcesToAdd and sourcesToRemove not created") }
+        if let updateInstructions = updater.createUpdateInstructions(urlGroups: [[self.pageIDs[0], self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]], [self.pageIDs[6]]], noteGroups: [[noteId1], [noteId2], [noteId3]], activeSources: [UUID: [UUID]]()) {
+            expect(updateInstructions.sourcesToAdd[noteId1]).to(beNil())
+            expect(Set(updateInstructions.sourcesToAdd[noteId2] ?? [])) == Set([self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]])
+            expect(updateInstructions.sourcesToAdd[noteId3]).to(beNil())
+            expect(Set(updateInstructions.sourcesToRemove[noteId1] ?? [])) == Set([self.pageIDs[2]])
+            expect(Set(updateInstructions.sourcesToRemove[noteId2] ?? [])) == Set([self.pageIDs[0], self.pageIDs[1]])
+            expect(updateInstructions.sourcesToRemove[noteId3]).to(beNil())
+        } else { XCTFail("createUpdateInstructions doesn't reply")}
     }
 
     func testCreateUpdateInstructionsWithActiceSources() throws {
-        updater.oldUrlGroups = [[self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]], [self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]], [self.pageIDs[6]]]
         let noteId1 = UUID()
         let noteId2 = UUID()
         let noteId3 = UUID()
-        updater.oldNoteGroups = [[noteId1], [noteId2], [noteId3]]
+        updater.oldAllSources = [noteId1: Set([self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]]),
+                                 noteId2: Set([self.pageIDs[3], self.pageIDs[4], self.pageIDs[5]]),
+                                 noteId3: Set([self.pageIDs[2], self.pageIDs[6]])]
         let activeSources: [UUID: [UUID]] = [noteId1: [self.pageIDs[6]], noteId3: [self.pageIDs[1], self.pageIDs[6]]]
 
-        if let (sourcesToAdd, sourcesToRemove) = updater.createUpdateInstructions(urlGroups: [[self.pageIDs[0], self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3], self.pageIDs[4]], [self.pageIDs[5], self.pageIDs[6]]], noteGroups: [[noteId1], [noteId2], [noteId3]], activeSources: activeSources) {
-            expect(sourcesToAdd[noteId1]) == [self.pageIDs[5]]
-            expect(sourcesToAdd[noteId2]) == [self.pageIDs[2]]
-            expect(Set(sourcesToAdd[noteId3] ?? [])) == Set([self.pageIDs[0], self.pageIDs[5]])
-            expect(sourcesToRemove[noteId1]) == [self.pageIDs[2]]
-            expect(sourcesToRemove[noteId2]) == [self.pageIDs[5]]
-            expect(sourcesToRemove[noteId3]) == [self.pageIDs[2]]
+        if let updateInstructions = updater.createUpdateInstructions(urlGroups: [[self.pageIDs[0], self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3], self.pageIDs[4]], [self.pageIDs[5], self.pageIDs[6]]], noteGroups: [[noteId1], [noteId2], [noteId3]], activeSources: activeSources) {
+            expect(updateInstructions.sourcesToAdd[noteId1]) == [self.pageIDs[5]]
+            expect(updateInstructions.sourcesToAdd[noteId2]) == [self.pageIDs[2]]
+            expect(Set(updateInstructions.sourcesToAdd[noteId3] ?? [])) == Set([self.pageIDs[0], self.pageIDs[5]])
+            expect(updateInstructions.sourcesToRemove[noteId1]) == [self.pageIDs[2]]
+            expect(updateInstructions.sourcesToRemove[noteId2]) == [self.pageIDs[5]]
+            expect(updateInstructions.sourcesToRemove[noteId3]) == Set([self.pageIDs[2], self.pageIDs[6]])
         } else { fail("sourcesToAdd and sourcesToRemove not created") }
+    }
+    
+    func testCreateUpdateInstreuctionsWithActiveSourcesAndNoNote() throws {
+        let noteId1 = UUID()
+        let noteId2 = UUID()
+        let noteId3 = UUID()
+        updater.oldAllSources = [noteId1: Set([self.pageIDs[0], self.pageIDs[1], self.pageIDs[2]]),
+                                 noteId3: Set([self.pageIDs[2], self.pageIDs[6]])]
+        let activeSources: [UUID: [UUID]] = [noteId2: [self.pageIDs[3]]]
+        if let updateInstructions = updater.createUpdateInstructions(urlGroups: [[self.pageIDs[0], self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3], self.pageIDs[4]], [self.pageIDs[5], self.pageIDs[6]]], noteGroups: [[noteId1], [], [noteId3]], activeSources: activeSources) {
+            expect(updateInstructions.sourcesToAdd[noteId1]).to(beNil())
+            expect(updateInstructions.sourcesToAdd[noteId2]) == Set([self.pageIDs[2], self.pageIDs[4]])
+            expect(updateInstructions.sourcesToAdd[noteId3]) == [self.pageIDs[5]]
+            expect(updateInstructions.sourcesToRemove[noteId1]) == [self.pageIDs[2]]
+            expect(updateInstructions.sourcesToRemove[noteId2]).to(beNil())
+            expect(updateInstructions.sourcesToRemove[noteId3]) == [self.pageIDs[2]]
+        } else { fail("sourcesToAdd and sourcesToRemove not created") }
+        
     }
 }
