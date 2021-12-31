@@ -40,7 +40,7 @@ import GRDB
 struct ChromiumHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
     var timestamp: Date
     var title: String?
-    var url: URL
+    var url: URL?
 
     fileprivate enum CodingKeys: String, CodingKey {
         case timestamp = "visit_time"
@@ -53,11 +53,9 @@ struct ChromiumHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
         let timestamp = try container.decode(Double.self, forKey: .timestamp)
         let title = try container.decode(String?.self, forKey: .title)
         let urlStr = try container.decode(String.self, forKey: .url)
-        let cleanedUrlStr = urlStr.components(separatedBy: "|")[0]
-        guard let url = URL(string: cleanedUrlStr) else { throw DecodingError.dataCorruptedError(forKey: .url, in: container, debugDescription: "Invalid URL") }
+        url = URL(string: urlStr)
         self.timestamp = Date(timeIntervalSince1970: timestamp)
         self.title = title
-        self.url = url
     }
 }
 
@@ -87,7 +85,11 @@ final class ChromiumHistoryImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from databaseURL: URL) throws {
-        let dbQueue = try DatabaseQueue(path: databaseURL.path)
+        try importHistory(from: databaseURL.path)
+    }
+
+    func importHistory(from dbPath: String) throws {
+        let dbQueue = try DatabaseQueue(path: dbPath)
         try dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM visits") else {
@@ -96,7 +98,9 @@ final class ChromiumHistoryImporter: BrowserHistoryImporter {
                 // visit_time is number of microseconds since 1601-01-01
                 let rows = try ChromiumHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title FROM visits v JOIN urls u ON v.url = u.id ORDER BY v.visit_time ASC")
                 while let row = try rows.next() {
-                    currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                    if row.url != nil {
+                        currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                    }
                 }
                 currentSubject?.send(completion: .finished)
             } catch {
