@@ -9,4 +9,5 @@ import Foundation
 
 protocol MouseHandler {
     var cursor: NSCursor? { get }
+    var description: String { get }
 }
