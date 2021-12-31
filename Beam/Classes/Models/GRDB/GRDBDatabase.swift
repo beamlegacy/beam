@@ -589,11 +589,12 @@ extension GRDBDatabase {
                         _ includeText: Bool = false,
                         _ filter: SQLSpecificExpressible?,
                         _ frecencyParam: FrecencyParamKey? = nil,
+                        _ column: BeamElementRecord.Columns? = nil,
                         _ completion: @escaping CompletionSearch) {
         dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
             do {
                 let db = try dbResult.get()
-                let results = try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam)
+                let results = try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam, column: column)
                 completion(.success(results))
             } catch {
                 completion(.failure(error))
@@ -606,13 +607,26 @@ extension GRDBDatabase {
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
                         filter: SQLSpecificExpressible?,
-                        frecencyParam: FrecencyParamKey?) throws -> [SearchResult] {
+                        frecencyParam: FrecencyParamKey?,
+                        column: BeamElementRecord.Columns? = nil) throws -> [SearchResult] {
         if let frecencyParam = frecencyParam {
             return try search(db, pattern, maxResults, includeText, filter: filter, frencencyParam: frecencyParam)
         } else {
-            return try search(db, pattern, maxResults, includeText, filter: filter)
+            return try search(db, pattern, maxResults, includeText, filter: filter, column: column)
         }
 
+    }
+
+    private func query(_ pattern: FTS3Pattern?,
+                       column: BeamElementRecord.Columns? = nil) -> QueryInterfaceRequest<BeamElementRecord> {
+        if let pattern = pattern {
+            if let column = column {
+                return BeamElementRecord.filter(column.match(pattern))
+            } else {
+                return BeamElementRecord.matching(pattern)
+            }
+        }
+        return BeamElementRecord.all()
     }
 
     /// Search in notes content without frecencies (synchronous).
@@ -620,8 +634,9 @@ extension GRDBDatabase {
                         _ pattern: FTS3Pattern?,
                         _ maxResults: Int? = nil,
                         _ includeText: Bool = false,
-                        filter: SQLSpecificExpressible? = nil) throws -> [SearchResult] {
-        var query = pattern != nil ? BeamElementRecord.matching(pattern) : BeamElementRecord.all()
+                        filter: SQLSpecificExpressible? = nil,
+                        column: BeamElementRecord.Columns? = nil) throws -> [SearchResult] {
+        var query = self.query(pattern, column: column)
         if let maxResults = maxResults {
             query = query.limit(maxResults)
         }
@@ -686,40 +701,44 @@ extension GRDBDatabase {
                 maxResults: Int? = nil,
                 includeText: Bool = false,
                 frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil,
                 completion: @escaping CompletionSearch) {
         guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
             return completion(.failure(ReadError.invalidFTSPattern))
         }
-        search(pattern, maxResults, includeText, nil, frecencyParam, completion)
+        search(pattern, maxResults, includeText, nil, frecencyParam, column, completion)
     }
 
     func search(matchingAnyTokenIn string: String,
                 maxResults: Int? = nil,
                 includeText: Bool = false,
                 frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil,
                 completion: @escaping CompletionSearch) {
         guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
             return completion(.failure(ReadError.invalidFTSPattern))
         }
-        search(pattern, maxResults, includeText, nil, frecencyParam, completion)
+        search(pattern, maxResults, includeText, nil, frecencyParam, column, completion)
     }
 
     func search(matchingPhrase string: String,
                 maxResults: Int? = nil,
                 includeText: Bool = false,
                 frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil,
                 completion: @escaping CompletionSearch) {
         guard let pattern = FTS3Pattern(matchingPhrase: string) else {
             return completion(.failure(ReadError.invalidFTSPattern))
         }
-        search(pattern, maxResults, includeText, nil, frecencyParam, completion)
+        search(pattern, maxResults, includeText, nil, frecencyParam, column, completion)
     }
 
     func search(matchingAllTokensIn string: String,
                 maxResults: Int? = nil,
                 includeText: Bool = false,
                 excludeElements: [UUID]? = nil,
-                frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
+                frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAllTokensIn: string) else {
             return []
         }
@@ -729,7 +748,7 @@ extension GRDBDatabase {
         }
         do {
             return try dbReader.read { db in
-                try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam)
+                try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
@@ -740,7 +759,8 @@ extension GRDBDatabase {
                 maxResults: Int? = nil,
                 includeText: Bool = false,
                 excludeElements: [UUID]? = nil,
-                frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
+                frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingAnyTokenIn: string) else {
             return []
         }
@@ -750,7 +770,7 @@ extension GRDBDatabase {
         }
         do {
             return try dbReader.read { db in
-                try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam)
+                try search(db, pattern, maxResults, includeText, filter: filter, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
@@ -759,10 +779,11 @@ extension GRDBDatabase {
 
     func search(allWithMaxResults maxResults: Int? = nil,
                 includeText: Bool = false,
-                frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
+                frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
         do {
             return try dbReader.read { db in
-                try search(db, nil, maxResults, includeText, filter: nil, frecencyParam: frecencyParam)
+                try search(db, nil, maxResults, includeText, filter: nil, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
@@ -772,13 +793,14 @@ extension GRDBDatabase {
     func search(matchingPhrase string: String,
                 maxResults: Int? = nil,
                 includeText: Bool = false,
-                frecencyParam: FrecencyParamKey? = nil) -> [SearchResult] {
+                frecencyParam: FrecencyParamKey? = nil,
+                column: BeamElementRecord.Columns? = nil) -> [SearchResult] {
         guard let pattern = FTS3Pattern(matchingPhrase: string) else {
             return []
         }
         do {
             return try dbReader.read { db in
-                try search(db, pattern, maxResults, includeText, filter: nil, frecencyParam: frecencyParam)
+                try search(db, pattern, maxResults, includeText, filter: nil, frecencyParam: frecencyParam, column: column)
             }
         } catch {
             return []
