@@ -44,10 +44,10 @@ class LinksSection: Widget {
 
     // signposts names:
     struct Signs {
-        static let updateLinkedReferences: StaticString = "LinkSection.updateLinkedReferences"
-        static let updateLinkedReferencesEvaluateSource: StaticString = "LinkSection.updateLinkedReferencesEvaluateSource"
-        static let firstInit: StaticString = "LinkSection.firstInit"
-        static let setupUI: StaticString = "LinkSection.setupUI"
+        static let updateLinkedReferences: StaticString = "LinksSection.updateLinkedReferences"
+        static let updateLinkedReferencesEvaluateSource: StaticString = "LinksSection.updateLinkedReferencesEvaluateSource"
+        static let firstInit: StaticString = "LinksSection.firstInit"
+        static let setupUI: StaticString = "LinksSection.setupUI"
     }
 
     init(parent: Widget, note: BeamNote, availableWidth: CGFloat) {
@@ -131,7 +131,7 @@ class LinksSection: Widget {
 
     var currentReferences = [BeamNoteReference]()
 
-    var sectionTypeName: StaticString { "LinkSection" }
+    var sectionTypeName: StaticString { "LinksSection" }
     var initialUpdate = true
 
     //swiftlint:disable:next function_body_length
@@ -259,7 +259,7 @@ class LinksSection: Widget {
         let mayBeDanglingRef = isChild && isFocused && !linksToNote && !referencesToNote
         let result = linksToNote || mayBeDanglingRef
 
-        Logger.shared.logInfo("LinkSection.shouldHandleReference to \(rootNote) - \(rootNoteId): \(result) [linksToNote.\(linksToNote) || Dangling.\(mayBeDanglingRef)] (referencesToNote.\(referencesToNote)) - text: \(text.text)", category: .noteEditor)
+        Logger.shared.logInfo("LinksSection.shouldHandleReference to \(rootNote) - \(rootNoteId): \(result) [linksToNote.\(linksToNote) || Dangling.\(mayBeDanglingRef)] (referencesToNote.\(referencesToNote)) - text: \(text.text)", category: .noteEditor)
         return result
     }
 
@@ -288,6 +288,6 @@ class LinksSection: Widget {
     }
 
     override var mainLayerName: String {
-        return "LinkSection"
+        return "LinksSection"
     }
 }

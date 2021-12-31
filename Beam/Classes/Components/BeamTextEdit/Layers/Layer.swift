@@ -263,4 +263,8 @@ extension Layer {
     override func accessibilityTitle() -> String? {
         return  accessibilityTitle(for: layer) ?? sublayersAccessibilityTitle() ?? super.accessibilityTitle()
     }
+
+    override var description: String {
+        "\(name) - layer = \(layer)"
+    }
 }
