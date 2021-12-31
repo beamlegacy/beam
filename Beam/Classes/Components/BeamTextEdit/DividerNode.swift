@@ -37,12 +37,12 @@ public class DividerNode: ElementNode {
         super.setBottomPaddings(withDefault: 17)
     }
 
-    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
         setupDivider()
     }
 
-    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
         super.init(editor: editor, element: element, availableWidth: availableWidth)
         setupDivider()
     }

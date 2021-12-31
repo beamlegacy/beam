@@ -33,12 +33,6 @@ class ResizableNode: ElementNode {
     var initialDragImageSize: CGSize?
     var initialDragImageGlobalPosition: NSPoint?
 
-    var fallBackWidth: CGFloat {
-        let fullWidth = BeamTextEdit.textNodeWidth(for: editor?.frame.size ?? .zero) - childInset
-        let embedWidth = (fullWidth - contentsLead)
-        return embedWidth
-    }
-
     var visibleSize: CGSize {
         let computedWidth: CGFloat
         if let ratio = desiredWidthRatio {

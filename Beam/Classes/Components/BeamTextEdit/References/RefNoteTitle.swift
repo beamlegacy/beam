@@ -35,7 +35,7 @@ class RefNoteTitle: Widget {
         }
     }
 
-    init(parent: Widget, noteId: UUID, availableWidth: CGFloat?) throws {
+    init(parent: Widget, noteId: UUID, availableWidth: CGFloat) throws {
         self.noteId = noteId
         let title = BeamNote.titleForNoteId(noteId, false) ?? "<note not found>"
         self.noteTitle = title
