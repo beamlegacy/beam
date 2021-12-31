@@ -37,16 +37,16 @@ class ImageNode: ResizableNode {
     }
     var isHoverCollapseExpandButton: Bool = false
 
-    init(parent: Widget, element: BeamElement, availableWidth: CGFloat?) {
+    init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         self.isCollapsed = element.collapsed
         super.init(parent: parent, element: element, availableWidth: availableWidth)
-        setupImage(width: availableWidth ?? fallBackWidth)
+        setupImage(width: availableWidth)
     }
 
-    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat?) {
+    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
         self.isCollapsed = element.collapsed
         super.init(editor: editor, element: element, availableWidth: availableWidth)
-        setupImage(width: availableWidth ?? fallBackWidth)
+        setupImage(width: availableWidth)
     }
 
     override func setBottomPaddings(withDefault: CGFloat) {

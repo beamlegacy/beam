@@ -40,7 +40,7 @@ class DebugSection: Widget {
         layer.frame = CGRect(origin: position, size: textLayer.preferredFrameSize())
     }
 
-    init(parent: Widget, note: BeamNote, availableWidth: CGFloat?) {
+    init(parent: Widget, note: BeamNote, availableWidth: CGFloat) {
         self.note = note
 
         super.init(parent: parent, availableWidth: availableWidth)

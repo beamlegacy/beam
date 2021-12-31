@@ -16,7 +16,7 @@ class SpacerWidget: Widget {
 
     var spacerType: SpacerType
 
-    init(parent: Widget, spacerType: SpacerType, availableWidth: CGFloat?) {
+    init(parent: Widget, spacerType: SpacerType, availableWidth: CGFloat) {
         self.spacerType = spacerType
         super.init(parent: parent, availableWidth: availableWidth)
     }
