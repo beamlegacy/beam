@@ -50,7 +50,7 @@ class BreadCrumb: Widget {
     private let spaceBreadcrumbIcon: CGFloat = 3
     private var containerPadding: CGFloat = 8
 
-    init(parent: Widget, sourceNote: BeamNote, element: BeamElement, availableWidth: CGFloat?) {
+    init(parent: Widget, sourceNote: BeamNote, element: BeamElement, availableWidth: CGFloat) {
         self.sourceNote = sourceNote
         self.proxy = ProxyElement(for: element)
         super.init(parent: parent, nodeProvider: NodeProviderImpl(proxy: true), availableWidth: availableWidth)

@@ -50,7 +50,7 @@ class LinksSection: Widget {
         static let setupUI: StaticString = "LinkSection.setupUI"
     }
 
-    init(parent: Widget, note: BeamNote, availableWidth: CGFloat?) {
+    init(parent: Widget, note: BeamNote, availableWidth: CGFloat) {
         self.note = note
         super.init(parent: parent, availableWidth: availableWidth)
         self.sign = BeamTextEdit.signPost.createId(object: self)
@@ -171,7 +171,7 @@ class LinksSection: Widget {
             guard   BeamNote.fetch(id: noteID, includeDeleted: false) != nil,
                     let refTitleWidget = try? titles[noteID]
                     ?? newrefs[noteID]
-                    ?? RefNoteTitle(parent: self, noteId: noteID, availableWidth: availableWidth - childInset)
+                    ?? RefNoteTitle(parent: self, noteId: noteID, availableWidth: childAvailableWidth)
             else {
                 sign.end(Signs.updateLinkedReferencesEvaluateSource)
                 continue

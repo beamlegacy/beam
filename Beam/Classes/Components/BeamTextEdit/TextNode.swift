@@ -172,13 +172,13 @@ public class TextNode: ElementNode {
 
     // MARK: - Initializer
 
-    override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+    override init(parent: Widget, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat) {
         super.init(parent: parent, element: element, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupTextNode()
     }
 
-    override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat?) {
+    override init(editor: BeamTextEdit, element: BeamElement, nodeProvider: NodeProvider? = nil, availableWidth: CGFloat) {
         super.init(editor: editor, element: element, nodeProvider: nodeProvider, availableWidth: availableWidth)
 
         setupTextNode()
