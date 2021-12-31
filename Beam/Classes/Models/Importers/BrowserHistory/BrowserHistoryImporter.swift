@@ -8,11 +8,12 @@
 import Foundation
 import Combine
 import BeamCore
+import GRDB
 
 protocol BrowserHistoryItem {
     var timestamp: Date { get }
     var title: String? { get }
-    var url: URL { get }
+    var url: URL? { get }
 }
 
 struct BrowserHistoryResult {
@@ -25,6 +26,7 @@ protocol BrowserHistoryImporter {
     var publisher: AnyPublisher<BrowserHistoryResult, Error> { get }
     func historyDatabaseURL() throws -> URL?
     func importHistory(from databaseURL: URL) throws
+    func importHistory(from dbPath: String) throws
 }
 
 enum BrowserHistoryImporterError: Error {
@@ -34,17 +36,14 @@ enum BrowserHistoryImporterError: Error {
 extension BrowserHistoryImporter {
 
     func importHistory() throws {
-        let url = try historyDatabaseURL()
-        guard url != nil else {
+        guard let url = try historyDatabaseURL() else {
             throw BrowserHistoryImporterError.noDatabaseURL
         }
-        try historyDatabaseURL().map { url in
-            DispatchQueue.global().async {
-                do {
-                    try importHistory(from: url)
-                } catch {
-                    currentSubject?.send(completion: .failure(error))
-                }
+        DispatchQueue.global().async {
+            do {
+                try importHistory(from: url)
+            } catch {
+                currentSubject?.send(completion: .failure(error))
             }
         }
     }

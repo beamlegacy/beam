@@ -19,7 +19,7 @@ import GRDB
 struct SafariHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
     var timestamp: Date
     var title: String?
-    var url: URL
+    var url: URL?
 
     fileprivate enum CodingKeys: String, CodingKey {
         case timestamp = "visit_time"
@@ -33,10 +33,9 @@ struct SafariHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
         let title = try container.decode(String?.self, forKey: .title)
         let urlStr = try container.decode(String.self, forKey: .url)
         guard let timestampValue = Double(timestampStr) else { throw DecodingError.dataCorruptedError(forKey: .timestamp, in: container, debugDescription: "Expected numeric timestamp") }
-        guard let url = URL(string: urlStr) ?? URL(string: String(urlStr.prefix(while: { $0 != "?" }))) else { throw DecodingError.dataCorruptedError(forKey: .url, in: container, debugDescription: "Invalid URL") }
+        url = URL(string: urlStr) ?? URL(string: String(urlStr.prefix(while: { $0 != "?" })))
         self.timestamp = Date(timeIntervalSinceReferenceDate: timestampValue)
         self.title = title
-        self.url = url
     }
 }
 
@@ -63,7 +62,11 @@ final class SafariImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from databaseURL: URL) throws {
-        let dbQueue = try DatabaseQueue(path: databaseURL.path)
+        try importHistory(from: databaseURL.path)
+    }
+
+    func importHistory(from dbPath: String) throws {
+        let dbQueue = try DatabaseQueue(path: dbPath)
         try? dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM history_visits") else {
@@ -71,7 +74,9 @@ final class SafariImporter: BrowserHistoryImporter {
                 }
                 let rows = try SafariHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time, v.title, v.load_successful, i.url, i.domain_expansion, i.status_code, v.origin, v.generation, v.attributes FROM history_visits v JOIN history_items i ON v.history_item = i.id ORDER BY v.visit_time ASC")
                 while let row = try rows.next() {
-                    currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                    if row.url != nil {
+                        currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                    }
                 }
                 currentSubject?.send(completion: .finished)
             } catch {
