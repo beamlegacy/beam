@@ -51,7 +51,7 @@ import INI
 struct FirefoxHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
     var timestamp: Date
     var title: String?
-    var url: URL
+    var url: URL?
 
     fileprivate enum CodingKeys: String, CodingKey {
         case timestamp = "visit_date"
@@ -64,11 +64,10 @@ struct FirefoxHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
         let timestamp = try container.decode(Double.self, forKey: .timestamp)
         let title = try container.decode(String?.self, forKey: .title)
         let urlStr = try container.decode(String.self, forKey: .url)
-        guard let url = URL(string: urlStr) else { throw DecodingError.dataCorruptedError(forKey: .url, in: container, debugDescription: "Invalid URL") }
+        url = URL(string: urlStr)
         // timestamp is number of microseconds since UNIX epoch
         self.timestamp = Date(timeIntervalSince1970: timestamp / 1_000_000)
         self.title = title
-        self.url = url
     }
 }
 
@@ -114,7 +113,11 @@ final class FirefoxImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from databaseURL: URL) throws {
-        let dbQueue = try DatabaseQueue(path: databaseURL.path)
+        try importHistory(from: databaseURL.path)
+    }
+
+    func importHistory(from dbPath: String) throws {
+        let dbQueue = try DatabaseQueue(path: dbPath)
         try dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM moz_historyvisits") else {
@@ -122,7 +125,9 @@ final class FirefoxImporter: BrowserHistoryImporter {
                 }
                 let rows = try FirefoxHistoryItem.fetchCursor(db, sql: "SELECT v.visit_date, v.visit_type, v.session, p.url, p.title FROM moz_historyvisits v JOIN moz_places p ON v.place_id = p.id ORDER BY v.visit_date ASC")
                 while let row = try rows.next() {
-                    currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                    if row.url != nil {
+                        currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                    }
                 }
                 currentSubject?.send(completion: .finished)
             } catch {
