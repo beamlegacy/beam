@@ -413,7 +413,7 @@ class PasswordsDB: PasswordStore {
     }
 
     @discardableResult
-    func delete(hostname: String, username: String) throws -> PasswordRecord {
+    func markDeleted(hostname: String, username: String) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
                 if var password = try PasswordRecord
@@ -431,7 +431,7 @@ class PasswordsDB: PasswordStore {
     }
 
     @discardableResult
-    func deleteAll() throws -> [PasswordRecord] {
+    func markAllDeleted() throws -> [PasswordRecord] {
         do {
             return try dbPool.write { db in
                 let now = BeamDate.now
@@ -450,7 +450,7 @@ class PasswordsDB: PasswordStore {
     }
 
     @discardableResult
-    func realDeleteAll() throws -> [PasswordRecord] {
+    func deleteAll() throws -> [PasswordRecord] {
         do {
             return try dbPool.write { db in
                 let passwords = try PasswordRecord.fetchAll(db)

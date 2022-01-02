@@ -56,18 +56,12 @@ extension AppDelegate {
 
         // Cookies && Cache
         data.clearCookiesAndCache()
-
+        //Contacts
+        ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
         // Passwords
-        PasswordManager.shared.realDeleteAll(includedRemote: false) { result in
-            switch result {
-            case .failure(let error):
-                UserAlert.showError(message: "Could not delete Passwords", error: error)
-                return
-            case .success:
-                // Documents && Databases
-                self.deleteDocumentsAndDatabases(includedRemote: false)
-            }
-        }
+        PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
+        // Notes and Databases
+        self.deleteDocumentsAndDatabases(includedRemote: false)
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
