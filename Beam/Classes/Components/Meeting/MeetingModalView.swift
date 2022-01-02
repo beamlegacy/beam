@@ -108,7 +108,13 @@ struct MeetingModalView: View {
                                     HStack(spacing: BeamSpacing._80) {
                                         BoxedTextFieldView(title: "Email Address", text: Binding<String>(
                                             get: { attendee.email },
-                                            set: { viewModel.attendees[index].email = $0 }),
+                                            set: {
+                                                if let noteId = ContactsManager.shared.note(for: $0),
+                                                   let name = BeamNote.fetch(id: noteId, includeDeleted: false)?.title {
+                                                        viewModel.attendees[index].name = name
+                                                }
+                                                viewModel.attendees[index].email = $0
+                                            }),
                                                            isEditing: Binding<Bool>(
                                                             get: { focusedField == .attendeeEmail(attendee.id) },
                                                             set: {
@@ -122,8 +128,17 @@ struct MeetingModalView: View {
                                                            onBackspace: { if attendee.email.isEmpty { viewModel.removeAttendee(attendee) } },
                                                            onEscape: { viewModel.cancel() })
                                         BoxedTextFieldView(title: "Name", text: Binding<String>(
-                                            get: { attendee.name },
-                                            set: { viewModel.attendees[index].name = $0 }),
+                                            get: {
+                                                // Return note title (name) if email already in ContactDB
+                                                guard let noteId = ContactsManager.shared.note(for: attendee.email),
+                                                      let name = BeamNote.fetch(id: noteId, includeDeleted: false)?.title, viewModel.attendees.count > index else { return attendee.name }
+                                                viewModel.attendees[index].name = name
+                                                return name
+                                            },
+                                            set: {
+                                                // Search for existing Note with contact
+                                                viewModel.attendees[index].name = ContactsManager.shared.search(for: $0)
+                                            }),
                                                            isEditing: Binding<Bool>(
                                                             get: { focusedField == .attendeeName(attendee.id) },
                                                             set: {

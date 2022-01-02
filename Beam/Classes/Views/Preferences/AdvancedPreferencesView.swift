@@ -636,7 +636,7 @@ struct AdvancedPreferencesView: View {
 
     private var PasswordsDBDrop: some View {
         Button(action: {
-            PasswordManager.shared.deleteAll()
+            PasswordManager.shared.markAllDeleted()
         }, label: {
             Text("Erase Passwords Database")
         })

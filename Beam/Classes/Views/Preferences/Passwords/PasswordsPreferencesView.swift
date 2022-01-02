@@ -185,7 +185,7 @@ struct Passwords: View {
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
             for entry in passwordsViewModel.selectedEntries {
-                PasswordManager.shared.delete(hostname: entry.minimizedHost, for: entry.username)
+                PasswordManager.shared.markDeleted(hostname: entry.minimizedHost, for: entry.username)
             }
             passwordsViewModel.refresh()
             if !searchString.isEmpty { searchString.removeAll() }
