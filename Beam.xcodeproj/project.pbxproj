@@ -666,7 +666,9 @@
 		A05B74782628701600A78A7C /* LinkButtonLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A05B74772628701600A78A7C /* LinkButtonLayer.swift */; };
 		A0614EEA270B382400C38F82 /* GoogleCalendar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0614EE9270B382400C38F82 /* GoogleCalendar.swift */; };
 		A0614EEC270B383000C38F82 /* GoogleEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0614EEB270B383000C38F82 /* GoogleEvent.swift */; };
+		A062DD33275FC5EE0033DB6E /* ContactsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A062DD32275FC5EE0033DB6E /* ContactsManager.swift */; };
 		A0642C3226D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = A0642C3126D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel */; };
+		A0673C43274F933E00A0E365 /* ContactsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0673C42274F933E00A0E365 /* ContactsDB.swift */; };
 		A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E6C25DE623D00B19CBB /* DeleteText.swift */; };
 		A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */; };
 		A06D5FA32683454C009D7C38 /* DeepCopyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A06D5FA22683454C009D7C38 /* DeepCopyTests.swift */; };
@@ -1840,7 +1842,9 @@
 		A05B74772628701600A78A7C /* LinkButtonLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkButtonLayer.swift; sourceTree = "<group>"; };
 		A0614EE9270B382400C38F82 /* GoogleCalendar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleCalendar.swift; sourceTree = "<group>"; };
 		A0614EEB270B383000C38F82 /* GoogleEvent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleEvent.swift; sourceTree = "<group>"; };
+		A062DD32275FC5EE0033DB6E /* ContactsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsManager.swift; sourceTree = "<group>"; };
 		A0642C3126D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcmappingmodel; path = Beam5ToBeam6Migration.xcmappingmodel; sourceTree = "<group>"; };
+		A0673C42274F933E00A0E365 /* ContactsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactsDB.swift; sourceTree = "<group>"; };
 		A0689E6C25DE623D00B19CBB /* DeleteText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteText.swift; sourceTree = "<group>"; };
 		A0689E7025DE6B8700B19CBB /* CommandsTextTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandsTextTests.swift; sourceTree = "<group>"; };
 		A06D5FA22683454C009D7C38 /* DeepCopyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeepCopyTests.swift; sourceTree = "<group>"; };
@@ -2492,6 +2496,7 @@
 				0D4EC933268372E800487B75 /* FrecencyScore.swift */,
 				0D65977026975FD500AC9822 /* TopDomainDatabase.swift */,
 				DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */,
+				A0673C42274F933E00A0E365 /* ContactsDB.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -3066,6 +3071,7 @@
 				A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */,
 				DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */,
 				96F53559271DADDD00B719C6 /* BeamLinkDB.swift */,
+				A062DD32275FC5EE0033DB6E /* ContactsManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -6460,6 +6466,7 @@
 				330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */,
 				3303E0FC26FA221400E175AC /* UserInfoRequest.swift in Sources */,
 				A0CB5AEC268B241400D1EF02 /* PasswordsPreferencesView.swift in Sources */,
+				A0673C43274F933E00A0E365 /* ContactsDB.swift in Sources */,
 				A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */,
 				A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */,
 				52019A6F26DE470A005E8278 /* DocumentManager+Foundation.swift in Sources */,
@@ -6558,6 +6565,7 @@
 				BAA67D3C5D44656448093D73 /* LoggingMessageHandler.swift in Sources */,
 				A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */,
 				A5919F4B268BDDBA009015C5 /* NoteMediaPlayerManager.swift in Sources */,
+				A062DD33275FC5EE0033DB6E /* ContactsManager.swift in Sources */,
 				BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */,
 				BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */,
 				96BDCBE926DD043800EBCB6B /* NSSize+Beam.swift in Sources */,

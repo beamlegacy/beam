@@ -202,7 +202,7 @@ class PasswordsDBTests: XCTestCase {
 
         expectation = self.expectation(description: "delete password")
 
-        PasswordManager.shared.delete(hostname: Self.host.minimizedHost!, for: Self.username) { _ in
+        PasswordManager.shared.markDeleted(hostname: Self.host.minimizedHost!, for: Self.username) { _ in
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 10.0)
@@ -228,7 +228,7 @@ class PasswordsDBTests: XCTestCase {
         BeamObjectTestsHelper().deleteAll()
         let semaphore = DispatchSemaphore(value: 0)
 
-        PasswordManager.shared.realDeleteAll(includedRemote: true) { _ in
+        PasswordManager.shared.deleteAll(includedRemote: true) { _ in
             semaphore.signal()
         }
         semaphore.wait()
