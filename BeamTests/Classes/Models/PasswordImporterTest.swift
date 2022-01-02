@@ -13,12 +13,12 @@ class PasswordImporterTest: XCTestCase {
     override func setUp() {
         super.setUp()
         BeamTestsHelper.logout()
-        PasswordManager.shared.delete(hostname: "test1.com", for: "user1")
-        PasswordManager.shared.delete(hostname: "test2.com", for: "user2")
-        PasswordManager.shared.delete(hostname: "test3.com", for: "user3")
-        PasswordManager.shared.delete(hostname: "test4.com", for: "user4")
-        PasswordManager.shared.delete(hostname: "test5.com", for: "user5")
-        PasswordManager.shared.delete(hostname: "test6.com", for: "user6")
+        PasswordManager.shared.markDeleted(hostname: "test1.com", for: "user1")
+        PasswordManager.shared.markDeleted(hostname: "test2.com", for: "user2")
+        PasswordManager.shared.markDeleted(hostname: "test3.com", for: "user3")
+        PasswordManager.shared.markDeleted(hostname: "test4.com", for: "user4")
+        PasswordManager.shared.markDeleted(hostname: "test5.com", for: "user5")
+        PasswordManager.shared.markDeleted(hostname: "test6.com", for: "user6")
     }
 
     func testValidCSVCanBeImported() throws {
