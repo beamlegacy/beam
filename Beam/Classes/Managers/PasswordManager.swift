@@ -118,9 +118,9 @@ class PasswordManager {
         return []
     }
 
-    func delete(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func markDeleted(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            let passwordRecord = try passwordsDB.delete(hostname: hostname, username: username)
+            let passwordRecord = try passwordsDB.markDeleted(hostname: hostname, username: username)
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(passwordRecord, networkCompletion)
             } else {
@@ -135,9 +135,9 @@ class PasswordManager {
         networkCompletion?(.success(false))
     }
 
-    func deleteAll(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func markAllDeleted(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            let passwordsRecord = try passwordsDB.deleteAll()
+            let passwordsRecord = try passwordsDB.markAllDeleted()
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveAllOnNetwork(passwordsRecord, networkCompletion)
             } else {
@@ -152,9 +152,9 @@ class PasswordManager {
         networkCompletion?(.success(false))
     }
 
-    func realDeleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
-            try passwordsDB.realDeleteAll()
+            try passwordsDB.deleteAll()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
                 try self.deleteAllFromBeamObjectAPI { result in
                     networkCompletion?(result)

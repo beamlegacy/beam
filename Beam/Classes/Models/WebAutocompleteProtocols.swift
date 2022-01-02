@@ -35,7 +35,7 @@ protocol PasswordStore {
     func fetchAll() throws -> [PasswordRecord]
     func password(hostname: String, username: String) throws -> String?
     func save(hostname: String, username: String, password: String) throws -> PasswordRecord
-    func delete(hostname: String, username: String) throws -> PasswordRecord
+    func markDeleted(hostname: String, username: String) throws -> PasswordRecord
 }
 
 struct UserInformations: Identifiable {
