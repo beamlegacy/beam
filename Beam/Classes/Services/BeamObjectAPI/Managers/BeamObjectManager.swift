@@ -19,6 +19,7 @@ enum BeamObjectObjectType: String {
     case file
     case document
     case myRemoteObject = "my_remote_object"
+    case contact
 }
 
 class BeamObjectManager {
@@ -75,6 +76,7 @@ class BeamObjectManager {
         BeamFileDBManager.shared.registerOnBeamObjectManager()
         BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         BeamLinkDB.shared.registerOnBeamObjectManager()
+        ContactsManager.shared.registerOnBeamObjectManager()
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace

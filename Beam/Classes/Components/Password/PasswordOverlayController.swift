@@ -376,7 +376,7 @@ class PasswordOverlayController: WebPageHolder {
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entries: [PasswordManagerEntry]) {
         for entry in entries {
-            PasswordManager.shared.delete(hostname: entry.minimizedHost, for: entry.username)
+            PasswordManager.shared.markDeleted(hostname: entry.minimizedHost, for: entry.username)
         }
     }
 

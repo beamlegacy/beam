@@ -110,6 +110,7 @@ public class BeamNote: BeamElement {
     @Published public var saving = ManagedAtomic<Bool>(false)
     @Published public var updateAttempts: Int = 0
     @Published public var updates: Int = 0
+    public var contactId: UUID? { didSet { change(.meta) } }
 
     public var titleAndId: String {
         "\(title) {\(id)} v\(version)"
@@ -154,6 +155,7 @@ public class BeamNote: BeamElement {
         case sources
         case publicationStatus
         case browsingSessionIds
+        case contactId
     }
 
     public required init(from decoder: Decoder) throws {
@@ -188,6 +190,7 @@ public class BeamNote: BeamElement {
             type = try container.decode(BeamNoteType.self, forKey: .type)
         }
         browsingSessionIds = (try container.decodeIfPresent([UUID].self, forKey: .browsingSessionIds) ?? [UUID]())
+        contactId = try? container.decodeIfPresent(UUID.self, forKey: .contactId)
         switch type {
         case .note:
             break
@@ -209,6 +212,7 @@ public class BeamNote: BeamElement {
         try container.encode(sources, forKey: .sources)
         try container.encode(publicationStatus, forKey: .publicationStatus)
         try container.encode(browsingSessionIds, forKey: .browsingSessionIds)
+        try container.encode(contactId, forKey: .contactId)
         try super.encode(to: encoder)
     }
 
