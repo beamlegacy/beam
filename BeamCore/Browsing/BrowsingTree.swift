@@ -14,17 +14,17 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     case searchBar(query: String)
     case searchFromNode(nodeText: String)
     case linkFromNote(noteName: String)
-    case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?) //following a cmd + click on link
+    case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?, rootId: UUID?) //following a cmd + click on link
 
     public var rootOrigin: BrowsingTreeOrigin? {
         switch self {
-        case let .browsingNode(_, _, origin): return origin
+        case let .browsingNode(_, _, origin, _): return origin
         default: return self
         }
     }
 
     enum CodingKeys: CodingKey {
-        case type, value, rootOrigin, pageLoadId
+        case type, value, rootOrigin, pageLoadId, rootId
     }
 
     public func encode(to encoder: Encoder) throws {
@@ -39,7 +39,7 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         case .linkFromNote(let noteName):
             try container.encode("linkFromNote", forKey: .type)
             try container.encode(noteName, forKey: .value)
-        case .browsingNode(let id, let pageLoadId, let rootOrigin):
+        case .browsingNode(let id, let pageLoadId, let rootOrigin, let rootId):
             try container.encode("browsingNode", forKey: .type)
             if let pageLoadId = pageLoadId {
                 try container.encode(pageLoadId, forKey: .pageLoadId)
@@ -47,6 +47,10 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
             try container.encode(id, forKey: .value)
             if let rootOrigin = rootOrigin {
                 try container.encode(rootOrigin, forKey: .rootOrigin)
+            }
+
+            if let rootId = rootId {
+                try container.encode(rootId, forKey: .rootId)
             }
         }
     }
@@ -65,7 +69,8 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
             self = .browsingNode(
                 id: try container.decode(UUID.self, forKey: .value),
                 pageLoadId: try? container.decode(UUID.self, forKey: .pageLoadId),
-                rootOrigin: try? container.decode(BrowsingTreeOrigin.self, forKey: .rootOrigin))
+                rootOrigin: try? container.decode(BrowsingTreeOrigin.self, forKey: .rootOrigin),
+                rootId: try? container.decodeIfPresent(UUID.self, forKey: .rootId))
         default:
             throw DecodingError.dataCorrupted(
                         DecodingError.Context(

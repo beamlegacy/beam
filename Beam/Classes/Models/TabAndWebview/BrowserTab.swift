@@ -568,7 +568,8 @@ import Promises
         let origin = BrowsingTreeOrigin.browsingNode(
             id: browsingTree.current.id,
             pageLoadId: browsingTree.current.events.last?.pageLoadId,
-            rootOrigin: browsingTree.origin.rootOrigin
+            rootOrigin: browsingTree.origin.rootOrigin,
+            rootId: browsingTree.rootId
         )
         let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
                                      note: noteController.note, element: beamNavigationController?.isNavigatingFromNote == true ? noteController.element : nil,
