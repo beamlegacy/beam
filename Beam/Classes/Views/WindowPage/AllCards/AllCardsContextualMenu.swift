@@ -148,7 +148,7 @@ class AllCardsContextualMenu {
     }
 
     @objc private func databaseExport() {
-//        only support export all notes for now
+        // only support export all notes for now
         AppDelegate.main.exportNotes(self)
     }
 
