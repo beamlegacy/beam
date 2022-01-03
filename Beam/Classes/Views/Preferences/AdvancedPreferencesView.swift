@@ -19,7 +19,7 @@ struct AdvancedPreferencesView: View {
     @State private var autoUpdate: Bool = Configuration.autoUpdate
     @State private var updateFeedURL = Configuration.updateFeedURL
     @State private var sentryEnabled = Configuration.sentryEnabled
-    @State private var loggedIn: Bool = AccountManager().loggedIn
+    @State private var loggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @State private var networkEnabled: Bool = Configuration.networkEnabled
     @State private var privateKey = EncryptionManager.shared.privateKey().asString()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
@@ -376,7 +376,9 @@ struct AdvancedPreferencesView: View {
                     Create10RandomNotes
                 }
             }.onAppear {
-                observeDefaultDatabase()
+                startObservers()
+            }.onDisappear {
+                stopObservers()
             }
         }.frame(maxHeight: 500)
     }
@@ -575,13 +577,19 @@ struct AdvancedPreferencesView: View {
 
     @State private var cancellables = [AnyCancellable]()
 
-    private func observeDefaultDatabase() {
+    private func startObservers() {
         NotificationCenter.default
             .publisher(for: .defaultDatabaseUpdate, object: nil)
             .sink { _ in
                 selectedDatabase = Database.defaultDatabase()
             }
             .store(in: &cancellables)
+        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { isAuthenticated in
+            loggedIn = isAuthenticated
+        }.store(in: &cancellables)
+    }
+    private func stopObservers() {
+        cancellables.removeAll()
     }
 
     private var PasswordCSVImporter: some View {

@@ -1,6 +1,7 @@
 import Foundation
 import JWTDecode
 import BeamCore
+import Combine
 
 class AuthenticationManager {
     static var shared = AuthenticationManager()
@@ -27,15 +28,24 @@ class AuthenticationManager {
     }
     var accessToken: String? {
         get { Persistence.Authentication.accessToken }
-        set { Persistence.Authentication.accessToken = newValue }
+        set {
+            Persistence.Authentication.accessToken = newValue
+            persistenceDidUpdate()
+        }
     }
     var refreshToken: String? {
         get { Persistence.Authentication.refreshToken }
-        set { Persistence.Authentication.refreshToken = newValue }
+        set {
+            Persistence.Authentication.refreshToken = newValue
+            persistenceDidUpdate()
+        }
     }
     var username: String? {
         get { Persistence.Authentication.username }
-        set { Persistence.Authentication.username = newValue }
+        set {
+            Persistence.Authentication.username = newValue
+            persistenceDidUpdate()
+        }
     }
     var isAuthenticated: Bool {
         let now = BeamDate.now
@@ -47,6 +57,16 @@ class AuthenticationManager {
         }
 
         return true
+    }
+
+    private var authenticationSubject = PassthroughSubject<Bool, Never>()
+
+    var isAuthenticatedPublisher: AnyPublisher<Bool, Never> {
+        authenticationSubject.eraseToAnyPublisher()
+    }
+
+    func persistenceDidUpdate() {
+        authenticationSubject.send(isAuthenticated)
     }
 
     func updateAccessTokenIfNeeded() {

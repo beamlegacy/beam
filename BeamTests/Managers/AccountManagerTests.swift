@@ -31,6 +31,10 @@ class AccountManagerTests: QuickSpec {
             BeamDate.reset()
         }
 
+        func isLoggedIn() -> Bool {
+            AuthenticationManager.shared.isAuthenticated
+        }
+
         describe(".forgotPassword") {
             context("with Foundation") {
                 context("with existing account") {
@@ -218,7 +222,7 @@ class AccountManagerTests: QuickSpec {
                     let password = Configuration.testAccountPassword
 
                     it("authenticates") {
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
 
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.signIn(email: existingAccountEmail, password: password, completionHandler: { result in
@@ -227,7 +231,7 @@ class AccountManagerTests: QuickSpec {
                             })
                         }
 
-                        expect(sut.loggedIn).to(beTrue())
+                        expect(isLoggedIn()).to(beTrue())
                     }
                 }
 
@@ -235,7 +239,7 @@ class AccountManagerTests: QuickSpec {
                     let password = "wrong password"
 
                     it("doesn't authenticate") {
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                         waitUntil(timeout: .seconds(10)) { done in
                             sut.signIn(email: existingAccountEmail, password: password, completionHandler: { result in
                                 expect { try result.get() }.to(throwError { (error: APIRequestError) in
@@ -250,7 +254,7 @@ class AccountManagerTests: QuickSpec {
                                 done()
                             })
                         }
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                     }
                 }
             }
@@ -259,7 +263,7 @@ class AccountManagerTests: QuickSpec {
                     let password = Configuration.testAccountPassword
 
                     it("authenticates") {
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: PromiseKit.Promise<Bool> = sut.signIn(existingAccountEmail, password)
                             promise.done { success in
@@ -267,7 +271,7 @@ class AccountManagerTests: QuickSpec {
                                 done()
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
-                        expect(sut.loggedIn).to(beTrue())
+                        expect(isLoggedIn()).to(beTrue())
                     }
                 }
 
@@ -275,7 +279,7 @@ class AccountManagerTests: QuickSpec {
                     let password = "wrong password"
 
                     it("doesn't authenticate") {
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: PromiseKit.Promise<Bool> = sut.signIn(existingAccountEmail, password)
                             promise.catch { error in
@@ -289,7 +293,7 @@ class AccountManagerTests: QuickSpec {
                                 done()
                             }
                         }
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                     }
                 }
             }
@@ -298,7 +302,7 @@ class AccountManagerTests: QuickSpec {
                     let password = Configuration.testAccountPassword
 
                     it("authenticates") {
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: Promises.Promise<Bool> = sut.signIn(existingAccountEmail, password)
                             promise.then { success in
@@ -306,7 +310,7 @@ class AccountManagerTests: QuickSpec {
                                 done()
                             }.catch { fail("Should not be called: \($0)"); done() }
                         }
-                        expect(sut.loggedIn).to(beTrue())
+                        expect(isLoggedIn()).to(beTrue())
                     }
                 }
 
@@ -314,7 +318,7 @@ class AccountManagerTests: QuickSpec {
                     let password = "wrong password"
 
                     it("doesn't authenticate") {
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                         waitUntil(timeout: .seconds(10)) { done in
                             let promise: Promises.Promise<Bool> = sut.signIn(existingAccountEmail, password)
                             promise.catch { error in
@@ -328,7 +332,7 @@ class AccountManagerTests: QuickSpec {
                                 done()
                             }
                         }
-                        expect(sut.loggedIn).to(beFalse())
+                        expect(isLoggedIn()).to(beFalse())
                     }
                 }
             }

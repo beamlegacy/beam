@@ -28,7 +28,7 @@ extension AccountManager {
 
                     Persistence.Authentication.accessToken = refresh.accessToken
                     Persistence.Authentication.refreshToken = refresh.refreshToken
-
+                    AuthenticationManager.shared.persistenceDidUpdate()
                     completionHandler?(.success(true))
                 }
             }
@@ -56,6 +56,7 @@ extension AccountManager {
                     Persistence.Authentication.refreshToken = signIn.refreshToken
                     Persistence.Authentication.email = email
                     Persistence.Authentication.password = password
+                    AuthenticationManager.shared.persistenceDidUpdate()
                     LibrariesManager.shared.setSentryUser()
 
                     // Syncing with remote API, AppDelegate needs to be called in mainthread
@@ -107,6 +108,7 @@ extension AccountManager {
                         Persistence.Authentication.email = signIn.me?.email
                         Persistence.Authentication.password = nil
                     }
+                    AuthenticationManager.shared.persistenceDidUpdate()
                     LibrariesManager.shared.setSentryUser()
 
                     // Syncing with remote API, AppDelegate needs to be called in mainthread
@@ -191,7 +193,7 @@ extension AccountManager {
                     completionHandler?(.failure(error))
                 case .success(let infos):
                     Logger.shared.logInfo("Get user infos succeeded", category: .network)
-                    Persistence.Authentication.username = infos.username
+                    AuthenticationManager.shared.username = infos.username
                     completionHandler?(.success(infos))
                 }
             }
@@ -216,7 +218,7 @@ extension AccountManager {
                         return
                     }
                     Logger.shared.logInfo("Set username succeeded", category: .network)
-                    Persistence.Authentication.username = username
+                    AuthenticationManager.shared.username = username
                     completionHandler?(.success(username))
                 }
             }
@@ -230,6 +232,7 @@ extension AccountManager {
     static func logout() {
         Persistence.cleanUp()
         AppDelegate.main.disconnectWebSockets()
+        AuthenticationManager.shared.persistenceDidUpdate()
         Logger.shared.logDebug("Logged out", category: .general)
     }
 }

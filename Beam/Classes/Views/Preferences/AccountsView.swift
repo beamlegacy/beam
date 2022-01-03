@@ -10,22 +10,15 @@ let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.bu
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
-    @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyLogin: true)
+    @ObservedObject var onboardingManager = OnboardingManager(onlyLogin: true)
     @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @Published var accountsCalendar: [AccountCalendar] = []
 
-    var scope = Set<AnyCancellable>()
+    private var onboardingScope = Set<AnyCancellable>()
+    private var scope = Set<AnyCancellable>()
 
     init(calendarManager: CalendarManager) {
         self.calendarManager = calendarManager
-
-        onboardingManager.$needsToDisplayOnboard.sink { [weak self] result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-                self?.isloggedIn = AuthenticationManager.shared.isAuthenticated
-            }
-        }.store(in: &scope)
-
         calendarManager.$connectedSources.sink { [weak self] sources in
             guard let self = self, !sources.isEmpty else {
                 self?.accountsCalendar.removeAll()
@@ -39,6 +32,22 @@ class AccountsViewModel: ObservableObject {
                 }
             }
         }.store(in: &scope)
+
+        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
+            self?.isloggedIn = isAuthenticated
+        }.store(in: &scope)
+    }
+
+    fileprivate func showOnboarding() {
+        let onboardingManager = OnboardingManager(onlyLogin: true)
+        onboardingScope.removeAll()
+        onboardingManager.$needsToDisplayOnboard.sink { result in
+            if !result {
+                AppDelegate.main.closeOnboardingWindow()
+            }
+        }.store(in: &onboardingScope)
+        self.onboardingManager = onboardingManager
+        AppDelegate.main.showOnboardingWindow(model: onboardingManager)
     }
 }
 
@@ -171,7 +180,7 @@ struct AccountsView: View {
     private var accountLoggedOffView: some View {
         VStack(alignment: .leading) {
             Button(action: {
-                AppDelegate.main.showOnboardingWindow(model: viewModel.onboardingManager)
+                viewModel.showOnboarding()
             }, label: {
                 Text("Connect to Beam...")
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
