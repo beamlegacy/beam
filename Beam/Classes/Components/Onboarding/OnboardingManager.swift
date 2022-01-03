@@ -63,7 +63,7 @@ class OnboardingManager: ObservableObject {
             step = OnboardingStep(type: .imports)
         }
         self.needsToDisplayOnboard = needsToDisplayOnboard
-        currentStep = step ?? OnboardingStep(type: .imports)
+        currentStep = step ?? OnboardingStep(type: .welcome)
         Persistence.Authentication.hasSeenOnboarding = true
         self.onlyLogin = onlyLogin
     }
