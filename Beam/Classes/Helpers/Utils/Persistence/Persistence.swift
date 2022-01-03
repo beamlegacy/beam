@@ -69,6 +69,7 @@ enum Persistence {
         Persistence.Authentication.refreshToken = nil
         Persistence.Authentication.userId = nil
         Persistence.Authentication.email = nil
+        Persistence.Authentication.username = nil
         Persistence.Authentication.password = nil
         Persistence.Authentication.googleCalendarTokens = nil
         Sync.cleanUp()

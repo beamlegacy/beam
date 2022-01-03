@@ -58,6 +58,7 @@ struct OnboardingView: View {
             .fixedSize(horizontal: true, vertical: false)
             bottomBar
         }
+        .background(BeamColor.Generic.background.swiftUI.edgesIgnoringSafeArea(.all))
         .onAppear {
             displayedStep = model.currentStep
         }
