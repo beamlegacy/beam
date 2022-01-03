@@ -59,7 +59,7 @@ public extension String {
         return !regex.matches(in: self, options: [], range: NSRange(location: 0, length: self.count)).isEmpty
     }
 
-    // MARK: - Url checking
+    // MARK: - URL checking
     var mayBeURL: Bool {
         return mayBeWebURL || mayBeFileURL || mayBeIP || isLocalhost
     }
@@ -76,12 +76,17 @@ public extension String {
         self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)?(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}", options: .caseInsensitive)
     }
 
+    var isLocalhost: Bool {
+        self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)(localhost)", options: .caseInsensitive)
+    }
+
+    // MARK: - Strings checking
     var mayBeEmail: Bool {
         self.matches(withRegex: "^[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,64}$", options: .caseInsensitive)
     }
 
-    var isLocalhost: Bool {
-        self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)(localhost)", options: .caseInsensitive)
+    var mayBeUsername: Bool {
+        self.matches(withRegex: "^[A-Za-z0-9\\-_]{2,30}$", options: .caseInsensitive)
     }
 
     var containsSymbol: Bool {

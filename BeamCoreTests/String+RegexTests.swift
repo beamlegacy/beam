@@ -12,10 +12,12 @@ class StringRegexTests: XCTestCase {
     let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr", "http://the-super--swift.fr"]
     let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html", "file:///some-dir/some-swift--file.html"]
     let validEmails = ["swift@beamapp.co", "s@b.co", "john-swift--the3rd@beamapp.co"]
+    let validUsernames = ["tyler", "tyler_joseph", "josh-dun-09", "ty", "username20characters"]
 
     let invalidWebURLs = ["http://swift", "swift"]
     let invalidFileURLs = ["file://swift.html", "file://path/swift.html", "file"]
     let invalidEmails = ["swift", "https://swift", "@swift.co", "mailto:swift@beamapp.co", "swift@beamapp.co:wrong"]
+    let invalidUsernames = ["tyler joseph", "tyler.joseph", "t", "usernameislongerthan30characters", ""]
 
     func testMayBeURL() {
         for validWebURL in validWebURLs {
@@ -89,5 +91,15 @@ class StringRegexTests: XCTestCase {
         XCTAssertTrue("a@b.co".matches(withRegex: emailPattern))
         XCTAssertFalse("a@co".matches(withRegex: emailPattern))
         XCTAssertFalse("macosbeamapp.co".matches(withRegex: emailPattern))
+    }
+
+    func testMayBeUsername() {
+        for validUsername in validUsernames {
+            XCTAssertTrue(validUsername.mayBeUsername, "\(validUsername) should be a valid username")
+        }
+
+        for invalidUsername in invalidUsernames {
+            XCTAssertFalse(invalidUsername.mayBeUsername, "\(invalidUsername) should not be a valid username")
+        }
     }
 }
