@@ -136,7 +136,7 @@ class BrowsingTreeTest: XCTestCase {
         let decoder = JSONDecoder()
 
         //decode(encode(x)) is identity
-        let origin: BrowsingTreeOrigin = .browsingNode(id: UUID(), pageLoadId: UUID(), rootOrigin: .searchBar(query: "rolex pas cher"))
+        let origin: BrowsingTreeOrigin = .browsingNode(id: UUID(), pageLoadId: UUID(), rootOrigin: .searchBar(query: "rolex pas cher"), rootId: UUID())
         let encoded = try encoder.encode(origin)
         let decoded = try decoder.decode(BrowsingTreeOrigin.self, from: encoded)
         XCTAssertEqual(origin, decoded)
