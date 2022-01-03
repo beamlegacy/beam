@@ -40,6 +40,7 @@ class BeamUITestsMenuGenerator {
         case .signInWithTestAccount: signInWithTestAccount()
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()
+        case .clearPasswordsDB: clearPasswordsDatabase()
         default: break
         }
     }
@@ -253,5 +254,9 @@ class BeamUITestsMenuGenerator {
         logout()
         AuthenticationManager.shared.username = nil
         AppDelegate.main.window?.state.data.onboardingManager.resetOnboarding()
+    }
+
+    private func clearPasswordsDatabase() {
+        PasswordManager.shared.deleteAll(includedRemote: false)
     }
 }
