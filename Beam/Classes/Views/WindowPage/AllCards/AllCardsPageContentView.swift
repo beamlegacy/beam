@@ -16,6 +16,11 @@ class AllCardsViewModel: ObservableObject, Identifiable {
             updateNoteItemsFromAllNotes()
         }
     }
+    @Published fileprivate var username: String?
+    @Published fileprivate var isAuthenticated: Bool = false
+    private var signinScope = Set<AnyCancellable>()
+    private var onboardingManager: OnboardingManager?
+
     @Published fileprivate var allNotesItems = [NoteTableViewItem]()
     @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
     @Published fileprivate var publicNotesItems = [NoteTableViewItem]()
@@ -42,6 +47,13 @@ class AllCardsViewModel: ObservableObject, Identifiable {
                 self?.refreshAllNotes()
             }
             .store(in: &notesCancellables)
+
+        username = AuthenticationManager.shared.username
+        isAuthenticated = AuthenticationManager.shared.isAuthenticated
+        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
+            self?.isAuthenticated = isAuthenticated
+            self?.username = AuthenticationManager.shared.username
+        }.store(in: &signinScope)
     }
 
     fileprivate func refreshAllNotes() {
@@ -115,6 +127,17 @@ class AllCardsViewModel: ObservableObject, Identifiable {
                 }
             }
         }.eraseToAnyPublisher()
+    }
+
+    fileprivate func showConnectWindow() {
+        let model = OnboardingManager(onlyLogin: true)
+        onboardingManager = model
+        model.$needsToDisplayOnboard.sink { result in
+            if !result {
+                AppDelegate.main.closeOnboardingWindow()
+            }
+        }.store(in: &signinScope)
+        AppDelegate.main.showOnboardingWindow(model: model)
     }
 }
 
@@ -200,33 +223,52 @@ struct AllCardsPageContentView: View {
     }
     @State private var listType: ListType = .allNotes
 
+    private var cardsFilters: some View {
+        HStack(alignment: .center, spacing: BeamSpacing._20) {
+            ButtonLabel("All (\(model.allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
+                listType = .allNotes
+            }
+            Separator()
+                .frame(height: 16)
+            ButtonLabel("Published (\(model.publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
+                listType = .publicNotes
+            }
+            Separator()
+                .frame(height: 16)
+            ButtonLabel("Private (\(model.privateNotesItems.count))",
+                        state: listType == .privateNotes ? .active : .normal) {
+                listType = .privateNotes
+            }
+        }
+    }
+
+    private var pageTitle: String {
+        guard model.isAuthenticated, let username = model.username else {
+            return "All Cards"
+        }
+        return username
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
                 HStack(spacing: BeamSpacing._20) {
-                    Text("Personal")
-                        .font(BeamFont.regular(size: 20).swiftUI)
-                        .foregroundColor(BeamColor.Niobium.swiftUI)
+                    Text(pageTitle)
+                        .font(BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .padding(.leading, 35)
-                    Icon(name: "editor-breadcrumb_down", width: 8, color: BeamColor.LightStoneGray.swiftUI)
+                    Icon(name: "editor-breadcrumb_down", width: 12, color: BeamColor.LightStoneGray.swiftUI)
                 }
                 .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
                     showGlobalContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil), allowImports: true)
                 }))
                 Spacer()
-                ButtonLabel("All (\(model.allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
-                    listType = .allNotes
-                }
-                Separator()
-                    .frame(height: 16)
-                ButtonLabel("Published (\(model.publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
-                    listType = .publicNotes
-                }
-                Separator()
-                    .frame(height: 16)
-                ButtonLabel("Private (\(model.privateNotesItems.count))",
-                            state: listType == .privateNotes ? .active : .normal) {
-                    listType = .privateNotes
+                if model.isAuthenticated {
+                    cardsFilters
+                } else {
+                    ButtonLabel("Connect to Beam to publish your cards") {
+                        model.showConnectWindow()
+                    }
                 }
             }
             .frame(height: 22)

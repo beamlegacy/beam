@@ -4,12 +4,19 @@ import BeamCore
 class AccountManager {
 //    let safariDomains: [CFString] = [Configuration.publicHostnameDefault as CFString]
 
-    var loggedIn: Bool {
-        Persistence.Authentication.accessToken != nil
-    }
-
     let userSessionRequest = UserSessionRequest()
     let userInfoRequest = UserInfoRequest()
+
+    enum AuthenticationAPIError: Error {
+        case userNotFound
+
+        var description: String {
+            switch self {
+            case .userNotFound:
+                return "User not found"
+            }
+        }
+    }
 }
 
 // Safari Keychain
