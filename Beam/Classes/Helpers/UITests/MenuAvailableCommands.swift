@@ -8,16 +8,18 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case logout = "Logout"
     case deleteLogs = "Delete Logs"
     case showOnboarding = "Reset Onboarding"
-    case clearPasswordsDB = "Clear Passwords Database"
 
     case separatorA
+
+    // Resize Window
     case resizeWindowLandscape = "Resize Window to Landscape"
     case resizeWindowPortrait = "Resize Window to Portrait"
     case resizeSquare1000 = "Resize Window Square"
+
+    // Browsing Session
     case enableBrowsingSessionCollection = "Enable BrowsingSession Collect"
     case disableBrowsingSessionCollection = "Disable BrowsingSession Collect"
 
-    case separatorB
     // Load HTML Page
     case loadUITestPage1 = "Load UITests Page 1"
     case loadUITestPage2 = "Load UITests Page 2"
@@ -28,8 +30,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case loadUITestPageAlerts = "Load JS/Native alert panels"
     case loadUITestPageMedia = "Load Media test page"
 
-    case separatorC
-    // setup
+    // Notes
     case populateDBWithJournal = "Populate Journal"
     case insertTextInCurrentNote = "Insert Text in Current Note"
     case create100Notes = "Create 100 Random Notes"
@@ -38,19 +39,34 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case create10Notes = "Create 10 Random Notes"
     case create10NormalNotes = "Create 10 Normal Notes"
     case create10JournalNotes = "Create 10 Journal Notes"
-    case setAutoUpdateToMock = "Set Autoupdate to Mock"
-    case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
+
+    // Passwords
     case populatePasswordsDB = "Populate Passwords Database"
-    case showWebViewCount = "Show Number of WebView in Memory"
+    case clearPasswordsDB = "Clear Passwords Database"
 
     // Omnibox setup
     case omniboxFillHistory = "Fill History with Results"
+
+    // Others
+    case separatorB
+    case setAutoUpdateToMock = "Set Autoupdate to Mock"
+    case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
+    case showWebViewCount = "Show Number of WebView in Memory"
 
     var group: UITestMenuGroup? {
         switch self {
         case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia,
              .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground:
             return .loadHTMLPage
+        case .populateDBWithJournal, .insertTextInCurrentNote,
+                .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes:
+            return .notes
+        case .enableBrowsingSessionCollection, .disableBrowsingSessionCollection:
+            return .browsingSession
+        case .resizeSquare1000, .resizeWindowPortrait, .resizeWindowLandscape:
+            return .resizeWindow
+        case .populatePasswordsDB, .clearPasswordsDB:
+            return .passwords
         case .omniboxFillHistory:
             return .omniboxSetup
         default:
@@ -67,6 +83,10 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 }
 
 public enum UITestMenuGroup: String, CaseIterable {
+    case browsingSession = "Browsing Session"
     case loadHTMLPage = "Load UITest HTML Page"
+    case notes = "Notes"
     case omniboxSetup = "Omnibox Setup"
+    case passwords = "Passwords"
+    case resizeWindow = "Resize Window"
 }
