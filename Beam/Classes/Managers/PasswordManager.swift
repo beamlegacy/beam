@@ -18,7 +18,7 @@ class PasswordManager {
     static let shared = PasswordManager()
     static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 
-    private var passwordsDB: PasswordsDB
+    private var passwordsDB: PasswordStore
 
     init() {
         do {
@@ -26,6 +26,10 @@ class PasswordManager {
         } catch {
             fatalError("Error while creating the Passwords Database \(error)")
         }
+    }
+
+    init(passwordsDB: PasswordStore) {
+        self.passwordsDB = passwordsDB
     }
 
     private func managerEntries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {

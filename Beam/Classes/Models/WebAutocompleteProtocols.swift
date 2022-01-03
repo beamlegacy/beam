@@ -29,13 +29,19 @@ extension PasswordManagerEntry: Identifiable {
 }
 
 protocol PasswordStore {
-    func entries(for hostname: String) throws -> [PasswordRecord]
-    func entriesWithSubdomains(for hostname: String) throws -> [PasswordRecord]
+    func entries(for hostname: String, exact: Bool) throws -> [PasswordRecord]
     func find(_ searchString: String) throws -> [PasswordRecord]
     func fetchAll() throws -> [PasswordRecord]
+    func allRecords(_ updatedSince: Date?) throws -> [PasswordRecord]
     func password(hostname: String, username: String) throws -> String?
-    func save(hostname: String, username: String, password: String) throws -> PasswordRecord
-    func markDeleted(hostname: String, username: String) throws -> PasswordRecord
+    func passwordRecord(hostname: String, username: String) throws -> PasswordRecord?
+    func save(hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord
+    func save(passwords: [PasswordRecord]) throws
+    func update(record: PasswordRecord, password: String, uuid: UUID?) throws -> PasswordRecord
+    @discardableResult func markDeleted(hostname: String, username: String) throws -> PasswordRecord
+    @discardableResult func markAllDeleted() throws -> [PasswordRecord]
+    @discardableResult func deleteAll() throws -> [PasswordRecord]
+    func credentials(for hostname: String, completion: @escaping ([Credential]) -> Void)
 }
 
 struct UserInformations: Identifiable {
