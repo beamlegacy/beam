@@ -101,7 +101,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         testRootChildVisitType(origin: BrowsingTreeOrigin.searchBar(query: "beam"), expected: FrecencyEventType.webSearchBar)
         testRootChildVisitType(origin: BrowsingTreeOrigin.searchFromNode(nodeText: "beam"), expected: FrecencyEventType.webFromNote)
         testRootChildVisitType(origin: BrowsingTreeOrigin.linkFromNote(noteName: "beam beam"), expected: FrecencyEventType.webFromNote)
-        testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: nil), expected: FrecencyEventType.webLinkActivation)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: nil, rootId: UUID()), expected: FrecencyEventType.webLinkActivation)
 
         //controls visitType value of a root grand child node
         func testAnyOtherNodeVisitType(isLinkActivation: Bool, expected visitType: FrecencyEventType) {

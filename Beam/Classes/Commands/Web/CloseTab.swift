@@ -71,12 +71,22 @@ class CloseTab: WebCommand {
         if let i = context.browserTabsManager.tabs.firstIndex(of: tab) {
             self.tabIndex = i
 
+            var tabParentToGo: BrowserTab?
+            switch tab.browsingTreeOrigin {
+            case .browsingNode(_, _, _, let rootId):
+                tabParentToGo = context.browserTabsManager.tabs.first(where: {$0.browsingTree.rootId == rootId})
+            default: break
+            }
+
             context.browserTabsManager.tabs.remove(at: i)
             context.browserTabsManager.removeTabFromGroup(tabId: tab.id)
 
             if context.browserTabsManager.currentTab === tab {
+
                 let nextTabIndex = min(i, context.browserTabsManager.tabs.count - 1)
-                if nextTabIndex >= 0 {
+                if let tabParentToGo = tabParentToGo, tabParentToGo.isPinned {
+                    context.browserTabsManager.currentTab = tabParentToGo
+                } else if nextTabIndex >= 0 {
                     context.browserTabsManager.currentTab = context.browserTabsManager.tabs[nextTabIndex]
                 } else {
                     context.browserTabsManager.currentTab = nil
