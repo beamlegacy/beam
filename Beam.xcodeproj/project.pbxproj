@@ -420,6 +420,8 @@
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
+		8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */; };
+		87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87685675277371A7002A8069 /* MockPasswordsDB.swift */; };
 		8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768565C27709210002A8069 /* BrowserPasswordImporter.swift */; };
 		8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566327709413002A8069 /* ChromiumPasswordImporter.swift */; };
 		876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */; };
@@ -1605,6 +1607,8 @@
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
+		8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModelTests.swift; sourceTree = "<group>"; };
+		87685675277371A7002A8069 /* MockPasswordsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPasswordsDB.swift; sourceTree = "<group>"; };
 		8768565C27709210002A8069 /* BrowserPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPasswordImporter.swift; sourceTree = "<group>"; };
 		8768566327709413002A8069 /* ChromiumPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordImporter.swift; sourceTree = "<group>"; };
 		876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordDecryptionTests.swift; sourceTree = "<group>"; };
@@ -2530,9 +2534,11 @@
 			children = (
 				759442D426FCA85500CBFB7A /* Navigation */,
 				0DD0DACA2681C7330005339A /* GRDB */,
+				87685675277371A7002A8069 /* MockPasswordsDB.swift */,
 				BAA67BB2F54210479C1DB836 /* SearchEngineTest.swift */,
 				8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */,
 				877888DA269C977C00D703F0 /* PasswordImporterTest.swift */,
+				8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -6748,11 +6754,13 @@
 				52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */,
 				332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */,
+				87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */,
 				8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */,
 				8A7F949226A8611600270A74 /* PointAndShootCancelShootTest.swift in Sources */,
 				963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */,
 				A519F0732721A68100BB42E2 /* CacheTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
+				8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */,
 				8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */,
 				A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */,
 				5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */,
