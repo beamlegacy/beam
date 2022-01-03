@@ -19,7 +19,7 @@ struct AutocompleteList: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(elements) { i in
-                if i.source == .createCard {
+                if i.source == .createCard && elements.count > 1 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
