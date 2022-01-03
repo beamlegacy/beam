@@ -13,8 +13,6 @@ struct OnboardingWelcomeView: View {
     var finish: OnboardingView.StepFinishCallback
     @State private var isLoadingDataStartTime: Date?
 
-    private let accountManager = AccountManager()
-
     private enum SigninError: Error {
         case googleFailed
     }
@@ -82,7 +80,7 @@ struct OnboardingWelcomeView: View {
     }
 
     private func onSigninDone() {
-        guard accountManager.loggedIn else { return }
+        guard AuthenticationManager.shared.isAuthenticated else { return }
         isLoadingDataStartTime = BeamDate.now
     }
 
