@@ -23,7 +23,7 @@ struct OnboardingProfileCreationView: View {
             return errorMessage
         }
         var text = "Enter a username for your profile."
-        if isAuthenticated && !textField.isEmpty {
+        if textField.isEmpty {
             text += "\nYou can access your profile at beamapp.co/\(textField)"
         }
         return text
@@ -46,10 +46,11 @@ struct OnboardingProfileCreationView: View {
                 })
                 Text(subtitle)
                     .font(BeamFont.regular(size: 10).swiftUI)
+                    .lineLimit(3)
                     .foregroundColor(errorMessage != nil ? BeamColor.Shiraz.swiftUI : BeamColor.Generic.subtitle.swiftUI)
             }
             .frame(width: 280)
-            .frame(minHeight: 50, alignment: .top)
+            .frame(minHeight: 80, alignment: .top)
         }
         .onAppear {
             if let username = AuthenticationManager.shared.username {
@@ -63,7 +64,7 @@ struct OnboardingProfileCreationView: View {
     }
 
     private func isUsernameValid(_ username: String) -> Bool {
-        username.count >= 4
+        username.mayBeUsername
     }
 
     private func saveUsernameAndFinish() {
