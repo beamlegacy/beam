@@ -9,12 +9,14 @@ import Foundation
 import SwiftUI
 
 final class PasswordListViewModel: ObservableObject {
+    private var passwordManager: PasswordManager
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
-    var filteredPasswordEntries: [PasswordManagerEntry] = []
+    private var filteredIndices: [Int] = []
+    private var allToFilteredMapping: [Int: Int] = [:]
+    private var currentFilteredSelection = IndexSet() // indices are relative to filtered list -- used only for comparison
+    private var currentSelection = IndexSet() // indices are relative to full list, regardless of filtering options
 
-    @Published var filteredPasswordTableViewItems: [PasswordTableViewItem] = []
-    private var currentSelection = IndexSet()
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
 
@@ -23,56 +25,60 @@ final class PasswordListViewModel: ObservableObject {
             guard searchString != oldValue else {
                 return
             }
-            filteredPasswordEntries = allPasswordEntries.filtered(by: searchString)
-            filteredPasswordTableViewItems = allPasswordTableViewItems.filtered(by: searchString)
+            updateIndices()
         }
     }
 
     var selectedEntries: [PasswordManagerEntry] {
-        currentSelection.map { filteredPasswordEntries[$0] }
+        currentSelection.map { allPasswordEntries[$0] }
     }
 
-    init() {
+    var filteredPasswordEntries: [PasswordManagerEntry] {
+        filteredIndices.map { allPasswordEntries[$0] }
+    }
+
+    var filteredPasswordTableViewItems: [PasswordTableViewItem] {
+        filteredIndices.map { allPasswordTableViewItems[$0] }
+    }
+
+    init(passwordManager: PasswordManager = .shared) {
+        self.passwordManager = passwordManager
         refresh()
     }
 
     func updateSelection(_ idx: IndexSet) {
-        guard idx != currentSelection else {
+        guard idx != currentFilteredSelection else {
             return
         }
-        currentSelection = idx
+        currentFilteredSelection = idx
+        currentSelection = IndexSet(idx.map { filteredIndices[$0] })
         disableFillButton = idx.count != 1
         disableRemoveButton = idx.count == 0
     }
 
     func refresh() {
         currentSelection.removeAll()
-        let entries = PasswordManager.shared.fetchAll()
+        let entries = passwordManager.fetchAll()
         self.allPasswordEntries = entries
         self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)
-        self.filteredPasswordEntries = self.allPasswordEntries.filtered(by: self.searchString)
-        self.filteredPasswordTableViewItems = self.allPasswordTableViewItems.filtered(by: self.searchString)
+        self.updateIndices()
+    }
+
+    private func updateIndices() {
+        currentFilteredSelection.removeAll()
+        filteredIndices = allPasswordEntries.filteredIndices(by: searchString)
+        allToFilteredMapping = Dictionary(uniqueKeysWithValues: filteredIndices.enumerated().map { ($0.1, $0.0) })
+        objectWillChange.send()
     }
 }
 
-fileprivate extension Sequence where Element == PasswordManagerEntry {
-    func filtered(by searchString: String) -> [Element] {
+fileprivate extension Array where Element == PasswordManagerEntry {
+    func filteredIndices(by searchString: String) -> [Int] {
         guard !searchString.isEmpty else {
-            return Array(self)
+            return [Int](0..<count)
         }
-        return filter { item in
+        return enumerated().filter { (_, item) in
             item.username.contains(searchString) || item.minimizedHost.contains(searchString)
-        }
-    }
-}
-
-fileprivate extension Sequence where Element == PasswordTableViewItem {
-    func filtered(by searchString: String) -> [Element] {
-        guard !searchString.isEmpty else {
-            return Array(self)
-        }
-        return filter { item in
-            item.username.contains(searchString) || item.hostname.contains(searchString)
-        }
+        }.map { $0.0 }
     }
 }
