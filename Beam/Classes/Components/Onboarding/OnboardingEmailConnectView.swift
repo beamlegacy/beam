@@ -165,6 +165,9 @@ struct OnboardingEmailConnectView: View {
                     loadingState = nil
                     if case APIRequestError.notFound = error {
                         createAccount()
+                    } else if case APIRequestError.apiErrors(let errorable) = error,
+                              errorable.errors?.first?.message == AccountManager.AuthenticationAPIError.userNotFound.description {
+                        createAccount()
                     } else if error as? APIRequestError != nil {
                         errorState = .invalidCredentials
                     } else {
