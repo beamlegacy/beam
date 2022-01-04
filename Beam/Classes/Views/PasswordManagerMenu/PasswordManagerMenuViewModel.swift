@@ -35,9 +35,7 @@ enum PasswordSearchCellMode {
 class PasswordManagerMenuViewModel: ObservableObject {
     struct Contents {
         var entriesForHost: [PasswordManagerEntry]
-        var allEntries: [PasswordManagerEntry]
-        var hasScroll: Bool
-        var hasMoreThanOneEntry: Bool
+        var entryDisplayLimit: Int
         var showSuggestPasswordOption: Bool
         var suggestNewPassword: Bool
         var userInfo: UserInformations?
@@ -55,7 +53,6 @@ class PasswordManagerMenuViewModel: ObservableObject {
     let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let userInfoStore: UserInformationsStore
     private var entriesForHost: [PasswordManagerEntry]
-    private var allEntries: [PasswordManagerEntry]
     private var revealFullList = false
     private var revealMoreItemsInList = false
     private var showPasswordGenerator = false
@@ -67,12 +64,9 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.credentialsBuilder = credentialsBuilder
         self.userInfoStore = userInfoStore
         self.entriesForHost = []
-        self.allEntries = []
         self.display = Contents(
-            entriesForHost: Array(entriesForHost.prefix(1)),
-            allEntries: allEntries,
-            hasScroll: false,
-            hasMoreThanOneEntry: entriesForHost.count > 1,
+            entriesForHost: entriesForHost,
+            entryDisplayLimit: 1,
             showSuggestPasswordOption: options.showExistingCredentials && options.suggestNewPassword,
             suggestNewPassword: !options.showExistingCredentials,
             userInfo: userInfoStore.fetchAll().first ?? nil
@@ -83,22 +77,15 @@ class PasswordManagerMenuViewModel: ObservableObject {
             passwordGeneratorViewModel.delegate = self
             self.passwordGeneratorViewModel = passwordGeneratorViewModel
         }
-        if options.showExistingCredentials {
-            let entries = PasswordManager.shared.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
-            if !entries.isEmpty {
-                self.entriesForHost = entries
-                self.updateDisplay()
-            }
-        }
+        self.loadEntries()
+        self.updateDisplay()
     }
 
     func resetItems() {
-        guard revealFullList else { return }
         revertToFirstItem()
     }
 
     func revertToFirstItem() {
-        revealFullList = false
         revealMoreItemsInList = false
         updateDisplay()
     }
@@ -109,47 +96,30 @@ class PasswordManagerMenuViewModel: ObservableObject {
         updateDisplay()
     }
 
-    func revealAllItems() {
-        guard !revealFullList else { return }
-        revealFullList = true
-        updateAllEntries()
-    }
-
     func onSuggestNewPassword(state: PasswordManagerMenuCellState) {
         guard state == .clicked else { return }
         showPasswordGenerator = true
         updateDisplay()
     }
 
-    private func updateDisplay() {
-        var visibleEntries: [PasswordManagerEntry]
-        if revealMoreItemsInList {
-            visibleEntries = Array(entriesForHost.prefix(3))
-        } else {
-            if !credentialsBuilder.hasManualInput, let bestEntry = credentialsBuilder.suggestedEntry() ?? entriesForHost.first {
-                visibleEntries = [bestEntry]
+    private func loadEntries() {
+        if options.showExistingCredentials {
+            if !credentialsBuilder.hasManualInput, let bestEntry = credentialsBuilder.suggestedEntry() {
+                self.entriesForHost = [bestEntry]
             } else {
-                visibleEntries = []
+                self.entriesForHost = PasswordManager.shared.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
             }
         }
-        let hasScroll = entriesForHost.count == 3
+    }
+
+    private func updateDisplay() {
         display = Contents(
-            entriesForHost: visibleEntries,
-            allEntries: allEntries,
-            hasScroll: hasScroll,
-            hasMoreThanOneEntry: entriesForHost.count > 1,
+            entriesForHost: entriesForHost,
+            entryDisplayLimit: revealMoreItemsInList ? 3 : 1,
             showSuggestPasswordOption: options.showExistingCredentials && options.suggestNewPassword && !showPasswordGenerator,
             suggestNewPassword: !options.showExistingCredentials || showPasswordGenerator,
             userInfo: display.userInfo
         )
-    }
-
-    private func updateAllEntries() {
-        let entries = PasswordManager.shared.fetchAll()
-        if !entries.isEmpty {
-            self.allEntries = entries
-            self.updateDisplay()
-        }
     }
 
     public func getHostStr() -> String {
@@ -181,7 +151,7 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entries: [PasswordManagerEntry]) {
         Logger.shared.logDebug("Delete \(entries.count) password manager entries")
         delegate?.deleteCredentials(entries)
-        updateAllEntries()
+        loadEntries()
     }
 }
 

@@ -16,7 +16,6 @@ struct HeightKey: PreferenceKey {
 }
 
 struct PasswordManagerMenu: View {
-    let width: CGFloat
     @ObservedObject var viewModel: PasswordManagerMenuViewModel
 
     @State private var searchString = ""
@@ -25,77 +24,78 @@ struct PasswordManagerMenu: View {
     @State private var height: CGFloat?
 
     var body: some View {
-        FormatterViewBackground {
+        FormatterViewBackground(boxCornerRadius: 10) {
             VStack(alignment: .leading, spacing: 0) {
                 if viewModel.display.suggestNewPassword, let passwordGeneratorViewModel = viewModel.passwordGeneratorViewModel {
                     PasswordGeneratorSuggestionCell(viewModel: passwordGeneratorViewModel)
-                        .frame(height: 81, alignment: .center)
                 } else {
-                    ForEach(viewModel.display.entriesForHost.prefix(3)) { entry in
-                        StoredPasswordCell(host: entry.minimizedHost, username: entry.username) { newState in
-                            if newState == .clicked {
-                                viewModel.fillCredentials(entry)
+                    if !viewModel.display.entriesForHost.isEmpty {
+                        VStack(spacing: 0) {
+                            ForEach(viewModel.display.entriesForHost.prefix(viewModel.display.entryDisplayLimit)) { entry in
+                                StoredPasswordCell(host: entry.minimizedHost, username: entry.username) { newState in
+                                    if newState == .clicked {
+                                        viewModel.fillCredentials(entry)
+                                    }
+                                }
                             }
                         }
-                    }
-                    if viewModel.display.entriesForHost.count == 1 && viewModel.display.hasMoreThanOneEntry {
+                        .padding(.vertical, 6)
                         Separator(horizontal: true)
-                            .padding(.vertical, 1)
-                            .padding(.horizontal, 12)
-                        PasswordsViewMoreCell(hostName: viewModel.getHostStr()) { newState in
+                    }
+                    if viewModel.display.entriesForHost.count <= 1 || viewModel.display.entryDisplayLimit > 1 {
+                        OtherPasswordsCell { newState in
+                            if newState == .clicked {
+                                showingOtherPasswordsSheet.toggle()
+                            }
+                        }
+                    } else {
+                        OtherPasswordsCell(host: viewModel.host.minimizedHost) { newState in
                             if newState == .clicked {
                                 viewModel.revealMoreItemsForCurrentHost()
                             }
                         }
                     }
-                    if viewModel.display.entriesForHost.count > 1 {
-                        Separator(horizontal: true)
-                            .padding(.vertical, 1)
-                            .padding(.horizontal, 12)
-                    }
-                    if viewModel.display.entriesForHost.count != 1 || !viewModel.display.hasMoreThanOneEntry {
-                        OtherPasswordsCell { newState in
-                            // Show More Password view
-                            if newState == .clicked {
-                                viewModel.revealAllItems()
-                                showingOtherPasswordsSheet.toggle()
-                            }
-                        }.sheet(isPresented: $showingOtherPasswordsSheet, content: {
-                            OtherPasswordModal(viewModel: viewModel.otherPasswordsViewModel, onFill: { entry in
-                                viewModel.fillCredentials(entry)
-                            }, onRemove: { entry in
-                                viewModel.deleteCredentials(entry)
-                            }, onDismiss: {
-                                showingOtherPasswordsSheet.toggle()
-                                viewModel.resetItems()
-                            }).frame(width: 568, height: 361, alignment: .center)
-                        })
-                    }
                     if viewModel.display.showSuggestPasswordOption {
                         Separator(horizontal: true)
-                            .padding(.vertical, 1)
-                            .padding(.horizontal, 12)
                         SuggestPasswordCell(onChange: viewModel.onSuggestNewPassword)
                     }
                 }
             }
             .fixedSize(horizontal: false, vertical: true)
             .background(GeometryReader { proxy in
-                Color.clear.preference(key: HeightKey.self, value: proxy.size.height)
+                BeamColor.WebFieldAutofill.popupBackground.swiftUI
+                    .preference(key: HeightKey.self, value: proxy.size.height)
             })
             .onPreferenceChange(HeightKey.self) {
                 self.height = $0
-            }.animation(nil)
+            }
+            .animation(nil)
         }
-        .frame(width: max(width, 400), height: height, alignment: .top)
-        .cornerRadius(6)
+        .frame(width: width, height: height, alignment: .top)
         .animation(nil)
+        .sheet(isPresented: $showingOtherPasswordsSheet, content: {
+            OtherPasswordModal(viewModel: viewModel.otherPasswordsViewModel, onFill: { entry in
+                viewModel.fillCredentials(entry)
+            }, onRemove: { entry in
+                viewModel.deleteCredentials(entry)
+            }, onDismiss: {
+                showingOtherPasswordsSheet.toggle()
+                viewModel.resetItems()
+            }).frame(width: 568, height: 361, alignment: .center)
+        })
+    }
+
+    var width: CGFloat {
+        if viewModel.display.suggestNewPassword && viewModel.passwordGeneratorViewModel != nil {
+            return 441
+        }
+        return 255
     }
 }
 
 struct PasswordManagerMenu_Previews: PreviewProvider {
     static var userInfoStore = MockUserInformationsStore()
     static var previews: some View {
-        PasswordManagerMenu(width: 300, viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: userInfoStore, options: .login))
+        PasswordManagerMenu(viewModel: PasswordManagerMenuViewModel(host: URL(string: "http://mock1.beam")!, credentialsBuilder: PasswordManagerCredentialsBuilder(), userInfoStore: userInfoStore, options: .login))
     }
 }
