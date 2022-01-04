@@ -98,9 +98,18 @@ class EmbedNode: ResizableNode {
 
         contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
 
-        updateResizableElementContentSize(with: embedContent)
-        setupLoader()
-        updateEmbedContent(updateWebview: !isReusedWebview)
+        // try cache before setting up loader
+        let builder = EmbedContentBuilder()
+        if let embedContent = builder.cachedEmbed(for: sourceURL) {
+            self.embedContent = embedContent
+            updateResizableElementContentSize()
+            self.loadEmbedContentInWebView()
+        } else {
+            updateResizableElementContentSize()
+            setupLoader()
+            updateEmbedContent(updateWebview: !isReusedWebview)
+        }
+
     }
 
     deinit {
@@ -138,9 +147,12 @@ class EmbedNode: ResizableNode {
     }
 
     /// Display EmbedContent in WebView
-    /// - Parameter embedContent: EmbedContent to display
-    fileprivate func loadEmbedContentInWebView(_ embedContent: EmbedContent) {
-        updateResizableElementContentSize(with: embedContent)
+    fileprivate func loadEmbedContentInWebView() {
+        guard let embedContent = embedContent else {
+            return
+        }
+
+        updateResizableElementContentSize()
         self.updateLayout()
         switch embedContent.type {
         case .url, .link:
@@ -151,7 +163,7 @@ class EmbedNode: ResizableNode {
             if let content = embedContent.html {
                 let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
                 let headContent = self.getHeadContent(theme: theme)
-                self.webView?.loadHTMLString(headContent + content, baseURL: nil)
+                self.webView?.loadHTMLString(headContent + "<div class=\"iframe \(embedContent.type.rawValue)\">" + content + "</div>", baseURL: nil)
             }
         }
     }
@@ -164,7 +176,7 @@ class EmbedNode: ResizableNode {
         if let embedContent = builder.embeddableContent(for: sourceURL) {
             self.embedContent = embedContent
             if updateWebview {
-                self.loadEmbedContentInWebView(embedContent)
+                self.loadEmbedContentInWebView()
             }
         } else {
             isLoadingEmbed = true
@@ -182,7 +194,7 @@ class EmbedNode: ResizableNode {
                 } receiveValue: { [weak self] embedContent in
                     self?.embedContent = embedContent
                     if updateWebview {
-                        self?.loadEmbedContentInWebView(embedContent)
+                        self?.loadEmbedContentInWebView()
                     }
                 }.store(in: &embedCancellables)
         }
@@ -192,16 +204,46 @@ class EmbedNode: ResizableNode {
     /// in both Light and Dark color schemes.Css and Scripts are added via EmbedNode.ts
     /// - Parameter theme: The inital "dark" or "light" theme
     /// - Returns: html `<head>`tag as String
-    private
-    // swiftlint:disable:next function_body_length
-    func getHeadContent(theme: String) -> String {
+    private func getHeadContent(theme: String) -> String {
+        let cssStyle = getCSSStyle(width: embedContent?.width, height: embedContent?.height)
         return """
             <head>
                 <meta name="twitter:dnt" content="on" />
                 <meta name="twitter:widgets:theme" content="\(theme)" />
                 <meta name="twitter:widgets:chrome" content="transparent" />
+                \(cssStyle)
             </head>
         """
+    }
+
+    /// Returns html `<style>` tag with provided width and height values as css :root values.
+    /// - Parameters:
+    ///   - width:
+    ///   - height:
+    /// - Returns: html `<style>` tag as string or empty string if both width and height are nil
+    func getCSSStyle(width: CGFloat? = nil, height: CGFloat? = nil) -> String {
+        // If both width and height are nil return empty string
+        guard height != nil, width != nil else { return "" }
+        // build up width and height string
+        var widthVar = ""
+        if let width = width {
+            widthVar = "--width: \(width);"
+        }
+
+        var heightVar = ""
+        if let height = height {
+            heightVar = "--height: \(height);"
+        }
+
+        // return css style with css variables
+        return """
+                <style>
+                    :root {
+                        \(widthVar)
+                        \(heightVar)
+                    }
+                </style>
+            """
     }
 
     private func clearWebViewAndStopPlaying() {
@@ -234,18 +276,38 @@ class EmbedNode: ResizableNode {
 
     /// Updates the resizableElementContentSize with the EmbedContent width and height
     /// - Parameter content: EmbedContent of this EmbedNode
-    func updateResizableElementContentSize(with content: EmbedContent?) {
-        if let content = content {
+    func updateResizableElementContentSize() {
+        if let content = self.embedContent {
+            if let minWidth = embedContent?.minWidth {
+                self.minWidth = minWidth
+            }
+
+            if let minHeight = embedContent?.minHeight {
+                self.minHeight = minHeight
+            }
+
+            if let maxWidth = embedContent?.maxWidth {
+                self.maxWidth = maxWidth
+            }
+
+            if let maxHeight = embedContent?.maxHeight {
+                self.maxHeight = maxHeight
+            }
+
+            if let keepAspectRatio = embedContent?.keepAspectRatio {
+                self.keepAspectRatio = keepAspectRatio
+            }
+
+            if let responsiveStrategy = embedContent?.responsive {
+                self.responsiveStrategy = responsiveStrategy
+            }
+
             if let width = content.width {
                 resizableElementContentSize.width = width
             }
 
             if let height = content.height {
                 resizableElementContentSize.height = height
-            }
-
-            if let width = content.width, let height = content.height {
-                desiredHeightRatio = (1 / width) * height
             }
         } else {
             let height = availableWidth  * CGFloat(defaultSizeRatio)
@@ -319,14 +381,14 @@ extension EmbedNode: EmbedNodeWebPageDelegate {
     /// - Parameter size: Computed width and height from JS
     func embedNodeDelegateCallback(size: CGSize) {
         if embedContent?.height == nil {
-            resizableElementContentSize.height = size.height
-            self.invalidateLayout()
-        } else if let content = embedContent, content.width != nil, content.height != nil {
-            // with both height and width defined scale by ratio
-            let newRatio = (1 / size.width) * size.height
-            desiredHeightRatio = newRatio
-            self.invalidateLayout()
+            setVisibleHeight(size.height)
         }
+
+        if embedContent?.width == nil {
+            setVisibleWidth(size.width)
+        }
+
+        self.invalidateLayout()
     }
 }
 

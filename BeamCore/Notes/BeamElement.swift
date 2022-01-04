@@ -59,7 +59,7 @@ public enum ElementKind: Codable, Equatable {
     /// - URL: url to embed
     /// - SourceMetadata
     /// - displayRatio
-    case embed(URL, origin: SourceMetadata? = nil, displayRatio: Double?)
+    case embed(URL, origin: SourceMetadata? = nil, displayInfos: MediaDisplayInfos)
     /// Block Reference
     /// - UUID: Target Note UUID
     /// - UUID: Target Element UUID
@@ -179,28 +179,33 @@ public enum ElementKind: Codable, Equatable {
             }
 
         case "embed":
-            let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio)
+            var displayInfos = MediaDisplayInfos()
+            if let infos = try? container.decodeIfPresent(MediaDisplayInfos.self, forKey: .displayInfos) {
+                displayInfos = infos
+            } else if let sizeRatio = try? container.decodeIfPresent(Double.self, forKey: .sizeRatio) {
+                displayInfos = MediaDisplayInfos(height: nil, width: nil, displayRatio: sizeRatio)
+            }
 
             // Compatibility: We went through multiple strategies to decode the embed source.
             // For backwards compatibility all strategies are still supported
             // V3
             if let urlString = try? container.decodeIfPresent(String.self, forKey: .source),
                let url = URL(string: urlString) {
-                self = .embed(url, displayRatio: sizeRatio)
+                self = .embed(url, displayInfos: displayInfos)
                 return
             }
 
             // V2
             if let sourceMetadata = try? container.decodeIfPresent(SourceMetadata.self, forKey: .source),
                case .remote(let url) = sourceMetadata.origin {
-                self = .embed(url, displayRatio: sizeRatio)
+                self = .embed(url, displayInfos: displayInfos)
                 return
             }
 
             // V1
             if let urlString = try? container.decodeIfPresent(String.self, forKey: .source),
                 let url = URL(string: urlString) {
-                self = .embed(url, displayRatio: sizeRatio)
+                self = .embed(url, displayInfos: displayInfos)
                 return
             } else {
                 throw ElementKindError.failedToDecode(typeName, forKey: "source")
@@ -271,14 +276,14 @@ public enum ElementKind: Codable, Equatable {
             try container.encode(imageId, forKey: .source)
             try container.encode(sourceMetadata, forKey: .sourceMetadata)
             try container.encode(displayInfo, forKey: .displayInfos)
-        case let .embed(url, sourceMetadata, sizeRatio):
+        case let .embed(url, sourceMetadata, displayInfo):
             try container.encode("embed", forKey: .type)
             /// .source should describe a datasource, for additional source
             /// information use sourceMetadata instead
             /// TODO: Rename .source to be descriptive e.g. "url"
             try container.encode(url, forKey: .source)
             try container.encode(sourceMetadata, forKey: .sourceMetadata)
-            try container.encode(sizeRatio, forKey: .sizeRatio)
+            try container.encode(displayInfo, forKey: .displayInfos)
         case let .blockReference(noteId, elementId, sourceMetadata):
             try container.encode("blockReference", forKey: .type)
             /// TODO: Rename .title to be descriptive e.g. "noteId"

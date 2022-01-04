@@ -250,7 +250,7 @@ class BreadCrumb: Widget {
             switch element.kind {
             case let .image(_, origin: data, displayInfos: _):
                 return data?.title ?? "img"
-            case let .embed(url, origin: data, displayRatio: _):
+            case let .embed(url, origin: data, displayInfos: _):
                 return data?.title ?? url.hostname ?? "embed"
             default:
                 return "media"
