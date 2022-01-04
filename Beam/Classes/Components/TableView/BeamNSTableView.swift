@@ -61,6 +61,6 @@ class BeamNSTableView: NSTableView {
 
     @objc func didDoubleSelectRow() {
         guard let additionalDelegate = additionalDelegate else { return }
-        additionalDelegate.tableView(self, didDoubleTap: self.selectedRow)
+        additionalDelegate.tableView(self, didDoubleTap: self.clickedRow)
     }
 }
