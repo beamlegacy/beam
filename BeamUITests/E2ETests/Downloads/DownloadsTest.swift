@@ -69,8 +69,8 @@ class DownloadsTest: BaseTest {
         downloadsView.staticText(DownloadViewLocators.Buttons.clearButton.accessibilityIdentifier).click()
         
         testRailPrint("Then Downloads option is unavailable anymore")
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.notExists.rawValue, omniBoxView.button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier))
+        WaitHelper().waitFor(WaitHelper.PredicateFormat.notExists.rawValue, omniBoxView.button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier))
         XCTAssertFalse(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).exists)
-        XCTAssertFalse(omniBoxView.button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)
+        XCTAssertFalse(omniBoxView.button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)
     }
 }

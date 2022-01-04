@@ -55,8 +55,8 @@ class OmniboxViewTests: BaseTest {
         let webView = WebTestView()
         XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertEqual(omniboxView.getAutocompleteResults().count, 0)
-        XCTAssertTrue(omniboxView.button(OmniBoxLocators.Buttons.homeButton.accessibilityIdentifier).exists)
-        let pivotButton = omniboxView.button(OmniBoxLocators.Buttons.openCardButton.accessibilityIdentifier)
+        XCTAssertTrue(omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
+        let pivotButton = omniboxView.button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier)
         XCTAssertTrue(pivotButton.exists)
         XCTAssertEqual(pivotButton.title, "card")
 
@@ -67,7 +67,7 @@ class OmniboxViewTests: BaseTest {
         XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
 
         testRailPrint("Then pivot button shows the number of tabs")
-        let pivotWebButton = omniboxView.button(OmniBoxLocators.Buttons.openWebButton.accessibilityIdentifier)
+        let pivotWebButton = omniboxView.button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier)
         XCTAssertTrue(pivotWebButton.exists)
         XCTAssertEqual(pivotWebButton.title, "2")
 

@@ -16,7 +16,7 @@ class JournalTestView: BaseView {
     
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
-        let allCardsMenuButton = staticText(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier)
+        let allCardsMenuButton = button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier)
         WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, allCardsMenuButton)
         allCardsMenuButton.click()
         return AllCardsTestView()
