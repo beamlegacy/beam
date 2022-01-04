@@ -12,15 +12,20 @@ import Combine
 class CalendarGutterViewModel: ObservableObject {
     @Published var calendarManager: CalendarManager
     var noteId: UUID
+    var todaysCalendar: Bool
     var isConnected: Bool {
         calendarManager.connectedSources.count > 0
     }
+    @UserDefault(key: "showedNotConnectedViewKey", defaultValue: 0)
+    var showedNotConnectedView: Int
+
     @Published var meetings: [Meeting] = []
     var scope = Set<AnyCancellable>()
 
-    init(calendarManager: CalendarManager, noteId: UUID) {
+    init(calendarManager: CalendarManager, noteId: UUID, todaysCalendar: Bool) {
         self.calendarManager = calendarManager
         self.noteId = noteId
+        self.todaysCalendar = todaysCalendar
         self.meetings = calendarManager.meetingsForNote[noteId] ?? []
 
         calendarManager.$meetingsForNote.sink { meetingsForNote in
@@ -83,7 +88,7 @@ struct CalendarView: View {
                     isHoveringConnect = isHovering
                 }
             }
-        } else {
+        } else if viewModel.todaysCalendar && viewModel.showedNotConnectedView <= 3 && !viewModel.isConnected {
             isNotConnectedView
                 .padding(.leading, 14)
                 .onHover { isHoveringNotConnect = $0 }
@@ -101,24 +106,27 @@ struct CalendarView: View {
                     .renderingMode(.template)
                     .resizable()
                     .frame(width: 16, height: 16)
-                    .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                    .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                 Spacer()
             }.frame(width: 21)
             if isHoveringNotConnect {
                 VStack(alignment: .leading, spacing: 4.5) {
                     Text("Connect your Calendar")
                         .font(BeamFont.medium(size: 12).swiftUI)
-                        .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                        .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                     Text("Write a meeting note or join a video call")
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .multilineTextAlignment(.leading)
                         .font(BeamFont.regular(size: 11).swiftUI)
-                        .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                        .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
                     Spacer()
                 }
             }
         }.frame(width: 161, alignment: .leading)
+            .onAppear {
+                viewModel.showedNotConnectedView += 1
+            }
     }
 
     private func prompt(_ meeting: Meeting) {
