@@ -12,16 +12,23 @@ struct StoredPasswordCell: View {
     let username: String
     let onChange: (PasswordManagerMenuCellState) -> Void
 
+    @Environment(\.colorScheme) private var colorScheme
+
     var body: some View {
-        PasswordManagerMenuCell(height: 56, onChange: onChange) {
-            HStack {
-                FaviconView(url: URL(string: "https://\(host)"))
-                VStack(alignment: .leading) {
+        PasswordManagerMenuCell(type: .autofill, height: 56, onChange: onChange) {
+            HStack(spacing: 12) {
+                Image("autofill-password")
+                    .renderingMode(.template)
+                    .foregroundColor(BeamColor.WebFieldAutofill.icon.swiftUI)
+                    .blendMode(colorScheme == .light ? .multiply : .screen)
+                VStack(alignment: .leading, spacing: 3) {
                     Text(username)
-                        .offset(y: 10)
-                        .padding(.bottom, 4)
-                    Text("••••••••••••")
-                        .padding(.bottom, 10)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.WebFieldAutofill.primaryText.swiftUI)
+                    Text("From this website")
+                        .font(BeamFont.regular(size: 11).swiftUI)
+                        .foregroundColor(BeamColor.WebFieldAutofill.secondaryText.swiftUI)
+                        .blendMode(colorScheme == .light ? .multiply : .screen)
                 }
             }
         }

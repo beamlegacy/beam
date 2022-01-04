@@ -11,7 +11,7 @@ struct PasswordGeneratorSettingsCell: View {
     @ObservedObject var viewModel: PasswordGeneratorViewModel
 
     var body: some View {
-        PasswordManagerMenuCell(height: 56, onChange: handleStateChange) {
+        PasswordManagerMenuCell(type: .autofill, height: 56, onChange: handleStateChange) {
             HStack {
                 OptionSelector(value: $viewModel.generatorOption)
                 Spacer()

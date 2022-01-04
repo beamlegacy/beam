@@ -14,23 +14,21 @@ enum PasswordManagerMenuCellState {
     case clicked
 }
 
-extension PasswordManagerMenuCellState {
-    var backgroundColor: Color {
-        switch self {
-        case .idle, .clicked:
-            return Color.clear
-        case .hovering:
-            return BeamColor.Passwords.hoverBackground.swiftUI
-        case .down:
-            return BeamColor.Passwords.activeBackground.swiftUI
-        }
-    }
-}
-
 struct PasswordManagerMenuCell<Content: View>: View {
+    enum CellType {
+        case autofill
+        case action
+    }
+
+    let type: CellType
     let height: CGFloat
     let onChange: ((PasswordManagerMenuCellState) -> Void)?
     let content: () -> Content
+
+    private let highlightCornerRadius: CGFloat = 6
+    private let contentPadding: CGFloat = 6
+
+    @Environment(\.colorScheme) private var colorScheme
 
     @State private var highlightState: PasswordManagerMenuCellState = .idle
     @State private var hoveringState = false
@@ -42,6 +40,7 @@ struct PasswordManagerMenuCell<Content: View>: View {
             Spacer()
                 .layoutPriority(-1)
         }
+        .padding(.horizontal, type == .autofill ? 0 : contentPadding)
         .onHover(perform: {
             hoveringState = $0
             updateHighlightState()
@@ -50,17 +49,56 @@ struct PasswordManagerMenuCell<Content: View>: View {
             mouseDownState = $0
             updateHighlightState()
         }
-        .padding()
-        .background(highlightState.backgroundColor
-                        .frame(height: height, alignment: .center))
+        .padding(10) // minimum... define in content view instead
+        .background(cellBackground)
         .simultaneousGesture(
             TapGesture().onEnded {
                 onChange?(.clicked)
             }
-        ).frame(height: height, alignment: .center)
+        )
+        .frame(height: height, alignment: .center)
+        .padding(.horizontal, type == .autofill ? contentPadding : 0)
     }
 
-    func updateHighlightState() {
+    private var cellBackground: some View {
+        let color: Color
+        let cornerRadius: CGFloat
+        switch type {
+        case .autofill:
+            color = autofillBackgroundColor
+            cornerRadius = highlightCornerRadius
+        case .action:
+            color = actionBackgroundColor
+            cornerRadius = 0
+        }
+        return color
+            .blendMode(colorScheme == .light ? .multiply : .screen)
+            .cornerRadius(cornerRadius)
+    }
+
+    private var autofillBackgroundColor: Color {
+        switch highlightState {
+        case .idle, .clicked:
+            return .clear
+        case .hovering:
+            return BeamColor.WebFieldAutofill.autofillCellBackgroundHovered.swiftUI
+        case .down:
+            return BeamColor.WebFieldAutofill.autofillCellBackgroundClicked.swiftUI
+        }
+    }
+
+    private var actionBackgroundColor: Color {
+        switch highlightState {
+        case .idle, .clicked:
+            return .clear
+        case .hovering:
+            return BeamColor.WebFieldAutofill.actionCellBackgroundHovered.swiftUI
+        case .down:
+            return BeamColor.WebFieldAutofill.actionCellBackgroundClicked.swiftUI
+        }
+    }
+
+    private func updateHighlightState() {
         let newHighlightState: PasswordManagerMenuCellState
         if mouseDownState {
             newHighlightState = .down
@@ -73,19 +111,5 @@ struct PasswordManagerMenuCell<Content: View>: View {
             highlightState = newHighlightState
             onChange?(highlightState)
         }
-    }
-}
-
-struct PasswordManagerMenuCell_Previews: PreviewProvider {
-    static var previews: some View {
-        PasswordManagerMenuCell(height: 35, onChange: { _ in }, content: {
-            OtherPasswordsCell()
-        })
-        PasswordManagerMenuCell(height: 35, onChange: { _ in }, content: {
-            PasswordsViewMoreCell(hostName: "www.github.com", onChange: { _ in })
-        })
-        PasswordManagerMenuCell(height: 56, onChange: { _ in }, content: {
-            StoredPasswordCell(host: "beamapp.co", username: "Beam", onChange: { _ in })
-        })
     }
 }
