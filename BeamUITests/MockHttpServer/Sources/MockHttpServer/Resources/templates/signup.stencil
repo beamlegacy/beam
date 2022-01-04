@@ -1,0 +1,18 @@
+<html>
+
+<head>
+<title>Sign Up</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Create an account</h1>
+<form action="/view" method="POST">
+<div>Username: <input type="text" autocomplete="username" name="username" id="username"></input></div>
+<div>Password: <input type="password" autocomplete="new-password" name="password" id="password"></input></div>
+<div>Confirm Password: <input type="password" autocomplete="new-password" name="password-confirm" id="password-confirm"></input></div>
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>

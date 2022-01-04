@@ -44,6 +44,10 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case populatePasswordsDB = "Populate Passwords Database"
     case clearPasswordsDB = "Clear Passwords Database"
 
+    // Mock HTTP Server
+    case startMockHttpServer = "Start Mock HTTP Server"
+    case stopMockHttpServer = "Stop Mock HTTP Server"
+
     // Omnibox setup
     case omniboxFillHistory = "Fill History with Results"
 
@@ -67,6 +71,8 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .resizeWindow
         case .populatePasswordsDB, .clearPasswordsDB:
             return .passwords
+        case .startMockHttpServer, .stopMockHttpServer:
+            return .mockHttpServer
         case .omniboxFillHistory:
             return .omniboxSetup
         default:
@@ -88,5 +94,6 @@ public enum UITestMenuGroup: String, CaseIterable {
     case notes = "Notes"
     case omniboxSetup = "Omnibox Setup"
     case passwords = "Passwords"
+    case mockHttpServer = "Mock HTTP Server"
     case resizeWindow = "Resize Window"
 }

@@ -2,6 +2,7 @@ import Foundation
 import Fakery
 import BeamCore
 import AutoUpdate
+import MockHttpServer
 
 import SwiftUI // Remove once we remove .testMeetingModal menu
 
@@ -41,6 +42,8 @@ class BeamUITestsMenuGenerator {
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()
         case .clearPasswordsDB: clearPasswordsDatabase()
+        case .startMockHttpServer: startMockHttpServer()
+        case .stopMockHttpServer: stopMockHttpServer()
         default: break
         }
     }
@@ -258,5 +261,13 @@ class BeamUITestsMenuGenerator {
 
     private func clearPasswordsDatabase() {
         PasswordManager.shared.deleteAll(includedRemote: false)
+    }
+
+    private func startMockHttpServer() {
+        MockHttpServer.start(port: 8080)
+    }
+
+    private func stopMockHttpServer() {
+        MockHttpServer.stop()
     }
 }

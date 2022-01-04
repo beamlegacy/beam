@@ -431,6 +431,7 @@
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
 		877888D9269C743F00D703F0 /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888D1269C743F00D703F0 /* CSVParser.swift */; };
 		877888DB269C977C00D703F0 /* PasswordImporterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888DA269C977C00D703F0 /* PasswordImporterTest.swift */; };
+		878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */ = {isa = PBXBuildFile; productRef = 878417BD276FB1FB005EB5B0 /* MockHttpServer */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
 		87C539A12616295300D51877 /* ViewMorePasswordsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539A02616295300D51877 /* ViewMorePasswordsCell.swift */; };
@@ -1619,6 +1620,7 @@
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
 		877888D1269C743F00D703F0 /* CSVParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		877888DA269C977C00D703F0 /* PasswordImporterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporterTest.swift; sourceTree = "<group>"; };
+		878417BC276FB164005EB5B0 /* MockHttpServer */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MockHttpServer; path = BeamUITests/MockHttpServer; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
 		87C539A02616295300D51877 /* ViewMorePasswordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewMorePasswordsCell.swift; sourceTree = "<group>"; };
@@ -2344,6 +2346,7 @@
 				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
+				878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */,
 				33B2FF2D274C3F8500518F12 /* Lottie in Frameworks */,
 				964548A02523B3550064D062 /* CloudKit.framework in Frameworks */,
 				873528C127354295005E7CBC /* INI in Frameworks */,
@@ -3820,6 +3823,14 @@
 			path = PasswordManagerMenu;
 			sourceTree = "<group>";
 		};
+		87B00A78276F97A6003BE016 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				878417BC276FB164005EB5B0 /* MockHttpServer */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
 		8A0DFA9E27551E3D0044515B /* Web */ = {
 			isa = PBXGroup;
 			children = (
@@ -4200,6 +4211,7 @@
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
+				87B00A78276F97A6003BE016 /* Packages */,
 				B5EEBFE82757D98B00DA9782 /* BeamTestPlans */,
 				965A78272514F147009980D4 /* Beam */,
 				965A78402514F149009980D4 /* BeamTests */,
@@ -5373,6 +5385,7 @@
 				873528C027354295005E7CBC /* INI */,
 				33B2FF2C274C3F8500518F12 /* Lottie */,
 				8A0DFAD4275664090044515B /* FaviconFinder */,
+				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -8176,6 +8189,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 873528BF27354295005E7CBC /* XCRemoteSwiftPackageReference "ini" */;
 			productName = INI;
+		};
+		878417BD276FB1FB005EB5B0 /* MockHttpServer */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = MockHttpServer;
 		};
 		8A0DFAD4275664090044515B /* FaviconFinder */ = {
 			isa = XCSwiftPackageProductDependency;
