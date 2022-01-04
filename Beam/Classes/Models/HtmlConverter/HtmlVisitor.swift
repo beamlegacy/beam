@@ -228,7 +228,7 @@ class HtmlVisitor {
            let link = links.first,
            let url = URL(string: link),
            EmbedContentBuilder().canBuildEmbed(for: url) {
-            element.kind = .embed(url, origin: SourceMetadata(origin: .remote(self.urlBase)), displayRatio: nil)
+            element.kind = .embed(url, origin: SourceMetadata(origin: .remote(self.urlBase)), displayInfos: MediaDisplayInfos())
         }
     }
 }

@@ -16,6 +16,7 @@ class ResizableNode: ElementNode {
             if !canBeResized {
                 removeLayer("handle")
             } else {
+                setupContentSizing()
                 setupResizeHandleLayer()
             }
             invalidate()
@@ -23,42 +24,86 @@ class ResizableNode: ElementNode {
     }
 
     ///The main element's real size (image or video)
-    var resizableElementContentSize = CGSize.zero
+    var resizableElementContentSize = CGSize.zero {
+        didSet {
+            let widthRatio = (desiredWidthRatio ?? 1.0)
+            let initWidith = availableWidth * widthRatio
+            setVisibleWidth(initWidith)
+
+            if !keepAspectRatio {
+                let initScaleFactor = (1.0 / availableWidth) * initWidith
+                let initHeight = resizableElementContentSize.height * initScaleFactor
+                visibleSize.height = initHeight.clamp(minHeight, maxHeight)
+            }
+        }
+    }
+
+    /// Scaling ratio of Node
+    @OptionalClamped<Double>(0.001...1.0) var desiredWidthRatio = 1.0
 
     var isResizing = false
-
-    @OptionalClamped<Double>(0.0...1.0) var desiredWidthRatio = nil
-    @OptionalClamped<Double>(0.0...1.0) var desiredHeightRatio = nil
 
     var initialDragImageSize: CGSize?
     var initialDragImageGlobalPosition: NSPoint?
 
-    var visibleSize: CGSize {
-        let computedWidth: CGFloat
-        if let ratio = desiredWidthRatio {
-            computedWidth = computeWidth(with: contentsWidth * CGFloat(ratio))
-        } else {
-            computedWidth = computeWidth(with: contentsWidth)
+    var fallBackWidth: CGFloat {
+        let fullWidth = BeamTextEdit.textNodeWidth(for: editor?.frame.size ?? .zero) - childInset
+        let embedWidth = (fullWidth - contentsLead)
+        return embedWidth
+    }
+
+    var minWidth: CGFloat = 48
+    var minHeight: CGFloat = 48
+    var maxWidth: CGFloat?
+    var maxHeight: CGFloat = 700
+    var keepAspectRatio: Bool = true
+    var responsiveStrategy: ResponsiveType = .horizontal
+    var visibleSize: CGSize = .zero
+
+    func setVisibleSize(width: CGFloat? = nil, height: CGFloat? = nil) {
+        switch responsiveStrategy {
+        case .horizontal:
+            setVisibleWidth(width)
+        case .vertical:
+            setVisibleHeight(height)
+        case .both:
+            setVisibleWidth(width)
+            setVisibleHeight(height)
         }
-        let width = computedWidth.isNaN ? 0 : computedWidth
-        var computedHeight = (width / resizableElementContentSize.width) * resizableElementContentSize.height
-        // swiftlint:disable:next empty_enum_arguments
-        if case .embed(_, _, _) = element.kind {
-            if let ratio = desiredHeightRatio {
-                // scale embed by ratio when both height and width are defined
-                computedHeight = width * CGFloat(ratio)
-            } else {
-                // fix height in place when no height is defined
-                computedHeight = resizableElementContentSize.height
-            }
+    }
+
+    func setVisibleWidth(_ width: CGFloat? = nil) {
+        guard let width = width else { return }
+        let clampedWidth = width.clamp(minWidth, maxWidth ?? fallBackWidth)
+        visibleSize.width = clampedWidth
+
+        if keepAspectRatio {
+            let originalAspectRatio = resizableElementContentSize.aspectRatio
+            let computedHeight = clampedWidth * originalAspectRatio
+            visibleSize.height = computedHeight.clamp(minHeight, maxHeight)
         }
-        let height = computedHeight.isNaN ? 0 : computedHeight
-        return NSSize(width: width, height: height)
+    }
+
+    func setVisibleHeight(_ height: CGFloat? = nil) {
+        guard let height = height else { return }
+        visibleSize.height = height.clamp(minHeight, maxHeight)
+
+        if keepAspectRatio {
+            let originalAspectRatio = resizableElementContentSize.width / resizableElementContentSize.height
+            let computedWidth = height * originalAspectRatio
+            visibleSize.width = computedWidth.clamp(minWidth, maxWidth ?? fallBackWidth)
+        }
     }
 
     override var hover: Bool {
         didSet {
-            if let handle = layers["handle"],
+            if let handle = layers["handle_horizontal"],
+               let handleLayer = handle.layer as? CAShapeLayer {
+                guard !isResizing else { return }
+                handleLayer.opacity = hover ? 1.0 : 0.0
+            }
+
+            if let handle = layers["handle_vertical"],
                let handleLayer = handle.layer as? CAShapeLayer {
                 guard !isResizing else { return }
                 handleLayer.opacity = hover ? 1.0 : 0.0
@@ -66,31 +111,121 @@ class ResizableNode: ElementNode {
             invalidate()
         }
     }
-
+    //swiftlint:disable:next function_body_length
     override func updateLayout() {
         super.updateLayout()
 
         let position = CGPoint(x: contentsLead, y: contentsTop)
         let bounds = CGRect(origin: .zero, size: visibleSize)
 
-        if let handle = layers["handle"], let handleLayer = handle.layer as? CAShapeLayer {
-            let layerPosition = CGPoint(x: position.x + bounds.size.width + 6, y: position.y + bounds.size.height / 2)
+            switch responsiveStrategy {
+            case .horizontal:
+                if let handle = layers["handle_horizontal"], let handleLayer = handle.layer as? CAShapeLayer {
+                    let layerPosition = CGPoint(x: position.x + bounds.size.width + 6, y: position.y + bounds.size.height / 2)
 
-            let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 12, height: 44))
+                    let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 12, height: 44))
 
-            let handlePosition = CGPoint(x: layerPosition.x + 5, y: layerPosition.y)
-            let handlePath = NSBezierPath()
-            handlePath.move(to: handlePosition)
-            handlePath.line(to: NSPoint(x: handlePosition.x, y: handlePosition.y + 44))
+                    let handlePosition = CGPoint(x: layerPosition.x + 5, y: layerPosition.y)
+                    let handlePath = NSBezierPath()
+                    handlePath.move(to: handlePosition)
+                    handlePath.line(to: NSPoint(x: handlePosition.x, y: handlePosition.y + 44))
 
-            handleLayer.path = handlePath.cgPath
-            handleLayer.position = layerPosition
-            handleLayer.bounds = handleBounds
-        }
+                    handleLayer.path = handlePath.cgPath
+                    handleLayer.position = layerPosition
+                    handleLayer.bounds = handleBounds
+                }
+            case .vertical:
+                if let handle = layers["handle_vertical"], let handleLayer = handle.layer as? CAShapeLayer {
+                    let layerPosition = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height)
+
+                    let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 44, height: 12))
+
+                    let handlePosition = CGPoint(x: layerPosition.x, y: layerPosition.y + 5)
+                    let handlePath = NSBezierPath()
+                    handlePath.move(to: handlePosition)
+                    handlePath.line(to: NSPoint(x: handlePosition.x + 44, y: handlePosition.y))
+
+                    handleLayer.path = handlePath.cgPath
+                    handleLayer.position = layerPosition
+                    handleLayer.bounds = handleBounds
+                }
+            case .both:
+                if let handle = layers["handle_horizontal"], let handleLayer = handle.layer as? CAShapeLayer {
+                    let layerPosition = CGPoint(x: position.x + bounds.size.width + 6, y: position.y + bounds.size.height / 2)
+
+                    let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 12, height: 44))
+
+                    let handlePosition = CGPoint(x: layerPosition.x + 5, y: layerPosition.y)
+                    let handlePath = NSBezierPath()
+                    handlePath.move(to: handlePosition)
+                    handlePath.line(to: NSPoint(x: handlePosition.x, y: handlePosition.y + 44))
+
+                    handleLayer.path = handlePath.cgPath
+                    handleLayer.position = layerPosition
+                    handleLayer.bounds = handleBounds
+                }
+
+                if let handle = layers["handle_vertical"], let handleLayer = handle.layer as? CAShapeLayer {
+                    let layerPosition = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height + 6)
+
+                    let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 44, height: 12))
+
+                    let handlePosition = CGPoint(x: layerPosition.x, y: layerPosition.y + 5)
+                    let handlePath = NSBezierPath()
+                    handlePath.move(to: handlePosition)
+                    handlePath.line(to: NSPoint(x: handlePosition.x + 44, y: handlePosition.y))
+
+                    handleLayer.path = handlePath.cgPath
+                    handleLayer.position = layerPosition
+                    handleLayer.bounds = handleBounds
+                }
+            }
     }
 
     func setupResizeHandleLayer() {
+        switch responsiveStrategy {
+        case .horizontal:
+            setupHorizontalResizeHandleLayer()
+        case .vertical:
+            setupVerticalResizeHandleLayer()
+        case .both:
+            setupHorizontalResizeHandleLayer()
+            setupVerticalResizeHandleLayer()
+        }
+    }
 
+    func setupContentSizing() {
+        switch element.kind {
+        case .image(_, _, let displayInfo):
+            if let ratio = displayInfo.displayRatio {
+                self.desiredWidthRatio = ratio
+            }
+
+            if let width = displayInfo.width {
+                self.resizableElementContentSize.width = CGFloat(width)
+            }
+
+            if let height = displayInfo.height {
+                self.resizableElementContentSize.height = CGFloat(height)
+            }
+        case .embed(_, _, let displayInfo):
+            if let ratio = displayInfo.displayRatio {
+                self.desiredWidthRatio = ratio
+            }
+
+            if let width = displayInfo.width {
+                self.resizableElementContentSize.width = CGFloat(width)
+            }
+
+            if let height = displayInfo.height {
+                self.resizableElementContentSize.height = CGFloat(height)
+            }
+        default:
+            break
+        }
+    }
+
+    func setupHorizontalResizeHandleLayer() {
         guard canBeResized else {
             return
         }
@@ -103,10 +238,8 @@ class ResizableNode: ElementNode {
         handleLayer.zPosition = 2
         handleLayer.opacity = 0.0
 
-        let handle = Layer(name: "handle", layer: handleLayer) { [weak self] info in
+        let handle = Layer(name: "handle_horizontal", layer: handleLayer) { [weak self] info in
             if info.event.clickCount == 2 {
-                guard let elementSize = self?.resizableElementContentSize else { return false }
-                self?.desiredWidthRatio = self?.visibleSize.width == self?.smallestWidth(for: elementSize) ? 1.0 : 0.0
                 self?.invalidateLayout(animated: true)
                 return true
             }
@@ -129,6 +262,7 @@ class ResizableNode: ElementNode {
             let xTranslation = info.globalPosition.x - initialPosition.x
             let desiredWidth = initialSize.width + xTranslation
             self?.desiredWidthRatio = Double(desiredWidth / contentsWidth)
+            self?.setVisibleSize(width: desiredWidth)
             self?.invalidateLayout(animated: false)
             return true
         } hovered: { hovered in
@@ -139,34 +273,56 @@ class ResizableNode: ElementNode {
         addLayer(handle, origin: .zero)
     }
 
+    func setupVerticalResizeHandleLayer() {
+        guard canBeResized else {
+            return
+        }
+        let handleLayer = CAShapeLayer()
+        handleLayer.lineWidth = 2
+        handleLayer.lineCap = .round
+        handleLayer.strokeColor = BeamColor.AlphaGray.cgColor
+        handleLayer.bounds = CGRect.zero
+        handleLayer.position = .zero
+        handleLayer.zPosition = 2
+        handleLayer.opacity = 0.0
+
+        let handle = Layer(name: "handle_vertical", layer: handleLayer) { [weak self] info in
+            if info.event.clickCount == 2 {
+                self?.invalidateLayout(animated: true)
+                return true
+            }
+            self?.initialDragImageGlobalPosition = info.globalPosition
+            self?.initialDragImageSize = self?.visibleSize
+            return true
+        } up: { [weak self] _ in
+            self?.initialDragImageGlobalPosition = nil
+            self?.initialDragImageSize = nil
+            self?.isResizing = false
+            self?.updateElementRatio()
+            return true
+        } dragged: { [weak self] info in
+            guard let initialPosition = self?.initialDragImageGlobalPosition else { return false }
+            guard let initialSize = self?.initialDragImageSize else { return false }
+
+            self?.isResizing = true
+            let yTranslation = info.globalPosition.y - initialPosition.y
+            let desiredHeight = initialSize.height + yTranslation
+            self?.setVisibleSize(height: desiredHeight)
+            self?.invalidateLayout(animated: false)
+            return true
+        } hovered: { hovered in
+            handleLayer.strokeColor = hovered ? BeamColor.LightStoneGray.cgColor : BeamColor.AlphaGray.cgColor
+            handleLayer.lineWidth = hovered ? 4.0 : 2.0
+        }
+        handle.cursor = NSCursor.resizeUpDown
+        addLayer(handle, origin: .zero)
+    }
+
     private func invalidateLayout(animated: Bool) {
         if !animated {
             self.editor?.shouldDisableAnimationAtNextLayout = true
         }
         self.invalidateLayout()
-    }
-
-    private func smallestWidth(for contentSize: CGSize) -> CGFloat {
-        let smallestPossibleHeight: CGFloat = 48.0
-        let width = contentSize.width / contentSize.height * smallestPossibleHeight
-        return width
-    }
-
-    private func computeWidth(with desiredWidth: CGFloat?) -> CGFloat {
-
-        var computedWidth: CGFloat
-
-        if let width = desiredWidth {
-            let maxWidth = min(width, resizableElementContentSize.width)
-            let minWidth = smallestWidth(for: resizableElementContentSize)
-
-            computedWidth = maxWidth > contentsWidth ? contentsWidth : maxWidth
-            computedWidth = width < minWidth ? minWidth : computedWidth
-        } else {
-            computedWidth = resizableElementContentSize.width > contentsWidth ? contentsWidth : resizableElementContentSize.width
-        }
-
-        return computedWidth
     }
 
     private func updateElementRatio() {
@@ -182,7 +338,15 @@ class ResizableNode: ElementNode {
                 )
             )
         case .embed(let url, let sourceMetadata, _):
-            element.kind = .embed(url, origin: sourceMetadata, displayRatio: desiredWidthRatio)
+            element.kind = .embed(
+                url,
+                origin: sourceMetadata,
+                displayInfos: MediaDisplayInfos(
+                    height: Int(resizableElementContentSize.height),
+                    width: Int(resizableElementContentSize.width),
+                    displayRatio: desiredWidthRatio
+                )
+            )
         default:
             break
         }

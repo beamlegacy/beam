@@ -272,7 +272,7 @@ class HtmlNoteAdapterTests: XCTestCase {
             XCTAssertEqual(results.count, 1)
             if let embedElement = results.first,
                let url = URL(string: "https://www.youtube.com/embed/dQw4w9WgXcQ") {
-                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)), displayRatio: nil))
+                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)), displayInfos: MediaDisplayInfos()))
             }
             expectation.fulfill()
         })
@@ -287,7 +287,7 @@ class HtmlNoteAdapterTests: XCTestCase {
             XCTAssertEqual(results.count, 1)
             if let embedElement = results.first,
                let url = URL(string: "https://www.youtube.com/embed/dQw4w9WgXcQ") {
-                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)), displayRatio: nil))
+                XCTAssertEqual(embedElement.kind, .embed(url, origin: SourceMetadata(origin: .remote(URL(string: "https://www.youtube.com/watch?v=dQw4w9WgXcQ")!)), displayInfos: MediaDisplayInfos()))
             }
             expectation.fulfill()
         })
