@@ -1,0 +1,20 @@
+<html>
+
+<head>
+<title>Mock Form Server</title>
+</head>
+
+<body>
+<h1>Mock Form Server</h1>
+<table>
+{% for param in params %}
+<tr>
+<td>{{ param.key }}</td>
+<td>{{ param.value }}</td>
+</tr>
+{% endfor %}
+</table>
+<a href="/">Back</a>
+</body>
+
+</html>

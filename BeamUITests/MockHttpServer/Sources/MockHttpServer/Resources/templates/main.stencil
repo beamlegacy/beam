@@ -1,0 +1,28 @@
+<html>
+
+<head>
+<title>Mock Form Server</title>
+</head>
+
+<body>
+<h1>Mock Form Server</h1>
+
+<h2>Forms:</h2>
+<ul>
+{% for form in params.forms %}
+<li>
+<a href="http://{{ form }}.form.lvh.me:{{ params.port }}">http://{{ form }}.form.lvh.me:{{ params.port }}</a>
+</li>
+{% endfor %}
+</ul>
+
+<h2>Styles:</h2>
+<ul>
+{% for style in params.styles %}
+<li>?style={{ style }}</li>
+{% endfor %}
+</ul>
+
+</body>
+
+</html>
