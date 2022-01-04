@@ -33,6 +33,7 @@ class TextEditorContextViewTests: BaseTest {
         testRailPrint("Then the note text is remained: \(textToType)")
         XCTAssertEqual(textToType + " ", cardView.getCardNoteValueByIndex(0))
         shortcutsHelper.shortcutActionInvoke(action: .showAllCards)
+        allCardsView.waitForAllCardsViewToLoad()
         //Substring to be used
         allCardsView.openCardByName(cardTitle: "new card")
         

@@ -9,10 +9,6 @@ import Foundation
 
 enum JournalViewLocators {
     
-    enum Buttons: String, CaseIterable, UIElement {
-        case allCardsMenuButton = "All Cards"
-    }
-    
     enum ScrollViews: String, CaseIterable, UIElement {
         case journalScrollView = "journalView"
     }

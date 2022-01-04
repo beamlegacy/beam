@@ -109,7 +109,7 @@ class BaseView {
         populateOmniboxWith(searchText)
         if typeReturnButton {
             typeKeyboardKey(.enter)
-            _ = button(OmniBoxLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+            _ = button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
         }
         return WebTestView()
     }
@@ -120,7 +120,7 @@ class BaseView {
         
     @discardableResult
     func populateOmniboxWith(_ text: String) -> OmniBoxTestView {
-        let omniSearchField = searchField(OmniBoxLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+        let omniSearchField = searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
         if !omniSearchField.exists {
             shortcutsHelper.shortcutActionInvoke(action: .openLocation)
         }
@@ -196,7 +196,8 @@ class BaseView {
     @discardableResult
     func openCardFromRecentsList(cardTitleToOpen: String) -> CardTestView {
         let cardView = CardTestView()
-        cardView.staticText(cardTitleToOpen).clickOnExistence()
+        let cardSwitcherButton = cardView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.cardSwitcher.accessibilityIdentifier)' AND value = '\(cardTitleToOpen)'")).firstMatch
+        cardSwitcherButton.clickOnExistence()
         XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardTitleToOpen), "\(cardTitleToOpen) card is failed to load")
         return cardView
     }

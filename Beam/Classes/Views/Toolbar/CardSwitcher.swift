@@ -43,6 +43,7 @@ struct CardSwitcher: View {
             }
             .fixedSize(horizontal: true, vertical: false)
             .layoutPriority(2)
+            .accessibilityIdentifier("card-switcher-journal")
             .onHover { h in
                 if h {
                     hoveredIndex = 0
@@ -54,9 +55,11 @@ struct CardSwitcher: View {
                 ForEach(Array(recentsManager.recentNotes.enumerated()), id: \.1.id) { index, note in
                     let isToday = state.mode == .today
                     let isActive = !isToday && note.id == currentNote?.id
-                    ToolbarCapsuleButton(text: titleForNote(note), isSelected: isActive) {
+                    let text = titleForNote(note)
+                    ToolbarCapsuleButton(text: text, isSelected: isActive) {
                         state.navigateToNote(note)
                     }
+                    .accessibilityIdentifier("card-switcher")
                     .onHover { h in
                         if h {
                             hoveredIndex = index + 1
@@ -71,6 +74,7 @@ struct CardSwitcher: View {
             }
             .fixedSize(horizontal: true, vertical: false)
             .layoutPriority(2)
+            .accessibilityIdentifier("card-switcher-all-cards")
             .onHover { h in
                 if h {
                     hoveredIndex = recentsManager.recentNotes.count + 1
