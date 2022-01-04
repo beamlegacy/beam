@@ -121,6 +121,9 @@ struct ToolbarCapsuleButton<Content: View>: View {
                 action?()
             })
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityValue(text)
     }
 }
 

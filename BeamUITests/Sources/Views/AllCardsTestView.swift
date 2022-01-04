@@ -9,7 +9,13 @@ import Foundation
 import XCTest
 
 class AllCardsTestView: BaseView {
-    
+
+    @discardableResult
+    func waitForAllCardsViewToLoad() -> Bool {
+        return app.tables.firstMatch.staticTexts.matching(identifier: AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).firstMatch
+            .waitForExistence(timeout: implicitWaitTimeout)
+    }
+
     @discardableResult
     func deleteAllCards() -> AllCardsTestView {
         triggerAllCardsMenuOptionAction(.deleteNotes)
