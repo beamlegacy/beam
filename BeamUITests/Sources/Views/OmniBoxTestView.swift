@@ -16,7 +16,7 @@ class OmniBoxTestView: BaseView {
     }
 
     func getOmniBoxSearchField() -> XCUIElement {
-        return searchField(OmniBoxLocators.SearchFields.omniSearchField.accessibilityIdentifier)
+        return searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
     }
     
     func getAutocompleteResults() -> XCUIElementQuery {
@@ -28,28 +28,28 @@ class OmniBoxTestView: BaseView {
     }
     
     func clickBackButton() {
-        button(OmniBoxLocators.Buttons.backButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.backButton.accessibilityIdentifier).click()
     }
     
     func clickForwardButton() {
-        button(OmniBoxLocators.Buttons.forwardButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.forwardButton.accessibilityIdentifier).click()
     }
     
     @discardableResult
     func navigateToJournalViaHomeButton() -> JournalTestView {
-        button(OmniBoxLocators.Buttons.homeButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
         return JournalTestView()
     }
     
     @discardableResult
     func navigateToCardViaPivotButton() -> CardTestView {
-        button(OmniBoxLocators.Buttons.openCardButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
         return CardTestView()
     }
     
     @discardableResult
     func navigateToWebView()  -> WebTestView {
-        button(OmniBoxLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
         return WebTestView()
     }
     
@@ -59,7 +59,7 @@ class OmniBoxTestView: BaseView {
     
     @discardableResult
     func openDownloadsView() -> DownloadTestView {
-        let downloadViewButton = button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier)
+        let downloadViewButton = button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier)
         _ = downloadViewButton.waitForExistence(timeout: minimumWaitTimeout)
         WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, downloadViewButton, minimumWaitTimeout)
         downloadViewButton.tapInTheMiddle()

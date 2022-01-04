@@ -22,7 +22,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
-        button(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier).click()
         return AllCardsTestView()
     }
     
@@ -55,7 +55,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openDestinationCard() -> CardTestView {
-        button(OmniBoxLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
+        button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
         let cardView = CardTestView()
         cardView.waitForCardViewToLoad()
         return cardView
