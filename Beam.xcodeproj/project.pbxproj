@@ -494,6 +494,7 @@
 		8AD2632326F485190074D673 /* HtmlVisitorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632226F485190074D673 /* HtmlVisitorTests.swift */; };
 		8AD2632A26F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */; };
 		8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */; };
+		8AD38F992768AC8F003D6B48 /* CGSize+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD38F982768AC8F003D6B48 /* CGSize+Beam.swift */; };
 		8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */; };
 		8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05EF2729657D004C3EC9 /* WebPositions_prod.js */; };
 		8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05F42729657D004C3EC9 /* WebPositions.js */; };
@@ -1711,6 +1712,7 @@
 		8AD2635526F4A0480074D673 /* UITests-Playground.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-Playground.html"; sourceTree = "<group>"; };
 		8AD2635626F4A0480074D673 /* beam-logo-test.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "beam-logo-test.png"; sourceTree = "<group>"; };
 		8AD2635726F4A0480074D673 /* UITests-1.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = "UITests-1.html"; sourceTree = "<group>"; };
+		8AD38F982768AC8F003D6B48 /* CGSize+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGSize+Beam.swift"; sourceTree = "<group>"; };
 		8AD9DEBD26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootOffsetWithAnimation.swift; sourceTree = "<group>"; };
 		8ADD05EE2729657D004C3EC9 /* WebPositions.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebPositions.ts; sourceTree = "<group>"; };
 		8ADD05EF2729657D004C3EC9 /* WebPositions_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WebPositions_prod.js; sourceTree = "<group>"; };
@@ -2907,6 +2909,7 @@
 				525C5471261F619D00378FAA /* Binding+onChange.swift */,
 				5284895326C5650A0064878B /* Error+NotFound.swift */,
 				418171A42581107C00317ED8 /* Range+Beam.swift */,
+				8AD38F982768AC8F003D6B48 /* CGSize+Beam.swift */,
 				418171992581107C00317ED8 /* OSLog+Beam.swift */,
 				418171982581107C00317ED8 /* NSImage+Beam.swift */,
 				4181719E2581107C00317ED8 /* NSView+Beam.swift */,
@@ -6476,6 +6479,7 @@
 				8AD2631526F3A8730074D673 /* Throttle.swift in Sources */,
 				87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */,
 				032562AE26051D3B006513E4 /* RBFilterGroup.m in Sources */,
+				8AD38F992768AC8F003D6B48 /* CGSize+Beam.swift in Sources */,
 				5298EB0126272D230033862C /* NSPersistentStoreCoordinator+Extension.swift in Sources */,
 				52B9A370264546570063AEEF /* MinimalistWebViewWindow.swift in Sources */,
 				8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */,

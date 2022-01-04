@@ -60,7 +60,7 @@ export class EmbedNode<UI extends EmbedNodeUI> {
       height: 0
     }
     // Get all child elements
-    const els = this.win.document.querySelectorAll("body > *")
+    const els = this.win.document.querySelectorAll("body > .iframe > *")
 
     // Loop through each of them and get the accumilated Width and Height
     Array.from(els).forEach((el) => {

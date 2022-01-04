@@ -30,7 +30,7 @@ struct EmbedContentBuilder {
         strategies = [EmbedContentLocalStrategy(), EmbedContentAPIStrategy()]
     }
 
-    private func cachedEmbed(for url: URL) -> EmbedContent? {
+    func cachedEmbed(for url: URL) -> EmbedContent? {
         guard useCache else { return nil }
         return EmbedContentCache.shared.cachedEmbedContent(for: url.absoluteString)
     }

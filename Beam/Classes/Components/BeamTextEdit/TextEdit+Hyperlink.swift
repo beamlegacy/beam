@@ -232,7 +232,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         guard let link = node.linkAt(index: range.upperBound) else { return }
         let embedElement = BeamElement()
         embedElement.text = BeamText(text: "")
-        embedElement.kind = .embed(link, displayRatio: nil)
+        embedElement.kind = .embed(link, displayInfos: MediaDisplayInfos())
         let parent = node.parent as? ElementNode ?? node
         let shouldDeleteEntireNode = node.text.wholeRange == range && node.children.count == 0
         let cmdManager = rootNode?.note?.cmdManager

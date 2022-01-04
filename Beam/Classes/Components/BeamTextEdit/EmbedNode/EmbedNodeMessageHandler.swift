@@ -40,7 +40,7 @@ class EmbedNodeMessageHandler: BeamMessageHandler<EmbedNodeMessages> {
                 // Called when the embednode content size updates. Will be called multiple times and possibly when the webview resizes.
                 // The call is debounced on the trailing edge from JS side as it's called multiple times while loading the page.
                 // Possibly some padding needs to be accounted for.
-                embedPage.delegate?.embedNodeDelegateCallback(size: CGSize(width: width + 10, height: height + 5))
+                embedPage.delegate?.embedNodeDelegateCallback(size: CGSize(width: width, height: height))
             }
         }
     }
