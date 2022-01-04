@@ -1,0 +1,17 @@
+<html>
+
+<head>
+<title>Sign In</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Sign in or create an account</h1>
+<form action="/view" method="POST">
+<div>Username: <input type="text" name="username" id="username"></input></div>
+<div>Password: <input type="password" name="password" id="password"></input></div>
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>
