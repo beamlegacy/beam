@@ -20,6 +20,8 @@ final class PasswordListViewModel: ObservableObject {
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
 
+    var doubleTappedRow: Int?
+
     var searchString = "" {
         didSet {
             guard searchString != oldValue else {
