@@ -27,6 +27,12 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
         var type: String?
         var width: CGFloat?
         var height: CGFloat?
+        var minWidth: CGFloat?
+        var maxWidth: CGFloat?
+        var minHeight: CGFloat?
+        var maxHeight: CGFloat?
+        var keepAspectRatio: Bool?
+        var responsive: String?
 
         // swiftlint:disable:next nesting
         enum CodingKeys: CodingKey {
@@ -38,6 +44,12 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
             case item
             case width
             case height
+            case minWidth
+            case maxWidth
+            case minHeight
+            case maxHeight
+            case keepAspectRatio
+            case responsive
         }
 
         init(from decoder: Decoder) throws {
@@ -55,6 +67,12 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
                 type = cachedItem.type
                 width = cachedItem.width
                 height = cachedItem.height
+                minWidth = cachedItem.minWidth
+                maxWidth = cachedItem.maxWidth
+                minHeight = cachedItem.minHeight
+                maxHeight = cachedItem.maxHeight
+                keepAspectRatio = cachedItem.keepAspectRatio
+                responsive = cachedItem.responsive
             } else {
                 url = try values.decode(String.self, forKey: .url)
                 title = try values.decode(String.self, forKey: .title)
@@ -63,6 +81,12 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
                 type = try? values.decode(String.self, forKey: .type)
                 width = try? values.decode(CGFloat.self, forKey: .width)
                 height = try? values.decode(CGFloat.self, forKey: .height)
+                minWidth = try? values.decode(CGFloat.self, forKey: .minWidth)
+                maxWidth = try? values.decode(CGFloat.self, forKey: .maxWidth)
+                minHeight = try? values.decode(CGFloat.self, forKey: .minHeight)
+                maxHeight = try? values.decode(CGFloat.self, forKey: .maxHeight)
+                keepAspectRatio = try? values.decode(Bool.self, forKey: .keepAspectRatio)
+                responsive = try? values.decode(String.self, forKey: .responsive)
             }
         }
 
@@ -75,6 +99,12 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
             try? container.encode(type, forKey: .type)
             try? container.encode(width, forKey: .width)
             try? container.encode(height, forKey: .height)
+            try? container.encode(minWidth, forKey: .minWidth)
+            try? container.encode(maxWidth, forKey: .maxWidth)
+            try? container.encode(minHeight, forKey: .minHeight)
+            try? container.encode(maxHeight, forKey: .maxHeight)
+            try? container.encode(keepAspectRatio, forKey: .keepAspectRatio)
+            try? container.encode(responsive, forKey: .responsive)
         }
     }
     /// *Potential* embed, doesn't mean it's 100% sure we will be able to build a embed
@@ -120,8 +150,10 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
     private func embedAPIResultToContent(_ apiResult: EmbedAPIResult, sourceURL: URL) -> EmbedContent? {
         let title = apiResult.title
 
-        guard let rawType = apiResult.type,
-              let typeEnum = EmbedContent.MediaType(rawValue: rawType),
+        guard let mediaRawType = apiResult.type,
+              let typeEnum = EmbedContent.MediaType(rawValue: mediaRawType),
+              let responsiveRawType = apiResult.responsive,
+              let responsive = ResponsiveType(rawValue: responsiveRawType),
               let url = URL(string: apiResult.url) else {
                   if let url = URL(string: apiResult.url) {
                       // if we have no matching MediaType, for example when `apiResult.type` is `text/html`, default to MediaType.url
@@ -131,7 +163,23 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
               }
 
         let thumbnail = getThumbnailURL(url: apiResult.thumbnail) ?? url
-        let embed = EmbedContent(title: title, type: typeEnum, sourceURL: sourceURL, embedURL: url, html: apiResult.html, thumbnail: thumbnail, width: apiResult.width, height: apiResult.height)
+        let aspectRatio = apiResult.keepAspectRatio ?? true
+        let embed = EmbedContent(
+            title: title,
+            type: typeEnum,
+            sourceURL: sourceURL,
+            embedURL: url,
+            html: apiResult.html,
+            thumbnail: thumbnail,
+            width: apiResult.width,
+            height: apiResult.height,
+            minWidth: apiResult.minWidth,
+            maxWidth: apiResult.maxWidth,
+            minHeight: apiResult.minHeight,
+            maxHeight: apiResult.maxHeight,
+            keepAspectRatio: aspectRatio,
+            responsive: responsive
+        )
         return embed
     }
 }

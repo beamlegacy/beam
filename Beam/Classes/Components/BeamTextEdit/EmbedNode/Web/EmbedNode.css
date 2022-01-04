@@ -17,6 +17,27 @@ html {
   background-color: var(--Beam-Embed-Background);
 }
 
-html, body, .twitter-tweet {
+.twitter-tweet-rendered {
   margin: 0 !important;
+}
+
+html, body, .twitter-tweet, .twitter-tweet-rendered, iframe {
+  margin: 0 !important;
+}
+
+/* only if aspect ratio is fixed */
+.iframe.video {
+  padding-top: calc(var(--height) / var(--width) * 100%);
+  position: relative;
+  width: 100%;
+}
+
+.iframe iframe {
+  background: transparent;
+  display: block;
+  height: 100%;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 100%;
 }

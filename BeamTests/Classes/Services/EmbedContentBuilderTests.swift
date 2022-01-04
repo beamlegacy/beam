@@ -33,7 +33,7 @@ class EmbedContentBuilderTests: XCTestCase {
         strategy.canEmbed = false
         XCTAssertFalse(builder.canBuildEmbed(for: url))
 
-        let expectedContent = EmbedContent(title: "embed.com", type: .url, sourceURL: url, embedURL: url, html: "some content")
+        let expectedContent = EmbedContent(title: "embed.com", type: .link, sourceURL: url, embedURL: url, html: "some content")
         strategy.returnContent = expectedContent
 
         let result = builder.embeddableContent(for: url)
@@ -49,7 +49,7 @@ class EmbedContentBuilderTests: XCTestCase {
         let strategy = MockStrategy()
         builder.strategies = [strategy]
 
-        let expectedContent = EmbedContent(title: "embed.com", type: .url, sourceURL: url, embedURL: url, html: "some content")
+        let expectedContent = EmbedContent(title: "embed.com", type: .link, sourceURL: url, embedURL: url, html: "some content")
         strategy.returnContent = expectedContent
 
         XCTAssertEqual(strategy.numberOfCallsToBuild, 0)

@@ -59,6 +59,12 @@ class ImageNode: ResizableNode {
         case .image(let id, _, let displayInfos):
             uid = id
             desiredWidthRatio = displayInfos.displayRatio
+            if let width = displayInfos.width {
+                maxWidth = CGFloat(width)
+            }
+            if let height = displayInfos.height {
+                maxHeight = CGFloat(height)
+            }
         default:
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
             return
