@@ -420,12 +420,12 @@
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
-		8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */; };
-		87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87685675277371A7002A8069 /* MockPasswordsDB.swift */; };
 		8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768565C27709210002A8069 /* BrowserPasswordImporter.swift */; };
 		8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566327709413002A8069 /* ChromiumPasswordImporter.swift */; };
 		876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */; };
 		876856692770E239002A8069 /* ChromiumLoginData.db in Resources */ = {isa = PBXBuildFile; fileRef = 876856682770E239002A8069 /* ChromiumLoginData.db */; };
+		8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */; };
+		87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87685675277371A7002A8069 /* MockPasswordsDB.swift */; };
 		8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */; };
 		8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */; };
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
@@ -960,7 +960,7 @@
 		B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */; };
 		B5CDFF3A274EC83800742CC9 /* OnboardingUsernameTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */; };
 		B5CDFF3D274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */; };
-		B5DC1F8126B1975900A4C94B /* OmniBoxLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8026B1975900A4C94B /* OmniBoxLocators.swift */; };
+		B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8026B1975900A4C94B /* ToolbarLocators.swift */; };
 		B5DC1F8A26B19C8700A4C94B /* OmniBoxTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1F8926B19C8700A4C94B /* OmniBoxTestView.swift */; };
 		B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FB426B928CA00A4C94B /* DateHelper.swift */; };
 		B5DC1FBE26B92A8800A4C94B /* CardViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DC1FBD26B92A8800A4C94B /* CardViewTests.swift */; };
@@ -1608,12 +1608,12 @@
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
-		8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModelTests.swift; sourceTree = "<group>"; };
-		87685675277371A7002A8069 /* MockPasswordsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPasswordsDB.swift; sourceTree = "<group>"; };
 		8768565C27709210002A8069 /* BrowserPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPasswordImporter.swift; sourceTree = "<group>"; };
 		8768566327709413002A8069 /* ChromiumPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordImporter.swift; sourceTree = "<group>"; };
 		876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordDecryptionTests.swift; sourceTree = "<group>"; };
 		876856682770E239002A8069 /* ChromiumLoginData.db */ = {isa = PBXFileReference; lastKnownFileType = file; path = ChromiumLoginData.db; sourceTree = "<group>"; };
+		8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModelTests.swift; sourceTree = "<group>"; };
+		87685675277371A7002A8069 /* MockPasswordsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPasswordsDB.swift; sourceTree = "<group>"; };
 		8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserHistoryImport.swift"; sourceTree = "<group>"; };
 		8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredPasswordCell.swift; sourceTree = "<group>"; };
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
@@ -2137,7 +2137,7 @@
 		B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLandingViewLocators.swift; sourceTree = "<group>"; };
 		B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingUsernameTestView.swift; sourceTree = "<group>"; };
 		B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingUsernameViewLocators.swift; sourceTree = "<group>"; };
-		B5DC1F8026B1975900A4C94B /* OmniBoxLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBoxLocators.swift; sourceTree = "<group>"; };
+		B5DC1F8026B1975900A4C94B /* ToolbarLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarLocators.swift; sourceTree = "<group>"; };
 		B5DC1F8926B19C8700A4C94B /* OmniBoxTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBoxTestView.swift; sourceTree = "<group>"; };
 		B5DC1FB426B928CA00A4C94B /* DateHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateHelper.swift; sourceTree = "<group>"; };
 		B5DC1FBD26B92A8800A4C94B /* CardViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewTests.swift; sourceTree = "<group>"; };
@@ -4913,7 +4913,7 @@
 				B57A9B3A26AB08A5002C954D /* AllCardsViewLocators.swift */,
 				B5E8010B26AEA1F100C8BD61 /* JournalViewLocators.swift */,
 				B5E8010F26AEA64E00C8BD61 /* WebViewLocators.swift */,
-				B5DC1F8026B1975900A4C94B /* OmniBoxLocators.swift */,
+				B5DC1F8026B1975900A4C94B /* ToolbarLocators.swift */,
 				B5DC1FBF26B9607900A4C94B /* DownloadViewLocators.swift */,
 				B551F3C226BD100300B72D27 /* WebsiteAuthPopupViewLocators.swift */,
 				B551F3C626BD10C300B72D27 /* AppWebsiteViewLocators.swift */,
@@ -6840,7 +6840,7 @@
 				B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* CardViewTests.swift in Sources */,
 				B551F3C726BD10C300B72D27 /* AppWebsiteViewLocators.swift in Sources */,
-				B5DC1F8126B1975900A4C94B /* OmniBoxLocators.swift in Sources */,
+				B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */,
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				B5FAE2EE270DDD9F00EAC8A3 /* AlertViewLocators.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
