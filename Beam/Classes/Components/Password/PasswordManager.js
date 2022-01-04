@@ -75,7 +75,9 @@ window.beam.__ID__PMng = {
 
     password_elementDidGainFocus: function(event) {
         if (event.target !== null && this.beam_isTextField(event.target)) {
-            window.webkit.messageHandlers.password_textInputFocusIn.postMessage(this.beam_getOrCreateBeamId(event.target))
+            let beamId = this.beam_getOrCreateBeamId(event.target)
+            let text = event.target.value
+            window.webkit.messageHandlers.password_textInputFocusIn.postMessage({id: beamId, text: text})
         }
     },
 
