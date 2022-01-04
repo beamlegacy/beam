@@ -16,7 +16,7 @@ class CardCreationTests: BaseTest {
         let journalView = launchApp()
         
         testRailPrint("Given I get number of cards in All Cards view")
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue,    journalView.staticText(JournalViewLocators.Buttons.allCardsMenuButton.accessibilityIdentifier))
+        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier))
         let numberOfCardsBeforeAdding = journalView.openAllCardsMenu().getNumberOfCards()
         
         testRailPrint("When I create a card from All Cards view")
@@ -45,7 +45,7 @@ class CardCreationTests: BaseTest {
         
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
-        XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(cardView.textField(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
     }
     
     func testCreateCardUsingCardReference() {
@@ -69,7 +69,7 @@ class CardCreationTests: BaseTest {
         
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         XCTAssertTrue(cardView.waitForCardViewToLoad())
-        XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertTrue(cardView.textField(cardNameToBeCreated).waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("Then Journal has no mentions for created card")
         ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
@@ -89,6 +89,6 @@ class CardCreationTests: BaseTest {
         testRailPrint("Then card with \(cardNameToBeCreated) is opened")
         let cardView = CardTestView()
         XCTAssertTrue(cardView.waitForCardViewToLoad())
-        XCTAssertTrue(cardView.staticText(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(cardView.textField(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
     }
 }

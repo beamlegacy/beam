@@ -18,8 +18,8 @@ class OmniboxDestinationTests: BaseTest {
     let partialSearchKeyword = "One"
     let expectedNumberOfAutocompletedCards = 1
     let omniboxView = OmniBoxTestView()
-    let destinationCardTitle = OmniBoxTestView().staticText(OmniBoxLocators.Labels.cardTitleLabel.accessibilityIdentifier)
-    let destinationCardSearchField = OmniBoxTestView().searchField(OmniBoxLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier)
+    let destinationCardTitle = OmniBoxTestView().staticText(ToolbarLocators.Labels.cardTitleLabel.accessibilityIdentifier)
+    let destinationCardSearchField = OmniBoxTestView().searchField(ToolbarLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier)
     let helper = OmniBoxUITestsHelper(OmniBoxTestView().app)
     
     func createDestinationNote(_ journalView: JournalTestView, _ cardNameToBeCreated: String) {
@@ -36,7 +36,7 @@ class OmniboxDestinationTests: BaseTest {
         createDestinationNote(journalView, cardNameToBeCreated)
         
         testRailPrint("When I search in omnibox and click on destination card")
-        omniboxView.button(OmniBoxLocators.Buttons.homeButton.accessibilityIdentifier).click()
+        omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
         omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
         _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
         destinationCardTitle.click()
