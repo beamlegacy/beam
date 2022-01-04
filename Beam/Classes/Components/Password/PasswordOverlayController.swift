@@ -31,6 +31,7 @@ class PasswordOverlayController: WebPageHolder {
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
     private var autocompleteContext: WebAutocompleteContext
+    private var fieldWithIcon: String?
     private var currentlyFocusedElementId: String?
     private var previouslyFocusedElementId: String?
     private var lastFocusOutTimestamp: Date = .distantPast
@@ -82,7 +83,7 @@ class PasswordOverlayController: WebPageHolder {
             page.executeJS("beam_getFocusedField()", objectName: JSObjectName).then { result in
                 if let focusedId = result as? String {
                     DispatchQueue.main.async {
-                        self.inputFieldDidGainFocus(focusedId)
+                        self.inputFieldDidGainFocus(focusedId, contents: nil)
                     }
                 }
             }
@@ -96,7 +97,7 @@ class PasswordOverlayController: WebPageHolder {
         page.executeJS(focusScript, objectName: JSObjectName)
     }
 
-    func inputFieldDidGainFocus(_ elementId: String) {
+    func inputFieldDidGainFocus(_ elementId: String, contents: String?) {
         Logger.shared.logDebug("Text field \(elementId) gained focus.", category: .passwordManagerInternal)
         guard elementId != currentlyFocusedElementId else {
             return
@@ -114,6 +115,57 @@ class PasswordOverlayController: WebPageHolder {
             disabledForSubmit = false
             return
         }
+        if let contents = contents, contents.isEmpty, !autocompleteGroup.isAmbiguous {
+            showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup)
+        } else {
+            dismissPasswordManagerMenu()
+        }
+        showIcon(onField: elementId)
+    }
+
+    func inputFieldDidLoseFocus(_ elementId: String) {
+        Logger.shared.logDebug("Text field \(elementId) lost focus.", category: .passwordManagerInternal)
+        requestValuesFromTextFields { dict in
+            self.valuesOnFocusOut = dict
+        }
+        dismissPasswordManagerMenu()
+        lastFocusOutTimestamp = BeamDate.now
+        previouslyFocusedElementId = elementId
+        currentlyFocusedElementId = nil
+    }
+
+    private func showIcon(onField elementId: String) {
+        guard fieldWithIcon != elementId else { return }
+        if fieldWithIcon != nil {
+            clearIcon()
+        }
+        requestWebFieldFrame(elementId: elementId) { rect in
+            if let rect = rect {
+                DispatchQueue.main.async {
+                    let location = CGRect(x: rect.origin.x + rect.width - 24 - 16, y: rect.origin.y - rect.height / 2 - 24 - 12, width: 24, height: 24)
+                    guard let webView = (self.page as? BrowserTab)?.webView,
+                          let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true)
+                    else { return }
+                    buttonWindow.isMovableByWindowBackground = false
+                    let buttonView = WebFieldAutofillButton { [weak self] in
+                        if let self = self, self.passwordMenuWindow == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
+                            self.showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup)
+                        }
+                    }
+                    buttonWindow.setView(with: buttonView, at: self.convertRect(location, relativeTo: webView).origin, fromTopLeft: true)
+                    self.fieldWithIcon = elementId
+                }
+            }
+        }
+    }
+
+    private func clearIcon() {
+        guard fieldWithIcon != nil else { return }
+        CustomPopoverPresenter.shared.dismissPopovers(animated: false)
+        fieldWithIcon = nil
+    }
+
+    private func showPasswordManagerMenu(for elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup) {
         currentlyFocusedElementId = elementId
         if autocompleteGroup.isAmbiguous, let fieldWithFocus = autocompleteGroup.field(id: elementId) {
             self.showPasswordManagerMenu(for: elementId, options: fieldWithFocus.role.isPassword ? .ambiguousPassword : .login)
@@ -127,17 +179,6 @@ class PasswordOverlayController: WebPageHolder {
                 break
             }
         }
-    }
-
-    func inputFieldDidLoseFocus(_ elementId: String) {
-        Logger.shared.logDebug("Text field \(elementId) lost focus.", category: .passwordManagerInternal)
-        requestValuesFromTextFields { dict in
-            self.valuesOnFocusOut = dict
-        }
-        dismissPasswordManagerMenu()
-        lastFocusOutTimestamp = BeamDate.now
-        previouslyFocusedElementId = elementId
-        currentlyFocusedElementId = nil
     }
 
     private func showPasswordManagerMenu(for elementId: String, options: PasswordManagerMenuOptions) {
@@ -161,9 +202,9 @@ class PasswordOverlayController: WebPageHolder {
             dismissPasswordManagerMenu()
         }
         let viewModel = passwordManagerViewModel(for: host, options: options)
-        let passwordManagerMenu = PasswordManagerMenu(width: location.size.width, viewModel: viewModel)
+        let passwordManagerMenu = PasswordManagerMenu(viewModel: viewModel)
         guard let webView = (page as? BrowserTab)?.webView,
-              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true, storedInPresenter: true)
+              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, storedInPresenter: true)
         else { return }
         var updatedRect = convertRect(location, relativeTo: webView)
         updatedRect.origin.y += location.height
@@ -190,6 +231,7 @@ class PasswordOverlayController: WebPageHolder {
         CustomPopoverPresenter.shared.dismissPopovers()
         passwordMenuWindow = nil
         currentPasswordManagerViewModel = nil
+        clearIcon() // required: the child window containing the icon is not visible anymore, but fieldWithIcon has not been reset
     }
 
     private func convertRect(_ rect: CGRect, relativeTo webView: WKWebView) -> CGRect {
@@ -205,6 +247,7 @@ class PasswordOverlayController: WebPageHolder {
             if self.passwordMenuWindow != nil {
                 self.dismissPasswordManagerMenu()
             }
+            self.clearIcon()
             Logger.shared.logDebug("scrolled to \(x) \(y) \(width) \(height)", category: .passwordManagerInternal)
         }
     }
@@ -220,7 +263,6 @@ class PasswordOverlayController: WebPageHolder {
                     position.y -= menuWindow.frame.size.height + self.page.webView.topContentInset
                     self.passwordMenuPosition = position
                     menuWindow.setOrigin(self.passwordMenuPosition)
-                    // TODO: update width
                 }
             }
         }

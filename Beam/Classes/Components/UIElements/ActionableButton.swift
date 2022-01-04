@@ -64,6 +64,7 @@ struct ActionableButton: View {
     let defaultState: ActionableButtonState
     let variant: ActionableButtonVariant
     var minWidth: CGFloat = 0
+    var height: CGFloat = 30
     var action: (() -> Void)?
 
     @State private var isHovered = false
@@ -117,7 +118,7 @@ struct ActionableButton: View {
                     .padding(.trailing, hPadding)
             }
         }
-        .frame(height: 30)
+        .frame(height: height)
         .background(customBackground)
         .background(backgroundColor)
         .cornerRadius(6.0)
