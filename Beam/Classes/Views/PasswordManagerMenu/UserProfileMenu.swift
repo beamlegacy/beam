@@ -77,7 +77,7 @@ struct EditUserInfoCell: View {
     var onChange: ((PasswordManagerMenuCellState) -> Void)?
 
     var body: some View {
-        PasswordManagerMenuCell(height: 35, onChange: onChange) {
+        PasswordManagerMenuCell(type: .action, height: 35, onChange: onChange) {
             VStack(alignment: .leading) {
                 Separator(horizontal: true)
                 Text("Edit Adresses...")
