@@ -51,7 +51,6 @@ struct Passwords: View {
     @State private var selectedEntries = IndexSet()
     @State private var passwordSelected: Bool = false
     @State private var multipleSelection: Bool = false
-    @State private var doubleTapRow: Int = 0
 
     @State private var showingAddPasswordSheet: Bool = false
     @State private var showingEditPasswordSheet: Bool = false
@@ -85,7 +84,7 @@ struct Passwords: View {
                     PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
                         passwordsViewModel.updateSelection(idx)
                     } onDoubleTap: { row in
-                        doubleTapRow = row
+                        passwordsViewModel.doubleTappedRow = row
                         showingEditPasswordSheetonDoubleTap = true
                     }
                     .frame(width: 682, height: 240, alignment: .center)
@@ -98,9 +97,10 @@ struct Passwords: View {
                         Text("").hidden()
                     }.hidden()
                     .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
-                        if let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTapRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTapRow].username) {
-                            PasswordEditView(hostname: passwordsViewModel.filteredPasswordEntries[doubleTapRow].minimizedHost,
-                                             username: passwordsViewModel.filteredPasswordEntries[doubleTapRow].username,
+                        if let doubleTappedRow = passwordsViewModel.doubleTappedRow,
+                           let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username) {
+                            PasswordEditView(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost,
+                                             username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username,
                                              password: password, editType: .update) {
                                 passwordsViewModel.refresh()
                             }.frame(width: 400, height: 179, alignment: .center)
