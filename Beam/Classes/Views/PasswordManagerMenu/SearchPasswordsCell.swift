@@ -15,7 +15,7 @@ struct SearchPasswordsCell: View {
     var onChange: ((PasswordManagerMenuCellState) -> Void)?
 
     var body: some View {
-        PasswordManagerMenuCell(height: 56, onChange: onChange) {
+        PasswordManagerMenuCell(type: .action, height: 56, onChange: onChange) {
             HStack {
                 Icon(name: "field-search", color: BeamColor.Generic.placeholder.swiftUI)
                 BeamTextField(text: $searchString,
