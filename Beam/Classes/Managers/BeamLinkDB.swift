@@ -66,6 +66,18 @@ extension Link: BeamObjectProtocol {
     }
 }
 
+extension Link: Equatable {
+    static public func == (lhs: Link, rhs: Link) -> Bool {
+        lhs.id == rhs.id
+    }
+}
+
+extension Link: Hashable {
+    public func hash(into hasher: inout Hasher) {
+       hasher.combine(self)
+    }
+}
+
 enum BeamLinkDBManagerError: Error, Equatable {
     case localLinkNotFound
 }

@@ -132,6 +132,8 @@ extension DocumentManager {
         Self.networkTasksSemaphore.wait()
         defer { Self.networkTasksSemaphore.signal() }
 
+        guard !Self.networkTasks.keys.isEmpty else { return }
+
         Logger.shared.logDebug("Cancel all \(Self.networkTasks.keys.count) previous network tasks",
                                category: .documentNetwork)
 
