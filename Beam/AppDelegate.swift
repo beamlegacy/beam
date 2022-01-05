@@ -143,7 +143,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Database
-    func syncDataWithBeamObject(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func syncDataWithBeamObject(force: Bool = false, _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
@@ -161,15 +161,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         do {
             Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
-            try beamObjectManager.syncAllFromAPI { result in
+            try beamObjectManager.syncAllFromAPI(force: force) { result in
+                Logger.shared.logInfo("syncAllFromAPI called",
+                                      category: .beamObjectNetwork,
+                                      localTimer: localTimer)
+
                 self.deleteEmptyDatabases { _ in
                     switch result {
                     case .success:
-                        Logger.shared.logInfo("syncAllFromAPI called", category: .beamObjectNetwork, localTimer: localTimer)
                         DatabaseManager.changeDefaultDatabaseIfNeeded()
                         completionHandler?(.success(true))
                     case .failure(let error):
-                        Logger.shared.logInfo("syncAllFromAPI failed", category: .beamObjectNetwork, localTimer: localTimer)
+                        Logger.shared.logInfo("syncAllFromAPI failed",
+                                              category: .beamObjectNetwork,
+                                              localTimer: localTimer)
                         completionHandler?(.failure(error))
                     }
                 }
@@ -195,7 +200,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                        localTimer: localTimer)
                 completionHandler?(.failure(error))
             case .success(let success):
-                Logger.shared.logDebug("Deleted Empty databases, success: \(success)", category: .database)
+                Logger.shared.logDebug("Deleted Empty databases, success: \(success)",
+                                       category: .database,
+                                       localTimer: localTimer)
                 do {
                     if Configuration.shouldDeleteEmptyDatabase {
                         try self.databaseManager.deleteCurrentDatabaseIfEmpty()
@@ -203,14 +210,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 } catch {
                     Logger.shared.logError(error.localizedDescription, category: .database)
                 }
-                if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id, window?.state.isShowingOnboarding != true {
-                    Logger.shared.logWarning("Default database changed, showing alert",
-                                             category: .database,
-                                             localTimer: localTimer)
-                    DatabaseManager.showRestartAlert(previousDefaultDatabase,
-                                                     DatabaseManager.defaultDatabase)
+
+                DispatchQueue.main.async {
+                    if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id, self.window?.state.isShowingOnboarding != true {
+                        Logger.shared.logWarning("Default database changed, showing alert",
+                                                 category: .database,
+                                                 localTimer: localTimer)
+                        DatabaseManager.showRestartAlert(previousDefaultDatabase,
+                                                         DatabaseManager.defaultDatabase)
+                    }
+                    completionHandler?(.success(success))
                 }
-                completionHandler?(.success(success))
             }
         }
     }

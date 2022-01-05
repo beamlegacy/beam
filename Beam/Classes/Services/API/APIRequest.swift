@@ -38,7 +38,8 @@ class APIRequest: NSObject {
     static var callsCount = 0
     static var uploadedBytes: Int64 = 0
     static var downloadedBytes: Int64 = 0
-    let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .userInitiated)
+    // Using `userInteractive` for instant
+    let backgroundQueue = DispatchQueue(label: "APIRequest backgroundQueue", qos: .userInteractive)
     var dataTask: Foundation.URLSessionDataTask?
     var cancelRequest: Bool = false
 

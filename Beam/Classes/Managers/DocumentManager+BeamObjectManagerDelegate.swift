@@ -47,7 +47,10 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
             for var document in documents {
                 let fakeDate = Date.distantPast
-                guard var localDocument: Document = try? fetchOrCreate(document.id, title: document.title, deletedAt: fakeDate) else {
+                guard var localDocument: Document = try? fetchOrCreate(document.id,
+                                                                       title: document.title,
+                                                                       deletedAt: fakeDate,
+                                                                       shouldSaveContext: false) else {
                     Logger.shared.logError("Received object \(document.titleAndId), but could't create it localy, skip",
                                            category: .documentNetwork)
                     continue
@@ -71,8 +74,11 @@ extension DocumentManager: BeamObjectManagerDelegate {
                         }
 
                         localDocument.update(document)
-                        Logger.shared.logDebug("Received object \(document.titleAndId) update",
-                                               category: .documentNetwork)
+                        // Don't want to pollute logs with tons of lines
+                        if documents.count < 5 {
+                            Logger.shared.logDebug("Received object \(document.titleAndId) update",
+                                                   category: .documentNetwork)
+                        }
 
                         localDocument.version += 1
 

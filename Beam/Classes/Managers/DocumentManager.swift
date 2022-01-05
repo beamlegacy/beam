@@ -828,7 +828,7 @@ extension DocumentManager {
         }
     }
 
-    func create(id: UUID, title: String? = nil, deletedAt: Date?) throws -> Document {
+    func create(id: UUID, title: String? = nil, deletedAt: Date?, shouldSaveContext: Bool = true) throws -> Document {
         checkThread()
         let document = Document(context: context)
         document.id = id
@@ -841,7 +841,9 @@ extension DocumentManager {
         }
 
         try checkValidations(document)
-        try saveContext()
+        if shouldSaveContext {
+            try saveContext()
+        }
 
         return document
     }
@@ -930,9 +932,9 @@ extension DocumentManager {
         return try fetchFirst(filters: filters)
     }
 
-    func fetchOrCreate(_ id: UUID, title: String, deletedAt: Date?) throws -> Document {
+    func fetchOrCreate(_ id: UUID, title: String, deletedAt: Date?, shouldSaveContext: Bool = true) throws -> Document {
         checkThread()
-        let document = try ((try? fetchWithId(id, includeDeleted: false)) ?? (try create(id: id, title: title, deletedAt: deletedAt)))
+        let document = try ((try? fetchWithId(id, includeDeleted: false)) ?? (try create(id: id, title: title, deletedAt: deletedAt, shouldSaveContext: shouldSaveContext)))
         return document
     }
 
