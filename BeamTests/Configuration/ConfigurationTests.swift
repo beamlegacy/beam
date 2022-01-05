@@ -9,7 +9,7 @@ import Combine
 class ConfigurationTests: QuickSpec {
     override func spec() {
         it("has test env") {
-            expect(Configuration.env).to(equal("test"))
+            expect(Configuration.env.rawValue).to(equal("test"))
         }
 
         it("doesn't have sparkle") {

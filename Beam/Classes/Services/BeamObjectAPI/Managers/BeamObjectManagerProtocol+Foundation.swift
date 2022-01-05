@@ -47,7 +47,7 @@ extension BeamObjectManagerDelegate {
             return nil
         }
 
-        if Thread.isMainThread, Configuration.env != "test" {
+        if Thread.isMainThread, Configuration.env != .test {
             Logger.shared.logError("Please don't use saveOnBeamObjectsAPI in the main thread. Create your own DispatchQueue instead.",
                                    category: .beamObjectNetwork)
             assert(false)
@@ -303,7 +303,7 @@ extension BeamObjectManagerDelegate {
             throw APIRequestError.notAuthenticated
         }
 
-        if Thread.isMainThread, Configuration.env != "test" {
+        if Thread.isMainThread, Configuration.env != .test {
             Logger.shared.logError("Please don't use saveOnBeamObjectAPI in the main thread. Create your own DispatchQueue instead.",
                                    category: .beamObjectNetwork)
             assert(false)
