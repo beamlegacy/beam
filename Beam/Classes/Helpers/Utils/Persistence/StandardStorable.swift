@@ -3,7 +3,7 @@ import Foundation
 @propertyWrapper
 struct StandardStorable<T> {
     let key: String
-    private let store = UserDefaults(suiteName: Configuration.env) ?? UserDefaults.standard
+    private let store = UserDefaults(suiteName: Configuration.env.rawValue) ?? UserDefaults.standard
 
     init(_ key: String) {
         self.key = key
@@ -41,7 +41,7 @@ struct StandardStorable<T> {
     }
 
     static func clear() {
-        let store = UserDefaults(suiteName: Configuration.env) ?? UserDefaults.standard
+        let store = UserDefaults(suiteName: Configuration.env.rawValue) ?? UserDefaults.standard
         store.dictionaryRepresentation().keys.forEach { key in
             store.removeObject(forKey: key)
         }

@@ -15,7 +15,7 @@ struct AdvancedPreferencesView: View {
     @State private var apiHostname: String = Configuration.apiHostname
     @State private var publicHostname: String = Configuration.publicHostname
     @State private var bundleIdentifier: String = Configuration.bundleIdentifier
-    @State private var env: String = Configuration.env
+    @State private var env: String = Configuration.env.rawValue
     @State private var autoUpdate: Bool = Configuration.autoUpdate
     @State private var updateFeedURL = Configuration.updateFeedURL
     @State private var sentryEnabled = Configuration.sentryEnabled

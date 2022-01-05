@@ -70,7 +70,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
-        if Configuration.env == "$(ENV)" || Configuration.sentryKey == "$(SENTRY_KEY)", !isSwiftUIPreview {
+        if Configuration.env.rawValue == "$(ENV)" || Configuration.sentryKey == "$(SENTRY_KEY)", !isSwiftUIPreview {
             fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
         }
 
@@ -109,7 +109,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         prepareMenuForTestEnv()
 
         // In test mode, we want to start fresh without auth tokens as they may have expired
-        if Configuration.env == "test" {
+        if Configuration.env == .test {
             AccountManager.logout()
         }
         #endif
@@ -144,7 +144,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Database
     func syncDataWithBeamObject(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        guard Configuration.env != "test",
+        guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
             completionHandler?(.success(false))

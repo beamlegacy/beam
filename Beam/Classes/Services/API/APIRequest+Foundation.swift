@@ -28,7 +28,7 @@ extension APIRequest {
         }
         #endif
 
-        if Configuration.env == "test", !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable) {
+        if Configuration.env == .test, !BeamURLSession.shouldNotBeVinyled, !(BeamURLSession.shared is Turntable) {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 
