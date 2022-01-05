@@ -1,4 +1,4 @@
-function beamLog(emoji, type, args) {
+function beamLog(type, args) {
   const messageArgs = Object.values(args)
       .map(v => {
         let str
@@ -26,22 +26,22 @@ let originalError = console.error
 let originalDebug = console.debug
 
 console.log = function () {
-    beamLog("📗", "log", arguments);
+    beamLog("log", arguments);
     originalLog.apply(null, arguments)
 }
 console.warn = function () {
-    beamLog("📙", "warning", arguments);
+    beamLog("warning", arguments);
     originalWarn.apply(null, arguments)
 }
 console.error = function () {
-    beamLog("📕", "error", arguments);
+    beamLog("error", arguments);
     originalError.apply(null, arguments)
 }
 console.debug = function () {
-    beamLog("📘", "debug", arguments);
+    beamLog("debug", arguments);
     originalDebug.apply(null, arguments)
 }
 
 window.addEventListener("error",  (e) => {
-    beamLog("💥", "Uncaught", [`${e.message} at ${e.filename}:${e.lineno}:${e.colno}: ${JSON.stringify(e.error)}`])
+    beamLog("uncaught", [`${e.message} at ${e.filename}:${e.lineno}:${e.colno}: ${JSON.stringify(e.error.stack)}`])
 })
