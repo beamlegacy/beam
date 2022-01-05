@@ -1,7 +1,8 @@
 import Foundation
 import BeamCore
 
-class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
+class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
+    weak var page: WebPage?
 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
         guard let url = navigationAction.request.url else { return nil }
@@ -22,13 +23,13 @@ class BeamWebkitUIDelegateController: WebPageHolder, WKUIDelegate {
                                       toolBars=\(toolBars),
                                       containing \(url.absoluteString)
                                       """, category: .web)
-                return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
+                return self.page?.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
             } else {
                 Logger.shared.logInfo("Redirecting toward new tab containing \(url.absoluteString)", category: .web)
             }
         }
         Logger.shared.logInfo("Creating new webview tab for \(url.absoluteString)", category: .web)
-        let newTab = page.createNewTab(url, configuration, setCurrent: true)
+        let newTab = self.page?.createNewTab(url, configuration, setCurrent: true)
         return newTab?.webView
     }
 

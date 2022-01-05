@@ -19,9 +19,12 @@ struct PointAndShootView: View {
     @State private var wiggleValue: CGFloat = 0
 
     private var transitionAnchor: UnitPoint {
-        UnitPoint(
-            x: (1 / pns.page.frame.width) * pns.mouseLocation.x,
-            y: (1 / pns.page.frame.height) * pns.mouseLocation.y
+        guard let page = pns.page else {
+            return UnitPoint(x: pns.mouseLocation.x, y: pns.mouseLocation.y)
+        }
+        return UnitPoint(
+            x: (1 / page.frame.width) * pns.mouseLocation.x,
+            y: (1 / page.frame.height) * pns.mouseLocation.y
         )
     }
 

@@ -12,7 +12,7 @@ struct NoteMediaPlaying {
     var note: BeamNote
     var elementId: UUID
     var webview: BeamWebView?
-    var page: WebPage?
+    weak var page: WebPage?
     var originalURL: URL?
     var muted: Bool = false
 }
