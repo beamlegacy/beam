@@ -49,7 +49,7 @@ extension PointAndShoot {
             saveButton.tag = NSApplication.ModalResponse.OK.rawValue
             cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
 
-            guard let window = page.webviewWindow else {
+            guard let window = page?.webviewWindow else {
                 return
             }
 

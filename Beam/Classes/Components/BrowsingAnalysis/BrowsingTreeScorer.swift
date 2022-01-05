@@ -2,7 +2,8 @@ import Foundation
 import BeamCore
 import Combine
 
-class BrowsingTreeScorer: WebPageHolder, BrowsingScorer {
+class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
+    weak var page: WebPage?
 
     let browsingTree: BrowsingTree
 
@@ -28,7 +29,7 @@ class BrowsingTreeScorer: WebPageHolder, BrowsingScorer {
     }
     func updateScore() {
         let score = browsingTree.current.score.score
-        page.score = score
+        self.page?.score = score
     }
 
     func addTextSelection() {

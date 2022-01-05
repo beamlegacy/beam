@@ -26,9 +26,10 @@ class PointAndShootTargetTest: PointAndShootTest {
         animated: false
     )
 
+    let windowHref = TestWebPage.urlStr
+
     override func setUpWithError() throws {
         initTestBed()
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("expected test page")
@@ -60,7 +61,6 @@ class PointAndShootTargetTest: PointAndShootTest {
                   XCTFail("expected test page")
                   return
               }
-        let windowHref = self.pns.page.url!.string
 
         let translatedTarget = self.pns.translateAndScaleTargetIfNeeded(target, windowHref)
 
@@ -81,7 +81,6 @@ class PointAndShootTargetTest: PointAndShootTest {
                   XCTFail("expected test page")
                   return
               }
-        let windowHref = self.pns.page.url!.string
 
         // set scroll positions
         let scrollDelta: CGFloat = 33
@@ -114,7 +113,6 @@ class PointAndShootTargetTest: PointAndShootTest {
                   XCTFail("expected test page")
                   return
               }
-        let windowHref = self.pns.page.url!.string
         // set scroll positions
         let scrollDeltaWindow: CGFloat = 87
         positions.setFrameInfoScroll(href: windowHref, scrollX: 0, scrollY: scrollDeltaWindow)
@@ -162,7 +160,6 @@ class PointAndShootTargetTest: PointAndShootTest {
                   XCTFail("expected test page")
                   return
               }
-        let windowHref = self.pns.page.url!.string
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         // set scroll positions
@@ -215,7 +212,6 @@ class PointAndShootTargetTest: PointAndShootTest {
                   XCTFail("expected test page")
                   return
               }
-        let windowHref = self.pns.page.url!.string
         // Register Frame to framesInfo
         positions.framesInfo[iFrame.href] = iFrame
         // set scroll positions
