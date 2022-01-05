@@ -34,7 +34,7 @@ protocol WebPage: AnyObject, Scorable {
     var webPositions: WebPositions? { get }
 
     @discardableResult
-    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?) -> Promise<Any?>
+    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory) -> Promise<Any?>
 
     // MARK: Note handling
     func addToNote(allowSearchResult: Bool, inSourceBullet: Bool) -> BeamElement?
@@ -94,7 +94,7 @@ class WebPageHolder: NSObject, WebPageRelated {
 extension WebPage {
 
     @discardableResult
-    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil) -> Promise<Any?> {
+    func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil, successLogCategory: LogCategory = .javascript) -> Promise<Any?> {
         Promise<Any?> { [unowned self] fulfill, reject in
             var command = jsCode
             if let configuration = webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
@@ -107,7 +107,7 @@ extension WebPage {
                     Logger.shared.logError("(\(command) failed: \(String(describing: error))", category: .javascript)
                     reject(error)
                 case .success(let response):
-                    Logger.shared.logInfo("(\(command) succeeded: \(String(describing: response))", category: .javascript)
+                    Logger.shared.logInfo("(\(command) succeeded: \(String(describing: response))", category: successLogCategory)
                     fulfill(response)
                 }
             }
