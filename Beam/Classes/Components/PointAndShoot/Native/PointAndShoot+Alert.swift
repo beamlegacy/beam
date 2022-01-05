@@ -66,7 +66,7 @@ extension PointAndShoot {
 
                 if response == .OK {
                     let report = self.generateReport(group, elements, message)
-                    if Configuration.env != "test" {
+                    if Configuration.env != .test {
                         self.sendFeedback(title: "Point and Shoot failed on: \(host)", report: report, comments: textField.stringValue)
                     } else {
                         Logger.shared.logDebug("Skipping sending PNS sentry report: \(report)", category: .pointAndShoot)

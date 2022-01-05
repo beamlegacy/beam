@@ -7,7 +7,7 @@ struct Configuration {
     static private(set) var sentryKey = EnvironmentVariables.Sentry.key
     static private(set) var sentryHostname = "o477543.ingest.sentry.io"
     static private(set) var sentryProject = "5518785"
-    static private(set) var env = EnvironmentVariables.env
+    static private(set) var env = Configuration.Env(rawValue: EnvironmentVariables.env) ?? .debug
     static private(set) var testAccountEmail = EnvironmentVariables.Account.testEmail
     static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
     static private(set) var autoUpdate = EnvironmentVariables.autoUpdate
@@ -117,5 +117,14 @@ struct Configuration {
             fatalError("Invalid or missing Info.plist key: \(key)")
         }
         return value
+    }
+}
+
+
+extension Configuration {
+    enum Env: String {
+        case debug = "debug"
+        case test = "test"
+        case release = "release"
     }
 }
