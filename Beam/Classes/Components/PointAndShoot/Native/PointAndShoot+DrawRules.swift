@@ -23,6 +23,7 @@ extension PointAndShoot {
     /// - Parameter target: Target to check
     /// - Returns: true if either width or height is largeey
     func isLargeTargetArea(_ target: Target) -> Bool {
+        guard let page = self.page else { return false }
         let yPercent = (100 / page.frame.height) * target.rect.height
         let yIsLarge = yPercent > 120
 
