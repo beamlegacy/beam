@@ -5,6 +5,14 @@ enum LogMessages: String, CaseIterable {
     case beam_logging
 }
 
+enum LogTypes: String {
+    case uncaught
+    case error
+    case warning
+    case debug
+    case log
+}
+
 /**
  Handles logging messages sent from web page's javascript.
  */
@@ -30,11 +38,17 @@ class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
                                        category: .web)
                 return
             }
-            if type == "error" {
+
+            switch LogTypes(rawValue: type) {
+            case .error, .uncaught:
                 Logger.shared.logError(message, category: .javascript)
-            } else if type == "warning" {
+            case .warning:
                 Logger.shared.logWarning(message, category: .javascript)
-            } else if type == "log" {
+            case .debug:
+                Logger.shared.logDebug(message, category: .javascript)
+            case .log:
+                Logger.shared.logInfo(message, category: .javascript)
+            case .none:
                 Logger.shared.logInfo(message, category: .javascript)
             }
         }
