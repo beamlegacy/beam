@@ -866,6 +866,9 @@ class DocumentManagerNetworkTests: QuickSpec {
                 beforeEach {
                     docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
                     docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
+
+                    docStruct = helper.fillDocumentStructWithStaticText(docStruct)
+                    docStruct2 = helper.fillDocumentStructWithStaticText(docStruct2)
                 }
 
                 afterEach {
@@ -883,26 +886,30 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
 
                 context("without any locally saved documents") {
-                    beforeEach {
-                        helper.deleteDocumentStruct(docStruct)
-                        helper.deleteDocumentStruct(docStruct2)
-                    }
-
                     context("with 2 documents with different titles") {
-                        it("saves to local objects") {
+                        it("saves to local objects without extra network calls") {
                             let networkCalls = APIRequest.callsCount
 
                             try sut.receivedObjects([docStruct, docStruct2])
 
                             expect(APIRequest.callsCount - networkCalls) == 0
-
-                            expect(1) == sut.count(filters: [.id(docStruct.id)])
-                            expect(1) == sut.count(filters: [.id(docStruct2.id)])
-
-                            expect(try? sut.fetchWithId(docStruct.id, includeDeleted: false)?.title) == docStruct.title
-                            expect(try? sut.fetchWithId(docStruct2.id, includeDeleted: false)?.title) == docStruct2.title
                         }
-                    }
+
+                        it("doesn't update local documents once saved") {
+                            BeamDate.travel(10)
+
+                            try sut.receivedObjects([docStruct, docStruct2])
+
+                            guard let localDoc = try? sut.fetchWithId(docStruct.id, includeDeleted: false),
+                                  let localDoc2 = try? sut.fetchWithId(docStruct2.id, includeDeleted: false) else {
+                                      fail("Should exist")
+                                      return
+                                  }
+
+                            expect(DocumentStruct(document: localDoc)).to(equal(docStruct))
+                            expect(DocumentStruct(document: localDoc2)).to(equal(docStruct2))
+                        }
+                     }
 
                     context("with 2 documents with same titles") {
                         beforeEach {
@@ -939,12 +946,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                 context("with locally saved documents") {
                     beforeEach {
-                        docStruct = helper.createDocumentStruct(title: "Doc 1", id: "995d94e1-e0df-4eca-93e6-8778984bcd29")
-                        docStruct2 = helper.createDocumentStruct(title: "Doc 2", id: "995d94e1-e0df-4eca-93e6-8778984bcd39")
-
-                        docStruct = helper.fillDocumentStructWithStaticText(docStruct)
-                        docStruct2 = helper.fillDocumentStructWithStaticText(docStruct2)
-
                         _ = helper.saveLocally(docStruct)
                         _ = helper.saveLocally(docStruct2)
                     }

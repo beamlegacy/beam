@@ -345,6 +345,11 @@ public class DocumentManager: NSObject {
     func mergeDocumentWithNewData(_ document: Document, _ remoteDocumentStruct: DocumentStruct) -> Bool {
         checkThread()
 
+        guard document.data != nil else {
+            Logger.shared.logError("You should not call this method when data is nil", category: .documentMerge)
+            return false
+        }
+
         // If the local data is equal to what was previously saved (hasLocalChanges), we have no local motification.
         // We can just use the remote document and store it as our new local document.
         guard DocumentStruct(document: document).hasLocalChanges else {
@@ -400,7 +405,8 @@ public class DocumentManager: NSObject {
     @discardableResult
     func saveContext(file: StaticString = #file, line: UInt = #line) throws -> Bool {
         checkThread()
-        Logger.shared.logDebug("\(self) DocumentManager.saveContext called from \(file):\(line). \(context.hasChanges ? "changed" : "unchanged")", category: .document)
+        Logger.shared.logDebug("\(self) saveContext called from \(file):\(line). hasChanges: \(context.hasChanges)",
+                               category: .document)
 
         guard context.hasChanges else {
             Logger.shared.logDebug("DocumentManager.saveContext: no changes!", category: .document)
@@ -808,6 +814,7 @@ extension DocumentManager {
     /// to properly propagate changes to other contexts :(
     func deleteAll(databaseId: UUID?) throws {
         checkThread()
+
         do {
             let filters: [DocumentFilter] = {
                 if let databaseId = databaseId {
@@ -821,7 +828,9 @@ extension DocumentManager {
                 context.delete(document)
             }
 
-            try saveContext()
+            if !allDocuments.isEmpty {
+                try saveContext()
+            }
         } catch {
             Logger.shared.logError("DocumentManager.deleteAll failed: \(error)", category: .document)
             throw error

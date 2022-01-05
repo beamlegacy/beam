@@ -417,6 +417,7 @@ extension DocumentManager {
 
      - you know the note has not been propagated yet (previousChecksums are nil)
      - you're adding this in a debug window for developers (like DocumentDetail)
+     - You're deleting documents in test scenarios
      */
     func delete(documents: [DocumentStruct], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         documents.forEach { Self.cancelPreviousThrottledAPICall($0.beamObjectId) }
@@ -425,6 +426,7 @@ extension DocumentManager {
         var goods: [DocumentStruct] = []
         backgroundQueue.async {
             let documentManager = DocumentManager()
+
             for document in documents {
                 guard let cdDocument: Document = try? documentManager.fetchWithId(document.id, includeDeleted: true) else {
                     errors.append(DocumentManagerError.idNotFound)
