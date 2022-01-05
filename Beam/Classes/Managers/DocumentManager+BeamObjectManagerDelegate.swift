@@ -66,7 +66,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
                 while !good && index < 10 {
                     do {
-                        if localDocument.objectID.isTemporaryID || !mergeDocumentWithNewData(localDocument, document) {
+                        if localDocument.version == 0 || localDocument.data == nil || !mergeDocumentWithNewData(localDocument, document) {
                             localDocument.data = document.data
                         }
 
