@@ -3,7 +3,7 @@ import BeamCore
 // swiftlint:disable file_length
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest? {
+    func saveAllOnBeamObjectApi(force: Bool = false, _ completion: @escaping ((Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -22,9 +22,10 @@ extension BeamObjectManagerDelegate {
             completion(.success((0, nil)))
             return nil
         }
+
         let mostRecentUpdatedAt = toSaveObjects.compactMap({ $0.updatedAt }).sorted().last
 
-        return try saveOnBeamObjectsAPI(toSaveObjects) { result in
+        return try saveOnBeamObjectsAPI(toSaveObjects, force: force) { result in
             switch result {
             case .failure(let error): completion(.failure(error))
             case .success(let savedObjects): completion(.success((savedObjects.count, mostRecentUpdatedAt)))

@@ -102,7 +102,7 @@ struct AdvancedPreferencesView: View {
                         self.loading = true
                         Persistence.Sync.BeamObjects.last_received_at = nil
                         Persistence.Sync.BeamObjects.last_updated_at = nil
-                        AppDelegate.main.syncDataWithBeamObject { _ in
+                        AppDelegate.main.syncDataWithBeamObject(force: true) { _ in
                             self.loading = false
                         }
                     }, label: {

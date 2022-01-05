@@ -8,7 +8,7 @@ protocol BeamObjectManagerDelegateProtocol {
 
     // Called when `BeamObjectManager` wants to store all existing `Document` as `BeamObject`
     // it will call this method
-    func saveAllOnBeamObjectApi(_ completion: @escaping ((Swift.Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest?
+    func saveAllOnBeamObjectApi(force: Bool, _ completion: @escaping ((Swift.Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest?
 }
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
@@ -64,30 +64,16 @@ extension BeamObjectManagerDelegate {
         }
 
         var objectIds = objects.map { $0.beamObjectId.uuidString.lowercased() }
-        if objectIds.count > 10 {
-            objectIds = Array(objectIds[0...10])
+        if objectIds.count > 3 {
+            objectIds = Array(objectIds[0...3])
             objectIds.append("...")
         }
 
         Logger.shared.logDebug("Received \(parsedObjects.count) \(T.beamObjectType): \(objectIds)",
                                category: .beamObjectNetwork)
-        let localTimer = BeamDate.now
+        Logger.shared.logDebug("Calling manager for \(T.beamObjectType)", category: .beamObjectNetwork)
 
-        let receivedParsedObjects: [BeamObjectType] = try parsedObjects.compactMap {
-            let checksum = try $0.checksum()
-            if checksum == $0.previousChecksum && !$0.hasLocalChanges {
-                Logger.shared.logDebug("Received \($0): checksum and previousChecksum match and not local changes, skip",
-                                       category: .beamObjectNetwork)
-                return nil
-            }
-            return $0
-        }
-
-        try receivedObjects(receivedParsedObjects)
-
-        Logger.shared.logDebug("Received \(parsedObjects.count) \(T.beamObjectType). Manager done",
-                               category: .beamObjectNetwork,
-                               localTimer: localTimer)
+        try receivedObjects(parsedObjects)
     }
 
     func saveOnBeamObjectsAPI(_ objects: [BeamObjectType]) throws {
