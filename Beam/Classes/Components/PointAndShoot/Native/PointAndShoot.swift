@@ -23,10 +23,10 @@ public struct NoteInfo: Encodable {
 }
 
 // swiftlint:disable file_length
-class PointAndShoot: WebPageHolder, ObservableObject {
+class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     var data: BeamData = AppDelegate.main.data
     private var scorer: BrowsingScorer? {
-        page.browsingScorer
+        page?.browsingScorer
     }
     let shapeCache = PnSTargetsShapeCache()
 
@@ -49,23 +49,20 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     @Published var mouseLocation: NSPoint = NSPoint()
 
     private var isEnabled: Bool {
-        !isTypingOnWebView && page.pointAndShootEnabled
+        guard let page = self.page else { return false }
+        return !isTypingOnWebView && page.pointAndShootEnabled
     }
 
-    override var page: WebPage {
-        get {
-            super.page
-        }
-        set {
-            super.page = newValue
-            self.page.webView.optionKeyToggle = { [weak self] key in
+    weak var page: WebPage? {
+        didSet {
+            self.page?.webView.optionKeyToggle = { [weak self] key in
                 guard let self = self else { return }
                 self.refresh(self.mouseLocation, key)
             }
-            self.page.webView.mouseClickChange = { [weak self] (mousePos) in
+            self.page?.webView.mouseClickChange = { [weak self] (mousePos) in
                 self?.handleMouseClick(mousePos)
             }
-            self.page.webView.mouseMoveTriggeredChange = { [weak self] (mousePos, modifier) in
+            self.page?.webView.mouseMoveTriggeredChange = { [weak self] (mousePos, modifier) in
                 self?.refresh(mousePos, modifier)
             }
         }
@@ -158,9 +155,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
 
             activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
             if let group = self.activeShootGroup,
-               let sourceUrl = self.page.url {
+               let sourceUrl = self.page?.url {
                 let text = group.text
-                self.page.addTextToClusteringManager(text, url: sourceUrl)
+                self.page?.addTextToClusteringManager(text, url: sourceUrl)
             }
             throttledHaptic()
         } else {
@@ -240,9 +237,9 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         group.updateSelectionPath()
         activeShootGroup = group
 
-        if let sourceUrl = self.page.url {
+        if let sourceUrl = self.page?.url {
             let text = group.text
-            self.page.addTextToClusteringManager(text, url: sourceUrl)
+            self.page?.addTextToClusteringManager(text, url: sourceUrl)
         }
     }
 
@@ -275,7 +272,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// - Returns: BeamElement containing noteText without any styling
     fileprivate func createNote(_ noteText: String) -> BeamElement {
         let note = BeamElement(BeamText(text: noteText))
-        note.query = self.page.originalQuery
+        note.query = self.page?.originalQuery
         return note
     }
 
@@ -288,14 +285,15 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     ///   - completion:
     ///   - noteText: optional text to add underneath the shoot quote
     func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, withSourceBullet: Bool = true, completion: @escaping () -> Void) {
-        guard let sourceUrl = page.url else {
-            fatalError("Could not find note to update with title \(targetNote.title)")
+        guard let page = self.page, let sourceUrl = page.url else {
+            Logger.shared.logError("Expected webpage to be defined when adding shoot to note", category: .pointAndShoot)
+            return
         }
 
         // Make group mutable
         var shootGroup = group
         // Convert html to BeamText
-        let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page.downloadManager, self.page.fileStorage)
+        let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page?.downloadManager, page.fileStorage)
         htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
             // exit early when failing to collect correctly
             guard beamElements.count != 0 else {
@@ -308,7 +306,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             }
 
             let elements = beamElements.map({ element -> BeamElement in
-                element.query = self.page.originalQuery
+                element.query = page.originalQuery
 
                 guard element.kind == .bullet else { return element }
                 element.text.addAttributes([.source(SourceMetadata(origin: .remote(sourceUrl), title: page.title))], to: element.text.wholeRange)
@@ -321,7 +319,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
             page.setDestinationNote(targetNote, rootElement: targetNote)
             // Add all quotes to source Note
             let addWithSourceBullet = withSourceBullet ? shouldAddWithSourceBullet(elements) : withSourceBullet
-            if let destinationElement = self.page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
+            if let destinationElement = page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
                 if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
                     // Append NoteText last quote
                     let note = self.createNote(noteText)
@@ -427,7 +425,7 @@ class PointAndShoot: WebPageHolder, ObservableObject {
     /// frame context only, we can't rely this gets properly executed within iframes.
     /// - Parameter id: ID of target to remove
     func removeTarget(_ id: String) {
-        self.page.executeJS("removeTarget(\"\(id)\")", objectName: "PointAndShoot")
+        self.page?.executeJS("removeTarget(\"\(id)\")", objectName: "PointAndShoot")
     }
 
     //This variable could be migrated as a preference if we want. Setting to true gives the original PnS behavior
@@ -447,11 +445,15 @@ class PointAndShoot: WebPageHolder, ObservableObject {
         }
 
         // A single link matching the source bullet link should be inserted without source bullet
-        guard let pageUrl = page.url?.absoluteString else {
+        guard let pageUrl = self.page?.url?.absoluteString else {
             Logger.shared.logDebug("Could not find page url while checking text links", category: .pointAndShoot)
             return true
         }
-        for link in first.text.links where (link == pageUrl) && (first.text.text == page.title) {
+        guard let pageTitle = self.page?.title else {
+            Logger.shared.logDebug("Could not find page title while checking text links", category: .pointAndShoot)
+            return true
+        }
+        for link in first.text.links where (link == pageUrl) && (first.text.text == pageTitle) {
             return false
         }
 

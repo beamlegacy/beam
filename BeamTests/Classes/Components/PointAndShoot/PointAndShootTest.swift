@@ -150,7 +150,8 @@ class MockUserInformationsStore: UserInformationsStore {
     func delete(id: UUID) {}
 }
 
-class BrowsingScorerMock: WebPageHolder, BrowsingScorer {
+class BrowsingScorerMock: NSObject, WebPageRelated, BrowsingScorer {
+    weak var page: WebPage?
     var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
     private(set) var currentScore: BeamCore.Score = Score()
 

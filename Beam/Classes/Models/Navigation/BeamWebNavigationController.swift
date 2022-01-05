@@ -1,7 +1,8 @@
 import Foundation
 import BeamCore
 
-class BeamWebNavigationController: WebPageHolder, WebNavigationController {
+class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationController {
+    weak var page: WebPage?
 
     let browsingTree: BrowsingTree
     let noteController: WebNoteController
@@ -39,6 +40,9 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
     }
 
     func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
+        guard let page = self.page else {
+            return
+        }
         //If the webview is loading, we should not index the content.
         //We will be called by the webView delegate at the end of the loading
         guard !webView.isLoading else {
@@ -46,12 +50,12 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
         }
 
         //Only register navigation if the page was successfully loaded
-        guard self.page.responseStatusCode == 200 else { return }
+        guard page.responseStatusCode == 200 else { return }
 
         let isLinkActivation = !isNavigatingFromSearchBar && !replace
         isNavigatingFromSearchBar = false
 
-        self.page.navigatedTo(url: url, title: webView.title, reason: isLinkActivation ? .navigation : .loading)
+        page.navigatedTo(url: url, title: webView.title, reason: isLinkActivation ? .navigation : .loading)
 
         Readability.read(webView) { [weak self] result in
             guard let self = self else { return }
@@ -82,19 +86,19 @@ class BeamWebNavigationController: WebPageHolder, WebNavigationController {
                 }
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .javascript)
-                self.browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: self.page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: 0)
+                self.browsingTree.navigateTo(url: url.absoluteString, title: webView.title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: 0)
             }
         }
     }
 
     private func indexVisit(url: URL, isLinkActivation: Bool, read: Readability? = nil) {
-
+        guard let page = self.page else { return }
         //Alway index the visit, event if we were not able to read the content
-        self.browsingTree.navigateTo(url: url.absoluteString, title: read?.title ?? webView?.title, startReading: self.page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
+        self.browsingTree.navigateTo(url: url.absoluteString, title: read?.title ?? webView?.title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
 
         guard let read = read else { return }
-        self.page.appendToIndexer?(url, read)
         try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
+        page.appendToIndexer?(url, read)
     }
 
     private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {
@@ -140,7 +144,9 @@ extension BeamWebNavigationController: WKNavigationDelegate {
                     NSWorkspace.shared.open(targetURL)
                 }
                 return
-            } else if navigationAction.navigationType == .linkActivated && (withCommandKey || page.shouldNavigateInANewTab(url: targetURL)) {
+            } else if let page = self.page,
+                      navigationAction.navigationType == .linkActivated &&
+                        (withCommandKey || page.shouldNavigateInANewTab(url: targetURL)) {
                 if withCommandKey {
                     Logger.shared.logInfo("Cmd required create new tab toward: \(String(describing: targetURL))", category: .web)
                 } else {
@@ -166,10 +172,10 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             if let sourceURL = webView.url {
                 headers["Referer"] = sourceURL.absoluteString
             }
-            page.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
+            page?.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
         } else {
             if let response = navigationResponse.response as? HTTPURLResponse, webView.url == response.url {
-                page.responseStatusCode = response.statusCode
+                page?.responseStatusCode = response.statusCode
             }
             decisionHandler(.allow)
         }
@@ -181,7 +187,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
         Logger.shared.logError("didFail: \(error)", category: .javascript)
-        page.errorPageManager = nil
+        page?.errorPageManager = nil
         let error = error as NSError
 
         if error.domain == "WebKitErrorDomain" && error.code == 102 {
@@ -196,7 +202,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             let errorUrl = error.userInfo[NSURLErrorFailingURLErrorKey] as? URL,
             error.code != WebKitErrorFrameLoadInterruptedByPolicyChange else { return }
         let errorManager = ErrorPageManager(error.code, webView: webView, errorUrl: errorUrl, defaultLocalizedDescription: error.localizedDescription)
-        page.errorPageManager = errorManager
+        self.page?.errorPageManager = errorManager
 
         if errorManager.error == .radblock {
             webView.load(errorManager.htmlPage(), mimeType: "", characterEncodingName: "utf-8", baseURL: errorUrl)
@@ -210,25 +216,24 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             return // webview probably failed to load
         }
         if webviewUrl.isDomain {
-            page.userTypedDomain = webviewUrl
+            self.page?.userTypedDomain = webviewUrl
         }
         if BeamURL(webviewUrl).isErrorPage {
             let beamSchemeUrl = BeamURL(webviewUrl)
-            page.url = beamSchemeUrl.originalURLFromErrorPage
+            self.page?.url = beamSchemeUrl.originalURLFromErrorPage
 
             if let extractedCode = BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "code"),
                let errorCode = Int(extractedCode),
-               let errorUrl = page.url {
-                page.errorPageManager = .init(errorCode, webView: webView,
+               let errorUrl = self.page?.url {
+                self.page?.errorPageManager = .init(errorCode, webView: webView,
                                          errorUrl: errorUrl,
                                          defaultLocalizedDescription: BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "localizedDescription"))
             }
         } else {
-            page.url = webviewUrl
+            self.page?.url = webviewUrl
         }
-        page.leave()
+        self.page?.leave()
         (page as? BrowserTab)?.updateFavIcon(fromWebView: false, cacheOnly: true)
-
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
@@ -251,12 +256,12 @@ extension BeamWebNavigationController: WKNavigationDelegate {
                 if savePassword && (!password.isEmpty || !username.isEmpty) {
                     PasswordManager.shared.save(hostname: challenge.protectionSpace.host, username: username, password: password)
                 }
-                self?.page.authenticationViewModel = nil
+                self?.page?.authenticationViewModel = nil
 
             }, onCancel: { [weak self] in
                 NSApp.mainWindow?.makeFirstResponder(nil)
                 completionHandler(.performDefaultHandling, nil)
-                self?.page.authenticationViewModel = nil
+                self?.page?.authenticationViewModel = nil
             })
 
             if challenge.previousFailureCount == 0 {
@@ -266,11 +271,11 @@ extension BeamWebNavigationController: WKNavigationDelegate {
                        !decrypted.isEmpty || !firstCredential.username.isEmpty {
                         completionHandler(.useCredential, URLCredential(user: firstCredential.username, password: decrypted, persistence: .forSession))
                     } else {
-                        self.page.authenticationViewModel = viewModel
+                        self.page?.authenticationViewModel = viewModel
                     }
                 }
             } else {
-                self.page.authenticationViewModel = viewModel
+                self.page?.authenticationViewModel = viewModel
             }
         } else if authenticationMethod == NSURLAuthenticationMethodServerTrust {
             let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)

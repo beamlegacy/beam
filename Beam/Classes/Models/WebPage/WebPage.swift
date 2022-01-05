@@ -66,28 +66,8 @@ protocol WebPage: AnyObject, Scorable {
 }
 
 protocol WebPageRelated {
-    var page: WebPage { get set }
-}
-
-class WebPageHolder: NSObject, WebPageRelated {
-    private weak var _page: WebPage?
-
-    var page: WebPage {
-        get {
-            guard let definedPage = _page else {
-                fatalError("\(self) must have an associated WebPage")
-            }
-            return definedPage
-        }
-        set {
-            _page = newValue
-        }
-    }
-
-    convenience init(page: WebPage?) {
-        self.init()
-        _page = page
-    }
+    /// Should be implemented as a `weak` value to avoid memory leaks
+    var page: WebPage? { get set }
 }
 
 // MARK: - Default WebPage methods implementations
