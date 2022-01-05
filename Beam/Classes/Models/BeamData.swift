@@ -109,7 +109,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         noteAutoSaveService = NoteAutoSaveService()
         cookies = HTTPCookieStorage()
 
-        let enableUpdateAutoCheck = Configuration.env != "dev"
+        let enableUpdateAutoCheck = Configuration.env != .debug
         if let feed = URL(string: Configuration.updateFeedURL) {
             self.versionChecker = VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
         } else {

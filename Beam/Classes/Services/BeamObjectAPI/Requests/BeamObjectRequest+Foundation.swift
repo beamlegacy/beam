@@ -377,7 +377,7 @@ extension BeamObjectRequest {
 
                     // This code is multi-threaded, with vinyl once network calls are saved, it might take one for another
                     // because not in the same order, adding a sleep should fix that
-                    if EnvironmentVariables.env == "test" {
+                    if Configuration.env == .test {
                         usleep(100000) // 0.1s
                     }
                 }

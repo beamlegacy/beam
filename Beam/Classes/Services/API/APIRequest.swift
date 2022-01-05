@@ -23,7 +23,7 @@ class BeamURLSessionDelegate: NSObject, URLSessionDelegate {
                            completionHandler: (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         // We only allow self-signed certificates for dev and test.
         if let trust = challenge.protectionSpace.serverTrust,
-           ["test", "dev"].contains(EnvironmentVariables.env) {
+           [.test, .debug].contains(Configuration.env) {
             completionHandler(.useCredential, URLCredential(trust: trust))
         } else {
             completionHandler(.useCredential, nil)

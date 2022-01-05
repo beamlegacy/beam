@@ -3,7 +3,7 @@ import BeamCore
 
 extension AppDelegate {
     func fetchTopDomains(forced: Bool = false) {
-        guard Configuration.env != "test" else { return }
+        guard Configuration.env != .test else { return }
 
         // Will not fill database unless we have a new version of the file
         if !forced,
