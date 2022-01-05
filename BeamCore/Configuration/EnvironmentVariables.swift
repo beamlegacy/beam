@@ -46,13 +46,12 @@ public struct EnvironmentVariables {
         static public private(set) var testEmail = "$(TEST_ACCOUNT_EMAIL)"
     }
 
-    static public private(set) var beamObjectAPIEnabled = NSString("$(BEAM_OBJECT_API_ENABLED)").boolValue
     static public private(set) var env = "$(ENV)"
     static public private(set) var autoUpdate = NSString("$(AUTOMATIC_UPDATE)").boolValue
     static public private(set) var networkStubs = NSString("$(NETWORK_STUBS)").boolValue
     static public private(set) var sentryEnabled = NSString("$(SENTRY_ENABLED)").boolValue
     static public private(set) var networkEnabled = NSString("$(NETWORK_ENABLED)").boolValue
-    static public private(set) var encryptionEnabled = NSString("$(ENCRYPTION_ENABLED)").boolValue
+    static public private(set) var beamObjectSendPrivateKey = NSString("$(BEAM_OBJECT_SEND_PRIVATE_KEY)").boolValue
     static public private(set) var hideCategories = "$(HIDE_CATEGORIES)".split(separator: " ").compactMap {
         LogCategory(rawValue: String($0))
     }

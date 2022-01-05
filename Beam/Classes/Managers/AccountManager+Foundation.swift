@@ -21,7 +21,7 @@ extension AccountManager {
                         return
                     }
 
-                    Logger.shared.logInfo("Expiration \(String(describing: AuthenticationManager.expirationDate(accessToken))) -> \(String(describing: AuthenticationManager.expirationDate(newAccessToken)))", category: .network)
+                    Logger.shared.logInfo("Expiration \(String(describing: AuthenticationManager.expirationDate(accessToken))) -> \(String(describing: AuthenticationManager.expirationDate(newAccessToken)))", category: .accountManager)
                     EventsTracker.logBreadcrumb(message: "Refreshed access token and refresh token",
                                                        category: "app.lifecycle",
                                                        type: "system")
@@ -33,7 +33,7 @@ extension AccountManager {
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
 
@@ -49,7 +49,7 @@ extension AccountManager {
             return try userSessionRequest.signIn(email: email, password: password) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
                     completionHandler?(.failure(error))
                 case .success(let signIn):
                     Persistence.Authentication.accessToken = signIn.accessToken
@@ -84,7 +84,7 @@ extension AccountManager {
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
         return nil
@@ -99,7 +99,7 @@ extension AccountManager {
             return try userSessionRequest.signInWithProvider(provider: provider, accessToken: accessToken) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+                    Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
                     completionHandler?(.failure(error))
                 case .success(let signIn):
                     Persistence.Authentication.accessToken = signIn.accessToken
@@ -134,7 +134,7 @@ extension AccountManager {
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not signin: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
         return nil
@@ -148,15 +148,15 @@ extension AccountManager {
             return try userSessionRequest.signUp(email, password) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
+                    Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .accountManager)
                     completionHandler?(.failure(error))
                 case .success(let signUp):
-                    Logger.shared.logInfo("signUp succeeded: \(signUp.user?.email ?? "-")", category: .network)
+                    Logger.shared.logInfo("signUp succeeded: \(signUp.user?.email ?? "-")", category: .accountManager)
                     completionHandler?(.success(true))
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not sign up: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
         return nil
@@ -169,15 +169,15 @@ extension AccountManager {
             return try userSessionRequest.forgotPassword(email: email) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
+                    Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .accountManager)
                     completionHandler?(.failure(error))
                 case .success:
-                    Logger.shared.logInfo("forgot Password succeeded", category: .network)
+                    Logger.shared.logInfo("forgot Password succeeded", category: .accountManager)
                     completionHandler?(.success(true))
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not forgot password: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
         return nil
@@ -189,16 +189,16 @@ extension AccountManager {
             return try userInfoRequest.getUserInfos { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logInfo("Could not get user infos: \(error.localizedDescription)", category: .network)
+                    Logger.shared.logInfo("Could not get user infos: \(error.localizedDescription)", category: .accountManager)
                     completionHandler?(.failure(error))
                 case .success(let infos):
-                    Logger.shared.logInfo("Get user infos succeeded", category: .network)
+                    Logger.shared.logInfo("Get user infos succeeded", category: .accountManager)
                     AuthenticationManager.shared.username = infos.username
                     completionHandler?(.success(infos))
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not get user infos: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not get user infos: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
         return nil
@@ -210,20 +210,20 @@ extension AccountManager {
             return try userInfoRequest.setUsername(username: username) { result in
                 switch result {
                 case .failure(let error):
-                    Logger.shared.logInfo("Could not set username: \(error.localizedDescription)", category: .network)
+                    Logger.shared.logInfo("Could not set username: \(error.localizedDescription)", category: .accountManager)
                     completionHandler?(.failure(error))
                 case .success(let infos):
                     guard let username = infos.me?.username else {
                         completionHandler?(.failure(APIRequestError.parserError))
                         return
                     }
-                    Logger.shared.logInfo("Set username succeeded", category: .network)
+                    Logger.shared.logInfo("Set username succeeded", category: .accountManager)
                     AuthenticationManager.shared.username = username
                     completionHandler?(.success(username))
                 }
             }
         } catch {
-            Logger.shared.logInfo("Could not set username: \(error.localizedDescription)", category: .network)
+            Logger.shared.logInfo("Could not set username: \(error.localizedDescription)", category: .accountManager)
             completionHandler?(.failure(error))
         }
         return nil

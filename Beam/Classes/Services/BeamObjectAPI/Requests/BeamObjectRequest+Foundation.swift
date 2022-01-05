@@ -27,9 +27,9 @@ extension BeamObjectRequest {
 
         let parameters = UpdateBeamObject(beamObject: saveObject, privateKey: nil)
 
-        #if DEBUG
-        parameters.privateKey = EncryptionManager.shared.privateKey().asString()
-        #endif
+        if EnvironmentVariables.beamObjectSendPrivateKey {
+            parameters.privateKey = EncryptionManager.shared.privateKey().asString()
+        }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object",
                                                   variables: parameters,
@@ -106,14 +106,16 @@ extension BeamObjectRequest {
               _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
         var filesUpload: [GraphqlFileUpload] = []
         var saveBeamObjects: [BeamObject] = []
-        var sameChecksum = false
+        var sameChecksum = 0
+
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
 
         for (index, beamObject) in beamObjects.enumerated() {
             let saveObject = beamObject.copy()
             try saveObject.encrypt()
 
-            if saveObject.dataChecksum == saveObject.previousChecksum {
-                sameChecksum = true
+            if saveObject.dataChecksum == checksums[saveObject] {
+                sameChecksum += 1
             }
 
             if let data = saveObject.data {
@@ -127,16 +129,16 @@ extension BeamObjectRequest {
             saveBeamObjects.append(saveObject)
         }
 
-        if sameChecksum {
-            Logger.shared.logWarning("Some objects have the same checksum and previousChecksum, they could have been avoided.",
+        if sameChecksum > 0 {
+            Logger.shared.logWarning("\(sameChecksum) objects have the same checksum and previousChecksum, they could have been avoided.",
                                      category: .beamObjectNetwork)
         }
 
         var parameters = UpdateBeamObjects(beamObjects: saveBeamObjects, privateKey: nil)
 
-        #if DEBUG
-        parameters.privateKey = EncryptionManager.shared.privateKey().asString()
-        #endif
+        if EnvironmentVariables.beamObjectSendPrivateKey {
+            parameters.privateKey = EncryptionManager.shared.privateKey().asString()
+        }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects",
                                                   variables: parameters,

@@ -57,7 +57,7 @@ extension BeamObjectManager {
 
 // MARK: - BeamObjectProtocol
 extension BeamObjectManager {
-    func saveToAPI<T: BeamObjectProtocol>(_ objects: [T]) -> Promise<[T]> {
+    func saveToAPI<T: BeamObjectProtocol>(_ objects: [T], force: Bool = false) -> Promise<[T]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(error: BeamObjectManagerError.notAuthenticated)
         }
@@ -385,7 +385,7 @@ extension BeamObjectManager {
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
 
         beamObjects.forEach {
-            $0.previousChecksum = checksums[$0.id]
+            $0.previousChecksum = checksums[$0]
         }
 
         let request = BeamObjectRequest()

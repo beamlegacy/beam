@@ -27,6 +27,12 @@ struct ContactRecord: Decodable {
     var deletedAt: Date?
 }
 
+extension ContactRecord: Hashable {
+    public func hash(into hasher: inout Hasher) {
+       hasher.combine(self)
+    }
+}
+
 extension ContactRecord: BeamObjectProtocol {
     static var beamObjectType: BeamObjectObjectType {
         BeamObjectObjectType.contact

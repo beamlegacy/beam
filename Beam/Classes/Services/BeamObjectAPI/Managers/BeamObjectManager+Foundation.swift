@@ -4,14 +4,14 @@ import BeamCore
 // swiftlint:disable file_length
 
 extension BeamObjectManager {
-    func syncAllFromAPI(delete: Bool = true, _ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    func syncAllFromAPI(force: Bool = false, delete: Bool = true, _ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
 
         var localTimer = BeamDate.now
 
-        try fetchAllByChecksumsFromAPI { result in
+        try fetchAllByChecksumsFromAPI(force: force) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("syncAllFromAPI: \(error.localizedDescription)",
@@ -19,13 +19,15 @@ extension BeamObjectManager {
                                        localTimer: localTimer)
                 completion?(result)
             case .success:
-                Logger.shared.logDebug("syncAllFromAPI: Calling saveAllToAPI, called FetchAllFromAPI",
+                Logger.shared.logDebug("syncAllFromAPI: called fetchAllByChecksumsFromAPI",
                                        category: .beamObjectNetwork,
                                        localTimer: localTimer)
 
                 do {
                     localTimer = BeamDate.now
-                    let objectsCount = try self.saveAllToAPI()
+                    Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
+                                           category: .beamObjectNetwork)
+                    let objectsCount = try self.saveAllToAPI(force: force)
                     Logger.shared.logDebug("syncAllFromAPI: Called saveAllToAPI, saved \(objectsCount) objects",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
@@ -40,7 +42,7 @@ extension BeamObjectManager {
 
     @discardableResult
     // swiftlint:disable:next function_body_length
-    func saveAllToAPI() throws -> Int {
+    func saveAllToAPI(force: Bool = false) throws -> Int {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -49,7 +51,7 @@ extension BeamObjectManager {
         var errors: [Error] = []
         let lock = DispatchSemaphore(value: 1)
         var savedObjects = 0
-        // Just a very old date as default
+        // Just a very old date as default (10 years)
         var mostRecentUpdatedAt: Date = Persistence.Sync.BeamObjects.last_updated_at ?? (BeamDate.now.addingTimeInterval(-(60*60*24*31*12*10)))
         var mostRecentUpdatedAtChanged = false
 
@@ -60,11 +62,15 @@ extension BeamObjectManager {
         for (_, manager) in Self.managerInstances {
             group.enter()
 
-            DispatchQueue.global(qos: .userInitiated).async {
+            // Note: I tried QOS `userInitiated` but I had 50sec latency... `userInteractive` makes it instant.
+            DispatchQueue.global(qos: .userInteractive).async {
                 let localTimer = BeamDate.now
 
                 do {
-                    let request = try manager.saveAllOnBeamObjectApi { result in
+                    Logger.shared.logDebug("saveAllToAPI using \(manager)",
+                                           category: .beamObjectNetwork)
+
+                    let request = try manager.saveAllOnBeamObjectApi(force: force) { result in
                         switch result {
                         case .failure(let error):
                             Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
@@ -125,24 +131,24 @@ extension BeamObjectManager {
     // checksum locally, and therefor must be fetched from the API. This allows for a faster fetch since most of the time
     // we might already have those object locally if they had been sent and updated from the same device
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func fetchAllByChecksumsFromAPI(_ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
+    func fetchAllByChecksumsFromAPI(force: Bool = false, _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
 
         let beamRequest = BeamObjectRequest()
 
-        let lastReceivedAt: Date? = Persistence.Sync.BeamObjects.last_received_at
+        let lastReceivedAt: Date? = force ? nil : Persistence.Sync.BeamObjects.last_received_at
 
         if let lastReceivedAt = lastReceivedAt {
             Logger.shared.logDebug("Using lastReceivedAt for BeamObjects API call: \(lastReceivedAt.iso8601withFractionalSeconds)",
                                    category: .beamObjectNetwork)
         } else {
-            Logger.shared.logDebug("No previous updatedAt for BeamObjects API call",
+            Logger.shared.logDebug("No previous lastReceivedAt for BeamObjects API call",
                                    category: .beamObjectNetwork)
         }
 
-        let localTimer = BeamDate.now
+        var localTimer = BeamDate.now
 
         try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt) { result in
             switch result {
@@ -154,33 +160,47 @@ extension BeamObjectManager {
                 // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
                 // If not doing a delta sync, we don't as we want to update local document as `deleted`
                 guard lastReceivedAt == nil || !beamObjects.isEmpty else {
-                    Logger.shared.logDebug("fetchAllByChecksumsFromAPI: 0 beam object fetched.",
+                    Logger.shared.logDebug("fetchAllByChecksumsFromAPI: 0 beam object checksums fetched",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
                     completion(.success(true))
                     return
                 }
 
-                Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(beamObjects.count) beam object fetched.",
+                Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(beamObjects.count) beam object checksums fetched",
                                        category: .beamObjectNetwork,
                                        localTimer: localTimer)
 
                 do {
-                    let changedObjects = try self.parseFilteredObjectChecksums(self.filteredObjects(beamObjects))
+                    localTimer = BeamDate.now
+                    let filteredObjects = self.filteredObjects(beamObjects)
+                    Logger.shared.logDebug("filtered \(beamObjects.count) checksums by type",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
+
+                    localTimer = BeamDate.now
+                    let changedObjects = try self.parseFilteredObjectChecksums(filteredObjects)
+
+                    Logger.shared.logDebug("parsed \(filteredObjects.count) checksums, got \(changedObjects.reduce(0, { $1.value.count })) objects to fetch",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
+
+                    localTimer = BeamDate.now
 
                     let ids: [UUID] = changedObjects.values.flatMap { $0.map { $0.id }}
 
                     guard !ids.isEmpty else {
                         if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
                             Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
-                            Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam object checksums fetched.",
-                                                   category: .beamObjectNetwork)
+                            Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) checksums",
+                                                   category: .beamObjectNetwork,
+                            localTimer: localTimer)
                         }
                         completion(.success(true))
                         return
                     }
 
-                    Logger.shared.logDebug("Need to fetch \(ids.count) objects remotely, different previousChecksum",
+                    Logger.shared.logDebug("Need to fetch \(ids.count) objects remotely, with different checksums",
                                            category: .beamObjectNetwork)
                     let beamRequestForIds = BeamObjectRequest()
 
@@ -194,19 +214,24 @@ extension BeamObjectManager {
                             // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
                             // If not doing a delta sync, we don't as we want to update local document as `deleted`
                             guard lastReceivedAt == nil || !beamObjects.isEmpty else {
-                                Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
+                                Logger.shared.logDebug("0 beam object fetched", category: .beamObjectNetwork)
                                 completion(.success(true))
                                 return
                             }
 
                             if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
                                 Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
-                                Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam objects fetched.",
+                                Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam objects fetched",
                                                        category: .beamObjectNetwork)
                             }
 
                             do {
-                                try self.parseFilteredObjects(self.filteredObjects(beamObjects))
+                                let parsedFilteredObjects = self.filteredObjects(beamObjects)
+                                try self.parseFilteredObjects(parsedFilteredObjects)
+
+                                // Note: you don't need to save checksum here, they are saved in `translators[object.beamObjectType]` callback
+                                // called by `parseFilteredObjects`
+
                                 completion(.success(true))
                                 return
                             } catch {
@@ -295,12 +320,15 @@ extension BeamObjectManager {
 
 // MARK: - BeamObjectProtocol
 extension BeamObjectManager {
-    func updatedObjectsOnly(_ objects: [BeamObject]) -> [BeamObject] {
-        objects.filter {
-            $0.previousChecksum != $0.dataChecksum || $0.previousChecksum == nil
+    func updatedObjectsOnly(_ beamObjects: [BeamObject]) -> [BeamObject] {
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
+
+        return beamObjects.filter {
+            checksums[$0] != $0.dataChecksum || checksums[$0] == nil
         }
     }
 
+    // swiftlint:disable function_body_length
     func saveToAPI<T: BeamObjectProtocol>(_ objects: [T],
                                           force: Bool = false,
                                           _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
@@ -308,29 +336,46 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        let request = BeamObjectRequest()
-
-        let checksums = BeamObjectChecksum.previousChecksums(objects: objects)
+        var localTimer = BeamDate.now
 
         let beamObjects: [BeamObject] = try objects.map {
-            let result = try BeamObject(object: $0)
-            result.previousChecksum = checksums[$0.beamObjectId]
-
-            return result
+            try BeamObject(object: $0)
         }
+
+        Logger.shared.logDebug("Converted \(objects.count) \(T.beamObjectType) to beam objects",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
+
+        localTimer = BeamDate.now
 
         let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
 
         guard !objectsToSave.isEmpty else {
             Logger.shared.logDebug("Skip \(beamObjects.count) objects, based on previousChecksum they were already saved",
-                                   category: .beamObjectNetwork)
+                                   category: .beamObjectNetwork,
+                                   localTimer: localTimer)
             completion(.success([]))
             return nil
         }
 
-        let beamObjectTypes = Set(objectsToSave.map { $0.beamObjectType }).joined(separator: ", ")
-        Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(beamObjectTypes) on API",
+        Logger.shared.logDebug("Filtered \(beamObjects.count) beam objects to \(objectsToSave.count)",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
+
+        localTimer = BeamDate.now
+
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objectsToSave)
+        objectsToSave.forEach {
+            $0.previousChecksum = checksums[$0]
+        }
+
+        Logger.shared.logDebug("Set \(objects.count) checksums", category: .beamObjectChecksum, localTimer: localTimer)
+
+        Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
+
+        let request = BeamObjectRequest()
+
         try request.save(beamObjects) { result in
             switch result {
             case .failure(let error):
@@ -338,7 +383,6 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
-
                     completion(.success(objects))
                 } catch {
                     completion(.failure(error))
@@ -346,11 +390,6 @@ extension BeamObjectManager {
             }
         }
 
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
         return request
     }
 
@@ -525,6 +564,8 @@ extension BeamObjectManager {
                         // decode them or view their paste checksum for now
                         // TODO: fetch remote object checksums and overwrite
                         guard fetchedConflictedObjects.count == conflictedObjects.count else {
+                            Logger.shared.logError("Fetch error, fetched: \(fetchedConflictedObjects.count) instead of \(conflictedObjects.count)",
+                                                   category: .beamObjectNetwork)
                             completion(.failure(BeamObjectManagerError.fetchError))
                             return
                         }
@@ -737,7 +778,7 @@ extension BeamObjectManager {
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
 
         beamObjects.forEach {
-            $0.previousChecksum = checksums[$0.id]
+            $0.previousChecksum = checksums[$0]
         }
 
         let request = BeamObjectRequest()

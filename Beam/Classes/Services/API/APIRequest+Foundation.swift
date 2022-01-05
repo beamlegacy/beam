@@ -13,7 +13,6 @@ extension APIRequest {
         let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
 
         let filename = bodyParamsRequest.fileName ?? "no filename"
-        let localTimer = BeamDate.now
         let callsCount = Self.callsCount
 
         #if DEBUG
@@ -35,6 +34,8 @@ extension APIRequest {
         // Note: all `completionHandler` call must use `backgroundQueue.async` because if the
         // code called in the completion handler is blocking, it will prevent new following requests
         // to be parsed in the NSURLSession delegate callback thread
+
+        var localTimer = BeamDate.now
 
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             guard let dataTask = self.dataTask else {
@@ -92,7 +93,16 @@ extension APIRequest {
             }
 
             do {
+                localTimer = BeamDate.now
+
                 let value: T = try self.manageResponse(data, response)
+
+                let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+                if diffTime > 0.1 {
+                    Logger.shared.logWarning("Parsed network response (\(data?.count.byteSize ?? "-"))",
+                                             category: .network,
+                                             localTimer: localTimer)
+                }
 
                 self.backgroundQueue.async {
                     completionHandler(.success(value))
@@ -147,8 +157,9 @@ extension APIRequest {
             return
         }
         let diffTime = BeamDate.now.timeIntervalSince(localTimer)
-        let diff = String(format: "%.2f", diffTime)
-        let text = "[\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
+        let diff = String(format: "%.3f", diffTime)
+        let request_id = httpResponse.allHeaderFields["X-Request-Id"] ?? "-"
+        let text = "[\(request_id)] [\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
 
         if diffTime > 1.0 {
             Logger.shared.logDebug("🐢🐢🐢 \(text)", category: .network)
