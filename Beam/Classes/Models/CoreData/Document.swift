@@ -38,7 +38,7 @@ class Document: NSManagedObject {
         title = documentStruct.title
         document_type = documentStruct.documentType.rawValue
         created_at = documentStruct.createdAt
-        updated_at = BeamDate.now
+        updated_at = documentStruct.updatedAt
         deleted_at = documentStruct.deletedAt
         is_public = documentStruct.isPublic
 
