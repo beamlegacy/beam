@@ -3,7 +3,7 @@ import Promises
 import BeamCore
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi() -> Promise<[BeamObjectType]> {
+    func saveAllOnBeamObjectApi(force: Bool = false) -> Promise<[BeamObjectType]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(APIRequestError.notAuthenticated)
         }
@@ -16,10 +16,10 @@ extension BeamObjectManagerDelegate {
             return Promise(error)
         }
 
-        return saveOnBeamObjectsAPI(objects)
+        return saveOnBeamObjectsAPI(objects, force: force)
     }
 
-    func saveOnBeamObjectsAPI(_ objects: [BeamObjectType], deep: Int = 0) -> Promise<[BeamObjectType]> {
+    func saveOnBeamObjectsAPI(_ objects: [BeamObjectType], force: Bool = false, deep: Int = 0) -> Promise<[BeamObjectType]> {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             return Promise(APIRequestError.notAuthenticated)
         }

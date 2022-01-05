@@ -20,6 +20,12 @@ enum BeamObjectObjectType: String {
     case document
     case myRemoteObject = "my_remote_object"
     case contact
+
+    static func fromString(value: String) -> Self? {
+        // Have to try the snake case version as `browsing_tree` used to be saved as `browsingTree`
+        BeamObjectObjectType(rawValue: value) ??
+            BeamObjectObjectType(rawValue: value.camelCaseToSnakeCase())
+    }
 }
 
 class BeamObjectManager {
@@ -41,10 +47,34 @@ class BeamObjectManager {
          Translators is a way to know what object type is being processed by the manager
          */
         translators[object.beamObjectType] = { manager, objects in
+            let previousChecksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
 
-            let encapsulatedObjects: [O] = try objects.map {
+            var localTimer = BeamDate.now
+
+            // Any received object with the same content than the one we already sent is skipped
+            let toSaveObjects: [BeamObject] = {
+                // Skip the check if no previous stored checksums at all meaning it's a first sync
+                guard !previousChecksums.isEmpty else { return objects }
+
+                return objects.compactMap {
+                    // previous stored checksum is the same as the temote data checksum, we can skip
+                    if previousChecksums[$0] == $0.dataChecksum {
+                        return nil
+                    }
+                    return $0
+                }
+            }()
+
+            Logger.shared.logDebug("Received \(objects.count) \(object.beamObjectType), filtered to \(toSaveObjects.count). Already had \(previousChecksums.count) checksums",
+                                   category: .beamObjectNetwork,
+                                   localTimer: localTimer)
+
+            var totalSize: Int64 = 0
+
+            let encapsulatedObjects: [O] = try toSaveObjects.map {
                 do {
                     let result: O = try $0.decodeBeamObject()
+                    totalSize += Int64($0.data?.count ?? 0)
 
                     // Setting previousChecksum so code not doing anything more than storing objects/replacing existing objects
                     // at least doesn't break the sync and delta sync.
@@ -59,7 +89,15 @@ class BeamObjectManager {
                 }
             }
 
+            localTimer = BeamDate.now
+
             try manager.parse(objects: encapsulatedObjects)
+
+            Logger.shared.logDebug("Received \(encapsulatedObjects.count) \(object.beamObjectType) (\(totalSize.byteSize)). Manager done",
+                                   category: .beamObjectNetwork,
+                                   localTimer: localTimer)
+
+            try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
         }
     }
 
@@ -83,9 +121,12 @@ class BeamObjectManager {
 
     internal func filteredObjects(_ beamObjects: [BeamObject]) -> [BeamObjectObjectType: [BeamObject]] {
         let filteredObjects: [BeamObjectObjectType: [BeamObject]] = beamObjects.reduce(into: [:]) { result, object in
-            if let beamObjectType = BeamObjectObjectType(rawValue: object.beamObjectType) {
+            if let beamObjectType = BeamObjectObjectType.fromString(value: object.beamObjectType) {
                 result[beamObjectType] = result[beamObjectType] ?? []
                 result[beamObjectType]?.append(object)
+            } else {
+                Logger.shared.logWarning("Found \(object.beamObjectType) but can't process this type",
+                                         category: .beamObject)
             }
         }
 
@@ -98,7 +139,10 @@ class BeamObjectManager {
         for (key, objects) in filteredObjects {
             let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
 
-            let changedObjects = objects.filter { $0.dataChecksum != checksums[$0.id] }
+            let changedObjects = objects.filter {
+                $0.dataChecksum != checksums[$0] || checksums[$0] == nil
+            }
+
             results[key] = changedObjects
         }
 
@@ -107,6 +151,10 @@ class BeamObjectManager {
 
     internal func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
         var objectsInErrors: Set<String> = Set()
+
+        let group = DispatchGroup()
+
+        var errors: [Error] = []
 
         for (key, objects) in filteredObjects {
             guard let managerInstance = Self.managerInstances[key] else {
@@ -121,37 +169,47 @@ class BeamObjectManager {
                 continue
             }
 
-            do {
-                try translator(managerInstance, objects)
-            } catch {
-                Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
-                                       category: .beamObjectNetwork)
-
-                var objectsInError: [BeamObject] = []
-
-                // When error occurs, we need to know what object is actually failing
-                for beamObject in objects {
-                    do {
-                        try translator(managerInstance, [beamObject])
-                    } catch {
-                        objectsInError.append(beamObject)
-                        objectsInErrors.insert(beamObject.beamObjectType)
-                    }
-                }
-
-                var message: String
-                if objectsInError.count == objects.count {
-                    Logger.shared.logError("All \(key) objects in error", category: .beamObjectNetwork)
-                    message = "All BeamObjects types: \(key) are in error"
-                } else {
-                    Logger.shared.logError("Error parsing following \(key) beamobjects: \(objectsInError.map { $0.id.uuidString }.joined(separator: ", "))",
+            group.enter()
+            DispatchQueue.global(qos: .userInteractive).async {
+                do {
+                    try translator(managerInstance, objects)
+                } catch {
+                    Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
                                            category: .beamObjectNetwork)
-                    dump(objectsInError)
-                    message = "Some BeamObjects types: \(key) are in error"
+
+                    var objectsInError: [BeamObject] = []
+
+                    // When error occurs, we need to know what object is actually failing
+                    for beamObject in objects {
+                        do {
+                            try translator(managerInstance, [beamObject])
+                        } catch {
+                            objectsInError.append(beamObject)
+                            objectsInErrors.insert(beamObject.beamObjectType)
+                        }
+                    }
+
+                    var message: String
+                    if objectsInError.count == objects.count {
+                        Logger.shared.logError("All \(key) objects in error", category: .beamObjectNetwork)
+                        message = "All BeamObjects types: \(key) are in error"
+                    } else {
+                        Logger.shared.logError("Error parsing following \(key) beamobjects: \(objectsInError.map { $0.id.uuidString }.joined(separator: ", "))",
+                                               category: .beamObjectNetwork)
+                        dump(objectsInError)
+                        message = "Some BeamObjects types: \(key) are in error"
+                    }
+                    DispatchQueue.main.sync { errors.append(BeamObjectManagerError.parsingError(message)) }
                 }
 
-                throw BeamObjectManagerError.parsingError(message)
+                group.leave()
             }
+        }
+
+        group.wait()
+
+        if !errors.isEmpty {
+            throw BeamObjectManagerError.multipleErrors(errors)
         }
     }
 

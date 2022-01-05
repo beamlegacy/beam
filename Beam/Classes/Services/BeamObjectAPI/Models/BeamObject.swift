@@ -3,7 +3,7 @@ import CryptoKit
 import BeamCore
 
 /// Anything to be stored as BeamObject should implement this protocol.
-protocol BeamObjectProtocol: Codable {
+protocol BeamObjectProtocol: Codable, Hashable {
     static var beamObjectType: BeamObjectObjectType { get }
 
     var beamObjectId: UUID { get set }
@@ -200,8 +200,8 @@ class BeamObject: Codable {
     }
 
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
-        let localTimer = BeamDate.now
         assert(!encoded)
+        let localTimer = BeamDate.now
 
         let jsonData = try Self.encoder.encode(object)
 
@@ -210,10 +210,10 @@ class BeamObject: Codable {
         dataChecksum = jsonData.SHA256
 
         let timeDiff = BeamDate.now.timeIntervalSince(localTimer)
-        if timeDiff > 1.0 {
-            Logger.shared.logError("Slow BeamObject encoding, data size: \(jsonData.count)",
-                                   category: .beamObject,
-                                   localTimer: localTimer)
+        if timeDiff > 0.1 {
+            Logger.shared.logWarning("Slow BeamObject encoding for \(object.beamObjectId) \(T.beamObjectType), size: \(jsonData.count.byteSize)",
+                                     category: .beamObject,
+                                     localTimer: localTimer)
         }
     }
 
@@ -234,7 +234,18 @@ class BeamObject: Codable {
         }
         return nil
     }
+}
 
+extension BeamObject: Equatable {
+    static func == (lhs: BeamObject, rhs: BeamObject) -> Bool {
+        lhs.beamObjectType == rhs.beamObjectType && lhs.id == rhs.id
+    }
+}
+
+extension BeamObject: Hashable {
+    func hash(into hasher: inout Hasher) {
+       hasher.combine(ObjectIdentifier(self))
+    }
 }
 
 // MARK: - Encryption
