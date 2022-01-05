@@ -46,7 +46,7 @@ class OnboardingManager: ObservableObject {
     private(set) var stepsHistory = [OnboardingStep]()
 
     init(onlyLogin: Bool = false, onlyImport: Bool = false) {
-        var needsToDisplayOnboard = Configuration.env != "test" && Persistence.Authentication.hasSeenOnboarding != true
+        var needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
             if AuthenticationManager.shared.isAuthenticated {
