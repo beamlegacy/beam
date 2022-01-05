@@ -296,7 +296,7 @@ extension BeamObject {
 
         guard let clearData = data else { return }
 
-        if Configuration.env == "test",
+        if Configuration.env == .test,
            EncryptionManager.shared.privateKey().asString() != Configuration.testPrivateKey {
             fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)` in your tests")
         }

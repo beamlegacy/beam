@@ -20,7 +20,7 @@ struct KeychainStorable<T> {
     private var cache = InternalValueCache()
 
     init(_ key: String, _ label: String? = nil, _ comment: String? = nil) {
-        self.key = Configuration.env + "." + key
+        self.key = Configuration.env.rawValue + "." + key
         self.label = label
         self.comment = comment
     }
