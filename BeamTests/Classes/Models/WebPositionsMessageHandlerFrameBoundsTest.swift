@@ -15,6 +15,7 @@ import Nimble
 
 // swiftlint:disable type_body_length type_name file_length
 class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
+    let windowHref = TestWebPage.urlStr
     var browserTabConfiguration: BrowserTabConfiguration!
     var webPositionsMessageHandler: WebPositionsMessageHandler!
     var windowFrameBounds: [String: Any] = [
@@ -44,7 +45,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     fileprivate func helperRegisterWindowFrameInfo() {
         // Register window frame
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -66,7 +66,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     }
 
     func testOnMessage_frameBounds_windowFrame() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -82,7 +81,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     windowFrameBounds
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -109,7 +108,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -153,7 +151,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         // Send windowFrame event
@@ -174,7 +172,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -208,7 +206,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_iFrame_reverse_order() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -251,7 +248,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -274,7 +271,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -312,7 +309,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_onLoad_frameBounds_sequence() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -358,7 +354,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         //
@@ -391,7 +387,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         //
@@ -413,7 +409,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         //
@@ -461,7 +457,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -507,7 +502,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -540,7 +535,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -561,7 +556,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -608,7 +603,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_reverse_order() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -653,7 +647,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         // Send iframe1 event
@@ -685,7 +679,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         // Send windowFrame event
@@ -706,7 +700,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
@@ -751,7 +745,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     }
 
     func testOnMessage_frameBounds_windowFrame_Scroll() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -775,7 +768,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     windowFrameBounds
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should contain 1 frameInfos")
@@ -790,7 +783,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 200
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 1, "webPositions should still contain 1 frameInfos")
@@ -809,7 +802,6 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
 
     // swiftlint:disable:next function_body_length
     func testOnMessage_frameBounds_nested_iframes_Scroll() throws {
-        let windowHref = self.pns.page.url!.string
         guard let page = self.testPage,
               let positions = page.webPositions else {
                   XCTFail("webPositions are required for test")
@@ -854,7 +846,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         // Send iframe1 event
@@ -886,7 +878,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         // Send windowFrame event
@@ -907,7 +899,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                     ]
                 ]
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
         XCTAssertEqual(positions.framesInfo.count, 3, "webPositions should contain 3 frameInfos")
@@ -922,7 +914,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 200
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -936,7 +928,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 330
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 
@@ -950,7 +942,7 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
                 "x": 0,
                 "y": 30
             ],
-            from: self.pns.page,
+            from: page,
             frameInfo: nil
         )
 

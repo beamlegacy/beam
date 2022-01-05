@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 extension PointAndShoot {
     /// Describes a target area as part of a Shoot group
@@ -56,9 +57,11 @@ extension PointAndShoot {
     }
 
     func translateAndScaleTargetsIfNeeded(_ targets: [PointAndShoot.Target], _ href: String) -> [PointAndShoot.Target]? {
-        guard let view = page.webView else {
-            fatalError("Webview is required to scale target correctly")
-        }
+        guard let page = self.page,
+              let view = page.webView else {
+                  Logger.shared.logError("Webview is required to scale target correctly", category: .pointAndShoot)
+                  return nil
+              }
         let scale: CGFloat = view.zoomLevel()
         // We can reduce calculations for the MainWindowFrame
         let isDifferentUrl = href != page.url?.absoluteString
@@ -89,9 +92,11 @@ extension PointAndShoot {
     }
 
     private func deltaForWebPositions(href: String) -> (x: CGFloat, y: CGFloat) {
-        guard let webPositions = page.webPositions else {
-            fatalError("webPositions is required to scale target correctly")
-        }
+        guard let page = self.page,
+              let webPositions = page.webPositions else {
+                  Logger.shared.logError("webPositions is required to scale target correctly", category: .pointAndShoot)
+                  return (x: 0, y: 0)
+              }
         let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
         let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
         let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)

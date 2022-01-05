@@ -39,7 +39,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
 
     class FakeBrowsingScorer: BrowsingScorer {
         var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
-        var page: WebPage
+        weak var page: WebPage?
         var currentScore: Score = Score()
 
         init(page: WebPage) {
