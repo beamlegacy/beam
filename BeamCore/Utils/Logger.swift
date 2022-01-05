@@ -46,6 +46,7 @@ public enum LogCategory: String, CaseIterable {
     case beamObject
     case beamObjectNetwork
     case beamObjectDebug
+    case beamObjectChecksum
     case downloader
     case autocompleteManager
     case topDomain
@@ -60,6 +61,7 @@ public enum LogCategory: String, CaseIterable {
     case contactsDB
     case browserImport
     case autoUpdate
+    case accountManager
 }
 
 public final class Logger {

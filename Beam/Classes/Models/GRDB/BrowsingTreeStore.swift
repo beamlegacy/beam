@@ -24,6 +24,18 @@ extension BrowsingTree {
 }
 extension BrowsingTree: DatabaseValueConvertible {}
 
+extension BrowsingTree: Equatable {
+    static public func == (lhs: BrowsingTree, rhs: BrowsingTree) -> Bool {
+        lhs.rootId == rhs.rootId
+    }
+}
+
+extension BrowsingTree: Hashable {
+    public func hash(into hasher: inout Hasher) {
+       hasher.combine(ObjectIdentifier(self))
+    }
+}
+
 struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
     static var beamObjectType = BeamObjectObjectType.browsingTree
 

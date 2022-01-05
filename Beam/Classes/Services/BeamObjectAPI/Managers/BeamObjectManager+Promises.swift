@@ -391,7 +391,7 @@ extension BeamObjectManager {
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjects)
 
         beamObjects.forEach {
-            $0.previousChecksum = checksums[$0.id]
+            $0.previousChecksum = checksums[$0]
         }
 
         let request = BeamObjectRequest()
