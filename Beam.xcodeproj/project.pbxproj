@@ -688,7 +688,6 @@
 		A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */; };
 		A07F243A269D9624008918B0 /* PreferencesManager+Privacy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */; };
 		A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */; };
-		A08C7FA1276CA3D60006B386 /* AppDelegate+Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08C7FA0276CA3D60006B386 /* AppDelegate+Onboarding.swift */; };
 		A08C7FA8276CA4130006B386 /* OnboardingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */; };
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
@@ -783,6 +782,8 @@
 		A52596E7273EB87F004B27E4 /* OnboardingProfileCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */; };
 		A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */; };
 		A52596EB273EB8FB004B27E4 /* OnboardingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596EA273EB8FB004B27E4 /* OnboardingManager.swift */; };
+		A526E2772785BCFB00597F89 /* OnboardingEmailConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A526E2762785BCFB00597F89 /* OnboardingEmailConfirmationView.swift */; };
+		A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */ = {isa = PBXBuildFile; fileRef = A526E27D2785E02600597F89 /* resend_verification_email.graphql */; };
 		A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558C27592E99002D0C99 /* Inter-Regular.otf */; };
 		A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558D27592E99002D0C99 /* Inter-Medium.otf */; };
 		A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */ = {isa = PBXBuildFile; fileRef = A52A558E27592E99002D0C99 /* Inter-SemiBold.otf */; };
@@ -851,6 +852,7 @@
 		A5946826265D29350044A892 /* CGPath+Union.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5946825265D29350044A892 /* CGPath+Union.swift */; };
 		A5946846265E30350044A892 /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = A5946845265E30350044A892 /* Fakery */; };
 		A59738C727103D3C00821F90 /* Meeting+BeamText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59738C627103D3C00821F90 /* Meeting+BeamText.swift */; };
+		A599F8D327849AF200657CD5 /* AppDelegate+Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */; };
 		A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59C4412268233960066AA0E /* CheckboxLayer.swift */; };
 		A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleEffect.swift */; };
 		A5A2314526FB355B00D01D08 /* DividerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2314426FB355B00D01D08 /* DividerNode.swift */; };
@@ -1877,7 +1879,6 @@
 		A07F2437269D8B0D008918B0 /* UserDefaultStorable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserDefaultStorable.swift; sourceTree = "<group>"; };
 		A07F2439269D9624008918B0 /* PreferencesManager+Privacy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Privacy.swift"; sourceTree = "<group>"; };
 		A0877A3626FDD8400081C7D8 /* ChangeCredentialsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeCredentialsView.swift; sourceTree = "<group>"; };
-		A08C7FA0276CA3D60006B386 /* AppDelegate+Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Onboarding.swift"; sourceTree = "<group>"; };
 		A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingWindow.swift; sourceTree = "<group>"; };
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
@@ -1964,6 +1965,8 @@
 		A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingProfileCreationView.swift; sourceTree = "<group>"; };
 		A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingImportsView.swift; sourceTree = "<group>"; };
 		A52596EA273EB8FB004B27E4 /* OnboardingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingManager.swift; sourceTree = "<group>"; };
+		A526E2762785BCFB00597F89 /* OnboardingEmailConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingEmailConfirmationView.swift; sourceTree = "<group>"; };
+		A526E27D2785E02600597F89 /* resend_verification_email.graphql */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = resend_verification_email.graphql; sourceTree = "<group>"; };
 		A52A558C27592E99002D0C99 /* Inter-Regular.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Regular.otf"; sourceTree = "<group>"; };
 		A52A558D27592E99002D0C99 /* Inter-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-Medium.otf"; sourceTree = "<group>"; };
 		A52A558E27592E99002D0C99 /* Inter-SemiBold.otf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "Inter-SemiBold.otf"; sourceTree = "<group>"; };
@@ -2032,6 +2035,7 @@
 		A5946805265CE5ED0044A892 /* DocumentCommand.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentCommand.swift; sourceTree = "<group>"; };
 		A5946825265D29350044A892 /* CGPath+Union.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "CGPath+Union.swift"; sourceTree = "<group>"; };
 		A59738C627103D3C00821F90 /* Meeting+BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Meeting+BeamText.swift"; sourceTree = "<group>"; };
+		A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Onboarding.swift"; sourceTree = "<group>"; };
 		A59C4412268233960066AA0E /* CheckboxLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxLayer.swift; sourceTree = "<group>"; };
 		A59D33872655101A002E7E96 /* WiggleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleEffect.swift; sourceTree = "<group>"; };
 		A5A2314426FB355B00D01D08 /* DividerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DividerNode.swift; sourceTree = "<group>"; };
@@ -2772,6 +2776,7 @@
 				4181716A2581107C00317ED8 /* sign_in.graphql */,
 				52F4E4A126417F210067B017 /* sign_in_with_provider.graphql */,
 				5241E5F326F89C5000B08F69 /* refresh_token.graphql */,
+				A526E27D2785E02600597F89 /* resend_verification_email.graphql */,
 				3303E10226FA22D300E175AC /* user_infos.graphql */,
 				A54A452927677F9A00B9AE1B /* set_username.graphql */,
 			);
@@ -3127,7 +3132,7 @@
 				A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */,
 				3343794227037578004EF5A4 /* BeamWindow+Search.swift */,
 				DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */,
-				A08C7FA0276CA3D60006B386 /* AppDelegate+Onboarding.swift */,
+				A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -4554,6 +4559,7 @@
 				A52596E8273EB8AC004B27E4 /* OnboardingImportsView.swift */,
 				A51C4C252771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift */,
 				A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */,
+				A526E2762785BCFB00597F89 /* OnboardingEmailConfirmationView.swift */,
 				A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */,
 				A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */,
 			);
@@ -5657,6 +5663,7 @@
 				52EA56CE274F8F8B00F092C8 /* beam_object_data_url.graphql in Resources */,
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
+				A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */,
 				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
 				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
@@ -6176,6 +6183,7 @@
 				8AF4F7D1275A67750081B6B5 /* EmbedContentCache.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,
+				A599F8D327849AF200657CD5 /* AppDelegate+Onboarding.swift in Sources */,
 				A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */,
 				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
@@ -6261,6 +6269,7 @@
 				A0CB7E5F268E7E9200D15AFD /* PreferencesManager+Cards.swift in Sources */,
 				339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */,
 				33353EBC26F0EAA300063078 /* HelpAndFeedbackMenuView.swift in Sources */,
+				A526E2772785BCFB00597F89 /* OnboardingEmailConfirmationView.swift in Sources */,
 				A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */,
 				8AB7DFA526AAEDB30033C747 /* PointAndShootView.swift in Sources */,
 				A07A90E5268E1804000C502C /* PreferencesManager.swift in Sources */,
@@ -6659,7 +6668,6 @@
 				52019A6D26DE42C9005E8278 /* DocumentManager+PromiseKit.swift in Sources */,
 				BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */,
 				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
-				A08C7FA1276CA3D60006B386 /* AppDelegate+Onboarding.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
 				BAA671B36B54CF95A2D162CB /* BrowserTabConfiguration.swift in Sources */,
 				A0614EEC270B383000C38F82 /* GoogleEvent.swift in Sources */,

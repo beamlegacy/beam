@@ -9,7 +9,6 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var state: BeamState
-    @EnvironmentObject var onboardingManager: OnboardingManager
 
     @State private var contentIsScrolled = false
     private var isToolbarAboveContent: Bool {
@@ -33,19 +32,12 @@ struct ContentView: View {
 
     var body: some View {
         ZStack {
-            Group {
-                if onboardingManager.needsToDisplayOnboard {
-                    OnboardingView(model: onboardingManager)
-                        .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
-                } else {
-                    mainAppContent
-                        .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
-                }
-            }
-            .frame(minWidth: 800)
-            .background(BeamColor.Generic.background.swiftUI)
-            .edgesIgnoringSafeArea(.top)
-            .zIndex(0)
+            mainAppContent
+                .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
+                .frame(minWidth: 800)
+                .background(BeamColor.Generic.background.swiftUI)
+                .edgesIgnoringSafeArea(.top)
+                .zIndex(0)
             OverlayViewCenter(viewModel: state.overlayViewModel)
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
