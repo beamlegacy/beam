@@ -6,8 +6,9 @@
 //
 
 import Foundation
+import BeamCore
 
-enum BeamUserDefaults: CaseIterable {
+enum BeamUserDefaults: String, CaseIterable {
     case supportedEmbedDomains
     case pinnedBrowserTabs
     case savedClosedTabs
@@ -20,22 +21,15 @@ enum BeamUserDefaults: CaseIterable {
     case editorDebugPreferences
 
     public var suiteName: String {
-        self.suiteNamePrefix + "-\(Configuration.env)"
+        guard let bundleIdentifier = Bundle.main.bundleIdentifier else {
+            Logger.shared.logError("Error creating suiteName for BeamUserDefaults: Can't find bundle identifier", category: .general)
+            return self.suiteNameBody + ".\(Configuration.env)"
+        }
+        return bundleIdentifier + ".\(self.suiteNameBody)" + ".\(Configuration.env)"
     }
 
-    private var suiteNamePrefix: String {
-        switch self {
-        case .supportedEmbedDomains: return "SupportedEmbedDomains"
-        case .pinnedBrowserTabs: return "PinnedBrowserTabsManager"
-        case .savedClosedTabs: return "SavedClosedTabs"
-        case .generalPreferences: return "app_general_preferences"
-        case .browserPreferences: return "app_browser_preferences"
-        case .cardsPreferences: return "app_cards_preferences"
-        case .privacyPreferences: return "app_privacy_preferences"
-        case .passwordsPreferences: return "app_passwords_preferences"
-        case .advancedPreferences: return "app_advanced_preferences"
-        case .editorDebugPreferences: return "app_advanced_preferences_editor_debug"
-        }
+    private var suiteNameBody: String {
+        self.rawValue.prefix(1).capitalized + self.rawValue.dropFirst()
     }
 }
 
