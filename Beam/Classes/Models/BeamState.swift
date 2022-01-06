@@ -15,7 +15,7 @@ import Sentry
 
 @objc class BeamState: NSObject, ObservableObject, Codable {
     var data: BeamData
-    public var searchEngine: SearchEngine = GoogleSearch()
+    private let searchEngine: SearchEngineDescription = PreferredSearchEngine()
 
     @Published var currentNote: BeamNote? {
         didSet {
@@ -397,8 +397,7 @@ import Sentry
 
     private func urlFor(query: String) -> URL? {
         guard let url = query.toEncodedURL else {
-            searchEngine.query = query
-            return URL(string: searchEngine.searchUrl)
+            return searchEngine.searchURL(forQuery: query)
         }
         return url.urlWithScheme
     }
@@ -415,9 +414,11 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
         case .autocomplete:
-            searchEngine.query = result.text
-            // Logger.shared.logDebug("Start search query: \(searchEngine.searchUrl)")
-            let url = URL(string: searchEngine.searchUrl)!
+            guard let url = searchEngine.searchURL(forQuery: result.text) else {
+                Logger.shared.logError("Couldn't retrieve search URL from search engine description", category: .search)
+                break
+            }
+
             if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
