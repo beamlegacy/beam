@@ -43,6 +43,7 @@ class CalendarManager: ObservableObject {
     let calendarQueue = DispatchQueue(label: "calendarQueue")
     @Published var connectedSources: [CalendarService] = []
     @Published var meetingsForNote = [BeamNote.ID: [Meeting]]()
+    @Published var updated: Bool = false
 
     init() { }
 
@@ -54,7 +55,7 @@ class CalendarManager: ObservableObject {
 
         if let googleTokensStr = Persistence.Authentication.googleCalendarTokens,
            let googleTokens = GoogleTokenUtility.objectifyOauth(str: googleTokensStr) {
-            for (googleAccessToken, googleRefreshToken)  in googleTokens {
+            for (googleAccessToken, googleRefreshToken) in googleTokens {
                 let googleCalendar = GoogleCalendarService(accessToken: googleAccessToken, refreshToken: googleRefreshToken)
                 self.connectedSources.append(googleCalendar)
             }
@@ -115,6 +116,7 @@ class CalendarManager: ObservableObject {
                 googleCalendarTokens.removeValue(forKey: accessToken)
                 Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleCalendarTokens)
                 connectedSources.remove(at: idx)
+                updated = true
             }
         }
     }
