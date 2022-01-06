@@ -17,14 +17,6 @@ class BrowserPreferencesViewModel: ObservableObject {
     @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyImport: true)
 
     var scope = Set<AnyCancellable>()
-
-    init() {
-        onboardingManager.$needsToDisplayOnboard.sink { result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-            }
-        }.store(in: &scope)
-    }
 }
 
 struct BrowserPreferencesView: View {
@@ -148,7 +140,7 @@ struct BookmarksSection: View {
     var body: some View {
         VStack(alignment: .leading) {
             Button {
-                AppDelegate.main.showOnboardingWindow(model: viewModel.onboardingManager)
+                viewModel.onboardingManager.presentOnboardingWindow()
             } label: {
                 Text("Import...")
                     .font(BeamFont.regular(size: 13).swiftUI)

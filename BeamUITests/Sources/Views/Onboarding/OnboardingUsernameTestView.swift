@@ -31,7 +31,7 @@ class OnboardingUsernameTestView: BaseView {
     
     @discardableResult
     func clickSkipButton() -> JournalTestView {
-        staticText(OnboardingUsernameViewLocators.Buttons.skipButton.accessibilityIdentifier).clickOnExistence()
+        button(OnboardingUsernameViewLocators.Buttons.skipButton.accessibilityIdentifier).clickOnExistence()
         return JournalTestView()
     }
     

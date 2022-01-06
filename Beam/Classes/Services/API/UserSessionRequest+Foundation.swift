@@ -81,6 +81,28 @@ extension UserSessionRequest {
     }
 
     @discardableResult
+    func resendVerificationEmail(email: String,
+                                 _ completionHandler: @escaping (Result<ResendVerificationEmail, Error>) -> Void) throws -> URLSessionDataTask? {
+        let variables = ResendVerificationEmailParameters(email: email)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "resend_verification_email", variables: variables)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<ResendVerificationEmail, Error>) in
+            switch result {
+            case .failure(let error):
+                completionHandler(.failure(error))
+            case .success(let result):
+                guard result.success == true else {
+                    completionHandler(.failure(UserSessionRequestError.resendVerificationEmailFailed))
+                    return
+                }
+
+                completionHandler(.success(result))
+            }
+        }
+    }
+
+    @discardableResult
     func refreshToken(accessToken: String,
                       refreshToken: String,
                       _ completionHandler: @escaping (Result<RenewCredentials, Error>) -> Void) throws -> URLSessionDataTask? {

@@ -3,6 +3,7 @@ import Foundation
 enum UserSessionRequestError: Error, Equatable {
     case signInFailed
     case forgotPasswordFailed
+    case resendVerificationEmailFailed
 }
 
 class UserSessionRequest: APIRequest {
@@ -48,6 +49,15 @@ class UserSessionRequest: APIRequest {
     }
 
     class ForgotPassword: Decodable, Errorable {
+        let success: Bool
+        let errors: [UserErrorData]?
+    }
+
+    struct ResendVerificationEmailParameters: Encodable {
+        let email: String
+    }
+
+    class ResendVerificationEmail: Decodable, Errorable {
         let success: Bool
         let errors: [UserErrorData]?
     }

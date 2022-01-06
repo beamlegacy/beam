@@ -35,6 +35,7 @@ class AccountManagerTests: QuickSpec {
             AuthenticationManager.shared.isAuthenticated
         }
 
+        // MARK: forgotPassword
         describe(".forgotPassword") {
             context("with Foundation") {
                 context("with existing account") {
@@ -111,6 +112,84 @@ class AccountManagerTests: QuickSpec {
             }
         }
 
+        // MARK: resendVerificationEmail
+        describe(".resendVerificationEmail") {
+            context("with Foundation") {
+                context("with existing account") {
+                    it("returns") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.resendVerificationEmail(email: existingAccountEmail) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                done()
+                            }
+                        }
+                    }
+                }
+
+                context("with non-existing account") {
+                    it("returns") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            sut.resendVerificationEmail(email: nonExistingAccountEmail) { result in
+                                expect { try result.get() }.toNot(throwError())
+                                done()
+                            }
+                        }
+                    }
+                }
+            }
+            context("with PromiseKit") {
+                context("with existing account") {
+                    it("returns") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: PromiseKit.Promise<Bool> = sut.resendVerificationEmail(email: existingAccountEmail)
+                            promise.done { success in
+                                expect(success) == true
+                                done()
+                            }.catch { _ in }
+                        }
+                    }
+                }
+
+                context("with non-existing account") {
+                    it("returns") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: PromiseKit.Promise<Bool> = sut.resendVerificationEmail(email: existingAccountEmail)
+                            promise.done { success in
+                                expect(success) == true
+                                done()
+                            }.catch { _ in }
+                        }
+                    }
+                }
+            }
+            context("with Promises") {
+                context("with existing account") {
+                    it("returns") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: Promises.Promise<Bool> = sut.resendVerificationEmail(email: existingAccountEmail)
+                            promise.then { success in
+                                expect(success) == true
+                                done()
+                            }
+                        }
+                    }
+                }
+
+                context("with non-existing account") {
+                    it("returns") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let promise: Promises.Promise<Bool> = sut.resendVerificationEmail(email: existingAccountEmail)
+                            promise.then { success in
+                                expect(success) == true
+                                done()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // MARK: signUp
         describe(".signUp()") {
             let password = String.random(length: 12)
 
@@ -216,6 +295,7 @@ class AccountManagerTests: QuickSpec {
             }
         }
 
+        // MARK: signIn
         describe(".signIn()") {
             context("with Foundation") {
                 context("with good password") {

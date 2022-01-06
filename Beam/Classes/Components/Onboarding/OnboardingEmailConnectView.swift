@@ -9,8 +9,10 @@ import SwiftUI
 import BeamCore
 
 struct OnboardingEmailConnectView: View {
+    @Binding var actions: [OnboardingManager.StepAction]
     var finish: OnboardingView.StepFinishCallback
 
+    @EnvironmentObject private var onboardingManager: OnboardingManager
     @State private var emailField: String = ""
     @State private var passwordField: String = ""
     @State private var isEmailEditing: Bool = false
@@ -57,6 +59,63 @@ struct OnboardingEmailConnectView: View {
         }
     }
 
+    var emailForm: some View {
+        Group {
+            VStack(alignment: .leading, spacing: BeamSpacing._120) {
+                VStack(spacing: 0) {
+                    BeamTextField(text: $emailField, isEditing: $isEmailEditing, placeholder: "Email Address", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, contentType: .username, onTextChanged: { _ in
+                        updateButtonState()
+                    }, onCommit: { _ in
+                        isPasswordEditing = true
+                    }, onTab: {
+                        isEmailEditing = false
+                        isPasswordEditing = true
+                        return true
+                    })
+                        .frame(height: 40)
+                        .accessibility(identifier: "emailField\(isEmailEditing ? "-editing" : "")")
+
+                    Separator(horizontal: true, color: BeamColor.Nero)
+                    BeamTextField(text: $passwordField, isEditing: $isPasswordEditing, placeholder: "Password", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, secure: true, contentType: .password, onTextChanged: { newText in
+                        updateMissingRequirements(for: newText)
+                        updateButtonState()
+                    }, onCommit: { _ in
+                        triggerConnect()
+                    }, onTab: {
+                        isPasswordEditing = false
+                        isEmailEditing = true
+                        return true
+                    })
+                        .frame(height: 40)
+                        .accessibility(identifier: "passwordField\(isPasswordEditing ? "-editing" : "")")
+                    Separator(horizontal: true, color: BeamColor.Nero)
+                }
+                Group {
+                    if let errorMessage = errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(BeamColor.Shiraz.swiftUI)
+                    } else if isPasswordEditing || (passwordField.count > 0 && passwordMissingRequirements.count > 0) {
+                        StyledText(verbatim: "Use at least 8 characters, 1 symbol and 1 number")
+                            .style(.foregroundColor(BeamColor.Generic.text.swiftUI), ranges: { passwordHelpRanges(in: $0, matchingRequirements: false) })
+                    } else {
+                        Text("Preserve Height").hidden()
+                    }
+                }
+                .font(BeamFont.regular(size: 11).swiftUI)
+                .foregroundColor(BeamColor.AlphaGray.swiftUI)
+            }
+            .padding(.bottom, 24)
+            .allowsHitTesting(loadingState == nil)
+            ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                sendForgotPassword()
+            }
+            .overlay(forgotPasswordTooltip == nil ? nil : Tooltip(title: forgotPasswordTooltip ?? "")
+                        .fixedSize().offset(x: 0, y: 30).transition(.opacity.combined(with: .move(edge: .top))),
+                     alignment: .bottom)
+            .animation(BeamAnimation.easeInOut(duration: 0.3), value: forgotPasswordTooltip)
+        }
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             if loadingState == .gettingInfos {
@@ -64,67 +123,15 @@ struct OnboardingEmailConnectView: View {
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 VStack(spacing: 0) {
-                    OnboardingView.TitleText(title: "Connect to Beam")
-                    VStack(alignment: .leading, spacing: BeamSpacing._100) {
-                        BeamTextField(text: $emailField, isEditing: $isEmailEditing, placeholder: "Email Address", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, contentType: .username, onTextChanged: { _ in
-                            updateButtonState()
-                        }, onCommit: { _ in
-                            isPasswordEditing = true
-                        }, onTab: {
-                            isEmailEditing = false
-                            isPasswordEditing = true
-                            return true
-                        })
-                            .accessibility(identifier: "emailField\(isEmailEditing ? "-editing" : "")")
-
-                        BeamTextField(text: $passwordField, isEditing: $isPasswordEditing, placeholder: "Password", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, secure: true, contentType: .password, onTextChanged: { newText in
-                            updateMissingRequirements(for: newText)
-                            updateButtonState()
-                        }, onCommit: { _ in
-                            triggerConnect()
-                        }, onTab: {
-                            isPasswordEditing = false
-                            isEmailEditing = true
-                            return true
-                        })
-                            .accessibility(identifier: "passwordField\(isPasswordEditing ? "-editing" : "")")
-                        Group {
-                            if let errorMessage = errorMessage {
-                                Text(errorMessage)
-                                    .foregroundColor(BeamColor.Shiraz.swiftUI)
-                            } else if isPasswordEditing || (passwordField.count > 0 && passwordMissingRequirements.count > 0) {
-                                StyledText(verbatim: "Use at least 8 characters, 1 symbol and 1 number")
-                                    .style(.foregroundColor(BeamColor.CharmedGreen.swiftUI), ranges: { passwordHelpRanges(in: $0, matchingRequirements: false) })
-                            } else {
-                                Text("Preserve Height").hidden()
-                            }
-                        }
-                        .font(BeamFont.regular(size: 10).swiftUI)
-                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
-                    }.padding(.bottom, 18)
-                        .allowsHitTesting(loadingState == nil)
-                    VStack(spacing: 16) {
-                        ActionableButton(text: "Connect", defaultState: areCredentialsValid ? .normal : .disabled, variant: buttonVariant, minWidth: 280) {
-                            triggerConnect()
-                        }
-                        .opacity(loadingState != nil ? 0.3 : 1.0)
-                        .allowsHitTesting(loadingState == nil)
-                        .disabled(!areCredentialsValid)
-                        .accessibilityAddTraits(.isButton)
-                        .accessibility(identifier: "connect_button")
-                        ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
-                            sendForgotPassword()
-                        }
-                        .overlay(forgotPasswordTooltip == nil ? nil : Tooltip(title: forgotPasswordTooltip ?? "")
-                                    .fixedSize().offset(x: 0, y: 30).transition(.opacity.combined(with: .move(edge: .top))),
-                                 alignment: .bottom)
-                        .animation(BeamAnimation.easeInOut(duration: 0.3), value: forgotPasswordTooltip)
-                    }
+                    OnboardingView.TitleText(title: "Connect with Email")
+                    emailForm
                 }
+                .frame(width: 280)
                 .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             }
         }
         .onAppear {
+            updateButtonState()
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                 // wait a little for the animation to finish before focusing the text field
                 isEmailEditing = true
@@ -146,10 +153,17 @@ struct OnboardingEmailConnectView: View {
         passwordMissingRequirements = missing
     }
 
+    private let actionId = "connect_button"
     private func updateButtonState() {
         forgotPasswordTooltip = nil
         errorState = nil
         areCredentialsValid = passwordMissingRequirements.isEmpty && emailField.mayBeEmail
+        actions = [
+            .init(id: actionId, title: "Connect", enabled: areCredentialsValid && loadingState == nil, onClick: {
+                triggerConnect()
+                return false
+            })
+        ]
     }
 
     private func triggerConnect() {
@@ -158,6 +172,7 @@ struct OnboardingEmailConnectView: View {
         isPasswordEditing = false
         loadingState = .signinin
         var loadingStartTime = BeamDate.now
+        updateButtonState()
         accountManager.signIn(email: emailField, password: passwordField) { result in
             DispatchQueue.main.async {
                 switch result {
@@ -166,8 +181,11 @@ struct OnboardingEmailConnectView: View {
                     if case APIRequestError.notFound = error {
                         createAccount()
                     } else if case APIRequestError.apiErrors(let errorable) = error,
-                              errorable.errors?.first?.message == AccountManager.AuthenticationAPIError.userNotFound.description {
+                              errorable.errors?.first(where: { $0.code == .userNotFound }) != nil {
                         createAccount()
+                    } else if case APIRequestError.apiErrors(let errorable) = error,
+                              errorable.errors?.first(where: { $0.code == .userNotConfirmed }) != nil {
+                        showEmailConfirmationStep()
                     } else if error as? APIRequestError != nil {
                         errorState = .invalidCredentials
                     } else {
@@ -184,6 +202,11 @@ struct OnboardingEmailConnectView: View {
         }
     }
 
+    private func showEmailConfirmationStep() {
+        onboardingManager.temporaryCredentials = (emailField, passwordField)
+        finish(.init(type: .emailConfirm))
+    }
+
     private func createAccount() {
         guard areCredentialsValid, loadingState == nil else { return }
         loadingState = .signinup
@@ -198,7 +221,7 @@ struct OnboardingEmailConnectView: View {
                         errorState = .genericError(description: error.localizedDescription)
                     }
                 case .success:
-                    finish(nil)
+                    showEmailConfirmationStep()
                 }
             }
         }
@@ -248,6 +271,6 @@ struct OnboardingEmailConnectView: View {
 
 struct OnboardingEmailConnectView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingEmailConnectView(finish: { _ in })
+        OnboardingEmailConnectView(actions: .constant([]), finish: { _ in })
     }
 }
