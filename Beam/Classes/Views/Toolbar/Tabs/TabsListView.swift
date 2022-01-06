@@ -138,7 +138,7 @@ struct TabsListView: View {
                     if h { hoveredIndex = index }
                 }
                 .background(!selected ? nil : GeometryReader { prxy in
-                    Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil))
+                    Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: index, frame: prxy.safeTopLeftGlobalFrame(in: nil).rounded()))
                 })
                 .contextMenu { tabContextMenuItems(forTabAtIndex: index) }
             if !isSingle && !isTheDraggedTab {
@@ -262,9 +262,10 @@ struct TabsListView: View {
             .onDisappear {
                 updateDraggableWindowRect(with: nil, otherTabsCount: tabsSections.otherTabs.count)
             }
-            .onPreferenceChange(CurrentTabGlobalFrameKey.self) {
+            .onPreferenceChange(CurrentTabGlobalFrameKey.self) { [weak state] newValue in
                 guard !isDraggingATab else { return }
-                state.browserTabsManager.currentTabUIFrame = $0
+                guard newValue == nil || newValue?.index == selectedIndex else { return }
+                state?.browserTabsManager.currentTabUIFrame = newValue?.frame
             }
         }
     }
@@ -352,8 +353,13 @@ struct TabsListView: View {
 }
 
 private struct CurrentTabGlobalFrameKey: PreferenceKey {
-    static let defaultValue: CGRect? = nil
-    static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) {
+
+    struct TabFrame: Equatable {
+        var index: Int
+        var frame: CGRect
+    }
+    static let defaultValue: TabFrame? = nil
+    static func reduce(value: inout TabFrame?, nextValue: () -> TabFrame?) {
         value = nextValue() ?? value
     }
 }
