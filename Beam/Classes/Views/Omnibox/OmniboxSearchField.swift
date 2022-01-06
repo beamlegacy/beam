@@ -123,7 +123,6 @@ struct OmniboxSearchField: View {
                             .foregroundColor(Color.purple)
                             .hidden()
                             .layoutPriority(10)
-                            .animation(nil)
                         GeometryReader { geo in
                             HStack {
                             let pixelRoundUp = geo.frame(in: .global).minX.truncatingRemainder(dividingBy: 1)
@@ -146,6 +145,7 @@ struct OmniboxSearchField: View {
                 }
             }
         }
+        .animation(nil)
     }
 
     func onEnterPressed(modifierFlags: NSEvent.ModifierFlags?) {

@@ -78,10 +78,15 @@ class AutocompleteManager: ObservableObject {
         var searchText = receivedQueryString
         let previousUnselectedText = getUnselectedText(for: searchQuery)?.lowercased() ?? searchQuery
         let isRemovingCharacters = searchText.count < previousUnselectedText.count || searchText.lowercased() == previousUnselectedText
+        var selectionWasReset = false
         if let realText = replacedProposedText {
             searchText = realText
             replacedProposedText = nil
+        } else if !isRemovingCharacters && autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .autocomplete {
+            // if we autoselect a search engine result that is alone,
+            // let's the keep selection until have new results.
         } else {
+            selectionWasReset = true
             self.resetAutocompleteSelection()
         }
 
@@ -106,7 +111,7 @@ class AutocompleteManager: ObservableObject {
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.autocompleteResults = finalResults
                 if !isRemovingCharacters {
-                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText)
+                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: selectionWasReset)
                 }
             }.store(in: &searchRequestsCancellables)
     }
@@ -158,12 +163,12 @@ class AutocompleteManager: ObservableObject {
         }
     }
 
-    private func automaticallySelectFirstResultIfNeeded(withResults results: [AutocompleteResult], searchText: String) {
+    private func automaticallySelectFirstResultIfNeeded(withResults results: [AutocompleteResult], searchText: String, canResetText: Bool = true) {
         if let firstResult = results.first, isResultCandidateForAutoselection(firstResult, forSearch: searchText) {
             autocompleteSelectedIndex = 0
         } else if autocompleteSelectedIndex == 0 {
             // first result was selected but is not matching anymore
-            self.resetAutocompleteSelection(resetText: true)
+            self.resetAutocompleteSelection(resetText: canResetText)
         }
     }
 
@@ -302,7 +307,12 @@ extension AutocompleteManager {
         // if new entered character is the next character in selection, user is following the autocompletion
         guard currentText.lowercased().starts(with: unselectedProposedText.lowercased()),
               unselectedProposedText.last?.lowercased() == selectedText.first?.lowercased()
-        else { return nil }
+        else {
+            if proposedText.isEmpty {
+                resetAutocompleteSelection(resetText: false)
+            }
+            return nil
+        }
 
         replacedProposedText = unselectedProposedText
         let newRange = unselectedProposedText.count..<currentText.count
