@@ -7,9 +7,18 @@ protocol Errorable {
 }
 
 struct UserErrorData: Codable, Equatable {
+
+    enum UserErrorCode: Int, Codable {
+        case userNotFound = 2000
+        case passwordInvalid = 2001
+        case userLocked = 2002
+        case userNotConfirmed = 2003
+    }
+
     var objectid: String?
     var message: String?
     var path: [String]?
+    var code: UserErrorCode?
 
     var isErrorInvalidChecksum: Bool {
         guard let message = message else { return false }

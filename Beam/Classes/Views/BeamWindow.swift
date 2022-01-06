@@ -63,7 +63,6 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         let mainView = ContentView()
             .environmentObject(state)
             .environmentObject(data)
-            .environmentObject(data.onboardingManager)
             .environmentObject(state.browserTabsManager)
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
@@ -89,19 +88,17 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     }
 
     override func performClose(_ sender: Any?) {
-        if !state.isShowingOnboarding {
-            if state.mode != .web && state.hasUnpinnedBrowserTabs {
-                state.mode = .web
-                return
+        if state.mode != .web && state.hasUnpinnedBrowserTabs {
+            state.mode = .web
+            return
+        }
+        if state.mode == .web {
+            let currentTab = state.browserTabsManager.currentTab
+            _ = state.closeCurrentTab()
+            if currentTab == state.browserTabsManager.currentTab { // currentTab might be the last unclosable tab (unpinned tab)
+                state.mode = .today
             }
-            if state.mode == .web {
-                let currentTab = state.browserTabsManager.currentTab
-                _ = state.closeCurrentTab()
-                if currentTab == state.browserTabsManager.currentTab { // currentTab might be the last unclosable tab (unpinned tab)
-                    state.mode = .today
-                }
-                return
-            }
+            return
         }
         super.performClose(sender)
     }

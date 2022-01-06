@@ -61,4 +61,10 @@ extension AccountManager {
 
         return promise.then { _ in true }
     }
+
+    func resendVerificationEmail(email: String) -> Promises.Promise<Bool> {
+        let promise: Promises.Promise<UserSessionRequest.ResendVerificationEmail> = userSessionRequest.resendVerificationEmail(email: email)
+
+        return promise.then { _ in true }
+    }
 }

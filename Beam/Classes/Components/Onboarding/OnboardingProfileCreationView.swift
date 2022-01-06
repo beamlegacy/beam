@@ -16,7 +16,7 @@ struct OnboardingProfileCreationView: View {
     @State private var isEditing: Bool = true
     @State private var isAuthenticated: Bool = false
     @State private var errorMessage: String?
-    private let actionId = UUID()
+    private let actionId = "profile_continue"
 
     private var subtitle: String {
         if let errorMessage = errorMessage {

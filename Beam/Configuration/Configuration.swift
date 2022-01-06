@@ -120,11 +120,10 @@ struct Configuration {
     }
 }
 
-
 extension Configuration {
     enum Env: String {
-        case debug = "debug"
-        case test = "test"
-        case release = "release"
+        case debug
+        case test
+        case release
     }
 }
