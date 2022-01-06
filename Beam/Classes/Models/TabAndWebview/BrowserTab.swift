@@ -415,7 +415,7 @@ import Promises
             Logger.shared.logError("Cannot get current URL", category: .general)
             return nil
         }
-        guard allowSearchResult || SearchEngines.get(url) != nil else {
+        guard allowSearchResult || SearchEngineProvider.provider(for: url) != nil else {
             Logger.shared.logWarning("Adding search results is not allowed", category: .web)
             return nil
         } // Don't automatically add search results
