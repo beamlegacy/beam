@@ -122,7 +122,7 @@ struct SearchEngineSection: View {
     var body: some View {
         VStack(alignment: .leading) {
             Picker("", selection: $selectedSearchEngine) {
-                ForEach(SearchEnginesPreferences.allCases) { engine in
+                ForEach(SearchEngineProvider.allCases) { engine in
                     Text(engine.name)
                 }
             }.labelsHidden()
