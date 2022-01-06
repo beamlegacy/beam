@@ -105,11 +105,12 @@ struct AccountsView: View {
                             }.padding(.bottom, 20)
 
                             Button(action: {
-                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in
+                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                                    if connected { viewModel.calendarManager.updated = true }
                                 }
                             }, label: {
                                 // TODO: loc
-                                Text("Connect Another Google Account...")
+                                Text("Connect Another Google Calendar...")
                                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                                     .frame(width: 236)
                                     .padding(.top, -4)
@@ -195,7 +196,8 @@ struct AccountsView: View {
     private var connectGoogleCalendarView: some View {
         VStack(alignment: .leading) {
             Button(action: {
-                viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in
+                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                    if connected { viewModel.calendarManager.updated = true }
                 }
             }, label: {
                 // TODO: loc
@@ -380,7 +382,9 @@ struct GoogleAccountView: View {
                 if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
                     Button {
                         onDisconnect?()
-                        viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in}
+                        viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                            if connected { viewModel.calendarManager.updated = true }
+                        }
                     } label: {
                         Text("Fix Permissions...")
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
