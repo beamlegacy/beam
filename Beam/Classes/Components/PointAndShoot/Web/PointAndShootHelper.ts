@@ -298,7 +298,7 @@ export class PointAndShootHelper {
    * Returns boolean if document has active selection
    */
   static hasSelection(win: BeamWindow): boolean {
-    return Boolean(win.document.getSelection().toString())
+    return !win.document.getSelection().isCollapsed && Boolean(win.document.getSelection().toString())
   }
   /**
    * Returns an array of ranges for a given HTML selection
