@@ -132,12 +132,7 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     fileprivate func showConnectWindow() {
         let model = OnboardingManager(onlyLogin: true)
         onboardingManager = model
-        model.$needsToDisplayOnboard.sink { result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-            }
-        }.store(in: &signinScope)
-        AppDelegate.main.showOnboardingWindow(model: model)
+        model.presentOnboardingWindow()
     }
 }
 

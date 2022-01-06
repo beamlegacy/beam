@@ -155,11 +155,10 @@ struct OnboardingImportsView: View {
             updateActions()
         }
         .onChange(of: checkPassword) { newValue in
-            if newValue {
-                updateActions()
-            } else {
+            if !newValue {
                 passwordImportURL = nil
             }
+            updateActions()
         }
         .onChange(of: passwordImportURL) { _ in
             updateActions()
@@ -175,8 +174,8 @@ struct OnboardingImportsView: View {
     private func updateAvailableSources() {
         availableSources = ImportSource.allCases.filter { $0.isAvailable }
     }
-    private let skipActionId = UUID()
-    private let importActionId = UUID()
+    private let skipActionId = "skip_action"
+    private let importActionId = "import_action"
 
     private var shoudlEnableImportButton: Bool {
         if checkPassword {

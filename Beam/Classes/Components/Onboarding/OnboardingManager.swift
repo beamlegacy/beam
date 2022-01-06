@@ -6,19 +6,24 @@
 //
 
 import Foundation
+import Combine
 
 struct OnboardingStep: Equatable {
-
     enum StepType {
         case welcome
         case profile
         case emailConnect
+        case emailConfirm
         case imports
         case loading
     }
 
     let type: StepType
     var title: String?
+}
+
+protocol OnboardingManagerDelegate: AnyObject {
+    func onboardingManagerDidFinish()
 }
 
 class OnboardingManager: ObservableObject {
@@ -28,7 +33,7 @@ class OnboardingManager: ObservableObject {
             lhs.id == rhs.id
         }
 
-        var id = UUID()
+        var id = UUID().uuidString
         var title: String
         var enabled: Bool
         var secondary: Bool = false
@@ -42,8 +47,12 @@ class OnboardingManager: ObservableObject {
     var currentStepIsFromHistory = false
     var onlyLogin: Bool = false
     var onlyImport: Bool = false
+    weak var delegate: OnboardingManagerDelegate?
+    var temporaryCredentials: (email: String, password: String)?
 
     private(set) var stepsHistory = [OnboardingStep]()
+    private weak var window: NSWindow?
+    private var cancellables = Set<AnyCancellable>()
 
     init(onlyLogin: Bool = false, onlyImport: Bool = false) {
         var needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
@@ -64,7 +73,6 @@ class OnboardingManager: ObservableObject {
         }
         self.needsToDisplayOnboard = needsToDisplayOnboard
         currentStep = step ?? OnboardingStep(type: .welcome)
-        Persistence.Authentication.hasSeenOnboarding = true
         self.onlyLogin = onlyLogin
     }
 
@@ -97,12 +105,14 @@ class OnboardingManager: ObservableObject {
             }
         } else {
             needsToDisplayOnboard = false
+            dismissOnboardingWindow()
+            delegate?.onboardingManagerDidFinish()
         }
     }
 
     private func stepAfter(step: OnboardingStep) -> OnboardingStep? {
         switch step.type {
-        case .welcome, .emailConnect:
+        case .welcome, .emailConnect, .emailConfirm:
             if AuthenticationManager.shared.isAuthenticated && AuthenticationManager.shared.username == nil {
                 return OnboardingStep(type: .profile)
             } else {
@@ -115,5 +125,42 @@ class OnboardingManager: ObservableObject {
         default:
             return nil
         }
+    }
+
+    private func onboardingDidStart() {
+        Persistence.Authentication.hasSeenOnboarding = true
+        AuthenticationManager.shared.isAuthenticatedPublisher.sink { [weak self] isAuthenticated in
+            if isAuthenticated {
+                self?.stepsHistory.removeAll()
+            }
+        }.store(in: &cancellables)
+    }
+
+    private func onboardingDidFinish() {
+        cancellables.removeAll()
+    }
+}
+
+// MARK: - Window management
+extension OnboardingManager {
+
+    func presentOnboardingWindow() {
+        if let window = window {
+            window.makeKeyAndOrderFront(nil)
+            return
+        }
+        let newWindow = OnboardingWindow(contentRect: NSRect(x: 0, y: 0, width: 512, height: 600), model: self)
+        newWindow.center()
+        newWindow.makeKeyAndOrderFront(nil)
+        newWindow.isReleasedWhenClosed = false
+        window = newWindow
+        onboardingDidStart()
+        return
+    }
+
+    func dismissOnboardingWindow() {
+        window?.close()
+        window = nil
+        onboardingDidFinish()
     }
 }

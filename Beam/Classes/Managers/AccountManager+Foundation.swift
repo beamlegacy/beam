@@ -184,6 +184,27 @@ extension AccountManager {
     }
 
     @discardableResult
+    func resendVerificationEmail(email: String,
+                                 _ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
+        do {
+            return try userSessionRequest.resendVerificationEmail(email: email) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logInfo("Could not resend verification email: \(error.localizedDescription)", category: .accountManager)
+                    completionHandler?(.failure(error))
+                case .success:
+                    Logger.shared.logInfo("resend verification email succeeded", category: .accountManager)
+                    completionHandler?(.success(true))
+                }
+            }
+        } catch {
+            Logger.shared.logInfo("Could not resend verification email: \(error.localizedDescription)", category: .accountManager)
+            completionHandler?(.failure(error))
+        }
+        return nil
+    }
+
+    @discardableResult
     func getUserInfos(_ completionHandler: ((Result<UserInfoRequest.UserInfos, Error>) -> Void)? = nil) -> URLSessionTask? {
         do {
             return try userInfoRequest.getUserInfos { result in
