@@ -352,9 +352,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     private func observeCalendarManager(_ calendarManager: CalendarManager) {
-        calendarManager.$connectedSources.dropFirst().sink { [weak self] _ in
+        calendarManager.$updated.sink { [weak self] updated in
             guard let self = self else { return }
-            self.reloadAllEvents()
+            if updated {
+                self.reloadAllEvents()
+            }
         }.store(in: &scope)
     }
 
