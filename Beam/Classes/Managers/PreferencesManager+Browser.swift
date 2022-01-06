@@ -7,24 +7,6 @@
 
 import Foundation
 
-enum SearchEnginesPreferences: Int, CaseIterable, Identifiable {
-    case google
-    case yahoo
-    case duckduckgo
-    case bing
-
-    var id: Int { return rawValue}
-
-    var name: String {
-        switch self {
-        case .google: return "Google"
-        case .yahoo: return "Yahoo"
-        case .duckduckgo: return "DuckDuckGo"
-        case .bing: return "Bing"
-        }
-    }
-}
-
 enum DownloadFolder: Int, CaseIterable, Identifiable {
     case downloads
     case documents
@@ -92,7 +74,7 @@ extension PreferencesManager {
 
 // MARK: - Default Values
 extension PreferencesManager {
-    static let defaultSearchEngine = 0
+    static let defaultSearchEngine = SearchEngineProvider.google
     static let includeSearchEngineSuggestionDefault = true
     static var defaultDownloadFolder = 0
     static var defaultCustomDownloadFolder: Data? = nil
@@ -105,8 +87,8 @@ extension PreferencesManager {
 }
 
 extension PreferencesManager {
-    @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine, suiteName: BeamUserDefaults.browserPreferences.suiteName)
-    static var selectedSearchEngine: Int
+    @UserDefault(key: selectedDefaultSearchEngineKey, defaultValue: defaultSearchEngine.rawValue, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var selectedSearchEngine: String
 
     @UserDefault(key: searchEngineSuggestionKey, defaultValue: includeSearchEngineSuggestionDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var includeSearchEngineSuggestion: Bool

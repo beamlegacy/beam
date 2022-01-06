@@ -33,13 +33,13 @@ class AutocompleteManager: ObservableObject {
     let beamData: BeamData
 
     private let searchEngineCompleter: Autocompleter
-    var searchEngine: SearchEngine {
+    var searchEngine: SearchEngineDescription {
         searchEngineCompleter.searchEngine
     }
     private var scope = Set<AnyCancellable>()
     var searchRequestsCancellables = Set<AnyCancellable>()
 
-    init(with data: BeamData, searchEngine: SearchEngine) {
+    init(with data: BeamData, searchEngine: SearchEngineDescription) {
         beamData = data
         searchEngineCompleter = Autocompleter(searchEngine: searchEngine)
 
