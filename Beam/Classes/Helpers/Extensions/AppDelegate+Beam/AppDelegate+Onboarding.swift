@@ -6,18 +6,13 @@
 //
 
 import Foundation
-extension AppDelegate {
-    func showOnboardingWindow(model: OnboardingManager) {
-        if let onboardingWindow = onboardingWindow {
-            onboardingWindow.makeKeyAndOrderFront(window)
+
+extension AppDelegate: OnboardingManagerDelegate {
+    func onboardingManagerDidFinish() {
+        guard windows.isEmpty else {
+            windows.first?.makeKeyAndOrderFront(nil)
             return
         }
-        onboardingWindow = OnboardingWindow(contentRect: NSRect(x: 0, y: 0, width: 500, height: 520), model: model)
-        onboardingWindow?.center()
-        onboardingWindow?.makeKeyAndOrderFront(window)
-    }
-
-    func closeOnboardingWindow() {
-        self.onboardingWindow?.close()
+        createWindow(frame: nil, restoringTabs: false)
     }
 }

@@ -136,6 +136,9 @@ struct ActionableButton: View {
                 action?()
             } : nil
         )
+        .accessibilityElement(children: .ignore)
+        .accessibilityAddTraits(.isButton)
+        .accessibilityIdentifier(text)
     }
 
     private var actualState: ActionableButtonState {

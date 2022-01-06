@@ -8,9 +8,11 @@
 import Foundation
 
 class OnboardingWindow: NSWindow, NSWindowDelegate {
+    override var isResizable: Bool { false }
+
     init(contentRect: NSRect, model: OnboardingManager) {
         super.init(contentRect: contentRect,
-                   styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+                   styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
 
@@ -20,9 +22,5 @@ class OnboardingWindow: NSWindow, NSWindowDelegate {
         contentView = BeamHostingView(rootView: onboardingView)
         isMovableByWindowBackground = false
         delegate = self
-    }
-
-    deinit {
-        AppDelegate.main.onboardingWindow = nil
     }
 }

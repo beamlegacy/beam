@@ -14,7 +14,6 @@ class AccountsViewModel: ObservableObject {
     @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @Published var accountsCalendar: [AccountCalendar] = []
 
-    private var onboardingScope = Set<AnyCancellable>()
     private var scope = Set<AnyCancellable>()
 
     init(calendarManager: CalendarManager) {
@@ -40,14 +39,8 @@ class AccountsViewModel: ObservableObject {
 
     fileprivate func showOnboarding() {
         let onboardingManager = OnboardingManager(onlyLogin: true)
-        onboardingScope.removeAll()
-        onboardingManager.$needsToDisplayOnboard.sink { result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-            }
-        }.store(in: &onboardingScope)
         self.onboardingManager = onboardingManager
-        AppDelegate.main.showOnboardingWindow(model: onboardingManager)
+        onboardingManager.presentOnboardingWindow()
     }
 }
 

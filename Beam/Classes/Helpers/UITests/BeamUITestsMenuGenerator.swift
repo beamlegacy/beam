@@ -257,6 +257,10 @@ class BeamUITestsMenuGenerator {
         logout()
         AuthenticationManager.shared.username = nil
         AppDelegate.main.window?.state.data.onboardingManager.resetOnboarding()
+        AppDelegate.main.windows.forEach { window in
+            window.close()
+        }
+        AppDelegate.main.createWindow(frame: nil, restoringTabs: false)
     }
 
     private func clearPasswordsDatabase() {

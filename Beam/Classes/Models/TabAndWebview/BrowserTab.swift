@@ -605,9 +605,8 @@ import Promises
 
         var newWebView: BeamWebView
         var newWindow: NSWindow
-        if menubar && statusBar && toolBars && resizing {
+        if menubar && statusBar && toolBars && resizing, let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame, restoringTabs: false) {
             // we are being asked for the full browser experience, give it to them...
-            let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame, restoringTabs: false)
             let tab = createNewTab(targetURL, configuration, setCurrent: setCurrent, state: newBeamWindow.state)
             newWindow = newBeamWindow
             newWebView = tab.webView
@@ -626,7 +625,6 @@ import Promises
             newWindow = NSWindow(contentRect: windowFrame, styleMask: windowMasks, backing: .buffered, defer: true)
             newWindow.isReleasedWhenClosed = false
             newWindow.contentView = newWebView
-
             newWindow.makeKeyAndOrderFront(nil)
         }
         if windowFeatures.x == nil || windowFeatures.y == nil {
