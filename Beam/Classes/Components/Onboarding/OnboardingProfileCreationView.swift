@@ -23,7 +23,7 @@ struct OnboardingProfileCreationView: View {
             return errorMessage
         }
         var text = "Enter a username for your profile."
-        if textField.isEmpty {
+        if textField.count >= 2 {
             text += "\nYou can access your profile at beamapp.co/\(textField)"
         }
         return text
@@ -34,9 +34,14 @@ struct OnboardingProfileCreationView: View {
             OnboardingView.TitleText(title: "Create your profile")
             VStack(alignment: .leading, spacing: BeamSpacing._60) {
                 BeamTextField(text: $textField, isEditing: $isEditing, placeholder: "Username", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, onTextChanged: { newValue in
-                    errorMessage = nil
+                    let isValid = isUsernameValid(newValue)
+                    if !isValid {
+                        errorMessage = buildErrorMessageForInvalidUsername(newValue)
+                    } else {
+                        errorMessage = nil
+                    }
                     actions = [
-                        .init(id: actionId, title: "Continue", enabled: isUsernameValid(newValue), onClick: {
+                        .init(id: actionId, title: "Continue", enabled: isValid, onClick: {
                             saveUsernameAndFinish()
                             return false
                         })
@@ -65,6 +70,17 @@ struct OnboardingProfileCreationView: View {
 
     private func isUsernameValid(_ username: String) -> Bool {
         username.mayBeUsername
+    }
+
+    private func buildErrorMessageForInvalidUsername(_ username: String) -> String? {
+        guard username.count >= 2 else { return nil }
+        if username.count > 30 {
+            return "Username is too long."
+        }
+        if !username.matches(withRegex: "^[A-Za-z0-9\\-_]+$") {
+            return "Username can't contain special characters."
+        }
+        return nil
     }
 
     private func saveUsernameAndFinish() {
