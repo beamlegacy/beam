@@ -33,11 +33,17 @@ struct OnboardingView: View {
                     .offset(x: 0, y: stepOffset[.profile] ?? 0)
                     .opacity(stepOpacity[.profile] ?? 1)
                 case .emailConnect:
-                    OnboardingEmailConnectView { nextStep in
+                    OnboardingEmailConnectView(actions: $model.actions) { nextStep in
                         model.advanceToNextStep(nextStep)
                     }
                     .offset(x: 0, y: stepOffset[.emailConnect] ?? 0)
                     .opacity(stepOpacity[.emailConnect] ?? 1)
+                case .emailConfirm:
+                    OnboardingEmailConfirmationView(actions: $model.actions) { nextStep in
+                        model.advanceToNextStep(nextStep)
+                    }
+                    .offset(x: 0, y: stepOffset[.emailConfirm] ?? 0)
+                    .opacity(stepOpacity[.emailConfirm] ?? 1)
                 case .imports:
                     OnboardingImportsView(actions: $model.actions) { nextStep in
                         model.advanceToNextStep(nextStep)
@@ -56,6 +62,7 @@ struct OnboardingView: View {
             .frame(minWidth: 280)
             .padding(.top, BeamSpacing._100)
             .fixedSize(horizontal: true, vertical: false)
+            .environmentObject(model)
             bottomBar
         }
         .background(BeamColor.Generic.background.swiftUI.edgesIgnoringSafeArea(.all))
@@ -70,6 +77,7 @@ struct OnboardingView: View {
             }
             animateStepTransition(to: newValue, from: displayedStep, reverse: model.currentStepIsFromHistory)
         }
+        .frame(width: 512, height: 600)
     }
 
     private func animateStepTransition(to newStep: OnboardingStep, from previousStep: OnboardingStep, reverse: Bool = false) {
@@ -99,7 +107,7 @@ struct OnboardingView: View {
     }
 
     private let customButtonStyle = ButtonLabelStyle(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear)
-    private let bottomBarHeight: CGFloat = 76
+    private let bottomBarHeight: CGFloat = 90
     private var secondarActionVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.secondary.style
         style.icon = .init(name: "shortcut-bttn_space", size: 16, palette: style.icon?.palette, alignment: .trailing)
@@ -115,7 +123,7 @@ struct OnboardingView: View {
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
                 }
                 Spacer()
-                if [.welcome, .emailConnect].contains(currentStep.type) {
+                if [.welcome].contains(currentStep.type) {
                     GlobalCenteringContainer(containerGeometry: proxy) {
                         HStack(spacing: 0) {
                             Text("Terms and Conditions").onTapGesture {
@@ -140,6 +148,8 @@ struct OnboardingView: View {
                                 model.advanceToNextStep()
                             }
                         })
+                            .disabled(!action.enabled)
+                            .accessibilityIdentifier(action.id)
                     }
                 }
             }
@@ -149,6 +159,8 @@ struct OnboardingView: View {
             .frame(maxHeight: .infinity)
         }
         .animation(BeamAnimation.easeInOut(duration: 0.3), value: model.actions)
+        .padding(.top, BeamSpacing._200)
+        .padding(.bottom, BeamSpacing._400)
         .frame(height: bottomBarHeight)
         .frame(maxWidth: .infinity)
     }

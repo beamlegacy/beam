@@ -20,7 +20,7 @@ class HelpTestView: BaseView {
     }
     
     func closeShortcuts() {
-        staticText(HelpViewLocators.StaticTexts.closeShortcuts.accessibilityIdentifier).clickOnHittable()
+        button(HelpViewLocators.StaticTexts.closeShortcuts.accessibilityIdentifier).clickOnHittable()
     }
     
     @discardableResult

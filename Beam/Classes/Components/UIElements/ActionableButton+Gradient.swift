@@ -23,7 +23,7 @@ extension ActionableButtonVariant {
     }
 
     static func gradient(icon: String? = nil) -> ActionableButtonVariant {
-        var baseStyle = ActionableButtonVariant.secondary.style
+        var baseStyle = ActionableButtonVariant.primaryPurple.style
         let foreground = BeamColor.From(color: .white)
         let foregroundPalette = ActionableButtonState.Palette(normal: foreground, hovered: foreground, clicked: foreground, disabled: baseStyle.foregroundColor.disabled)
         baseStyle.foregroundColor = foregroundPalette

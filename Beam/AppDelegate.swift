@@ -211,13 +211,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     Logger.shared.logError(error.localizedDescription, category: .database)
                 }
 
-                DispatchQueue.main.async {
-                    if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id, self.window?.state.isShowingOnboarding != true {
-                        Logger.shared.logWarning("Default database changed, showing alert",
-                                                 category: .database,
-                                                 localTimer: localTimer)
-                        DatabaseManager.showRestartAlert(previousDefaultDatabase,
-                                                         DatabaseManager.defaultDatabase)
+                DispatchQueue.main.async { [unowned self] in
+                    if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
+                        if self.data.onboardingManager.needsToDisplayOnboard == true {
+                            Logger.shared.logWarning("Default database changed after onboarding",
+                                                    category: .database, localTimer: localTimer)
+                        } else {
+                            Logger.shared.logWarning("Default database changed, showing alert",
+                                                    category: .database, localTimer: localTimer)
+                            DatabaseManager.showRestartAlert(previousDefaultDatabase, DatabaseManager.defaultDatabase)
+                        }
                     }
                     completionHandler?(.success(success))
                 }
@@ -262,7 +265,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow {
+    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow? {
+        guard !data.onboardingManager.needsToDisplayOnboard else {
+            data.onboardingManager.delegate = self
+            data.onboardingManager.presentOnboardingWindow()
+            return nil
+        }
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
                                 data: data,
@@ -365,7 +373,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
-    var onboardingWindow: OnboardingWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {

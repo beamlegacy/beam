@@ -6,17 +6,6 @@ class AccountManager {
 
     let userSessionRequest = UserSessionRequest()
     let userInfoRequest = UserInfoRequest()
-
-    enum AuthenticationAPIError: Error {
-        case userNotFound
-
-        var description: String {
-            switch self {
-            case .userNotFound:
-                return "User not found"
-            }
-        }
-    }
 }
 
 // Safari Keychain
