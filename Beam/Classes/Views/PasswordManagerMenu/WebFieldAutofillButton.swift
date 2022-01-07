@@ -10,30 +10,26 @@ import SwiftUI
 struct WebFieldAutofillButton: View {
     var action: () -> Void
 
-    @Environment(\.colorScheme) private var colorScheme
-
     @State private var isHovering = false
 
     var body: some View {
         Button(action: action) {
             ZStack {
                 backgroundColor
-                    .blendMode(colorScheme == .light ? .multiply : .screen)
                     .frame(width: 24, height: 24)
                     .cornerRadius(3)
                 Image("autofill-password")
                     .renderingMode(.template)
-                    .foregroundColor(isHovering ? BeamColor.Niobium.swiftUI : BeamColor.Corduroy.swiftUI)
-                    .blendMode(colorScheme == .light ? .multiply : .screen)
+                    .foregroundColor(isHovering ? BeamColor.WebFieldAutofill.fieldButtonIconHovered.swiftUI : BeamColor.WebFieldAutofill.fieldButtonIcon.swiftUI)
             }
             .onHover { isHovering = $0 }
         }
         .buttonStyle(.borderless)
+        .environment(\.colorScheme, .light)
     }
 
     var backgroundColor: Color {
-        guard isHovering else { return .clear }
-        return BeamColor.Mercury.swiftUI
+        isHovering ? BeamColor.WebFieldAutofill.fieldButtonBackgroundHovered.swiftUI : .clear
     }
 }
 
