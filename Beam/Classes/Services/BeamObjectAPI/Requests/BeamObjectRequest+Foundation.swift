@@ -186,6 +186,56 @@ extension BeamObjectRequest {
             }
         }
     }
+
+    func prepare(_ beamObject: BeamObject,
+                 _ completion: @escaping (Swift.Result<BeamObjectUpload, Error>) -> Void) throws -> URLSessionDataTask? {
+
+        let saveObject = beamObject.copy()
+
+        let parameters = try prepareBeamObjectParameters(saveObject)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_object", variables: parameters)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<BeamObjectsUploads, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let prepareBeamObjects):
+                guard let beamObject = prepareBeamObjects.beamObjectUpload else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                completion(.success(beamObject))
+            }
+        }
+    }
+
+    func prepare(_ beamObjects: [BeamObject],
+                 _ completion: @escaping (Swift.Result<[BeamObjectUpload], Error>) -> Void) throws -> URLSessionDataTask? {
+        let saveObjects: [BeamObject] = beamObjects.map {
+            $0.copy()
+        }
+
+        let parameters = try prepareBeamObjectsParameters(saveObjects)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_objects", variables: parameters)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<BeamObjectsUploads, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let prepareBeamObjects):
+                guard let beamObjects = prepareBeamObjects.beamObjectUploads else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                completion(.success(beamObjects))
+            }
+        }
+    }
+
     @discardableResult
     func delete<T: BeamObjectProtocol>(object: T,
                                        _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws  -> URLSessionDataTask {
@@ -500,6 +550,7 @@ extension BeamObjectRequest {
     enum BeamObjectRequestError: Error {
         case malformattedURL
         case not200
+        case noData
     }
 
     @discardableResult
