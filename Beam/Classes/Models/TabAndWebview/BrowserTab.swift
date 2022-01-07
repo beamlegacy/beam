@@ -5,9 +5,10 @@ import WebKit
 import BeamCore
 import Promises
 
-enum GoogleURLHostsThatBreakOnUserAgentStrings: String, CaseIterable {
+enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     case docs = "docs.google.com"
     case sheets_new = "sheets.new"
+    case sheets = "sheets.google.com"
 }
 
 // swiftlint:disable file_length
@@ -44,7 +45,7 @@ enum GoogleURLHostsThatBreakOnUserAgentStrings: String, CaseIterable {
             // The alternative of setting the applicationNameForUserAgent in BeamWebViewConfiguration
             // creates unexpected behaviour on google search results pages.
             // Source: https://github.com/sindresorhus/Plash/blob/main/Plash/WebViewController.swift#L69-L72
-            let shouldClearUserAgent = GoogleURLHostsThatBreakOnUserAgentStrings
+            let shouldClearUserAgent = GoogleURLHostsThatBreakOnUserAgentString
                 .allCases
                 .contains(where: { $0.rawValue == url.host })
 
