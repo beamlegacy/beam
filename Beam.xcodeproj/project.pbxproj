@@ -395,6 +395,8 @@
 		52F4E4AE264182E00067B017 /* IdentityRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52F4E4AD264182E00067B017 /* IdentityRequest.swift */; };
 		52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4B32641844E0067B017 /* delete_identity.graphql */; };
 		52F4E4BA264185FC0067B017 /* identities.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F4E4B9264185FC0067B017 /* identities.graphql */; };
+		52F78D2827872F55007A9F53 /* prepare_beam_objects.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F78D2727872F55007A9F53 /* prepare_beam_objects.graphql */; };
+		52F78D2F27884699007A9F53 /* prepare_beam_object.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 52F78D2E27884699007A9F53 /* prepare_beam_object.graphql */; };
 		52FB30CA25E3D7B3001BF098 /* String+Title.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FB30C925E3D7B3001BF098 /* String+Title.swift */; };
 		52FC002325E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FC002225E4244200ABECB0 /* MenuAvailableCommands.swift */; };
 		52FC002425E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52FC002225E4244200ABECB0 /* MenuAvailableCommands.swift */; };
@@ -1587,6 +1589,8 @@
 		52F4E4AD264182E00067B017 /* IdentityRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IdentityRequest.swift; sourceTree = "<group>"; };
 		52F4E4B32641844E0067B017 /* delete_identity.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_identity.graphql; sourceTree = "<group>"; };
 		52F4E4B9264185FC0067B017 /* identities.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = identities.graphql; sourceTree = "<group>"; };
+		52F78D2727872F55007A9F53 /* prepare_beam_objects.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = prepare_beam_objects.graphql; sourceTree = "<group>"; };
+		52F78D2E27884699007A9F53 /* prepare_beam_object.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = prepare_beam_object.graphql; sourceTree = "<group>"; };
 		52FB30C925E3D7B3001BF098 /* String+Title.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Title.swift"; sourceTree = "<group>"; };
 		52FC002225E4244200ABECB0 /* MenuAvailableCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuAvailableCommands.swift; sourceTree = "<group>"; };
 		52FC003C25E426FE00ABECB0 /* BeamUITestsMenuGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUITestsMenuGeneratorTests.swift; sourceTree = "<group>"; };
@@ -3301,6 +3305,8 @@
 				5224CD4B2685FF8C00D4179E /* delete_beam_object.graphql */,
 				5224CD5F2685FFB500D4179E /* delete_all_beam_objects.graphql */,
 				5224CD452685FF7E00D4179E /* update_beam_objects.graphql */,
+				52F78D2727872F55007A9F53 /* prepare_beam_objects.graphql */,
+				52F78D2E27884699007A9F53 /* prepare_beam_object.graphql */,
 				5224CD512685FF9B00D4179E /* update_beam_object.graphql */,
 				5224CD692685FFD100D4179E /* beam_object.graphql */,
 				52EA56CD274F8F8B00F092C8 /* beam_object_data_url.graphql */,
@@ -5599,6 +5605,7 @@
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
+				52F78D2F27884699007A9F53 /* prepare_beam_object.graphql in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
 				022843372617C4C3001C062E /* OverrideConsole.js in Resources */,
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
@@ -5638,6 +5645,7 @@
 				A515597A267786E1006F6D6F /* MediaPlayer.js in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
 				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
+				52F78D2827872F55007A9F53 /* prepare_beam_objects.graphql in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
@@ -6504,7 +6512,6 @@
 				418172072581107C00317ED8 /* Document.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
 				A51C4C262771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift in Sources */,
-				87D53559272608D700163D9B /* SuggestPasswordCell.swift in Sources */,
 				A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */,
 				A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */,
 				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
