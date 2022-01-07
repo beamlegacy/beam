@@ -26,8 +26,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
     private var passwordMenuWindow: PopoverWindow?
-    private var passwordMenuPosition: CGPoint = .zero
-    private var webViewScrollPosition: CGPoint = .zero
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
     private var autocompleteContext: WebAutocompleteContext
@@ -242,31 +240,26 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
-        webViewScrollPosition.x = x
-        webViewScrollPosition.y = y
+        guard currentlyFocusedElementId != nil || fieldWithIcon != nil else {
+            return
+        }
         DispatchQueue.main.async {
             if self.passwordMenuWindow != nil {
                 self.dismissPasswordManagerMenu()
             }
             self.clearIcon()
-            Logger.shared.logDebug("scrolled to \(x) \(y) \(width) \(height)", category: .passwordManagerInternal)
         }
     }
 
     func updateViewSize(width: CGFloat, height: CGFloat) {
-        guard let elementId = currentlyFocusedElementId, let menuWindow = passwordMenuWindow else {
+        guard currentlyFocusedElementId != nil || fieldWithIcon != nil else {
             return
         }
-        requestWebFieldFrame(elementId: elementId) { frame in
-            if let frame = frame {
-                DispatchQueue.main.async { [unowned self] in
-                    var position = self.page?.webView.convert(frame.origin, to: nil) ?? CGPoint.zero
-                    let topInset = self.page?.webView.topContentInset ?? 0
-                    position.y -= menuWindow.frame.size.height + topInset
-                    self.passwordMenuPosition = position
-                    menuWindow.setOrigin(self.passwordMenuPosition)
-                }
+        DispatchQueue.main.async {
+            if self.passwordMenuWindow != nil {
+                self.dismissPasswordManagerMenu()
             }
+            self.clearIcon()
         }
     }
 
