@@ -71,12 +71,17 @@ struct SmallUpdateIndicatorView: View {
                 ButtonLabel("Installing update…")
             case .updateInstalled:
                 ButtonLabel(updateInstalledMessage(timerExpired: timerExpired), customStyle: buttonLabelStyle) {
+                    updateInstalledTimerCancellable?.cancel()
                     NSApp.terminate(nil)
-                }.onAppear(perform: {
+                }
+                .onAppear(perform: {
                     updateInstalledTimerCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
                         timerExpired = true
                     })
                 })
+                .onDisappear {
+                    updateInstalledTimerCancellable?.cancel()
+                }
             default:
                 EmptyView()
             }
