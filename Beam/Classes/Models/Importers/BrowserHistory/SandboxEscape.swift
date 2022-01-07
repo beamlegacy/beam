@@ -64,4 +64,13 @@ enum SandboxEscape {
         }
         return nil
     }
+
+    static func endorsedIfExists(url: URL) -> Bool {
+        do {
+            return try endorsedURL(for: url) != nil
+        } catch {
+            let decodedError = error as NSError
+            return decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError
+        }
+    }
 }
