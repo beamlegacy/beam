@@ -74,7 +74,10 @@ class ResizableNode: ElementNode {
 
     func setVisibleWidth(_ width: CGFloat? = nil) {
         guard let width = width else { return }
-        let clampedWidth = width.clamp(minWidth, maxWidth ?? fallBackWidth)
+        // clamp the maximum width at the maxWidth of the element or
+        //at the fallBackWidth which ever is smallest
+        let maxWidthClamp = min(maxWidth ?? fallBackWidth, fallBackWidth)
+        let clampedWidth = width.clamp(minWidth, maxWidthClamp)
         visibleSize.width = clampedWidth
 
         if keepAspectRatio {
@@ -91,7 +94,10 @@ class ResizableNode: ElementNode {
         if keepAspectRatio {
             let originalAspectRatio = resizableElementContentSize.width / resizableElementContentSize.height
             let computedWidth = height * originalAspectRatio
-            visibleSize.width = computedWidth.clamp(minWidth, maxWidth ?? fallBackWidth)
+            // clamp the maximum width at the maxWidth of the element or
+            //at the fallBackWidth which ever is smallest
+            let maxWidthClamp = min(maxWidth ?? fallBackWidth, fallBackWidth)
+            visibleSize.width = computedWidth.clamp(minWidth, maxWidthClamp)
         }
     }
 
