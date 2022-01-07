@@ -133,6 +133,13 @@ class CardTestView: BaseView {
     func getLinksContentElement() -> [XCUIElement] {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier).allElementsBoundByIndex
     }
+
+    func getFirstLinksContentElement() -> XCUIElement {
+        let firstLink = app.windows.textViews.matching(identifier: CardViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier)
+            .element
+        XCTAssertTrue(firstLink.waitForExistence(timeout: implicitWaitTimeout))
+        return firstLink
+    }
     
     func getLinksNamesNumber() -> Int {
         return self.getLinksNames().count
