@@ -4,7 +4,6 @@ import {
   BeamWindow
 } from "../../../../Helpers/Utils/Web/BeamTypes"
 import type { EmbedNodeUI as EmbedNodeUI } from "./EmbedNodeUI"
-import debounce from "debounce"
 
 export class EmbedNode<UI extends EmbedNodeUI> {
   win: BeamWindow
@@ -38,11 +37,9 @@ export class EmbedNode<UI extends EmbedNodeUI> {
   }
 
   onLoad(): void {
-    // assign resize obserer to body element
-    const target = this.win.document.querySelector("body") as unknown as Element
-    this.bodyResizeObserver.unobserve(target)
-    this.bodyResizeObserver.observe(target)
-    this.win.addEventListener("resize", this.sendSize.bind(this))
+    // assign resize obserer to iframe element
+    const el= this.win.document.querySelector("body > .iframe")
+    this.resizeObserver.observe(el as unknown as Element)
   }
 
   /**
@@ -50,32 +47,25 @@ export class EmbedNode<UI extends EmbedNodeUI> {
    *
    * @memberof EmbedNode
    */
-   bodyResizeObserver = new ResizeObserver((_entries) => {
-    this.sendSize()
-  })
-
-  sendSize() {    
-    const sizing = {
-      width: 0,
-      height: 0
-    }
-    // Get all child elements
-    const els = this.win.document.querySelectorAll("body > .iframe > *")
-
-    // Loop through each of them and get the accumilated Width and Height
-    Array.from(els).forEach((el) => {
-      const styles = this.win.getComputedStyle(el as BeamElement)
-      sizing.width += el.offsetWidth
+   resizeObserver = new ResizeObserver((entries) => {
+     entries.forEach( (entry) => {
+      const sizing = {
+       width: 0,
+       height: 0
+     }
+      const beamElement = entry.target as unknown as BeamElement
+      // Use resizeObserver width and height because `getComputedStyle` might 
+      // return outdated size information and only update the values with a 100-200ms delay
+      const styles = this.win.getComputedStyle(beamElement)
+      sizing.width += entry.contentRect.width
       sizing.width += parseFloat(styles?.marginLeft)
       sizing.width += parseFloat(styles?.marginRight)
-      sizing.height += el.offsetHeight
+      sizing.height += entry.contentRect.height
       sizing.height += parseFloat(styles?.marginTop)
       sizing.height += parseFloat(styles?.marginBottom)
+      this.ui.sendContentSize(sizing)
     })
-
-    // Send the total Width and total Height to the UI
-    this.ui.sendContentSize(sizing)
-  }
+  })
 
   switchTweetTheme(event): void {
     const currentTheme = event.matches ? "light" : "dark"
@@ -93,8 +83,6 @@ export class EmbedNode<UI extends EmbedNodeUI> {
       )
     })
   }
-
-  debouncedSendSize = debounce(this.sendSize, 300, false) // sent on the trailing edge of timeout
 
   toString(): string {
     return this.constructor.name
