@@ -51,7 +51,7 @@ class LinksTests: BaseTest {
         let cardView = createCardsAndLinkThem()
         
         testRailPrint("When I delete the link between \(cardName2) and \(cardName1)")
-        cardView.getLinksContentElement()[0].tapInTheMiddle()
+        cardView.getFirstLinksContentElement().tapInTheMiddle()
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.typeKeyboardKey(.delete)
         

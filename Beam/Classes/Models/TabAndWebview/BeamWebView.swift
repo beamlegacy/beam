@@ -60,6 +60,7 @@ class BeamWebView: WKWebView {
         allowsBackForwardNavigationGestures = true
         allowsLinkPreview = true
         allowsMagnification = true
+        customUserAgent = Constants.SafariUserAgent
 
         monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             guard let self = self, self.page != nil else { return event }

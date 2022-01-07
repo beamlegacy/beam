@@ -5,6 +5,11 @@ import WebKit
 import BeamCore
 import Promises
 
+enum GoogleURLHostsThatBreakOnUserAgentStrings: String, CaseIterable {
+    case docs = "docs.google.com"
+    case sheets_new = "sheets.new"
+}
+
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, WebPage, Scorable {
@@ -35,11 +40,15 @@ import Promises
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
-            // Google Sheets shows an error message when using the Safari User Agent
+            // Google Sheets and friends show an error message when using the Safari User Agent
             // The alternative of setting the applicationNameForUserAgent in BeamWebViewConfiguration
             // creates unexpected behaviour on google search results pages.
             // Source: https://github.com/sindresorhus/Plash/blob/main/Plash/WebViewController.swift#L69-L72
-            if url.host == "docs.google.com" {
+            let shouldClearUserAgent = GoogleURLHostsThatBreakOnUserAgentStrings
+                .allCases
+                .contains(where: { $0.rawValue == url.host })
+
+            if shouldClearUserAgent {
                 webView.customUserAgent = ""
             } else {
                 webView.customUserAgent = Constants.SafariUserAgent
