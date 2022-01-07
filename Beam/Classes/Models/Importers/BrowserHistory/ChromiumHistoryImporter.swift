@@ -89,7 +89,9 @@ final class ChromiumHistoryImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from dbPath: String) throws {
-        let dbQueue = try DatabaseQueue(path: dbPath)
+        var configuration = GRDB.Configuration()
+        configuration.readonly = true
+        let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
         try dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM visits") else {
