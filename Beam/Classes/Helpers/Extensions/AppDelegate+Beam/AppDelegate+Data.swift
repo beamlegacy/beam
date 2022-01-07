@@ -4,6 +4,10 @@ import BeamCore
 
 extension AppDelegate {
     @IBAction func deleteLocalContent(_ sender: Any) {
+        deleteAllLocalContent()
+    }
+
+    func deleteAllLocalContent() {
         // Clustering Orphaned file
         do {
             try data.clusteringOrphanedUrlManager.clear()
@@ -83,9 +87,19 @@ extension AppDelegate {
                         UserAlert.showError(message: "Could not delete databases",
                                             error: error)
                     case .success:
-                        UserAlert.showMessage(message: "All the local data has been deleted. Beam must exit now.",
-                                              buttonTitle: "Exit now")
-                        NSApplication.shared.terminate(nil)
+                        if includedRemote {
+                            UserAlert.showMessage(message: "All the Notes data has been deleted. Beam must restart now.",
+                                                  buttonTitle: "Restart Beam now") {
+                                guard Configuration.env != .test else { return }
+                                NSApplication.shared.relaunch()
+                            }
+                        } else {
+                            UserAlert.showMessage(message: "All the local data has been deleted. Beam must restart now.",
+                                                  buttonTitle: "Restart Beam now") {
+                                guard Configuration.env != .test else { return }
+                                NSApplication.shared.relaunch()
+                            }
+                        }
                     }
                 }
             }
