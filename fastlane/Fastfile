@@ -526,12 +526,18 @@ platform :mac do
   private_lane :generate_update_feed do |params|
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
-    s3_path = params[:branch]
+    
+    # We store resources at different locations depending on branches (i.e. for develop/release we use version-specific folders, for others the root) 
+    resources_path = s3_path_from_branch(params[:branch])
+    # The feed is always at the root of the branch folder in s3
+    branch_root_path = params[:branch]
 
-    directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}"
-    app_download_url = "#{directory}/Beam.zip"
-    update_json_url = "#{directory}/AppFeed.json"
-    release_notes_html_url = "#{directory}/release_notes.html"
+    root_directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}"
+    resources_directory = "#{root_directory}/#{resources_path}"
+    branch_root_directory = "#{root_directory}/#{branch_root_path}"
+    app_download_url = "#{resources_directory}/Beam.zip"
+    update_json_url = "#{branch_root_directory}/AppFeed.json"
+    release_notes_html_url = "#{resources_directory}/release_notes.html"
     human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
     machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
     release_title = "Version #{human_version}, build #{machine_version}"
