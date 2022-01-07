@@ -9,6 +9,10 @@ class UserAlert {
         showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle)
     }
 
+    static func showMessage(message: String, informativeText: String? = nil, buttonTitle: String? = nil, buttonAction: (() -> Void)? = nil) {
+        showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle, buttonAction: buttonAction)
+    }
+
     static func showError(message: String, informativeText: String? = nil, buttonTitle: String? = nil) {
         showAlert(message: message, informativeText: informativeText, buttonTitle: buttonTitle, style: .critical)
     }
