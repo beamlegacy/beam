@@ -26,4 +26,8 @@ public extension Data {
             String(format: "%02hhx", $0)
         }.joined().lowercased()
     }
+
+    var md5Base64: String {
+        Data(Insecure.MD5.hash(data: self)).base64EncodedString()
+    }
 }
