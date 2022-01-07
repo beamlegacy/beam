@@ -66,6 +66,7 @@ struct AccountsView: View {
 
     private let accountManager = AccountManager()
     private let contentWidth: Double = PreferencesManager.contentWidth
+    private let checkboxHelper = NSButtonCheckboxHelper()
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
@@ -335,7 +336,13 @@ struct AccountsView: View {
 
     private func promptLogoutAlert() {
         let alert = NSAlert()
-        alert.messageText = "Are you sure you want to sign out from your Beam account?"
+        alert.messageText = "Are you sure you want to sign out ?"
+        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 16))
+        let checkBox = NSButton(checkboxWithTitle: "Delete all my notes & data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
+        checkBox.frame.origin = CGPoint(x: 17, y: 0)
+        checkBox.font = BeamFont.regular(size: 12).nsFont
+        customView.addSubview(checkBox)
+        alert.accessoryView = customView
         alert.addButton(withTitle: "Sign Out")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
@@ -343,6 +350,9 @@ struct AccountsView: View {
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
             AccountManager.logout()
+            if self.checkboxHelper.isOn {
+                AppDelegate.main.deleteAllLocalContent()
+            }
             viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated
         }
     }
