@@ -55,7 +55,7 @@ class ReferencesTests: BaseTest {
             .expandReferenceSection()
         
         testRailPrint("When I delete the reference between \(cardName2) and \(cardName1)")
-        cardView.getLinksContentElement()[0].tapInTheMiddle()
+        cardView.getFirstLinksContentElement().tapInTheMiddle()
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.typeKeyboardKey(.delete)
         
