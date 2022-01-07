@@ -174,7 +174,9 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
 
     func importPasswords(from databaseURL: URL, keychainSecret: String) throws {
         let symmetricKey = try Self.derivedKey(secret: keychainSecret)
-        let dbQueue = try DatabaseQueue(path: databaseURL.path)
+        var configuration = GRDB.Configuration()
+        configuration.readonly = true
+        let dbQueue = try DatabaseQueue(path: databaseURL.path, configuration: configuration)
         try dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM logins") else {
