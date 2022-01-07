@@ -19,20 +19,24 @@ enum BeamFont {
 }
 
 extension BeamFont {
+    private func defaultFont(ofSize: CGFloat) -> NSFont {
+        .systemFont(ofSize: ofSize)
+    }
+
     var nsFont: NSFont {
         switch self {
         case .regular(let size):
-            return NSFont(name: "Inter", size: size)!
+            return NSFont(name: "Inter", size: size) ?? defaultFont(ofSize: size)
         case .medium(let size):
-            return NSFont(name: "Inter-Medium", size: size)!
+            return NSFont(name: "Inter-Medium", size: size) ?? defaultFont(ofSize: size)
         case .semibold(let size):
-            return NSFont(name: "Inter-SemiBold", size: size)!
+            return NSFont(name: "Inter-SemiBold", size: size) ?? defaultFont(ofSize: size)
         case .bold(let size):
-            return NSFont(name: "Inter-Bold", size: size)!
+            return NSFont(name: "Inter-Bold", size: size) ?? defaultFont(ofSize: size)
         case .regularItalic(let size):
-            return NSFont(name: "Inter-Italic", size: size)!
+            return NSFont(name: "Inter-Italic", size: size) ?? defaultFont(ofSize: size)
         case .mediumItalic(let size):
-            return NSFont(name: "Inter-MediumItalic", size: size)!
+            return NSFont(name: "Inter-MediumItalic", size: size) ?? defaultFont(ofSize: size)
         }
     }
 
