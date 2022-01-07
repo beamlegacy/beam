@@ -78,8 +78,11 @@ extension WebPage {
         Promise<Any?> { [unowned self] fulfill, reject in
             var command = jsCode
             if let configuration = webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
-                let parameterized = objectName != nil ? "beam.__ID__\(objectName!)." + jsCode : jsCode
-                command = configuration.obfuscate(str: parameterized)
+                if let name = objectName {
+                    command = configuration.obfuscate(str: "beam.__ID__\(name)." + jsCode)
+                } else {
+                    command = configuration.obfuscate(str: jsCode)
+                }
             }
             webView.evaluateJavaScript(command, in: frameInfo, in: WKContentWorld.page) { result in
                 switch result {
