@@ -8,6 +8,9 @@ window.beam.__ID__PMng = {
         if (element === null) {
             return false
         }
+        if (element.getAttribute('list') !== null) {
+            return false
+        }
         let elementType = element.getAttribute('type')
         return elementType === 'text' || elementType === 'password' || elementType === 'email' || elementType === '' || elementType === null
     },
