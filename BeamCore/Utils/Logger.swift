@@ -39,6 +39,7 @@ public enum LogCategory: String, CaseIterable {
     case passwordManager
     case passwordManagerInternal
     case passwordNetwork
+    case frecencyNetwork
     case fileNetwork
     case linkNetwork
     case clustering

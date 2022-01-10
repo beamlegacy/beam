@@ -331,7 +331,7 @@ extension DestinationNoteAutocompleteList {
             var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
             var items = [DocumentStruct]()
-            var scores = [UUID: Float]()
+            var scores = [UUID: FrecencyNoteRecord]()
             let documentManager = DocumentManager()
             if !text.isEmpty {
                 allowCreateCard = true
@@ -345,7 +345,7 @@ extension DestinationNoteAutocompleteList {
                 items = documentManager.loadDocumentsById(ids: Array(scores.keys))
             }
             let itemsSlice = items.map {
-                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id])
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }
                 .sorted(by: >)
                 .prefix(itemLimit)
