@@ -150,7 +150,13 @@ extension BeamObjectManager {
 
         var localTimer = BeamDate.now
 
-        try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt) { result in
+        /*
+         TODO: when we have no local data, and never did any sync, we don't need to fetch remote checksums,
+         we should just fetch all remote objects
+         */
+
+        try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
+                                          filterDeleted: Persistence.Sync.BeamObjects.last_received_at == nil) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(error.localizedDescription)",
@@ -181,7 +187,7 @@ extension BeamObjectManager {
                     localTimer = BeamDate.now
                     let changedObjects = try self.parseFilteredObjectChecksums(filteredObjects)
 
-                    Logger.shared.logDebug("parsed \(filteredObjects.count) checksums, got \(changedObjects.reduce(0, { $1.value.count })) objects to fetch",
+                    Logger.shared.logDebug("parsed \(beamObjects.count) checksums, got \(changedObjects.reduce(0, { $1.value.count })) objects to fetch",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
 
@@ -200,8 +206,9 @@ extension BeamObjectManager {
                         return
                     }
 
-                    Logger.shared.logDebug("Need to fetch \(ids.count) objects remotely, with different checksums",
-                                           category: .beamObjectNetwork)
+                    Logger.shared.logDebug("need to fetch \(ids.count) remote objects, they have different checksums",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
                     let beamRequestForIds = BeamObjectRequest()
 
                     try beamRequestForIds.fetchAll(receivedAtAfter: nil, ids: ids) { result in
