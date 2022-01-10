@@ -103,7 +103,7 @@ extension BeamObjectRequest {
 
     @discardableResult
     func save(_ beamObjects: [BeamObject],
-              _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
+              _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask? {
         var filesUpload: [GraphqlFileUpload] = []
         var saveBeamObjects: [BeamObject] = []
         var sameChecksum = 0
@@ -148,20 +148,15 @@ extension BeamObjectRequest {
             switch result {
             case .failure(let error):
                 completion(.failure(error))
-            case .success(let updateBeamObjects):
-                guard let beamObjects = updateBeamObjects.beamObjects else {
-                    completion(.failure(APIRequestError.parserError))
-                    return
-                }
-
-                completion(.success(beamObjects))
+            case .success:
+                completion(.success(true))
             }
         }
     }
 
     @discardableResult
     func saveInline(_ beamObjects: [BeamObject],
-                    _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask? {
+                    _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask? {
         var parameters: UpdateBeamObjects
 
         let saveObjects: [BeamObject] = beamObjects.map {
@@ -176,13 +171,8 @@ extension BeamObjectRequest {
             switch result {
             case .failure(let error):
                 completion(.failure(error))
-            case .success(let updateBeamObjects):
-                guard let beamObjects = updateBeamObjects.beamObjects else {
-                    completion(.failure(APIRequestError.parserError))
-                    return
-                }
-
-                completion(.success(beamObjects))
+            case .success:
+                completion(.success(true))
             }
         }
     }
@@ -258,10 +248,12 @@ extension BeamObjectRequest {
     func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
                   beamObjectType: String? = nil,
+                  filterDeleted: Bool? = false,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
-                                               beamObjectType: beamObjectType)
+                                               beamObjectType: beamObjectType,
+                                               filterDeleted: filterDeleted)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
     }
@@ -270,10 +262,12 @@ extension BeamObjectRequest {
     func fetchAllWithDataUrl(receivedAtAfter: Date? = nil,
                              ids: [UUID]? = nil,
                              beamObjectType: String? = nil,
+                             filterDeleted: Bool? = false,
                              _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
-                                               beamObjectType: beamObjectType)
+                                               beamObjectType: beamObjectType,
+                                               filterDeleted: filterDeleted)
 
         return try fetchAllWithFile("beam_objects_data_url", parameters, completion)
     }
@@ -282,10 +276,12 @@ extension BeamObjectRequest {
     func fetchAllChecksums(receivedAtAfter: Date? = nil,
                            ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
+                           filterDeleted: Bool? = false,
                            _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
-                                               beamObjectType: beamObjectType)
+                                               beamObjectType: beamObjectType,
+                                               filterDeleted: filterDeleted)
 
         return try fetchAllWithFile("beam_object_checksums", parameters, completion)
     }

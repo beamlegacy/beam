@@ -116,10 +116,12 @@ extension BeamObjectRequest {
 
     func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
-                  beamObjectType: String? = nil) -> Promise<[BeamObject]> {
+                  beamObjectType: String? = nil,
+                  filterDeleted: Bool? = false) -> Promise<[BeamObject]> {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
-                                               beamObjectType: beamObjectType)
+                                               beamObjectType: beamObjectType,
+                                               filterDeleted: filterDeleted)
 
         return fetchAllWithFile("beam_objects", parameters)
     }
