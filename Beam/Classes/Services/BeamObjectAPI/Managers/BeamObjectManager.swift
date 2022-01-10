@@ -22,9 +22,7 @@ enum BeamObjectObjectType: String {
     case contact
 
     static func fromString(value: String) -> Self? {
-        // Have to try the snake case version as `browsing_tree` used to be saved as `browsingTree`
-        BeamObjectObjectType(rawValue: value) ??
-            BeamObjectObjectType(rawValue: value.camelCaseToSnakeCase())
+        BeamObjectObjectType(rawValue: value)
     }
 }
 
