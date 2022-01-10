@@ -56,7 +56,11 @@ extension BeamObjectChecksum {
         var result: [BeamObject: String] = [:]
 
         checksums.forEach { (key, value) in
-            result[key] = value.previous_checksum
+            // If checksum doesn't exist, findChecksumsForBeamObjects has created a new one. Calling `previous_checksum`
+            // will crash
+            if !value.objectID.isTemporaryID {
+                result[key] = value.previous_checksum
+            }
         }
 
         return result
