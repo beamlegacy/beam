@@ -24,7 +24,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             BeamTestsHelper.logout()
 
             APIRequest.networkCallFiles = []
-            beamHelper.beginNetworkRecording()
+//            beamHelper.beginNetworkRecording()
+            BeamURLSession.shouldNotBeVinyled = true
 
             BeamTestsHelper.login()
 
@@ -39,7 +40,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
         afterEach {
             BeamObjectManager.clearNetworkCalls()
-            beamHelper.endNetworkRecording()
+//            beamHelper.endNetworkRecording()
 
             BeamDate.reset()
         }
@@ -3137,7 +3138,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             context("when object doesn't exist on the API") {
                 context("when we don't send previousChecksum") {
                     context("Foundation") {
-                        it("saves new object") {
+                        fit("saves new object") {
                             let networkCalls = APIRequest.callsCount
 
                             waitUntil(timeout: .seconds(10)) { done in
@@ -3161,7 +3162,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             expect(MyRemoteObjectManager.store[object.beamObjectId]) == object
                         }
 
-                        it("stores previousChecksum") {
+                        fit("stores previousChecksum") {
                             expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
 
                             waitUntil(timeout: .seconds(10)) { done in

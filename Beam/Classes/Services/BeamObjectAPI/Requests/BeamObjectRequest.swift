@@ -48,7 +48,7 @@ class BeamObjectRequest: APIRequest {
         let blobSignedId: String
     }
 
-    struct BeamObjectsUploads: Codable, Errorable {
+    struct PrepareBeamObjectUpload: Codable, Errorable {
         let beamObjectUploads: [BeamObjectUpload]?
         let beamObjectUpload: BeamObjectUpload?
         var errors: [UserErrorData]?

@@ -187,6 +187,7 @@ extension BeamObjectRequest {
         }
     }
 
+    @discardableResult
     func prepare(_ beamObject: BeamObject,
                  _ completion: @escaping (Swift.Result<BeamObjectUpload, Error>) -> Void) throws -> URLSessionDataTask? {
 
@@ -196,7 +197,7 @@ extension BeamObjectRequest {
 
         let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_object", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<BeamObjectsUploads, Error>) in
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<PrepareBeamObjectUpload, Error>) in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
@@ -211,6 +212,7 @@ extension BeamObjectRequest {
         }
     }
 
+    @discardableResult
     func prepare(_ beamObjects: [BeamObject],
                  _ completion: @escaping (Swift.Result<[BeamObjectUpload], Error>) -> Void) throws -> URLSessionDataTask? {
         let saveObjects: [BeamObject] = beamObjects.map {
@@ -221,7 +223,7 @@ extension BeamObjectRequest {
 
         let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_objects", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<BeamObjectsUploads, Error>) in
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<PrepareBeamObjectUpload, Error>) in
             switch result {
             case .failure(let error):
                 completion(.failure(error))
@@ -570,6 +572,46 @@ extension BeamObjectRequest {
 
         let session = BeamURLSession.shared
         let localTimer = BeamDate.now
+        let task = session.dataTask(with: request) { (data, response, error) -> Void in
+            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
+                                   category: .network,
+                                   localTimer: localTimer)
+
+            guard let httpResponse = response as? HTTPURLResponse,
+                  httpResponse.statusCode == 200,
+                  let data = data else {
+                      completionHandler(.failure(error ?? BeamObjectRequestError.not200))
+
+                      return
+                  }
+
+            completionHandler(.success(data))
+        }
+
+        task.resume()
+        return task
+    }
+
+    @discardableResult
+    func sendDataToUrl(urlString: String,
+                       putHeaders: [String: String],
+                       data: Data,
+                       _ completionHandler: @escaping (Swift.Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
+        guard let url = URL(string: urlString) else {
+             throw BeamObjectRequestError.malformattedURL
+        }
+        var request = URLRequest(url: url)
+
+        var headers = putHeaders
+        headers["User-Agent"] = "Beam client, \(Information.appVersionAndBuild)"
+        headers["Content-Length"] = String(data.count)
+        request.httpMethod = "PUT"
+        request.httpBody = data
+        request.allHTTPHeaderFields = headers
+
+        let session = BeamURLSession.shared
+        let localTimer = BeamDate.now
+
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
             Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
                                    category: .network,
