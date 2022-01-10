@@ -56,6 +56,14 @@ extension LibrariesManager {
             if let mergeRequestSourceBranche = ProcessInfo.processInfo.environment["CI_MERGE_REQUEST_SOURCE_BRANCH_NAME"] {
                 scope.setTag(value: mergeRequestSourceBranche, key: "MERGE_REQUEST")
             }
+
+            if let ciJobId = ProcessInfo.processInfo.environment["CI_JOB_ID"] {
+                scope.setTag(value: "https://gitlab.com/beamgroup/beam/-/jobs/\(ciJobId)", key: "CI_JOB_ID")
+            }
+
+            if let scheme = ProcessInfo.processInfo.environment["SCHEME"] {
+                scope.setTag(value: scheme, key: "SCHEME")
+            }
         }
     }
 
