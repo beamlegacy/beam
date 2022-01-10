@@ -33,6 +33,9 @@ protocol WebPage: AnyObject, Scorable {
     var pointAndShoot: PointAndShoot? { get }
     var webPositions: WebPositions? { get }
 
+    var authenticationViewModel: AuthenticationViewModel? { get set }
+    var searchViewModel: SearchViewModel? { get set }
+
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory) -> Promise<Any?>
 
@@ -60,9 +63,8 @@ protocol WebPage: AnyObject, Scorable {
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
 
-    var authenticationViewModel: AuthenticationViewModel? { get set }
-    var searchViewModel: SearchViewModel? { get set }
-
+    // MARK: Mouse Interactions
+    func allowsMouseMoved(with event: NSEvent) -> Bool
 }
 
 protocol WebPageRelated {
@@ -128,6 +130,7 @@ extension WebPage {
     }
 
     func addTextToClusteringManager(_ text: String, url: URL) { }
+    func allowsMouseMoved(with event: NSEvent) -> Bool { true }
 }
 
 extension WebPage {
