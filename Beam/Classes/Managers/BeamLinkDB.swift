@@ -275,7 +275,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                     }
                 }
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
             }
         }
     }
@@ -306,7 +306,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                     }
                 }
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
             }
         }
     }

@@ -262,6 +262,41 @@ struct GRDBDatabase {
             try db.create(index: "LinkUpdatedAt", on: "Link", columns: ["updatedAt"], unique: false)
         }
 
+        migrator.registerMigration("AddBeamObjectFieldsToNoteFrecencyRecords") { db in
+            try db.create(table: "newFrecencyNoteRecord", ifNotExists: true) { t in
+                t.column("id", .text).notNull().primaryKey()
+                t.column("noteId", .text)
+                t.column("lastAccessAt", .date)
+                t.column("frecencyScore", .double)
+                t.column("frecencySortScore", .double)
+                t.column("frecencyKey")
+                t.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("deletedAt", .datetime)
+            }
+            let now = BeamDate.now
+            let rows = try Row.fetchCursor(db, sql: """
+                SELECT noteId, lastAccessAt, frecencyScore, frecencySortScore, frecencyKey FROM FrecencyNoteRecord
+                """
+            )
+            while let row = try rows.next() {
+                try db.execute(
+                        sql: """
+                            INSERT INTO newFrecencyNoteRecord
+                                (id, noteId, lastAccessAt, frecencyScore, frecencySortScore, frecencyKey, createdAt, updatedAt)
+                            VALUES
+                                (?, ?, ?, ?, ?, ?, ?, ?)
+                            """,
+                        arguments: [UUID(), row["noteId"], row["lastAccessAt"], row["frecencyScore"], row["frecencySortScore"],
+                                   row["frecencyKey"], now, now])
+            }
+
+            try db.drop(table: "FrecencyNoteRecord")
+            try db.rename(table: "newFrecencyNoteRecord", to: "FrecencyNoteRecord")
+            try db.create(index: "FrecencyNoteIdKeyIndex", on: "FrecencyNoteRecord", columns: ["noteId", "frecencyKey"], unique: true)
+            try db.create(index: "FrecencyNoteUpdatedAtIndex", on: "FrecencyNoteRecord", columns: ["updatedAt"], unique: false)
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
@@ -1041,29 +1076,37 @@ extension GRDBDatabase {
         }
     }
 
-    func getFrecencyScoreValues(noteIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: Float] {
-        var scores = [UUID: Float]()
+    func getFrecencyScoreValues(noteIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyNoteRecord] {
+        var scores = [UUID: FrecencyNoteRecord]()
         let noteIdsStr = noteIds.map { $0.uuidString }
         try? dbReader.read { db in
             return try FrecencyNoteRecord
                 .filter(noteIdsStr.contains(FrecencyNoteRecord.Columns.noteId))
                 .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
                 .fetchCursor(db)
-                .forEach { scores[$0.noteId] = $0.frecencySortScore }
+                .forEach { scores[$0.noteId] = $0 }
         }
         return scores
     }
-    func getTopNoteFrecencies(limit: Int = 10, paramKey: FrecencyParamKey) -> [UUID: Float] {
-        var scores = [UUID: Float]()
+    func getTopNoteFrecencies(limit: Int = 10, paramKey: FrecencyParamKey) -> [UUID: FrecencyNoteRecord] {
+        var scores = [UUID: FrecencyNoteRecord]()
         try? dbReader.read { db in
             return try FrecencyNoteRecord
                 .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
                 .order(FrecencyNoteRecord.Columns.frecencySortScore.desc)
                 .limit(limit)
                 .fetchCursor(db)
-                .forEach { scores[$0.noteId] = $0.frecencySortScore }
+                .forEach { scores[$0.noteId] = $0 }
         }
         return scores
+    }
+    func allNoteFrecencies(updatedSince: Date?) throws -> [FrecencyNoteRecord] {
+        guard let updatedSince = updatedSince else {
+            return try dbReader.read { db in try FrecencyNoteRecord.fetchAll(db) }
+        }
+        return try dbReader.read { db in
+            try FrecencyNoteRecord.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
+        }
     }
 
     // MARK: - LongTermUrlScore
