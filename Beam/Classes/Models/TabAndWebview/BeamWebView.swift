@@ -189,6 +189,7 @@ class BeamWebView: WKWebView {
     }
 
     public override func mouseMoved(with theEvent: NSEvent) {
+        guard page?.allowsMouseMoved(with: theEvent) != false else { return }
         super.mouseMoved(with: theEvent)
         mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }
