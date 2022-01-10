@@ -70,8 +70,6 @@ public class NoteSources: Codable {
                oldSource.type == .suggestion {
                 if oldSource.score < sourceToAdd.score {
                     sources[urlId] = sourceToAdd
-                } else {
-                    sources[urlId]?.similarity = similarity
                 }
             } else if sources[urlId] == nil {
                 sources[urlId] = sourceToAdd
