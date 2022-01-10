@@ -76,7 +76,7 @@ extension AutocompleteManager {
                     let ids = documentStructs.map { $0.id }
                     let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
                     let autocompleteResults = documentStructs.map {
-                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
+                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
                     }.sorted(by: >).prefix(6)
                     let autocompleteResultsArray = Array(autocompleteResults)
                     self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
@@ -259,7 +259,7 @@ extension AutocompleteManager {
             let ids = documentStructs.map { $0.id }
             let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
             let autocompleteResults = documentStructs.map {
-                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id])
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }.sorted(by: >).prefix(limit)
             let autocompleteResultsArray = Array(autocompleteResults)
             self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray, startedAt: start)

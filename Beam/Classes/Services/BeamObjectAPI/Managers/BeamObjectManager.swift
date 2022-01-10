@@ -20,6 +20,7 @@ enum BeamObjectObjectType: String {
     case document
     case myRemoteObject = "my_remote_object"
     case contact
+    case noteFrecency = "note_frecency"
 
     static func fromString(value: String) -> Self? {
         // Have to try the snake case version as `browsing_tree` used to be saved as `browsingTree`
@@ -115,6 +116,7 @@ class BeamObjectManager {
         BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
+        GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
