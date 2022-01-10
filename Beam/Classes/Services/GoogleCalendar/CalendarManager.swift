@@ -86,6 +86,7 @@ class CalendarManager: ObservableObject {
     }
 
     func getInformation(for source: CalendarService, completionHandler: @escaping (AccountCalendar) -> Void) {
+        lazyInitConnectedSources()
         source.getUserEmail { result in
             switch result {
             case .success(let email):
