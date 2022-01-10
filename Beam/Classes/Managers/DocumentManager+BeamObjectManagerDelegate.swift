@@ -211,7 +211,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     func indexDocument(_ docStruct: DocumentStruct) {
-        BeamNote.indexingQueue.async {
+        BeamNote.indexingQueue.addOperation {
             let decoder = JSONDecoder()
             do {
                 let note = try decoder.decode(BeamNote.self, from: docStruct.data)
