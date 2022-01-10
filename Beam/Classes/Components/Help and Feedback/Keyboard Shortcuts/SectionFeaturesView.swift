@@ -20,7 +20,7 @@ enum SectionShortcuts: String {
         case .browser:
             return [KeyboardFeature(name: "Capture the Web", shortcuts: [Shortcut(modifiers: [.option], keys: [])], prefix: "hold"),
                     KeyboardFeature(name: "Save page", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("S")]), Shortcut(modifiers: [.option], keys: [.string("S")])], separationString: "or"),
-                    KeyboardFeature(name: "Go to Card", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("D")])]),
+                    KeyboardFeature(name: "Go to Note", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("D")])]),
                     KeyboardFeature(name: "Omnibox", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("L")])]),
                     KeyboardFeature(name: "New Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("T")])]),
                     KeyboardFeature(name: "Close Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("W")])]),
@@ -54,7 +54,7 @@ enum SectionShortcuts: String {
                     KeyboardFeature(name: "Italic", shortcuts: [Shortcut(modifiers: [], keys: [.string("**")])]),
                     KeyboardFeature(name: "Strikeout", shortcuts: [Shortcut(modifiers: [], keys: [.string("~~")])]),
                     KeyboardFeature(name: "Journal", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("J")])]),
-                    KeyboardFeature(name: "All cards", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("H")])]),
+                    KeyboardFeature(name: "All Notes", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("H")])]),
                     KeyboardFeature(name: "Find", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("F")])])
             ]        }
     }

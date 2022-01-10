@@ -77,7 +77,7 @@ class PreferencesBaseView: BaseView {
     enum PreferenceMenus {
         case general
         case browser
-        case cards
+        case notes
         case privacy
         case passwords
         case account
@@ -92,8 +92,8 @@ class PreferencesBaseView: BaseView {
             app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.generalButton.accessibilityIdentifier].click()
         case .browser:
             app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.browserButton.accessibilityIdentifier].click()
-        case .cards:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.cardsButton.accessibilityIdentifier].click()
+        case .notes:
+            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.notesButton.accessibilityIdentifier].click()
         case .privacy:
             app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.privacyButton.accessibilityIdentifier].click()
         case .passwords:

@@ -188,7 +188,7 @@ struct MeetingModalView: View {
                 HStack(spacing: BeamSpacing._200) {
                     HStack(spacing: BeamSpacing._60) {
                         CheckboxView(checked: $viewModel.linkCards)
-                        Text("Link Cards")
+                        Text("Link Notes")
                             .font(BeamFont.regular(size: 13).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.onTapGesture {

@@ -47,10 +47,10 @@ class PnSTestView: BaseView {
         /*if isNewCard {
         }*/
         let cardsDropDown = otherElement(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier)
-        XCTAssertTrue(cardsDropDown.waitForExistence(timeout: implicitWaitTimeout), "PnS Card picker drop down didn't appear")
+        XCTAssertTrue(cardsDropDown.waitForExistence(timeout: implicitWaitTimeout), "PnS Note picker drop down didn't appear")
         app.windows.children(matching: .other).matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
         destinationCard.tapInTheMiddle()
-        XCTAssertTrue(WaitHelper().waitForDoesntExist(cardsDropDown), "PnS Card picker drop down remains opened")
+        XCTAssertTrue(WaitHelper().waitForDoesntExist(cardsDropDown), "PnS Note picker drop down remains opened")
         typeKeyboardKey(.enter)
     }
     
