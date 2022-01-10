@@ -17,6 +17,8 @@ struct Configuration {
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
     static private(set) var topDomainDBMaxSize = 10000
     static private(set) var beamObjectDataOnSeparateCall = false
+    static private(set) var beamObjectDataUploadOnSeparateCall = false
+
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
 
