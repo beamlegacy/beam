@@ -97,6 +97,10 @@ class AutocompleteManager: ObservableObject {
         } else {
             publishers = getAutocompletePublishers(for: searchText) +
             [getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)]
+            #if DEBUG
+            // Use this to help you recreate situation producing bugs.
+            //  publishers = getAutocompleteMockPublishers(for: searchText)
+            #endif
         }
 
         Logger.shared.logInfo("------------------- ✳️ Start of autocomplete for \(receivedQueryString) -------------------", category: .autocompleteManager)
@@ -181,15 +185,20 @@ class AutocompleteManager: ObservableObject {
             if i == 0, let completingText = result.completingText,
                isResultCandidateForAutoselection(result, forSearch: completingText) {
                 let completingTextEnd = completingText.wholeRange.upperBound
-                let newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
-                guard newSelection.count > 0 else { return }
+                var newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
+                var queryToSet: String?
+                if newSelection.count > 0 && resultText.prefix(newSelection.lowerBound).lowercased() == completingText.lowercased() {
+                    let additionalText = resultText.substring(range: newSelection)
+                    queryToSet = completingText + additionalText
+                } else if searchQuery != completingText && searchQuerySelectedRange?.isEmpty != true {
+                    queryToSet = completingText
+                    newSelection = completingText.count..<completingText.count
+                }
 
-                let resultPrefix = resultText.prefix(newSelection.lowerBound)
-                guard resultPrefix.lowercased() == completingText.lowercased() else { return }
-
-                let additionalText = resultText.substring(range: newSelection)
-                setQuery(completingText + additionalText, updateAutocompleteResults: false)
-                searchQuerySelectedRange = newSelection
+                if let queryToSet = queryToSet {
+                    setQuery(queryToSet, updateAutocompleteResults: false)
+                    searchQuerySelectedRange = newSelection
+                }
             } else if searchQuery != resultText {
                 setQuery(resultText, updateAutocompleteResults: false)
                 searchQuerySelectedRange = resultText.count..<resultText.count
