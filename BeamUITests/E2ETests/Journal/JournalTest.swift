@@ -20,7 +20,7 @@ class JournalTest: BaseTest {
         testRailPrint("Then Journal scroll view exists")
         XCTAssertTrue(journalScrollView.waitForExistence(timeout: minimumWaitTimeout))
         
-        testRailPrint("When I open All cards and restart the app")
+        testRailPrint("When I open All notes and restart the app")
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         restartApp()
         

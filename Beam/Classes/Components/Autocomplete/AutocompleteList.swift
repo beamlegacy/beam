@@ -77,7 +77,7 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "Search Result 2", source: .autocomplete),
         AutocompleteResult(text: "Site Visited", source: .history, url: URL(string: "https://apple.com")),
         AutocompleteResult(text: "result.com", source: .url),
-        AutocompleteResult(text: "My Own Card", source: .createCard)]
+        AutocompleteResult(text: "My Own Note", source: .createCard)]
     static var previews: some View {
         AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
     }

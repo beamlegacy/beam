@@ -36,7 +36,7 @@ extension AutocompleteManager {
                 .map { canCreate in
                     let createResult = AutocompleteResult(text: searchText,
                                                           source: .createCard,
-                                                          information: "New card",
+                                                          information: "New note",
                                                           completingText: searchText)
                     let results = canCreate ? [createResult] : []
                     return (AutocompleteResult.Source.createCard, results)

@@ -11,14 +11,14 @@ import XCTest
 class CardEditTests: BaseTest {
     
     func testRenameCardSuccessfully() {
-        let cardNameToBeCreated = "RenameCard"
+        let cardNameToBeCreated = "RenameNote"
         let expectedCardRenameFirstTime = "Rename"
         let expectedCardRenameSecondTime = "Renamed2"
         let numberOfLetterToBeDeleted = 4
         
         let journalView = launchApp()
                                                 
-        testRailPrint("Given I create \(cardNameToBeCreated) card")
+        testRailPrint("Given I create \(cardNameToBeCreated) note")
         //To be replaced with UITests helper - card creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
@@ -27,25 +27,25 @@ class CardEditTests: BaseTest {
         cardView.typeKeyboardKey(.delete, numberOfLetterToBeDeleted)
         cardView.typeKeyboardKey(.enter)
         
-        testRailPrint("Then card title is changed to \(expectedCardRenameFirstTime)")
+        testRailPrint("Then note title is changed to \(expectedCardRenameFirstTime)")
         XCTAssertEqual(cardView.getCardTitle(), expectedCardRenameFirstTime)
         
         testRailPrint("When I type \(expectedCardRenameSecondTime) to the title")
         cardView.makeCardTitleEditable().typeText(expectedCardRenameSecondTime)
         cardView.typeKeyboardKey(.enter)
         
-        testRailPrint("Then card's title is changed to \(expectedCardRenameFirstTime + expectedCardRenameSecondTime)")
+        testRailPrint("Then note's title is changed to \(expectedCardRenameFirstTime + expectedCardRenameSecondTime)")
         XCTAssertEqual(cardView.getCardTitle(), expectedCardRenameFirstTime + expectedCardRenameSecondTime)
     }
     
     func testRenameCardError() throws {
         let cardNameToBeCreated = "Rename"
         let cardTwoNameToBeCreated = "Renamed"
-        let expectedErrorMessage = "This card’s title already exists in your knowledge base"
+        let expectedErrorMessage = "This note’s title already exists in your knowledge base"
         
         let journalView = launchApp()
         
-        testRailPrint("Given I create \(cardNameToBeCreated) card")
+        testRailPrint("Given I create \(cardNameToBeCreated) note")
         //To be replaced with UITests helper - card creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
@@ -63,7 +63,7 @@ class CardEditTests: BaseTest {
         let cardNameToBeCreated = "Delete"
         let journalView = launchApp()
         
-        testRailPrint("Given I create \(cardNameToBeCreated) card")
+        testRailPrint("Given I create \(cardNameToBeCreated) note")
         //To be replaced with UITests helper - card creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         testRailPrint("When I try to delete \(cardNameToBeCreated) and cancel it")
@@ -71,7 +71,7 @@ class CardEditTests: BaseTest {
             .clickDeleteButton()
             .cancelDeletion()
         
-        testRailPrint("Then the card is not deleted")
+        testRailPrint("Then the note is not deleted")
         XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated, "\(cardNameToBeCreated) is deleted")
         
         testRailPrint("When I try to delete \(cardNameToBeCreated) and confirm it")
@@ -79,7 +79,7 @@ class CardEditTests: BaseTest {
             .clickDeleteButton()
             .confirmDeletion()
         
-        testRailPrint("Then the card is deleted")
+        testRailPrint("Then the note is deleted")
         XCTAssertFalse(journalView.openAllCardsMenu().isCardNameAvailable(cardNameToBeCreated), "\(cardNameToBeCreated) card is not deleted")
     }
     
@@ -87,7 +87,7 @@ class CardEditTests: BaseTest {
         let pnsView = PnSTestView()
         let webView = WebTestView()
         
-        testRailPrint("When I add image to a card")
+        testRailPrint("When I add image to a note")
         BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
         let imageItemToAdd = pnsView.image("forest")
         pnsView.addToTodayCard(imageItemToAdd)

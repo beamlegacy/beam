@@ -239,7 +239,7 @@ struct AllCardsPageContentView: View {
 
     private var pageTitle: String {
         guard model.isAuthenticated, let username = model.username else {
-            return "All Cards"
+            return "All Notes"
         }
         return username
     }
@@ -261,7 +261,7 @@ struct AllCardsPageContentView: View {
                 if model.isAuthenticated {
                     cardsFilters
                 } else {
-                    ButtonLabel("Connect to Beam to publish your cards") {
+                    ButtonLabel("Connect to Beam to publish your notes") {
                         model.showConnectWindow()
                     }
                 }
@@ -270,7 +270,7 @@ struct AllCardsPageContentView: View {
             .padding(.top, 85)
             .padding(.trailing, 20)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: listType == .publicNotes ? "New Published Card" : "New Private Card",
+                      creationRowTitle: listType == .publicNotes ? "New Published Note" : "New Private Note",
                       shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in

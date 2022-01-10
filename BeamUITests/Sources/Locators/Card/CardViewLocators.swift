@@ -34,7 +34,7 @@ enum CardViewLocators {
     }
     
     enum TextFields: String, CaseIterable, UIElement {
-        case cardTitle = "Card's title"
+        case cardTitle = "Note's title"
         case noteField = "TextNode"
         case imageNote = "ImageNode"
     }
