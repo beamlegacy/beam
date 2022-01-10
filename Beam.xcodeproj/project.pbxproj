@@ -768,6 +768,7 @@
 		A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Additions.swift */; };
 		A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
+		A51058102786E7E600E4F1F2 /* BrowserTab+WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */; };
 		A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */; };
 		A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5144000263803600021DD56 /* TrackableScrollView.swift */; };
 		A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */; };
@@ -1994,6 +1995,7 @@
 		A50612D526CC75200053AD37 /* Calendar+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Additions.swift"; sourceTree = "<group>"; };
 		A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+AdditionsTests.swift"; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
+		A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowserTab+WebPage.swift"; sourceTree = "<group>"; };
 		A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableHeaderView.swift; sourceTree = "<group>"; };
 		A5109F902670227800304B3A /* CommandManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandManagerTests.swift; sourceTree = "<group>"; };
 		A5144000263803600021DD56 /* TrackableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackableScrollView.swift; sourceTree = "<group>"; };
@@ -4721,6 +4723,7 @@
 			children = (
 				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
+				A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */,
 				BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */,
 				BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */,
 				BAA67CB267E1C45A009AC2D9 /* BeamWebkitUIDelegate.swift */,
@@ -6527,6 +6530,7 @@
 				418172442581107C00317ED8 /* ScrollableTextView.swift in Sources */,
 				418171EB2581107C00317ED8 /* Autocompleter.swift in Sources */,
 				418172082581107C00317ED8 /* NSManagedObject+initExtension.swift in Sources */,
+				A51058102786E7E600E4F1F2 /* BrowserTab+WebPage.swift in Sources */,
 				9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */,
 				A5B1DBEE26CE933100F1F81A /* CardReferenceFormatterView.swift in Sources */,
 				A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */,
