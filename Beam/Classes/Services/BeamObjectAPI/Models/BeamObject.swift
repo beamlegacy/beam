@@ -62,6 +62,7 @@ class BeamObject: Codable {
     var dataChecksum: String?
     var previousChecksum: String?
     var privateKeySignature: String?
+    var largeDataBlobId: String?
 
     var id: UUID
 
@@ -167,6 +168,8 @@ class BeamObject: Codable {
         result.previousChecksum = previousChecksum
         result.dataChecksum = dataChecksum
         result.encrypted = encrypted
+        result.largeDataBlobId = largeDataBlobId
+        
         return result
     }
 
