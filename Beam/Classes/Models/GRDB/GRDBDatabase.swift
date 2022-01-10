@@ -333,7 +333,7 @@ extension GRDBDatabase {
         let records = note.allTextElements.map { BeamElementRecord(title: noteTitle, text: $0.text.text, uid: $0.id.uuidString, noteId: noteIdStr, databaseId: databaseId) }
         let links = note.internalLinks
 
-        BeamNote.indexingQueue.async {
+        BeamNote.indexingQueue.addOperation {
             note.sign.begin(BeamNote.Signs.indexContentsReferences)
             do {
                 try dbWriter.write { db in
