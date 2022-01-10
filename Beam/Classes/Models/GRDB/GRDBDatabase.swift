@@ -257,6 +257,11 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("AddIndexToBeamOjectsUpdateAt") { db in
+            try db.create(index: "BrowsingTreeRecordUpdatedAt", on: "BrowsingTreeRecord", columns: ["updatedAt"], unique: false)
+            try db.create(index: "LinkUpdatedAt", on: "Link", columns: ["updatedAt"], unique: false)
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
