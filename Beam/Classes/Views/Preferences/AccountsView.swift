@@ -184,7 +184,7 @@ struct AccountsView: View {
         })
                 .padding(.bottom, 6)
             VStack {
-                Text("Connect to Beam to publish your cards and sync your notes between your devices.")
+                Text("Connect to Beam to publish your notes and sync your notes between your devices.")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
@@ -249,7 +249,7 @@ struct AccountsView: View {
                     .frame(width: 132)
                     .padding(.top, -4)
             })
-            Text("All your cards will be deleted and cannot be recovered.")
+            Text("All your notes will be deleted and cannot be recovered.")
                 .font(BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(width: 286, alignment: .leading)
@@ -266,7 +266,7 @@ struct AccountsView: View {
 
             })
             VStack {
-                Text("Your account, your database and all your cards will be deleted and cannot be recovered.")
+                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
@@ -324,7 +324,7 @@ struct AccountsView: View {
                         }
                     })
 
-            Text("Your encryption key is used to decrypt your cards on Beam Web. Click to copy it and paste it on Beam Web.")
+            Text("Your encryption key is used to decrypt your notes on Beam Web. Click to copy it and paste it on Beam Web.")
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)
@@ -360,7 +360,7 @@ struct AccountsView: View {
     // TODO: Implement when endpoint is ready
     private func promptDeleteAllGraphAlert() {
         UserAlert.showMessage(message: "Are you sure you want to delete all your graphs?",
-                              informativeText: "All your cards will be deleted and cannot be recovered.",
+                              informativeText: "All your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
             // TODO: Implement when endpoint is ready
@@ -370,7 +370,7 @@ struct AccountsView: View {
     // TODO: Implement when endpoint is ready
     private func promptDeleteAccountActionAlert() {
         UserAlert.showMessage(message: "Are you sure you want to delete your Beam account?",
-                              informativeText: "Your account, all your graphs and all your cards will be deleted and cannot be recovered.",
+                              informativeText: "Your account, all your graphs and all your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
             // TODO: Implement when endpoint is ready

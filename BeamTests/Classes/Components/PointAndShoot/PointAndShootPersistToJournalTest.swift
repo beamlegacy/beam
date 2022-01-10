@@ -58,7 +58,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
             XCTFail("test page not found")
             return
         }
-        // Add Paragraph 1 to Card 1
+        // Add Paragraph 1 to Note 1
         let paragraphTarget: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -83,7 +83,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         })
         wait(for: [expectation], timeout: 10.0)
 
-        // Add Paragraph 2 to Card 2
+        // Add Paragraph 2 to Note 2
         let paragraphTarget2: PointAndShoot.Target = PointAndShoot.Target(
             id: UUID().uuidString,
             rect: NSRect(x: 101, y: 102, width: 301, height: 302),

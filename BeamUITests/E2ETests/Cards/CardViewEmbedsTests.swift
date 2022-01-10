@@ -16,7 +16,7 @@ class CardViewEmbedsTests: BaseTest {
         let pnsView = PnSTestView()
         let webView = WebTestView()
         
-        testRailPrint("When I add image to a card")
+        testRailPrint("When I add image to a note")
         BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
         let imageItemToAdd = pnsView.image("forest")
         pnsView.addToTodayCard(imageItemToAdd)

@@ -315,7 +315,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             // Update shootgroup information
             shootGroup.numberOfElements = elements.count
             shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
-            // Set Destination note to the current card
+            // Set Destination note to the current note
             page.setDestinationNote(targetNote, rootElement: targetNote)
             // Add all quotes to source Note
             let addWithSourceBullet = withSourceBullet ? shouldAddWithSourceBullet(elements) : withSourceBullet
@@ -369,7 +369,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     private func setNoteSources(targetNote: BeamNote, sourceUrl: URL) {
         // Update BrowsingScorer about note submission
         scorer?.addTextSelection()
-        // Adds urlId to current card source
+        // Adds urlId to current note source
         let urlId = LinkStore.getOrCreateIdFor(sourceUrl.absoluteString)
         targetNote.sources.add(
             urlId: urlId,

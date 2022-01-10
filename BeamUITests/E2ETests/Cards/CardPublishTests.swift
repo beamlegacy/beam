@@ -12,7 +12,7 @@ class CardPublishTests: BaseTest {
     
     func testDefaultPublishStatus() {
         launchApp()
-        testRailPrint("Given I publish default card without being logged in")
+        testRailPrint("Given I publish default note without being logged in")
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         let cardView = AllCardsTestView().openFirstCard()
         
@@ -27,20 +27,20 @@ class CardPublishTests: BaseTest {
     
     func testPublishCard() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
-        let cardNameToBeCreated = "Card publish"
+        let cardNameToBeCreated = "Note publish"
         let journalView = JournalTestView()
         launchAppWithArgument(uiTestModeLaunchArgument)
         //UITestsMenuBar().logout()
         UITestsMenuBar().signInApp()
         
-        testRailPrint("Given I create \(cardNameToBeCreated) card")
+        testRailPrint("Given I create \(cardNameToBeCreated) note")
         //To be replaced with UITests helper - card creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
                                                                         
-        testRailPrint("Then the card is private by default")
+        testRailPrint("Then the note is private by default")
         XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
                         
-        testRailPrint("When I publish the card")
+        testRailPrint("When I publish the note")
         cardView.publishCard()
         
         testRailPrint("Then published label and link icon are displayed")
@@ -59,11 +59,11 @@ class CardPublishTests: BaseTest {
         let cardNameToBeCreated = "Unpublish"
         let journalView = launchApp()
         
-        testRailPrint("Given I create \(cardNameToBeCreated) card")
+        testRailPrint("Given I create \(cardNameToBeCreated) note")
         //To be replaced with UITests helper - card creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
-        testRailPrint("When I publish and then unpublish the card")
+        testRailPrint("When I publish and then unpublish the note")
         cardView.publishCard()
         cardView.unpublishCard()
         

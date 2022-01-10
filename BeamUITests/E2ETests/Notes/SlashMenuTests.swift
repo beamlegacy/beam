@@ -33,7 +33,7 @@ class SlashMenuTests: BaseTest {
                 .selectMonth(month: monthToSelect)
                 .selectDate(date: dayToSelect)
         
-        testRailPrint("Then \(dayToSelect) \(monthToSelect) \(yearToSelect) card is successfully created and accessible via BiDi link")
+        testRailPrint("Then \(dayToSelect) \(monthToSelect) \(yearToSelect) note is successfully created and accessible via BiDi link")
         cardTestView.openBiDiLink(0)
         XCTAssertTrue(cardTestView.getCardStaticTitle() == localDateFormat || cardTestView.getCardStaticTitle() == ciDateFormat,
         "\(cardTestView.getCardStaticTitle()) is incorrect comparing to \(localDateFormat) OR \(ciDateFormat)")
@@ -59,7 +59,7 @@ class SlashMenuTests: BaseTest {
         cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
             .clickItem(item: .dividerItem)
         
-        testRailPrint("Then divider appears in the card area")
+        testRailPrint("Then divider appears in the note area")
         XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         XCTAssertEqual(cardTestView.getNumberOfVisibleNotes(), 3)
         XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), row1Text + " ")

@@ -47,7 +47,7 @@ class EditorShortcutsTests: BaseTest {
         launchApp()
         let cardView = openFirstCardInAllCardsList()
         let textToType = "This text replaces selected notes text"
-        testRailPrint("Then app doesn't crash after using text edit shortcuts on empty card")
+        testRailPrint("Then app doesn't crash after using text edit shortcuts on empty note")
         helper.shortcutActionInvoke(action: .selectAll)
         helper.shortcutActionInvoke(action: .copy)
         cardView.typeKeyboardKey(.delete)
@@ -109,7 +109,7 @@ class EditorShortcutsTests: BaseTest {
         let wait = WaitHelper()
         let testHelper = BeamUITestsHelper(webView.app)
         let journalView = launchApp()
-        testRailPrint("Given I create \(card1) card")
+        testRailPrint("Given I create \(card1) note")
         //TBD replace creation by omnibox to craetion by Destination cards search
         webView.searchForCardByTitle(card1)
         journalView.createCardViaOmniboxSearch(card1)
@@ -121,29 +121,29 @@ class EditorShortcutsTests: BaseTest {
         testRailPrint("Then the destination card is remained \(card1)")
         XCTAssertEqual(cardView.getCardTitle(), card1)
         
-        testRailPrint("Given I create \(card2) card")
+        testRailPrint("Given I create \(card2) note")
         journalView.createCardViaOmniboxSearch(card2)
         
-        testRailPrint("When I search in web and switch to card view")
+        testRailPrint("When I search in web and switch to note view")
         journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
         helper.shortcutActionInvoke(action: .switchBetweenCardWeb)
         testRailPrint("Then the destination card is remained \(card2)")
         XCTAssertEqual(cardView.getCardTitle(), card2)
         
-        testRailPrint("Then \(card2) is a destination card in web mode")
+        testRailPrint("Then \(card2) is a destination note in web mode")
         helper.shortcutActionInvoke(action: .switchBetweenCardWeb)
         XCTAssertEqual(webView.getDestinationCardTitle(), card2)
         
-        testRailPrint("Then \(card1) is a destination card in web mode when switching tabs")
+        testRailPrint("Then \(card1) is a destination note in web mode when switching tabs")
         helper.shortcutActionInvoke(action: .jumpToPreviousTab)
         XCTAssertTrue(wait.waitForStringValueEqual(card1, webView.getDestinationCardElement(), minimumWaitTimeout))
         
-        testRailPrint("Then \(card2) is a destination card in web mode when switching tabs")
+        testRailPrint("Then \(card2) is a destination note in web mode when switching tabs")
         helper.shortcutActionInvoke(action: .jumpToNextTab)
         XCTAssertTrue(wait.waitForStringValueEqual(card2, webView.getDestinationCardElement(), minimumWaitTimeout))
     }
     
     func assertDestinationCard(_ cardName: String) {
-        XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName, webView.getDestinationCardElement()), "Destination card is not \(cardName), but \(String(describing: webView.getDestinationCardElement().value))")
+        XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName, webView.getDestinationCardElement()), "Destination note is not \(cardName), but \(String(describing: webView.getDestinationCardElement().value))")
     }
 }
