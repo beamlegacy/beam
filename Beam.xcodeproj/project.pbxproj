@@ -55,7 +55,7 @@
 		0D3DD8F52681CD4B009F2DF0 /* HistoryUrlRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */; };
 		0D45BA2F26949EF100D4E8A5 /* DispatchTime+Chrono.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */; };
 		0D45BA382694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D45BA372694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift */; };
-		0D4EC934268372E800487B75 /* FrecencyScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4EC933268372E800487B75 /* FrecencyScore.swift */; };
+		0D4EC934268372E800487B75 /* FrecencyUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4EC933268372E800487B75 /* FrecencyUrlScore.swift */; };
 		0D4EC94526838FA800487B75 /* FrecencyUrlRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */; };
 		0D65977126975FD500AC9822 /* TopDomainDatabase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D65977026975FD500AC9822 /* TopDomainDatabase.swift */; };
 		0D700435269764BD00C7B243 /* TopDomainDatabaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D700434269764BD00C7B243 /* TopDomainDatabaseTests.swift */; };
@@ -1064,6 +1064,8 @@
 		DA69305A268DB375008EF756 /* BrowsingTreeSenderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */; };
 		DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */; };
 		DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */; };
+		DA905D50277B0BC500307146 /* FrecencyNoteScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */; };
+		DA905D52277CB20A00307146 /* FrecencyNoteStorageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA905D51277CB20A00307146 /* FrecencyNoteStorageTest.swift */; };
 		DA9E5B9D26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */; };
 		DAA0A50A270CA8ED00F952E5 /* BrowsingTreeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */; };
 		DAA3875426B043C800CAE20B /* FrecencyNoteRecordTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */; };
@@ -1274,7 +1276,7 @@
 		0D3DD8F42681CD4B009F2DF0 /* HistoryUrlRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryUrlRecord.swift; sourceTree = "<group>"; };
 		0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchTime+Chrono.swift"; sourceTree = "<group>"; };
 		0D45BA372694A1FE00D4E8A5 /* DispatchTime+ChronoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DispatchTime+ChronoTests.swift"; sourceTree = "<group>"; };
-		0D4EC933268372E800487B75 /* FrecencyScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyScore.swift; sourceTree = "<group>"; };
+		0D4EC933268372E800487B75 /* FrecencyUrlScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyUrlScore.swift; sourceTree = "<group>"; };
 		0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyUrlRecordTests.swift; sourceTree = "<group>"; };
 		0D65977026975FD500AC9822 /* TopDomainDatabase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopDomainDatabase.swift; sourceTree = "<group>"; };
 		0D700434269764BD00C7B243 /* TopDomainDatabaseTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopDomainDatabaseTests.swift; sourceTree = "<group>"; };
@@ -2346,6 +2348,8 @@
 		DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeSenderTest.swift; path = ../BrowsingTreeSenderTest.swift; sourceTree = "<group>"; };
 		DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedNoteSourcesUpdater.swift; sourceTree = "<group>"; };
 		DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScoreTests.swift; sourceTree = "<group>"; };
+		DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteScore.swift; sourceTree = "<group>"; };
+		DA905D51277CB20A00307146 /* FrecencyNoteStorageTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteStorageTest.swift; sourceTree = "<group>"; };
 		DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteSources+LongTermUrlScoreStore.swift"; sourceTree = "<group>"; };
 		DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeStore.swift; sourceTree = "<group>"; };
 		DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteRecordTest.swift; sourceTree = "<group>"; };
@@ -2585,10 +2589,11 @@
 				0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */,
 				0D15BE422681DAC30035F322 /* BeamElementRecord.swift */,
 				96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */,
-				0D4EC933268372E800487B75 /* FrecencyScore.swift */,
+				0D4EC933268372E800487B75 /* FrecencyUrlScore.swift */,
 				0D65977026975FD500AC9822 /* TopDomainDatabase.swift */,
 				DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */,
 				A0673C42274F933E00A0E365 /* ContactsDB.swift */,
+				DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -2596,6 +2601,7 @@
 		0DD0DACA2681C7330005339A /* GRDB */ = {
 			isa = PBXGroup;
 			children = (
+				DA905D51277CB20A00307146 /* FrecencyNoteStorageTest.swift */,
 				DA547BA427107DA00085EEC1 /* BrowsingTreeRecordTests.swift */,
 				0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */,
 				0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */,
@@ -6325,6 +6331,7 @@
 				96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */,
 				8AF4F7D1275A67750081B6B5 /* EmbedContentCache.swift in Sources */,
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
+				DA905D50277B0BC500307146 /* FrecencyNoteScore.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,
 				A599F8D327849AF200657CD5 /* AppDelegate+Onboarding.swift in Sources */,
 				A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */,
@@ -6401,7 +6408,7 @@
 				A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */,
 				418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */,
 				33B2746A264C103400A318CD /* SmallUpdateIndicatorView.swift in Sources */,
-				0D4EC934268372E800487B75 /* FrecencyScore.swift in Sources */,
+				0D4EC934268372E800487B75 /* FrecencyUrlScore.swift in Sources */,
 				96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */,
 				520088BC2613266600AED835 /* Database+CoreDataProperties.swift in Sources */,
 				A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */,
@@ -6868,6 +6875,7 @@
 				529E1EE625D3EDA300F8B500 /* BeamTestsHelper.swift in Sources */,
 				DA69305A268DB375008EF756 /* BrowsingTreeSenderTest.swift in Sources */,
 				52FC003D25E426FE00ABECB0 /* BeamUITestsMenuGeneratorTests.swift in Sources */,
+				DA905D52277CB20A00307146 /* FrecencyNoteStorageTest.swift in Sources */,
 				032562F126051D65006513E4 /* NSString+IDNATests.m in Sources */,
 				5298649125D151D300D27A80 /* AutocompleteTests.swift in Sources */,
 				DA547BA527107DA00085EEC1 /* BrowsingTreeRecordTests.swift in Sources */,
