@@ -32,7 +32,7 @@ struct ToolbarDownloadButton: View {
 
     var body: some View {
         ToolbarButton(icon: hasOngoingDownload ? "nav-downloads" : "nav-downloads_done",
-                               action: action)
+                      action: action)
             .overlay(!hasOngoingDownload ?  nil :
                         LinearProgressView(progress: previewFractionCompleted ?? downloadManager.fractionCompleted, height: 2.0)
                         .frame(width: 16)
@@ -40,7 +40,6 @@ struct ToolbarDownloadButton: View {
                      alignment: .bottom
             )
             .accessibility(identifier: "downloads")
-            .animation(Animation.default.delay(0.2), value: hasOngoingDownload)
     }
 
     var foregroundColor: Color {
