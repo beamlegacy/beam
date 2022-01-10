@@ -78,7 +78,7 @@ struct OnboardingProfileCreationView: View {
             return "Username is too long."
         }
         if !username.matches(withRegex: "^[A-Za-z0-9\\-_]+$") {
-            return "Username can't contain special characters."
+            return "Username can only include latin letters, numbers, dashes and underscores."
         }
         return nil
     }
