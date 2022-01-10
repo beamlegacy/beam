@@ -23,7 +23,7 @@ extension IndexDocument {
         self.title = title
         self.language = language ?? (NLLanguageRecognizer.dominantLanguage(for: contents) ?? .undetermined)
         self.outboundLinks = outboundLinks.compactMap({ link -> UUID? in
-            // Only register links that points to cards or to pages we have really visited:
+            // Only register links that points to notes or to pages we have really visited:
             let id = LinkStore.getOrCreateIdFor(link)
 //            guard LinkStore.isInternalLink(id: id) else { return nil }
             return id

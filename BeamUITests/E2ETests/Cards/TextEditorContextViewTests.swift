@@ -16,10 +16,10 @@ class TextEditorContextViewTests: BaseTest {
     let allCardsView = AllCardsTestView()
     
     func testCreateCardViaContextView() {
-        let textToType = "text before a new card"
+        let textToType = "text before a new note"
         let numberOfCharsToSelect = 8
         
-        testRailPrint("Given open today's card")
+        testRailPrint("Given open today's note")
         let cardView = launchApp()
             .openAllCardsMenu()
             .openFirstCard()
@@ -28,27 +28,27 @@ class TextEditorContextViewTests: BaseTest {
         cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
         shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: numberOfCharsToSelect)
         textEditorContext.selectEditorOption(.bidi)
-        textEditorContext.confirmBidiLinkCreation(cardName: "new card")
+        textEditorContext.confirmBidiLinkCreation(cardName: "new note")
         
         testRailPrint("Then the note text is remained: \(textToType)")
         XCTAssertEqual(textToType + " ", cardView.getCardNoteValueByIndex(0))
         shortcutsHelper.shortcutActionInvoke(action: .showAllCards)
         allCardsView.waitForAllCardsViewToLoad()
         //Substring to be used
-        allCardsView.openCardByName(cardTitle: "new card")
+        allCardsView.openCardByName(cardTitle: "new note")
         
-        testRailPrint("Then new card is created")
+        testRailPrint("Then new note is created")
         cardView.waitForCardViewToLoad()
-        XCTAssertEqual("new card", cardView.getCardTitle())
+        XCTAssertEqual("new note", cardView.getCardTitle())
         XCTAssertEqual(1, cardView.getLinksContentNumber())
         XCTAssertEqual(textToType + " ", cardView.getLinkContentByIndex(0))
     }
     
     func testBidiLinkViaContextView() {
         let notePrefix = "prefix"
-        let cardName = "BiDi card"
+        let cardName = "BiDi note"
         let notePostix = "postfix"
-        let cardName1 = "BiDied card"
+        let cardName1 = "BiDied note"
         let composedText = notePrefix + cardName + notePostix
         
         testRailPrint("Given I create \(cardName)")
@@ -79,7 +79,7 @@ class TextEditorContextViewTests: BaseTest {
         let linkURL = "www.google.com"
         let expectedTabURL = "google.com/"
         
-        testRailPrint("Given open today's card")
+        testRailPrint("Given open today's note")
         let cardView = launchApp()
             .openAllCardsMenu()
             .openFirstCard()
@@ -114,7 +114,7 @@ class TextEditorContextViewTests: BaseTest {
     
     func testFormatTextViaContextView() {
         let text = "THE_text 2 TE$t"
-        testRailPrint("Given open today's card")
+        testRailPrint("Given open today's note")
         let cardView = launchApp()
             .openAllCardsMenu()
             .openFirstCard()

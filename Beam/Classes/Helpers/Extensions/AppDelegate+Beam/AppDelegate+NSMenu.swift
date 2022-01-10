@@ -66,7 +66,7 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
 
     private func updateMenuItems(items: [NSMenuItem], for state: BeamState?) {
         for item in items {
-            if item.title == "Recent Cards" && item.hasSubmenu {
+            if item.identifier == Self.recentNoteItemIdentifier && item.hasSubmenu {
                 item.submenu?.removeAllItems()
                 for recentCard in recentCardsItems() {
                     item.submenu?.addItem(recentCard)
@@ -88,7 +88,7 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         if let note = currentTab.noteController.note {
             menuItem.title = "Capture Page to \(note.title)"
         } else {
-            menuItem.title = "Capture Page to Card…"
+            menuItem.title = "Capture Page to Note…"
         }
     }
 
@@ -113,12 +113,13 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         return passConditionTag(tag: value, for: window?.state)
     }
 
-    func recentCardsItems() -> [NSMenuItem] {
+    private static let recentNoteItemIdentifier = NSUserInterfaceItemIdentifier("recent_notes")
+    private func recentCardsItems() -> [NSMenuItem] {
         var recentItems: [NSMenuItem] = []
 
         guard let recentsNotes = window?.state.recentsManager.recentNotes else {
             let emptyItem = NSMenuItem()
-            emptyItem.title = "No recent Cards"
+            emptyItem.title = "No recent Notes"
             emptyItem.tag = 0
             emptyItem.isEnabled = false
             recentItems.append(emptyItem)

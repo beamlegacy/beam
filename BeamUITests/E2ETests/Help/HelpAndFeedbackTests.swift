@@ -58,7 +58,7 @@ class HelpAndFeedbackTests: BaseTest {
         
         testRailPrint("When I close shortcuts help menu")
         helpView.closeShortcuts()
-        testRailPrint("Then I broght back to a card view")
+        testRailPrint("Then I broght back to a note view")
         XCTAssertTrue(journalView.getHelpButton().waitForExistence(timeout: minimumWaitTimeout))
     }
     
