@@ -64,7 +64,7 @@ struct SearchInContentView: View {
     private var title: String {
         switch viewModel.context {
         case .card:
-            return "Find on \(state.currentNote?.title ?? "Card")"
+            return "Find on \(state.currentNote?.title ?? "Note")"
         case .web:
             return "Find on \(state.browserTabsManager.currentTab?.title ?? "Page")"
         }

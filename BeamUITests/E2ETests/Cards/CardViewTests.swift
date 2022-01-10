@@ -15,21 +15,21 @@ class CardViewTests: BaseTest {
     let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
     
     func testDefaultCardView() throws {
-        try XCTSkipIf(true, "Workaround to open a card from journal/all cards menu is pending")
+        try XCTSkipIf(true, "Workaround to open a note from journal/all notes menu is pending")
         let defaultNumberOfCardsAtFreshInstallation = 1
         let journalView = launchApp()
         
-        testRailPrint("Given I open All Cards view")
+        testRailPrint("Given I open All Notes view")
         let allCardsView = journalView.openAllCardsMenu()
-        testRailPrint("Then number of cards available by default is \(defaultNumberOfCardsAtFreshInstallation)")
+        testRailPrint("Then number of notes available by default is \(defaultNumberOfCardsAtFreshInstallation)")
         XCTAssertEqual(defaultNumberOfCardsAtFreshInstallation, allCardsView.getNumberOfCards())
         
         let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
         let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(.cardViewCreation)
-        testRailPrint("When I open \(todaysDateInCardTitleFormat) from All cards view")
+        testRailPrint("When I open \(todaysDateInCardTitleFormat) from All notes view")
         let cardView = allCardsView.openJournal()
                                     .openRecentCardByName(todaysDateInCardTitleFormat)
-        testRailPrint("Then the title of the card is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)")
+        testRailPrint("Then the title of the note is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)")
         cardView.waitForCardViewToLoad()
         let cardTitle = cardView.getCardTitle()
         XCTAssertTrue(cardTitle == todayCardNameTitleViewFormat || cardTitle == todayCardNameCreationViewFormat || cardTitle == todayCardNameCreationViewFormatWithout0InDays)

@@ -100,7 +100,7 @@ struct AutocompleteItem: View {
 
     var mainText: String {
         if item.source == .createCard {
-            return "New Card:"
+            return "New Note:"
         }
         if isUrlWithTitle, let information = item.information {
             return information
@@ -217,7 +217,7 @@ extension AutocompleteItem {
 
 struct AutocompleteItem_Previews: PreviewProvider {
     static let items = [
-        AutocompleteResult(text: "James Dean", source: .createCard, information: "New Card"),
+        AutocompleteResult(text: "James Dean", source: .createCard, information: "New Note"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .autocomplete, information: "Google Search"),
         AutocompleteResult(text: "jamesdean.com", source: .url),
