@@ -37,7 +37,7 @@ class AllCardsContextualMenu {
         var countSuffix = "All"
         if selectedNotes.count > 0 {
             let count = selectedNotes.count
-            countSuffix = count == 1 ? "" : "\(count) Cards"
+            countSuffix = count == 1 ? "" : "\(count) Notes"
 
             if let first = selectedNotes.first, first.publicationStatus.isPublic {
                 menu.addItem(NSMenuItem(
@@ -203,10 +203,10 @@ class AllCardsContextualMenu {
     @objc private func deleteNotes() {
         let alert = NSAlert()
         let messageNotesInfo = selectedNotes.count == 1 ?
-            "this card" :
+            "this note" :
             selectedNotes.count == 0 ?
-            "all cards" :
-            "these \(selectedNotes.count) cards"
+            "all notes" :
+            "these \(selectedNotes.count) notes"
         alert.messageText = "Are you sure you want to delete \(messageNotesInfo)?"
         alert.addButton(withTitle: "Delete...")
         alert.addButton(withTitle: "Cancel")
@@ -227,7 +227,7 @@ class AllCardsContextualMenu {
             self.delegate?.contextualMenuWillDeleteDocuments(ids: [], all: true)
             cmdManager.deleteAllDocuments(in: DocumentManager()) { _ in
                 DispatchQueue.main.async {
-                    self.registerUndo(actionName: "Delete All Cards")
+                    self.registerUndo(actionName: "Delete All Notes")
                     self.onFinishBlock?(true)
                 }
             }
@@ -239,7 +239,7 @@ class AllCardsContextualMenu {
         cmdManager.deleteDocuments(ids: ids, in: DocumentManager()) { _ in
             DispatchQueue.main.async {
                 let count = ids.count
-                self.registerUndo(actionName: "Delete \(count) Card\(count > 1 ? "s" : "")")
+                self.registerUndo(actionName: "Delete \(count) Note\(count > 1 ? "s" : "")")
                 self.onFinishBlock?(true)
             }
         }

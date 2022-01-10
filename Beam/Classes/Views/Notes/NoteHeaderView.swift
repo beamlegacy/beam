@@ -55,7 +55,7 @@ struct NoteHeaderView: View {
             if model.canEditTitle {
                 BeamTextField(text: $model.titleText,
                               isEditing: $model.isEditingTitle,
-                              placeholder: "Card's title",
+                              placeholder: "Note's title",
                               font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
                               textColor: textColor.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
@@ -89,13 +89,13 @@ struct NoteHeaderView: View {
         .onDisappear {
             model.commitRenameCard(fromTextField: false)
         }
-        .accessibility(identifier: "Card's title")
+        .accessibility(identifier: "Note's title")
     }
 
     private var subtitleInfoView: some View {
         Group {
             if model.isTitleTaken {
-                Text("This card’s title ")
+                Text("This note’s title ")
                 + Text("already exists")
                     .foregroundColor(errorColor.swiftUI)
                 + Text(" in your knowledge base")

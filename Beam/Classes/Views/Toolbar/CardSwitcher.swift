@@ -69,7 +69,7 @@ struct CardSwitcher: View {
                         .opacity(hoveredIndex == index + 1 || hoveredIndex == index + 2 ? 0 : 1)
                 }
             }
-            ToolbarCapsuleButton(text: "All Cards", isSelected: isAllCardsActive) {
+            ToolbarCapsuleButton(text: "All Notes", isSelected: isAllCardsActive) {
                 state.navigateToPage(.allCardsWindowPage)
             }
             .fixedSize(horizontal: true, vertical: false)
@@ -95,10 +95,10 @@ struct CardSwitcher_Previews: PreviewProvider {
     static var previews: some View {
         let recentsManager = state.recentsManager
         state.mode = .today
-        recentsManager.currentNoteChanged(BeamNote(title: "Card D"))
-        recentsManager.currentNoteChanged(BeamNote(title: "Card C"))
-        recentsManager.currentNoteChanged(BeamNote(title: "Card B"))
-        recentsManager.currentNoteChanged(BeamNote(title: "Card A"))
+        recentsManager.currentNoteChanged(BeamNote(title: "Note D"))
+        recentsManager.currentNoteChanged(BeamNote(title: "Note C"))
+        recentsManager.currentNoteChanged(BeamNote(title: "Note B"))
+        recentsManager.currentNoteChanged(BeamNote(title: "Note A"))
         return CardSwitcher()
             .environmentObject(state)
             .environmentObject(recentsManager)
