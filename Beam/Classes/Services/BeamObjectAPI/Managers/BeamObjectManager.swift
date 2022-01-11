@@ -27,6 +27,7 @@ enum BeamObjectObjectType: String {
 }
 
 class BeamObjectManager {
+    static var managerOrder: [BeamObjectObjectType] = []
     static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
     static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
 
@@ -67,6 +68,8 @@ class BeamObjectManager {
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
 
+            localTimer = BeamDate.now
+
             var totalSize: Int64 = 0
 
             let encapsulatedObjects: [O] = try toSaveObjects.map {
@@ -87,15 +90,35 @@ class BeamObjectManager {
                 }
             }
 
+            Logger.shared.logDebug("Decoded \(toSaveObjects.count) BeamObject to \(O.beamObjectType)",
+                                   category: .beamObjectNetwork,
+                                   localTimer: localTimer)
+
             localTimer = BeamDate.now
 
-            try manager.parse(objects: encapsulatedObjects)
+            /*
+             IMPORTANT: the code inside the `parse` and done by the manager, outside the area of `BeamObjectManager`
+             might resend `saveOnAPI()` calls (like when database with same titles arrive and it's being changed +
+             resaved on the API and need to have `previousChecksum` already available to avoid conflicts.
+
+             We must save object's previousChecksums *before* in case that happens.
+             */
+
+            let checksums = try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
+
+            do {
+                try manager.parse(objects: encapsulatedObjects)
+            } catch {
+                // We had issues saving those, we *must* delete previous checksums attached to those objects else a new
+                // fetch will not fetch those objects again, as the local checksum will be equal to remote ones.
+                // The error might be temporary and we should fetch those again.
+                try BeamObjectChecksum.deletePreviousChecksums(beamObjects: toSaveObjects)
+                throw error
+            }
 
             Logger.shared.logDebug("Received \(encapsulatedObjects.count) \(object.beamObjectType) (\(totalSize.byteSize)). Manager done",
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
-
-            try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
         }
     }
 
@@ -113,6 +136,11 @@ class BeamObjectManager {
         BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
+
+        // In what order should we proceed when receiving new objects?
+        managerOrder = [.database, .contact, .file, .document, .password, .link, .browsingTree]
+
+        assert(managerOrder.count == managerInstances.count)
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
@@ -131,28 +159,36 @@ class BeamObjectManager {
         return filteredObjects
     }
 
-    internal func parseFilteredObjectChecksums(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws -> [BeamObjectObjectType: [BeamObject]] {
-        var results: [BeamObjectObjectType: [BeamObject]] = [:]
+    internal func parseObjectChecksums(_ objects: [BeamObject]) -> [BeamObject] {
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
 
-        for (key, objects) in filteredObjects {
-            let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objects)
-
-            let changedObjects = objects.filter {
-                $0.dataChecksum != checksums[$0] || checksums[$0] == nil
-            }
-
-            results[key] = changedObjects
+        let changedObjects = objects.filter {
+            $0.dataChecksum != checksums[$0] || checksums[$0] == nil
         }
 
-        return results
+        return changedObjects
     }
 
+    // swiftlint:disable function_body_length
     internal func parseFilteredObjects(_ filteredObjects: [BeamObjectObjectType: [BeamObject]]) throws {
         var objectsInErrors: Set<String> = Set()
 
         let group = DispatchGroup()
 
         var errors: [Error] = []
+
+        let localTimer = BeamDate.now
+        Logger.shared.logDebug("Call object managers: start",
+                               category: .beamObject)
+
+        /*
+         IMPORTANT: we might receive a bunch of objects at once (initial sync) and parsing all of the types in parallels
+         might raise issues, as `document` objects need their `database`. Bug if done in parallel would be resaving
+         the database object on the API without having its local checksum saved yet.
+
+         BeamObjects don't have dependencies map, therefor we don't know which ones we should proceed first. As a quick
+         fix I will parse per type, in the order listed at `managerOrder`.
+         */
 
         for (key, objects) in filteredObjects {
             guard let managerInstance = Self.managerInstances[key] else {
@@ -205,6 +241,10 @@ class BeamObjectManager {
         }
 
         group.wait()
+
+        Logger.shared.logDebug("Call all object managers: done",
+                               category: .beamObject,
+                               localTimer: localTimer)
 
         if !errors.isEmpty {
             throw BeamObjectManagerError.multipleErrors(errors)

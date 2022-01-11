@@ -59,6 +59,11 @@ extension BeamObjectManager {
             Logger.shared.logDebug("Using updatedAt for BeamObjects API call: \(updatedAt)", category: .beamObjectNetwork)
         }
 
+        /*
+         IMPORTANT: We want to save in the order potentially needed by another device, which is the same as used
+         for parsing
+         */
+
         for (_, manager) in Self.managerInstances {
             group.enter()
 
@@ -179,21 +184,15 @@ extension BeamObjectManager {
 
                 do {
                     localTimer = BeamDate.now
-                    let filteredObjects = self.filteredObjects(beamObjects)
-                    Logger.shared.logDebug("filtered \(beamObjects.count) checksums by type",
-                                           category: .beamObjectNetwork,
-                                           localTimer: localTimer)
+                    let changedObjects = self.parseObjectChecksums(beamObjects)
 
-                    localTimer = BeamDate.now
-                    let changedObjects = try self.parseFilteredObjectChecksums(filteredObjects)
-
-                    Logger.shared.logDebug("parsed \(beamObjects.count) checksums, got \(changedObjects.reduce(0, { $1.value.count })) objects to fetch",
+                    Logger.shared.logDebug("parsed \(beamObjects.count) checksums, got \(changedObjects.count) objects after",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
 
                     localTimer = BeamDate.now
 
-                    let ids: [UUID] = changedObjects.values.flatMap { $0.map { $0.id }}
+                    let ids: [UUID] = changedObjects.map { $0.id }
 
                     guard !ids.isEmpty else {
                         if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
@@ -206,9 +205,6 @@ extension BeamObjectManager {
                         return
                     }
 
-                    Logger.shared.logDebug("need to fetch \(ids.count) remote objects, they have different checksums",
-                                           category: .beamObjectNetwork,
-                                           localTimer: localTimer)
                     let beamRequestForIds = BeamObjectRequest()
 
                     try beamRequestForIds.fetchAll(receivedAtAfter: nil, ids: ids) { result in
@@ -376,10 +372,21 @@ extension BeamObjectManager {
             $0.previousChecksum = checksums[$0]
         }
 
-        Logger.shared.logDebug("Set \(objects.count) checksums", category: .beamObjectChecksum, localTimer: localTimer)
+        if checksums.count != objectsToSave.count {
+            Logger.shared.logWarning("\(checksums.count) checksums doesn't match \(objectsToSave.count) objects! It's ok if new.",
+                                     category: .beamObjectChecksum)
+        }
+
+        Logger.shared.logDebug("Set \(checksums.count) checksums for \(objectsToSave.count) objects",
+                               category: .beamObjectChecksum,
+                               localTimer: localTimer)
 
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
+
+        if T.beamObjectType == .browsingTree {
+            print("ok")
+        }
 
         let request = BeamObjectRequest()
 
