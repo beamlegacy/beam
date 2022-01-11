@@ -20,13 +20,19 @@ public class ImportsManager: NSObject, ObservableObject {
 
     func startBrowserHistoryImport(from importer: BrowserHistoryImporter) {
         let id = UUID()
+        let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser))
         do {
             let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: GRDBUrlFrecencyStorage())
             let cancellable = importer.publisher.sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
                     frecencyUpdater.saveAll()
-                    Logger.shared.logInfo("Import History finished successfully", category: .browserImport)
+                    do {
+                        try BrowsingTreeStoreManager.shared.save(browsingTree: browsingTree)
+                    } catch {
+                        Logger.shared.logError("Couldn't save tree: \(error)", category: .browserImport)
+                    }
+                    Logger.shared.logInfo("Import finished successfully", category: .browserImport)
                 case .failure(let error):
                     Logger.shared.logError("Import History failed with error: \(error)", category: .browserImport)
                 }
@@ -35,8 +41,9 @@ public class ImportsManager: NSObject, ObservableObject {
                 guard let url = result.item.url else { return }
                 let absoluteString = url.absoluteString
                 let title = result.item.title
-                let urlId = LinkStore.shared.getOrCreateIdFor(url: absoluteString, title: title)
-                frecencyUpdater.add(urlId: urlId, date: result.item.timestamp)
+                browsingTree.addChildToRoot(url: absoluteString, title: title, date: result.item.timestamp)
+                let urlId = browsingTree.current.link
+                frecencyUpdater.add(urlId: urlId, date: result.item.timestamp, eventType: .webLinkActivation)
                 Logger.shared.logDebug("\(result.item.timestamp): \(result.item.title ?? "---") [\(url)] (total count: \(result.itemCount))")
             })
             cancellableScope[id] = cancellable
