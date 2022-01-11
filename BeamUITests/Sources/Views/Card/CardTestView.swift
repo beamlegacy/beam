@@ -60,11 +60,11 @@ class CardTestView: BaseView {
     }
     
     func getCardNotesForVisiblePart() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func getCardNotesElementQueryForVisiblePart() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier)
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
     
     func getNumberOfVisibleNotes() -> Int {
@@ -92,20 +92,20 @@ class CardTestView: BaseView {
         button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
     }
     
-    func getNumberOfImageNotes() -> Int {
-        return self.getImageNotes().count
+    func getNumberOfImageNodes() -> Int {
+        return self.getImageNodes().count
     }
     
-    func getImageNotes() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier).allElementsBoundByIndex
+    func getImageNodes() -> [XCUIElement] {
+        return getImageNotesElementsQuery().allElementsBoundByIndex
     }
     
     func getImageNotesElementsQuery() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier:  CardViewLocators.TextFields.imageNote.accessibilityIdentifier)
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.imageNode.accessibilityIdentifier)
     }
     
-    func getImageNoteByIndex(noteIndex: Int) -> XCUIElement {
-        return self.getImageNotes()[noteIndex]
+    func getImageNodeByIndex(nodeIndex: Int) -> XCUIElement {
+        return self.getImageNodes()[nodeIndex]
     }
     
     func getNotesExpandButtons() -> [XCUIElement] {
@@ -124,6 +124,30 @@ class CardTestView: BaseView {
     func clickNoteExpandButtonByIndex(noteIndex: Int) -> CardTestView {
         self.getNoteExpandButtonByIndex(noteIndex: noteIndex).coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1)).tap()
         return self
+    }
+
+    func getTextNodes() -> [XCUIElement] {
+        return getTextNodesElementsQuery().allElementsBoundByIndex
+    }
+
+    func getTextNodesElementsQuery() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)
+    }
+
+    func getTextNodeByIndex(nodeIndex: Int) -> XCUIElement {
+        return self.getTextNodes()[nodeIndex]
+    }
+
+    func getEmbedNodes() -> [XCUIElement] {
+        return getEmbedNodesElementsQuery().allElementsBoundByIndex
+    }
+
+    func getEmbedNodesElementsQuery() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.embedNode.accessibilityIdentifier)
+    }
+
+    func getEmbedNodeByIndex(nodeIndex: Int) -> XCUIElement {
+        return self.getEmbedNodes()[nodeIndex]
     }
     
     func getLinksNames() -> [XCUIElement] {
@@ -162,7 +186,7 @@ class CardTestView: BaseView {
     }
     
     func getReferences() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     @discardableResult
@@ -295,12 +319,12 @@ class CardTestView: BaseView {
         return ContextMenuTestView(key: key)
     }
     
-    func isImageNoteCollapsed(noteIndex: Int) -> Bool {
-        return getImageNoteByIndex(noteIndex: noteIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: minimumWaitTimeout)
+    func isImageNodeCollapsed(nodeIndex: Int) -> Bool {
+        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: minimumWaitTimeout)
     }
     
-    func getImageNoteCollapsedTitle(noteIndex: Int) -> String {
-        return getImageNoteByIndex(noteIndex: noteIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].firstMatch.title
+    func getImageNodeCollapsedTitle(nodeIndex: Int) -> String {
+        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].firstMatch.title
     }
     
     func waitForCardToOpen(cardTitle: String) -> Bool {

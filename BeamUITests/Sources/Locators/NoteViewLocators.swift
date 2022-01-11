@@ -10,10 +10,11 @@ import Foundation
 enum NoteViewLocators {
     
     enum Groups: String, CaseIterable, UIElement {
-        case slashContextMenu = "ContextMenu"
+        case contextMenu = "ContextMenu"
     }
     
-    enum ContextMenuItems: String, CaseIterable, UIElement {
+    enum SlashContextMenuItems: String, CaseIterable, UIElement {
+        // slash menu options
         case cardReferenceItem = "ContextMenuItem-note reference"
         case todoItem = "ContextMenuItem-todo"
         case datePickerItem = "ContextMenuItem-date picker"
@@ -25,6 +26,11 @@ enum NoteViewLocators {
         case heading2Item = "ContextMenuItem-heading 2"
         case textItem = "ContextMenuItem-text"
         case dividerItem = "ContextMenuItem-divider"
+    }
+
+    enum ContextMenuItems: String, CaseIterable, UIElement {
+        // other options (not in slash menu)
+        case asEmbed = "ContextMenuItem-show as embed"
     }
     
     enum Others: String, CaseIterable, UIElement {
