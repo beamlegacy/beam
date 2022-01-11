@@ -15,6 +15,11 @@ enum ShortcutKey: Hashable {
     case right
     case tab
     case enter
+    case arobase
+    case bracket
+    case bracketReversed
+    case doubleBracket
+    case slash
 
     var symbol: some View {
         switch self {
@@ -32,6 +37,16 @@ enum ShortcutKey: Hashable {
             return buildView(with: Image("shortcut-tab_mac"))
         case .enter:
             return buildView(with: Image("shortcut-return"))
+        case .arobase:
+            return buildView(with: Image("shortcut-arobase"))
+        case .bracket:
+            return buildView(with: Image("shortcut-bracket"))
+        case .bracketReversed:
+            return buildView(with: Image("shortcut-bracket_reversed"))
+        case .doubleBracket:
+            return buildView(with: Image("shortcut-doublebracket"))
+        case .slash:
+            return buildView(with: Image("shortcut-slash"))
         }
     }
 
@@ -51,6 +66,16 @@ enum ShortcutKey: Hashable {
             return "tab"
         case .enter:
             return "enter"
+        case .arobase:
+            return "arobase"
+        case .bracket:
+            return "bracket"
+        case .bracketReversed:
+            return "bracketReversed"
+        case .doubleBracket:
+            return "doubleBracket"
+        case .slash:
+            return "slash"
         }
     }
 
@@ -59,21 +84,18 @@ enum ShortcutKey: Hashable {
     }
 
     @ViewBuilder func buildView(with symbol: Image) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 3)
-                .foregroundColor(BeamColor.Mercury.swiftUI)
             symbol
-                .resizable()
                 .renderingMode(.template)
-                .aspectRatio(contentMode: .fit)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
-                .frame(width: 12, height: 12)
-        }.frame(width: 18, height: 18)
+                .frame(minWidth: 12, minHeight: 18)
+                .padding(.horizontal, 3)
+                .background(RoundedRectangle(cornerRadius: 3)
+                                .foregroundColor(BeamColor.Mercury.swiftUI))
     }
 
     private func characterImage(string: String) -> Image {
         let attributedString = NSAttributedString(string: string.uppercased())
-        let image = attributedString.image(foregroundColor: BeamColor.Corduroy.nsColor, font: BeamFont.semibold(size: 14).nsFont)
+        let image = attributedString.image(foregroundColor: BeamColor.Corduroy.nsColor, font: BeamFont.medium(size: 12).nsFont)
         return Image(nsImage: image)
     }
 }
