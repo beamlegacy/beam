@@ -339,6 +339,8 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        guard !objects.isEmpty else { return nil }
+
         var localTimer = BeamDate.now
 
         let beamObjects: [BeamObject] = try objects.map {
@@ -386,7 +388,7 @@ extension BeamObjectManager {
 
         let request = BeamObjectRequest()
 
-        try request.save(beamObjects) { result in
+        try request.save(objectsToSave) { result in
             switch result {
             case .failure(let error):
                 self.saveToAPIFailure(objects, error, completion)
