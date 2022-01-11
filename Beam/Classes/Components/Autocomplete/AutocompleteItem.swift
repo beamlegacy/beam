@@ -45,7 +45,7 @@ struct AutocompleteItem: View {
     }
 
     private var isUrlWithTitle: Bool {
-        item.source == .url && item.information != nil
+        item.source == .url && item.information?.isEmpty == false
     }
 
     private var defaultTextColor: Color {
