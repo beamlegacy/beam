@@ -60,6 +60,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
 
                         good = true
                     } catch {
+                        changed = true
                         // I don't need to flag this object `deleted` like I do for DocumentStruct because
                         // Database `checkValidations` only has title checks. In such case, changing the title.
                         database.title = "\(originalTitle) (\(index))"
@@ -70,11 +71,9 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 }
 
                 // Database's title was changed, we need to save it on the API to propagate to other devices
-                if index > 2 {
+                if changed {
                     changedDatabases.append(database)
                 }
-
-                changed = true
             }
 
             if changed {
