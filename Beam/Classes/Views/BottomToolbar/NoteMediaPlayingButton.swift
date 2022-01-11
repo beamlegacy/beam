@@ -22,7 +22,8 @@ struct NoteMediaPlayingButton: View {
 
     var body: some View {
         ZStack(alignment: .center) {
-            ButtonLabel(icon: playerManager.isAnyMediaUnmuted ? "tabs-media" : "tabs-media_muted") {
+            let isAnyMediaUnmuted = playerManager.isAnyMediaUnmuted
+            ButtonLabel(icon: isAnyMediaUnmuted ? "tabs-media" : "tabs-media_muted") {
                 onMuteNote?(nil)
                 updateContextMenuItems()
             }.onHover { hovering in
@@ -36,6 +37,7 @@ struct NoteMediaPlayingButton: View {
                 hoverButtonDelayedBlock = block
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(hovering ? 500 : 1000)), execute: block)
             }
+            .accessibilityIdentifier("note-media-\(isAnyMediaUnmuted ? "playing" : "muted")")
             if let contextMenuModel = contextMenuModel, contextMenuModel.visible {
                 ContextMenuView(viewModel: contextMenuModel)
                     .frame(width: contextMenuSize.width, height: contextMenuSize.height)
