@@ -39,7 +39,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
         var changedDatabases: [DatabaseStruct] = []
 
         try context.performAndWait {
-            var changed = false
+            var anyChanged = false
 
             for var database in databases {
                 let localDatabase = Database.fetchOrCreateWithId(context, database.id)
@@ -49,6 +49,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 }
 
                 var good = false
+                var changed = false
 
                 var (originalTitle, index) = database.title.originalTitleWithIndex()
 
@@ -61,6 +62,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                         good = true
                     } catch {
                         changed = true
+                        anyChanged = true
                         // I don't need to flag this object `deleted` like I do for DocumentStruct because
                         // Database `checkValidations` only has title checks. In such case, changing the title.
                         database.title = "\(originalTitle) (\(index))"
@@ -76,7 +78,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                 }
             }
 
-            if changed {
+            if anyChanged {
                 try Self.saveContext(context: context)
             }
         }
