@@ -14,7 +14,7 @@ class ResizableNode: ElementNode {
     var canBeResized = true {
         didSet {
             if !canBeResized {
-                removeLayer("handle")
+                removeHandles()
             } else {
                 setupContentSizing()
                 setupResizeHandleLayer()
@@ -279,7 +279,7 @@ class ResizableNode: ElementNode {
         addLayer(handle, origin: .zero)
     }
 
-    func setupVerticalResizeHandleLayer() {
+    private func setupVerticalResizeHandleLayer() {
         guard canBeResized else {
             return
         }
@@ -322,6 +322,11 @@ class ResizableNode: ElementNode {
         }
         handle.cursor = NSCursor.resizeUpDown
         addLayer(handle, origin: .zero)
+    }
+
+    private func removeHandles() {
+        removeLayer("handle_vertical")
+        removeLayer("handle_horizontal")
     }
 
     private func invalidateLayout(animated: Bool) {
