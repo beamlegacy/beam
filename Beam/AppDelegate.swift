@@ -143,7 +143,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Database
-    func syncDataWithBeamObject(force: Bool = false, _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func syncDataWithBeamObject(force: Bool = false,
+                                showAlert: Bool = true,
+                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
@@ -166,7 +168,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                       category: .beamObjectNetwork,
                                       localTimer: localTimer)
 
-                self.deleteEmptyDatabases { _ in
+                self.deleteEmptyDatabases(showAlert: showAlert) { _ in
                     switch result {
                     case .success:
                         DatabaseManager.changeDefaultDatabaseIfNeeded()
@@ -187,7 +189,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func deleteEmptyDatabases(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    private func deleteEmptyDatabases(showAlert: Bool = true,
+                                      _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         let localTimer = BeamDate.now
         let previousDefaultDatabase = DatabaseManager.defaultDatabase
 
@@ -211,6 +214,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     Logger.shared.logError(error.localizedDescription, category: .database)
                 }
 
+                guard showAlert else {
+                    completionHandler?(.success(success))
+                    return
+                }
+
+                // `DispatchQueue.main.async` doesn't call its block once we called terminate...
                 DispatchQueue.main.async { [unowned self] in
                     if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
                         if self.data.onboardingManager.needsToDisplayOnboard == true {
@@ -219,6 +228,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                         } else {
                             Logger.shared.logWarning("Default database changed, showing alert",
                                                     category: .database, localTimer: localTimer)
+
                             DatabaseManager.showRestartAlert(previousDefaultDatabase, DatabaseManager.defaultDatabase)
                         }
                     }
@@ -416,7 +426,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
-        syncDataWithBeamObject { _ in
+        syncDataWithBeamObject(force: false, showAlert: false) { _ in
             Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
             RunLoop.main.perform(inModes: [.modalPanel]) {
                 Logger.shared.logDebug("Sending toApplicationShouldTerminate true (main thread)")
@@ -424,6 +434,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        Logger.shared.logDebug("applicationShouldTerminate: terminateLater")
         return .terminateLater
     }
 
