@@ -297,6 +297,28 @@ struct GRDBDatabase {
             try db.create(index: "FrecencyNoteUpdatedAtIndex", on: "FrecencyNoteRecord", columns: ["updatedAt"], unique: false)
         }
 
+        migrator.registerMigration("RemoveInfinityFromFrecencies") { db in
+            let threshold = -Float.greatestFiniteMagnitude
+            try db.execute(
+                    sql: """
+                        UPDATE FrecencyNoteRecord
+                        SET
+                            frecencySortScore = :threshold,
+                            updatedAt = :date
+                        WHERE frecencySortScore < :threshold
+                        """,
+                    arguments: ["threshold": threshold, "date": BeamDate.now])
+
+            try db.execute(
+                    sql: """
+                        UPDATE FrecencyUrlRecord
+                        SET
+                            frecencySortScore = :threshold
+                        WHERE frecencySortScore < :threshold
+                        """,
+                    arguments: ["threshold": threshold])
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
