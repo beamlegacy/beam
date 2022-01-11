@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import GRDB
+import BeamCore
 
 /*
  History database schema:
@@ -60,6 +61,8 @@ struct ChromiumHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 }
 
 final class ChromiumHistoryImporter: BrowserHistoryImporter {
+    let sourceBrowser: BrowserType
+
     enum ImportError: Error {
         case countNotAvailable
     }
@@ -76,6 +79,7 @@ final class ChromiumHistoryImporter: BrowserHistoryImporter {
 
     init(browser: ChromiumBrowserInfo) {
         self.browser = browser
+        self.sourceBrowser = browser.browserType
     }
 
     func historyDatabaseURL() throws -> URL? {
