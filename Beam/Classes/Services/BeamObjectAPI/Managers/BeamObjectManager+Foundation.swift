@@ -384,10 +384,6 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
-        if T.beamObjectType == .browsingTree {
-            print("ok")
-        }
-
         let request = BeamObjectRequest()
 
         try request.save(beamObjects) { result in
