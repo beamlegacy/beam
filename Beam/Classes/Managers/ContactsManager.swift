@@ -14,14 +14,9 @@ enum ContactType: String, Codable {
     case work
 }
 
-struct Email: Codable, Equatable {
+struct Email: Codable, Hashable {
     var value: String
     var type: ContactType
-
-    static func == (lhs: Email, rhs: Email) -> Bool {
-        lhs.value == rhs.value &&
-        lhs.type == rhs.type
-    }
 }
 
 class ContactsManager {

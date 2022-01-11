@@ -74,7 +74,7 @@ extension Link: Equatable {
 
 extension Link: Hashable {
     public func hash(into hasher: inout Hasher) {
-       hasher.combine(self)
+       hasher.combine(id)
     }
 }
 

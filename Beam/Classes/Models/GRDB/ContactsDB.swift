@@ -29,7 +29,12 @@ struct ContactRecord: Decodable {
 
 extension ContactRecord: Hashable {
     public func hash(into hasher: inout Hasher) {
-       hasher.combine(self)
+        hasher.combine(uuid)
+        hasher.combine(noteId)
+        hasher.combine(emails)
+        hasher.combine(createdAt)
+        hasher.combine(updatedAt)
+        hasher.combine(deletedAt)
     }
 }
 
