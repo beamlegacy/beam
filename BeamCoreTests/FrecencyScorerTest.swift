@@ -115,21 +115,18 @@ class FrecencyScorerTest: XCTestCase {
             XCTAssertEqual(score.lastTimestamp, expectedDate)
 
         }
-        let halfLife = Float(10.0)
+        let halfLife = try XCTUnwrap(FrecencyParameters[.webVisit30d0]?.halfLife)
         let now = BeamDate.now
-        let frecencyParameters: [FrecencyParamKey: FrecencyParam] = [
-            .webVisit30d0: FrecencyParam(key: .webVisit30d0, eventWeights: [:], halfLife: halfLife)
-        ]
         let store = FakeFrecencyStorage()
         let urlIds = [UUID(), UUID()]
         let score = FrecencyScore(id: urlIds[0], lastTimestamp: now, lastScore: 2, halfLife: halfLife)
         try store.save(score: score, paramKey: .webVisit30d0)
         try store.save(score: score, paramKey: .webReadingTime30d0)
-        let scorer = BatchFrecencyUpdater(frencencyStore: store, params: frecencyParameters)
+        let scorer = BatchFrecencyUpdater(frencencyStore: store)
 
-        scorer.add(urlId: urlIds[0], date: now + Double(halfLife))
-        scorer.add(urlId: urlIds[1], date: now)
-        scorer.add(urlId: urlIds[1], date: now - Double(halfLife))
+        scorer.add(urlId: urlIds[0], date: now + Double(halfLife), eventType: .webLinkActivation)
+        scorer.add(urlId: urlIds[1], date: now, eventType: .webLinkActivation)
+        scorer.add(urlId: urlIds[1], date: now - Double(halfLife), eventType: .webLinkActivation)
         scorer.saveAll()
 
         //case 0: metrics other than visitCount are not touched

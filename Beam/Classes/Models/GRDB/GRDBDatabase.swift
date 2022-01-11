@@ -1073,7 +1073,11 @@ extension GRDBDatabase {
         }
         return scores
     }
-
+    func clearUrlFrecencies() throws {
+        _ = try dbWriter.write { db in
+            try FrecencyUrlRecord.deleteAll(db)
+        }
+    }
     // MARK: - FrecencyNoteRecord
     func saveFrecencyNote(_ frecencyNote: FrecencyNoteRecord) throws {
         try dbWriter.write { db in
@@ -1128,6 +1132,12 @@ extension GRDBDatabase {
         }
         return try dbReader.read { db in
             try FrecencyNoteRecord.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
+        }
+    }
+
+    func clearNoteFrecencies() throws {
+        _ = try dbWriter.write { db in
+            try FrecencyNoteRecord.deleteAll(db)
         }
     }
 

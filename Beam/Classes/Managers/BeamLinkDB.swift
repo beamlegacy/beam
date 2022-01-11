@@ -287,10 +287,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
                                category: .linkNetwork)
-
-        let backgroundQueue = DispatchQueue(label: "Link BeamObjectManager backgroundQueue", qos: .userInitiated)
-
-        backgroundQueue.async { [weak self] in
+        Self.backgroundQueue.async { [weak self] in
             do {
                 try self?.saveOnBeamObjectAPI(link) { result in
                     switch result {

@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import GRDB
+import BeamCore
 
 /*
  History database schema:
@@ -40,6 +41,8 @@ struct SafariHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 }
 
 final class SafariImporter: BrowserHistoryImporter {
+    let sourceBrowser: BrowserType = .safari
+
     enum ImportError: Error {
         case countNotAvailable
     }
