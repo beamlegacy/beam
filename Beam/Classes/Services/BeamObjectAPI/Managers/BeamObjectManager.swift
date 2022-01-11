@@ -242,7 +242,7 @@ class BeamObjectManager {
 
         group.wait()
 
-        Logger.shared.logDebug("Call all object managers: done",
+        Logger.shared.logDebug("Call object managers: done",
                                category: .beamObject,
                                localTimer: localTimer)
 
