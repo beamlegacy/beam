@@ -15,6 +15,7 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     case searchFromNode(nodeText: String)
     case linkFromNote(noteName: String)
     case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?, rootId: UUID?) //following a cmd + click on link
+    case historyImport(sourceBrowser: BrowserType)
 
     public var rootOrigin: BrowsingTreeOrigin? {
         switch self {
@@ -48,10 +49,12 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
             if let rootOrigin = rootOrigin {
                 try container.encode(rootOrigin, forKey: .rootOrigin)
             }
-
             if let rootId = rootId {
                 try container.encode(rootId, forKey: .rootId)
             }
+        case .historyImport(let sourceBrowser):
+            try container.encode("historyImport", forKey: .type)
+            try container.encode(sourceBrowser.rawValue, forKey: .value)
         }
     }
 
@@ -71,6 +74,8 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
                 pageLoadId: try? container.decode(UUID.self, forKey: .pageLoadId),
                 rootOrigin: try? container.decode(BrowsingTreeOrigin.self, forKey: .rootOrigin),
                 rootId: try? container.decodeIfPresent(UUID.self, forKey: .rootId))
+        case "historyImport":
+            self = .historyImport(sourceBrowser: try container.decode(BrowserType.self, forKey: .value))
         default:
             throw DecodingError.dataCorrupted(
                         DecodingError.Context(
@@ -157,6 +162,14 @@ public struct ScoredLink: Hashable {
     }
 }
 
+public struct ForegroundSegment {
+    public var start: Date
+    public var end: Date
+    public var duration: TimeInterval {
+        end.timeIntervalSince(start)
+    }
+}
+
 public class BrowsingNode: ObservableObject, Codable {
     public let id: UUID
     public var legacy = false
@@ -170,7 +183,7 @@ public class BrowsingNode: ObservableObject, Codable {
             }
         }
     }
-    @Published public var events = [ReadingEvent(type: .creation, date: BeamDate.now, webSessionId: WebSessionnizer.shared.sessionId, pageLoadId: UUID())]
+    @Published public var events: [ReadingEvent] = []
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
     public func longTermScoreApply(changes: (LongTermUrlScore) -> Void) {
@@ -219,7 +232,7 @@ public class BrowsingNode: ObservableObject, Codable {
         }
         score.isForeground = isForeground
     }
-    var visitType: FrecencyEventType {
+    public var visitType: FrecencyEventType {
         guard let parent = parent else { return .webRoot }
         if parent.id == tree.root.id {
             switch tree.origin {
@@ -227,6 +240,7 @@ public class BrowsingNode: ObservableObject, Codable {
             case .searchFromNode: return .webFromNote
             case .linkFromNote: return .webFromNote
             case .searchBar: return .webSearchBar
+            case .historyImport: return .webSearchBar
             }
         }
         return isLinkActivation ? .webLinkActivation : .webSearchBar
@@ -240,18 +254,18 @@ public class BrowsingNode: ObservableObject, Codable {
         }
     }
 
-    public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool) {
+    public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool, date: Date = BeamDate.now) {
         id = UUID()
         self.link = LinkStore.visit(url, title: title).id
         self.parent = parent
         self.tree = tree
         self.isLinkActivation = isLinkActivation
-        let creationDate = events.first?.date
-        score.lastCreationDate = creationDate
-        longTermScoreApply { $0.lastCreationDate = creationDate }
-        if let creationDate = creationDate, let scorer = tree.frecencyScorer {
-            scorer.update(id: link, value: 1, eventType: visitType, date: creationDate, paramKey: .webVisit30d0)
-            Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: creationDate, paramKey: .webVisit30d0)
+        self.events = [ReadingEvent(type: .creation, date: date, webSessionId: WebSessionnizer.shared.sessionId, pageLoadId: UUID())]
+        score.lastCreationDate = date
+        longTermScoreApply { $0.lastCreationDate = date }
+        if let scorer = tree.frecencyScorer {
+            scorer.update(id: link, value: 1, eventType: visitType, date: date, paramKey: .webVisit30d0)
+            Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
             }
         longTermScoreApply { $0.visitCount += 1 }
     }
@@ -357,6 +371,20 @@ public class BrowsingNode: ObservableObject, Codable {
             return child
         }
         return child.childWithPath(path.suffix(path.count - 1))
+    }
+    public var foregroundSegments: [ForegroundSegment] {
+        var segments = [ForegroundSegment]()
+        var start: Date?
+        for event in events {
+            if event.type == .startReading, start == nil {
+                start = event.date
+            }
+            if event.isForegroundExiting, let startUnwrapped = start {
+                segments.append(ForegroundSegment(start: startUnwrapped, end: event.date))
+                start = nil
+            }
+        }
+        return segments
     }
 }
 
@@ -476,6 +504,13 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         current.score.textAmount = readCount
         current.longTermScoreApply { $0.textAmount = readCount }
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
+    }
+    //to use only in history import (prevent deep nesting then impossible to encode)
+    public func addChildToRoot(url link: String, title: String?, date: Date) {
+        guard case .historyImport = origin else { return }
+        let node = BrowsingNode(tree: self, parent: root, url: link, title: title, isLinkActivation: true, date: date)
+        root.children.append(node)
+        current = node
     }
 
     public func closeTab() {

@@ -116,11 +116,15 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     public let group = DispatchGroup()
     static let shared = BrowsingTreeStoreManager()
     let groupTimeOut: Double = 2
+    let treeProcessor = BrowsingTreeProcessor()
 
     init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
     }
 
+    func process(tree: BrowsingTree) {
+        treeProcessor.process(tree: tree)
+    }
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil) throws {
         guard let record = browsingTree.toRecord(appSessionId: appSessionId) else { return }
         try db.save(browsingTreeRecord: record)
@@ -220,6 +224,10 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ records: [BrowsingTreeRecord]) throws {
+        let newRecords = try records.filter { try !db.exists(browsingTreeRecord: $0) }
+        for rec in newRecords {
+            process(tree: rec.data)
+        }
         try save(browsingTreeRecords: records)
     }
 
