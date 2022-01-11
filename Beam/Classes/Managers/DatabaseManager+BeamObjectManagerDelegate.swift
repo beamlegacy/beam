@@ -86,7 +86,6 @@ extension DatabaseManager: BeamObjectManagerDelegate {
             let semaphore = DispatchSemaphore(value: 0)
             try saveOnBeamObjectsAPI(Array(changedDatabases)) { _ in
                 semaphore.signal()
-
             }
 
             let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
