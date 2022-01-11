@@ -24,11 +24,11 @@ class SlashMenuTests: BaseTest {
         AllCardsTestView().openFirstCard()
         
         testRailPrint("Given I trigger context menu appearance")
-        let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
+        let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
         XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
         
         testRailPrint("When I select \(dayToSelect) \(monthToSelect) \(yearToSelect) date in Date picker")
-        contextMenuView.clickItem(item: .datePickerItem)
+        contextMenuView.clickSlashMenuItem(item: .datePickerItem)
         datePicker.selectYear(year: yearToSelect)
                 .selectMonth(month: monthToSelect)
                 .selectDate(date: dayToSelect)
@@ -56,8 +56,8 @@ class SlashMenuTests: BaseTest {
         
         testRailPrint("When I add divider item between 2 rows")
         cardTestView.typeKeyboardKey(.space)
-        cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
-            .clickItem(item: .dividerItem)
+        cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
+            .clickSlashMenuItem(item: .dividerItem)
         
         testRailPrint("Then divider appears in the note area")
         XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
