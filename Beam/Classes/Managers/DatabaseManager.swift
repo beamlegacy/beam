@@ -366,7 +366,7 @@ class DatabaseManager {
             let predicate = NSPredicate(format: "id != %@", DatabaseManager.defaultDatabase.id as CVarArg)
             guard let databases = try? Database.fetchAll(context, predicate) else { return }
 
-            Logger.shared.logDebug("Databases found: \(databases)", category: .database)
+            Logger.shared.logDebug("Databases found other than default: \(databases)", category: .database)
             let group = DispatchGroup()
             var errors: [Error] = []
 
