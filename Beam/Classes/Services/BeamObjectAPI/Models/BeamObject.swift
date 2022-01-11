@@ -244,7 +244,8 @@ extension BeamObject: Equatable {
 
 extension BeamObject: Hashable {
     func hash(into hasher: inout Hasher) {
-       hasher.combine(ObjectIdentifier(self))
+        hasher.combine(beamObjectType)
+        hasher.combine(id)
     }
 }
 
