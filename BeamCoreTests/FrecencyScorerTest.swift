@@ -50,9 +50,14 @@ class FrecencyScorerTest: XCTestCase {
                        file: file, line: line)
         XCTAssertEqual(score?.lastTimestamp, lastTimestamp,
                        file: file, line: line)
-        XCTAssertEqual(score?.sortValue,
-                       log(value) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife,
-                       file: file, line: line)
+        if value != 0 {
+            XCTAssertEqual(score?.sortValue,
+                           log(value) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife,
+                           file: file, line: line)
+        } else {
+            XCTAssertEqual(score?.sortValue, -Float.greatestFiniteMagnitude)
+        }
+
     }
     func testScoreObject() {
         let id = UUID()
