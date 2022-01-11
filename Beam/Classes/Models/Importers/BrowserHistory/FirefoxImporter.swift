@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import GRDB
 import INI
+import BeamCore
 
 /*
  History database schema:
@@ -72,6 +73,7 @@ struct FirefoxHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 }
 
 final class FirefoxImporter: BrowserHistoryImporter {
+    let sourceBrowser: BrowserType = .firefox
     enum ImportError: Error {
         case pathNotFoundInDefaultProfile
         case countNotAvailable

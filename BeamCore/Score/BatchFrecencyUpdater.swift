@@ -10,32 +10,38 @@ import Foundation
 public class BatchFrecencyUpdater {
     var scores = [UUID: FrecencyScore]()
     var frecencyStore: FrecencyStorage
-    var params: [FrecencyParamKey: FrecencyParam]
+    var params: [FrecencyParamKey: FrecencyParam] = FrecencyParameters
     let halfLife: Float
-    static var frecencyKey: FrecencyParamKey = .webVisit30d0
+    var frecencyKey: FrecencyParamKey
 
-    public init(frencencyStore: FrecencyStorage, params: [FrecencyParamKey: FrecencyParam] = FrecencyParameters) {
+    public init(frencencyStore: FrecencyStorage, frecencyKey: FrecencyParamKey = .webVisit30d0) {
         self.frecencyStore = frencencyStore
-        self.params = params
-        self.halfLife = params[Self.frecencyKey]?.halfLife ?? (30 * 24 * 60 * 60)
+        self.frecencyKey = frecencyKey
+        self.halfLife = params[frecencyKey]?.halfLife ?? (30 * 24 * 60 * 60)
     }
 
     private func getScore(urlId: UUID) -> FrecencyScore? {
-        return scores[urlId] ?? (try? frecencyStore.fetchOne(id: urlId, paramKey: BatchFrecencyUpdater.frecencyKey))
+        return scores[urlId] ?? (try? frecencyStore.fetchOne(id: urlId, paramKey: frecencyKey))
     }
 
-    public func add(urlId: UUID, date: Date) {
+    private func eventWeight(eventType: FrecencyEventType, param: FrecencyParam) -> Float {
+        return param.eventWeights[eventType] ?? 1
+    }
+
+    public func add(urlId: UUID, date: Date, value: Float = 1, eventType: FrecencyEventType) {
+        guard let param = params[frecencyKey] else { return }
+        let weightedValue = value * eventWeight(eventType: eventType, param: param)
         guard let previousScore = getScore(urlId: urlId) else {
-            let score = FrecencyScore(id: urlId, lastTimestamp: date, lastScore: 1.0, halfLife: halfLife)
+            let score = FrecencyScore(id: urlId, lastTimestamp: date, lastScore: weightedValue, halfLife: halfLife)
             scores[urlId] = score
             return
         }
-        scores[urlId] = previousScore.updated(date: date, value: 1, halfLife: halfLife)
+        scores[urlId] = previousScore.updated(date: date, value: value, halfLife: halfLife)
     }
 
     public func saveAll() {
         do {
-            try frecencyStore.save(scores: Array(scores.values), paramKey: Self.frecencyKey)
+            try frecencyStore.save(scores: Array(scores.values), paramKey: frecencyKey)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .database)
         }

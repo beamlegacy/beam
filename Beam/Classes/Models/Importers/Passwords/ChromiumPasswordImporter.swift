@@ -13,14 +13,15 @@ import KeychainAccess
 import BeamCore
 
 struct ChromiumBrowserInfo {
+    var browserType: BrowserType
     var keychainService: String
     var keychainAccount: String
     var databaseDirectory: String
 }
 
 extension ChromiumBrowserInfo {
-    static let chrome = ChromiumBrowserInfo(keychainService: "Chrome Safe Storage", keychainAccount: "Chrome", databaseDirectory: "Google/Chrome")
-    static let brave = ChromiumBrowserInfo(keychainService: "Brave Safe Storage", keychainAccount: "Brave", databaseDirectory: "BraveSoftware/Brave-Browser")
+    static let chrome = ChromiumBrowserInfo(browserType: .chrome ,keychainService: "Chrome Safe Storage", keychainAccount: "Chrome", databaseDirectory: "Google/Chrome")
+    static let brave = ChromiumBrowserInfo(browserType: .brave, keychainService: "Brave Safe Storage", keychainAccount: "Brave", databaseDirectory: "BraveSoftware/Brave-Browser")
 }
 
 /*
