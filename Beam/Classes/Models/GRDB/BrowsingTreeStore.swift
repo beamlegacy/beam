@@ -32,7 +32,7 @@ extension BrowsingTree: Equatable {
 
 extension BrowsingTree: Hashable {
     public func hash(into hasher: inout Hasher) {
-       hasher.combine(ObjectIdentifier(self))
+       hasher.combine(rootId)
     }
 }
 
