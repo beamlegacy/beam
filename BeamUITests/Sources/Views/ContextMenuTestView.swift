@@ -25,6 +25,12 @@ class ContextMenuTestView: BaseView {
     }
     
     @discardableResult
+    func clickSlashMenuItem(item: NoteViewLocators.SlashContextMenuItems) -> BaseView {
+        staticText(item.accessibilityIdentifier).clickOnExistence()
+        return BaseView()
+    }
+
+    @discardableResult
     func clickItem(item: NoteViewLocators.ContextMenuItems) -> BaseView {
         staticText(item.accessibilityIdentifier).clickOnExistence()
         return BaseView()

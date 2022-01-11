@@ -94,7 +94,7 @@ class CardEditTests: BaseTest {
         
         testRailPrint("Then it has a source icon")
         let cardView = webView.openDestinationCard()
-        let imageNote = cardView.getImageNoteByIndex(noteIndex: 0)
+        let imageNote = cardView.getImageNodeByIndex(nodeIndex: 0)
         imageNote.hover()
         XCTAssertTrue(cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
         

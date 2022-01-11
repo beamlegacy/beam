@@ -13,15 +13,15 @@ class SupportedEmbedDomains {
 
     private static let supportedEmbedDomainsDictKey_dict = "supportedEmbedDomains_dict"
     @UserDefault(key: supportedEmbedDomainsDictKey_dict, defaultValue: [:], suiteName: BeamUserDefaults.supportedEmbedDomains.suiteName)
-    var providers: [String: String]
+    private(set) var providers: [String: String]
 
     private static let supportedEmbedDomainsDictKey_pattern = "supportedEmbedDomains_pattern"
-    @UserDefault(key: supportedEmbedDomainsDictKey_pattern, defaultValue: "", suiteName: BeamUserDefaults.supportedEmbedDomains.suiteName)
-    var pattern: String
+    @UserDefault(key: supportedEmbedDomainsDictKey_pattern, defaultValue: initialPattern, suiteName: BeamUserDefaults.supportedEmbedDomains.suiteName)
+    private(set) var pattern: String
 
     private static let supportedEmbedDomainsDictKey_date = "supportedEmbedDomains_lastUpdate"
     @UserDefault(key: supportedEmbedDomainsDictKey_date, defaultValue: nil, suiteName: BeamUserDefaults.supportedEmbedDomains.suiteName)
-    var lastUpdate: Date?
+    private var lastUpdate: Date?
 
     init () { updateDomainsSupportedByAPI() }
 
@@ -59,4 +59,10 @@ class SupportedEmbedDomains {
         var pattern: String
         var providers: [String: String]
     }
+}
+
+extension SupportedEmbedDomains {
+
+    /// Default pattern until we fetch the real one from the api.
+    private static let initialPattern = "(?:https?:\\/\\/(?:www\\.)?(?:instagr\\.am|instagram\\.com)\\/p\\/([\\w-]+))|(?:https?:\\/\\/(?:www\\.)?(?:flic\\.kr\\/p|flickr.com\\/photos)\\/[^\\s]+)|(?:https?:\\/\\/(?:www\\.)?deviantart\\.com\\/([a-z0-9_-]+)\\/art\\/([a-z0-9_-]+)+)|(?:https?:\\/\\/(?:www\\.)?twitch\\.tv\\/([a-z0-9_-]+)\\/video\\/([a-z0-9_-]+)+)|(?:https?:\\/\\/(?:www\\.)?soundcloud\\.com\\/([a-z0-9_-]+)\\/([a-z0-9_-]+))|(?:https?:\\/\\/(www|open|play)\\.?spotify\\.com\\/(artist|track|playlist|show)\\/([\\w\\-/]+))|(?:https?:\\/\\/(?:www\\.)?ted\\.com\\/talks\\/[\\w]+)|(?:https?:\\/\\/(?:www\\.)?vimeo\\.com\\/(?:(album)\\/(\\w+)\\/video\\/([0-9]+)|(groups)\\/(\\w+)\\/videos\\/([0-9]+)|(channels)\\/(\\w+)\\/([0-9]+)|(ondemand)\\/(\\w+)\\/([0-9]+)|(\\w+)))|(?:https?:\\/\\/(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([\\w-]+)(?:&(.*=.+))*)|(?:https?:\\/\\/(?:www\\.)?slideshare\\.net\\/([\\w\\-]+)\\/([\\w\\-]+))|(?:https:\\/\\/public\\.beamapp\\.co\\/([a-zA-Z0-9._-]+)\\/note\\/([0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12})\\/([A-z0-1-]+))|(?:https?:\\/\\/(?:www\\.)?twitter\\.com\\/\\w+\\/status\\/[0-9]+(?:\\?s=[0-9]+)?)|(?:https?:\\/\\/(?:[\\w.-]+\\.)?figma.com\\/(?:file|proto)\\/([0-9a-zA-Z]{22,128})\\/(.*)?$)|(?:https:\\/\\/sketchfab.com\\/models\\/(\\w+))"
 }
