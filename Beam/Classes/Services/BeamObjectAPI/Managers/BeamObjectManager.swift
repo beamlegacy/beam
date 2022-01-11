@@ -116,7 +116,8 @@ class BeamObjectManager {
         BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
-        GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
+        //TODO: fix and re activate
+        //GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
     }
 
     var conflictPolicyForSave: BeamObjectConflictResolution = .replace
