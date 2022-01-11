@@ -13,6 +13,12 @@ extension XCUIElement {
         self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         return self
     }
+
+    @discardableResult
+    public func hoverInTheMiddle() -> XCUIElement {
+        self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).hover()
+        return self
+    }
     
     @discardableResult
     public func doubleTapInTheMiddle() -> XCUIElement {

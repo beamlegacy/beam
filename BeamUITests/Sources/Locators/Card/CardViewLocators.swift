@@ -31,12 +31,15 @@ enum CardViewLocators {
         case imageNoteCollapsedView = "collapsed-text"
         case linkReferenceCounterTitle = "sectionTitle"
         case breadcrumbTitle = "breadcrumb0"
+        case noteMediaPlaying = "note-media-playing"
+        case noteMediaMuted = "note-media-muted"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
         case cardTitle = "Note's title"
-        case noteField = "TextNode"
-        case imageNote = "ImageNode"
+        case textNode = "TextNode"
+        case imageNode = "ImageNode"
+        case embedNode = "EmbedNode"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {

@@ -51,8 +51,8 @@ class CardCreationTests: BaseTest {
     func testCreateCardUsingCardReference() {
         let journalView = launchApp()
         
-        testRailPrint("When I create \(cardNameToBeCreated) a note referencing it from another Card")
-        journalView.textView(CardViewLocators.TextFields.noteField.accessibilityIdentifier).firstMatch.click()
+        testRailPrint("When I create \(cardNameToBeCreated) a note referencing it from another Note")
+        journalView.textView(CardViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.click()
         journalView.app.typeText("@" + cardNameToBeCreated)
         journalView.typeKeyboardKey(.enter)
         let allCardsMenu = journalView.openAllCardsMenu()
