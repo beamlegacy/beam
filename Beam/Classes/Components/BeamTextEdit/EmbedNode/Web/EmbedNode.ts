@@ -1,6 +1,5 @@
 import {
   BeamElement,
-  BeamMutationObserver,
   BeamWindow
 } from "../../../../Helpers/Utils/Web/BeamTypes"
 import type { EmbedNodeUI as EmbedNodeUI } from "./EmbedNodeUI"
@@ -14,7 +13,6 @@ export class EmbedNode<UI extends EmbedNodeUI> {
    * @type EmbedNode
    */
   static instance: EmbedNode<any>
-  mutationObserver: BeamMutationObserver
 
   /**
    * @param win {(BeamWindow)}
@@ -38,8 +36,12 @@ export class EmbedNode<UI extends EmbedNodeUI> {
 
   onLoad(): void {
     // assign resize obserer to iframe element
-    const el= this.win.document.querySelector("body > .iframe")
+    const el = this.win.document.querySelector("body > .iframe")
     this.resizeObserver.observe(el as unknown as Element)
+    this.mutationObserver.observe(
+      el as unknown as Element,
+      this.mutationObserverOptions
+    )
   }
 
   /**
@@ -47,20 +49,41 @@ export class EmbedNode<UI extends EmbedNodeUI> {
    *
    * @memberof EmbedNode
    */
-   resizeObserver = new ResizeObserver((entries) => {
-     entries.forEach( (entry) => {
+  resizeObserver = new ResizeObserver((entries) => {
+    entries.forEach((entry) => {
       const sizing = {
-       width: 0,
-       height: 0
-     }
+        width: 0,
+        height: 0
+      }
       const beamElement = entry.target as unknown as BeamElement
-      // Use resizeObserver width and height because `getComputedStyle` might 
+      // Use resizeObserver width and height because `getComputedStyle` might
       // return outdated size information and only update the values with a 100-200ms delay
       const styles = this.win.getComputedStyle(beamElement)
       sizing.width += entry.contentRect.width
       sizing.width += parseFloat(styles?.marginLeft)
       sizing.width += parseFloat(styles?.marginRight)
       sizing.height += entry.contentRect.height
+      sizing.height += parseFloat(styles?.marginTop)
+      sizing.height += parseFloat(styles?.marginBottom)
+      this.ui.sendContentSize(sizing)
+    })
+  })
+
+  mutationObserver = new MutationObserver((mutations, _observer) => {
+    mutations.forEach((mutation) => {
+      const sizing = {
+        width: 0,
+        height: 0
+      }
+      const beamElement = mutation.target as unknown as BeamElement
+      // Use target getBoundingClientRect() width and height because `getComputedStyle` might
+      // return outdated size information and only update the values with a 100-200ms delay
+      const styles = this.win.getComputedStyle(beamElement)
+      const bounds = beamElement.getBoundingClientRect()
+      sizing.width += bounds.width
+      sizing.width += parseFloat(styles?.marginLeft)
+      sizing.width += parseFloat(styles?.marginRight)
+      sizing.height += bounds.height
       sizing.height += parseFloat(styles?.marginTop)
       sizing.height += parseFloat(styles?.marginBottom)
       this.ui.sendContentSize(sizing)
@@ -83,6 +106,8 @@ export class EmbedNode<UI extends EmbedNodeUI> {
       )
     })
   }
+
+  mutationObserverOptions = { attributes: true, childList: true, subtree: true }
 
   toString(): string {
     return this.constructor.name

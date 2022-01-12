@@ -9,7 +9,7 @@ import Foundation
 
 enum TextEditorContextViewLocators {
     
-    enum Images: String, CaseIterable, UIElement {
+    enum Formatters: String, CaseIterable, UIElement {
         case bold = "editor-format_bold"
         case italic = "editor-format_italic"
         case bidi = "editor-format_bidirectional"

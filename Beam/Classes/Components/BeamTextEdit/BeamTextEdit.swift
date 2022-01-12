@@ -1245,7 +1245,7 @@ public extension CALayer {
                 }
             }
             for selectedNode in selection.nodes {
-                if !textNodes.contains(selectedNode) && selectedNode != focussedNode {
+                if !textNodes.contains(selectedNode) && selectedNode != focussedNode && !selectedNode.parentIsSelectedAndClosed {
                     selection.remove(selectedNode)
                 }
             }

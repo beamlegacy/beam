@@ -97,7 +97,7 @@ extension BeamTextEdit {
             self?.handleAction(type)
         }
         var items = [
-            ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
+            ContextMenuItem(title: "Note Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
             ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Date Picker", subtitle: "", icon: "editor-calendar", action: { action(.date) }),
             ContextMenuItem.separator(),

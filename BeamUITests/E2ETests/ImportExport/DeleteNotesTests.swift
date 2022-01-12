@@ -38,7 +38,7 @@ class DeleteNotesTests: BaseTest {
         helper.tapCommand(.insertTextInCurrentNote)
         helper.tapCommand(.create10Notes)
         
-        testRailPrint("When Open All cards - asssert it is \(expectedNumberOfCardsAfterPopulatingDB) cards")
+        testRailPrint("When Open All notes - asssert it is \(expectedNumberOfCardsAfterPopulatingDB) notes")
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         /*if !waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: expectedNumberOfCardsAfterPopulatingDB, elementQuery: allCards.getCardsNamesElementQuery()) {
             //refresh all cards view by switching between Journal and All Cards

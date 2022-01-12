@@ -62,13 +62,13 @@ class NoteEditorTests: BaseTest {
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.tapInTheMiddle()
         firstJournalEntry.clear()
-        let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.slashContextMenu.accessibilityIdentifier)
+        let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
         
         testRailPrint("Then Context menu is displayed")
         XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
         
         testRailPrint("Then Context menu items exist, enabled and hittable")
-        for item in NoteViewLocators.ContextMenuItems.allCases {
+        for item in NoteViewLocators.SlashContextMenuItems.allCases {
             let identifier = item.accessibilityIdentifier
             let element = contextMenuView.staticText(identifier).firstMatch
             XCTAssertTrue(element.exists && element.isEnabled && element.isHittable, "element \(identifier) couldn't be reached")
@@ -81,7 +81,7 @@ class NoteEditorTests: BaseTest {
         XCTAssertTrue(WaitHelper().waitForDoesntExist(contextMenuView.menuElement()))
         
         journalView.app.typeText(contextMenuTriggerKey + "bol")
-        let boldMenuItem = contextMenuView.staticText(NoteViewLocators.ContextMenuItems.boldItem.accessibilityIdentifier)
+        let boldMenuItem = contextMenuView.staticText(NoteViewLocators.SlashContextMenuItems.boldItem.accessibilityIdentifier)
         
         testRailPrint("Then Bold context menu item is displayed")
         XCTAssertTrue(boldMenuItem.waitForExistence(timeout: implicitWaitTimeout))

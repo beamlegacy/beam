@@ -58,7 +58,7 @@ class OmniboxViewTests: BaseTest {
         XCTAssertTrue(omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
         let pivotButton = omniboxView.button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier)
         XCTAssertTrue(pivotButton.exists)
-        XCTAssertEqual(pivotButton.title, "card")
+        XCTAssertEqual(pivotButton.title, "note")
 
         testRailPrint("When I click on pivot button")
         WebTestView().openDestinationCard()

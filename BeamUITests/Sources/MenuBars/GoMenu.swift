@@ -14,7 +14,7 @@ class GoMenu: BaseMenuBar {
     
     func changeCard() {
         menuBarItem(menuBarTitle).click()
-        menuItem("Change Card").click()
+        menuItem("Change Note").click()
     }
     
 }

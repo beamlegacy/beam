@@ -134,20 +134,7 @@ class BrowserTabsManager: ObservableObject {
 
     private func updateTabsHandlers() {
         for tab in tabs {
-            guard tab.onNewTabCreated == nil else { continue }
-
-            tab.onNewTabCreated = { [unowned self] newTab in
-                self.tabs.append(newTab)
-                // if var note = self.currentNote {
-                // TODO bind visited sites with note contents:
-                //                        if note.searchQueries.contains(newTab.originalQuery) {
-                //                            if let url = newTab.url {
-                //                                note.visitedSearchResults.append(VisitedPage(originalSearchQuery: newTab.originalQuery, url: url, date: BeamDate.now, duration: 0))
-                //                                self.currentNote = note
-                //                            }
-                //                        }
-                //                    }
-            }
+            guard tab.appendToIndexer == nil else { continue }
 
             tab.appendToIndexer = { [unowned self, weak tab] url, read in
                 guard let tab = tab else { return }

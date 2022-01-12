@@ -27,7 +27,7 @@ class WebTestView: BaseView {
     }
     
     func searchForCardByTitle(_ title: String) {
-        XCTContext.runActivity(named: "Search for '\(title)' card in cards search drop-down") {_ in
+        XCTContext.runActivity(named: "Search for '\(title)' note in notes search drop-down") {_ in
         self.getDestinationCardElement().clickOnHittable()
         searchField(WebViewLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
@@ -43,7 +43,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func selectCreateCard(_ searchText: String) -> CardTestView {
-        XCTContext.runActivity(named: "Click on proposed New card option for '\(searchText)' search keyword") {_ in
+        XCTContext.runActivity(named: "Click on proposed New note option for '\(searchText)' search keyword") {_ in
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createCard'")
         let cardCreationElement = app.otherElements.matching(predicate).firstMatch
         //Try out to replace additional waiting
