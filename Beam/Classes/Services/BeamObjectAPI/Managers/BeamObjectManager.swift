@@ -97,21 +97,27 @@ class BeamObjectManager {
             localTimer = BeamDate.now
 
             /*
-             IMPORTANT: the code inside the `parse` and done by the manager, outside the area of `BeamObjectManager`
-             might resend `saveOnAPI()` calls (like when database with same titles arrive and it's being changed +
-             resaved on the API and need to have `previousChecksum` already available to avoid conflicts.
+             IMPORTANT: code inside `parse` and the manager, outside the area of `BeamObjectManager`
+             might call `saveOnAPI()` to save objects. Ex: when database with same titles arrive and it's being changed +
+             resaved on the API. It needs to have `previousChecksum` already available to avoid conflicts.
 
-             We must save object's previousChecksums *before* in case that happens.
+             We must therefor save object's previousChecksums *before* calling the manager.
              */
 
-            let checksums = try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
+            let _ = try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
 
             do {
                 try manager.parse(objects: encapsulatedObjects)
             } catch {
-                // We had issues saving those, we *must* delete previous checksums attached to those objects else a new
-                // fetch will not fetch those objects again, as the local checksum will be equal to remote ones.
-                // The error might be temporary and we should fetch those again.
+                /*
+                 We had issues saving those, we *must* delete previous checksums attached to those objects else a new
+                 fetch will not fetch those objects again, as the local checksum will be equal to remote ones.
+
+                 The error might be temporary and we should fetch those again.
+
+                 TODO: we should only delete checksums of failed objects, but we don't currently have a way to know about
+                 successful object saves and failed ones. We will therefor refetch successful objects in case of failures.
+                 */
                 try BeamObjectChecksum.deletePreviousChecksums(beamObjects: toSaveObjects)
                 throw error
             }
@@ -137,7 +143,12 @@ class BeamObjectManager {
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
 
-        // In what order should we proceed when receiving new objects?
+        /*
+         Not yet used: In what order should we proceed when receiving new objects? We might have objects with
+         dependencies. Ex: `Document` needs `Database`.
+
+         We should use that order when sending objects to the API, and when receiving new objects.
+         */
         managerOrder = [.database, .contact, .file, .document, .password, .link, .browsingTree]
 
         assert(managerOrder.count == managerInstances.count)
