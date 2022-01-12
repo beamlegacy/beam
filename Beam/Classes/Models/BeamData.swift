@@ -217,7 +217,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 Self.noteUpdated.send(documentStruct)
                 switch documentStruct.documentType {
                 case .note:
-                    break
+                    if documentStruct.deletedAt != nil {
+                        self.clusteringManager.removeNote(noteId: documentStruct.id)
+                        self.activeSources.removeNote(noteId: documentStruct.id)
+                    }
                 case .journal:
                     // Only send journal updates to this one
                     Self.journalNoteUpdated.send(documentStruct)
