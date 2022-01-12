@@ -248,12 +248,12 @@ extension BeamObjectRequest {
     func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
                   beamObjectType: String? = nil,
-                  filterDeleted: Bool? = false,
+                  skipDeleted: Bool? = false,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
-                                               filterDeleted: filterDeleted)
+                                               skipDeleted: skipDeleted)
 
         return try fetchAllWithFile("beam_objects", parameters, completion)
     }
@@ -262,12 +262,12 @@ extension BeamObjectRequest {
     func fetchAllWithDataUrl(receivedAtAfter: Date? = nil,
                              ids: [UUID]? = nil,
                              beamObjectType: String? = nil,
-                             filterDeleted: Bool? = false,
+                             skipDeleted: Bool? = false,
                              _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
-                                               filterDeleted: filterDeleted)
+                                               skipDeleted: skipDeleted)
 
         return try fetchAllWithFile("beam_objects_data_url", parameters, completion)
     }
@@ -276,12 +276,12 @@ extension BeamObjectRequest {
     func fetchAllChecksums(receivedAtAfter: Date? = nil,
                            ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
-                           filterDeleted: Bool? = false,
+                           skipDeleted: Bool? = false,
                            _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
-                                               filterDeleted: filterDeleted)
+                                               skipDeleted: skipDeleted)
 
         return try fetchAllWithFile("beam_object_checksums", parameters, completion)
     }
