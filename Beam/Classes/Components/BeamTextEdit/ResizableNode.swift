@@ -55,7 +55,7 @@ class ResizableNode: ElementNode {
     var minWidth: CGFloat = 48
     var minHeight: CGFloat = 48
     var maxWidth: CGFloat?
-    var maxHeight: CGFloat = 700
+    var maxHeight: CGFloat = 1200
     var keepAspectRatio: Bool = true
     var responsiveStrategy: ResponsiveType = .horizontal
     var visibleSize: CGSize = .zero
