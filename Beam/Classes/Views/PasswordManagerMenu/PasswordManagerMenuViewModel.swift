@@ -20,10 +20,12 @@ protocol PasswordManagerMenuDelegate: AnyObject {
 struct PasswordManagerMenuOptions: Equatable {
     let showExistingCredentials: Bool
     let suggestNewPassword: Bool
+    let showMenu: Bool
 
-    static let login = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: false)
-    static let createAccount = PasswordManagerMenuOptions(showExistingCredentials: false, suggestNewPassword: true)
-    static let ambiguousPassword = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: true)
+    static let login = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: false, showMenu: true)
+    static let createAccount = PasswordManagerMenuOptions(showExistingCredentials: false, suggestNewPassword: true, showMenu: false)
+    static let createAccountWithMenu = PasswordManagerMenuOptions(showExistingCredentials: false, suggestNewPassword: true, showMenu: true)
+    static let ambiguousPassword = PasswordManagerMenuOptions(showExistingCredentials: true, suggestNewPassword: true, showMenu: true)
 }
 
 enum PasswordSearchCellMode {
@@ -38,6 +40,8 @@ class PasswordManagerMenuViewModel: ObservableObject {
         var entryDisplayLimit: Int
         var showSuggestPasswordOption: Bool
         var suggestNewPassword: Bool
+        var separator1: Bool
+        var separator2: Bool
         var userInfo: UserInformations?
     }
 
@@ -66,9 +70,11 @@ class PasswordManagerMenuViewModel: ObservableObject {
         self.entriesForHost = []
         self.display = Contents(
             entriesForHost: entriesForHost,
-            entryDisplayLimit: 1,
-            showSuggestPasswordOption: options.showExistingCredentials && options.suggestNewPassword,
-            suggestNewPassword: !options.showExistingCredentials,
+            entryDisplayLimit: 0,
+            showSuggestPasswordOption: false,
+            suggestNewPassword: false,
+            separator1: false,
+            separator2: false,
             userInfo: userInfoStore.fetchAll().first ?? nil
         )
         self.otherPasswordsViewModel = PasswordListViewModel()
@@ -113,11 +119,20 @@ class PasswordManagerMenuViewModel: ObservableObject {
     }
 
     private func updateDisplay() {
+        let existingCredentials = options.showExistingCredentials && !entriesForHost.isEmpty
+        let showOtherPasswordsOption = options.showExistingCredentials
+        let showSuggestPasswordOption = options.showMenu && !showPasswordGenerator && options.suggestNewPassword
+        let separator1 = existingCredentials && showOtherPasswordsOption
+        let separator2 = (existingCredentials || showOtherPasswordsOption) && showSuggestPasswordOption
+        let suggestNewPassword = (!options.showMenu || showPasswordGenerator) && options.suggestNewPassword
+        let entryDisplayLimit = options.showExistingCredentials ? revealMoreItemsInList ? 3 : 1 : 0
         display = Contents(
             entriesForHost: entriesForHost,
-            entryDisplayLimit: revealMoreItemsInList ? 3 : 1,
-            showSuggestPasswordOption: options.showExistingCredentials && options.suggestNewPassword && !showPasswordGenerator,
-            suggestNewPassword: !options.showExistingCredentials || showPasswordGenerator,
+            entryDisplayLimit: entryDisplayLimit,
+            showSuggestPasswordOption: showSuggestPasswordOption,
+            suggestNewPassword: suggestNewPassword,
+            separator1: separator1,
+            separator2: separator2,
             userInfo: display.userInfo
         )
     }
@@ -162,7 +177,7 @@ enum PasswordGeneratorOption: String, CaseIterable, CustomStringConvertible {
     var description: String { rawValue }
 }
 
-class PasswordGeneratorViewModel: ObservableObject {
+class PasswordGeneratorViewModel: NSObject, ObservableObject {
     weak var delegate: PasswordManagerMenuDelegate?
 
     @Published var suggestion: String = ""
@@ -171,9 +186,11 @@ class PasswordGeneratorViewModel: ObservableObject {
     @Published var generatorPasswordLength = 20
 
     private var isLocked = false
+    private var isDismissed = false
     private var subscribers = Set<AnyCancellable>()
 
-    init() {
+    override init() {
+        super.init()
         $generatorOption.sink(receiveValue: { [weak self] newValue in
             guard let self = self else { return }
             self.generate(generatorOption: newValue, generatorPassphraseWordCount: self.generatorPassphraseWordCount, generatorPasswordLength: self.generatorPasswordLength)
@@ -190,8 +207,9 @@ class PasswordGeneratorViewModel: ObservableObject {
 
     func start() {
         guard !isLocked else { return }
+        isDismissed = false
         generate()
-        clicked()
+        delegate?.fillNewPassword(suggestion, dismiss: false)
     }
 
     func usePassword() {
@@ -218,16 +236,20 @@ class PasswordGeneratorViewModel: ObservableObject {
         }
     }
 
-    private func clicked() {
-        Logger.shared.logDebug("Clicked on generated password", category: .passwordManagerInternal)
-        delegate?.fillNewPassword(suggestion, dismiss: false)
-    }
-
     private func emptyPasswordField() {
         delegate?.emptyPasswordField()
     }
 
     private func dismiss() {
+        isDismissed = true
         delegate?.dismiss()
+    }
+}
+
+extension PasswordGeneratorViewModel: NSWindowDelegate {
+    func windowWillClose(_ notification: Notification) {
+        if !isDismissed {
+            dontUsePassword()
+        }
     }
 }
