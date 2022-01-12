@@ -99,6 +99,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             createWindow(frame: nil, restoringTabs: true)
         }
 
+        Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
+
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
             Logger.shared.logWarning("API HOSTNAME is \(Configuration.apiHostname)", category: .general)
