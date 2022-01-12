@@ -161,7 +161,7 @@ extension BeamObjectManager {
          */
 
         try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
-                                          filterDeleted: Persistence.Sync.BeamObjects.last_received_at == nil) { result in
+                                          skipDeleted: Persistence.Sync.BeamObjects.last_received_at == nil) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(error.localizedDescription)",
