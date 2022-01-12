@@ -12,40 +12,35 @@ extension AppDelegate {
         do {
             try data.clusteringOrphanedUrlManager.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete Clustering Orphaned file", error: error)
-            return
+            Logger.shared.logError("Could not delete Clustering Orphaned file", category: .general)
         }
 
         // Link Store
         do {
             try LinkStore.shared.deleteAll()
         } catch {
-            UserAlert.showError(message: "Could not delete LinkStore", error: error)
-            return
+            Logger.shared.logError("Could not delete LinkStore", category: .general)
         }
 
         // GRDB
         do {
             try GRDBDatabase.shared.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete GRDB Databases", error: error)
-            return
+            Logger.shared.logError("Could not delete GRDB Databases", category: .general)
         }
 
         // TopDomain
         do {
             try TopDomainDatabase.shared.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete TopDomains", error: error)
-            return
+            Logger.shared.logError("Could not delete TopDomains", category: .general)
         }
 
         // BeamFile
         do {
             try BeamFileDBManager.shared.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete BeamFiles", error: error)
-            return
+            Logger.shared.logError("Could not delete BeamFiles", category: .general)
         }
 
         // CoreData Logger
@@ -64,6 +59,12 @@ extension AppDelegate {
         ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
         // Passwords
         PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
+        // BeamObject Coredata Checksum
+        do {
+            try BeamObjectChecksum.deleteAll()
+        } catch {
+            Logger.shared.logError("Could not delete BeamObjectChecksum", category: .general)
+        }
         // Notes and Databases
         self.deleteDocumentsAndDatabases(includedRemote: false)
     }
