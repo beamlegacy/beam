@@ -55,4 +55,12 @@ public struct EnvironmentVariables {
     static public private(set) var hideCategories = "$(HIDE_CATEGORIES)".split(separator: " ").compactMap {
         LogCategory(rawValue: String($0))
     }
+    #if BEAM_BETA
+    static public private(set) var branchType = "beta"
+    #elseif BEAM_PUBLIC
+    static public private(set) var branchType = "public"
+    #else
+    static public private(set) var branchType = "develop"
+    #endif
+
 }
