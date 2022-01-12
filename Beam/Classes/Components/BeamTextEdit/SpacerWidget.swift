@@ -28,7 +28,7 @@ class SpacerWidget: Widget {
         case .beforeLinks:
             return (linksVisible || refsVisible) ? 44 : 0
         case .beforeReferences:
-            let space: CGFloat = (root?.linksSection?.open ?? true) ? 40 : 0
+            let space: CGFloat = (root?.linksSection?.open ?? true) ? 40 : 8
             return (linksVisible && refsVisible) ? space : 0
         case .bottom:
             guard !(editor?.journalMode ?? true) else { return 0 }

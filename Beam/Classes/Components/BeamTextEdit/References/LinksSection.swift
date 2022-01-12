@@ -88,6 +88,8 @@ class LinksSection: Widget {
         separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)
         childInset = 9
+
+        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 0, right: 0)
     }
 
     var links: [BeamNoteReference] { note.links }
@@ -266,7 +268,7 @@ class LinksSection: Widget {
     func setupLayerFrame() {
         let linkAllLayer = layers["linkAllLayer"]
         sectionTitleLayer.frame = CGRect(
-            origin: CGPoint(x: 22, y: 0),
+            origin: CGPoint(x: 26, y: 1),
             size: CGSize(
                 width: linkAllLayer?.frame.minX ?? availableWidth,
                 height: sectionTitleLayer.preferredFrameSize().height

@@ -77,7 +77,7 @@ class BreadCrumb: Widget {
 
         setupLayers(with: note)
         selectCrumb(crumbChain.count - 1)
-        contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 1 : 2, right: 0)
+        contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 0 : 1, right: 0)
         childrenPadding = NSEdgeInsets(top: 2, left: 7, bottom: 3 + containerPadding, right: 0)
 
         proxy.proxy.treeChanged.receive(on: DispatchQueue.main).sink { [weak self] _ in
@@ -117,6 +117,7 @@ class BreadCrumb: Widget {
             )
         updateLinkLayerState()
         guard let actionLayer = actionLayer else { return }
+        actionLayer.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
         actionLayer.setAccessibilityIdentifier("link-reference-button")
         addLayer(actionLayer)
 
