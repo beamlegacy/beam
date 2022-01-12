@@ -143,8 +143,7 @@ class BeamObjectManager {
         BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
-        //TODO: fix and re activate
-        //GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
+        GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
 
         /*
          Not yet used: In what order should we proceed when receiving new objects? We might have objects with
@@ -152,7 +151,7 @@ class BeamObjectManager {
 
          We should use that order when sending objects to the API, and when receiving new objects.
          */
-        managerOrder = [.database, .contact, .file, .document, .password, .link, .browsingTree]
+        managerOrder = [.database, .contact, .file, .document, .password, .link, .browsingTree, .noteFrecency]
 
         assert(managerOrder.count == managerInstances.count)
     }
