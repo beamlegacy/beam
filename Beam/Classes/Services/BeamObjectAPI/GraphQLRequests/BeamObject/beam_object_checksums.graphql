@@ -1,6 +1,6 @@
-query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String, $filterDeleted: Boolean) {
+query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String, $skipDeleted: Boolean) {
   me {
-    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType, filterDeleted: $filterDeleted) {
+    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType, filterDeleted: $skipDeleted) {
       id
       type
       checksum
