@@ -352,6 +352,10 @@ class ClusteringManager: ObservableObject {
             }
         }
     }
+    
+    func removeNote(noteId: UUID) {
+        cluster.removeNote(noteId: noteId)
+    }
 
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
