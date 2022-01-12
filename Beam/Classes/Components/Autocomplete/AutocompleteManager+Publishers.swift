@@ -36,7 +36,7 @@ extension AutocompleteManager {
                 .map { canCreate in
                     let createResult = AutocompleteResult(text: searchText,
                                                           source: .createCard,
-                                                          information: "New card",
+                                                          information: "New note",
                                                           completingText: searchText)
                     let results = canCreate ? [createResult] : []
                     return (AutocompleteResult.Source.createCard, results)
@@ -76,7 +76,7 @@ extension AutocompleteManager {
                     let ids = documentStructs.map { $0.id }
                     let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
                     let autocompleteResults = documentStructs.map {
-                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
+                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
                     }.sorted(by: >).prefix(6)
                     let autocompleteResultsArray = Array(autocompleteResults)
                     self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
@@ -259,7 +259,7 @@ extension AutocompleteManager {
             let ids = documentStructs.map { $0.id }
             let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
             let autocompleteResults = documentStructs.map {
-                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id])
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }.sorted(by: >).prefix(limit)
             let autocompleteResultsArray = Array(autocompleteResults)
             self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray, startedAt: start)
@@ -267,3 +267,33 @@ extension AutocompleteManager {
         }
     }
 }
+
+// MARK: - Quickly mock results for debugging
+#if DEBUG
+extension AutocompleteManager {
+
+    private func mockResultsPublisher(_ results: [AutocompleteResult]) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            promise(.success(results))
+        }
+    }
+
+    func getMockAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
+        if searchText.count == 1 {
+            return [
+                futureToPublisher(mockResultsPublisher([
+                    .init(text: "netflix.com", source: .topDomain, url: URL(string: "netflix.com")!, completingText: searchText)
+                ]), source: .topDomain)
+            ]
+        } else {
+            return [
+                futureToPublisher(mockResultsPublisher([
+                    .init(text: "eloquentjavascript.net", source: .url, url: URL(string: "https://eloquentjavascript.net")!, information: "Eloquent Javascript", completingText: searchText, score: 190),
+                    .init(text: "eloquentjavascript.net/test", source: .url, url: URL(string: "https://eloquentjavascript.net/test")!, information: "Other Javascript", completingText: searchText, score: 110)
+                ]), source: .url)
+            ]
+        }
+    }
+}
+
+#endif

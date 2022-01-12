@@ -40,6 +40,8 @@ swift lint:
   timeout: 5 minutes
   dependencies: []
   stage: test
+  variables:
+    GIT_SUBMODULE_STRATEGY: none
   artifacts:
     when: always
     paths:

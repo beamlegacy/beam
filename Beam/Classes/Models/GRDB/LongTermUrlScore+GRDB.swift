@@ -43,6 +43,6 @@ class LongTermUrlScoreStore: LongTermUrlScoreStoreProtocol {
 
     func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore] {
         let scores = db.getManyLongTermUrlScore(urlIds: urlIds)
-        return Dictionary(uniqueKeysWithValues: scores.map{ ($0.urlId, $0) })
+        return Dictionary(uniqueKeysWithValues: scores.map { ($0.urlId, $0) })
     }
 }

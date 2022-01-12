@@ -177,7 +177,7 @@ import Sentry
         }
     }
 
-    @available(*, deprecated, message: "Using title might navigate to a different card if multiple databases, use ID if possible.")
+    @available(*, deprecated, message: "Using title might navigate to a different note if multiple databases, use ID if possible.")
     @discardableResult func navigateToNote(named: String, elementId: UUID? = nil) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) named \(named) - elementId \(String(describing: elementId))", category: "BeamState")
         //Logger.shared.logDebug("load note named \(named)")
@@ -453,8 +453,10 @@ import Sentry
 
         focusOmniBox = false
         if let result = autocompleteManager.autocompleteResult(at: autocompleteManager.autocompleteSelectedIndex) {
-            autocompleteManager.resetQuery()
             selectAutocompleteResult(result)
+            DispatchQueue.main.async { [unowned self] in
+                self.autocompleteManager.resetQuery()
+            }
             return
         }
 
@@ -471,8 +473,10 @@ import Sentry
             _ = createTab(withURL: url, originalQuery: queryString)
         }
         autocompleteManager.clearAutocompleteResults()
-        autocompleteManager.resetQuery()
         mode = .web
+        DispatchQueue.main.async { [unowned self] in
+            self.autocompleteManager.resetQuery()
+        }
     }
 
     override public init() {
@@ -548,9 +552,9 @@ import Sentry
         if mode == .web {
             focusOmniBoxFromTab = fromTab
             if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
-                autocompleteManager.resetQuery()
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
+                autocompleteManager.clearAutocompleteResults()
             } else if !autocompleteManager.searchQuery.isEmpty || autocompleteManager.autocompleteResults.isEmpty {
                 autocompleteManager.resetQuery()
                 autocompleteManager.getEmptyQuerySuggestions()

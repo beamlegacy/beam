@@ -12,7 +12,7 @@ enum PreferencesToolbarViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case generalButton = "General"
         case browserButton = "Browser"
-        case cardsButton = "Cards"
+        case notesButton = "Notes"
         case privacyButton = "Privacy"
         case passwordsButton = "Passwords"
         case accountButton = "Account"

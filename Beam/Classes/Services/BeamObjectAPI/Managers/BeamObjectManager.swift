@@ -20,6 +20,7 @@ enum BeamObjectObjectType: String {
     case document
     case myRemoteObject = "my_remote_object"
     case contact
+    case noteFrecency = "note_frecency"
 
     static func fromString(value: String) -> Self? {
         BeamObjectObjectType(rawValue: value)
@@ -142,6 +143,8 @@ class BeamObjectManager {
         BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
+        //TODO: fix and re activate
+        //GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
 
         /*
          Not yet used: In what order should we proceed when receiving new objects? We might have objects with

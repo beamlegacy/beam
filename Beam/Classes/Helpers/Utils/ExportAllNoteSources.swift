@@ -67,10 +67,9 @@ func export_all_note_sources(to url: URL?) {
     guard let url = url else { return }
 
     let documentManager = DocumentManager()
-    let notesAndSources = documentManager.allDocumentsTitles(includeDeletedNotes: true)
-        .compactMap { title -> [NoteAndSourcesRow]? in
-            guard let note = BeamNote.fetch(title: title, keepInMemory: false),
-                  !note.type.isJournal else { return nil }
+    let notesAndSources = documentManager.allDocumentsIds(includeDeletedNotes: true)
+        .compactMap { id -> [NoteAndSourcesRow]? in
+            guard let note = BeamNote.fetch(id: id, includeDeleted: true) else { return nil }
             note.sources.refreshScores()
             if note.sources.count > 0 {
                 return note.sources.getAll().map { s in

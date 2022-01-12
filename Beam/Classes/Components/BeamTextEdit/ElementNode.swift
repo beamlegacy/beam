@@ -84,6 +84,15 @@ public class ElementNode: Widget {
         }
     }
 
+    var parentIsSelectedAndClosed: Bool {
+        if let open = self.parent?.open, let selected = self.parent?.selected, !open && selected {
+            return true
+        } else {
+            guard let parent = self.parent as? ElementNode else { return false }
+            return parent.parentIsSelectedAndClosed
+        }
+    }
+
     var strippedText: String {
         ""
     }

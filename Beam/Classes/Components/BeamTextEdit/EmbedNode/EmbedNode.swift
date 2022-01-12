@@ -97,19 +97,8 @@ class EmbedNode: ResizableNode {
         setAccessibilityRole(.textArea)
 
         contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
-
-        // try cache before setting up loader
-        let builder = EmbedContentBuilder()
-        if let embedContent = builder.cachedEmbed(for: sourceURL) {
-            self.embedContent = embedContent
-            updateResizableElementContentSize()
-            self.loadEmbedContentInWebView()
-        } else {
-            updateResizableElementContentSize()
-            setupLoader()
-            updateEmbedContent(updateWebview: !isReusedWebview)
-        }
-
+        updateResizableElementContentSize()
+        updateEmbedContent(updateWebview: !isReusedWebview)
     }
 
     deinit {
@@ -176,9 +165,13 @@ class EmbedNode: ResizableNode {
         if let embedContent = builder.embeddableContent(for: sourceURL) {
             self.embedContent = embedContent
             if updateWebview {
+                setupLoader()
                 self.loadEmbedContentInWebView()
+            } else {
+                updateResizableElementContentSize()
             }
         } else {
+            setupLoader()
             isLoadingEmbed = true
             builder.embeddableContentAsync(for: sourceURL)
                 .receive(on: DispatchQueue.main)

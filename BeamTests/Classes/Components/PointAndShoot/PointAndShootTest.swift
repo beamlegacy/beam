@@ -40,7 +40,7 @@ class TestWebPage: WebPage {
             return BeamNote(title: "activeNote backup")
         }
     }
-    var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
+    var testNotes: [String: BeamCore.BeamNote] = ["Note A": BeamNote(title: "Note A")]
     var fileStorage: BeamFileStorage? {
         storage
     }

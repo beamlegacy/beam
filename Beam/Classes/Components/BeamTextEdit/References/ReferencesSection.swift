@@ -24,6 +24,7 @@ class ReferencesSection: LinksSection {
         linkActionLayer.contentsScale = contentsScale
         linkActionLayer.alignmentMode = .center
         linkActionLayer.string = "Link All"
+        linkActionLayer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
     }
 
     override var links: [BeamNoteReference] { note.fastReferences }
@@ -104,6 +105,7 @@ class ReferencesSection: LinksSection {
             separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: availableWidth, height: 1)
 
             guard let linkAllLayer = linkLayer else { return }
+            linkAllLayer.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
             let linkActionLayerFrameSize = linkActionLayer.preferredFrameSize()
 
             linkAllLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayerFrameSize.width - 10, y: -3), size: NSSize(width: 54, height: 21))
