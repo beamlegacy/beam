@@ -115,7 +115,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             return
         }
         if let contents = contents, contents.isEmpty, !autocompleteGroup.isAmbiguous {
-            showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup)
+            showPasswordManagerMenu(for: elementId, emptyField: true, inGroup: autocompleteGroup)
         } else {
             dismissPasswordManagerMenu()
         }
@@ -148,7 +148,9 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                     buttonWindow.isMovableByWindowBackground = false
                     let buttonView = WebFieldAutofillButton { [weak self] in
                         if let self = self, self.passwordMenuWindow == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
-                            self.showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup)
+                            self.requestWebFieldValue(elementId: elementId) { value in
+                                self.showPasswordManagerMenu(for: elementId, emptyField: value?.isEmpty ?? true, inGroup: autocompleteGroup)
+                            }
                         }
                     }
                     buttonWindow.setView(with: buttonView, at: self.convertRect(location, relativeTo: webView).origin, fromTopLeft: true)
@@ -164,14 +166,14 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         fieldWithIcon = nil
     }
 
-    private func showPasswordManagerMenu(for elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup) {
+    private func showPasswordManagerMenu(for elementId: String, emptyField: Bool, inGroup autocompleteGroup: WebAutocompleteGroup) {
         currentlyFocusedElementId = elementId
         if autocompleteGroup.isAmbiguous, let fieldWithFocus = autocompleteGroup.field(id: elementId) {
             self.showPasswordManagerMenu(for: elementId, options: fieldWithFocus.role.isPassword ? .ambiguousPassword : .login)
         } else {
             switch autocompleteGroup.action {
             case .createAccount:
-                self.showPasswordManagerMenu(for: elementId, options: .createAccount)
+                self.showPasswordManagerMenu(for: elementId, options: emptyField ? .createAccount : .createAccountWithMenu)
             case .login:
                 self.showPasswordManagerMenu(for: elementId, options: .login)
             default:
@@ -208,6 +210,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         var updatedRect = convertRect(location, relativeTo: webView)
         updatedRect.origin.y += location.height
         passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromTopLeft: true)
+        passwordWindow.delegate = viewModel.passwordGeneratorViewModel
         passwordMenuWindow = passwordWindow
     }
 
@@ -298,18 +301,34 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         return host
     }
 
+    private func requestWebFieldValue(elementId: String, completion: @escaping (String?) -> Void) {
+        requestValuesFromTextFields(ids: [elementId]) { values in
+            completion(values?.first)
+        }
+    }
+
     private func requestValuesFromTextFields(completion: @escaping (([String: String]?) -> Void)) {
         let ids = autocompleteContext.allInputFieldIds
+        requestValuesFromTextFields(ids: ids) { values in
+            if let values = values {
+                let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
+                completion(dict)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    private func requestValuesFromTextFields(ids: [String], completion: @escaping (([String]?) -> Void)) {
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
         let script = "beam_getTextFieldValues('[\(formattedList)]')"
         self.page?.executeJS(script, objectName: JSObjectName, successLogCategory: .passwordManagerInternal).then { jsResult in
             if let jsonString = jsResult as? String,
                let jsonData = jsonString.data(using: .utf8),
                let values = try? self.decoder.decode([String].self, from: jsonData) {
-                let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
-                completion(dict)
+                completion(values)
             } else {
-                Logger.shared.logWarning("Unable to decode text field values from \(String(describing: jsResult))", category: .passwordManager)
+                Logger.shared.logWarning("Unable to decode text field values from \(String(describing: jsResult))", category: .passwordManagerInternal)
                 completion(nil)
             }
         }
@@ -489,8 +508,10 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func dismiss() {
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             self.dismissPasswordManagerMenu()
+            self.togglePasswordField(visibility: false)
         }
     }
 
