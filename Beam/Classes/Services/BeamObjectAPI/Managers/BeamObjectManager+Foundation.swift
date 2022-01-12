@@ -339,7 +339,10 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        guard !objects.isEmpty else { return nil }
+        guard !objects.isEmpty else {
+            completion(.success([]))
+            return nil
+        }
 
         var localTimer = BeamDate.now
 
