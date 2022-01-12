@@ -182,7 +182,13 @@ extension BeamObjectChecksum {
         self.data_sent == (try? Self.encoder.encode(object))
     }
 
-    static func savePreviousChecksums(beamObjects: [BeamObject]) throws {
+    @discardableResult
+    static func savePreviousChecksums(beamObjects: [BeamObject]) throws -> [BeamObject: BeamObjectChecksum] {
+        guard !beamObjects.isEmpty else {
+            Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
+            return [:]
+        }
+
         var localTimer = BeamDate.now
 
         let (checksums, context) = self.findChecksumsForBeamObjects(beamObjects: beamObjects)
@@ -209,13 +215,21 @@ extension BeamObjectChecksum {
 
         try CoreDataManager.save(context)
 
-        Logger.shared.logDebug("Saved previous checksums for \(beamObjects.count) beamObjects",
+        let objectTypes = Array(Set(beamObjects.map { $0.beamObjectType }))
+        Logger.shared.logDebug("Saved previous checksums for \(beamObjects.count) \(objectTypes) beamObjects",
                                category: .beamObjectChecksum,
                                localTimer: localTimer)
+
+        return checksums
     }
 
     /// This will be much slower than using `savePreviousChecksums(beamObjects)`
     static func savePreviousChecksums<T: BeamObjectProtocol>(objects: [T]) throws {
+        guard !objects.isEmpty else {
+            Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
+            return
+        }
+
         let localTimer = BeamDate.now
 
         let (checksums, context) = self.findChecksumsForObjects(objects: objects)
