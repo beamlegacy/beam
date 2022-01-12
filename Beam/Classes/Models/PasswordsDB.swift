@@ -214,8 +214,10 @@ class PasswordsDB: PasswordStore {
                 for row in rows {
                     passwordRecords.append(PasswordRecord(row: row))
                 }
-                let beamObjectManager = BeamObjectManager()
-                _ = try? beamObjectManager.saveToAPI(passwordRecords) { _ in }
+                if !passwordRecords.isEmpty {
+                    let beamObjectManager = BeamObjectManager()
+                    _ = try? beamObjectManager.saveToAPI(passwordRecords) { _ in }
+                }
             }
         }
 

@@ -1,6 +1,6 @@
-query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String) {
+query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String, $skipDeleted: Boolean) {
   me {
-    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType) {
+    beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType, filterDeleted: $skipDeleted) {
       id
       createdAt
       updatedAt

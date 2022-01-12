@@ -45,6 +45,7 @@ class BeamObjectRequest: APIRequest {
         let receivedAtAfter: Date?
         let ids: [UUID]?
         let beamObjectType: String?
+        let skipDeleted: Bool?
     }
 
     internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
