@@ -162,6 +162,7 @@ extension BeamObjectChecksum {
     static func deleteAll() throws {
         Logger.shared.logDebug("Deleted all checksums",
                                category: .beamObjectChecksum)
+        let localTimer = BeamDate.now
         let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
@@ -170,6 +171,7 @@ extension BeamObjectChecksum {
         }
 
         try CoreDataManager.save(context)
+        Logger.shared.logInfo("Execution time for BeamObjectChecksum deleteAll", category: .beamObjectChecksum, localTimer: localTimer)
     }
 
     // MARK: -
