@@ -192,8 +192,8 @@ extension NoteHeaderView {
                 return
             }
             let alert = NSAlert()
-            alert.messageText = "Are you sure you want to unpublish the card \"\(note.title)\"?"
-            alert.informativeText = "Others will no longer have access to this card."
+            alert.messageText = "Are you sure you want to unpublish the note \"\(note.title)\"?"
+            alert.informativeText = "Others will no longer have access to this note."
             alert.addButton(withTitle: "Unpublish")
             alert.addButton(withTitle: "Cancel")
             alert.alertStyle = .warning
@@ -244,7 +244,7 @@ extension NoteHeaderView {
         func promptConfirmDelete() {
             guard let note = note else { return }
             let alert = NSAlert()
-            alert.messageText = "Are you sure you want to delete the card \"\(note.title)\"?"
+            alert.messageText = "Are you sure you want to delete the note \"\(note.title)\"?"
             alert.informativeText = "This cannot be undone."
             alert.addButton(withTitle: "Delete...")
             alert.addButton(withTitle: "Cancel")

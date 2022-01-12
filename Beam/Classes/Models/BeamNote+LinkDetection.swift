@@ -78,7 +78,7 @@ public extension BeamElement {
     func updateNoteNamesInInternalLinks(recursive: Bool) -> Bool {
         let res = _updateNoteNamesInInternalLinks(recursive: recursive)
         if res, let note = note, !note.cmdManager.isEmpty {
-            // If the card renaming has changed anything in the currently edited note we need to reset the commandManager
+            // If the note renaming has changed anything in the currently edited note we need to reset the commandManager
             note.resetCommandManager()
             _ = note.syncedSave()
         }

@@ -27,14 +27,11 @@ enum ShortcutModifier: Hashable {
     }
 
     @ViewBuilder func buildView(with symbol: Image) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 3)
-                .foregroundColor(BeamColor.Mercury.swiftUI)
-            symbol
-                .resizable()
-                .renderingMode(.template)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
-                .frame(width: 11, height: 11)
-        }.frame(width: 18, height: 18)
+        symbol
+            .renderingMode(.template)
+            .foregroundColor(BeamColor.Corduroy.swiftUI)
+            .padding(3)
+            .background(RoundedRectangle(cornerRadius: 3)
+                            .foregroundColor(BeamColor.Mercury.swiftUI))
     }
 }

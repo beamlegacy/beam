@@ -16,10 +16,10 @@ class TextEditorContextViewTests: BaseTest {
     let allCardsView = AllCardsTestView()
     
     func testCreateCardViaContextView() {
-        let textToType = "text before a new card"
+        let textToType = "text before a new note"
         let numberOfCharsToSelect = 8
         
-        testRailPrint("Given open today's card")
+        testRailPrint("Given open today's note")
         let cardView = launchApp()
             .openAllCardsMenu()
             .openFirstCard()
@@ -27,28 +27,28 @@ class TextEditorContextViewTests: BaseTest {
         testRailPrint("When I create a bidi link out of typed text: \(textToType)")
         cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
         shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: numberOfCharsToSelect)
-        textEditorContext.selectEditorOption(.bidi)
-        textEditorContext.confirmBidiLinkCreation(cardName: "new card")
+        textEditorContext.selectFormatterOption(.bidi)
+        textEditorContext.confirmBidiLinkCreation(cardName: "new note")
         
         testRailPrint("Then the note text is remained: \(textToType)")
         XCTAssertEqual(textToType + " ", cardView.getCardNoteValueByIndex(0))
         shortcutsHelper.shortcutActionInvoke(action: .showAllCards)
         allCardsView.waitForAllCardsViewToLoad()
         //Substring to be used
-        allCardsView.openCardByName(cardTitle: "new card")
+        allCardsView.openCardByName(cardTitle: "new note")
         
-        testRailPrint("Then new card is created")
+        testRailPrint("Then new note is created")
         cardView.waitForCardViewToLoad()
-        XCTAssertEqual("new card", cardView.getCardTitle())
+        XCTAssertEqual("new note", cardView.getCardTitle())
         XCTAssertEqual(1, cardView.getLinksContentNumber())
         XCTAssertEqual(textToType + " ", cardView.getLinkContentByIndex(0))
     }
     
     func testBidiLinkViaContextView() {
         let notePrefix = "prefix"
-        let cardName = "BiDi card"
+        let cardName = "BiDi note"
         let notePostix = "postfix"
-        let cardName1 = "BiDied card"
+        let cardName1 = "BiDied note"
         let composedText = notePrefix + cardName + notePostix
         
         testRailPrint("Given I create \(cardName)")
@@ -63,7 +63,7 @@ class TextEditorContextViewTests: BaseTest {
         shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: cardName.count)
         
         testRailPrint("When I create a BiDi link for: \(cardName)")
-        textEditorContext.selectEditorOption(.bidi)
+        textEditorContext.selectFormatterOption(.bidi)
         XCTAssertFalse(textEditorContext.getLinkTitleTextFieldElement().waitForExistence(timeout: minimumWaitTimeout))
         
         testRailPrint("Then BiDi link appears for: \(cardName)")
@@ -79,7 +79,7 @@ class TextEditorContextViewTests: BaseTest {
         let linkURL = "www.google.com"
         let expectedTabURL = "google.com/"
         
-        testRailPrint("Given open today's card")
+        testRailPrint("Given open today's note")
         let cardView = launchApp()
             .openAllCardsMenu()
             .openFirstCard()
@@ -90,7 +90,7 @@ class TextEditorContextViewTests: BaseTest {
         testRailPrint("When I create a hyperlink out of typed text: \(linkTitle)")
         cardView.typeInCardNoteByIndex(noteIndex: 0, text: linkTitle)
         shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: linkTitle.count)
-        textEditorContext.selectEditorOption(.link)
+        textEditorContext.selectFormatterOption(.link)
         
         testRailPrint("Then I see hyperlink creation pop-up appeared")
         XCTAssertEqual(cardView.getElementStringValue(element:  textEditorContext.getLinkTitleTextFieldElement()), linkTitle)
@@ -114,7 +114,7 @@ class TextEditorContextViewTests: BaseTest {
     
     func testFormatTextViaContextView() {
         let text = "THE_text 2 TE$t"
-        testRailPrint("Given open today's card")
+        testRailPrint("Given open today's note")
         let cardView = launchApp()
             .openAllCardsMenu()
             .openFirstCard()
@@ -124,10 +124,10 @@ class TextEditorContextViewTests: BaseTest {
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         
         testRailPrint("Then I select bold, italic, h1, h2")
-        textEditorContext.selectEditorOption(.bold)
-        textEditorContext.selectEditorOption(.italic)
-        textEditorContext.selectEditorOption(.h1)
-        textEditorContext.selectEditorOption(.h2)
+        textEditorContext.selectFormatterOption(.bold)
+        textEditorContext.selectFormatterOption(.italic)
+        textEditorContext.selectFormatterOption(.h1)
+        textEditorContext.selectFormatterOption(.h2)
 
         testRailPrint("Then text remains the same") //there is no other ways so far to assert it is applied correctly
         //Could be done by using screenshots of the element in future
@@ -136,18 +136,18 @@ class TextEditorContextViewTests: BaseTest {
         testRailPrint("Then I can dismiss text editor context menu by ESC")
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.typeKeyboardKey(.escape)
-        WaitHelper().waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Images.h2.accessibilityIdentifier))
-        self.assertTextEditorOptionsDontExist()
+        WaitHelper().waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
+        self.assertFormatterOptionsDontExist()
         
         testRailPrint("Then I can dismiss text editor context menu by clicking outside")
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.getCardNoteElementByIndex(0).tapInTheMiddle()
-        WaitHelper().waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Images.h2.accessibilityIdentifier))
-        self.assertTextEditorOptionsDontExist()
+        WaitHelper().waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
+        self.assertFormatterOptionsDontExist()
     }
     
-    private func assertTextEditorOptionsDontExist() {
-        for item in TextEditorContextViewLocators.Images.allCases {
+    private func assertFormatterOptionsDontExist() {
+        for item in TextEditorContextViewLocators.Formatters.allCases {
             let identifier = item.accessibilityIdentifier
             let element = textEditorContext.image(identifier).firstMatch
                 XCTAssertFalse(element.exists && element.isEnabled && element.isHittable, "element \(identifier) exists but shouldn't")

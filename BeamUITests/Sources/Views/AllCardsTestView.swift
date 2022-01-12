@@ -63,7 +63,7 @@ class AllCardsTestView: BaseView {
     
     @discardableResult
     func addNewCard(_ cardName: String) -> AllCardsTestView {
-        XCTContext.runActivity(named: "Create a card named '\(cardName)' using + icon") {_ in
+        XCTContext.runActivity(named: "Create a note named '\(cardName)' using + icon") {_ in
             tableTextField(AllCardsViewLocators.TextFields.newCardField.accessibilityIdentifier).doubleClick()
             app.typeText(" " + cardName) //Workaround for CI that skips chars in the end
             tableImage(AllCardsViewLocators.Buttons.newCardButton.accessibilityIdentifier).click()
@@ -106,7 +106,7 @@ class AllCardsTestView: BaseView {
                 return
             }
         }
-        XCTAssertTrue(elementFound, "\(cardTitle) was not found in All Cards list")
+        XCTAssertTrue(elementFound, "\(cardTitle) was not found in All Notes list")
         return CardTestView()
     }
     

@@ -239,7 +239,7 @@ extension OnboardingImportsView {
         // show the loading view at least 2s, at most 10s
         let forceFinishAfter: Int
         if importsManager.isImporting {
-            let cancellable = importsManager.$isImporting.first { $0 == false }.sink { _ in
+            let cancellable = importsManager.$isImporting.first { $0 == false }.receive(on: DispatchQueue.main).sink { _ in
                 sendFinish()
             }
             viewModel.importCancellable = cancellable

@@ -55,20 +55,20 @@ class BlockReferenceTests: BaseTest {
         try XCTSkipIf(true, "Feature is temporary deprecated")
         let journalView = launchApp()
         
-        testRailPrint("Given I create 2 cards")
+        testRailPrint("Given I create 2 notes")
         createBlockRefForTwoCards(journalView, cardName1, cardName2)
         let cardView = CardTestView()
         
         testRailPrint("Then I can see correct origin of the reference")
         cardView.blockReferenceMenuActionTrigger(.blockRefOrigin, blockRefNumber: 1)
-        XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName1, cardView.cardTitle), "Actual card name is \(cardView.cardTitle)")
+        XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName1, cardView.cardTitle), "Actual note name is \(cardView.cardTitle)")
     }
     
     func testRemoveBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
         let journalView = launchApp()
         
-        testRailPrint("Given I create 2 cards")
+        testRailPrint("Given I create 2 notes")
         let noteForReference = createBlockRefForTwoCards(journalView, cardName1, cardName2)
         let cardView = CardTestView()
         

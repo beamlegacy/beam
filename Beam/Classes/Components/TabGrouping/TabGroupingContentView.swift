@@ -64,7 +64,7 @@ struct ClusterContentView: View {
                 VStack(alignment: .leading) {
                     let clusterNoteGroup = clusteringManager.clusteredNotes[clusterGroupIdx]
                     if !clusterNoteGroup.isEmpty {
-                        Text("Cards:")
+                        Text("Notes:")
                             .font(BeamFont.medium(size: 13).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                         ForEach(0..<clusterNoteGroup.count, id: \.self) { clusteredNoteIdx in

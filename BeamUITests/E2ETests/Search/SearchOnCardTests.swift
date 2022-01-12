@@ -143,8 +143,8 @@ class SearchOnCardTests: BaseTest {
     func prepareTest(populateCardTimes: Int) -> SearchTestView {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        JournalTestView().createCardViaOmniboxSearch("Search card")
-        testRailPrint("Given I populate the card")
+        JournalTestView().createCardViaOmniboxSearch("Search note")
+        testRailPrint("Given I populate the note")
         for _ in 1...populateCardTimes {
             helper.tapCommand(.insertTextInCurrentNote)
         }

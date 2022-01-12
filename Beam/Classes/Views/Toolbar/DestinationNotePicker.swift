@@ -39,7 +39,7 @@ struct DestinationNotePicker: View {
     }
     private var placeholder: String {
         let currentNote = tab.noteController.noteOrDefault.title
-        return !currentNote.isEmpty ? currentNote : "Destination Card"
+        return !currentNote.isEmpty ? currentNote : "Destination Note"
     }
 
     private var isEditing: Bool {

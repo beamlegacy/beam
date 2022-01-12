@@ -170,9 +170,10 @@ class NodeSelection {
 
     func removeChildren(of node: ElementNode) {
         for child in node.children {
-            guard let child = child as? ElementNode else { continue }
+            guard let child = child as? ElementNode,
+                    let childIdx = nodes.firstIndex(of: child) else { continue }
             child.selected = false
-            nodes.insert(child)
+            nodes.remove(at: childIdx)
 
             removeChildren(of: child)
         }
