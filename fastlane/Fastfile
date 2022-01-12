@@ -614,9 +614,16 @@ platform :mac do
     # sync_code_signing
     # disable_automatic_code_signing(path: "Beam.xcodeproj")
     # clear_derived_data
+
+    scheme = if branch.start_with?("beta")
+      "Beam beta release"
+    else
+      "Beam release"
+    end
+
     build_mac_app(
       workspace: "Beam.xcworkspace",
-      scheme: "Beam release",
+      scheme: scheme,
       silent: true,
       clean: true,
       output_directory: "builds",
@@ -627,4 +634,5 @@ platform :mac do
     )
     # enable_automatic_code_signing(path: "Beam.xcodeproj")
   end
+
 end
