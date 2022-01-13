@@ -11,7 +11,7 @@ enum OnboardingUsernameViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case skipButton = "skip_action"
-        case goBackButton = "onboarding-back"
+        case goBackButton = "nav-back"
         case connectButton = "connect_button"
         case forgotPassword = "Forgot password"
     }

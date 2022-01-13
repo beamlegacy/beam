@@ -61,7 +61,7 @@ struct ActionableButtonStyle {
 
 struct ActionableButton: View {
     let text: String
-    let defaultState: ActionableButtonState
+    var defaultState: ActionableButtonState = .normal
     let variant: ActionableButtonVariant
     var minWidth: CGFloat = 0
     var height: CGFloat = 30
@@ -119,9 +119,14 @@ struct ActionableButton: View {
             }
         }
         .frame(height: height)
+        .background(Group {
+            if let color = strokeColor {
+                RoundedRectangle(cornerRadius: 4).stroke(color, lineWidth: 2)
+            }
+        })
         .background(customBackground)
         .background(backgroundColor)
-        .cornerRadius(6.0)
+        .cornerRadius(4.0)
         .animation(.easeInOut(duration: 0.2), value: isTouched)
         .animation(.easeInOut(duration: 0.2), value: isHovered)
         .onHover(perform: { hovering in
@@ -186,6 +191,16 @@ struct ActionableButton: View {
         }
     }
 
+    private var strokeColor: Color? {
+        let palette = variant.style.backgroundColor
+        switch actualState {
+        case .disabled:
+            return palette.disabledStroke?.swiftUI
+        default:
+            return nil
+        }
+    }
+
     private var iconColor: Color {
         if let iconPalette = variant.style.icon?.palette {
             switch actualState {
@@ -209,6 +224,7 @@ extension ActionableButtonState {
         var hovered: BeamColor
         var clicked: BeamColor
         var disabled: BeamColor
+        var disabledStroke: BeamColor?
 
         static let primaryBlueForeground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.foreground,
                                                                          hovered: .ActionableButtonBlue.foreground,
@@ -217,7 +233,8 @@ extension ActionableButtonState {
         static let primaryBlueBackground = ActionableButtonState.Palette(normal: .ActionableButtonBlue.background,
                                                                          hovered: .ActionableButtonBlue.backgroundHovered,
                                                                          clicked: .ActionableButtonBlue.backgroundClicked,
-                                                                         disabled: .ActionableButtonBlue.backgroundDisabled)
+                                                                         disabled: .ActionableButtonBlue.backgroundDisabled,
+                                                                         disabledStroke: .ActionableButtonBlue.strokeDisabled)
 
         static let primaryPurpleForeground = ActionableButtonState.Palette(normal: .ActionableButtonPurple.foreground,
                                                                            hovered: .ActionableButtonPurple.foreground,
@@ -226,7 +243,8 @@ extension ActionableButtonState {
         static let primaryPurpleBackground = ActionableButtonState.Palette(normal: .ActionableButtonPurple.background,
                                                                            hovered: .ActionableButtonPurple.backgroundHovered,
                                                                            clicked: .ActionableButtonPurple.backgroundClicked,
-                                                                           disabled: .ActionableButtonPurple.backgroundDisabled)
+                                                                           disabled: .ActionableButtonPurple.backgroundDisabled,
+                                                                           disabledStroke: .ActionableButtonPurple.strokeDisabled)
 
         static let secondaryForeground = ActionableButtonState.Palette(normal: .ActionableButtonSecondary.foreground,
                                                                        hovered: .ActionableButtonSecondary.foreground,

@@ -63,7 +63,10 @@ struct OnboardingEmailConnectView: View {
         Group {
             VStack(alignment: .leading, spacing: BeamSpacing._120) {
                 VStack(spacing: 0) {
-                    BeamTextField(text: $emailField, isEditing: $isEmailEditing, placeholder: "Email Address", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, contentType: .username, onTextChanged: { _ in
+                    BeamTextField(text: $emailField, isEditing: $isEmailEditing, placeholder: "Email Address", font: BeamFont.regular(size: 14).nsFont,
+                                  textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                                  contentType: .username,
+                                  onTextChanged: { _ in
                         updateButtonState()
                     }, onCommit: { _ in
                         isPasswordEditing = true
@@ -76,7 +79,10 @@ struct OnboardingEmailConnectView: View {
                         .accessibility(identifier: "emailField\(isEmailEditing ? "-editing" : "")")
 
                     Separator(horizontal: true, color: BeamColor.Nero)
-                    BeamTextField(text: $passwordField, isEditing: $isPasswordEditing, placeholder: "Password", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, secure: true, contentType: .password, onTextChanged: { newText in
+                    BeamTextField(text: $passwordField, isEditing: $isPasswordEditing, placeholder: "Password", font: BeamFont.regular(size: 14).nsFont,
+                                  textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                                  secure: true, contentType: .password,
+                                  onTextChanged: { newText in
                         updateMissingRequirements(for: newText)
                         updateButtonState()
                     }, onCommit: { _ in
@@ -106,7 +112,7 @@ struct OnboardingEmailConnectView: View {
             }
             .padding(.bottom, 24)
             .allowsHitTesting(loadingState == nil)
-            ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+            ButtonLabel("Forgot password", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                 sendForgotPassword()
             }
             .overlay(forgotPasswordTooltip == nil ? nil : Tooltip(title: forgotPasswordTooltip ?? "")
@@ -272,5 +278,7 @@ struct OnboardingEmailConnectView: View {
 struct OnboardingEmailConnectView_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingEmailConnectView(actions: .constant([]), finish: { _ in })
+            .padding(20)
+            .background(BeamColor.Generic.background.swiftUI)
     }
 }

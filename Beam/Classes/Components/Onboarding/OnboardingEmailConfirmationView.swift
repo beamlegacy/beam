@@ -47,34 +47,46 @@ struct OnboardingEmailConfirmationView: View {
         }
     }
 
+    private var text: String {
+        """
+        A confirmation email was sent to: \(email).
+
+        Follow the instructions to confirm your account.
+        """
+    }
+
+    private func highlightedTextRanges(in text: String) -> [Range<String.Index>] {
+        text.ranges(of: email)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             if loadingState == .gettingInfos {
                 OnboardingView.LoadingView(message: "Importing your data...")
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
-                VStack(spacing: BeamSpacing._200) {
+                VStack(spacing: 0) {
                     OnboardingView.TitleText(title: "Check your inbox!")
-                    VStack(alignment: .leading, spacing: BeamSpacing._100) {
-                        Text("A confirmation email was sent to the email address ")
-                        + Text(verbatim: email).font(BeamFont.semibold(size: 12).swiftUI)
-                        + Text(".\nFollow the instructions to confirm your account.")
-                        if let errorMessage = errorMessage {
-                            Text(errorMessage)
-                                .foregroundColor(BeamColor.Shiraz.swiftUI)
+                    VStack(spacing: BeamSpacing._400) {
+                        VStack(alignment: .leading, spacing: BeamSpacing._100) {
+                            StyledText(verbatim: text)
+                                .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges)
+                            if let errorMessage = errorMessage {
+                                Text(errorMessage)
+                                    .foregroundColor(BeamColor.Shiraz.swiftUI)
+                            }
                         }
+                        .font(BeamFont.regular(size: 14).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
 
-                    }
-                    .font(BeamFont.regular(size: 12).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-
-                    ButtonLabel("Send Confirmation Email Again", customStyle: .init(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                    ButtonLabel("Send Confirmation Email Again", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         resendEmailConfirmation()
                     }
                     .overlay(emailConfirmationTooltip == nil ? nil : Tooltip(title: emailConfirmationTooltip ?? "")
                                 .fixedSize().offset(x: 0, y: 30).transition(.opacity.combined(with: .move(edge: .top))),
                              alignment: .bottom)
                     .animation(BeamAnimation.easeInOut(duration: 0.3), value: emailConfirmationTooltip)
+                    }
                 }
                 .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             }
@@ -94,12 +106,16 @@ struct OnboardingEmailConfirmationView: View {
 
     private let actionId = "email_confirm_continue"
     private func updateActions() {
-        actions = [
-            .init(id: actionId, title: "Continue", enabled: loadingState == nil, onClick: {
-                triggerConnect()
-                return false
-            })
-        ]
+        if loadingState != nil {
+            actions = []
+        } else {
+            actions = [
+                .init(id: actionId, title: "Continue", enabled: loadingState == nil, onClick: {
+                    triggerConnect()
+                    return false
+                })
+            ]
+        }
     }
     private func triggerConnect() {
         guard loadingState == nil else { return }
@@ -158,7 +174,16 @@ struct OnboardingEmailConfirmationView: View {
 }
 
 struct OnboardingEmailConfirmationView_Previews: PreviewProvider {
+    static var onboardingManager: OnboardingManager {
+        let mngr = OnboardingManager()
+        mngr.temporaryCredentials = ("tyler_joseph@beamapp.co", "nothing")
+        return mngr
+    }
     static var previews: some View {
         OnboardingEmailConfirmationView(actions: .constant([]), finish: { _ in })
+            .environmentObject(onboardingManager)
+            .padding(20)
+            .frame(width: 400, height: 400)
+            .background(BeamColor.Generic.background.swiftUI)
     }
 }

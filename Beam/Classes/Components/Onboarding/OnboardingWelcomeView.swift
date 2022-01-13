@@ -38,32 +38,29 @@ struct OnboardingWelcomeView: View {
                 OnboardingView.LoadingView()
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
-                OnboardingView.TitleText(title: welcoming ? "Welcome to Beam" : "Connect to Beam")
-                VStack(spacing: BeamSpacing._100) {
+                VStack(spacing: BeamSpacing._140) {
+                    Image("preferences-about-beam-beta")
+                        .resizable()
+                        .frame(width: 64, height: 64)
+                    OnboardingView.TitleText(title: welcoming ? "Welcome to Beam" : "Connect to Beam")
+                }
+                VStack(spacing: BeamSpacing._120) {
                     GoogleButton(buttonType: .signin, onClick: nil, onConnect: onSigninDone, onDataSync: onDataSyncDone, onFailure: onGoogleSigninError, label: { _ in
-                        ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280)
+                        ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280, height: 34)
                     })
                     .buttonStyle(.borderless)
                     .overlay(error != .googleFailed ? nil : Tooltip(title: "Couldn't login with Google")
                                 .fixedSize().offset(x: 0, y: -30).transition(.opacity.combined(with: .move(edge: .bottom))),
                              alignment: .top)
                     .animation(BeamAnimation.easeInOut(duration: 0.3), value: error)
-                    ActionableButton(text: "Continue with Email", defaultState: .normal, variant: secondaryCenteredVariant, minWidth: 280) {
+                    ActionableButton(text: "Continue with Email", defaultState: .normal, variant: secondaryCenteredVariant, minWidth: 280, height: 34) {
                         finish(OnboardingStep(type: .emailConnect))
                     }
-                    Text("Sync and encrypt your notes")
-                        .font(BeamFont.regular(size: 10).swiftUI)
-                        .foregroundColor(BeamColor.AlphaGray.swiftUI)
                 }
                 if welcoming {
-                    HStack {
-                        Separator(horizontal: true)
-                        Text("or")
-                            .font(BeamFont.regular(size: 10).swiftUI)
-                            .foregroundColor(BeamColor.AlphaGray.swiftUI)
-                        Separator(horizontal: true)
-                    }
-                    ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 12).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                    Separator(horizontal: true)
+                        .padding(.vertical, BeamSpacing._40)
+                    ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         finish(nil)
                     }
                 }
@@ -97,7 +94,10 @@ struct OnboardingWelcomeView: View {
 struct OnboardingWelcomeView_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingWelcomeView(welcoming: true) { _ in }
+        .frame(width: 600, height: 600)
+        .background(BeamColor.Generic.background.swiftUI)
         OnboardingWelcomeView(welcoming: false) { _ in }
-
+        .frame(width: 600, height: 600)
+        .background(BeamColor.Generic.background.swiftUI)
     }
 }
