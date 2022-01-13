@@ -55,7 +55,7 @@ struct PrivacyPreferencesView: View {
                 UpdateRulesSection(selectedUpdate: $selectedUpdate)
             }
 
-            Preferences.Section(bottomDivider: false) {
+            Preferences.Section(verticalAlignment: .top) {
             Text("Allowlist:")
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)

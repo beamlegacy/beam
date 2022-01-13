@@ -26,7 +26,7 @@ struct BrowserPreferencesView: View {
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section {
+            Preferences.Section(verticalAlignment: .top) {
                 Text("Default Browser:")
                     .frame(width: 250, alignment: .trailing)
             } content: {
@@ -38,7 +38,7 @@ struct BrowserPreferencesView: View {
                 SearchEngineSection()
             }
 
-            Preferences.Section(bottomDivider: true) {
+            Preferences.Section(bottomDivider: true, verticalAlignment: .top) {
                 Text("Bookmarks & Settings:")
             } content: {
                 BookmarksSection(viewModel: viewModel)
@@ -56,7 +56,7 @@ struct BrowserPreferencesView: View {
                 TabsSection()
             }
 
-            Preferences.Section {
+            Preferences.Section(verticalAlignment: .top) {
                 Text("Clear Caches:")
             } content: {
                 ClearCachesSection()
