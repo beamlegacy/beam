@@ -15,6 +15,11 @@ class AllCardsTestView: BaseView {
         return app.tables.firstMatch.staticTexts.matching(identifier: AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).firstMatch
             .waitForExistence(timeout: implicitWaitTimeout)
     }
+    
+    @discardableResult
+    func waitForCardTitlesToAppear() -> Bool {
+        return staticText(AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+    }
 
     @discardableResult
     func deleteAllCards() -> AllCardsTestView {
