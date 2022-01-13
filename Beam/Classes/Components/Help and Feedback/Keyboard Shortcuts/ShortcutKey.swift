@@ -21,33 +21,36 @@ enum ShortcutKey: Hashable {
     case doubleBracket
     case slash
 
-    var symbol: some View {
+    // swiftlint:disable:next cyclomatic_complexity
+    func symbol(withBackground: Bool = true) -> some View {
+        let image: Image
         switch self {
         case .string(let str):
-            return buildView(with: characterImage(string: str))
+            image = characterImage(string: str)
         case .up:
-            return buildView(with: Image("shortcut-up_arrow"))
+            image = Image("shortcut-up_arrow")
         case .down:
-            return buildView(with: Image("shortcut-down_arrow"))
+            image = Image("shortcut-down_arrow")
         case .left:
-            return buildView(with: Image("shortcut-left_arrow"))
+            image = Image("shortcut-left_arrow")
         case .right:
-            return buildView(with: Image("shortcut-right_arrow"))
+            image = Image("shortcut-right_arrow")
         case .tab:
-            return buildView(with: Image("shortcut-tab_mac"))
+            image = Image("shortcut-tab_mac")
         case .enter:
-            return buildView(with: Image("shortcut-return"))
+            image = Image("shortcut-return")
         case .arobase:
-            return buildView(with: Image("shortcut-arobase"))
+            image = Image("shortcut-arobase")
         case .bracket:
-            return buildView(with: Image("shortcut-bracket"))
+            image = Image("shortcut-bracket")
         case .bracketReversed:
-            return buildView(with: Image("shortcut-bracket_reversed"))
+            image = Image("shortcut-bracket_reversed")
         case .doubleBracket:
-            return buildView(with: Image("shortcut-doublebracket"))
+            image = Image("shortcut-doublebracket")
         case .slash:
-            return buildView(with: Image("shortcut-slash"))
+            image = Image("shortcut-slash")
         }
+        return buildView(with: image, withBackground: withBackground)
     }
 
     var buildHashValue: String {
@@ -83,14 +86,14 @@ enum ShortcutKey: Hashable {
         hasher.combine(buildHashValue)
     }
 
-    @ViewBuilder func buildView(with symbol: Image) -> some View {
+    @ViewBuilder func buildView(with symbol: Image, withBackground: Bool) -> some View {
             symbol
                 .renderingMode(.template)
-                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
                 .frame(minWidth: 12, minHeight: 18)
                 .padding(.horizontal, 3)
-                .background(RoundedRectangle(cornerRadius: 3)
-                                .foregroundColor(BeamColor.Mercury.swiftUI))
+                .background(withBackground ? RoundedRectangle(cornerRadius: 3)
+                                .foregroundColor(BeamColor.Shortcut.background.swiftUI) : nil)
     }
 
     private func characterImage(string: String) -> Image {
