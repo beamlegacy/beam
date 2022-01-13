@@ -131,6 +131,14 @@
 		33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */ = {isa = PBXBuildFile; productRef = 33F0F1C726DE87E000FF8B48 /* Vinyl */; };
 		33F64F1227283201004EB0CD /* Macaw in Frameworks */ = {isa = PBXBuildFile; productRef = 33F64F1127283201004EB0CD /* Macaw */; };
 		33FE719826D38A0400E63849 /* SearchLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FE719726D38A0400E63849 /* SearchLocationView.swift */; };
+		375D83B6278D63260064C246 /* MouseHoveringLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83B0278D63260064C246 /* MouseHoveringLocation.swift */; };
+		375D83B8278D634C0064C246 /* LinkMouseOver.js in Resources */ = {isa = PBXBuildFile; fileRef = 375D83B7278D634C0064C246 /* LinkMouseOver.js */; };
+		375D83BB278D636D0064C246 /* LinkMouseOverMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83B9278D636C0064C246 /* LinkMouseOverMessageHandler.swift */; };
+		375D83BC278D636D0064C246 /* ScriptMessageBodyDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83BA278D636D0064C246 /* ScriptMessageBodyDecodable.swift */; };
+		375D83BE278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83BD278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift */; };
+		375D83C8278D6ACE0064C246 /* WebViewStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83C1278D6ACE0064C246 /* WebViewStatusBar.swift */; };
+		375D83C9278D6ACE0064C246 /* WebViewStatusText.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83C2278D6ACE0064C246 /* WebViewStatusText.swift */; };
+		375D83CB278D6AE80064C246 /* BrowserStatusBarTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */; };
 		37C412DE2785477500954FD7 /* SearchEngineProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C412DD2785477500954FD7 /* SearchEngineProvider.swift */; };
 		37C4130927854EAF00954FD7 /* SearchEngineDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C4130827854EAF00954FD7 /* SearchEngineDescription.swift */; };
 		37C4130D27854EC600954FD7 /* SearchEngineDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37C4130C27854EC600954FD7 /* SearchEngineDescriptionTests.swift */; };
@@ -1344,6 +1352,14 @@
 		33DEF48726617E0B00834839 /* CircledButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CircledButton.swift; sourceTree = "<group>"; };
 		33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomPopoverPresenter.swift; sourceTree = "<group>"; };
 		33FE719726D38A0400E63849 /* SearchLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchLocationView.swift; sourceTree = "<group>"; };
+		375D83B0278D63260064C246 /* MouseHoveringLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseHoveringLocation.swift; sourceTree = "<group>"; };
+		375D83B7278D634C0064C246 /* LinkMouseOver.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = LinkMouseOver.js; sourceTree = "<group>"; };
+		375D83B9278D636C0064C246 /* LinkMouseOverMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkMouseOverMessageHandler.swift; sourceTree = "<group>"; };
+		375D83BA278D636D0064C246 /* ScriptMessageBodyDecodable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScriptMessageBodyDecodable.swift; sourceTree = "<group>"; };
+		375D83BD278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkMouseOverMessageHandlerTests.swift; sourceTree = "<group>"; };
+		375D83C1278D6ACE0064C246 /* WebViewStatusBar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewStatusBar.swift; sourceTree = "<group>"; };
+		375D83C2278D6ACE0064C246 /* WebViewStatusText.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebViewStatusText.swift; sourceTree = "<group>"; };
+		375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowserStatusBarTests.swift; sourceTree = "<group>"; };
 		37C412DD2785477500954FD7 /* SearchEngineProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchEngineProvider.swift; sourceTree = "<group>"; };
 		37C4130827854EAF00954FD7 /* SearchEngineDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchEngineDescription.swift; sourceTree = "<group>"; };
 		37C4130C27854EC600954FD7 /* SearchEngineDescriptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SearchEngineDescriptionTests.swift; sourceTree = "<group>"; };
@@ -2637,6 +2653,7 @@
 				37C4130A27854EC600954FD7 /* SearchEngine */,
 				87685675277371A7002A8069 /* MockPasswordsDB.swift */,
 				8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */,
+				375D83BD278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift */,
 				877888DA269C977C00D703F0 /* PasswordImporterTest.swift */,
 				8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */,
 			);
@@ -2728,6 +2745,16 @@
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		375D83C0278D6ACE0064C246 /* WebViewStatusBar */ = {
+			isa = PBXGroup;
+			children = (
+				375D83C1278D6ACE0064C246 /* WebViewStatusBar.swift */,
+				375D83C2278D6ACE0064C246 /* WebViewStatusText.swift */,
+			);
+			name = WebViewStatusBar;
+			path = Beam/Classes/Views/WebViewStatusBar;
+			sourceTree = SOURCE_ROOT;
 		};
 		37C412D72785476700954FD7 /* SearchEngine */ = {
 			isa = PBXGroup;
@@ -2958,6 +2985,7 @@
 				DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */,
 				DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */,
 				DA52E97F276CE026008D4990 /* BrowsingTreeProcessor.swift */,
+				375D83B0278D63260064C246 /* MouseHoveringLocation.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3354,6 +3382,7 @@
 				418172FD25811DB200317ED8 /* Readability.js */,
 				418171912581107C00317ED8 /* OverrideConsole.js */,
 				A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */,
+				375D83B7278D634C0064C246 /* LinkMouseOver.js */,
 				BAA67665F74CAB7F75D9E89B /* BeamTypes.ts */,
 				BAA67E114386A7E280F2068C /* BeamWindowDecorator.js */,
 				BAA673B1CC2B3CA419467258 /* Test */,
@@ -4721,6 +4750,7 @@
 		A54936B0260B71FE00EF7622 /* BottomToolbar */ = {
 			isa = PBXGroup;
 			children = (
+				375D83C0278D6ACE0064C246 /* WebViewStatusBar */,
 				A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */,
 				33B27469264C103400A318CD /* SmallUpdateIndicatorView.swift */,
 				A53C8F4D26446C6C003A5DF8 /* SharingBannerInfo.swift */,
@@ -4760,6 +4790,8 @@
 				A52B5016271D72FB0078670C /* PinnedBrowserTabsManager.swift */,
 				33D0D90A2732BFAB00D6C924 /* FullPageCollectAnimator.swift */,
 				A055CE79274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift */,
+				375D83B9278D636C0064C246 /* LinkMouseOverMessageHandler.swift */,
+				375D83BA278D636D0064C246 /* ScriptMessageBodyDecodable.swift */,
 			);
 			path = TabAndWebview;
 			sourceTree = "<group>";
@@ -4968,6 +5000,7 @@
 			isa = PBXGroup;
 			children = (
 				B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */,
+				375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -5831,6 +5864,7 @@
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				8AFE8354276B248B00D4B560 /* UITests-Password.html in Resources */,
+				375D83B8278D634C0064C246 /* LinkMouseOver.js in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
 				8AFE835A276B248B00D4B560 /* UITests-Media.html in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
@@ -6498,6 +6532,7 @@
 				A52596E5273EB83B004B27E4 /* OnboardingWelcomeView.swift in Sources */,
 				5224CD7C2686034200D4179E /* BeamObject.swift in Sources */,
 				A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */,
+				375D83BC278D636D0064C246 /* ScriptMessageBodyDecodable.swift in Sources */,
 				A55760822665501000DEE86C /* TableViewColumn.swift in Sources */,
 				9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */,
 				877888D9269C743F00D703F0 /* CSVParser.swift in Sources */,
@@ -6531,6 +6566,7 @@
 				A5C9F005261353420096380F /* WindowPage.swift in Sources */,
 				96C9AA5725901AA9007D3D98 /* LinksSection.swift in Sources */,
 				A039B14D26960F21008A2E0B /* UserInformationsModalView.swift in Sources */,
+				375D83C9278D6ACE0064C246 /* WebViewStatusText.swift in Sources */,
 				414B98FA25A23A4F002E81A3 /* NSView+Xib.swift in Sources */,
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
 				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
@@ -6574,6 +6610,7 @@
 				A570D2E827581A14003B239D /* TabView.swift in Sources */,
 				A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */,
 				96120D0E260C917600592546 /* TextLine.swift in Sources */,
+				375D83B6278D63260064C246 /* MouseHoveringLocation.swift in Sources */,
 				0DC6E2CF269DE73B00BD2E2A /* AppDelegate+TopDomain.swift in Sources */,
 				522D48A42719D1D90038DB81 /* LoggerWindowController.swift in Sources */,
 				A5946806265CE5ED0044A892 /* DocumentCommand.swift in Sources */,
@@ -6620,6 +6657,7 @@
 				A5D885B1274F9F5200F37859 /* Toolbar.swift in Sources */,
 				A5919F7F268EF964009015C5 /* TextEditCmdReturnAnimator.swift in Sources */,
 				52842D522715B3F40099602C /* FilesList.swift in Sources */,
+				375D83C8278D6ACE0064C246 /* WebViewStatusBar.swift in Sources */,
 				4181713325810CDC00317ED8 /* Constants.swift in Sources */,
 				52842D572715D2620099602C /* FileRow.swift in Sources */,
 				A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */,
@@ -6684,6 +6722,7 @@
 				52842D4E2715B3180099602C /* FilesWindow.swift in Sources */,
 				A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
+				375D83BB278D636D0064C246 /* LinkMouseOverMessageHandler.swift in Sources */,
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
 				5284894E26C54C460064878B /* String+TitleConflict.swift in Sources */,
@@ -6979,6 +7018,7 @@
 				DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */,
 				52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */,
 				332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */,
+				375D83BE278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */,
 				87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */,
 				8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */,
@@ -7079,6 +7119,7 @@
 				B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */,
 				B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */,
 				B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */,
+				375D83CB278D6AE80064C246 /* BrowserStatusBarTests.swift in Sources */,
 				B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */,
 				B575360526BDA6260053CE2D /* LoginTest.swift in Sources */,
 				B507CB32275F8C3800DFF11A /* DatePickerTestView.swift in Sources */,
