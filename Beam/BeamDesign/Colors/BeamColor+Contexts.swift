@@ -11,11 +11,16 @@ extension BeamColor {
 
     enum Generic {
         static let background = BeamColor.Custom(named: "WindowBackgroundColor")
+        /// -> light: Generic.background / dark: Mercury
         static let secondaryBackground = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
+        /// -> Niobium
         static let text = BeamColor.Niobium
+        /// -> LightStoneGray
         static let subtitle = BeamColor.LightStoneGray
+        /// -> AlphaGray
         static let placeholder = BeamColor.AlphaGray
         static let transparent = BeamColor.Custom(named: "Transparent")
+        /// -> Mercury
         static let separator = BeamColor.Mercury
     }
 
@@ -195,11 +200,11 @@ extension BeamColor {
                                                            darkColor: .Bluetiful, darkAlpha: 0.2)
         static let backgroundClicked = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.28,
                                                            darkColor: .Bluetiful, darkAlpha: 0.34)
-        static let backgroundDisabled = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.04,
-                                                            darkColor: .Bluetiful, darkAlpha: 0.07)
+        static let backgroundDisabled = BeamColor.Generic.transparent
+        static let strokeDisabled = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.15,
+                                                                  darkColor: .Bluetiful, darkAlpha: 0.4)
         static let foreground = BeamColor.Bluetiful
-        static let disabledForeground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.15,
-                                                            darkColor: .Bluetiful, darkAlpha: 0.2)
+        static let disabledForeground = BeamColor.Bluetiful.alpha(0.4)
     }
 
     enum ActionableButtonPurple {
@@ -208,11 +213,11 @@ extension BeamColor {
                                                            darkColor: .Beam, darkAlpha: 0.2)
         static let backgroundClicked = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.28,
                                                            darkColor: .Beam, darkAlpha: 0.34)
-        static let backgroundDisabled = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.04,
-                                                            darkColor: .Beam, darkAlpha: 0.07)
+        static let backgroundDisabled = BeamColor.Generic.transparent
+        static let strokeDisabled = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.15,
+                                                                  darkColor: .Beam, darkAlpha: 0.2)
         static let foreground = BeamColor.Beam
-        static let disabledForeground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.15,
-                                                            darkColor: .Beam, darkAlpha: 0.2)
+        static let disabledForeground = BeamColor.Beam.alpha(0.4)
     }
 
     enum ActionableButtonSecondary {

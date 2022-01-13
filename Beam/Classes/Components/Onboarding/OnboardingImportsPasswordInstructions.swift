@@ -14,25 +14,43 @@ extension OnboardingImportsView {
         var panelOpener: ((String, @escaping (URL?) -> Void) -> Void)?
 
         private let vStackSpacing: CGFloat = 4
-        private func bulletPoint(_ text: String) -> some View {
-            HStack(spacing: 1) {
-                Icon(name: "editor-bullet", width: 20, color: BeamColor.AlphaGray.swiftUI)
+
+        private func bulletPoints(_ texts: [String], startIndex: Int = 1) -> some View {
+            VStack(alignment: .leading, spacing: vStackSpacing) {
+                ForEach(Array(texts.enumerated()), id: \.1) { (index, t) in
+                    bulletPoint(t, index: startIndex + index)
+                }
+            }
+        }
+
+        private func bulletPoint(_ text: String, index: Int) -> some View {
+            HStack(alignment: .firstTextBaseline, spacing: 1) {
+                indexIcon(index)
                 Text(text)
             }
         }
 
+        private func indexIcon(_ index: Int) -> some View {
+            Text("\(index)")
+                .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                .font(BeamFont.medium(size: 11).swiftUI)
+                .frame(width: 20, height: 20)
+        }
+
         private var safariInstructions: some View {
             VStack(alignment: .leading, spacing: vStackSpacing) {
-                bulletPoint("Open Safari Preferences -> Passwords.")
-                bulletPoint("Click on “•••” and choose “Export...”")
-                bulletPoint("Click on Choose CSV File button and select the exported CSV file.")
+                bulletPoints([
+                    "Open Safari Preferences -> Passwords.",
+                    "Click on “•••” and choose “Export...”",
+                    "Click on Choose CSV File button and select the exported CSV file."
+                ])
             }
         }
 
         private var safariOldInstructions: some View {
             VStack(alignment: .leading, spacing: vStackSpacing) {
-                HStack(spacing: 1) {
-                    Icon(name: "editor-bullet", width: 20, color: BeamColor.AlphaGray.swiftUI)
+                HStack(alignment: .firstTextBaseline, spacing: 1) {
+                    indexIcon(1)
                     Text("Download and Launch ") +
                     Text("Beam Passwords Importer").font(BeamFont.medium(size: 11).swiftUI).bold().underline()
 
@@ -40,30 +58,38 @@ extension OnboardingImportsView {
                 .onTapGesture {
                     openExternalURL("https://github.com/franklefebvre/SafariPasswordExporter", title: "Beam Passwords Importer")
                 }
-                bulletPoint("Give it the Accessibility permission in System Preferences")
-                bulletPoint("Keep Safari in the foreground while the import ongoing. Don’t touch anything")
-                bulletPoint("Click on Choose CSV File button and select the exported CSV file.")
+                bulletPoints([
+                    "Give it the Accessibility permission in System Preferences",
+                    "Keep Safari in the foreground while the import ongoing. Don’t touch anything",
+                    "Click on Choose CSV File button and select the exported CSV file."
+                ], startIndex: 2)
             }
         }
 
         private var firefoxInstructions: some View {
-            VStack(alignment: .leading, spacing: vStackSpacing) {
-                bulletPoint("Open Firefox Preferences -> Privacy & Security -> Saved Logins.")
-                bulletPoint("Click on “•••” and choose “Export logins...”")
-                bulletPoint("Click on Choose CSV File button and select the exported CSV file.")
-            }
+            bulletPoints([
+                "Open Firefox Preferences -> Privacy & Security -> Saved Logins.",
+                "Click on “•••” and choose “Export logins...”",
+                "Click on Choose CSV File button and select the exported CSV file."
+            ])
         }
 
         private var anyCSVInstructions: some View {
-            VStack(alignment: .leading, spacing: vStackSpacing) {
-                bulletPoint("Export your passwords from other browsers or password managers as a CSV file.")
-                bulletPoint("Click the “Choose CSV File” button and select the CSV file.")
-            }
+            bulletPoints([
+                "Export your passwords from other browsers or password managers as a CSV file.",
+                "Click the “Choose CSV File” button and select the CSV file."
+            ])
+        }
+
+        private var secondaryActionVariant: ActionableButtonVariant {
+            var style = ActionableButtonVariant.secondary.style
+            style.icon = nil
+            return .custom(style)
         }
 
         private var fileSelector: some View {
             let fileName = selectedURL?.lastPathComponent
-            return ButtonLabel(fileName ?? "Choose CSV File", icon: fileName != nil ? "tabs-file" : nil, variant: .dropdown) {
+            return ActionableButton(text: fileName ?? "Choose CSV File", variant: secondaryActionVariant, height: 26) {
                 panelOpener?("Select a csv file exported from \(source.rawValue)") { url in
                     selectedURL = url
                 }
@@ -78,7 +104,7 @@ extension OnboardingImportsView {
 
         var body: some View {
             Group {
-                VStack(alignment: .leading, spacing: 3) {
+                VStack(alignment: .leading, spacing: BeamSpacing._160) {
                     if source == .safari {
                         safariInstructions
                     } else if source == .safariOld {

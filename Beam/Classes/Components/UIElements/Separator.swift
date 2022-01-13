@@ -7,6 +7,11 @@
 
 import SwiftUI
 
+/// Simple separator
+///
+/// - `horizontal`: true for right to left separator
+/// - `hairline`: true for 0.5 line width
+/// - `color`: Default to Mercury
 struct Separator: View {
     var horizontal: Bool = false
     var hairline: Bool = false
