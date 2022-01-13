@@ -45,6 +45,16 @@ public struct BeamText: Codable {
                 return true
             }
         }
+
+        public var markdownTag: String {
+            switch self {
+            case .emphasis: return "*"
+            case .strong: return "**"
+            case .underline: return "_"
+            case .strikethrough: return "~~"
+            default: return ""
+            }
+        }
         // swiftlint:disable:next nesting
         public enum AttributeError: Error {
             case unknownAttribute
