@@ -77,6 +77,19 @@ public extension BeamText {
         insert(text, at: range.lowerBound)
     }
 
+    func backwardPairRangesSearch(of substring: String, from position: Int) -> (Swift.Range<Int>, Swift.Range<Int>)? {
+        var endingRange: Swift.Range<Int>?
+        let str = self.text.substring(from: 0, to: position)
+
+        for range in str.ranges(of: substring, options: .backwards) {
+            if let endingRange = endingRange {
+                return (self.text.range(from: range), endingRange)
+            }
+            endingRange = self.text.range(from: range)
+        }
+        return nil
+    }
+
     func hasPrefix(_ string: String) -> Bool {
         return text.hasPrefix(string)
     }
