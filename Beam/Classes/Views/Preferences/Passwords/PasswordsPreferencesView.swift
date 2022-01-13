@@ -27,11 +27,11 @@ struct PasswordsPreferencesView: View {
                         passwordsViewModel.refresh()
                     }
             }
-            Preferences.Section {
-                Text("").labelsHidden()
-            } content: {
-                Webforms()
-            }
+//            Preferences.Section {
+//                Text("").labelsHidden()
+//            } content: {
+//                Webforms()
+//            }
         }
     }
 }
@@ -90,12 +90,6 @@ struct Passwords: View {
                     .frame(width: 682, height: 240, alignment: .center)
                     .border(BeamColor.Mercury.swiftUI, width: 1)
                     .background(BeamColor.Generic.background.swiftUI)
-                    Spacer()
-
-                    Button {
-                    } label: {
-                        Text("").hidden()
-                    }.hidden()
                     .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
                         if let doubleTappedRow = passwordsViewModel.doubleTappedRow,
                            let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username) {
@@ -106,6 +100,7 @@ struct Passwords: View {
                             }.frame(width: 400, height: 179, alignment: .center)
                         }
                     }
+                    Spacer()
                 }
                 HStack {
                     Button {

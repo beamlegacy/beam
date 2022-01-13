@@ -70,7 +70,7 @@ struct AccountsView: View {
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: false, verticalAlignment: .firstTextBaseline) {
+            Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
                 Text("Account:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -85,7 +85,7 @@ struct AccountsView: View {
             Preferences.Section(title: "") {
                 Spacer(minLength: 26).frame(maxHeight: 26)
             }
-            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
+            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .top) {
                 Text("Calendars & Contacts:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -164,10 +164,12 @@ struct AccountsView: View {
 
     private var accountLoggedInView: some View {
         VStack(alignment: .leading) {
-            Text(AuthenticationManager.shared.username ?? "Username not defined")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(height: 16)
+            if let username = AuthenticationManager.shared.username {
+                Text(username)
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(height: 16)
+            }
             LogoutButton
         }
     }
@@ -184,7 +186,7 @@ struct AccountsView: View {
         })
                 .padding(.bottom, 6)
             VStack {
-                Text("Connect to Beam to publish your notes and sync your notes between your devices.")
+                Text("Sync your notes between device and share them easily")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
@@ -207,11 +209,6 @@ struct AccountsView: View {
                     .frame(width: 208)
                     .padding(.top, -4)
             })
-            VStack {
-                Text("Import your Calendar and Contacts and easily take meeting notes.")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.frame(width: 344, height: 26, alignment: .leading)
         }
     }
 
@@ -434,8 +431,6 @@ struct GoogleAccountView: View {
 struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
         AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
-        AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
-
     }
     // swiftlint:disable:next file_length
 }
