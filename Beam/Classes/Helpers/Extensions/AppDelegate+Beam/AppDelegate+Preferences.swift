@@ -10,11 +10,12 @@ extension Preferences.PaneIdentifier {
     static let passwords = Self("passwords")
     static let accounts = Self("accounts")
     static let about = Self("about")
+    static let beta = Self("beta")
     static let advanced = Self("advanced")
     static let editorDebug = Self("editorDebug")
 
     static var allBeamPreferences: [Preferences.PaneIdentifier] {
-        [.browser, .notes, .privacy, .passwords, .accounts, .about, .general]
+        [.browser, .notes, .privacy, .passwords, .accounts, .about, .beta, .general]
     }
 
 }
