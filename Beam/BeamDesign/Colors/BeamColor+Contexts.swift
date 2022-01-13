@@ -154,7 +154,7 @@ extension BeamColor {
     enum ToolBar {
         static let backgroundInactiveWindow = BeamColor.combining(lightColor: .Mercury, darkColor: .Nero)
         static let backgroundBottomSeparator = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.1)
-        static let backgroundBottomSeparatorWeb = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .black), darkAlpha: 0.75)
+        static let backgroundBottomSeparatorWeb = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.15, darkColor: From(color: .black), darkAlpha: 0.75)
         static let backgroundBottomSeparatorInactiveWindow = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.2, darkColor: From(color: .black), darkAlpha: 0.75)
         static let horizontalSeparator = BeamColor.combining(lightColor: .Mercury, darkColor: .Nero, darkAlpha: 0.75)
         static let shadowTop = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
