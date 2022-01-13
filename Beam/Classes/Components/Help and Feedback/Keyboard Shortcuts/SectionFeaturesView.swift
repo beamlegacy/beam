@@ -33,8 +33,8 @@ enum SectionShortcuts: String {
                                                                           Shortcut(modifiers: [.shift, .command], keys: [.bracket])], separationString: "or"),
                     KeyboardFeature(name: "Go back", shortcuts: [Shortcut(modifiers: [.command], keys: [.left])]),
                     KeyboardFeature(name: "Go forward", shortcuts: [Shortcut(modifiers: [.command], keys: [.right])]),
-                    KeyboardFeature(name: "Zoom in/out", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("-")]),
-                                                                    Shortcut(modifiers: [.command], keys: [.string("+")])], separationString: "and"),
+                    KeyboardFeature(name: "Zoom in/out", shortcuts: [Shortcut(modifiers: [.command], keys: [.minus]),
+                                                                    Shortcut(modifiers: [.command], keys: [.plus])], separationString: "and"),
                     KeyboardFeature(name: "Find", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("F")])])
             ]
         case .editor:
@@ -50,8 +50,8 @@ enum SectionShortcuts: String {
                     KeyboardFeature(name: "Command Menu", shortcuts: [Shortcut(modifiers: [], keys: [.string("/")])]),
                     KeyboardFeature(name: "Headings 1 & 2", shortcuts: [Shortcut(modifiers: [], keys: [.string("#")]),
                                                                         Shortcut(modifiers: [], keys: [.string("##")])], separationString: "and"),
-                    KeyboardFeature(name: "Bold", shortcuts: [Shortcut(modifiers: [], keys: [.string("*")])]),
-                    KeyboardFeature(name: "Italic", shortcuts: [Shortcut(modifiers: [], keys: [.string("**")])]),
+                    KeyboardFeature(name: "Bold", shortcuts: [Shortcut(modifiers: [], keys: [.string("**")])]),
+                    KeyboardFeature(name: "Italic", shortcuts: [Shortcut(modifiers: [], keys: [.string("*")])]),
                     KeyboardFeature(name: "Strikeout", shortcuts: [Shortcut(modifiers: [], keys: [.string("~~")])]),
                     KeyboardFeature(name: "Journal", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("J")])]),
                     KeyboardFeature(name: "All Notes", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("H")])]),
