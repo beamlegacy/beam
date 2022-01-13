@@ -50,6 +50,11 @@ struct ModeView: View {
             contentIsScrolled = scrollPoint.y >
             JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
             CustomPopoverPresenter.shared.dismissPopovers()
+            if state.focusOmniBox &&
+                scrollPoint.y + cardScrollViewTopInset > 10 &&
+                state.autocompleteManager.searchQuery.isEmpty {
+                state.focusOmniBox = false
+            }
         }
                           .frame(maxWidth: .infinity, maxHeight: .infinity)
                           .clipped()
