@@ -72,21 +72,33 @@ protocol WebPageRelated {
     var page: WebPage? { get set }
 }
 
+enum JavascriptExecutionError: Error {
+    case webPageDeallocated
+}
+
 // MARK: - Default WebPage methods implementations
 extension WebPage {
 
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo? = nil, successLogCategory: LogCategory = .javascript) -> Promise<Any?> {
-        Promise<Any?> { [unowned self] fulfill, reject in
+        Promise<Any?> { [weak self] fulfill, reject in
             var command = jsCode
-            if let configuration = webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
+
+            guard let self = self else {
+                let error = JavascriptExecutionError.webPageDeallocated
+                Logger.shared.logError("(\(command) failed: \(String(describing: error))", category: .javascript)
+                reject(error)
+                return
+            }
+
+            if let configuration = self.webView.configurationWithoutMakingCopy as? BeamWebViewConfiguration {
                 if let name = objectName {
                     command = configuration.obfuscate(str: "beam.__ID__\(name)." + jsCode)
                 } else {
                     command = configuration.obfuscate(str: jsCode)
                 }
             }
-            webView.evaluateJavaScript(command, in: frameInfo, in: WKContentWorld.page) { result in
+            self.webView.evaluateJavaScript(command, in: frameInfo, in: WKContentWorld.page) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError("(\(command) failed: \(String(describing: error))", category: .javascript)
