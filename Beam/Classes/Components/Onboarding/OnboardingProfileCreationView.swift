@@ -22,7 +22,7 @@ struct OnboardingProfileCreationView: View {
         if let errorMessage = errorMessage {
             return errorMessage
         }
-        var text = "Enter a username for your profile."
+        var text = "Choose your username"
         if textField.count >= 2 {
             text += "\nYou can access your profile at beamapp.co/\(textField)"
         }
@@ -32,30 +32,37 @@ struct OnboardingProfileCreationView: View {
     var body: some View {
         VStack(spacing: 0) {
             OnboardingView.TitleText(title: "Create your profile")
-            VStack(alignment: .leading, spacing: BeamSpacing._60) {
-                BeamTextField(text: $textField, isEditing: $isEditing, placeholder: "Username", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, onTextChanged: { newValue in
-                    let isValid = isUsernameValid(newValue)
-                    if !isValid {
-                        errorMessage = buildErrorMessageForInvalidUsername(newValue)
-                    } else {
-                        errorMessage = nil
-                    }
-                    actions = [
-                        .init(id: actionId, title: "Continue", enabled: isValid, onClick: {
-                            saveUsernameAndFinish()
-                            return false
-                        })
-                    ]
-                }, onCommit: { _ in
-                    saveUsernameAndFinish()
-                })
+            VStack(alignment: .leading, spacing: BeamSpacing._120) {
+                VStack(spacing: 0) {
+                    BeamTextField(text: $textField, isEditing: $isEditing, placeholder: "Username", font: BeamFont.regular(size: 14).nsFont,
+                                  textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                                  onTextChanged: { newValue in
+                        let isValid = isUsernameValid(newValue)
+                        if !isValid {
+                            errorMessage = buildErrorMessageForInvalidUsername(newValue)
+                        } else {
+                            errorMessage = nil
+                        }
+                        actions = [
+                            .init(id: actionId, title: "Continue", enabled: isValid, onClick: {
+                                saveUsernameAndFinish()
+                                return false
+                            })
+                        ]
+                    }, onCommit: { _ in
+                        saveUsernameAndFinish()
+                    })
+                        .frame(height: 40)
+                    Separator(horizontal: true, color: BeamColor.Nero)
+                }
+
                 Text(subtitle)
-                    .font(BeamFont.regular(size: 10).swiftUI)
+                    .font(BeamFont.regular(size: 12).swiftUI)
                     .lineLimit(3)
-                    .foregroundColor(errorMessage != nil ? BeamColor.Shiraz.swiftUI : BeamColor.Generic.subtitle.swiftUI)
+                    .foregroundColor(errorMessage != nil ? BeamColor.Shiraz.swiftUI : BeamColor.Generic.placeholder.swiftUI)
+                    .frame(minHeight: 80, alignment: .top)
             }
             .frame(width: 280)
-            .frame(minHeight: 80, alignment: .top)
         }
         .onAppear {
             if let username = AuthenticationManager.shared.username {
@@ -107,5 +114,7 @@ struct OnboardingProfileCreationView: View {
 struct OnboardingProfileCreationView_Previews: PreviewProvider {
     static var previews: some View {
         OnboardingProfileCreationView(actions: .constant([])) { _ in }
+        .padding(20)
+        .background(BeamColor.Generic.background.swiftUI)
     }
 }

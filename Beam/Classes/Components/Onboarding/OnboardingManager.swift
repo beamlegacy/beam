@@ -82,6 +82,7 @@ class OnboardingManager: ObservableObject {
         stepsHistory.removeAll()
         currentStepIsFromHistory = false
         needsToDisplayOnboard = true
+        temporaryCredentials = nil
         Persistence.Authentication.hasSeenOnboarding = false
     }
 
@@ -137,6 +138,7 @@ class OnboardingManager: ObservableObject {
     }
 
     private func onboardingDidFinish() {
+        temporaryCredentials = nil
         cancellables.removeAll()
     }
 }
