@@ -101,13 +101,17 @@ public extension String {
     func ranges<S: StringProtocol>(of string: S, options: String.CompareOptions = []) -> [Range<Index>] {
         var result: [Range<Index>] = []
         var startIndex = self.startIndex
-
+        let backwards = options.contains(.backwards)
+        var options = options
+        if backwards {
+            options.remove(.backwards)
+        }
         while startIndex < endIndex, let range = self[startIndex...].range(of: string, options: options) {
             result.append(range)
             startIndex = range.lowerBound < range.upperBound ? range.upperBound : index(range.lowerBound, offsetBy: 1, limitedBy: endIndex) ?? endIndex
         }
 
-        return result
+        return backwards ? result.reversed() : result
     }
 
     func range(from r: Range<String.Index>) -> Range<Int> {
