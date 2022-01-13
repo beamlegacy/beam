@@ -34,8 +34,8 @@ struct Toolbar: View {
             if isMainWindow {
                 if state.mode == .web {
                     ZStack {
+                        BeamColor.AlphaGray.swiftUI.opacity(0.425)
                         BeamColor.Generic.background.swiftUI.opacity(overlayOpacity)
-                        BeamColor.Mercury.swiftUI.opacity(overlayOpacity)
                     }
                     .transition(webOverlayTransition)
                     Separator(horizontal: true, hairline: true, color: BeamColor.ToolBar.backgroundBottomSeparatorWeb)
