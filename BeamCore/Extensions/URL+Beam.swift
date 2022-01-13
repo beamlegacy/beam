@@ -90,6 +90,39 @@ public extension URL {
         return URL(string: "\(scheme)://\(host)/")
     }
 
+    /// Returns a string containing only the scheme and host.
+    /// ```
+    /// URL("https://business.app.beamapp.co/blah/blah")!.schemeAndHost
+    /// // → "https://business.app.beamapp.co"
+    /// ```
+    var schemeAndHost: String? {
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+              let rangeOfScheme = components.rangeOfScheme,
+              let rangeOfHost = components.rangeOfHost
+        else {
+            return nil
+        }
+
+        let range = rangeOfScheme.lowerBound..<rangeOfHost.upperBound
+        return String(absoluteString[range])
+    }
+
+    /// Removes the path component entirely if it is just a forward slash.
+    /// ```
+    /// URL(string: "https://business.app.beamapp.co/")!.rootPathRemoved
+    /// // → "https://business.app.beamapp.co"
+    ///
+    /// URL(string: "https://business.app.beamapp.co/blah/blah/")!.rootPathRemoved
+    /// // → "https://business.app.beamapp.co/blah/blah/" (no change)
+    /// ```
+    var rootPathRemoved: URL {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return self }
+        if components.path == "/" {
+            components.path = ""
+        }
+        return components.url ?? self
+    }
+
     func isSameOrigin(as url: URL) -> Bool {
         guard self.scheme == url.scheme, self.host == url.host, self.port == url.port else { return false }
         return true

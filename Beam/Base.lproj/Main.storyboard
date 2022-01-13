@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19455" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
+<document type="com.apple.InterfaceBuilder3.Cocoa.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="MacOSX.Cocoa" propertyAccessControl="none" useAutolayout="YES">
     <dependencies>
         <deployment identifier="macosx"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19455"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.CocoaPlugin" version="19529"/>
         <capability name="Search Toolbar Item" minToolsVersion="12.0" minSystemVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -412,13 +412,13 @@
                                                 <action selector="performClose:" target="Ady-hI-5gd" id="HmO-Ls-i7Q"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Capture Page to Note..." tag="4" enabled="NO" keyEquivalent="s" id="IqJ-4H-Bqz" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Capture Page to Note..." tag="4" enabled="NO" keyEquivalent="s" identifier="collect_page" id="IqJ-4H-Bqz" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <modifierMask key="keyEquivalentModifierMask" option="YES"/>
                                             <connections>
                                                 <action selector="collectPageToCard:" target="Ady-hI-5gd" id="vCu-Ik-TRT"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Capture Page to Note..." tag="4" hidden="YES" enabled="NO" keyEquivalent="s" allowsKeyEquivalentWhenHidden="YES" id="BaN-p1-vse" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                        <menuItem title="Capture Page to Note..." tag="4" hidden="YES" enabled="NO" keyEquivalent="s" allowsKeyEquivalentWhenHidden="YES" identifier="collect_page_alternate" id="BaN-p1-vse" customClass="LoadedWebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="collectPageToCard:" target="Ady-hI-5gd" id="buc-nN-dY3"/>
                                             </connections>
@@ -1074,6 +1074,12 @@
                                 <modifierMask key="keyEquivalentModifierMask"/>
                                 <menu key="submenu" title="View" id="HyV-fh-RgO">
                                     <items>
+                                        <menuItem title="Toggle Status Bar" tag="4" keyEquivalent="/" identifier="toggle_status_bar" id="BDC-Xd-rD8" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
+                                            <connections>
+                                                <action selector="toggleStatusBar:" target="Ady-hI-5gd" id="Muv-Za-xSi"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="GMw-dS-uh1"/>
                                         <menuItem title="Stop" tag="4" keyEquivalent="." id="VKe-84-02R" customClass="WebviewRelatedMenuItem" customModule="Beam" customModuleProvider="target">
                                             <connections>
                                                 <action selector="stopLoadingPage:" target="Ady-hI-5gd" id="6uD-Da-ll9"/>
@@ -1302,13 +1308,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="723"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="721"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="721"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="719"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="721"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="719"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1470,7 +1476,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="706" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="704" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">

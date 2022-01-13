@@ -25,6 +25,9 @@ struct EnhancedWebView: View {
                 }
                 if state.windowIsMain || tabBelongsToThisWindow {
                     WebView(webView: tab.webView, topContentInset: topContentInset)
+                        .webViewStatusBar(isVisible: tab.showsStatusBar) {
+                            WebViewStatusText(mouseHoveringLocation: tab.mouseHoveringLocation)
+                        }
                         .if(!tab.webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
                     ZStack {
                         if let pns = tab.pointAndShoot, PreferencesManager.showPNSView == true {
