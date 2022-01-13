@@ -35,6 +35,7 @@ protocol WebPage: AnyObject, Scorable {
 
     var authenticationViewModel: AuthenticationViewModel? { get set }
     var searchViewModel: SearchViewModel? { get set }
+    var mouseHoveringLocation: MouseHoveringLocation { get set }
 
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory) -> Promise<Any?>

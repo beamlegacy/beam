@@ -24,6 +24,10 @@ enum BeamAnimation {
         Animation.easeInOut(duration: duration * Self.multiplier)
     }
 
+    static func easeOut(duration: Double) -> Animation {
+        Animation.easeOut(duration: duration * Self.multiplier)
+    }
+
     static func spring(stiffness: Double, damping: Double) -> Animation {
         .interpolatingSpring(stiffness: stiffness, damping: damping)
     }

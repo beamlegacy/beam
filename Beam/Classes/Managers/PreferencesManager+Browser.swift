@@ -70,6 +70,7 @@ extension PreferencesManager {
     static let cmdNumberSwitchTabsKey = "cmdNumberSwitchTabs"
     static let showWebsiteIconTabKey = "showWebsiteIconTab"
     static let restoreLastBeamSessionKey = "restoreLastBeamSession"
+    static let showsStatusBarKey = "showsStatusBar"
 }
 
 // MARK: - Default Values
@@ -84,6 +85,7 @@ extension PreferencesManager {
     static let cmdNumberSwitchTabsDefault = false
     static let showWebsiteIconTabDefault = true
     static let restoreLastBeamSessionDefault = false
+    static let showsStatusBarDefault = false
 }
 
 extension PreferencesManager {
@@ -116,4 +118,8 @@ extension PreferencesManager {
 
     @UserDefault(key: restoreLastBeamSessionKey, defaultValue: restoreLastBeamSessionDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var restoreLastBeamSession: Bool
+
+    @UserDefault(key: showsStatusBarKey, defaultValue: showsStatusBarDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var showsStatusBar: Bool
+
 }

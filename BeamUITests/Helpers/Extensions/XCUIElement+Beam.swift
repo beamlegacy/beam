@@ -77,6 +77,14 @@ extension XCUIElement {
         self.typeText(text)
         return self
     }
+
+    @discardableResult
+    public func clickIfExists() -> XCUIElement {
+        if exists {
+            self.click()
+        }
+        return self
+    }
     
     @discardableResult
     public func focusAndTypeTextOnExistence(_ text: String) -> XCUIElement {
