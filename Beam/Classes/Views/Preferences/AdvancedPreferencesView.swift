@@ -566,7 +566,7 @@ struct AdvancedPreferencesView: View {
             ForEach(databases, id: \.id) {
                 Text($0.title).tag($0)
             }
-        }
+        }.labelsHidden()
         .frame(idealWidth: 100, maxWidth: 400)
     }
 
