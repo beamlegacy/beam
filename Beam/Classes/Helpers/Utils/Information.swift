@@ -7,7 +7,7 @@ struct Information {
     }
 
     static var appName: String? {
-        return Bundle.main.infoDictionary?["CFBundleDisplayName"] as? String
+        return Bundle.main.infoDictionary?["CFBundleName"] as? String
     }
 
     static var appVersion: String? {
