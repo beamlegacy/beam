@@ -47,5 +47,6 @@ class WebPageBaseImpl: WebPage {
 
     var authenticationViewModel: AuthenticationViewModel?
     var searchViewModel: SearchViewModel?
+    var mouseHoveringLocation: MouseHoveringLocation = .none
 
 }

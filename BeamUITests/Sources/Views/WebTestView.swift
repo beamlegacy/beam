@@ -9,6 +9,10 @@ import Foundation
 import XCTest
 
 class WebTestView: BaseView {
+
+    var statusText: XCUIElement {
+        staticText("webview-status-text")
+    }
     
     func getDestinationCardElement() -> XCUIElement {
         let element = staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)

@@ -59,6 +59,14 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     static var webViewConfiguration = BrowserTabConfiguration()
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
+    var showsStatusBar: Bool {
+        guard PreferencesManager.showsStatusBar else { return false }
+        switch mouseHoveringLocation {
+        case .none: return false
+        case .link: return true
+        }
+    }
+
     // MARK: - WebPage properties
     @Published public var webView: BeamWebView! {
         didSet {
@@ -73,6 +81,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     @Published var userTypedDomain: URL?
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
+    @Published var mouseHoveringLocation: MouseHoveringLocation = .none
     @Published var responseStatusCode: Int = 200
     @Published var mediaPlayerController: MediaPlayerController?
     @Published var hasError: Bool = false {
