@@ -16,11 +16,11 @@ enum PreferencesEmbedOptions: Int, CaseIterable, Identifiable {
     var name: String {
         switch self {
         case .always:
-            return "Always embed"
+            return "Always"
         case .only:
-            return "Only embed when collecting"
+            return "Only embed when capturing"
         case .never:
-            return "Never embed"
+            return "Never"
         }
     }
 }
@@ -39,7 +39,7 @@ extension PreferencesManager {
     static let checkSpellingIsOnDefault = true
     static let checkGrammarIsOnDefault = true
     static let correctSpellingIsOnDefault = true
-    static let embedContentPreferenceDefault = 0
+    static let embedContentPreferenceDefault = 1
     static let alwaysShowBulletsDefault = false
 }
 

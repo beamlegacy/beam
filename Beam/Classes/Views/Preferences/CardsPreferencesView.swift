@@ -18,14 +18,14 @@ struct CardsPreferencesView: View {
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section {
-                Text("Spelling & Grammar:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                SpellingGrammarSection()
-            }
+//            Preferences.Section {
+//                Text("Spelling & Grammar:")
+//                    .font(BeamFont.regular(size: 13).swiftUI)
+//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+//                    .frame(width: 250, alignment: .trailing)
+//            } content: {
+//                SpellingGrammarSection()
+//            }
             Preferences.Section {
                 Text("Indentation:")
                     .font(BeamFont.regular(size: 13).swiftUI)
@@ -41,13 +41,13 @@ struct CardsPreferencesView: View {
                         PreferencesManager.alwaysShowBullets = $0
                     }
             }
-            Preferences.Section {
-                Text("Embed Content:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-            } content: {
-                PreferencesEmbedContentSection()
-            }
+//            Preferences.Section {
+//                Text("Embed Content:")
+//                    .font(BeamFont.regular(size: 13).swiftUI)
+//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+//            } content: {
+//                PreferencesEmbedContentSection()
+//            }
         }
     }
 }
