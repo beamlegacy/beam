@@ -13,25 +13,27 @@ enum ShortcutModifier: Hashable {
     case shift
     case control
 
-    var symbol: some View {
+    func symbol(withBackground: Bool = true) -> some View {
+        let image: Image
         switch self {
         case .option:
-            return buildView(with: Image("shortcut-option"))
+            image = Image("shortcut-option")
         case .command:
-            return buildView(with: Image("shortcut-cmd"))
+            image = Image("shortcut-cmd")
         case .shift:
-            return buildView(with: Image("shortcut-shift"))
+            image = Image("shortcut-shift")
         case .control:
-            return buildView(with: Image("shortcut-control"))
+            image = Image("shortcut-control")
         }
+        return buildView(with: image, withBackground: withBackground)
     }
 
-    @ViewBuilder func buildView(with symbol: Image) -> some View {
+    @ViewBuilder func buildView(with symbol: Image, withBackground: Bool) -> some View {
         symbol
             .renderingMode(.template)
-            .foregroundColor(BeamColor.Corduroy.swiftUI)
+            .foregroundColor(BeamColor.LightStoneGray.swiftUI)
             .padding(3)
-            .background(RoundedRectangle(cornerRadius: 3)
-                            .foregroundColor(BeamColor.Mercury.swiftUI))
+            .background(withBackground ? RoundedRectangle(cornerRadius: 3)
+                            .foregroundColor(BeamColor.Shortcut.background.swiftUI) : nil)
     }
 }

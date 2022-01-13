@@ -78,7 +78,7 @@ struct OmniboxSearchField: View {
     private var textSelectionColor: BeamColor {
         BeamColor.Generic.blueTextSelection
     }
-    private let textFont = BeamFont.regular(size: 15)
+    private let textFont = BeamFont.regular(size: 16)
 
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
@@ -96,7 +96,7 @@ struct OmniboxSearchField: View {
                 BeamTextField(
                     text: textFieldText,
                     isEditing: $isEditing,
-                    placeholder: "Search Beam or the web",
+                    placeholder: "Search the web and your notes",
                     font: textFont.nsFont,
                     textColor: textColor.nsColor,
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
