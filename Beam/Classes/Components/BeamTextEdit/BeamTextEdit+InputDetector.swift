@@ -128,16 +128,13 @@ extension BeamTextEdit {
         let handlers: [String: () -> BeamText.Attribute?] = [
             "#": { [unowned self] in self.postInputMakeHeader(node: node) },
             ">": { [unowned self] in self.postInputMakeQuote(node: node) },
-            "*": { [unowned self] in self.postInputMakeBoldOrItalic(node: node) },
-            "~": { [unowned self] in self.postInputMakeStrikethrough(node: node) },
-            "_": { [unowned self] in self.postInputMakeUnderline(node: node) },
+            "*": { [unowned self] in self.postInputMarkdown(node: node) },
+            "~": { [unowned self] in self.postInputMarkdown(node: node) },
+            "_": { [unowned self] in self.postInputMarkdown(node: node) },
             "-": { [unowned self] in self.postInputHandleDash(node: node) },
             " ": { [unowned self] in
                 if let res = self.postInputMakeHeader(node: node) ??
-                    self.postInputMakeQuote(node: node) ??
-                    self.postInputMakeBoldOrItalic(node: node) ??
-                    self.postInputMakeStrikethrough(node: node) ??
-                    self.postInputMakeUnderline(node: node) {
+                    self.postInputMakeQuote(node: node) {
                     return res
                 }
                 return nil
@@ -270,6 +267,72 @@ extension BeamTextEdit {
         return nil
     }
 
+    private func isStartingTagCorrect(for format: BeamText.Attribute, at range: Range<Int>, in node: TextNode) -> Bool {
+        if (format == .emphasis || format == .strong) &&
+            node.text.substring(from: range.lowerBound - 1 > 0 ? range.lowerBound - 1 : 0, to: range.lowerBound) == "*" {
+            return false
+        }
+
+        if format == .underline &&
+            node.text.substring(from: range.lowerBound - 1 > 0 ? range.lowerBound - 1 : 0, to: range.lowerBound) == "_" {
+            return false
+        }
+
+        if format == .strikethrough &&
+            node.text.substring(from: range.lowerBound - 1 > 0 ? range.lowerBound - 1 : 0, to: range.lowerBound) == "~" {
+            return false
+        }
+        return true
+    }
+
+    private func postInputMarkdown(node: TextNode) -> BeamText.Attribute? {
+        guard node.cursorPosition - 2 > 0, node.text.count > node.cursorPosition - 2 else { return nil }
+        let level1Substring = node.text.substring(from: node.cursorPosition - 1, to: node.cursorPosition)
+        let level2Substring = node.text.substring(from: node.cursorPosition - 2, to: node.cursorPosition)
+        var format: BeamText.Attribute?
+
+        if level1Substring == BeamText.Attribute.emphasis.markdownTag {
+            format = .emphasis
+        } else if level1Substring == BeamText.Attribute.underline.markdownTag {
+            format = .underline
+        }
+        if level2Substring == BeamText.Attribute.strong.markdownTag {
+            format = .strong
+        } else if level2Substring == BeamText.Attribute.strikethrough.markdownTag {
+            format = .strikethrough
+        }
+
+        if let format = format,
+            let pairRanges = node.text.backwardPairRangesSearch(of: format.markdownTag, from: node.cursorPosition) {
+            let startingTagRange = pairRanges.0
+            let endingTagRange = pairRanges.1
+            guard startingTagRange.upperBound + 1 < node.text.count else { return nil }
+
+            if isStartingTagCorrect(for: format, at: startingTagRange, in: node),
+                node.text.substring(from: startingTagRange.upperBound, to: startingTagRange.upperBound + 1) != " " &&
+                node.text.substring(from: endingTagRange.lowerBound - 1, to: endingTagRange.lowerBound) != " " {
+
+                Logger.shared.logInfo("Make \(format.rawValue)", category: .ui)
+                node.cmdManager.beginGroup(with: "Markdown Formatting")
+
+                let strToFormatRange = startingTagRange.upperBound..<endingTagRange.lowerBound
+                node.cmdManager.formatText(in: node, for: nil, with: format, for: strToFormatRange, isActive: false)
+
+                node.cmdManager.deleteText(in: node, for: endingTagRange)
+                node.cmdManager.deleteText(in: node, for: startingTagRange)
+
+                if endingTagRange.lowerBound - endingTagRange.count == node.text.count {
+                    node.cmdManager.insertText(BeamText(text: " "), in: node, at: strToFormatRange.upperBound)
+                    node.cmdManager.focusElement(node, cursorPosition: strToFormatRange.upperBound)
+                } else {
+                    node.cmdManager.focusElement(node, cursorPosition: strToFormatRange.upperBound - endingTagRange.count)
+                }
+                node.cmdManager.endGroup()
+            }
+        }
+        return nil
+    }
+
     // MARK: ">"
     private func postInputMakeQuote(node: TextNode) -> BeamText.Attribute? {
         let level1 = node.text.prefix(2).text == "> "
@@ -296,68 +359,4 @@ extension BeamTextEdit {
         return nil
     }
 
-    // MARK: "*"
-    private func postInputMakeBoldOrItalic(node: TextNode) -> BeamText.Attribute? {
-        let isBold = node.text.prefix(2).text == "* "
-        let isItalic = node.text.prefix(3).text == "** "
-
-        if node.cursorPosition <= 2, isBold {
-            Logger.shared.logInfo("Make Bold", category: .ui)
-            node.editor?.rootNode?.cursorPosition = 0
-            node.cmdManager.deleteText(in: node, for: 0..<2)
-
-            if !node.text.isEmpty {
-                node.cmdManager.formatText(in: node, for: nil, with: .strong, for: node.text.wholeRange, isActive: false)
-                return nil
-            }
-            return .strong
-        }
-
-        if node.cursorPosition <= 3, isItalic {
-            Logger.shared.logInfo("Make Italic", category: .ui)
-            node.editor?.rootNode?.cursorPosition = 0
-            node.cmdManager.deleteText(in: node, for: 0..<3)
-
-            if !node.text.isEmpty {
-                node.cmdManager.formatText(in: node, for: nil, with: .emphasis, for: node.text.wholeRange, isActive: false)
-                return nil
-            }
-            return .emphasis
-        }
-        return nil
-    }
-
-    // MARK: "~"
-    private func postInputMakeStrikethrough(node: TextNode) -> BeamText.Attribute? {
-        let isStrikethrough = node.text.prefix(3).text == "~~ "
-        if node.cursorPosition <= 3, isStrikethrough {
-            Logger.shared.logInfo("Make Strikethrough", category: .ui)
-            node.editor?.rootNode?.cursorPosition = 0
-            node.cmdManager.deleteText(in: node, for: 0..<3)
-
-            if !node.text.isEmpty {
-                node.cmdManager.formatText(in: node, for: nil, with: .strikethrough, for: node.text.wholeRange, isActive: false)
-                return nil
-            }
-            return .strikethrough
-        }
-        return nil
-    }
-
-    // MARK: "_"
-    private func postInputMakeUnderline(node: TextNode) -> BeamText.Attribute? {
-        let isUnderline = node.text.prefix(2).text == "_ "
-        if node.cursorPosition <= 2, isUnderline {
-            Logger.shared.logInfo("Make Underline", category: .ui)
-            node.editor?.rootNode?.cursorPosition = 0
-            node.cmdManager.deleteText(in: node, for: 0..<2)
-
-            if !node.text.isEmpty {
-                node.cmdManager.formatText(in: node, for: nil, with: .underline, for: node.text.wholeRange, isActive: false)
-                return nil
-            }
-            return .underline
-        }
-        return nil
-    }
 }
