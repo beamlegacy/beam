@@ -18,6 +18,8 @@ class TextEditorContextViewTests: BaseTest {
     func testCreateCardViaContextView() {
         let textToType = "text before a new note"
         let numberOfCharsToSelect = 8
+        let index = textToType.index(textToType.endIndex, offsetBy: -numberOfCharsToSelect)
+        let cardName = String(textToType[index...])
         
         testRailPrint("Given open today's note")
         let cardView = launchApp()
@@ -28,18 +30,17 @@ class TextEditorContextViewTests: BaseTest {
         cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
         shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: numberOfCharsToSelect)
         textEditorContext.selectFormatterOption(.bidi)
-        textEditorContext.confirmBidiLinkCreation(cardName: "new note")
+        textEditorContext.confirmBidiLinkCreation(cardName: cardName)
         
         testRailPrint("Then the note text is remained: \(textToType)")
         XCTAssertEqual(textToType + " ", cardView.getCardNoteValueByIndex(0))
         shortcutsHelper.shortcutActionInvoke(action: .showAllCards)
-        allCardsView.waitForAllCardsViewToLoad()
-        //Substring to be used
-        allCardsView.openCardByName(cardTitle: "new note")
+        XCTAssertTrue(allCardsView.waitForCardTitlesToAppear(), "Card titles didn't load during the timeout")
+        allCardsView.openCardByName(cardTitle: cardName)
         
         testRailPrint("Then new note is created")
         cardView.waitForCardViewToLoad()
-        XCTAssertEqual("new note", cardView.getCardTitle())
+        XCTAssertEqual(cardName, cardView.getCardTitle())
         XCTAssertEqual(1, cardView.getLinksContentNumber())
         XCTAssertEqual(textToType + " ", cardView.getLinkContentByIndex(0))
     }
