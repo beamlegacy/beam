@@ -21,7 +21,7 @@ struct DestinationNoteAutocompleteList: View {
     var allowScroll: Bool = false
     internal var onSelectAutocompleteResult: (() -> Void)?
 
-    private let itemHeight: CGFloat = 32
+    private let itemHeight: CGFloat = AutocompleteItem.defaultHeight
     private let customColorPalette = AutocompleteItemColorPalette(
         textColor: BeamColor.Beam,
         informationTextColor: BeamColor.LightStoneGray,
@@ -71,8 +71,8 @@ struct DestinationNoteAutocompleteList: View {
             ForEach(model.results, id: \.id) { i in
                 return AutocompleteItem(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
                                         alwaysHighlightCompletingText: alwaysHighlightCompletingText,
-                                        allowNewCardShortcut: model.allowNewCardShortcut, colorPalette: colorPalette,
-                                        additionalLeadingPadding: additionLeadingPadding)
+                                        allowsShortcut: i.source != .createCard || model.allowNewCardShortcut, colorPalette: colorPalette,
+                                        additionalLeadingPadding: additionLeadingPadding, cornerRadius: 0)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
                     }

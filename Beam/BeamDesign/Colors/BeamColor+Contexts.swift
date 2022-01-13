@@ -319,3 +319,9 @@ extension BeamColor {
         static let beamGradientEnd = BeamColor.From(color: NSColor(deviceRed: 116/255, green: 51/255, blue: 255/255, alpha: 1))
     }
 }
+
+extension BeamColor {
+    enum Shortcut {
+        static let background = BeamColor.combining(lightColor: .Nero, darkColor: .Nero, darkAlpha: 0.3)
+    }
+}
