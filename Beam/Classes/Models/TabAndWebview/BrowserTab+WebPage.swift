@@ -170,6 +170,7 @@ extension BrowserTab: WebPage {
     // MARK: Navigation handling
     func leave() {
         pointAndShoot?.leavePage()
+        mouseHoveringLocation = .none
         cancelSearch()
     }
 
