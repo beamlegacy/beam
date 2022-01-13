@@ -19,8 +19,11 @@ class OnboardingWindow: NSWindow, NSWindowDelegate {
         let onboardingView = OnboardingView(model: model)
         titlebarAppearsTransparent = true
         titleVisibility = .hidden
+        collectionBehavior = .fullScreenNone
         contentView = BeamHostingView(rootView: onboardingView)
         isMovableByWindowBackground = false
         delegate = self
+        let button = standardWindowButton(.zoomButton)
+        button?.isEnabled = false
     }
 }
