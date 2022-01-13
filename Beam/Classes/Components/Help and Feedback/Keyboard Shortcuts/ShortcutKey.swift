@@ -20,6 +20,8 @@ enum ShortcutKey: Hashable {
     case bracketReversed
     case doubleBracket
     case slash
+    case plus
+    case minus
 
     // swiftlint:disable:next cyclomatic_complexity
     func symbol(withBackground: Bool = true) -> some View {
@@ -49,6 +51,10 @@ enum ShortcutKey: Hashable {
             image = Image("shortcut-doublebracket")
         case .slash:
             image = Image("shortcut-slash")
+        case .plus:
+            image = Image("shortcut-plus")
+        case .minus:
+            image = Image("shortcut-minus")
         }
         return buildView(with: image, withBackground: withBackground)
     }
@@ -79,6 +85,10 @@ enum ShortcutKey: Hashable {
             return "doubleBracket"
         case .slash:
             return "slash"
+        case .plus:
+            return "plus"
+        case .minus:
+            return "minus"
         }
     }
 
