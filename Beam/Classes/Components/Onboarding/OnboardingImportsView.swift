@@ -269,7 +269,7 @@ extension OnboardingImportsView {
     class ImportSourceIconCache {
         private var cache: [ImportSource: NSImage] = [:]
         private let iconSize: CGFloat = 16
-        func getIconForSource(_ source: ImportSource) -> NSImage? {
+        func getIconForSource(_ source: OnboardingImportsView.ImportSource) -> NSImage? {
             if let image = cache[source] {
                 return image
             }
@@ -392,7 +392,8 @@ extension OnboardingImportsView {
 
 struct OnboardingImportsView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingImportsView(actions: .constant([]), finish: nil, selectedSource: .safari)
-            .frame(width: 600, height: 600)
+        OnboardingImportsView(actions: .constant([]), finish: nil, selectedSource: .safariOld)
+            .padding(20)
+            .background(BeamColor.Generic.background.swiftUI)
     }
 }

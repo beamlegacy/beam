@@ -106,21 +106,24 @@ struct OnboardingView: View {
         }
     }
 
-    private let customButtonStyle = ButtonLabelStyle(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear)
+    private let customButtonStyle = ButtonLabelStyle(font: BeamFont.regular(size: 10).swiftUI)//, activeBackgroundColor: .clear)
     private let bottomBarHeight: CGFloat = 90
+    private let buttonsHeight: CGFloat = 34
     private var secondarActionVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.secondary.style
         style.icon = .init(name: "shortcut-bttn_space", size: 16, palette: style.icon?.palette, alignment: .trailing)
         return .custom(style)
     }
+
     private var bottomBar: some View {
         GeometryReader { proxy in
             HStack(spacing: 0) {
                 if model.stepsHistory.count > 0 {
-                    ButtonLabel(nil, icon: "onboarding-back", customStyle: customButtonStyle) {
-                        model.backToPreviousStep()
-                    }
-                    .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
+                    BackButton()
+                        .onTapGesture {
+                            model.backToPreviousStep()
+                        }
+                        .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
                 }
                 Spacer()
                 if [.welcome].contains(currentStep.type) {
@@ -141,8 +144,9 @@ struct OnboardingView: View {
                 HStack(spacing: BeamSpacing._200) {
                     ForEach(model.actions) { action in
                         ActionableButton(text: action.title, defaultState: !action.enabled ? .disabled : .normal,
-                                         variant: action.secondary ? secondarActionVariant : .gradient(icon: "shortcut-return"),
-                                         minWidth: action.secondary ? 110 : 146,
+                                         variant: action.secondary ? secondarActionVariant : .primaryPurple,
+                                         minWidth: action.secondary ? 100 : 150,
+                                         height: buttonsHeight,
                                          action: !action.enabled ? nil : {
                             if action.onClick?() != false {
                                 model.advanceToNextStep()
@@ -153,10 +157,10 @@ struct OnboardingView: View {
                     }
                 }
             }
-            .font(BeamFont.medium(size: 10).swiftUI)
+            .font(BeamFont.medium(size: 11).swiftUI)
             .foregroundColor(BeamColor.AlphaGray.swiftUI)
             .padding(.horizontal, BeamSpacing._400)
-            .frame(maxHeight: .infinity)
+            .frame(height: buttonsHeight)
         }
         .animation(BeamAnimation.easeInOut(duration: 0.3), value: model.actions)
         .padding(.top, BeamSpacing._200)
@@ -174,9 +178,9 @@ struct OnboardingView: View {
         var title: String
         var body: some View {
             Text(title)
-                .font(BeamFont.medium(size: 20).swiftUI)
+                .font(BeamFont.medium(size: 24).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .padding(.bottom, 34)
+                .padding(.bottom, 40)
         }
     }
 
@@ -194,13 +198,34 @@ struct OnboardingView: View {
             }
         }
     }
+
+    struct BackButton: View {
+        @State private var isHovering = false
+        private var foregroundColor: Color {
+            (isHovering ? BeamColor.Niobium : BeamColor.AlphaGray).swiftUI
+        }
+        var body: some View {
+            HStack(spacing: 1) {
+                Icon(name: "nav-back", color: foregroundColor)
+                Text("Back")
+                    .foregroundColor(foregroundColor)
+                    .font(BeamFont.regular(size: 14).swiftUI)
+            }
+        }
+    }
 }
 
 struct OnboardingView_Previews: PreviewProvider {
+
+    static var onboardingManager: OnboardingManager {
+        let mngr = OnboardingManager()
+        mngr.advanceToNextStep(.init(type: .welcome))
+        mngr.advanceToNextStep(.init(type: .emailConnect))
+        return mngr
+    }
     static var previews: some View {
         Group {
-            OnboardingView(model: OnboardingManager())
-                .frame(width: 800, height: 512)
+            OnboardingView(model: onboardingManager)
                 .background(BeamColor.Generic.background.swiftUI)
         }
 
