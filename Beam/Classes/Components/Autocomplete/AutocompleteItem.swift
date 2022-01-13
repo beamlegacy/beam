@@ -9,15 +9,18 @@ import SwiftUI
 
 struct AutocompleteItem: View {
 
+    static let defaultHeight: CGFloat = 36
+
     @State var item: AutocompleteResult
     let selected: Bool
     var disabled: Bool = false
     var displayIcon: Bool = true
     var alwaysHighlightCompletingText: Bool = false
-    var allowNewCardShortcut: Bool = true
+    var allowsShortcut: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
     var additionalLeadingPadding: CGFloat = 0
+    var cornerRadius: Double = 6
 
     @State private var isTouchDown = false
 
@@ -160,25 +163,26 @@ struct AutocompleteItem: View {
             }
             .blendModeLightMultiplyDarkScreen()
             Spacer(minLength: 0)
-            if item.source == .createCard && allowNewCardShortcut {
-                HStack(spacing: BeamSpacing._20) {
-                    Icon(name: "shortcut-option", width: 12, color: cardColor, alignment: .trailing)
-                    Icon(name: "shortcut-return", width: 12, color: cardColor, alignment: .trailing)
+            if allowsShortcut {
+                if item.source == .createCard {
+                    ShortcutView(shortcut: .init(modifiers: [.option], keys: [.enter]), spacing: 1, withBackground: !selected)
+                        .frame(height: 18)
+                        .blendModeLightMultiplyDarkScreen()
+                } else {
+                    ShortcutView(shortcut: .init(modifiers: [], keys: [.enter]), spacing: 1, withBackground: !selected)
+                        .frame(height: 18)
+                        .opacity(selected ? 1 : 0)
+                        .blendModeLightMultiplyDarkScreen()
                 }
-                .opacity(0.5)
-                .blendModeLightMultiplyDarkScreen()
-            } else {
-                Icon(name: "shortcut-return", width: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
-                    .opacity(0.7)
-                    .blendModeLightMultiplyDarkScreen()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, BeamSpacing._100)
-        .padding(.horizontal, BeamSpacing._80)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 9)
         .padding(.leading, additionalLeadingPadding)
+        .frame(height: Self.defaultHeight)
         .background(backgroundColor)
-        .cornerRadius(6)
+        .cornerRadius(cornerRadius)
         .onTouchDown { t in
             isTouchDown = t && !disabled
         }
