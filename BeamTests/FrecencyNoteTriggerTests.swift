@@ -94,6 +94,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var authenticationViewModel: AuthenticationViewModel?
         var searchViewModel: SearchViewModel?
         var errorPageManager: ErrorPageManager?
+        var mouseHoveringLocation: MouseHoveringLocation = .none
 
         func getNote(fromTitle: String) -> BeamNote? {
             if fromTitle == pnsNoteTitle {

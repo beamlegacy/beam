@@ -14,6 +14,7 @@ class BrowserTabConfiguration: BeamWebViewConfigurationBase {
         WebSearchMessageHandler(config: self).register(to: self)
         WebViewFocusMessageHandler(config: self).register(to: self)
         PasswordMessageHandler(config: self).register(to: self)
+        LinkMouseOverMessageHandler(config: self).register(to: self)
     }
 
 }

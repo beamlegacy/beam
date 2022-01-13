@@ -259,6 +259,18 @@ extension BeamColor {
     }
 }
 
+extension BeamColor {
+    enum WebViewStatusBar {
+        static let text = BeamColor.Corduroy.alpha(0.85)
+        static let emphasizedText = BeamColor.Corduroy
+        static let background = BeamColor.Nero.alpha(0.5)
+        static let border = BeamColor.combining(
+            lightColor: From(color: .black), lightAlpha: 0.1,
+            darkColor: From(color: .white), darkAlpha: 0.1
+        )
+    }
+}
+
 // MARK: - Cursor & Selection
 extension BeamColor.Generic {
     static private let possibleCursorColors = [

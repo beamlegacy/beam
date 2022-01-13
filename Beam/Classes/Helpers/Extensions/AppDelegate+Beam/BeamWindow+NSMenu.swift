@@ -130,6 +130,10 @@ extension BeamWindow {
         state.navigateToPage(.shortcutsWindowPage)
     }
 
+    @IBAction func toggleStatusBar(_ sender: Any?) {
+        PreferencesManager.showsStatusBar.toggle()
+    }
+
     // MARK: Navigation
     @IBAction func goBack(_ sender: Any?) {
         state.goBack()
