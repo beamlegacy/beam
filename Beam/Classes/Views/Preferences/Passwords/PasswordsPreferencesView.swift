@@ -23,9 +23,6 @@ struct PasswordsPreferencesView: View {
                 Text("").labelsHidden()
             } content: {
                 Passwords(passwordsViewModel: passwordsViewModel)
-                    .onAppear {
-                        passwordsViewModel.refresh()
-                    }
             }
 //            Preferences.Section {
 //                Text("").labelsHidden()
@@ -95,9 +92,8 @@ struct Passwords: View {
                            let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username) {
                             PasswordEditView(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost,
                                              username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username,
-                                             password: password, editType: .update) {
-                                passwordsViewModel.refresh()
-                            }.frame(width: 400, height: 179, alignment: .center)
+                                             password: password, editType: .update)
+                                .frame(width: 400, height: 179, alignment: .center)
                         }
                     }
                     Spacer()
@@ -112,9 +108,8 @@ struct Passwords: View {
                         .sheet(isPresented: $showingAddPasswordSheet) {
                             PasswordEditView(hostname: "",
                                              username: "",
-                                             password: "", editType: .create) {
-                                passwordsViewModel.refresh()
-                            }.frame(width: 400, height: 179, alignment: .center)
+                                             password: "", editType: .create)
+                                .frame(width: 400, height: 179, alignment: .center)
                         }
                     Button {
                         promptDeletePasswordsAlert()
@@ -134,18 +129,14 @@ struct Passwords: View {
                                let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
                                 PasswordEditView(hostname: entry.minimizedHost,
                                                  username: entry.username,
-                                                 password: password, editType: .update) {
-                                    passwordsViewModel.refresh()
-                                }
+                                                 password: password, editType: .update)
                             }
                         }
                         .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
                     Spacer()
                     HStack {
                         Button {
-                            importPasswordAction(completion: {
-                                passwordsViewModel.refresh()
-                            })
+                            importPasswordAction()
                         } label: {
                             Text("Import...")
                                 .font(BeamFont.regular(size: 13).swiftUI)
@@ -182,12 +173,11 @@ struct Passwords: View {
             for entry in passwordsViewModel.selectedEntries {
                 PasswordManager.shared.markDeleted(hostname: entry.minimizedHost, for: entry.username)
             }
-            passwordsViewModel.refresh()
             if !searchString.isEmpty { searchString.removeAll() }
         }
     }
 
-    private func importPasswordAction(completion: @escaping () -> Void) {
+    private func importPasswordAction(completion: (() -> Void)? = nil) {
         let openPanel = NSOpenPanel()
         openPanel.canChooseFiles = true
         openPanel.canChooseDirectories = false
@@ -202,7 +192,7 @@ struct Passwords: View {
             }
             do {
                 try PasswordImporter.importPasswords(fromCSV: url)
-                completion()
+                completion?()
             } catch {
                 Logger.shared.logError(String(describing: error), category: .general)
             }
