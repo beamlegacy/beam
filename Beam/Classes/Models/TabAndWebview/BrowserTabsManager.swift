@@ -148,7 +148,7 @@ class BrowserTabsManager: ObservableObject {
 
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
-                        let indexDocument = IndexDocument(source: url.absoluteString, title: read.title, contents: read.textContent)
+                        let indexDocument = IndexDocument(source: url.absoluteString, title: tab.title, contents: read.textContent)
                         var shouldIndexUserTypedUrl = tab.userTypedDomain != nil && tab.userTypedDomain != tab.url
 
                         // this check is case last url redirected just contains a /
