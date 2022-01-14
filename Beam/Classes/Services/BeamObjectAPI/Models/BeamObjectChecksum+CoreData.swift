@@ -52,15 +52,11 @@ extension BeamObjectChecksum {
 
     /// I use `BeamObject` as the result key because the 100% way to be unique is a combined object type + object id
     static func previousChecksums(beamObjects: [BeamObject]) -> [BeamObject: String] {
-        let (checksums, _) = findChecksumsForBeamObjects(beamObjects: beamObjects)
+        let (checksums, _) = findChecksumsForBeamObjects(beamObjects: beamObjects, shouldCreate: false)
         var result: [BeamObject: String] = [:]
 
         checksums.forEach { (key, value) in
-            // If checksum doesn't exist, findChecksumsForBeamObjects has created a new one. Calling `previous_checksum`
-            // will crash
-            if !value.objectID.isTemporaryID {
-                result[key] = value.previous_checksum
-            }
+            result[key] = value.previous_checksum
         }
 
         return result
@@ -323,7 +319,8 @@ extension BeamObjectChecksum {
         return (result, context)
     }
 
-    private static func findChecksumsForBeamObjects(beamObjects: [BeamObject]) -> ([BeamObject: BeamObjectChecksum], NSManagedObjectContext) {
+    private static func findChecksumsForBeamObjects(beamObjects: [BeamObject],
+                                                    shouldCreate: Bool = true) -> ([BeamObject: BeamObjectChecksum], NSManagedObjectContext) {
         let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
 
         /*
@@ -359,7 +356,10 @@ extension BeamObjectChecksum {
 
             var result: [BeamObject: BeamObjectChecksum] = [:]
             beamObjects.forEach {
-                var checksum = storedChecksums["\($0.id.uuidString)::\($0.beamObjectType)"] ?? BeamObjectChecksum(context: context)
+                let storedChecksumValue = storedChecksums["\($0.id.uuidString)::\($0.beamObjectType)"]
+                if storedChecksumValue == nil, !shouldCreate { return }
+
+                var checksum = storedChecksumValue ?? BeamObjectChecksum(context: context)
 
                 if let object_type = checksum.object_type, object_type != $0.beamObjectType {
                     // Congrats, you found an unexpected issue with a beam object ID and a different type
