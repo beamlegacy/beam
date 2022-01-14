@@ -291,7 +291,11 @@ public extension CALayer {
 
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
-        layer?.backgroundColor = BeamColor.Generic.background.cgColor
+
+        NSAppearance.withAppAppearance {
+            layer?.backgroundColor = BeamColor.Generic.background.cgColor
+        }
+
         layer?.setNeedsDisplay()
         setupCardHeader()
         updateLayersColorsForAppearance()
