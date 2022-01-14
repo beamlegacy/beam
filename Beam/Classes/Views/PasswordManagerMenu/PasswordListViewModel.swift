@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 import SwiftUI
 
 final class PasswordListViewModel: ObservableObject {
@@ -16,6 +17,7 @@ final class PasswordListViewModel: ObservableObject {
     private var allToFilteredMapping: [Int: Int] = [:]
     private var currentFilteredSelection = IndexSet() // indices are relative to filtered list -- used only for comparison
     private var currentSelection = IndexSet() // indices are relative to full list, regardless of filtering options
+    private var cancellables = Set<AnyCancellable>()
 
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
@@ -46,6 +48,12 @@ final class PasswordListViewModel: ObservableObject {
     init(passwordManager: PasswordManager = .shared) {
         self.passwordManager = passwordManager
         refresh()
+        passwordManager.changePublisher
+            .receive(on: DispatchQueue.main)
+            .sink { [unowned self] in
+                self.refresh()
+            }
+            .store(in: &cancellables)
     }
 
     func updateSelection(_ idx: IndexSet) {
@@ -58,18 +66,23 @@ final class PasswordListViewModel: ObservableObject {
         disableRemoveButton = idx.count == 0
     }
 
-    func refresh() {
-        currentSelection.removeAll()
+    private func refresh() {
+        let savedSelection = Set(selectedEntries)
         let entries = passwordManager.fetchAll()
         self.allPasswordEntries = entries
+        currentSelection = IndexSet(
+            entries.enumerated()
+                .filter { (_, entry) in savedSelection.contains(entry) }
+                .map { (index, _) in index }
+        )
         self.allPasswordTableViewItems = entries.map(PasswordTableViewItem.init)
         self.updateIndices()
     }
 
     private func updateIndices() {
-        currentFilteredSelection.removeAll()
         filteredIndices = allPasswordEntries.filteredIndices(by: searchString)
         allToFilteredMapping = Dictionary(uniqueKeysWithValues: filteredIndices.enumerated().map { ($0.1, $0.0) })
+        currentFilteredSelection = IndexSet(currentSelection.compactMap { allToFilteredMapping[$0] })
         objectWillChange.send()
     }
 }
