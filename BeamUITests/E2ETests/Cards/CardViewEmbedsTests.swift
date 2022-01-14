@@ -84,32 +84,34 @@ class CardViewEmbedsTests: BaseTest {
         let mediaMutedButton = cardView.image(CardViewLocators.Buttons.noteMediaMuted.accessibilityIdentifier)
         XCTAssertTrue(mediaPlayingButton.waitForExistence(timeout: implicitWaitTimeout))
         embedNode.hoverInTheMiddle()
-        let youtubePauseButton = youtubeButtons.matching(NSPredicate(format: "label = 'Pause (k)'")).firstMatch
-        XCTAssertTrue(youtubePauseButton.exists)
+        let youtubePlayPauseButton = youtubeButtons.matching(NSPredicate(format: "label CONTAINS '(k)'")).firstMatch
+        XCTAssertTrue(youtubePlayPauseButton.exists)
 
         testRailPrint("When I leave note and come back")
         let allCardsView = journalView.openAllCardsMenu()
         XCTAssertTrue(mediaPlayingButton.exists)
-        XCTAssertFalse(youtubePauseButton.exists)
+        XCTAssertFalse(youtubePlayPauseButton.exists)
         allCardsView.openFirstCard()
-
         testRailPrint("Then the video is still playing")
         embedNode.hoverInTheMiddle()
-        XCTAssertTrue(youtubePauseButton.exists)
+        XCTAssertTrue(youtubePlayPauseButton.exists)
         XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
+
+        testRailPrint("When I pause the video")
         embedNode.tapInTheMiddle()
-        XCTAssertFalse(youtubePauseButton.exists)
+        XCTAssertTrue(youtubePlayPauseButton.exists)
+        testRailPrint("Then media button disappear")
         XCTAssertFalse(mediaPlayingButton.exists)
         XCTAssertFalse(mediaMutedButton.exists)
 
-        // tap in video to restart playing
-        embedNode.coordinate(withNormalizedOffset: .init(dx: 0.5, dy: 0.3)).tap()
+        testRailPrint("When I resume the video")
+        youtubePlayPauseButton.tap()
+        testRailPrint("Then media button comes back")
         XCTAssertTrue(mediaPlayingButton.waitForExistence(timeout: implicitWaitTimeout))
 
         testRailPrint("When I delete the embed node")
         embedNode.coordinate(withNormalizedOffset: .init(dx: 1, dy: 0.5)).tap()
         cardView.typeKeyboardKey(.delete, 1)
-
         testRailPrint("Then no more webview is playing")
         XCTAssertFalse(mediaPlayingButton.exists)
         XCTAssertFalse(mediaMutedButton.exists)
