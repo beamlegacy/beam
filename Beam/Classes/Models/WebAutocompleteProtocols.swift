@@ -5,7 +5,7 @@
 //  Created by Frank Lefebvre on 31/05/2021.
 //
 
-struct PasswordManagerEntry {
+struct PasswordManagerEntry: Hashable {
     var minimizedHost: String
     var username: String
 }

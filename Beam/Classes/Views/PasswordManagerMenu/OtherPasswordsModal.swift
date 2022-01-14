@@ -51,9 +51,8 @@ struct OtherPasswordModal: View {
                        let password = PasswordManager.shared.password(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: viewModel.filteredPasswordEntries[doubleTappedRow].username) {
                         PasswordEditView(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost,
                                          username: viewModel.filteredPasswordEntries[doubleTappedRow].username,
-                                         password: password, editType: .update) {
-                            viewModel.refresh()
-                        }.frame(width: 400, height: 179, alignment: .center)
+                                         password: password, editType: .update)
+                            .frame(width: 400, height: 179, alignment: .center)
                     }
                 }
 
@@ -66,7 +65,6 @@ struct OtherPasswordModal: View {
                     Alert(title: Text(removeAlertMessage(for: viewModel.selectedEntries)),
                           primaryButton: .destructive(Text("Remove"), action: {
                         onRemove(viewModel.selectedEntries)
-                        viewModel.refresh()
                     }),
                           secondaryButton: .cancel(Text("Cancel")))
                 }
