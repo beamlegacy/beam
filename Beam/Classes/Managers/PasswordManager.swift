@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import BeamCore
 
 enum PasswordManagerError: Error, Equatable {
@@ -18,11 +19,17 @@ class PasswordManager {
     static let shared = PasswordManager()
     static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 
+    var changePublisher: AnyPublisher<Void, Never> {
+        changeSubject.eraseToAnyPublisher()
+    }
+
     private var passwordsDB: PasswordStore
+    private var changeSubject: PassthroughSubject<Void, Never>
 
     init() {
         do {
             passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
+            changeSubject = PassthroughSubject<Void, Never>()
         } catch {
             fatalError("Error while creating the Passwords Database \(error)")
         }
@@ -30,6 +37,7 @@ class PasswordManager {
 
     init(passwordsDB: PasswordStore) {
         self.passwordsDB = passwordsDB
+        self.changeSubject = PassthroughSubject<Void, Never>()
     }
 
     private func managerEntries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {
@@ -93,6 +101,7 @@ class PasswordManager {
             } else {
                 passwordRecord = try passwordsDB.save(hostname: hostname, username: username, password: password, uuid: uuid)
             }
+            changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(passwordRecord, networkCompletion)
             } else {
@@ -125,6 +134,7 @@ class PasswordManager {
     func markDeleted(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let passwordRecord = try passwordsDB.markDeleted(hostname: hostname, username: username)
+            changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveOnNetwork(passwordRecord, networkCompletion)
             } else {
@@ -142,6 +152,7 @@ class PasswordManager {
     func markAllDeleted(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             let passwordsRecord = try passwordsDB.markAllDeleted()
+            changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated {
                 try self.saveAllOnNetwork(passwordsRecord, networkCompletion)
             } else {
@@ -159,6 +170,7 @@ class PasswordManager {
     func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         do {
             try passwordsDB.deleteAll()
+            changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated && includedRemote {
                 try self.deleteAllFromBeamObjectAPI { result in
                     networkCompletion?(result)
@@ -183,6 +195,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
 
     func saveObjectsAfterConflict(_ passwords: [PasswordRecord]) throws {
         try self.passwordsDB.save(passwords: passwords)
+        changeSubject.send()
     }
 
     func manageConflict(_ dbStruct: PasswordRecord,
@@ -192,6 +205,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
 
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
         try self.passwordsDB.save(passwords: passwords)
+        changeSubject.send()
     }
 
     func allObjects(updatedSince: Date?) throws -> [PasswordRecord] {
