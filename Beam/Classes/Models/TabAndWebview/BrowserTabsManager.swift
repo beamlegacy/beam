@@ -149,17 +149,17 @@ class BrowserTabsManager: ObservableObject {
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
                         let indexDocument = IndexDocument(source: url.absoluteString, title: tab.title, contents: read.textContent)
-                        var shouldIndexUserTypedUrl = tab.userTypedDomain != nil && tab.userTypedDomain != tab.url
+                        var shouldIndexUserTypedUrl = tab.requestedUrl != nil && tab.requestedUrl != tab.url
 
                         // this check is case last url redirected just contains a /
-                        if let url = tab.url, let userTypedUrl = tab.userTypedDomain {
+                        if let url = tab.url, let userTypedUrl = tab.requestedUrl {
                             if url.absoluteString.prefix(url.absoluteString.count - 1) == userTypedUrl.absoluteString {
                                 shouldIndexUserTypedUrl = false
                             }
                         }
 
                         let tabInformation: TabInformation? = TabInformation(url: url,
-                                                                             userTypedDomain: shouldIndexUserTypedUrl ? tab.userTypedDomain : nil,
+                                                                             requestedUrl: shouldIndexUserTypedUrl ? tab.requestedUrl : nil,
                                                                              shouldBeIndexed: tab.responseStatusCode == 200,
                                                                              tabTree: tabTree,
                                                                              currentTabTree: currentTabTree,
@@ -170,7 +170,7 @@ class BrowserTabsManager: ObservableObject {
                                                                              cleanedTextContentForClustering: textForClustering,
                                                                              isPinnedTab: tab.isPinned)
                         self.data.tabToIndex = tabInformation
-                        self.currentTab?.userTypedDomain = nil
+                        self.currentTab?.requestedUrl = nil
                         self.latestCurrentTab = nil
                     }
                 }
@@ -322,7 +322,7 @@ extension BrowserTabsManager {
 
 struct TabInformation {
     var url: URL
-    var userTypedDomain: URL?
+    var requestedUrl: URL?
     var shouldBeIndexed: Bool = true
     weak var tabTree: BrowsingTree?
     weak var currentTabTree: BrowsingTree?

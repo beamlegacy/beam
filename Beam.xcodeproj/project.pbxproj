@@ -569,6 +569,10 @@
 		9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */ = {isa = PBXBuildFile; fileRef = 9623ABBE26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel */; };
 		9624A65727431B4200B8D012 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 9624A65627431B4200B8D012 /* Atomics */; };
 		9624A6592743212500B8D012 /* Atomics in Frameworks */ = {isa = PBXBuildFile; productRef = 9624A6582743212500B8D012 /* Atomics */; };
+		962AC886279017FD001B7142 /* OmniboxContentDebuggerWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962AC885279017FD001B7142 /* OmniboxContentDebuggerWindow.swift */; };
+		962AC88827901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962AC88727901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift */; };
+		962AC88A27901953001B7142 /* OmniboxContentDebuggerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962AC88927901953001B7142 /* OmniboxContentDebuggerView.swift */; };
+		962AC88C27909C44001B7142 /* AutocompleteResultDebugView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 962AC88B27909C44001B7142 /* AutocompleteResultDebugView.swift */; };
 		96319C6E26160AB400D1CF31 /* BeamNote+DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */; };
 		96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */; };
 		96319D242616232700D1CF31 /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
@@ -635,6 +639,7 @@
 		9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
+		96A06EBD27836F69006ECF46 /* MnemonicRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A06EBC27836F69006ECF46 /* MnemonicRecord.swift */; };
 		96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */; };
 		96A3067C25F698FB0078A453 /* RefNoteTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A3067B25F698FB0078A453 /* RefNoteTitle.swift */; };
 		96BBA79F25FBA573008276FC /* ReparentElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96BBA78A25FBA573008276FC /* ReparentElement.swift */; };
@@ -1839,6 +1844,10 @@
 		962AC85A278F0CDD001B7142 /* Public.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Public.xcconfig; sourceTree = "<group>"; };
 		962AC860278F0D05001B7142 /* Public release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Public release.xcconfig"; sourceTree = "<group>"; };
 		962AC861278F0D05001B7142 /* Public debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Public debug.xcconfig"; sourceTree = "<group>"; };
+		962AC885279017FD001B7142 /* OmniboxContentDebuggerWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxContentDebuggerWindow.swift; sourceTree = "<group>"; };
+		962AC88727901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+OmniboxContentDebugger.swift"; sourceTree = "<group>"; };
+		962AC88927901953001B7142 /* OmniboxContentDebuggerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxContentDebuggerView.swift; sourceTree = "<group>"; };
+		962AC88B27909C44001B7142 /* AutocompleteResultDebugView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteResultDebugView.swift; sourceTree = "<group>"; };
 		96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+DocumentManager.swift"; sourceTree = "<group>"; };
 		96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+LinkDetection.swift"; sourceTree = "<group>"; };
 		96319C91261614C000D1CF31 /* BeamCore.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BeamCore.h; sourceTree = "<group>"; };
@@ -1892,6 +1901,7 @@
 		96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePicker.swift; sourceTree = "<group>"; };
 		969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteType.swift; sourceTree = "<group>"; };
 		96A06EA62781F315006ECF46 /* ReleaseDebugable.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; path = ReleaseDebugable.xcconfig; sourceTree = "<group>"; };
+		96A06EBC27836F69006ECF46 /* MnemonicRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MnemonicRecord.swift; sourceTree = "<group>"; };
 		96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+JsonImportExport.swift"; sourceTree = "<group>"; };
 		96A3067B25F698FB0078A453 /* RefNoteTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RefNoteTitle.swift; sourceTree = "<group>"; };
 		96BBA78A25FBA573008276FC /* ReparentElement.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReparentElement.swift; sourceTree = "<group>"; };
@@ -2631,6 +2641,7 @@
 				0D65977026975FD500AC9822 /* TopDomainDatabase.swift */,
 				DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */,
 				A0673C42274F933E00A0E365 /* ContactsDB.swift */,
+				96A06EBC27836F69006ECF46 /* MnemonicRecord.swift */,
 				DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */,
 			);
 			path = GRDB;
@@ -3304,6 +3315,7 @@
 				3343794227037578004EF5A4 /* BeamWindow+Search.swift */,
 				DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */,
 				A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */,
+				962AC88727901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift */,
 			);
 			path = "AppDelegate+Beam";
 			sourceTree = "<group>";
@@ -3311,6 +3323,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				962AC87F279017D1001B7142 /* OmnibarContentDebugger */,
 				A5336C04273AB4EA0075AF92 /* Onboarding */,
 				52842D4C2715B2FF0099602C /* FilesList */,
 				52DB025C2716CEBD00F3881D /* Logger */,
@@ -4278,6 +4291,16 @@
 				9678217426726005001413EF /* LockButton.swift */,
 			);
 			path = Layers;
+			sourceTree = "<group>";
+		};
+		962AC87F279017D1001B7142 /* OmnibarContentDebugger */ = {
+			isa = PBXGroup;
+			children = (
+				962AC885279017FD001B7142 /* OmniboxContentDebuggerWindow.swift */,
+				962AC88927901953001B7142 /* OmniboxContentDebuggerView.swift */,
+				962AC88B27909C44001B7142 /* AutocompleteResultDebugView.swift */,
+			);
+			path = OmnibarContentDebugger;
 			sourceTree = "<group>";
 		};
 		96319C9C261614CB00D1CF31 /* BeamCore */ = {
@@ -6397,6 +6420,7 @@
 				A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */,
+				96A06EBD27836F69006ECF46 /* MnemonicRecord.swift in Sources */,
 				9691C2592644948200F70DA1 /* BeamFileDB.swift in Sources */,
 				A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
@@ -6432,6 +6456,7 @@
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				A52596E7273EB87F004B27E4 /* OnboardingProfileCreationView.swift in Sources */,
 				DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */,
+				962AC88C27909C44001B7142 /* AutocompleteResultDebugView.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
 				032562A926051D3B006513E4 /* RBDatabase.m in Sources */,
 				33353EDE26F372D700063078 /* KeyboardFeature.swift in Sources */,
@@ -6554,6 +6579,7 @@
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
 				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
+				962AC88A27901953001B7142 /* OmniboxContentDebuggerView.swift in Sources */,
 				DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */,
 				9678217526726005001413EF /* LockButton.swift in Sources */,
 				964FE5B72624813E00966E03 /* RandomAccessCollection+BinarySearch.swift in Sources */,
@@ -6672,6 +6698,7 @@
 				8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */,
 				A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */,
 				DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */,
+				962AC88827901826001B7142 /* AppDelegate+OmniboxContentDebugger.swift in Sources */,
 				5295D91627187246008AF38C /* LoggerNSTableViewController.swift in Sources */,
 				33353EDA26F369AD00063078 /* KeyboardFeatureView.swift in Sources */,
 				96FACC522604B0EE0088DD67 /* DeleteElement.swift in Sources */,
@@ -6707,6 +6734,7 @@
 				A5C2023B2761FDA2008BB2FB /* TabFaviconView.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,
 				A05123DB27722842009B81CF /* GoogleTokenUtility.swift in Sources */,
+				962AC886279017FD001B7142 /* OmniboxContentDebuggerWindow.swift in Sources */,
 				37C413192785529300954FD7 /* MockSearchEngine.swift in Sources */,
 				75A1E5BA271D98F1000824B1 /* ExternalDeeplinkHandler.swift in Sources */,
 				A569EA3026A196F600B0861B /* AutocompleteManager+Publishers.swift in Sources */,

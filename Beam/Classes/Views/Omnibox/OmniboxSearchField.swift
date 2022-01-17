@@ -41,7 +41,7 @@ struct OmniboxSearchField: View {
     private var favicon: NSImage? {
         var icon: NSImage?
         if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url,
-           [.history, .url, .topDomain].contains(autocompleteResult.source) {
+           [.history, .url, .topDomain, .mnemonic].contains(autocompleteResult.source) {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { (image) in
                 icon = image
             }
@@ -56,7 +56,7 @@ struct OmniboxSearchField: View {
     private var resultSubtitle: String? {
         guard isEditing else { return nil }
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
-        if let info = autocompleteResult.information {
+        if let info = autocompleteResult.displayInformation {
             return info
         } else if autocompleteResult.source == .autocomplete {
             return autocompleteManager.searchEngine.description
