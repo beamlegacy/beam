@@ -38,7 +38,7 @@ struct AutocompleteItem: View {
         switch item.source {
         case .history:
             return "field-history"
-        case .autocomplete, .url, .topDomain:
+        case .autocomplete, .url, .topDomain, .mnemonic:
             return "field-search"
         case .createCard:
             return "field-card_new"
@@ -59,7 +59,7 @@ struct AutocompleteItem: View {
     private let cardColor = BeamColor.Beam.swiftUI
     private var mainTextColor: Color {
         switch item.source {
-        case .topDomain:
+        case .topDomain, .mnemonic:
             return subtitleLinkColor
         case .url where !isUrlWithTitle:
             return subtitleLinkColor
@@ -92,7 +92,7 @@ struct AutocompleteItem: View {
         guard let completingText = item.completingText, item.source != .createCard else {
             return []
         }
-        if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain].contains(item.source) {
+        if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain, .mnemonic].contains(item.source) {
             return text.ranges(of: completingText, options: .caseInsensitive)
         }
         if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
@@ -105,19 +105,14 @@ struct AutocompleteItem: View {
         if item.source == .createCard {
             return "New Note:"
         }
-        if isUrlWithTitle, let information = item.information {
-            return information
-        }
-        return item.text
+        return item.displayText
     }
 
     var secondaryText: String? {
         if item.source == .createCard {
             return " " + item.text
-        } else if isUrlWithTitle {
-            return " – \(item.text)"
-        } else if let info = item.information {
-            return " – \(info)"
+        } else if let info = item.displayInformation {
+            return " - " + info
         }
         return nil
     }
@@ -194,7 +189,7 @@ struct AutocompleteItem: View {
             }
         }
         .accessibilityElement()
-        .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
+        .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.displayText)-\(item.source)")
     }
 
     private func debugString(score: Float?) -> String {
@@ -224,7 +219,7 @@ struct AutocompleteItem_Previews: PreviewProvider {
         AutocompleteResult(text: "James Dean", source: .createCard, information: "New Note"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .autocomplete, information: "Google Search"),
-        AutocompleteResult(text: "jamesdean.com", source: .url),
+        AutocompleteResult(text: "jamesdean.com", source: .url, urlFields: .text),
         AutocompleteResult(text: "James Dean", source: .history, information: "https://wikipedia.com/James+Dean")
     ]
     static let selectedIndex = 3
