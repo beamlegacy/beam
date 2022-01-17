@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import WebKit
 
 class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationController {
     weak var page: WebPage?
@@ -10,6 +11,7 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
     public var isNavigatingFromNote: Bool = false
     private var isNavigatingFromSearchBar: Bool = false
     private weak var webView: WKWebView?
+    var requestedUrl: URL?
 
     init(browsingTree: BrowsingTree, noteController: WebNoteController, webView: WKWebView) {
         self.browsingTree = browsingTree
@@ -51,6 +53,13 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
 
         //Only register navigation if the page was successfully loaded
         guard page.responseStatusCode == 200 else { return }
+
+        // handle the case where a redirection happened and we never get a title for the original url:
+        if let requestedUrl = requestedUrl, requestedUrl != url {
+            Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedUrl) - \(String(describing: webView.title))")
+            let link = GRDBDatabase.shared.visit(url: requestedUrl.absoluteString, title: webView.title, content: nil, destination: url.absoluteString)
+            ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()).update(id: link.id, value: 0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
+        }
 
         let isLinkActivation = !isNavigatingFromSearchBar && !replace
         isNavigatingFromSearchBar = false
@@ -119,14 +128,29 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
 
 extension BeamWebNavigationController: WKNavigationDelegate {
 
+    private func handleNavigationAction(_ action: WKNavigationAction) {
+        switch action.navigationType {
+        case .other:
+            // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
+            break
+        default:
+            // update the requested url as it is not from a redirection but from a user action:
+            if let url = action.request.url {
+                requestedUrl = url
+            }
+        }
+    }
+
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+        handleNavigationAction(navigationAction)
         decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        handleNavigationAction(navigationAction)
         switch navigationAction.navigationType {
         case .backForward:
             handleBackForwardWebView(navigationAction: navigationAction)
@@ -215,9 +239,8 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         guard let webviewUrl = webView.url else {
             return // webview probably failed to load
         }
-        if webviewUrl.isDomain {
-            self.page?.userTypedDomain = webviewUrl
-        }
+        self.page?.requestedUrl = webviewUrl
+
         if BeamURL(webviewUrl).isErrorPage {
             let beamSchemeUrl = BeamURL(webviewUrl)
             self.page?.url = beamSchemeUrl.originalURLFromErrorPage
