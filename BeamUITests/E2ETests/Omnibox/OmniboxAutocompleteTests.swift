@@ -9,41 +9,41 @@ import Foundation
 import XCTest
 
 class OmniboxAutocompleteTests: BaseTest {
-    
+
     let omniboxView = OmniBoxTestView()
     let helper = OmniBoxUITestsHelper(OmniBoxTestView().app)
     let expectedAutocompleteResultsNumber = 8
-    
+
     func testAutocompleteSelection() {
         launchApp()
         testRailPrint("Given I search in Omnibox")
         omniboxView.searchInOmniBox("everest", false)
         let results = omniboxView.getAutocompleteResults()
         let omniboxSearchField = omniboxView.getOmniBoxSearchField()
-        
+
         testRailPrint("Then I see \(expectedAutocompleteResultsNumber) autocomplete results, no selected results and focused omnibox search")
         //on different environment goggle offers either 8 or 7 options
         XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber) || omniboxView.waitForAutocompleteResultsLoad(timeout: implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber - 1))
         XCTAssertEqual(results.matching(self.helper.autocompleteSelectedPredicate).count, 0)
         XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
-        
+
         testRailPrint("When I press down arrow key")
         omniboxView.typeKeyboardKey(.downArrow)
-        
+
         testRailPrint("Then I see 1 selected result from autocomplete")
         let autocompleteSelectedResultQuery = omniboxView.getAutocompleteResults().matching(helper.autocompleteSelectedPredicate)
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-        
+
         testRailPrint("When I press up arrow key")
         omniboxView.typeKeyboardKey(.upArrow)
-        
+
         testRailPrint("Then I see NO selected results from autocomplete")
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
         XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
-        
+
         testRailPrint("When I press ESC key 1st time")
         omniboxView.typeKeyboardKey(.escape)
-        
+
         testRailPrint("Then results back to default, search field is empty focused")
         XCTAssertLessThanOrEqual(results.count, 1) // default shows 1 today note
         XCTAssertEqual(omniboxSearchField.value as? String, "")
@@ -54,7 +54,7 @@ class OmniboxAutocompleteTests: BaseTest {
         testRailPrint("Then omnibox is dismissed")
         XCTAssertFalse(omniboxView.getOmniBoxSearchField().exists)
     }
-    
+
     func testAutoCompleteURLSelection() {
         launchApp()
         let searchText = "fr.wikipedia.org/wiki/Hello_world"
@@ -65,13 +65,13 @@ class OmniboxAutocompleteTests: BaseTest {
         let anotherOneLetterToAdd = "a"
         let helper = OmniBoxUITestsHelper(omniboxView.app)
         let waitHelper = WaitHelper()
-        
+
         testRailPrint("Given I open website: \(searchText)")
         let webView = omniboxView.searchInOmniBox(searchText, true)
-        
+
         testRailPrint("Then browser tab bar appears")
         XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
-        
+
         testRailPrint("When I type: \(partiallyTypedSearchText)")
         omniboxView.focusOmniBoxSearchField()
         omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
@@ -143,14 +143,14 @@ class OmniboxAutocompleteTests: BaseTest {
 ////        XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedFastTypedSearchFieldValue, omniboxView.getOmniBoxSearchField()), "Actual omnibox value: \(String(describing: omniboxView.getOmniBoxSearchField().value))")
 ////        XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
 //    }
-    
+
     func testAutoCompleteHistorySelection() {
         let partiallyTypedSearchText = "Hel"
         let expectedSearchFieldText = "Hello world"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let deletePressRepeatTimes = 2
         let waitHelper = WaitHelper()
-        
+
         launchApp()
         helper.tapCommand(.omniboxFillHistory)
 
@@ -159,38 +159,38 @@ class OmniboxAutocompleteTests: BaseTest {
         omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         let results = omniboxView.getAutocompleteResults()
         let firstResult = results.firstMatch
-        
+
         let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
 
         testRailPrint("Then Then search field value is \(expectedSearchFieldText)")
         XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
-        
+
         testRailPrint("When I type: l")
         omniboxView.getOmniBoxSearchField().typeText("l")
         testRailPrint("Then Then search field value is \(expectedSearchFieldText)")
         XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
-        
+
         testRailPrint("When I type: a")
         omniboxView.getOmniBoxSearchField().typeText("a")
         testRailPrint("Then search field value is updated accordingly and non of the results is selected")
         XCTAssertTrue(waitHelper.waitForStringValueEqual("Hella", omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
-        
+
         testRailPrint("When I press delete \(deletePressRepeatTimes) times and type l")
         omniboxView.typeKeyboardKey(.delete, deletePressRepeatTimes)
         omniboxView.getOmniBoxSearchField().typeText("l")
         testRailPrint("Then Then search field value is \(expectedSearchFieldText) and 1 result is selected")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
-        
+
         testRailPrint("When I press delete \(deletePressRepeatTimes) times")
         omniboxView.typeKeyboardKey(.delete, deletePressRepeatTimes)
         testRailPrint("Then search field value is updated accordingly and non of the results is selected")
         XCTAssertTrue(waitHelper.waitForStringValueEqual("Hel", omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
-        
+
         testRailPrint("When I type: l")
         omniboxView.getOmniBoxSearchField().typeText("l")
         testRailPrint("Then search field value is updated accordingly and there is 1 selected result")
@@ -200,7 +200,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
     func testAutoCompleteHistoryFromAliasUrlSelection() {
         let partiallyTypedSearchText = "alternateurl.co"
-        let expectedSearchFieldText = "Beam"
+        let expectedSearchFieldText = "alternateurl.com"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let waitHelper = WaitHelper()
 

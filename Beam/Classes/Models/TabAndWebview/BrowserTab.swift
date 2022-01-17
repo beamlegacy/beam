@@ -78,7 +78,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     @Published var title: String = "New Tab"
     @Published var originalQuery: String?
     @Published var url: URL?
-    @Published var userTypedDomain: URL?
+    @Published var requestedUrl: URL?
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
     @Published var mouseHoveringLocation: MouseHoveringLocation = .none
@@ -398,9 +398,8 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
             navigationController?.setLoading()
         }
         self.url = url
-        if url.isDomain {
-            userTypedDomain = url
-        }
+        requestedUrl = url
+
         navigationCount = 0
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
