@@ -30,10 +30,10 @@ struct PointAndShootView: View {
 
     private var transitionInOut: AnyTransition {
         let anchor = transitionAnchor
-        let transitionIn = AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2))
-            .combined(with: AnyTransition.scale(scale: 0.98, anchor: anchor).animation(.spring(response: 0.4, dampingFraction: 0.75)))
-        let transitionOut = AnyTransition.scale(scale: 1.03, anchor: anchor).animation(Animation.easeInOut(duration: 0.1))
-            .combined(with: AnyTransition.scale(scale: 0.7, anchor: anchor).animation(Animation.easeInOut(duration: 0.25).delay(0.1)))
+        let transitionIn = AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2))
+            .combined(with: AnyTransition.scale(scale: 0.98, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.2)))
+        let transitionOut = AnyTransition.scale(scale: 1.03, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.1))
+            .combined(with: AnyTransition.scale(scale: 0.7, anchor: anchor).animation(BeamAnimation.easeInOut(duration: 0.25).delay(0.1)))
             .combined(with: AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.3)))
         return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
     }
