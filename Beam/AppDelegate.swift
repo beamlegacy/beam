@@ -90,7 +90,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         ContentBlockingManager.shared.setup()
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
-        moveLinkDB()
         BeamObjectManager.setup()
 
         data = BeamData()
@@ -382,6 +381,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     var documentsWindow: DocumentsWindow?
+    var omniboxContentDebuggerWindow: OmniboxContentDebuggerWindow?
     var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?

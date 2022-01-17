@@ -426,11 +426,20 @@ import Sentry
                 mode = .web
             }
 
-        case .history, .url, .topDomain:
-            guard let url = result.url?.urlWithScheme ?? urlFor(query: result.text) else {
+        case .history, .url, .topDomain, .mnemonic:
+            let urlWithScheme = result.url?.urlWithScheme
+            guard let url = urlWithScheme ?? urlFor(query: result.text) else {
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
+
+            if url == urlWithScheme,
+               let mnemonic = result.completingText,
+               url.hostname?.starts(with: mnemonic) ?? false {
+                // Create a mnemonic shortcut
+                _ = try? GRDBDatabase.shared.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateIdFor(url: url.absoluteString, title: nil))
+            }
+
             if  mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {

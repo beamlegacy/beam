@@ -23,6 +23,9 @@ class AutocompleteManager: ObservableObject {
 
     @Published var searchQuerySelectedRange: Range<Int>?
     @Published var autocompleteResults = [AutocompleteResult]()
+    @Published var rawAutocompleteResults = [AutocompletePublisherSourceResults]()
+    @Published var rawSortedURLResults = [AutocompleteResult]()
+
     @Published var autocompleteSelectedIndex: Int? {
         didSet {
             updateSearchQueryWhenSelectingAutocomplete(autocompleteSelectedIndex, previousSelectedIndex: oldValue)
@@ -68,7 +71,6 @@ class AutocompleteManager: ObservableObject {
     typealias AutocompleteSourceResult = [AutocompleteResult.Source: [AutocompleteResult]]
 
     private func buildAutocompleteResults(for receivedQueryString: String) {
-
         guard !textChangeIsFromSelection else {
             textChangeIsFromSelection = false
             return
@@ -109,6 +111,7 @@ class AutocompleteManager: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] publishersResults in
                 guard let self = self else { return }
+                self.rawAutocompleteResults = publishersResults.compactMap({ $0.results.isEmpty ? nil : $0 })
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
@@ -147,18 +150,10 @@ class AutocompleteManager: ObservableObject {
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
+        case .mnemonic: return true // a mnemonic is by definition something that can take over the result
         case .topDomain: return result.text.lowercased().starts(with: searchText.lowercased())
-        case .history:
-            if searchText.mayBeURL {
-                guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else {
-                    return false
-                }
-                return host.lowercased().starts(with: searchText.lowercased())
-            }
-            return result.text.lowercased().starts(with: searchText.lowercased())
-        case .url:
-            guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
-            return result.text.lowercased().contains(host)
+        case .history, .url:
+            return result.prefixScore > 1.0
         case .autocomplete:
             return autocompleteResults.count == 2 // 1 search engine result + 1 create note
             && !searchQuery.mayBeURL && result.text == searchQuery
@@ -179,7 +174,7 @@ class AutocompleteManager: ObservableObject {
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
             let result = autocompleteResults[i]
-            let resultText = result.text
+            let resultText = result.displayText
 
             // if the first result is compatible with autoselection, select the added string
             if i == 0, let completingText = result.completingText,

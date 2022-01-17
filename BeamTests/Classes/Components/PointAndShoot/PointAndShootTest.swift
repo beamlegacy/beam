@@ -15,7 +15,7 @@ class TestWebPage: WebPage {
     private(set) var title: String = "PNS MockPage"
     static let urlStr = "https://webpage.com"
     var url: URL? = URL(string: urlStr)
-    var userTypedDomain: URL?
+    var requestedUrl: URL?
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
     var webPositions: WebPositions?
