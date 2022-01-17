@@ -22,6 +22,7 @@ extension AutocompleteManager {
                                             historyResults: autocompleteResults[.history] ?? [],
                                             urlResults: autocompleteResults[.url] ?? [],
                                             topDomainResults: autocompleteResults[.topDomain] ?? [],
+                                            mnemonicResults: autocompleteResults[.mnemonic] ?? [],
                                             searchEngineResults: autocompleteResults[.autocomplete] ?? [],
                                             createCardResults: autocompleteResults[.createCard] ?? [])
 
@@ -29,10 +30,12 @@ extension AutocompleteManager {
         return (results: finalResults, canCreateNote: canCreateNote)
     }
 
+    //swiftlint:disable:next function_parameter_count
     private func sortResults(notesResults: [AutocompleteResult],
                              historyResults: [AutocompleteResult],
                              urlResults: [AutocompleteResult],
                              topDomainResults: [AutocompleteResult],
+                             mnemonicResults: [AutocompleteResult],
                              searchEngineResults: [AutocompleteResult],
                              createCardResults: [AutocompleteResult]) -> [AutocompleteResult] {
         let start = DispatchTime.now()
@@ -43,20 +46,17 @@ extension AutocompleteManager {
         let urlResultsTruncated = Array(urlResults.prefix(6))
 
         var sortableResults = [AutocompleteResult]()
-        sortableResults.append(contentsOf: autocompleteResultsUniqueUrls(sequence: historyResultsTruncated + urlResultsTruncated))
+        let uniqueUrls = autocompleteResultsUniqueUrls(sequence: historyResultsTruncated + urlResultsTruncated)
+        self.rawSortedURLResults = uniqueUrls
+        sortableResults.append(contentsOf: uniqueUrls)
         sortableResults.append(contentsOf: notesResultsTruncated)
 
         sortableResults.sort(by: >)
         Self.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResults, startedAt: start)
 
-        if let topDomain = topDomainResults.first {
-            if let firstResult = sortableResults.first,
-                isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "") {
-                    // Push top domain suggestion only when the first result is not satisfying.
-            } else {
-                sortableResults.insert(topDomain, at: 0)
-            }
-        }
+        sortableResults = boostResult(topDomainResults, results: sortableResults)
+        sortableResults = boostResult(mnemonicResults, results: sortableResults)
+
         let resultLimit = 8
         let results = merge(sortableResults: sortableResults,
                             searchEngineResults: searchEngineResults,
@@ -64,6 +64,20 @@ extension AutocompleteManager {
                             limit: resultLimit)
         return results
     }
+
+    private func boostResult(_ partialResults: [AutocompleteResult], results: [AutocompleteResult]) -> [AutocompleteResult] {
+        guard let partialResult = partialResults.first else { return results }
+
+        // Push top domain suggestion only when the first result is not satisfying.
+        guard let firstResult = results.first,
+           isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "")
+        else {
+            return [partialResult] + results
+        }
+
+        return results
+    }
+
     private func merge(sortableResults: [AutocompleteResult],
                        searchEngineResults: [AutocompleteResult],
                        createCardResults: [AutocompleteResult],
@@ -86,7 +100,18 @@ extension AutocompleteManager {
     }
 
     private func autocompleteResultsUniqueUrls(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
-        var seenUrl = Set<String>()
-        return sequence.filter { seenUrl.update(with: $0.url?.urlStringByRemovingUnnecessaryCharacters ?? $0.text) == nil }
+        // Take all the results and deduplicate the results based on their urls and source priorities:
+        var uniqueUrls = [String: AutocompleteResult]()
+        for result in sequence {
+            let id = result.url?.urlStringByRemovingUnnecessaryCharacters ?? result.text
+            if let existing = uniqueUrls[id] {
+                if result.source.priority < existing.source.priority {
+                    uniqueUrls[id] = result
+                }
+            } else {
+                uniqueUrls[id] = result
+            }
+        }
+        return Array(uniqueUrls.values).sorted(by: >)
     }
 }

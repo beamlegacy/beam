@@ -175,21 +175,21 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
                 self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                _ = LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title)
+                _ = LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
             }
 
             // Update history record
-            do {
-                if tabToIndex.shouldBeIndexed {
-                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
-                                                             url: tabToIndex.url.string,
-                                                             aliasDomain: tabToIndex.userTypedDomain?.absoluteString,
-                                                             title: tabToIndex.document.title,
-                                                             content: nil)
-                }
-            } catch {
-                Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
-            }
+//            do {
+//                if tabToIndex.shouldBeIndexed {
+//                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
+//                                                             url: tabToIndex.url.string,
+//                                                             aliasDomain: tabToIndex.requestedUrl?.absoluteString,
+//                                                             title: tabToIndex.document.title,
+//                                                             content: nil)
+//                }
+//            } catch {
+//                Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
+//            }
         }.store(in: &scope)
 
         $newDay.sink { [weak self] newDay in

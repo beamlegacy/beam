@@ -13,14 +13,15 @@ class GRDBDatabaseHistoryTests: XCTestCase {
         _ = try GRDBDatabase(dbQueue)
     }
 
-    private func searchHistory(_ db: GRDBDatabase,
-                               query: String,
-                               enabledFrecencyParam: FrecencyParamKey? = nil,
-                               successCb: @escaping ([GRDBDatabase.HistorySearchResult]) -> Void,
-                               file: StaticString = #file,
-                               line: UInt = #line) {
+    private func searchLink(_ db: GRDBDatabase,
+                            query: String,
+                            prefixLast: Bool = true,
+                            enabledFrecencyParam: FrecencyParamKey? = nil,
+                            successCb: @escaping ([GRDBDatabase.LinkSearchResult]) -> Void,
+                            file: StaticString = #file,
+                            line: UInt = #line) {
         waitUntil { done in
-            db.searchHistory(query: query, enabledFrecencyParam: enabledFrecencyParam) { result in
+            db.searchLink(query: query, prefixLast: prefixLast, enabledFrecencyParam: enabledFrecencyParam) { result in
                 switch result {
                 case .failure(let error):
                     fail("failed async searchHistory: \(error)", file: file, line: line)
@@ -34,78 +35,73 @@ class GRDBDatabaseHistoryTests: XCTestCase {
 
     func testSearchHistory() throws {
         let db = GRDBDatabase.empty()
-        let urlIds = (0...2).map { _ in UUID() }
         for history in [
-            (urlId: urlIds[0], url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
+            (url: "https://macg.co", title: "Avec macOS Monterey, le Mac devient un récepteur AirPlay", content: """
 La recopie vidéo est également au menu depuis le centre de contrôle de l'appareil iOS. Le Mac prend en charge l'affichage portrait et paysage, et depuis l'app Photos, les clichés peuvent occuper le maximum d'espace possible sur l'écran de l'ordinateur (en zoomant sur l'iPhone, la photo s'agrandira sur le Mac).
 """ ),
-            (urlId: urlIds[1], url: "https://doesnotexists.co", title: "", content: nil),
-            (urlId: urlIds[2], url: "https://unicode-separator.com", title: "foo·bar", content: nil)
+            (url: "https://doesnotexists.co", title: "", content: nil),
+            (url: "https://unicode-separator.com", title: "foo·bar", content: nil)
         ] {
-            try db.insertHistoryUrl(urlId: history.urlId,
-                                    url: history.url,
-                                    aliasDomain: nil,
-                                    title: history.title,
-                                    content: history.content)
+            db.visit(url: history.url, title: history.title, content: history.content, destination: nil)
         }
 
         // Match `Monterey` on title.
-        searchHistory(db, query: "Monterey") { matches in
+        searchLink(db, query: "Monterey") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
 
         // Match `iPhone` on page content.
-        searchHistory(db, query: "iPhone") { matches in
+        searchLink(db, query: "iPhone") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
 
         // Prefix match `iPh` on page content.
-        searchHistory(db, query: "iPh") { matches in
+        searchLink(db, query: "iPh") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
 
         // Prefix match on last token - allTokens match
-        searchHistory(db, query: "maximum pho") { matches in
+        searchLink(db, query: "maximum pho") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
-        searchHistory(db, query: "max pho") { matches in
+        searchLink(db, query: "max pho") { matches in
             expect(matches.count) == 0
         }
 
         // Match with diacritic `écran` on page content.
-        searchHistory(db, query: "écran") { matches in
+        searchLink(db, query: "écran") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
 
         // Match with diacritic `ecran` on page content.
         // Expect the page content to be normalized after tokenization.
-        searchHistory(db, query: "ecran") { matches in
+        searchLink(db, query: "ecran") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://macg.co"
         }
 
         // Match token `bar` on page content.
         // Expect the unicode `·` to be treated as a separator during tokenization.
-        searchHistory(db, query: "bar") { matches in
+        searchLink(db, query: "bar") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://unicode-separator.com"
         }
 
         // Check frecency record is retrieved
         do {
-            let frecency = FrecencyUrlRecord(urlId: urlIds[0],
+            let frecency = FrecencyUrlRecord(urlId: LinkStore.getOrCreateIdFor("https://macg.co"),
                                              lastAccessAt: Date(timeIntervalSince1970: 0),
                                              frecencyScore: 0.42,
                                              frecencySortScore: 0,
                                              frecencyKey: .webVisit30d0)
             try db.saveFrecencyUrl(frecency)
             // Match urlId = 0, and check frecency record
-            searchHistory(db, query: "Monterey") { matches in
+            searchLink(db, query: "Monterey", prefixLast: false) { matches in
                 expect(matches.count) == 1
                 guard let f = matches[0].frecency else {
                     fail("expect a frecency record")
@@ -119,17 +115,18 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
 
     func testSearchHistoryFrecencySort() throws {
         let db = GRDBDatabase.empty()
-        let urlIds = (0...2).map { _ in UUID() }
+        let urlIds = [
+            LinkStore.getOrCreateIdFor("https://foobar.co"),
+            LinkStore.getOrCreateIdFor("https://foobar1.co"),
+            LinkStore.getOrCreateIdFor("https://foobar2.co"),
+        ]
+
         for history in [
             (urlId: urlIds[0], url: "https://foobar.co", title: "foo bar", content: ""),
             (urlId: urlIds[1], url: "https://foobar1.co", title: "foo baz", content: nil),
             (urlId: urlIds[2], url: "https://foobar2.co", title: "foo·bar baz", content: nil)
         ] {
-            try db.insertHistoryUrl(urlId: history.urlId,
-                                    url: history.url,
-                                    aliasDomain: nil,
-                                    title: history.title,
-                                    content: history.content)
+            db.visit(url: history.url, title: history.title, content: history.content, destination: nil)
         }
 
         for f in [
@@ -147,7 +144,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Retrieve search results with frecency sort on .visit30d0
-        searchHistory(db, query: "foo", enabledFrecencyParam: .webVisit30d0) { matches in
+        searchLink(db, query: "foo", enabledFrecencyParam: .webVisit30d0) { matches in
             expect(matches.count) == 3
 
             for (expectedUrlId, match) in zip([urlIds[2], urlIds[0], urlIds[1]], matches) {
@@ -160,7 +157,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
         }
 
         // Retrieve search results with frecency sort on .readingTime30d0
-        searchHistory(db, query: "foo", enabledFrecencyParam: .webReadingTime30d0) { matches in
+        searchLink(db, query: "foo", enabledFrecencyParam: .webReadingTime30d0) { matches in
             expect(matches.count) == 1
 
             for (expectedUrlId, match) in zip([ urlIds[2] ], matches) {
@@ -184,21 +181,17 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             (urlId: urldIds[2], url: "https://macg.co/article2", title: "", content: "Le Mac prend en charge l'affichage portrait et paysage"),
             // TODO: unique with ≠ URL but = urlId
         ] {
-            try db.insertHistoryUrl(urlId: history.urlId,
-                                    url: history.url,
-                                    aliasDomain: nil,
-                                    title: history.title,
-                                    content: history.content)
+            db.visit(url: history.url, title: history.title, content: history.content, destination: nil)
         }
 
         // Match `Monterey` on title.
-        searchHistory(db, query: "Monde") { matches in
+        searchLink(db, query: "Monde") { matches in
             expect(matches.count) == 1
             expect(matches[0].url) == "https://www.lemonde.fr/"
         }
 
         // Match `Mac` in the content. URLs are expected to be different.
-        searchHistory(db, query: "Mac") { matches in
+        searchLink(db, query: "Mac") { matches in
             expect(matches.count) == 2
             expect(matches[0].url) == "https://macg.co/article1"
             expect(matches[1].url) == "https://macg.co/article2"
