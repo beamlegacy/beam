@@ -65,8 +65,7 @@ struct BeamAboutSection: View {
             HStack(alignment: .top) {
                 Spacer(minLength: 160)
                 VStack {
-                    Image("preferences-about-beam")
-                        .resizable()
+                    AppIcon()
                         .scaledToFit()
                         .frame(width: 128, height: 128, alignment: .top)
                     Spacer()
@@ -149,6 +148,18 @@ struct BeamSocialSection: View {
                 }.buttonStyle(BorderedButtonStyle())
                 Spacer(minLength: 179)
             }
+        }
+    }
+}
+
+struct AppIcon: View {
+    var body: some View {
+        if let name = Bundle.main.iconFileName, let nsImage = NSImage(named: name) {
+            Image(nsImage: nsImage)
+                .resizable()
+        } else {
+            Image("preferences-about-beam")
+                .resizable()
         }
     }
 }
