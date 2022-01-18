@@ -249,7 +249,7 @@ struct AllCardsPageContentView: View {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
                 HStack(spacing: BeamSpacing._20) {
                     Text(pageTitle)
-                        .font(BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).swiftUI)
+                        .font(BeamFont.medium(size: PreferencesManager.editorFontSizeHeadingOne).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .padding(.leading, 35)
                     Icon(name: "editor-breadcrumb_down", width: 12, color: BeamColor.LightStoneGray.swiftUI)
