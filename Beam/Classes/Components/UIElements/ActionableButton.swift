@@ -107,6 +107,7 @@ struct ActionableButton: View {
                     .padding(.leading, hPadding)
             }
             Text(text)
+                .font(variant.style.font)
                 .foregroundColor(foregroundColor)
                 .padding(.leading, textLeadingPadding)
                 .padding(.trailing, textTrailingPadding)

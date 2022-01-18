@@ -63,7 +63,7 @@ struct OnboardingEmailConnectView: View {
         Group {
             VStack(alignment: .leading, spacing: BeamSpacing._120) {
                 VStack(spacing: 0) {
-                    BeamTextField(text: $emailField, isEditing: $isEmailEditing, placeholder: "Email Address", font: BeamFont.regular(size: 14).nsFont,
+                    BeamTextField(text: $emailField, isEditing: $isEmailEditing, placeholder: "Email", font: BeamFont.regular(size: 14).nsFont,
                                   textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor,
                                   contentType: .username,
                                   onTextChanged: { _ in
@@ -125,7 +125,7 @@ struct OnboardingEmailConnectView: View {
     var body: some View {
         VStack(spacing: 0) {
             if loadingState == .gettingInfos {
-                OnboardingView.LoadingView(message: "Importing your data...")
+                OnboardingView.LoadingView(randomDetails: ["account", "username"])
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 VStack(spacing: 0) {
@@ -164,6 +164,10 @@ struct OnboardingEmailConnectView: View {
         forgotPasswordTooltip = nil
         errorState = nil
         areCredentialsValid = passwordMissingRequirements.isEmpty && emailField.mayBeEmail
+        guard loadingState != .gettingInfos else {
+            actions = []
+            return
+        }
         actions = [
             .init(id: actionId, title: "Connect", enabled: areCredentialsValid && loadingState == nil, onClick: {
                 triggerConnect()
@@ -201,6 +205,7 @@ struct OnboardingEmailConnectView: View {
                     Logger.shared.logInfo("Sign in succeeded", category: .network)
                     loadingState = .gettingInfos
                     loadingStartTime = BeamDate.now
+                    updateButtonState()
                 }
             }
         } syncCompletion: { _ in
