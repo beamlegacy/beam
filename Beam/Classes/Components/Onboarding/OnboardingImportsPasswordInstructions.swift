@@ -117,7 +117,7 @@ extension OnboardingImportsView {
                     fileSelector
                 }
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .font(BeamFont.regular(size: 11).swiftUI)
+                .font(BeamFont.regular(size: 12).swiftUI)
                 .lineSpacing(2)
             }
         }

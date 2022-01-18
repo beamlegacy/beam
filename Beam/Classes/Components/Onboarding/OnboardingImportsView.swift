@@ -118,10 +118,17 @@ struct OnboardingImportsView: View {
         }
     }
 
+    private var loadingDetails: [String] {
+        var result = [String]()
+        if checkHistory { result.append("history") }
+        if checkPassword { result.append("password") }
+        return result
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             if isLoading {
-                OnboardingView.LoadingView(message: "Importing your data...")
+                OnboardingView.LoadingView(randomDetails: loadingDetails)
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 OnboardingView.TitleText(title: "Import your data")

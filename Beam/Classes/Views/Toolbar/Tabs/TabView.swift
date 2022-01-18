@@ -193,7 +193,7 @@ struct TabView: View {
         .lineLimit(1)
     }
 
-    // swiftlint:disable:next function_body_length
+    // swiftlint:disable function_body_length
     ///  Layout of leading views, title and trailing views together.
     ///
     ///  To maintain a perfectly centered title
@@ -281,6 +281,7 @@ struct TabView: View {
         .fixedSize(horizontal: isSingleTab && !isPinned, vertical: false)
         .coordinateSpace(name: localCoordinateSpaceName)
     }
+    //swiftlint:enable function_body_length
 
     var body: some View {
         GeometryReader { proxy in

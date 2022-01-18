@@ -26,10 +26,10 @@ public class ActiveSources {
             self.activeSources[noteId] = pages
         }
     }
-    
+
     public func removeNote(noteId: UUID) {
         self.activeSources[noteId] = nil
     }
-    
+
     public var urls: [UUID] { activeSources.values.flatMap { $0 } }
 }
