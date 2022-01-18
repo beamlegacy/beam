@@ -1,5 +1,6 @@
 import {WebPositionsUI} from "./WebPositionsUI"
-import {BeamWindow, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamLogCategory, BeamWindow, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
+import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 
 export class WebEventsUI_web implements WebPositionsUI {
   protected prefix = "__ID__"
@@ -7,6 +8,7 @@ export class WebEventsUI_web implements WebPositionsUI {
   protected readonly lang: string
 
   protected readonly win: BeamWindow
+  logger: BeamLogger
 
   /**
    */
@@ -15,7 +17,8 @@ export class WebEventsUI_web implements WebPositionsUI {
     const navigatorLanguage = navigator.language.substring(0, 2)
     const documentLanguage = doc.documentElement.lang
     this.lang = navigatorLanguage || documentLanguage
-    this.log(`${this.toString()} instantiated`)
+    this.logger = new BeamLogger(win, BeamLogCategory.webpositions)
+    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**
@@ -28,6 +31,7 @@ export class WebEventsUI_web implements WebPositionsUI {
     try {
       instance = new WebEventsUI_web(win)
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e)
       instance = null
     }
@@ -55,10 +59,6 @@ export class WebEventsUI_web implements WebPositionsUI {
 
   pinched(pinchInfo) {
     // Nothing to do for a web UI
-  }
-
-  protected log(...args) {
-    console.log(this.toString(), args)
   }
 
   toString() {
