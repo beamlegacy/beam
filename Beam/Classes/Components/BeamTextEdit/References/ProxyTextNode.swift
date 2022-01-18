@@ -15,6 +15,19 @@ class ProxyTextNode: TextNode, ProxyNode {
     // MARK: - Properties
     let linkTextLayer = CATextLayer()
 
+    var referencesRanges: [Range<Int>]? {
+        var result: [Range<Int>] = []
+        for range in text.ranges {
+            if let noteTitle = editor?.note.note?.title {
+                let cleanRanges = range.string.lowercased().ranges(of: noteTitle.lowercased())
+                for cleanRange in cleanRanges {
+                    result.append(range.string.range(from: cleanRange))
+                }
+            }
+        }
+        return result.isEmpty ?  nil : result
+    }
+
     // MARK: - Initializer
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
@@ -43,14 +56,6 @@ class ProxyTextNode: TextNode, ProxyNode {
     }
 
     // MARK: TextConfig and Paddings
-    override var config: TextConfig {
-        var config = TextConfig()
-        if !isLink {
-            config.color = BeamColor.Editor.reference.staticColor
-        }
-        return config
-    }
-
     override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
         switch elementKind {
         case .check:
