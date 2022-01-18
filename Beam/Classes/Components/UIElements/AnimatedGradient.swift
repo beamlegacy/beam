@@ -19,8 +19,8 @@ struct AnimatedGradient: View {
         Self.startColor,
         Self.endColor
     ]
-    @State private var startPoint = UnitPoint(x: 0, y: 0)
-    @State private var endPoint = UnitPoint(x: 1, y: 1)
+    @State private var startPoint = UnitPoint.bottomLeading
+    @State private var endPoint = UnitPoint.topTrailing
 
     @State private var isAnimating = false
     private var foreverAnimation: Animation {
@@ -28,31 +28,29 @@ struct AnimatedGradient: View {
             .repeatForever(autoreverses: false)
     }
 
+    private func gradient(with proxy: GeometryProxy) -> some View {
+        LinearGradient(gradient: .init(colors: colors), startPoint: startPoint, endPoint: endPoint)
+            .frame(width: proxy.size.width * 3)
+            .offset(x: isAnimating ? -proxy.size.width * 2 : 0, y: 0)
+            .animation(foreverAnimation, value: isAnimating)
+    }
+
     var body: some View {
         GeometryReader { proxy in
             if #available(macOS 12, *) {
-                LinearGradient(gradient: .init(colors: colors), startPoint: startPoint, endPoint: endPoint)
-                    .frame(width: proxy.size.width * 3)
-                    .offset(x: isAnimating ? -proxy.size.width * 2 : 0, y: 0)
-                    .animation(foreverAnimation, value: isAnimating)
+               gradient(with: proxy)
             } else {
-                LinearGradient(gradient: .init(colors: [Self.startColor, Self.endColor]), startPoint: startPoint, endPoint: endPoint)
-                    .frame(width: proxy.size.width + 1)
-                    .offset(x: isAnimating ? -proxy.size.width * 2 : 0, y: 0)
-                    .animation(foreverAnimation, value: isAnimating)
-                LinearGradient(gradient: .init(colors: [Self.endColor, Self.startColor]), startPoint: startPoint, endPoint: endPoint)
-                    .frame(width: proxy.size.width + 1)
-                    .offset(x: isAnimating ? -proxy.size.width : proxy.size.width, y: 0)
-                    .animation(foreverAnimation, value: isAnimating)
-                LinearGradient(gradient: .init(colors: [Self.startColor, Self.endColor]), startPoint: startPoint, endPoint: endPoint)
-                    .frame(width: proxy.size.width + 1)
-                    .offset(x: isAnimating ? 0 : proxy.size.width * 2, y: 0)
-                    .animation(foreverAnimation, value: isAnimating)
+                // Big Sur needs to force draw the entire gradient with .drawingGroup()
+                // otherwise it will only render the clipped portion
+                gradient(with: proxy)
+                    .drawingGroup()
             }
         }
         .clipped()
         .onAppear {
-            isAnimating = true
+            DispatchQueue.main.async {
+                isAnimating = true
+            }
         }
     }
 }
