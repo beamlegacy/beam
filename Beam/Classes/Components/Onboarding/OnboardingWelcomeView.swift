@@ -10,6 +10,7 @@ import BeamCore
 
 struct OnboardingWelcomeView: View {
     var welcoming: Bool
+    @Binding var viewIsLoading: Bool
     var finish: OnboardingView.StepFinishCallback
     @State private var isLoadingDataStartTime: Date?
 
@@ -77,8 +78,11 @@ struct OnboardingWelcomeView: View {
     }
 
     private func onSigninDone() {
-        guard AuthenticationManager.shared.isAuthenticated else { return }
-        isLoadingDataStartTime = BeamDate.now
+        DispatchQueue.main.async {
+            guard AuthenticationManager.shared.isAuthenticated else { return }
+            self.viewIsLoading = true
+            self.isLoadingDataStartTime = BeamDate.now
+        }
     }
 
     private func onDataSyncDone() {
@@ -93,10 +97,10 @@ struct OnboardingWelcomeView: View {
 
 struct OnboardingWelcomeView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingWelcomeView(welcoming: true) { _ in }
+        OnboardingWelcomeView(welcoming: true, viewIsLoading: .constant(false)) { _ in }
         .frame(width: 600, height: 600)
         .background(BeamColor.Generic.background.swiftUI)
-        OnboardingWelcomeView(welcoming: false) { _ in }
+        OnboardingWelcomeView(welcoming: false, viewIsLoading: .constant(false)) { _ in }
         .frame(width: 600, height: 600)
         .background(BeamColor.Generic.background.swiftUI)
     }
