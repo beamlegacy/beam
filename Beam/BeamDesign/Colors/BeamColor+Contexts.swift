@@ -221,9 +221,11 @@ extension BeamColor {
     }
 
     enum ActionableButtonSecondary {
-        static let background = BeamColor.combining(lightColor: .Nero, darkColor: .Mercury)
-        static let backgroundHovered = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray)
-        static let backgroundClicked = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
+        static let background = BeamColor.combining(lightColor: .Mercury, darkColor: .Mercury)
+        static let backgroundHovered = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.6,
+                                                           darkColor: .AlphaGray, darkAlpha: 0.8)
+        static let backgroundClicked = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.8,
+                                                           darkColor: .LightStoneGray, darkAlpha: 0.75)
         static let foreground = BeamColor.Corduroy
         static let backgroundDisabled = BeamColor.Nero
         static let activeForeground = BeamColor.Niobium
