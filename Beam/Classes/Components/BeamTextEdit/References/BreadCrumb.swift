@@ -77,8 +77,9 @@ class BreadCrumb: Widget {
 
         setupLayers(with: note)
         selectCrumb(crumbChain.count - 1)
+        padding = NSEdgeInsets(top: 0, left: 0, bottom: 8, right: 0)
         contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 0 : 1, right: 0)
-        childrenPadding = NSEdgeInsets(top: 2, left: 7, bottom: 3 + containerPadding, right: 0)
+        childrenPadding = NSEdgeInsets(top: 0, left: 7, bottom: 3, right: 0)
 
         proxy.proxy.treeChanged.receive(on: DispatchQueue.main).sink { [weak self] _ in
             self?.update()
@@ -335,7 +336,7 @@ class BreadCrumb: Widget {
             let linkLayerFrameSize = linkLayer.preferredFrameSize()
             if let actionLinkLayer = actionLinkLayer {
                 actionLinkLayer.frame = CGRect(
-                    origin: CGPoint(x: availableWidth - 36 - 10, y: actionLinkLayerheight),
+                    origin: CGPoint(x: availableWidth + containerPadding - 36 - 4, y: actionLinkLayerheight),
                     size: NSSize(width: 36, height: 21)
                 )
                 let linkLayerXPosition = actionLinkLayer.bounds.width / 2 - linkLayerFrameSize.width / 2

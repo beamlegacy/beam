@@ -301,6 +301,7 @@ public struct BeamText: Codable {
     public init(text: String = "", attributes: [Attribute] = []) {
         self.ranges = [Range(string: text, attributes: attributes, position: 0)]
     }
+
     public init(text: BeamText, attributes: [Attribute] = []) {
         var newText = text
         newText.addAttributes(attributes, to: newText.wholeRange)
