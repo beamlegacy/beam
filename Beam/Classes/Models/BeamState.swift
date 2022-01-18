@@ -95,6 +95,9 @@ import Sentry
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
     }
+    var editorShouldAllowMouseHoverEvents: Bool {
+        !focusOmniBox
+    }
     var isShowingOnboarding: Bool {
         data.onboardingManager.needsToDisplayOnboard
     }
