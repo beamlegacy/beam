@@ -1125,6 +1125,9 @@ public extension CALayer {
     private func shouldAllowMouseEvents() -> Bool {
         state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true
     }
+    private func shouldAllowHoverEvents() -> Bool {
+        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false
+    }
 
     override public func updateTrackingAreas() {
         for trackingArea in trackingAreas {
@@ -1207,7 +1210,7 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
-        guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
+        guard let rootNode = rootNode, shouldAllowMouseEvents() && shouldAllowHoverEvents() else { return }
         if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             let hoversCardTitle = cardTitleLayer.contains(titleCoord)

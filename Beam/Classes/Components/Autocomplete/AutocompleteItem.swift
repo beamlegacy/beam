@@ -176,7 +176,7 @@ struct AutocompleteItem: View {
         .padding(.horizontal, 9)
         .padding(.leading, additionalLeadingPadding)
         .frame(height: Self.defaultHeight)
-        .background(backgroundColor)
+        .background(backgroundColor.blendModeLightMultiplyDarkScreen())
         .cornerRadius(cornerRadius)
         .onTouchDown { t in
             isTouchDown = t && !disabled
