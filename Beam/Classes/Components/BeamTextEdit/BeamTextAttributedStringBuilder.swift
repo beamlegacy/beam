@@ -19,7 +19,7 @@ struct BeamTextAttributedStringBuilder {
         var caret: Caret?
         var markedRange: Swift.Range<Int>?
         var selectedRange: Swift.Range<Int>?
-
+        var referencesRanges: [Swift.Range<Int>]?
         var searchedRanges: [Swift.Range<Int>]
         var currentSearchRangeIndex: Int?
 
@@ -46,6 +46,15 @@ struct BeamTextAttributedStringBuilder {
                     let r = NSRange(location: markedRange.lowerBound, length: markedRange.count)
                     attributedString.addAttribute(.underlineStyle, value: NSUnderlineStyle.single.rawValue, range: r)
                     attributedString.addAttribute(.underlineColor, value: BeamColor.Editor.underlineAndStrikethrough.staticColor, range: r)
+                }
+            }
+
+            if let refRanges = config.referencesRanges {
+                for refRange in refRanges {
+                    if range.range.contains(refRange.lowerBound) && range.range.contains(refRange.upperBound) {
+                        let r = NSRange(location: refRange.lowerBound, length: refRange.count)
+                        attributedString.addAttribute(.foregroundColor, value: BeamColor.Editor.reference.staticColor, range: r)
+                    }
                 }
             }
 

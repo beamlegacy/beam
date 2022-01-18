@@ -69,7 +69,7 @@ class RefNoteTitle: Widget {
         addLayer(cardTitleLayer)
 
         cardTitleLayer.frame = CGRect(origin: CGPoint(x: titleLayerXPosition, y: titleLayerYPosition), size: titleLayer.preferredFrameSize())
-        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: (cardTitleLayer.frame.height / 2) - 7), size: CGSize(width: 20, height: 20))
+        layers["chevron"]?.frame = CGRect(origin: CGPoint(x: 0, y: (cardTitleLayer.frame.height / 2) - 6), size: CGSize(width: 20, height: 20))
         childInset = 13
         self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 2, right: 0)
     }
