@@ -1,6 +1,7 @@
 import { PointAndShootUI } from "./PointAndShootUI"
 import {
   BeamHTMLElement,
+  BeamLogCategory,
   BeamMouseLocation,
   BeamRange,
   BeamRangeGroup,
@@ -13,6 +14,7 @@ import { BeamMouseEvent } from "../../../Helpers/Utils/Web/BeamMouseEvent"
 import { debounce } from "debounce"
 import { BeamKeyEvent } from "../../../Helpers/Utils/Web/BeamKeyEvent"
 import { PointAndShootHelper } from "./PointAndShootHelper"
+import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 
 /**
  * Listen to events that hover and select web blocks with Option.
@@ -22,6 +24,7 @@ export class PointAndShoot {
   ui: PointAndShootUI
   static instance: PointAndShoot
   prefix = "__ID__"
+  logger: BeamLogger
   timer
   touchDuration = 2500
   mouseLocation: BeamMouseLocation = { x: 0, y: 0 }
@@ -54,6 +57,7 @@ export class PointAndShoot {
   constructor(win: BeamWindow, ui: PointAndShootUI) {
     this.win = win
     this.ui = ui
+    this.logger = new BeamLogger(this.win, BeamLogCategory.pointAndShoot)
     this.selectionUUID = Util.uuid(win)
     this.registerEventListeners()
     this.sendBounds = this.sendBounds.bind(this)
@@ -100,10 +104,6 @@ export class PointAndShoot {
       "scroll",
       debounce(this.onResize.bind(this), debounceTimeout, immediate)
     )
-  }
-
-  log(...args: unknown[]): void {
-    console.log(this.toString(), args)
   }
   /**
    * Send updates to the UI.

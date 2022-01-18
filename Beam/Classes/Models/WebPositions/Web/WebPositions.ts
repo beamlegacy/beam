@@ -1,5 +1,6 @@
-import type {
+import {
   BeamHTMLIFrameElement,
+  BeamLogCategory,
   BeamMutationObserver,
   BeamNode,
   BeamResizeInfo,
@@ -8,6 +9,7 @@ import type {
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import type {WebPositionsUI as WebPositionsUI} from "./WebPositionsUI"
 import debounce from "debounce"
+import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 
 export class WebPositions<UI extends WebPositionsUI> {
   win: BeamWindow
@@ -33,6 +35,7 @@ export class WebPositions<UI extends WebPositionsUI> {
    */
   touchDuration = 2500
   mutationObserver: BeamMutationObserver
+  logger: BeamLogger
 
   /**
    * @param win {(BeamWindow)}
@@ -40,14 +43,11 @@ export class WebPositions<UI extends WebPositionsUI> {
    */
   constructor(win: BeamWindow<any>, protected ui: UI) {
     this.win = win
+    this.logger = new BeamLogger(win, BeamLogCategory.webpositions)
     this.onScroll() // Init/refresh scroll info
     this.sendFramesInfo()
     this.registerEventListeners()
     this.setObserver("body", this.zoomMutationCallback)
-  }
-
-  log(...args): void {
-    console.log(this.toString(), args)
   }
 
   registerEventListeners(): void {
