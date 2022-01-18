@@ -16,7 +16,7 @@ extension ElementNode {
     }
     private static var bulletLayerPositionX = CGFloat(-4)
     @objc var bulletLayerPositionY: CGFloat {
-        firstLineBaseline - 15
+        firstLineBaseline - 14
     }
 
     @objc var indentLayerPositionY: CGFloat { 3 }
