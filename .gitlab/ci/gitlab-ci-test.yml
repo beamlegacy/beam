@@ -233,6 +233,7 @@ js_test:
     - develop
     - merge_requests
   script:
+    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web install
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run benchmark-show

@@ -2,7 +2,7 @@
 
 const path = require("path")
 
-function config(name, mode = "production") {
+function config(name, mode, { TerserPlugin }) {
   return {
     mode,
     devtool: "cheap-module-source-map",
@@ -41,6 +41,22 @@ function config(name, mode = "production") {
         }
       ]
     },
+    optimization: {
+      minimize: true,
+      minimizer: [
+        new TerserPlugin({
+          terserOptions: {
+            compress: {
+              drop_console: true,
+            },
+            format: {
+              comments: false,
+            },
+          },
+          extractComments: false,
+        }),
+      ],
+    },
     resolve: {
       extensions: [".tsx", ".ts", ".js"],
       modules: [path.resolve("./node_modules"), path.resolve("./src")]
@@ -48,7 +64,11 @@ function config(name, mode = "production") {
   }
 }
 
-module.exports = (env, argv) => {
-  const mode = env || argv.mode || "production"
-  return config(mode)
+module.exports = (env, _argv, modules) => {
+  const isDebugOrTest = process.env.ENV == "debug" || process.env.ENV == "test"
+  if (isDebugOrTest) {
+    return config("Utils", "development", modules)
+  } else {
+    return config("Utils", "production", modules)
+  }
 }

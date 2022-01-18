@@ -1,11 +1,14 @@
 import {
   BeamElement,
+  BeamLogCategory,
   BeamWindow
 } from "../../../../Helpers/Utils/Web/BeamTypes"
 import type { EmbedNodeUI as EmbedNodeUI } from "./EmbedNodeUI"
+import { BeamLogger } from "../../../../Helpers/Utils/Web/BeamLogger"
 
 export class EmbedNode<UI extends EmbedNodeUI> {
   win: BeamWindow
+  logger: BeamLogger
 
   /**
    * Singleton
@@ -20,11 +23,8 @@ export class EmbedNode<UI extends EmbedNodeUI> {
    */
   constructor(win: BeamWindow<any>, protected ui: UI) {
     this.win = win
+    this.logger = new BeamLogger(win, BeamLogCategory.embedNode)
     this.registerEventListeners()
-  }
-
-  log(...args): void {
-    console.log(this.toString(), args)
   }
 
   registerEventListeners(): void {
