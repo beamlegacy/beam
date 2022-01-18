@@ -9,10 +9,7 @@ import Foundation
 
 extension AppDelegate: OnboardingManagerDelegate {
     func onboardingManagerDidFinish() {
-        guard windows.isEmpty else {
-            windows.first?.makeKeyAndOrderFront(nil)
-            return
-        }
+        guard windows.isEmpty else { return }
         createWindow(frame: nil, restoringTabs: false)
     }
 }

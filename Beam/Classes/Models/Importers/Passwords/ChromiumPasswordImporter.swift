@@ -20,7 +20,7 @@ struct ChromiumBrowserInfo {
 }
 
 extension ChromiumBrowserInfo {
-    static let chrome = ChromiumBrowserInfo(browserType: .chrome ,keychainService: "Chrome Safe Storage", keychainAccount: "Chrome", databaseDirectory: "Google/Chrome")
+    static let chrome = ChromiumBrowserInfo(browserType: .chrome, keychainService: "Chrome Safe Storage", keychainAccount: "Chrome", databaseDirectory: "Google/Chrome")
     static let brave = ChromiumBrowserInfo(browserType: .brave, keychainService: "Brave Safe Storage", keychainAccount: "Brave", databaseDirectory: "BraveSoftware/Brave-Browser")
 }
 
