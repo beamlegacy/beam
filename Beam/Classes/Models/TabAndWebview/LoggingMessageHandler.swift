@@ -2,10 +2,10 @@ import Foundation
 import BeamCore
 
 enum LogMessages: String, CaseIterable {
-    case beam_logging
+    case beam_logger_log
 }
 
-enum LogTypes: String {
+enum LogLevel: String {
     case uncaught
     case error
     case warning
@@ -29,27 +29,28 @@ class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
         }
         let msgPayload = messageBody as? [String: AnyObject]
         switch messageKey {
-        case LogMessages.beam_logging:
+        case LogMessages.beam_logger_log:
             guard let dict = msgPayload,
-                  let type = dict["type"] as? String,
-                  let message = dict["message"] as? String
-                    else {
+                  let message = dict["message"] as? String,
+                  let level = dict["level"] as? String,
+                  let category = dict["category"] as? String
+            else {
                 Logger.shared.logError("Ignored log event: \(String(describing: msgPayload))",
                                        category: .web)
                 return
             }
-
-            switch LogTypes(rawValue: type) {
+            let logCategory = LogCategory(rawValue: category) ?? LogCategory.javascript
+            switch LogLevel(rawValue: level) {
             case .error, .uncaught:
-                Logger.shared.logError(message, category: .javascript)
+                Logger.shared.logError(message, category: logCategory)
             case .warning:
-                Logger.shared.logWarning(message, category: .javascript)
+                Logger.shared.logWarning(message, category: logCategory)
             case .debug:
-                Logger.shared.logDebug(message, category: .javascript)
+                Logger.shared.logDebug(message, category: logCategory)
             case .log:
-                Logger.shared.logInfo(message, category: .javascript)
+                Logger.shared.logInfo(message, category: logCategory)
             case .none:
-                Logger.shared.logInfo(message, category: .javascript)
+                Logger.shared.logInfo(message, category: logCategory)
             }
         }
     }
