@@ -313,9 +313,14 @@ public class TextRoot: ElementNode {
         node.cmdManager.beginGroup(with: "Insert Element")
         defer { node.cmdManager.endGroup() }
         let newElement = BeamElement(string)
-        let parent = node.parent as? ElementNode ?? node
-        let previous = node.previousSibbling() as? ElementNode
-        node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: (caretIndex == 0 ? previous : node)?.unproxyElement)
+        if node.element.children.isEmpty || caretIndex == 0 {
+            let parent = node.parent as? ElementNode ?? node
+            let previous = node.previousSibbling() as? ElementNode
+            node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: (caretIndex == 0 ? previous : node)?.unproxyElement)
+        } else {
+            let parent = node
+            node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: nil)
+        }
         node.cmdManager.focus(newElement, in: node)
     }
 }
