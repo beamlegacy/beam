@@ -10,7 +10,6 @@ let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.bu
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
-    @ObservedObject var onboardingManager = OnboardingManager(onlyLogin: true)
     @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @Published var accountsCalendar: [AccountCalendar] = []
 
@@ -38,8 +37,8 @@ class AccountsViewModel: ObservableObject {
     }
 
     fileprivate func showOnboarding() {
-        let onboardingManager = OnboardingManager(onlyLogin: true)
-        self.onboardingManager = onboardingManager
+        let onboardingManager = AppDelegate.main.data.onboardingManager
+        onboardingManager.prepareForConnectOnly()
         onboardingManager.presentOnboardingWindow()
     }
 }

@@ -62,7 +62,7 @@ struct OnboardingEmailConfirmationView: View {
     var body: some View {
         VStack(spacing: 0) {
             if loadingState == .gettingInfos {
-                OnboardingView.LoadingView(message: "Importing your data...")
+                OnboardingView.LoadingView(randomDetails: ["account", "username"])
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 VStack(spacing: 0) {

@@ -238,7 +238,7 @@ class GoogleCalendarService {
                 }
                 googleTokens.removeValue(forKey: accessToken)
                 googleTokens.updateValue(refreshToken, forKey: response.credential.oauthToken)
-        
+
                 self.accessToken = response.credential.oauthToken
                 Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleTokens)
                 completionHandler(.success(true))

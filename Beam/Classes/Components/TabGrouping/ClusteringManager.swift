@@ -352,7 +352,7 @@ class ClusteringManager: ObservableObject {
             }
         }
     }
-    
+
     func removeNote(noteId: UUID) {
         cluster.removeNote(noteId: noteId)
     }

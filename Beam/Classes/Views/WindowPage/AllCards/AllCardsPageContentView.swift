@@ -19,7 +19,6 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     @Published fileprivate var username: String?
     @Published fileprivate var isAuthenticated: Bool = false
     private var signinScope = Set<AnyCancellable>()
-    private var onboardingManager: OnboardingManager?
 
     @Published fileprivate var allNotesItems = [NoteTableViewItem]()
     @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
@@ -130,9 +129,9 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     }
 
     fileprivate func showConnectWindow() {
-        let model = OnboardingManager(onlyLogin: true)
-        onboardingManager = model
-        model.presentOnboardingWindow()
+        let onboardingManager = data?.onboardingManager
+        onboardingManager?.prepareForConnectOnly()
+        onboardingManager?.presentOnboardingWindow()
     }
 }
 

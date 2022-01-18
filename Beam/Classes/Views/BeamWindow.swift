@@ -235,6 +235,12 @@ extension BeamWindow: NSWindowDelegate {
     }
 
     func windowDidBecomeMain(_ notification: Notification) {
+        guard !state.isShowingOnboarding else {
+            data.onboardingManager.presentOnboardingWindow()
+            resignFirstResponder()
+            resignMain()
+            return
+        }
         state.windowIsMain = true
         for window in AppDelegate.main.windows where window != self {
             window.state.windowIsMain = false
