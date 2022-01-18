@@ -1,17 +1,16 @@
 import {Native} from "../../../Helpers/Utils/Web/Native"
 import {WebPositionsUI} from "./WebPositionsUI"
-import {BeamWindow, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamLogCategory, BeamWindow, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
+import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 
 export class WebPositionsUI_native implements WebPositionsUI {
+  logger: BeamLogger
   /**
    * @param native {Native}
    */
   constructor(protected native: Native<any>) {
-    this.log(`${this.toString()} instantiated`)
-  }
-
-  protected log(...args): void {
-    console.log(`${this.toString()}: `, args)
+    this.logger = new BeamLogger(native.win, BeamLogCategory.webpositions)
+    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**
@@ -25,6 +24,7 @@ export class WebPositionsUI_native implements WebPositionsUI {
       const native = Native.getInstance(win, "webPositions")
       instance = new WebPositionsUI_native(native)
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e)
       instance = null
     }

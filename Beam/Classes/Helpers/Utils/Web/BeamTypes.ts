@@ -483,7 +483,6 @@ export interface BeamMutationRecord {
 
 export class BeamMutationObserver {
   constructor(public fn) {
-    console.log("BeamMutationObserver init")
     new fn()
   }
   disconnect(): void {
@@ -510,4 +509,21 @@ export class FrameInfo {
   /**
    */
   bounds: BeamRect
+}
+
+export enum BeamLogLevel {
+  log = "log",
+  warning = "warning",
+  error = "error",
+  debug = "debug"
+}
+
+
+export enum BeamLogCategory {
+  general = "general",
+  pointAndShoot = "pointAndShoot",
+  embedNode = "embedNode",
+  webpositions = "webpositions",
+  navigation = "navigation",
+  native = "native"
 }

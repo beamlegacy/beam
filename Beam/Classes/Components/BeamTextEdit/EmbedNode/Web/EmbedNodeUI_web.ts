@@ -1,8 +1,10 @@
 import { EmbedNodeUI } from "./EmbedNodeUI"
 import {
   BeamEmbedContentSize,
+  BeamLogCategory,
   BeamWindow
 } from "../../../../Helpers/Utils/Web/BeamTypes"
+import { BeamLogger } from "../../../../Helpers/Utils/Web/BeamLogger"
 
 export class EmbedNodeUI_web implements EmbedNodeUI {
   protected prefix = "__ID__"
@@ -10,6 +12,7 @@ export class EmbedNodeUI_web implements EmbedNodeUI {
   protected readonly lang: string
 
   protected readonly win: BeamWindow
+  logger: BeamLogger
 
   /**
    */
@@ -18,7 +21,8 @@ export class EmbedNodeUI_web implements EmbedNodeUI {
     const navigatorLanguage = navigator.language.substring(0, 2)
     const documentLanguage = doc.documentElement.lang
     this.lang = navigatorLanguage || documentLanguage
-    this.log(`${this.toString()} instantiated`)
+    this.logger = new BeamLogger(win, BeamLogCategory.embedNode)
+    this.logger.log(`${this.toString()} instantiated`)
   }
 
   /**
@@ -31,14 +35,11 @@ export class EmbedNodeUI_web implements EmbedNodeUI {
     try {
       instance = new EmbedNodeUI_web(win)
     } catch (e) {
+      // eslint-disable-next-line no-console
       console.error(e)
       instance = null
     }
     return instance
-  }
-
-  protected log(...args) {
-    console.log(this.toString(), args)
   }
 
   sendContentSize(_sizing: BeamEmbedContentSize): void {
