@@ -27,7 +27,6 @@ class EmbedContentAPIStrategyTests: XCTestCase {
             "https://vimeo.com/286898202",
             "https://www.instagram.com/p/CQrBE1RDCKf",
             "https://www.twitch.tv/cocoatype/video/1221611733",
-            "https://public.beamapp.co/jeromebeam/note/c71239ba-9d75-433b-a776-f75d2640e260/Baudrillard",
             "https://sketchfab.com/models/dGUrytaktlDeNudCEGKk31oTJY",
             "http://www.slideshare.net/haraldf/business-quotes-for-2011",
             "https://www.deviantart.com/fi2-shift/art/Apple-Metal-107692353",
@@ -39,7 +38,7 @@ class EmbedContentAPIStrategyTests: XCTestCase {
 
         for string in strings {
             let url = URL(string: string)!
-            XCTAssertTrue(st.canBuildEmbeddableContent(for: url))
+            XCTAssertTrue(st.canBuildEmbeddableContent(for: url), "failed to build embbedable content for url: \(url)")
         }
     }
 
