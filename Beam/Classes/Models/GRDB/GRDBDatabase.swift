@@ -257,6 +257,118 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("AddIndexToBeamOjectsUpdateAt") { db in
+            try db.create(index: "BrowsingTreeRecordUpdatedAt", on: "BrowsingTreeRecord", columns: ["updatedAt"], unique: false)
+            try db.create(index: "LinkUpdatedAt", on: "Link", columns: ["updatedAt"], unique: false)
+        }
+
+        migrator.registerMigration("AddBeamObjectFieldsToNoteFrecencyRecords") { db in
+            try db.create(table: "newFrecencyNoteRecord", ifNotExists: true) { t in
+                t.column("id", .text).notNull().primaryKey()
+                t.column("noteId", .text)
+                t.column("lastAccessAt", .date)
+                t.column("frecencyScore", .double)
+                t.column("frecencySortScore", .double)
+                t.column("frecencyKey")
+                t.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("deletedAt", .datetime)
+            }
+            let now = BeamDate.now
+            let rows = try Row.fetchCursor(db, sql: """
+                SELECT noteId, lastAccessAt, frecencyScore, frecencySortScore, frecencyKey FROM FrecencyNoteRecord
+                """
+            )
+            while let row = try rows.next() {
+                try db.execute(
+                        sql: """
+                            INSERT INTO newFrecencyNoteRecord
+                                (id, noteId, lastAccessAt, frecencyScore, frecencySortScore, frecencyKey, createdAt, updatedAt)
+                            VALUES
+                                (?, ?, ?, ?, ?, ?, ?, ?)
+                            """,
+                        arguments: [UUID(), row["noteId"], row["lastAccessAt"], row["frecencyScore"], row["frecencySortScore"],
+                                   row["frecencyKey"], now, now])
+            }
+
+            try db.drop(table: "FrecencyNoteRecord")
+            try db.rename(table: "newFrecencyNoteRecord", to: "FrecencyNoteRecord")
+            try db.create(index: "FrecencyNoteIdKeyIndex", on: "FrecencyNoteRecord", columns: ["noteId", "frecencyKey"], unique: true)
+            try db.create(index: "FrecencyNoteUpdatedAtIndex", on: "FrecencyNoteRecord", columns: ["updatedAt"], unique: false)
+        }
+
+        migrator.registerMigration("RemoveInfinityFromFrecencies") { db in
+            let threshold = -Float.greatestFiniteMagnitude
+            try db.execute(
+                    sql: """
+                        UPDATE FrecencyNoteRecord
+                        SET
+                            frecencySortScore = :threshold,
+                            updatedAt = :date
+                        WHERE frecencySortScore < :threshold
+                        """,
+                    arguments: ["threshold": threshold, "date": BeamDate.now])
+
+            try db.execute(
+                    sql: """
+                        UPDATE FrecencyUrlRecord
+                        SET
+                            frecencySortScore = :threshold
+                        WHERE frecencySortScore < :threshold
+                        """,
+                    arguments: ["threshold": threshold])
+        }
+
+        migrator.registerMigration("create_MnemonicRecord") { db in
+            try db.create(table: "MnemonicRecord", ifNotExists: true) { t in
+                t.column("text", .text).unique(onConflict: .replace).primaryKey()
+                t.column("url", .text)
+                t.column("last_visited_at", .date)
+            }
+        }
+
+        migrator.registerMigration("addContentToLinkDB") { db in
+            try db.alter(table: BeamLinkDB.tableName, body: { tableAlteration in
+                tableAlteration.add(column: "content", .text).defaults(to: "")
+            })
+
+            // Index title and text in FTS from Link.
+            try db.create(virtualTable: Link.FTS.databaseTableName, using: FTS4()) { t in
+                t.tokenizer = .unicode61()
+                t.column("title")
+                t.column("content")
+                t.synchronize(withTable: BeamLinkDB.tableName)
+            }
+
+            do {
+                for history in try HistoryUrlRecord.fetchAll(db) {
+                    guard var link = try Link.filter(Column("url") == history.url).fetchOne(db) else {
+                        var link = Link(url: history.url, title: history.title, content: history.content, destination: nil)
+                        try link.insert(db)
+                        continue
+                    }
+
+                    // otherwise let's update the title and the updatedAt
+                    link.title = history.title
+                    link.content = history.content
+                    link.setDestination(nil)
+                    link.updatedAt = BeamDate.now
+
+                    try link.update(db, columns: [Column("updateAt"), Column("title"), Column("content"), Column("destination")])
+                }
+            } catch {
+                Logger.shared.logError("Unable to fetch all history urls: \(error)", category: .search)
+            }
+
+            //try HistoryUrlRecord.deleteAll(db)
+        }
+
+        migrator.registerMigration("addDestinationToLinkDB") { db in
+            try db.alter(table: BeamLinkDB.tableName, body: { tableAlteration in
+                tableAlteration.add(column: "destination", .blob).indexed()
+            })
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
@@ -293,7 +405,7 @@ extension GRDBDatabase {
         let records = note.allTextElements.map { BeamElementRecord(title: noteTitle, text: $0.text.text, uid: $0.id.uuidString, noteId: noteIdStr, databaseId: databaseId) }
         let links = note.internalLinks
 
-        BeamNote.indexingQueue.async {
+        BeamNote.indexingQueue.addOperation {
             note.sign.begin(BeamNote.Signs.indexContentsReferences)
             do {
                 try dbWriter.write { db in
@@ -507,6 +619,7 @@ extension GRDBDatabase {
             try LongTermUrlScore.deleteAll(db)
             try db.execute(sql: "DELETE FROM HistoryUrlContent")
             try db.dropFTS4SynchronizationTriggers(forTable: "HistoryUrlRecord")
+            try MnemonicRecord.deleteAll(db)
         }
     }
 
@@ -547,7 +660,7 @@ extension GRDBDatabase {
     /// - Parameter url: URL to the page
     /// - Parameter title: Title of the page indexed in FTS
     /// - Parameter text: Content of the page indexed in FTS
-    func insertHistoryUrl(urlId: UUID, url: String, aliasDomain: String?, title: String, content: String?) throws {
+    func _insertHistoryUrl(urlId: UUID, url: String, aliasDomain: String?, title: String, content: String?) throws {
         try dbWriter.write { db in
             try db.execute(
                 sql: """
@@ -557,6 +670,20 @@ extension GRDBDatabase {
                 arguments: [urlId, url, aliasDomain ?? "", title, content ?? ""])
         }
     }
+
+    // MARK: - MnemonicRecord
+
+    /// Register the URL in the history table associated with a `last_visited_at` timestamp.
+    /// - Parameter urlId: URL identifier from the LinkStore
+    /// - Parameter url: URL to the page
+    /// - Parameter title: Title of the page indexed in FTS
+    /// - Parameter text: Content of the page indexed in FTS
+    func insertMnemonic(text: String, url: UUID) throws {
+        try dbWriter.write { db in
+            try MnemonicRecord(text: text.lowercased(), url: url, lastVisitedAt: BeamDate.now).insert(db)
+        }
+    }
+
 }
 
 // MARK: - Database Access: Reads
@@ -569,6 +696,7 @@ extension GRDBDatabase {
 
     enum ReadError: Error {
         case invalidFTSPattern
+        case aliasSearchFailed
     }
 
     // MARK: - SearchResult (BeamElement/BeamNote)
@@ -829,101 +957,6 @@ extension GRDBDatabase {
         }
     }
 
-    // MARK: - HistorySearchResult
-
-    struct HistorySearchResult {
-        let title: String
-        let url: String
-        let frecency: FrecencyUrlRecord?
-    }
-
-    private struct HistoryUrlRecordWithFrecency: FetchableRecord {
-        var history: HistoryUrlRecord
-        var frecency: FrecencyUrlRecord?
-
-        init(row: Row) {
-            history = HistoryUrlRecord(row: row)
-            frecency = row[HistoryUrlRecord.frecencyForeign]
-        }
-    }
-
-    /// Perform a history search query.
-    /// - Parameter prefixLast: when enabled the last token is prefix matched.
-    /// - Parameter enabledFrecencyParam: select the frecency parameter to use to sort results.
-    func searchHistory(query: String,
-                       prefixLast: Bool = true,
-                       enabledFrecencyParam: FrecencyParamKey? = nil,
-                       completion: @escaping (Result<[HistorySearchResult], Error>) -> Void) {
-        guard var pattern = FTS3Pattern(matchingAllTokensIn: query) else {
-            completion(.failure(ReadError.invalidFTSPattern))
-            return
-        }
-        if prefixLast {
-            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else {
-                completion(.failure(ReadError.invalidFTSPattern))
-                return
-            }
-            pattern = prefixLastPattern
-        }
-
-        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
-            do {
-                let db = try dbResult.get()
-                var request = HistoryUrlRecord
-                    .joining(required: HistoryUrlRecord.content.matching(pattern))
-                    .including(optional: HistoryUrlRecord.frecency)
-                if let frecencyParam = enabledFrecencyParam {
-                    request = request
-                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
-                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
-                }
-
-                let results = try request
-                    .asRequest(of: HistoryUrlRecordWithFrecency.self)
-                    .fetchAll(db)
-                    .map { record -> HistorySearchResult in
-                        HistorySearchResult(title: record.history.title,
-                                            url: record.history.url,
-                                            frecency: record.frecency)
-                    }
-                completion(.success(results))
-            } catch {
-                Logger.shared.logError("history search failure: \(error)", category: .search)
-                completion(.failure(error))
-            }
-        }
-    }
-
-    func searchAlias(query: String,
-                     enabledFrecencyParam: FrecencyParamKey? = nil,
-                     completion: @escaping (Result<HistorySearchResult?, Error>) -> Void) {
-        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
-            do {
-                let db = try dbResult.get()
-                var request = HistoryUrlRecord
-                    .filter(HistoryUrlRecord.Columns.aliasUrl.like("%\(query)%"))
-                    .including(optional: HistoryUrlRecord.frecency)
-                if let frecencyParam = enabledFrecencyParam {
-                    request = request
-                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
-                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
-                }
-                let result = try request
-                    .asRequest(of: HistoryUrlRecordWithFrecency.self)
-                    .fetchOne(db)
-                    .map { record -> HistorySearchResult in
-                        HistorySearchResult(title: record.history.title,
-                                            url: record.history.aliasUrl,
-                                            frecency: record.frecency)
-                    }
-                completion(.success(result))
-            } catch {
-                Logger.shared.logError("history search failure: \(error)", category: .search)
-                completion(.failure(error))
-            }
-        }
-    }
-
     // BidirectionalLinks:
     func appendLink(_ link: BidirectionalLink) {
         appendLinks([link])
@@ -1011,7 +1044,11 @@ extension GRDBDatabase {
         }
         return scores
     }
-
+    func clearUrlFrecencies() throws {
+        _ = try dbWriter.write { db in
+            try FrecencyUrlRecord.deleteAll(db)
+        }
+    }
     // MARK: - FrecencyNoteRecord
     func saveFrecencyNote(_ frecencyNote: FrecencyNoteRecord) throws {
         try dbWriter.write { db in
@@ -1036,29 +1073,43 @@ extension GRDBDatabase {
         }
     }
 
-    func getFrecencyScoreValues(noteIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: Float] {
-        var scores = [UUID: Float]()
+    func getFrecencyScoreValues(noteIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyNoteRecord] {
+        var scores = [UUID: FrecencyNoteRecord]()
         let noteIdsStr = noteIds.map { $0.uuidString }
         try? dbReader.read { db in
             return try FrecencyNoteRecord
                 .filter(noteIdsStr.contains(FrecencyNoteRecord.Columns.noteId))
                 .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
                 .fetchCursor(db)
-                .forEach { scores[$0.noteId] = $0.frecencySortScore }
+                .forEach { scores[$0.noteId] = $0 }
         }
         return scores
     }
-    func getTopNoteFrecencies(limit: Int = 10, paramKey: FrecencyParamKey) -> [UUID: Float] {
-        var scores = [UUID: Float]()
+    func getTopNoteFrecencies(limit: Int = 10, paramKey: FrecencyParamKey) -> [UUID: FrecencyNoteRecord] {
+        var scores = [UUID: FrecencyNoteRecord]()
         try? dbReader.read { db in
             return try FrecencyNoteRecord
                 .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
                 .order(FrecencyNoteRecord.Columns.frecencySortScore.desc)
                 .limit(limit)
                 .fetchCursor(db)
-                .forEach { scores[$0.noteId] = $0.frecencySortScore }
+                .forEach { scores[$0.noteId] = $0 }
         }
         return scores
+    }
+    func allNoteFrecencies(updatedSince: Date?) throws -> [FrecencyNoteRecord] {
+        guard let updatedSince = updatedSince else {
+            return try dbReader.read { db in try FrecencyNoteRecord.fetchAll(db) }
+        }
+        return try dbReader.read { db in
+            try FrecencyNoteRecord.filter(Column("updatedAt") >= updatedSince).fetchAll(db)
+        }
+    }
+
+    func clearNoteFrecencies() throws {
+        _ = try dbWriter.write { db in
+            try FrecencyNoteRecord.deleteAll(db)
+        }
     }
 
     // MARK: - LongTermUrlScore
@@ -1155,7 +1206,7 @@ extension GRDBDatabase {
     }
 
     func getTopScoredLinks(matchingUrl url: String, frecencyParam: FrecencyParamKey, limit: Int = 10) -> [LinkWithFrecency] {
-        let association = Link.frecencyScores
+        let association = Link.frecency
             .filter(FrecencyUrlRecord.Columns.frecencyKey == frecencyParam)
             .order(FrecencyUrlRecord.Columns.frecencySortScore.desc)
             .forKey("frecency")
@@ -1169,10 +1220,10 @@ extension GRDBDatabase {
         }) ?? []
     }
 
-    func getOrCreateIdFor(url: String, title: String?) -> UUID {
+    func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID {
         (try? dbReader.read { db in
             try Link.filter(Column("url") == url).fetchOne(db)?.id
-        }) ?? visit(url: url, title: title).id
+        }) ?? visit(url: url, title: title, content: content, destination: destination).id
     }
 
     func insert(links: [Link]) throws {
@@ -1195,10 +1246,11 @@ extension GRDBDatabase {
         }
     }
 
-    func visit(url: String, title: String? = nil) -> Link {
+    @discardableResult
+    func visit(url: String, title: String? = nil, content: String?, destination: String?) -> Link {
         guard var link = linkFor(url: url) else {
             // The link doesn't exist, create it and return the id
-            var link = Link(url: url, title: title)
+            var link = Link(url: url, title: title, content: content, destination: destination)
             _ = try? dbWriter.write { db in
                 try link.insert(db)
             }
@@ -1207,9 +1259,12 @@ extension GRDBDatabase {
 
         // otherwise let's update the title and the updatedAt
         link.title = title
+        link.content = content
+        link.setDestination(destination)
         link.updatedAt = BeamDate.now
+
         _ = try? dbWriter.write { db in
-            try link.update(db, columns: [Column("updateAt"), Column("title")])
+            try link.update(db, columns: [Column("updateAt"), Column("title"), Column("content"), Column("destination")])
         }
         return link
     }
@@ -1234,6 +1289,146 @@ extension GRDBDatabase {
         try dbReader.read { db in
             try Link.filter(keys: ids).fetchAll(db)
         }
+    }
+
+    func getMnemonic(text: String) -> URL? {
+        guard let mnemonic = try? dbReader.read({ try MnemonicRecord.filter(MnemonicRecord.Columns.text == text.lowercased()).fetchOne($0) }),
+        let link = LinkStore.shared.linkFor(id: mnemonic.url)?.url,
+            let url = URL(string: link) else {
+                return nil
+            }
+        return url
+    }
+
+    // Search History and Aliases:
+    public struct LinkSearchResult {
+        let title: String
+        let url: String
+        let frecency: FrecencyUrlRecord?
+    }
+
+    public struct LinkWithFrecency: FetchableRecord {
+        var link: Link
+        var frecency: FrecencyUrlRecord?
+
+        init(row: Row) {
+            link = Link(row: row)
+            frecency = row[Link.frecencyForeign]
+        }
+    }
+
+    /// Perform a history search query.
+    /// - Parameter prefixLast: when enabled the last token is prefix matched.
+    /// - Parameter enabledFrecencyParam: select the frecency parameter to use to sort results.
+    func searchLink(query: String,
+                    prefixLast: Bool = true,
+                    enabledFrecencyParam: FrecencyParamKey? = nil,
+                    completion: @escaping (Result<[LinkSearchResult], Error>) -> Void) {
+        guard var pattern = FTS3Pattern(matchingAllTokensIn: query) else {
+            completion(.failure(GRDBDatabase.ReadError.invalidFTSPattern))
+            return
+        }
+        if prefixLast {
+            guard let prefixLastPattern = try? FTS3Pattern(rawPattern: pattern.rawPattern + "*") else {
+                completion(.failure(GRDBDatabase.ReadError.invalidFTSPattern))
+                return
+            }
+            pattern = prefixLastPattern
+        }
+
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
+                var request = Link
+                    .joining(required: Link.contentAssociation.matching(pattern))
+                    .including(optional: Link.frecency)
+                if let frecencyParam = enabledFrecencyParam {
+                    request = request
+                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
+                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
+                }
+
+                let results = try request
+                    .asRequest(of: LinkWithFrecency.self)
+                    .fetchAll(db)
+                    .map { record -> LinkSearchResult in
+                        LinkSearchResult(title: record.link.title ?? "",
+                                     url: record.link.url,
+                                     frecency: record.frecency)
+                    }
+                completion(.success(results))
+            } catch {
+                Logger.shared.logError("history search failure: \(error)", category: .search)
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func searchAlias(query: String,
+                     enabledFrecencyParam: FrecencyParamKey? = nil,
+                     completion: @escaping (Result<LinkSearchResult?, Error>) -> Void) {
+        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
+            do {
+                let db = try dbResult.get()
+                var request = Link
+                    .filter(Link.Columns.destination != nil)
+                    .filter(Link.Columns.url.like("%\(query)%"))
+                    .including(optional: Link.frecency)
+                if let frecencyParam = enabledFrecencyParam {
+                    request = request
+                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
+                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
+                }
+                let result = try request
+                    .asRequest(of: LinkWithFrecency.self)
+                    .fetchOne(db)
+                    .map { record -> LinkSearchResult in
+                        if let destination = record.link.destination,
+                           let searchResult = getLinkFrecency(db, id: destination, enabledFrecencyParam: enabledFrecencyParam) {
+                            // If we found a destination, try to use the destinations frecency as it will probably be more accurate (and visited more times)
+                            Logger.shared.logDebug("Found \(record.link) has a destination: \(record.link.destination) and frecency \(searchResult.frecency) - use frecency from destination instead: \(record.frecency)", category: .search)
+                            return LinkSearchResult(title: record.link.title ?? record.link.url,
+                                                       url: record.link.url,
+                                                       frecency: searchResult.frecency ?? record.frecency)
+                        }
+
+                        Logger.shared.logDebug("Found \(record.link) - with frecency: \(record.frecency)", category: .search)
+                        return LinkSearchResult(title: record.link.title ?? record.link.url,
+                                            url: record.link.url,
+                                            frecency: record.frecency)
+                    }
+                completion(.success(result))
+            } catch {
+                Logger.shared.logError("link search failure: \(error)", category: .search)
+                completion(.failure(error))
+            }
+        }
+    }
+
+    private func getLinkFrecency(_ db: GRDB.Database, id: UUID, enabledFrecencyParam: FrecencyParamKey? = nil) -> LinkSearchResult? {
+        do {
+            var request = Link
+                .filter(Link.Columns.id == id)
+                .including(optional: Link.frecency)
+            if let frecencyParam = enabledFrecencyParam {
+                request = request
+                    .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
+                    .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
+            }
+
+            let result = try request
+                .asRequest(of: LinkWithFrecency.self)
+                .fetchOne(db)
+                .map { record -> LinkSearchResult in
+                    LinkSearchResult(title: record.link.title ?? "",
+                                 url: record.link.url,
+                                 frecency: record.frecency)
+                }
+            return result
+        } catch {
+            Logger.shared.logError("history search failure: \(error)", category: .search)
+        }
+        return nil
     }
 }
 

@@ -15,7 +15,7 @@ enum AllCardsViewLocators {
     }
     
     enum TextFields: String, CaseIterable, UIElement {
-        case newCardField = "New Private Card"
+        case newCardField = "New Private Note"
     }
     
     enum ColumnCells: String, CaseIterable, UIElement {

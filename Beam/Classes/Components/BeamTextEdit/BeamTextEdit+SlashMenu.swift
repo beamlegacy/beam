@@ -97,12 +97,12 @@ extension BeamTextEdit {
             self?.handleAction(type)
         }
         var items = [
-            ContextMenuItem(title: "Card Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
+            ContextMenuItem(title: "Note Reference", subtitle: "@ or [[", icon: "field-card", action: { action(.internalLink) }),
             ContextMenuItem(title: "Todo", subtitle: "-[]", icon: "editor-task", action: { action(.task) }),
             ContextMenuItem(title: "Date Picker", subtitle: "", icon: "editor-calendar", action: { action(.date) }),
             ContextMenuItem.separator(),
-            ContextMenuItem(title: "Bold", subtitle: "*", action: { action(.bold) }),
-            ContextMenuItem(title: "Italic", subtitle: "**", action: { action(.italic) }),
+            ContextMenuItem(title: "Bold", subtitle: "**", action: { action(.bold) }),
+            ContextMenuItem(title: "Italic", subtitle: "*", action: { action(.italic) }),
             ContextMenuItem(title: "Strikethrough", subtitle: "~~", action: { action(.strikethrough) }),
             ContextMenuItem(title: "Underline", subtitle: "_", action: { action(.underline) }),
             ContextMenuItem(title: "Heading 1", subtitle: "#", action: { action(.h1) }),

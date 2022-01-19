@@ -59,6 +59,12 @@ class AlertTestView: BaseView {
         self.getAlertDialog().buttons["Exit now"].click()
         return self
     }
+
+    @discardableResult
+    func restartNowClick() -> BaseView {
+        self.getAlertDialog().buttons["Restart Beam now"].click()
+        return self
+    }
     
     private func getAlertDialogFromSheets() -> XCUIElement {
         return app.dialogs.sheets["alert"]

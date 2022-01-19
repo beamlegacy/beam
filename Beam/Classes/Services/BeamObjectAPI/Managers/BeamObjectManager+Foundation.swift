@@ -60,6 +60,11 @@ extension BeamObjectManager {
             Logger.shared.logDebug("Using updatedAt for BeamObjects API call: \(updatedAt)", category: .beamObjectNetwork)
         }
 
+        /*
+         IMPORTANT: We want to save in the order potentially needed by another device, which is the same as used
+         for parsing
+         */
+
         for (_, manager) in Self.managerInstances {
             group.enter()
 
@@ -151,7 +156,13 @@ extension BeamObjectManager {
 
         var localTimer = BeamDate.now
 
-        try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt) { result in
+        /*
+         TODO: when we have no local data, and never did any sync, we don't need to fetch remote checksums,
+         we should just fetch all remote objects
+         */
+
+        try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
+                                          skipDeleted: Persistence.Sync.BeamObjects.last_received_at == nil) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(error.localizedDescription)",
@@ -174,21 +185,15 @@ extension BeamObjectManager {
 
                 do {
                     localTimer = BeamDate.now
-                    let filteredObjects = self.filteredObjects(beamObjects)
-                    Logger.shared.logDebug("filtered \(beamObjects.count) checksums by type",
-                                           category: .beamObjectNetwork,
-                                           localTimer: localTimer)
+                    let changedObjects = self.parseObjectChecksums(beamObjects)
 
-                    localTimer = BeamDate.now
-                    let changedObjects = try self.parseFilteredObjectChecksums(filteredObjects)
-
-                    Logger.shared.logDebug("parsed \(filteredObjects.count) checksums, got \(changedObjects.reduce(0, { $1.value.count })) objects to fetch",
+                    Logger.shared.logDebug("parsed \(beamObjects.count) checksums, got \(changedObjects.count) objects after",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
 
                     localTimer = BeamDate.now
 
-                    let ids: [UUID] = changedObjects.values.flatMap { $0.map { $0.id }}
+                    let ids: [UUID] = changedObjects.map { $0.id }
 
                     guard !ids.isEmpty else {
                         if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
@@ -201,8 +206,6 @@ extension BeamObjectManager {
                         return
                     }
 
-                    Logger.shared.logDebug("Need to fetch \(ids.count) objects remotely, with different checksums",
-                                           category: .beamObjectNetwork)
                     let beamRequestForIds = BeamObjectRequest()
 
                     try beamRequestForIds.fetchAll(receivedAtAfter: nil, ids: ids) { result in
@@ -337,6 +340,11 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        guard !objects.isEmpty else {
+            completion(.success([]))
+            return nil
+        }
+
         var localTimer = BeamDate.now
 
         let beamObjects: [BeamObject] = try objects.map {
@@ -370,14 +378,21 @@ extension BeamObjectManager {
             $0.previousChecksum = checksums[$0]
         }
 
-        Logger.shared.logDebug("Set \(objects.count) checksums", category: .beamObjectChecksum, localTimer: localTimer)
+        if checksums.count != objectsToSave.count {
+            Logger.shared.logWarning("\(checksums.count) checksums doesn't match \(objectsToSave.count) objects! It's ok if new.",
+                                     category: .beamObjectChecksum)
+        }
+
+        Logger.shared.logDebug("Set \(checksums.count) checksums for \(objectsToSave.count) objects",
+                               category: .beamObjectChecksum,
+                               localTimer: localTimer)
 
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
         let request = BeamObjectRequest()
 
-        try request.save(beamObjects) { result in
+        try request.save(objectsToSave) { result in
             switch result {
             case .failure(let error):
                 self.saveToAPIFailure(objects, error, completion)

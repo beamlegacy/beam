@@ -45,7 +45,7 @@ struct TableView: NSViewRepresentable {
     var allowsMultipleSelection: Bool = true
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
-    var creationRowTitle: String? = "New Private Card"
+    var creationRowTitle: String? = "New Private Note"
     @Binding var shouldReloadData: Bool?
 
     var onEditingText: ((String?, Int) -> Void)?

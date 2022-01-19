@@ -14,6 +14,7 @@ struct OtherPasswordModal: View {
     @State private var isEditing: Bool = true
     @State private var showingAlert: Bool = false
     @State private var selectedEntries = IndexSet()
+    @State private var showingEditPasswordSheetonDoubleTap: Bool = false
 
     @ObservedObject var viewModel: PasswordListViewModel
 
@@ -31,19 +32,30 @@ struct OtherPasswordModal: View {
                 BeamSearchField(searchStr: $searchString, isEditing: $isEditing, placeholderStr: "Search", font: BeamFont.regular(size: 13).nsFont, textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onEscape: {
                     dismiss()
                 })
-                .frame(width: 220, height: 21, alignment: .center)
-                .onChange(of: searchString) {
-                    viewModel.searchString = $0
-                }
+                    .frame(width: 220, height: 21, alignment: .center)
+                    .onChange(of: searchString) {
+                        viewModel.searchString = $0
+                    }
             }
             Spacer()
-            PasswordsTableView(passwordEntries: viewModel.filteredPasswordTableViewItems,
-                               onSelectionChanged: { idx in
-                                viewModel.updateSelection(idx)
-                               })
-                .frame(width: 528, height: 240, alignment: .center)
+            PasswordsTableView(passwordEntries: viewModel.filteredPasswordTableViewItems) { idx in
+                viewModel.updateSelection(idx)
+            } onDoubleTap: { row in
+                viewModel.doubleTappedRow = row
+                showingEditPasswordSheetonDoubleTap = true
+            }   .frame(width: 528, height: 240, alignment: .center)
                 .border(BeamColor.Mercury.swiftUI, width: 1)
                 .background(BeamColor.Generic.background.swiftUI)
+                .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
+                    if let doubleTappedRow = viewModel.doubleTappedRow,
+                       let password = PasswordManager.shared.password(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: viewModel.filteredPasswordEntries[doubleTappedRow].username) {
+                        PasswordEditView(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost,
+                                         username: viewModel.filteredPasswordEntries[doubleTappedRow].username,
+                                         password: password, editType: .update)
+                            .frame(width: 400, height: 179, alignment: .center)
+                    }
+                }
+
             Spacer()
             HStack {
                 OtherPasswordModalButton(title: "Remove", isDisabled: viewModel.disableRemoveButton) {
@@ -52,9 +64,8 @@ struct OtherPasswordModal: View {
                 .alert(isPresented: $showingAlert) {
                     Alert(title: Text(removeAlertMessage(for: viewModel.selectedEntries)),
                           primaryButton: .destructive(Text("Remove"), action: {
-                            onRemove(viewModel.selectedEntries)
-                            viewModel.refresh()
-                          }),
+                        onRemove(viewModel.selectedEntries)
+                    }),
                           secondaryButton: .cancel(Text("Cancel")))
                 }
                 Spacer()
@@ -118,10 +129,10 @@ struct OtherPasswordModalButton: View {
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                 .frame(width: 72, alignment: .center)
         })
-        .disabled(isDisabled)
-        .buttonStyle(BorderedButtonStyle())
-        .foregroundColor(BeamColor.Generic.background.swiftUI)
-        .opacity(isDisabled ? 0.35 : 1)
+            .disabled(isDisabled)
+            .buttonStyle(BorderedButtonStyle())
+            .foregroundColor(BeamColor.Generic.background.swiftUI)
+            .opacity(isDisabled ? 0.35 : 1)
     }
 }
 

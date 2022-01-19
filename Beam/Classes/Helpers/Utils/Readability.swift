@@ -25,6 +25,10 @@ struct Readability: Codable, Equatable {
     var byLine: String = ""
 
     static func read(_ webView: WKWebView, _ getResults: @escaping (Result<Readability, Error>) -> Void) {
+        guard let readabilitySource = loadFile(from: "Readability", fileType: "js") else {
+            return
+        }
+
         //let now= BeamDate.now
         webView.evaluateJavaScript(readabilitySource) { (res, err) in
             if let r = res as? [String: Any] {
@@ -58,5 +62,4 @@ private func num(_ k: Any?) -> Int {
     return k as? Int ?? 0
 }
 
-private var readabilitySource: String = { loadFile(from: "Readability", fileType: "js") }()
 // swiftlint:enable file_length

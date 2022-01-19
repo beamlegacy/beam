@@ -12,7 +12,7 @@ struct PasswordEditView: View {
     @State var username: String
     @State var password: String
     var editType: PasswordEditType
-    var onSave: () -> Void
+    var onSave: (() -> Void)?
 
     @State private var urlIsNotValid: Bool = false
     @Environment(\.presentationMode) private var presentationMode
@@ -73,7 +73,7 @@ struct PasswordEditView: View {
                         if validHostname.isValid {
                             PasswordManager.shared.save(hostname: hostname, username: username, password: password)
                             dismiss()
-                            onSave()
+                            onSave?()
                         } else {
                             urlIsNotValid = true
                         }
@@ -94,7 +94,6 @@ struct PasswordEditView: View {
 
 struct PasswordEditView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordEditView(hostname: "", username: "", password: "", editType: .create) {
-        }
+        PasswordEditView(hostname: "", username: "", password: "", editType: .create)
     }
 }

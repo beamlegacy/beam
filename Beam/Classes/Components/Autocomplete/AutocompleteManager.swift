@@ -23,6 +23,9 @@ class AutocompleteManager: ObservableObject {
 
     @Published var searchQuerySelectedRange: Range<Int>?
     @Published var autocompleteResults = [AutocompleteResult]()
+    @Published var rawAutocompleteResults = [AutocompletePublisherSourceResults]()
+    @Published var rawSortedURLResults = [AutocompleteResult]()
+
     @Published var autocompleteSelectedIndex: Int? {
         didSet {
             updateSearchQueryWhenSelectingAutocomplete(autocompleteSelectedIndex, previousSelectedIndex: oldValue)
@@ -33,13 +36,13 @@ class AutocompleteManager: ObservableObject {
     let beamData: BeamData
 
     private let searchEngineCompleter: Autocompleter
-    var searchEngine: SearchEngine {
+    var searchEngine: SearchEngineDescription {
         searchEngineCompleter.searchEngine
     }
     private var scope = Set<AnyCancellable>()
     var searchRequestsCancellables = Set<AnyCancellable>()
 
-    init(with data: BeamData, searchEngine: SearchEngine) {
+    init(with data: BeamData, searchEngine: SearchEngineDescription) {
         beamData = data
         searchEngineCompleter = Autocompleter(searchEngine: searchEngine)
 
@@ -68,7 +71,6 @@ class AutocompleteManager: ObservableObject {
     typealias AutocompleteSourceResult = [AutocompleteResult.Source: [AutocompleteResult]]
 
     private func buildAutocompleteResults(for receivedQueryString: String) {
-
         guard !textChangeIsFromSelection else {
             textChangeIsFromSelection = false
             return
@@ -78,10 +80,15 @@ class AutocompleteManager: ObservableObject {
         var searchText = receivedQueryString
         let previousUnselectedText = getUnselectedText(for: searchQuery)?.lowercased() ?? searchQuery
         let isRemovingCharacters = searchText.count < previousUnselectedText.count || searchText.lowercased() == previousUnselectedText
+        var selectionWasReset = false
         if let realText = replacedProposedText {
             searchText = realText
             replacedProposedText = nil
+        } else if !isRemovingCharacters && autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .autocomplete {
+            // if we autoselect a search engine result that is alone,
+            // let's the keep selection until have new results.
         } else {
+            selectionWasReset = true
             self.resetAutocompleteSelection()
         }
 
@@ -92,6 +99,10 @@ class AutocompleteManager: ObservableObject {
         } else {
             publishers = getAutocompletePublishers(for: searchText) +
             [getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)]
+            #if DEBUG
+            // Use this to help you recreate situation producing bugs.
+            //  publishers = getAutocompleteMockPublishers(for: searchText)
+            #endif
         }
 
         Logger.shared.logInfo("------------------- ✳️ Start of autocomplete for \(receivedQueryString) -------------------", category: .autocompleteManager)
@@ -100,13 +111,14 @@ class AutocompleteManager: ObservableObject {
             .receive(on: DispatchQueue.main)
             .sink { [weak self] publishersResults in
                 guard let self = self else { return }
+                self.rawAutocompleteResults = publishersResults.compactMap({ $0.results.isEmpty ? nil : $0 })
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.autocompleteResults = finalResults
                 if !isRemovingCharacters {
-                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText)
+                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: selectionWasReset)
                 }
             }.store(in: &searchRequestsCancellables)
     }
@@ -138,53 +150,50 @@ class AutocompleteManager: ObservableObject {
 
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
+        case .mnemonic: return true // a mnemonic is by definition something that can take over the result
         case .topDomain: return result.text.lowercased().starts(with: searchText.lowercased())
-        case .history:
-            if searchText.mayBeURL {
-                guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else {
-                    return false
-                }
-                return host.lowercased().starts(with: searchText.lowercased())
-            }
-            return result.text.lowercased().starts(with: searchText.lowercased())
-        case .url:
-            guard let host = result.url?.minimizedHost ?? URL(string: result.text)?.minimizedHost else { return false }
-            return result.text.lowercased().contains(host)
+        case .history, .url:
+            return result.prefixScore > 1.0
         case .autocomplete:
-            return autocompleteResults.count == 2 // 1 search engine result + 1 create card
+            return autocompleteResults.count == 2 // 1 search engine result + 1 create note
             && !searchQuery.mayBeURL && result.text == searchQuery
         default:
             return false
         }
     }
 
-    private func automaticallySelectFirstResultIfNeeded(withResults results: [AutocompleteResult], searchText: String) {
+    private func automaticallySelectFirstResultIfNeeded(withResults results: [AutocompleteResult], searchText: String, canResetText: Bool = true) {
         if let firstResult = results.first, isResultCandidateForAutoselection(firstResult, forSearch: searchText) {
             autocompleteSelectedIndex = 0
         } else if autocompleteSelectedIndex == 0 {
             // first result was selected but is not matching anymore
-            self.resetAutocompleteSelection(resetText: true)
+            self.resetAutocompleteSelection(resetText: canResetText)
         }
     }
 
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
             let result = autocompleteResults[i]
-            let resultText = result.text
+            let resultText = result.displayText
 
             // if the first result is compatible with autoselection, select the added string
             if i == 0, let completingText = result.completingText,
                isResultCandidateForAutoselection(result, forSearch: completingText) {
                 let completingTextEnd = completingText.wholeRange.upperBound
-                let newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
-                guard newSelection.count > 0 else { return }
+                var newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
+                var queryToSet: String?
+                if newSelection.count > 0 && resultText.prefix(newSelection.lowerBound).lowercased() == completingText.lowercased() {
+                    let additionalText = resultText.substring(range: newSelection)
+                    queryToSet = completingText + additionalText
+                } else if searchQuery != completingText && searchQuerySelectedRange?.isEmpty != true {
+                    queryToSet = completingText
+                    newSelection = completingText.count..<completingText.count
+                }
 
-                let resultPrefix = resultText.prefix(newSelection.lowerBound)
-                guard resultPrefix.lowercased() == completingText.lowercased() else { return }
-
-                let additionalText = resultText.substring(range: newSelection)
-                setQuery(completingText + additionalText, updateAutocompleteResults: false)
-                searchQuerySelectedRange = newSelection
+                if let queryToSet = queryToSet {
+                    setQuery(queryToSet, updateAutocompleteResults: false)
+                    searchQuerySelectedRange = newSelection
+                }
             } else if searchQuery != resultText {
                 setQuery(resultText, updateAutocompleteResults: false)
                 searchQuerySelectedRange = resultText.count..<resultText.count
@@ -302,7 +311,12 @@ extension AutocompleteManager {
         // if new entered character is the next character in selection, user is following the autocompletion
         guard currentText.lowercased().starts(with: unselectedProposedText.lowercased()),
               unselectedProposedText.last?.lowercased() == selectedText.first?.lowercased()
-        else { return nil }
+        else {
+            if proposedText.isEmpty {
+                resetAutocompleteSelection(resetText: false)
+            }
+            return nil
+        }
 
         replacedProposedText = unselectedProposedText
         let newRange = unselectedProposedText.count..<currentText.count

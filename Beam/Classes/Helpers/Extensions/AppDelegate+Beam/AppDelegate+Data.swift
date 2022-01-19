@@ -4,44 +4,43 @@ import BeamCore
 
 extension AppDelegate {
     @IBAction func deleteLocalContent(_ sender: Any) {
+        deleteAllLocalContent()
+    }
+
+    func deleteAllLocalContent() {
         // Clustering Orphaned file
         do {
             try data.clusteringOrphanedUrlManager.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete Clustering Orphaned file", error: error)
-            return
+            Logger.shared.logError("Could not delete Clustering Orphaned file", category: .general)
         }
 
         // Link Store
         do {
             try LinkStore.shared.deleteAll()
         } catch {
-            UserAlert.showError(message: "Could not delete LinkStore", error: error)
-            return
+            Logger.shared.logError("Could not delete LinkStore", category: .general)
         }
 
         // GRDB
         do {
             try GRDBDatabase.shared.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete GRDB Databases", error: error)
-            return
+            Logger.shared.logError("Could not delete GRDB Databases", category: .general)
         }
 
         // TopDomain
         do {
             try TopDomainDatabase.shared.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete TopDomains", error: error)
-            return
+            Logger.shared.logError("Could not delete TopDomains", category: .general)
         }
 
         // BeamFile
         do {
             try BeamFileDBManager.shared.clear()
         } catch {
-            UserAlert.showError(message: "Could not delete BeamFiles", error: error)
-            return
+            Logger.shared.logError("Could not delete BeamFiles", category: .general)
         }
 
         // CoreData Logger
@@ -60,6 +59,12 @@ extension AppDelegate {
         ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
         // Passwords
         PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
+        // BeamObject Coredata Checksum
+        do {
+            try BeamObjectChecksum.deleteAll()
+        } catch {
+            Logger.shared.logError("Could not delete BeamObjectChecksum", category: .general)
+        }
         // Notes and Databases
         self.deleteDocumentsAndDatabases(includedRemote: false)
     }
@@ -83,9 +88,19 @@ extension AppDelegate {
                         UserAlert.showError(message: "Could not delete databases",
                                             error: error)
                     case .success:
-                        UserAlert.showMessage(message: "All the local data has been deleted. Beam must exit now.",
-                                              buttonTitle: "Exit now")
-                        NSApplication.shared.terminate(nil)
+                        if includedRemote {
+                            UserAlert.showMessage(message: "All the Notes data has been deleted. Beam must restart now.",
+                                                  buttonTitle: "Restart Beam now") {
+                                guard Configuration.env != .test else { return }
+                                NSApplication.shared.relaunch()
+                            }
+                        } else {
+                            UserAlert.showMessage(message: "All the local data has been deleted. Beam must restart now.",
+                                                  buttonTitle: "Restart Beam now") {
+                                guard Configuration.env != .test else { return }
+                                NSApplication.shared.relaunch()
+                            }
+                        }
                     }
                 }
             }

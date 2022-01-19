@@ -21,7 +21,7 @@ struct DestinationNoteAutocompleteList: View {
     var allowScroll: Bool = false
     internal var onSelectAutocompleteResult: (() -> Void)?
 
-    private let itemHeight: CGFloat = 32
+    private let itemHeight: CGFloat = AutocompleteItem.defaultHeight
     private let customColorPalette = AutocompleteItemColorPalette(
         textColor: BeamColor.Beam,
         informationTextColor: BeamColor.LightStoneGray,
@@ -71,8 +71,8 @@ struct DestinationNoteAutocompleteList: View {
             ForEach(model.results, id: \.id) { i in
                 return AutocompleteItem(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
                                         alwaysHighlightCompletingText: alwaysHighlightCompletingText,
-                                        allowNewCardShortcut: model.allowNewCardShortcut, colorPalette: colorPalette,
-                                        additionalLeadingPadding: additionLeadingPadding)
+                                        allowsShortcut: i.source != .createCard || model.allowNewCardShortcut, colorPalette: colorPalette,
+                                        additionalLeadingPadding: additionLeadingPadding, cornerRadius: 0)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
                     }
@@ -331,7 +331,7 @@ extension DestinationNoteAutocompleteList {
             var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
             var items = [DocumentStruct]()
-            var scores = [UUID: Float]()
+            var scores = [UUID: FrecencyNoteRecord]()
             let documentManager = DocumentManager()
             if !text.isEmpty {
                 allowCreateCard = true
@@ -345,7 +345,7 @@ extension DestinationNoteAutocompleteList {
                 items = documentManager.loadDocumentsById(ids: Array(scores.keys))
             }
             let itemsSlice = items.map {
-                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id])
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }
                 .sorted(by: >)
                 .prefix(itemLimit)
@@ -358,7 +358,7 @@ extension DestinationNoteAutocompleteList {
             allowCreateCard = allowCreateCard
                 && !items.contains(where: { $0.title.lowercased() == text.lowercased() })
             if allowCreateCard && !text.isEmpty {
-                let createItem = AutocompleteResult(text: text, source: .createCard, information: "New Card")
+                let createItem = AutocompleteResult(text: text, source: .createCard, information: "New Note")
                 if autocompleteItems.count >= itemLimit {
                     autocompleteItems[autocompleteItems.count - 1] = createItem
                 } else {

@@ -14,9 +14,13 @@ import BeamCore
 extension Link: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, url, title, createdAt, updatedAt, deletedAt
+        case id, url, title, content, destination, createdAt, updatedAt, deletedAt
     }
-    static let frecencyScores = hasMany(FrecencyUrlRecord.self, using: ForeignKey(["urlId"]))
+
+    static let frecencyForeign = "frecency"
+    static let frecency = hasOne(FrecencyUrlRecord.self,
+                                 key: frecencyForeign,
+                                 using: ForeignKey([FrecencyUrlRecord.Columns.urlId], to: [Columns.id]))
 }
 
 // Fetching methods
@@ -25,11 +29,22 @@ extension Link: FetchableRecord {
     public init(row: Row) {
         self.init(url: row[Columns.url],
                   title: row[Columns.title],
+                  content: row[Columns.content],
+                  destination: row[Columns.destination],
                   createdAt: row[Columns.createdAt],
                   updatedAt: row[Columns.updatedAt],
                   deletedAt: row[Columns.deletedAt]
         )
     }
+}
+
+extension Link {
+    struct FTS: TableRecord {
+        static let databaseTableName = "linkContent"
+    }
+
+    // Association to perform a key join on both `rowid` columns.
+    static let contentAssociation = hasOne(FTS.self, using: ForeignKey(["rowid"], to: ["rowid"]))
 }
 
 // Persistence methods
@@ -43,6 +58,8 @@ extension Link: MutablePersistableRecord {
         container[Columns.id] = id
         container[Columns.url] = url
         container[Columns.title] = title
+        container[Columns.content] = content
+        container[Columns.destination] = destination
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
@@ -62,7 +79,7 @@ extension Link: BeamObjectProtocol {
     }
 
     public func copy() throws -> Link {
-        Link(url: url, title: title, createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
+        Link(url: url, title: title, content: "", createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }
 
@@ -74,7 +91,7 @@ extension Link: Equatable {
 
 extension Link: Hashable {
     public func hash(into hasher: inout Hasher) {
-       hasher.combine(self)
+       hasher.combine(id)
     }
 }
 
@@ -95,46 +112,21 @@ struct LinkWithFrecency: FetchableRecord {
 public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     let db: GRDBDatabase
     static let tableName = "Link"
-    var dbPool: DatabasePool
-    static var shared = BeamLinkDB(path: BeamData.linkDBPath)
+    static var shared = BeamLinkDB()
     internal static var backgroundQueue = DispatchQueue(label: "Links BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     //swiftlint:disable:next function_body_length
-    init(path: String, db: GRDBDatabase = GRDBDatabase.shared) {
+    init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
-
-    //TODO: remove everything dbPool related when link data moved to GRDB
-        let configuration = GRDB.Configuration()
-        do {
-            dbPool = try DatabasePool(path: path, configuration: configuration)
-        } catch {
-            fatalError("Couldn't instanciate link db: \(error)")
-        }
-        var migrator = DatabaseMigrator()
-        migrator.registerMigration("createLinkDB") { db in
-            try db.create(table: BeamLinkDB.tableName, ifNotExists: true) { table in
-                table.column("id", .text).notNull().primaryKey().unique(onConflict: .replace)
-                table.column("url", .text).notNull().indexed().unique(onConflict: .replace)
-                table.column("title", .text).collate(.localizedCaseInsensitiveCompare)
-                table.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
-                table.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
-                table.column("deletedAt", .datetime)
-            }
-        }
-        do {
-            try migrator.migrate(dbPool)
-        } catch {
-            fatalError("Couldn't migrate link db: \(error)")
-        }
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
         return db.getLinks(matchingUrl: url)
     }
 
-    public func getOrCreateIdFor(url: String, title: String?) -> UUID {
+    public func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID {
         guard url != Link.missing.url else { return Link.missing.id }
-        return db.getOrCreateIdFor(url: url, title: title)
+        return db.getOrCreateIdFor(url: url, title: title, content: content, destination: destination)
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -150,7 +142,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
     public func linkFor(id: UUID) -> Link? {
         db.linkFor(id: id)
-        }
+    }
 
     public func isDomain(id: UUID) -> Bool {
         guard let link = linkFor(id: id), URL(string: link.url)?.isDomain ?? false else { return false }
@@ -160,28 +152,24 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     public func getDomainId(id: UUID) -> UUID? {
         guard let link = linkFor(id: id),
               let domain = URL(string: link.url)?.domain else { return nil }
-        return getOrCreateIdFor(url: domain.absoluteString, title: nil)
+        return getOrCreateIdFor(url: domain.absoluteString, title: nil, content: nil, destination: nil)
     }
 
     public func linkFor(url: String) -> Link? {
         db.linkFor(url: url)
     }
 
-    public func visit(_ url: String, title: String? = nil) -> UUID {
-        return visit(url, title: title).id
+    @discardableResult
+    public func visitId(_ url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> UUID {
+        return visit(url, title: title, content: content, destination: destination).id
     }
 
-    public func visit(_ url: String, title: String?) -> Link {
+    @discardableResult
+    public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link {
         guard url != Link.missing.url else { return Link.missing }
-        let link: Link = db.visit(url: url, title: title)
+        let link: Link = db.visit(url: url, title: title, content: content, destination: destination)
         saveOnNetwork(link)
         return link
-    }
-
-    public func deleteAllLegacy() throws {
-        _ = try dbPool.write { db in
-            try Link.deleteAll(db)
-        }
     }
 
     public func deleteAll() throws {
@@ -192,17 +180,6 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         return (try? db.allLinks(updatedSince: nil)) ?? []
     }
 
-    public var allLinksLegacy: [Link] {
-        (try? dbPool.read { db in
-            try? Link.fetchAll(db)
-        }) ?? []
-    }
-
-    public var countLegacy: Int? {
-        return try? dbPool.read { db in
-            try Link.fetchCount(db)
-        }
-    }
     public func showAllLinks() {
         Logger.shared.logDebug("------Links-------", category: .linkDB)
         for link in allLinks.sorted(by: { (lhs, rhs) in lhs.url < rhs.url }) {
@@ -275,7 +252,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                     }
                 }
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
             }
         }
     }
@@ -287,10 +264,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
                                category: .linkNetwork)
-
-        let backgroundQueue = DispatchQueue(label: "Link BeamObjectManager backgroundQueue", qos: .userInitiated)
-
-        backgroundQueue.async { [weak self] in
+        Self.backgroundQueue.async { [weak self] in
             do {
                 try self?.saveOnBeamObjectAPI(link) { result in
                     switch result {
@@ -306,7 +280,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                     }
                 }
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
             }
         }
     }
@@ -319,5 +293,4 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     func saveObjectsAfterConflict(_ objects: [Link]) throws {
         try store(links: objects, shouldSaveOnNetwork: false)
     }
-
 }

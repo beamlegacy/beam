@@ -38,7 +38,7 @@ class DeleteNotesTests: BaseTest {
         helper.tapCommand(.insertTextInCurrentNote)
         helper.tapCommand(.create10Notes)
         
-        testRailPrint("When Open All cards - asssert it is \(expectedNumberOfCardsAfterPopulatingDB) cards")
+        testRailPrint("When Open All notes - asssert it is \(expectedNumberOfCardsAfterPopulatingDB) notes")
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         /*if !waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: expectedNumberOfCardsAfterPopulatingDB, elementQuery: allCards.getCardsNamesElementQuery()) {
             //refresh all cards view by switching between Journal and All Cards
@@ -49,8 +49,9 @@ class DeleteNotesTests: BaseTest {
         
         testRailPrint("When click clear notes option")
         isLocalContentsTest ? fileMenu.deleteAllLocalContents() : fileMenu.deleteAllNotes()
-        XCTAssertTrue(alert.getAlertDialog().staticTexts["All the local data has been deleted. Beam must exit now."].waitForExistence(timeout: implicitWaitTimeout))
-        alert.exitNowClick()
+        let staticText = isLocalContentsTest ? "All the local data has been deleted. Beam must restart now." : "All the Notes data has been deleted. Beam must restart now."
+        XCTAssertTrue(alert.getAlertDialog().staticTexts[staticText].waitForExistence(timeout: implicitWaitTimeout))
+        alert.restartNowClick()
         
         testRailPrint("Then notes are cleared")
         launchApp()

@@ -212,4 +212,38 @@ class BrowsingTreeTest: XCTestCase {
         XCTAssertEqual(rootUrlId, decodedCurrentTree.root.link)
         XCTAssertEqual(childUrlId, decodedCurrentTree.current.link)
     }
+
+    func testForegroundSegment() {
+        BeamDate.freeze("2001-01-01T00:00:00+0000")
+        let tree = BrowsingTree(nil)
+
+        //first foreground segment start
+        tree.startReading()
+        BeamDate.travel(2.0)
+        //first foreground segment end
+        tree.switchToBackground()
+        BeamDate.travel(1.0)
+        //previous segment is already closed
+        tree.switchToBackground()
+        BeamDate.travel(1.0)
+        //second segment start
+        tree.startReading()
+        BeamDate.travel(1.0)
+        //second segment already started
+        tree.startReading()
+        //second segment end
+        BeamDate.travel(2.0)
+        tree.switchToBackground()
+
+        let foregoundSegments = tree.current.foregroundSegments
+        XCTAssertEqual(foregoundSegments.count, 2)
+        XCTAssertEqual(foregoundSegments[0].start, Date(timeIntervalSinceReferenceDate: 0))
+        XCTAssertEqual(foregoundSegments[0].end, Date(timeIntervalSinceReferenceDate: 2))
+        XCTAssertEqual(foregoundSegments[0].duration, 2)
+        XCTAssertEqual(foregoundSegments[1].start, Date(timeIntervalSinceReferenceDate: 4))
+        XCTAssertEqual(foregoundSegments[1].end, Date(timeIntervalSinceReferenceDate: 7))
+        XCTAssertEqual(foregoundSegments[1].duration, 3)
+
+        BeamDate.reset()
+    }
 }

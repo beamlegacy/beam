@@ -75,10 +75,12 @@ extension BeamColor {
         return NSColor.loadColor(named: colorName)
     }
 
+    /// Property originally returning the color value in the P3 Display color space. Preserved in case of needed
+    /// rollback. [Read original discussion.](https://linear.app/beamapp/issue/BE-448/system-wide-switch-light-dark-mode-breaks-the-ui)
+    ///
     /// staticColor computes an actual RGBA color from any symbolic color (for example created with NSColors(named: ...) ). It is important if you need to be able to compare colors as two NSColor(named: "yada") will actually be considered different (comparison will always fail). It serves a color in the Display P3 domain as it is the biggest domain on macOS (that I know of) which means it should encaspulate all colors without any risk of loss of precision. We need this for all the colors we use in the NSAttributedText produced by the editor as we need to be able to compare attributed text instances (and thus the colors  it uses).
     var staticColor: NSColor {
-        let color = self.nsColor
-        return color.usingColorSpace(.displayP3) ?? color
+        nsColor
     }
 
     var swiftUI: SwiftUI.Color {

@@ -11,11 +11,16 @@ extension BeamColor {
 
     enum Generic {
         static let background = BeamColor.Custom(named: "WindowBackgroundColor")
+        /// -> light: Generic.background / dark: Mercury
         static let secondaryBackground = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
+        /// -> Niobium
         static let text = BeamColor.Niobium
+        /// -> LightStoneGray
         static let subtitle = BeamColor.LightStoneGray
+        /// -> AlphaGray
         static let placeholder = BeamColor.AlphaGray
         static let transparent = BeamColor.Custom(named: "Transparent")
+        /// -> Mercury
         static let separator = BeamColor.Mercury
     }
 
@@ -154,7 +159,7 @@ extension BeamColor {
     enum ToolBar {
         static let backgroundInactiveWindow = BeamColor.combining(lightColor: .Mercury, darkColor: .Nero)
         static let backgroundBottomSeparator = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.1)
-        static let backgroundBottomSeparatorWeb = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .black), darkAlpha: 0.75)
+        static let backgroundBottomSeparatorWeb = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.15, darkColor: From(color: .black), darkAlpha: 0.75)
         static let backgroundBottomSeparatorInactiveWindow = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.2, darkColor: From(color: .black), darkAlpha: 0.75)
         static let horizontalSeparator = BeamColor.combining(lightColor: .Mercury, darkColor: .Nero, darkAlpha: 0.75)
         static let shadowTop = BeamColor.combining(lightColor: .From(color: .black), lightAlpha: 0.050,
@@ -195,11 +200,11 @@ extension BeamColor {
                                                            darkColor: .Bluetiful, darkAlpha: 0.2)
         static let backgroundClicked = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.28,
                                                            darkColor: .Bluetiful, darkAlpha: 0.34)
-        static let backgroundDisabled = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.04,
-                                                            darkColor: .Bluetiful, darkAlpha: 0.07)
+        static let backgroundDisabled = BeamColor.Generic.transparent
+        static let strokeDisabled = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.15,
+                                                                  darkColor: .Bluetiful, darkAlpha: 0.4)
         static let foreground = BeamColor.Bluetiful
-        static let disabledForeground = BeamColor.combining(lightColor: .Bluetiful, lightAlpha: 0.15,
-                                                            darkColor: .Bluetiful, darkAlpha: 0.2)
+        static let disabledForeground = BeamColor.Bluetiful.alpha(0.4)
     }
 
     enum ActionableButtonPurple {
@@ -208,17 +213,19 @@ extension BeamColor {
                                                            darkColor: .Beam, darkAlpha: 0.2)
         static let backgroundClicked = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.28,
                                                            darkColor: .Beam, darkAlpha: 0.34)
-        static let backgroundDisabled = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.04,
-                                                            darkColor: .Beam, darkAlpha: 0.07)
+        static let backgroundDisabled = BeamColor.Generic.transparent
+        static let strokeDisabled = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.15,
+                                                                  darkColor: .Beam, darkAlpha: 0.2)
         static let foreground = BeamColor.Beam
-        static let disabledForeground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.15,
-                                                            darkColor: .Beam, darkAlpha: 0.2)
+        static let disabledForeground = BeamColor.Beam.alpha(0.4)
     }
 
     enum ActionableButtonSecondary {
-        static let background = BeamColor.combining(lightColor: .Nero, darkColor: .Mercury)
-        static let backgroundHovered = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray)
-        static let backgroundClicked = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
+        static let background = BeamColor.combining(lightColor: .Mercury, darkColor: .Mercury)
+        static let backgroundHovered = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.6,
+                                                           darkColor: .AlphaGray, darkAlpha: 0.8)
+        static let backgroundClicked = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.8,
+                                                           darkColor: .LightStoneGray, darkAlpha: 0.75)
         static let foreground = BeamColor.Corduroy
         static let backgroundDisabled = BeamColor.Nero
         static let activeForeground = BeamColor.Niobium
@@ -232,6 +239,9 @@ extension BeamColor {
 
 extension BeamColor {
     enum WebFieldAutofill {
+        static let fieldButtonBackgroundHovered = BeamColor.Nero.alpha(0.5) // light version is used, regardless of actual mode
+        static let fieldButtonIcon = BeamColor.LightStoneGray // light version is used, regardless of actual mode
+        static let fieldButtonIconHovered = BeamColor.Niobium // light version is used, regardless of actual mode
         static let popupBackground = BeamColor.combining(lightColor: .From(color: NSColor(white: 1.0, alpha: 0.92) + BeamColor.Mercury.alpha(0.20).nsColor),
                                                          darkColor: .From(color: NSColor(red: 28.0/255.0, green: 28.0/255.0, blue: 31.0/255.0, alpha: 0.92) + BeamColor.Mercury.alpha(0.80).nsColor))
         static let autofillCellBackgroundHovered = BeamColor.combining(lightColor: .Bluetiful.alpha(0.10), darkColor: .Bluetiful.alpha(0.14))
@@ -253,6 +263,18 @@ extension BeamColor {
         static let foundElementHover = BeamColor.Custom(named: "SearchResultHover")
         static let currentElement = BeamColor.Custom(named: "CurrentSearchResult")
         static let currentElementHover = BeamColor.Custom(named: "CurrentSearchResultHover")
+    }
+}
+
+extension BeamColor {
+    enum WebViewStatusBar {
+        static let text = BeamColor.Corduroy.alpha(0.85)
+        static let emphasizedText = BeamColor.Corduroy
+        static let background = BeamColor.Nero.alpha(0.5)
+        static let border = BeamColor.combining(
+            lightColor: From(color: .black), lightAlpha: 0.1,
+            darkColor: From(color: .white), darkAlpha: 0.1
+        )
     }
 }
 
@@ -314,5 +336,11 @@ extension BeamColor {
     enum Gradient {
         static let beamGradientStart = BeamColor.From(color: NSColor(deviceRed: 184/255, green: 102/255, blue: 255/255, alpha: 1))
         static let beamGradientEnd = BeamColor.From(color: NSColor(deviceRed: 116/255, green: 51/255, blue: 255/255, alpha: 1))
+    }
+}
+
+extension BeamColor {
+    enum Shortcut {
+        static let background = BeamColor.combining(lightColor: .Nero, darkColor: .Nero, darkAlpha: 0.3)
     }
 }

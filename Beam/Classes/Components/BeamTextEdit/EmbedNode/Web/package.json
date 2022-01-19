@@ -38,8 +38,6 @@
     "@typescript-eslint/parser": "^5.3.1",
     "babel-jest": "^27.3.1",
     "css-loader": "^6.5.1",
-    "debounce": "^1.2.1",
-    "dequal": "^2.0.2",
     "eslint": "^8.2.0",
     "eslint-formatter-gitlab": "^3.0.0",
     "identity-obj-proxy": "^3.0.0",

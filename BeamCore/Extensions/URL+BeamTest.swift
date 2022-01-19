@@ -66,6 +66,21 @@ class URLBeamTest: XCTestCase {
         XCTAssertNil(URL(string: "www.wikipedia.org/wiki")?.domain)
     }
 
+    func testSchemeAndHost() {
+        XCTAssertEqual(URL(string: "http://google.com/")!.schemeAndHost, "http://google.com")
+        XCTAssertEqual(URL(string: "http://google.com/search?prout")!.schemeAndHost, "http://google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com/search?prout")!.schemeAndHost, "http://www.google.com")
+        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?prout")!.schemeAndHost, "http://search.somedomain.google.com")
+        XCTAssertEqual(URL(string: "http://google/search?prout")!.schemeAndHost, "http://google")
+        XCTAssertNil(URL(string: "google/search?prout")!.schemeAndHost)
+    }
+
+    func testRootPathRemoved() {
+        XCTAssertEqual(URL(string: "http://www.google.com/")!.rootPathRemoved.absoluteString, "http://www.google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com")!.rootPathRemoved.absoluteString, "http://www.google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com/search")!.rootPathRemoved.absoluteString, "http://www.google.com/search")
+    }
+
     func testSameOrigin() {
         let firstUrl = URL(string: "http://www.example.com/dir/page.html")!
 

@@ -10,13 +10,13 @@ import BeamCore
 
 struct Omnibox: View {
 
-    static let defaultHeight: CGFloat = 46
+    static let defaultHeight: CGFloat = 50
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
-    var isLaunchAppear = false
+    var isInsideNote = false
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private var enableAnimations: Bool {
@@ -41,9 +41,10 @@ struct Omnibox: View {
         !isEditingCurrentTabURL
     }
 
-    private var boxIsPulled: Bool {
-        (autocompleteManager.autocompleteResults.isEmpty && autocompleteManager.searchQuery.isEmpty) &&
-        [.today, .note].contains(state.mode)
+    private var boxIsLow: Bool {
+        isInsideNote &&
+        autocompleteManager.autocompleteResults.isEmpty &&
+        autocompleteManager.searchQuery.isEmpty
     }
 
     private var showPressedState: Bool {
@@ -51,7 +52,7 @@ struct Omnibox: View {
     }
 
     var body: some View {
-        Omnibox.Background(isPulled: boxIsPulled, isPressingCharacter: showPressedState) {
+        Omnibox.Background(isLow: boxIsLow, isPressingCharacter: showPressedState) {
             VStack(spacing: 0) {
                 HStack(spacing: BeamSpacing._200) {
                     OmniboxSearchField(isEditing: isEditingBinding,
@@ -66,7 +67,7 @@ struct Omnibox: View {
                             })
                     }
                 }
-                .padding(.horizontal, 14)
+                .padding(.horizontal, 15)
                 .overlay(!shouldShowAutocompleteResults ? nil :
                             Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                             .blendModeLightMultiplyDarkScreen(),
@@ -94,13 +95,17 @@ struct OmniboxContainer: View {
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
-    private let boxWidth: CGFloat = 600
+    private let boxWidth: CGFloat = 680
     private let boxMinX: CGFloat = 87
 
     @State private var isFirstLaunchAppear = true
     private func boxOffset(with containerGeometry: GeometryProxy) -> CGSize {
-        var offset: CGSize = CGSize(width: 0, height: 100)
-        if state.mode == .web && state.focusOmniBoxFromTab && browserTabsManager.currentTab?.url != nil, let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
+        var offset: CGSize = CGSize(width: 0, height: 190)
+
+        if boxIsInsideNote {
+            offset.height = 140
+        } else if state.mode == .web && state.focusOmniBoxFromTab && browserTabsManager.currentTab?.url != nil,
+                    let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
             var x = currentTabUIFrame.midX - boxWidth / 2
             x = max(boxMinX, x)
             x = min(containerGeometry.size.width - boxWidth - 11, x)
@@ -111,6 +116,10 @@ struct OmniboxContainer: View {
 
     private var showPressedState: Bool {
         autocompleteManager.animateInputingCharacter
+    }
+
+    private var boxIsInsideNote: Bool {
+        isFirstLaunchAppear && state.mode == .today
     }
 
     var body: some View {
@@ -124,7 +133,7 @@ struct OmniboxContainer: View {
                         } else {
                             Spacer(minLength: 0)
                         }
-                        Omnibox(isLaunchAppear: isFirstLaunchAppear)
+                        Omnibox(isInsideNote: boxIsInsideNote)
                             .frame(width: boxWidth)
                             .padding(.top, offset.height)
                         Spacer(minLength: 0)
@@ -133,7 +142,7 @@ struct OmniboxContainer: View {
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .transition(customTranstion)
                 .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
-                .onAppear {
+                .onDisappear {
                     guard isFirstLaunchAppear else { return }
                     DispatchQueue.main.async {
                         isFirstLaunchAppear = false
@@ -147,12 +156,8 @@ struct OmniboxContainer: View {
         .asymmetric(
             insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.06))
                 .combined(with:
-                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.1)))
-                .combined(with:
                                 .scale(scale: 0.96).animation(BeamAnimation.easeInOut(duration: 0.1))),
             removal: .opacity.animation(BeamAnimation.easeInOut(duration: 0.1))
-                .combined(with:
-                                .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.defaultiOSEasing(duration: 0.1)))
                 .combined(with:
                                 .scale(scale: 0.9).animation(BeamAnimation.defaultiOSEasing(duration: 0.25)))
         )

@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "shortcut-slash.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

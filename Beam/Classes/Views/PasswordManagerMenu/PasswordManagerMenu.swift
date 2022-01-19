@@ -40,23 +40,29 @@ struct PasswordManagerMenu: View {
                             }
                         }
                         .padding(.vertical, 6)
+                    }
+                    if viewModel.display.separator1 {
                         Separator(horizontal: true)
                     }
-                    if viewModel.display.entriesForHost.count <= 1 || viewModel.display.entryDisplayLimit > 1 {
-                        OtherPasswordsCell { newState in
-                            if newState == .clicked {
-                                showingOtherPasswordsSheet.toggle()
+                    if viewModel.display.entryDisplayLimit > 0 {
+                        if viewModel.display.entriesForHost.count <= 1 || viewModel.display.entryDisplayLimit > 1 {
+                            OtherPasswordsCell { newState in
+                                if newState == .clicked {
+                                    showingOtherPasswordsSheet.toggle()
+                                }
+                            }
+                        } else {
+                            OtherPasswordsCell(host: viewModel.host.minimizedHost) { newState in
+                                if newState == .clicked {
+                                    viewModel.revealMoreItemsForCurrentHost()
+                                }
                             }
                         }
-                    } else {
-                        OtherPasswordsCell(host: viewModel.host.minimizedHost) { newState in
-                            if newState == .clicked {
-                                viewModel.revealMoreItemsForCurrentHost()
-                            }
-                        }
+                    }
+                    if viewModel.display.separator2 {
+                        Separator(horizontal: true)
                     }
                     if viewModel.display.showSuggestPasswordOption {
-                        Separator(horizontal: true)
                         SuggestPasswordCell(onChange: viewModel.onSuggestNewPassword)
                     }
                 }

@@ -9,15 +9,18 @@ import SwiftUI
 
 struct AutocompleteItem: View {
 
+    static let defaultHeight: CGFloat = 36
+
     @State var item: AutocompleteResult
     let selected: Bool
     var disabled: Bool = false
     var displayIcon: Bool = true
     var alwaysHighlightCompletingText: Bool = false
-    var allowNewCardShortcut: Bool = true
+    var allowsShortcut: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
     var additionalLeadingPadding: CGFloat = 0
+    var cornerRadius: Double = 6
 
     @State private var isTouchDown = false
 
@@ -35,7 +38,7 @@ struct AutocompleteItem: View {
         switch item.source {
         case .history:
             return "field-history"
-        case .autocomplete, .url, .topDomain:
+        case .autocomplete, .url, .topDomain, .mnemonic:
             return "field-search"
         case .createCard:
             return "field-card_new"
@@ -45,7 +48,7 @@ struct AutocompleteItem: View {
     }
 
     private var isUrlWithTitle: Bool {
-        item.source == .url && item.information != nil
+        item.source == .url && item.information?.isEmpty == false
     }
 
     private var defaultTextColor: Color {
@@ -56,7 +59,7 @@ struct AutocompleteItem: View {
     private let cardColor = BeamColor.Beam.swiftUI
     private var mainTextColor: Color {
         switch item.source {
-        case .topDomain:
+        case .topDomain, .mnemonic:
             return subtitleLinkColor
         case .url where !isUrlWithTitle:
             return subtitleLinkColor
@@ -89,7 +92,7 @@ struct AutocompleteItem: View {
         guard let completingText = item.completingText, item.source != .createCard else {
             return []
         }
-        if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain].contains(item.source) {
+        if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain, .mnemonic].contains(item.source) {
             return text.ranges(of: completingText, options: .caseInsensitive)
         }
         if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
@@ -100,21 +103,16 @@ struct AutocompleteItem: View {
 
     var mainText: String {
         if item.source == .createCard {
-            return "New Card:"
+            return "New Note:"
         }
-        if isUrlWithTitle, let information = item.information {
-            return information
-        }
-        return item.text
+        return item.displayText
     }
 
     var secondaryText: String? {
         if item.source == .createCard {
             return " " + item.text
-        } else if isUrlWithTitle {
-            return " – \(item.text)"
-        } else if let info = item.information {
-            return " – \(info)"
+        } else if let info = item.displayInformation {
+            return " - " + info
         }
         return nil
     }
@@ -160,25 +158,26 @@ struct AutocompleteItem: View {
             }
             .blendModeLightMultiplyDarkScreen()
             Spacer(minLength: 0)
-            if item.source == .createCard && allowNewCardShortcut {
-                HStack(spacing: BeamSpacing._20) {
-                    Icon(name: "shortcut-option", width: 12, color: cardColor, alignment: .trailing)
-                    Icon(name: "shortcut-return", width: 12, color: cardColor, alignment: .trailing)
+            if allowsShortcut {
+                if item.source == .createCard {
+                    ShortcutView(shortcut: .init(modifiers: [.option], keys: [.enter]), spacing: 1, withBackground: !selected)
+                        .frame(height: 18)
+                        .blendModeLightMultiplyDarkScreen()
+                } else {
+                    ShortcutView(shortcut: .init(modifiers: [], keys: [.enter]), spacing: 1, withBackground: !selected)
+                        .frame(height: 18)
+                        .opacity(selected ? 1 : 0)
+                        .blendModeLightMultiplyDarkScreen()
                 }
-                .opacity(0.5)
-                .blendModeLightMultiplyDarkScreen()
-            } else {
-                Icon(name: "shortcut-return", width: 12, color: selected ? shortcutColor : .clear, alignment: .trailing)
-                    .opacity(0.7)
-                    .blendModeLightMultiplyDarkScreen()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, BeamSpacing._100)
-        .padding(.horizontal, BeamSpacing._80)
+        .padding(.vertical, 10)
+        .padding(.horizontal, 9)
         .padding(.leading, additionalLeadingPadding)
+        .frame(height: Self.defaultHeight)
         .background(backgroundColor)
-        .cornerRadius(6)
+        .cornerRadius(cornerRadius)
         .onTouchDown { t in
             isTouchDown = t && !disabled
         }
@@ -190,7 +189,7 @@ struct AutocompleteItem: View {
             }
         }
         .accessibilityElement()
-        .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.text)-\(item.source)")
+        .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.displayText)-\(item.source)")
     }
 
     private func debugString(score: Float?) -> String {
@@ -217,10 +216,10 @@ extension AutocompleteItem {
 
 struct AutocompleteItem_Previews: PreviewProvider {
     static let items = [
-        AutocompleteResult(text: "James Dean", source: .createCard, information: "New Card"),
+        AutocompleteResult(text: "James Dean", source: .createCard, information: "New Note"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .autocomplete, information: "Google Search"),
-        AutocompleteResult(text: "jamesdean.com", source: .url),
+        AutocompleteResult(text: "jamesdean.com", source: .url, urlFields: .text),
         AutocompleteResult(text: "James Dean", source: .history, information: "https://wikipedia.com/James+Dean")
     ]
     static let selectedIndex = 3

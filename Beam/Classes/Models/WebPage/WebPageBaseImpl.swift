@@ -31,7 +31,7 @@ class WebPageBaseImpl: WebPage {
 
     var title: String = ""
     var url: URL?
-    var userTypedDomain: URL?
+    var requestedUrl: URL?
     var hasError: Bool = false
     var responseStatusCode: Int = 200
 
@@ -47,5 +47,6 @@ class WebPageBaseImpl: WebPage {
 
     var authenticationViewModel: AuthenticationViewModel?
     var searchViewModel: SearchViewModel?
+    var mouseHoveringLocation: MouseHoveringLocation = .none
 
 }

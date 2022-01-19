@@ -10,19 +10,19 @@ import XCTest
 
 class ReferencesTests: BaseTest {
     
-    let cardName1 = "Card Reference 1"
-    let cardName2 = "Card Reference 2"
+    let cardName1 = "Note Reference 1"
+    let cardName2 = "Note Reference 2"
     let shortcutsHelper = ShortcutsHelper()
     let waitHelper = WaitHelper()
     
     private func createCardsAndReferenceThem() -> CardTestView {
         let journalView = launchApp()
         
-        testRailPrint("Given I create 2 cards")
+        testRailPrint("Given I create 2 notes")
         journalView.createCardViaOmniboxSearch(cardName1)
         let cardView = journalView.createCardViaOmniboxSearch(cardName2)
         
-        testRailPrint("Then I reference card 2 to card 1")
+        testRailPrint("Then I reference note 2 to note 1")
         cardView.createReference(cardName1)
         
         return cardView
@@ -42,7 +42,7 @@ class ReferencesTests: BaseTest {
         XCTAssertEqual(cardView.getLinkNameByIndex(0), cardName2)
         XCTAssertEqual(cardView.getLinkContentByIndex(0), cardName1)
         
-        testRailPrint("Then I can navigate to a card by Reference to a source card")
+        testRailPrint("Then I can navigate to a note by Reference to a source note")
         cardView.openLinkByIndex(0)
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), cardName1)
@@ -55,7 +55,7 @@ class ReferencesTests: BaseTest {
             .expandReferenceSection()
         
         testRailPrint("When I delete the reference between \(cardName2) and \(cardName1)")
-        cardView.getLinksContentElement()[0].tapInTheMiddle()
+        cardView.getFirstLinksContentElement().tapInTheMiddle()
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.typeKeyboardKey(.delete)
         
@@ -63,7 +63,7 @@ class ReferencesTests: BaseTest {
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         //cardView.expandReferenceSection()
         
-        testRailPrint("Then card 2 has no references available")
+        testRailPrint("Then note 2 has no references available")
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString)
         
@@ -72,7 +72,7 @@ class ReferencesTests: BaseTest {
         XCTAssertFalse(cardView.doesReferenceSectionExist())
         cardView.createReference(cardName2)
         
-        testRailPrint("Given I refresh the view switching cards")
+        testRailPrint("Given I refresh the view switching notes")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         XCTAssertTrue(cardView.doesReferenceSectionExist())
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1)
@@ -82,23 +82,23 @@ class ReferencesTests: BaseTest {
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.typeKeyboardKey(.delete)
         
-        testRailPrint("Then card 2 has no references available")
+        testRailPrint("Then note 2 has no references available")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         XCTAssertFalse(cardView.doesReferenceSectionExist())
         
         testRailPrint("Given I reference \(cardName1) and I reference \(cardName2)")
         cardView.createReference(cardName1)
         
-        testRailPrint("Given I refresh the view switching cards")
+        testRailPrint("Given I refresh the view switching notes")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1)
         XCTAssertTrue(cardView.doesReferenceSectionExist())
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         
-        testRailPrint("When I delete card 1")
+        testRailPrint("When I delete note 1")
         cardView.clickDeleteButton().confirmDeletion()
         
-        testRailPrint("Then card 2 has no references available")
-        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardName1), "\(cardName1) card is failed to load")
+        testRailPrint("Then note 2 has no references available")
+        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardName1), "\(cardName1) note is failed to load")
         XCTAssertFalse(cardView.doesReferenceSectionExist())
     }
     
@@ -109,35 +109,35 @@ class ReferencesTests: BaseTest {
         BeamUITestsHelper(cardView.app).tapCommand(.resizeWindowLandscape)
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1)
         
-        testRailPrint("Given I rename card 1 to \(cardName1)\(textToType)")
+        testRailPrint("Given I rename note 1 to \(cardName1)\(textToType)")
         cardView.makeCardTitleEditable().typeText(textToType)
         cardView.typeKeyboardKey(.enter)
         
-        testRailPrint("Then card 1 has no references available")
+        testRailPrint("Then note 1 has no references available")
         XCTAssertTrue(waitHelper.waitForDoesntExist(cardView.getRefereceSectionCounterElement()))
         
-        testRailPrint("Given I rename the note in card 2 to \(renamedCard1)")
+        testRailPrint("Given I rename the note in note 2 to \(renamedCard1)")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
             .getCardNoteElementByIndex(0)
             .clickOnExistence()
         cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
         
-        testRailPrint("Then in card 1 all the reference appears again")
+        testRailPrint("Then in note 1 all the reference appears again")
         cardView.openCardFromRecentsList(cardTitleToOpen: renamedCard1)
         XCTAssertTrue(cardView.doesReferenceSectionExist())
         
-        testRailPrint("When I change the reference text in card 1")
+        testRailPrint("When I change the reference text in note 1")
         cardView.expandReferenceSection()
             .getLinkContentElementByIndex(0)
             .clickOnExistence()
         cardView.typeKeyboardKey(.delete, textToType.count)
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         
-        testRailPrint("Then in card 2 the note is renamed as in card 1")
+        testRailPrint("Then in note 2 the note is renamed as in note 1")
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), cardName1)
         
-        testRailPrint("Then in card 1 the reference is gone")
+        testRailPrint("Then in note 1 the reference is gone")
         cardView.openCardFromRecentsList(cardTitleToOpen: renamedCard1)
         XCTAssertFalse(cardView.doesReferenceSectionExist())
     }

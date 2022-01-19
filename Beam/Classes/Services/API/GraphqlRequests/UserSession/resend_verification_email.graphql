@@ -1,0 +1,6 @@
+mutation ResendVerificationEmail($email: Email!) {
+  resendVerificationEmail(input: {email: $email}) {
+    errors { path message}
+    success
+  }
+}

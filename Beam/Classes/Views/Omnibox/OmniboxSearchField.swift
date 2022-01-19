@@ -41,7 +41,7 @@ struct OmniboxSearchField: View {
     private var favicon: NSImage? {
         var icon: NSImage?
         if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url,
-           [.history, .url, .topDomain].contains(autocompleteResult.source) {
+           [.history, .url, .topDomain, .mnemonic].contains(autocompleteResult.source) {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { (image) in
                 icon = image
             }
@@ -56,7 +56,7 @@ struct OmniboxSearchField: View {
     private var resultSubtitle: String? {
         guard isEditing else { return nil }
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
-        if let info = autocompleteResult.information {
+        if let info = autocompleteResult.displayInformation {
             return info
         } else if autocompleteResult.source == .autocomplete {
             return autocompleteManager.searchEngine.description
@@ -78,7 +78,7 @@ struct OmniboxSearchField: View {
     private var textSelectionColor: BeamColor {
         BeamColor.Generic.blueTextSelection
     }
-    private let textFont = BeamFont.regular(size: 15)
+    private let textFont = BeamFont.regular(size: 16)
 
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
@@ -96,7 +96,7 @@ struct OmniboxSearchField: View {
                 BeamTextField(
                     text: textFieldText,
                     isEditing: $isEditing,
-                    placeholder: "Search Beam or the web",
+                    placeholder: "Search the web and your notes",
                     font: textFont.nsFont,
                     textColor: textColor.nsColor,
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
@@ -123,7 +123,6 @@ struct OmniboxSearchField: View {
                             .foregroundColor(Color.purple)
                             .hidden()
                             .layoutPriority(10)
-                            .animation(nil)
                         GeometryReader { geo in
                             HStack {
                             let pixelRoundUp = geo.frame(in: .global).minX.truncatingRemainder(dividingBy: 1)
@@ -146,6 +145,7 @@ struct OmniboxSearchField: View {
                 }
             }
         }
+        .animation(nil)
     }
 
     func onEnterPressed(modifierFlags: NSEvent.ModifierFlags?) {
