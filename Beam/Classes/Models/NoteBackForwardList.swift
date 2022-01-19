@@ -34,6 +34,15 @@ class NoteBackForwardList: Codable {
             }
         }
 
+        func isNote(_ id: UUID) -> Bool {
+            switch self {
+            case let .note(note):
+                return note.id == id
+            default:
+                return false
+            }
+        }
+
         public init(from decoder: Decoder) throws {
             let container = try decoder.container(keyedBy: CodingKeys.self)
             self = .journal
@@ -141,6 +150,11 @@ class NoteBackForwardList: Codable {
         }
 
         return nil
+    }
+
+    func purgeDeletedNote(withId id: UUID) {
+        backList = backList.compactMap { $0.isNote(id) ? nil : $0 }
+        forwardList = forwardList.compactMap { $0.isNote(id) ? nil : $0 }
     }
 
     func clear() {
