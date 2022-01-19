@@ -546,6 +546,13 @@ import Sentry
     func setup(data: BeamData) {
         destinationCardName = data.todaysName
         backForwardList.push(.journal)
+
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] id in
+                guard let self = self else { return }
+                self.backForwardList.purgeDeletedNote(withId: id)
+                self.updateCanGoBackForward()
+            }.store(in: &scope)
     }
 
     func setup(webView: WKWebView) {

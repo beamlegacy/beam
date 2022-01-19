@@ -17,7 +17,7 @@ public protocol RWLockable {
 public class RWLock: RWLockable {
     private var lock = pthread_rwlock_t()
 
-    init() {
+    public init() {
         pthread_rwlock_init(&lock, nil)
     }
 
