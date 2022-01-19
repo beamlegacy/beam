@@ -227,10 +227,9 @@ extension NoteHeaderView {
         // MARK: Delete
         private func confirmedDelete() {
             guard let note = note else { return }
-            let cmdManager = CommandManagerAsync<DocumentManager>()
-            cmdManager.deleteDocuments(ids: [note.id], in: DocumentManager())
-            guard let state = state else { return }
-            DispatchQueue.main.async {
+
+            // To prevent complex interactions with the state and notifications it receives, let's apply the state changes before we delete the note:
+            if let state = state {
                 if state.canGoBack {
                     state.goBack()
                 } else {
@@ -239,6 +238,9 @@ extension NoteHeaderView {
                 state.backForwardList.clearForward()
                 state.updateCanGoBackForward()
             }
+
+            let cmdManager = CommandManagerAsync<DocumentManager>()
+            cmdManager.deleteDocuments(ids: [note.id], in: DocumentManager())
         }
 
         func promptConfirmDelete() {
