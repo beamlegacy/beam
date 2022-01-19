@@ -303,9 +303,10 @@ platform :mac do
                 build_configurations: ["Release"])
 
     UI.message "Branch is #{Actions.git_branch}"
-    unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch)
-      add_badge(dark: true,
-                grayscale: true,
+    unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch) || Actions.git_branch.start_with?("beta")
+
+      add_badge(dark: false,
+                grayscale: false,
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
     end
 
