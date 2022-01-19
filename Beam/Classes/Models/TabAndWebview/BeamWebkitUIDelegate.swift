@@ -35,6 +35,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
 
     func webViewDidClose(_ webView: WKWebView) {
         Logger.shared.logDebug("webView webDidClose", category: .web)
+        _ = (self.page as? BrowserTab)?.state?.closeCurrentTab()
     }
 
     func webView(_ webView: WKWebView, runJavaScriptAlertPanelWithMessage message: String, initiatedByFrame frame: WKFrameInfo, completionHandler: @escaping () -> Void) {
