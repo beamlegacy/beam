@@ -424,23 +424,21 @@ public class DocumentManager: NSObject {
             let inserted = context.insertedObjects.compactMap { ($0 as? Document)?.documentStruct }
             let updated = context.updatedObjects.compactMap { ($0 as? Document)?.documentStruct }
             let saved = Set(inserted + updated)
-            let deleted = context.deletedObjects.compactMap { ($0 as? Document)?.id }
+            let softDeleted = Set(saved.compactMap { object -> UUID? in
+                return object.deletedAt == nil ? nil : object.id
+            })
+            let deleted = softDeleted.union(Set(context.deletedObjects.compactMap { ($0 as? Document)?.id }))
 
             let localTimer = BeamDate.now
             try CoreDataManager.save(context)
             Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
 
-            let dispatchNotifications: (UUID) -> Bool = { id in
-                guard let note = BeamNote.getFetchedNote(id) else { return true }
-                return note.changePropagationEnabled
+            for noteSaved in saved {
+                Self.notifyDocumentSaved(noteSaved)
             }
 
-            for noteSaved in saved where dispatchNotifications(noteSaved.id) {
-                Self.documentSaved.send(noteSaved)
-            }
-
-            for noteDeleted in deleted where dispatchNotifications(noteDeleted) {
-                Self.documentDeleted.send(noteDeleted)
+            for noteDeleted in deleted {
+                Self.notifyDocumentDeleted(noteDeleted)
             }
 
             return true
@@ -695,6 +693,64 @@ extension DocumentManager {
     static let documentSaved = PassthroughSubject<DocumentStruct, Never>()
     /// This publisher is triggered anytime we are completely removing a note from the DB. Soft delete do NOT call it though.
     static let documentDeleted = PassthroughSubject<UUID, Never>()
+
+    private static var notificationLock = RWLock()
+    private static var waitingSavedNotifications = [UUID: DocumentStruct]()
+    private static var waitingDeletedNotifications = Set<UUID>()
+    private static var notificationStatus = 1
+
+    private static func notifyDocumentSaved(_ documentStuct: DocumentStruct) {
+        if notificationEnabled {
+            documentSaved.send(documentStuct)
+        } else {
+            notificationLock.write {
+                waitingSavedNotifications[documentStuct.id] = documentStuct
+            }
+        }
+    }
+
+    private static func notifyDocumentDeleted(_ documentId: UUID) {
+        if notificationEnabled {
+            documentDeleted.send(documentId)
+        } else {
+            _ = notificationLock.write {
+                waitingDeletedNotifications.insert(documentId)
+            }
+        }
+    }
+
+    static var notificationEnabled: Bool {
+        notificationLock.read {
+            notificationStatus > 0
+        }
+    }
+    static func disableNotifications() {
+        notificationLock.write {
+            notificationStatus -= 1
+        }
+    }
+    static func enableNotifications() {
+        notificationLock.write {
+            notificationStatus += 1
+            assert(notificationStatus <= 1)
+        }
+        purgeNotifications()
+    }
+
+    private static func purgeNotifications() {
+        guard notificationEnabled else { return }
+        notificationLock.write {
+            for saved in self.waitingSavedNotifications.values {
+                Self.documentSaved.send(saved)
+            }
+            for deleted in self.waitingDeletedNotifications {
+                Self.documentDeleted.send(deleted)
+            }
+
+            self.waitingSavedNotifications.removeAll()
+            self.waitingDeletedNotifications.removeAll()
+        }
+    }
 }
 
 // For tests

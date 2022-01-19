@@ -228,18 +228,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                     // Also update the journal if a note was added or removed and it's not in the future
                     if let journalDateString = documentStruct.journalDate, let journalDate = BeamNoteType.dateFormater.date(from: journalDateString), journalDate <= BeamDate.now {
                         let contained = self.journal.contains(where: { $0.id == documentStruct.id })
-                        let added = documentStruct.deletedAt == nil && !contained
-                        let removed = documentStruct.deletedAt != nil && contained
-
-                        if added {
+                        if documentStruct.deletedAt == nil && !contained {
                             if !self.journal.contains(where: { $0.id == documentStruct.id }),
                                let index = self.journal.firstIndex(where: { journalDate > ($0.type.journalDate ?? BeamDate.now) }),
                                let note = BeamNote.fetch(id: documentStruct.id, includeDeleted: false) {
                                 self.journal.insert(note, at: index)
-                            }
-                        } else if removed {
-                            if let index = self.journal.firstIndex(where: { $0.id == documentStruct.id }) {
-                                self.journal.remove(at: index)
                             }
                         }
                     }
