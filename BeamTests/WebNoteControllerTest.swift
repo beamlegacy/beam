@@ -33,41 +33,4 @@ class WebNoteControllerTest: XCTestCase {
         XCTAssertEqual(element, root)
     }
 
-    func testAdd() throws {
-        PreferencesManager.browsingSessionCollectionIsOn = true
-        defer { PreferencesManager.browsingSessionCollectionIsOn = false }
-        let note = BeamNote(title: "Sample note")
-
-        let controller = WebNoteController(note: note)
-
-        let someTitle = "Some website"
-        let someUrl = "https://www.website.com"
-        let added = controller.add(url: URL(string: someUrl)!, text: someTitle, reason: .navigation)
-        let noteChildren = controller.note?.children ?? []
-        XCTAssertEqual(noteChildren.count, 1)
-        XCTAssertEqual(noteChildren[0], added)
-        XCTAssertEqual(controller.element, added)
-        if let addedText = added?.text {
-            XCTAssertEqual(addedText.text, someTitle)
-            let attribute = addedText.ranges[0].attributes[0]
-            XCTAssertEqual(attribute, .link(someUrl))
-        }
-
-        // Add the same
-        let addedAgain = controller.add(url: URL(string: someUrl)!, text: someTitle, reason: .navigation)
-        XCTAssertEqual(note.children.count, 1)   // Still one, no add
-        XCTAssertEqual(controller.element, added)
-        XCTAssertEqual(addedAgain, added)
-
-        // Navigation doesn't nest
-        let subAdd = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", reason: .navigation)
-        XCTAssertEqual(note.children.count, 2)   // New bullet, not nested
-        XCTAssertEqual(controller.element, subAdd)
-        XCTAssertEqual(note.children[1], subAdd)
-
-        // Direct access doesn't nest
-        let parallelAdd = controller.add(url: URL(string: "http://some.other")!, text: "Some parallel website", reason: .loading)
-        XCTAssertEqual(note.children.count, 3)   // Still one, other is nested
-        XCTAssertEqual(note.children[2], parallelAdd)
-    }
 }
