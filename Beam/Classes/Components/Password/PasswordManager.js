@@ -25,13 +25,12 @@ window.beam.__ID__PMng = {
         return true
     },
 
+    frameIdentifier: '',
+
     lastId: 0,
     beam_makeBeamId: function(element) {
-        if (element.id.length != 0) {
-            return 'id-' + element.id
-        }
         this.lastId ++
-        return 'beam-' + this.lastId
+        return 'beam-' + this.frameIdentifier + '-' + this.lastId
     },
 
     beam_hasBeamId: function(element) {
@@ -55,7 +54,7 @@ window.beam.__ID__PMng = {
         return elements[0]
     },
 
-    beam_getTextFieldsInDocument: function (_doc, _frame) {
+    beam_getTextFieldsInDocument: function() {
         const textFields = []
         for (let tagName of ['input', 'select', 'textarea']) {
             let inputElements = document.getElementsByTagName(tagName)
@@ -125,22 +124,14 @@ window.beam.__ID__PMng = {
         window.webkit.messageHandlers.password_formSubmit.postMessage(this.beam_getOrCreateBeamId(event.target))
     },
 
-    beam_sendTextFields: function () {
+    beam_sendTextFields: function(_frameIdentifier) {
+        this.frameIdentifier = _frameIdentifier
         let observer = new MutationObserver(function (changes, observer) {
-            let textFields = this.beam_getTextFieldsInDocument(document, null)
+            let textFields = this.beam_getTextFieldsInDocument()
             window.webkit.messageHandlers.password_textInputFields.postMessage(JSON.stringify(textFields))
         }.bind(this));
         observer.observe(document, {childList: true, subtree: true})
-        let textFields = this.beam_getTextFieldsInDocument(document, null)
-        for (f = 0; f < window.frames.length; f++) {
-            let frame = window.frames[f]
-            try {
-                const frameTextFields = this.beam_getTextFieldsInDocument(frame.contentDocument, frame.name)
-                textFields = textFields.concat(frameTextFields)
-            } catch (e) {
-                console.error(e)
-            }
-        }
+        let textFields = this.beam_getTextFieldsInDocument()
         window.webkit.messageHandlers.password_textInputFields.postMessage(JSON.stringify(textFields))
     },
 
@@ -216,3 +207,5 @@ window.beam.__ID__PMng = {
         }
     },
 };
+
+window.webkit.messageHandlers.password_loaded.postMessage(document.URL)

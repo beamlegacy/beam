@@ -1,0 +1,14 @@
+<html>
+
+<head>
+<title>Nested iframe signin</title>
+</head>
+
+<body>
+<h1>Nested iframe signin</h1>
+
+<iframe id="enclosing_iframe" title="signin" src="/iframe" height="600" width="90%" />
+
+</body>
+
+</html>
