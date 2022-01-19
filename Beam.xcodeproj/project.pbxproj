@@ -480,6 +480,8 @@
 		8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */; };
 		8A4801AD26A1EBBF008F33FE /* PointAndShoot+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */; };
 		8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A50A53326E1035E0094BA97 /* BeamElementJoinTests.swift */; };
+		8A5EDB1A278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */; };
+		8A5EDB21278C584E007C0C59 /* BrowserTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */; };
 		8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
@@ -1750,6 +1752,8 @@
 		8A5BC6372733EFEF008E22D2 /* BeamNode.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = BeamNode.test.ts; sourceTree = "<group>"; };
 		8A5BC6382733EFEF008E22D2 /* Native.test.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = Native.test.ts; sourceTree = "<group>"; };
 		8A5BC6392733EFEF008E22D2 /* PNSWindowMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PNSWindowMock.ts; sourceTree = "<group>"; };
+		8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebNoteControllerTest+BrowsingCollect.swift"; sourceTree = "<group>"; };
+		8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabTests.swift; sourceTree = "<group>"; };
 		8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsMessageHandlerFrameBoundsTest.swift; sourceTree = "<group>"; };
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
 		8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BeamTest.swift"; sourceTree = "<group>"; };
@@ -4495,6 +4499,8 @@
 				A075AB0E268F5C9400FC85B1 /* BeamDataFolderTests.swift */,
 				8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */,
 				BAA6711C12F68C78C7D44DA5 /* WebNoteControllerTest.swift */,
+				8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */,
+				8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */,
 				8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */,
 				8A141559267393E2005F2464 /* WebPositionsTest.swift */,
 				9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */,
@@ -7058,6 +7064,7 @@
 				8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */,
 				87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */,
 				8A7C8C1926B8137F00471A5B /* PointAndShootTargetsPathTests.swift in Sources */,
+				8A5EDB21278C584E007C0C59 /* BrowserTabTests.swift in Sources */,
 				8A7F949226A8611600270A74 /* PointAndShootCancelShootTest.swift in Sources */,
 				37C4130D27854EC600954FD7 /* SearchEngineDescriptionTests.swift in Sources */,
 				963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */,
@@ -7088,6 +7095,7 @@
 				96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */,
 				4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */,
 				9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */,
+				8A5EDB1A278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift in Sources */,
 				BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */,
 				BAA67A6498E4E69779855E19 /* DownloadManagerTest.swift in Sources */,
 				A501B4D1273439C500407F3E /* EmbedContentAPIStrategyTests.swift in Sources */,

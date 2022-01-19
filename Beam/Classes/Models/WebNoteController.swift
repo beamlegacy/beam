@@ -16,6 +16,11 @@ enum NoteElementAddReason {
      Point and Shoot content collected from the page
      */
     case pointandshoot
+
+    /**
+     When the page recieves a title update
+     */
+    case receivedPageTitle
 }
 
 /**
@@ -105,18 +110,26 @@ class WebNoteController: Encodable, Decodable {
     ///   - browsingOrigin: browsing tree origin value
     /// - Returns: BeamElement of updated note or nil
     public func add(url: URL, text: String?, reason: NoteElementAddReason, isNavigatingFromNote: Bool? = nil, browsingOrigin: BrowsingTreeOrigin? = nil) -> BeamElement? {
-        if PreferencesManager.browsingSessionCollectionIsOn {
-            return addContent(url: url, text: text, reason: reason)
-        } else if !PreferencesManager.browsingSessionCollectionIsOn,
-                  let isNavigatingFromNote = isNavigatingFromNote, isNavigatingFromNote {
-            switch browsingOrigin {
-            case .searchFromNode, .browsingNode:
-                return addContent(url: url, text: text, reason: reason)
-            default:
-                break
-            }
+        // With BrowsingSessionCollect enabled AND Navigating from Note
+        guard PreferencesManager.browsingSessionCollectionIsOn, isNavigatingFromNote == true else {
+
+               if let newText = text,
+                  noteOrDefault.text.text != newText,
+                  reason == .receivedPageTitle {
+                   // Allow for updating the Note text even when collect is disabled
+                   setContents(url: url, text: text)
+               }
+
+               return nil
         }
-        return nil
+
+        // collect browsing links
+        switch browsingOrigin {
+        case .searchFromNode, .browsingNode:
+            return addContent(url: url, text: text, reason: reason)
+        default:
+            return nil
+        }
     }
 
     /// Add the current page url to the current note. and return
@@ -166,7 +179,12 @@ class WebNoteController: Encodable, Decodable {
     private func currentElementIsSimple() -> Bool {
         if element.text.ranges.count == 1 {
             let range = element.text.ranges.first
-            return range != nil ? range!.attributes.count <= 1 : true
+            if let range = range {
+                let result = range.attributes.count <= 1
+                return result
+            } else {
+                return true
+            }
         }
         return false
     }
@@ -185,7 +203,7 @@ class WebNoteController: Encodable, Decodable {
 
         let name = getContentName(url: url, text: text)
         var attributes = range.attributes
-        let alreadyHadLink = attributes.contains(where: { $0 == .link(url.absoluteString) })
+        let alreadyHadLink = !element.text.links.isEmpty
 
         if !alreadyHadLink || name != range.string {
             // let updatedAttributed = range.attributes + [.link(url.absoluteString)]
