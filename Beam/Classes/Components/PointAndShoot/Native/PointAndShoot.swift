@@ -349,7 +349,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     /// - Parameter group: ShootGroup of targets to draw the confirmation UI
     private func showShootConfirmation(group: ShootGroup) {
         guard let confirmation = group.confirmation else {
-            fatalError("ShootGroup confirmation enum should be set, instead recieved: \(group)")
+            fatalError("ShootGroup confirmation enum should be set, instead received: \(group)")
         }
         var mutableGroup = group
         mutableGroup.setConfirmation(confirmation)

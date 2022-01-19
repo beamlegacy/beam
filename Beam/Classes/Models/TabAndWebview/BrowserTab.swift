@@ -310,7 +310,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         guard let url = url else {
             return
         }
-        logInNote(url: url, title: title, reason: .loading)
+        logInNote(url: url, title: title, reason: .receivedPageTitle)
         self.title = title ?? ""
     }
 
