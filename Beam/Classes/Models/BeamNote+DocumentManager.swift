@@ -54,11 +54,7 @@ extension BeamNote: BeamNoteDocument {
     static var purgingNotes = Set<UUID>()
     static func updateNote(_ documentStruct: DocumentStruct) {
         guard documentStruct.deletedAt == nil else {
-            if !purgingNotes.contains(documentStruct.id) {
-                purgeDeletedNode(documentStruct.id)
-            } else {
-                purgingNotes.remove(documentStruct.id)
-            }
+            purgeDeletedNode(documentStruct.id)
             return
         }
 
@@ -93,6 +89,7 @@ extension BeamNote: BeamNoteDocument {
             return
         }
 
+        note.deleted = true
         unload(note: note)
 
         note.links.map({ $0.noteID }).forEach { id in
@@ -419,7 +416,7 @@ extension BeamNote: BeamNoteDocument {
 
         let documentManager = DocumentManager()
         // Is the note in the cache?
-        if let note = getFetchedNote(title) {
+        if let note = getFetchedNote(title), !note.deleted {
             return note
         }
 

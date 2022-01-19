@@ -81,17 +81,13 @@ class RecentsManager: ObservableObject {
 
     private func observeCoreDataChanges() {
         DocumentManager.documentSaved.receive(on: DispatchQueue.main)
-            .sink { [weak self] documentStruct in
-                guard let self = self else { return }
-                if documentStruct.deletedAt != nil {
-                    self.fetchRecents()
-                }
+            .sink { [weak self] _ in
+                self?.fetchRecents()
             }.store(in: &deletionsCancellables)
 
         DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
-                   guard let self = self else { return }
-                self.fetchRecents()
+                self?.fetchRecents()
             }.store(in: &deletionsCancellables)
 
     }
