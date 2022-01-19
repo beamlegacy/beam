@@ -99,6 +99,18 @@ class WebPositions: ObservableObject {
         return calculateViewportPosition(href: href, prop: prop)
     }
 
+    /// Calculate frame position relative to main frame
+    /// - Parameters:
+    ///   - href: url of frame
+    /// - Returns: absolute position
+    func viewportPosition(href: HREF) -> CGPoint {
+        let frameOffsetX = viewportPosition(href, prop: .x).reduce(0, +)
+        let frameOffsetY = viewportPosition(href, prop: .y).reduce(0, +)
+        let frameScrollX = viewportPosition(href, prop: .scrollX).reduce(0, +)
+        let frameScrollY = viewportPosition(href, prop: .scrollY).reduce(0, +)
+        return CGPoint(x: frameOffsetX - frameScrollX, y: frameOffsetY - frameScrollY)
+    }
+
     /// Sets frameInfo to stored dict. Will only set frameInfo when the provided frame is a child frame, or isn't registered yet.
     /// - Parameter frame: a full FrameInfo object
     func setFrameInfo(frame: FrameInfo) {

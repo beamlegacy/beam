@@ -1,0 +1,14 @@
+<html>
+
+<head>
+<title>iframe signin</title>
+</head>
+
+<body>
+<h1>iframe signin</h1>
+
+<iframe id="some_random_iframe" title="signin" src="/signin" height="400" width="90%" />
+
+</body>
+
+</html>
