@@ -39,11 +39,11 @@ extension BeamObjectChecksum {
         predicates.append(NSPredicate(format: "id IN %@",
                                       objects.compactMap { $0.beamObjectId } as CVarArg))
 
-        if let objects = try? context.fetch(request) {
+        context.performAndWait {
+            guard let objects = try? context.fetch(request) else { return }
             for objectChecksum in objects {
-                if let id = objectChecksum.id {
-                    result[id] = objectChecksum.previous_checksum
-                }
+                guard let id = objectChecksum.id else { continue }
+                result[id] = objectChecksum.previous_checksum
             }
         }
 
@@ -52,11 +52,13 @@ extension BeamObjectChecksum {
 
     /// I use `BeamObject` as the result key because the 100% way to be unique is a combined object type + object id
     static func previousChecksums(beamObjects: [BeamObject]) -> [BeamObject: String] {
-        let (checksums, _) = findChecksumsForBeamObjects(beamObjects: beamObjects)
+        let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
         var result: [BeamObject: String] = [:]
 
-        checksums.forEach { (key, value) in
-            result[key] = value.previous_checksum
+        context.performAndWait {
+            checksums.forEach { (key, value) in
+                result[key] = value.previous_checksum
+            }
         }
 
         return result
@@ -68,11 +70,12 @@ extension BeamObjectChecksum {
         request.predicate = predicates(id: object.beamObjectId, type: type(of: object).beamObjectType)
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        if let objects = try? context.fetch(request) {
+
+        return context.performAndWait {
+            guard let objects = try? context.fetch(request) else { return nil }
+
             return objects.first?.data_sent
         }
-
-        return nil
     }
 
     static func previousSavedObject<T: BeamObjectProtocol>(object: T) throws -> T? {
@@ -81,10 +84,13 @@ extension BeamObjectChecksum {
         request.predicate = predicates(id: object.beamObjectId, type: type(of: object).beamObjectType)
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
-        guard let objects = try? context.fetch(request), let previousData = objects.first?.data_sent else { return nil }
 
-        let beamObject = try Self.decoder.decode(BeamObject.self, from: previousData)
-        return try beamObject.decodeBeamObject()
+        return try context.performAndWait {
+            guard let objects = try? context.fetch(request), let previousData = objects.first?.data_sent else { return nil }
+
+            let beamObject = try Self.decoder.decode(BeamObject.self, from: previousData)
+            return try beamObject.decodeBeamObject()
+        }
     }
 
     static var encoder: JSONEncoder {
@@ -110,8 +116,10 @@ extension BeamObjectChecksum {
                                category: .beamObjectChecksum)
 
         let (objectChecksum, context) = objectWithObject(object: object)
-        context.delete(objectChecksum)
-        try CoreDataManager.save(context)
+        try context.performAndWait {
+            context.delete(objectChecksum)
+            try CoreDataManager.save(context)
+        }
     }
 
     static func deletePreviousChecksum(beamObject: BeamObject) throws {
@@ -119,8 +127,10 @@ extension BeamObjectChecksum {
                                category: .beamObjectChecksum)
 
         let (objectChecksum, context) = objectWithObject(object: beamObject)
-        context.delete(objectChecksum)
-        try CoreDataManager.save(context)
+        try context.performAndWait {
+            context.delete(objectChecksum)
+            try CoreDataManager.save(context)
+        }
     }
 
     static func deletePreviousChecksums(type: BeamObjectObjectType) throws {
@@ -133,11 +143,13 @@ extension BeamObjectChecksum {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        for object in try context.fetch(request) {
-            context.delete(object)
-        }
+        try context.performAndWait {
+            for object in try context.fetch(request) {
+                context.delete(object)
+            }
 
-        try CoreDataManager.save(context)
+            try CoreDataManager.save(context)
+        }
     }
 
     static func deletePreviousChecksums(beamObjects: [BeamObject]) throws {
@@ -158,28 +170,37 @@ extension BeamObjectChecksum {
     static func deleteAll() throws {
         Logger.shared.logDebug("Deleted all checksums",
                                category: .beamObjectChecksum)
+        let localTimer = BeamDate.now
         let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        for object in try context.fetch(request) {
-            context.delete(object)
-        }
+        try context.performAndWait {
+            for object in try context.fetch(request) {
+                context.delete(object)
+            }
 
-        try CoreDataManager.save(context)
+            try CoreDataManager.save(context)
+            Logger.shared.logInfo("Execution time for BeamObjectChecksum deleteAll", category: .beamObjectChecksum, localTimer: localTimer)
+        }
     }
 
     // MARK: -
     // MARK: Saves
 
     func isEqual(to object: BeamObject) -> Bool {
-        self.previous_checksum == object.dataChecksum &&
-        self.data_sent == (try? Self.encoder.encode(object))
+        previous_checksum == object.dataChecksum &&
+        data_sent == (try? Self.encoder.encode(object))
     }
 
     static func savePreviousChecksums(beamObjects: [BeamObject]) throws {
+        guard !beamObjects.isEmpty else {
+            Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
+            return
+        }
+
         var localTimer = BeamDate.now
 
-        let (checksums, context) = self.findChecksumsForBeamObjects(beamObjects: beamObjects)
+        let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
 
         Logger.shared.logDebug("Found or created previous checksum objects for \(beamObjects.count) beamObjects",
                                category: .beamObjectChecksum,
@@ -187,89 +208,106 @@ extension BeamObjectChecksum {
 
         localTimer = BeamDate.now
 
-        for beamObject in beamObjects {
-            guard let checksum = checksums[beamObject] else { assert(false); continue }
+        try context.performAndWait {
+            for beamObject in beamObjects {
+                let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
 
-            checksum.previous_checksum = beamObject.dataChecksum
+                // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
+                // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
+                if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
+                    checksum.data_sent = try encoder.encode(beamObject)
+                }
 
-            // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
-            // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
-            if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
-                checksum.data_sent = try encoder.encode(beamObject)
+                checksum.id = checksum.id ?? beamObject.id
+                checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
+                checksum.previous_checksum = beamObject.dataChecksum
+                checksum.updated_at = BeamDate.now
             }
 
-            checksum.updated_at = BeamDate.now
+            try CoreDataManager.save(context)
+
+            let objectTypes = Array(Set(beamObjects.map { $0.beamObjectType }))
+            Logger.shared.logDebug("Saved previous checksums for \(beamObjects.count) \(objectTypes) beamObjects",
+                                   category: .beamObjectChecksum,
+                                   localTimer: localTimer)
         }
-
-        try CoreDataManager.save(context)
-
-        Logger.shared.logDebug("Saved previous checksums for \(beamObjects.count) beamObjects",
-                               category: .beamObjectChecksum,
-                               localTimer: localTimer)
     }
 
     /// This will be much slower than using `savePreviousChecksums(beamObjects)`
     static func savePreviousChecksums<T: BeamObjectProtocol>(objects: [T]) throws {
-        let localTimer = BeamDate.now
-
-        let (checksums, context) = self.findChecksumsForObjects(objects: objects)
-
-        for object in objects {
-            guard let checksum = checksums[object] else { assert(false); continue }
-
-            let beamObject = try BeamObject(object: object)
-
-            checksum.previous_checksum = beamObject.dataChecksum
-
-            // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
-            // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
-            if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
-                checksum.data_sent = try encoder.encode(beamObject)
-            }
-            checksum.updated_at = BeamDate.now
+        guard !objects.isEmpty else {
+            Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
+            return
         }
 
-        try CoreDataManager.save(context)
+        let localTimer = BeamDate.now
 
-        Logger.shared.logDebug("Saved previous checksums for \(objects.count) \(T.beamObjectType) objects",
-                               category: .beamObjectChecksum,
-                               localTimer: localTimer)
+        let (checksums, context) = findChecksumsForObjects(objects: objects)
+
+        try context.performAndWait {
+            for object in objects {
+                let checksum = checksums[object] ?? BeamObjectChecksum(context: context)
+
+                let beamObject = try BeamObject(object: object)
+
+                // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
+                // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
+                if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
+                    checksum.data_sent = try encoder.encode(beamObject)
+                }
+
+                checksum.id = checksum.id ?? beamObject.id
+                checksum.object_type = checksum.object_type ?? type(of: object).beamObjectType.rawValue
+                checksum.previous_checksum = beamObject.dataChecksum
+                checksum.updated_at = BeamDate.now
+            }
+
+            try CoreDataManager.save(context)
+
+            Logger.shared.logDebug("Saved previous checksums for \(objects.count) \(T.beamObjectType) objects",
+                                   category: .beamObjectChecksum,
+                                   localTimer: localTimer)
+        }
     }
 
     static func savePreviousChecksum(beamObject: BeamObject, noLog: Bool = false) throws {
         let (objectChecksum, context) = objectWithObject(object: beamObject)
 
-        guard !objectChecksum.isEqual(to: beamObject) else { return }
+        try context.performAndWait {
+            guard !objectChecksum.isEqual(to: beamObject) else { return }
 
-        objectChecksum.previous_checksum = beamObject.dataChecksum
-        objectChecksum.data_sent = try encoder.encode(beamObject)
-        objectChecksum.updated_at = BeamDate.now
+            objectChecksum.previous_checksum = beamObject.dataChecksum
+            objectChecksum.data_sent = try encoder.encode(beamObject)
+            objectChecksum.updated_at = BeamDate.now
 
-        if !noLog {
-            Logger.shared.logDebug("Saving previous checksum for \(beamObject.description): \(objectChecksum.previous_checksum ?? "-")",
-                                   category: .beamObjectChecksum)
+            if !noLog {
+                Logger.shared.logDebug("Saving previous checksum for \(beamObject.description): \(objectChecksum.previous_checksum ?? "-")",
+                                       category: .beamObjectChecksum)
+            }
+
+            try CoreDataManager.save(context)
         }
-
-        try CoreDataManager.save(context)
     }
 
     static func savePreviousChecksum<T: BeamObjectProtocol>(object: T, noLog: Bool = false) throws {
         let (objectChecksum, context) = objectWithObject(object: object)
 
-        let beamObject = try BeamObject(object: object)
+        try context.performAndWait {
+            let beamObject = try BeamObject(object: object)
 
-        guard !objectChecksum.isEqual(to: object) else { return }
+            guard !objectChecksum.isEqual(to: object) else { return }
 
-        objectChecksum.previous_checksum = beamObject.dataChecksum
-        objectChecksum.data_sent = try encoder.encode(beamObject)
-        objectChecksum.updated_at = BeamDate.now
+            objectChecksum.previous_checksum = beamObject.dataChecksum
+            objectChecksum.data_sent = try encoder.encode(beamObject)
+            objectChecksum.updated_at = BeamDate.now
 
-        if !noLog {
-            Logger.shared.logDebug("Saving previous checksum for \(object.description): \(objectChecksum.previous_checksum ?? "-")",
-                                   category: .beamObjectChecksum)
+            if !noLog {
+                Logger.shared.logDebug("Saving previous checksum for \(object.description): \(objectChecksum.previous_checksum ?? "-")",
+                                       category: .beamObjectChecksum)
+            }
+
+            try CoreDataManager.save(context)
         }
-
-        try CoreDataManager.save(context)
     }
 
     static func savePreviousChecksum<T: BeamObjectProtocol>(object: T, previousChecksum: String?) throws {
@@ -277,14 +315,16 @@ extension BeamObjectChecksum {
 
         let beamObject = try BeamObject(object: object)
 
-        objectChecksum.previous_checksum = previousChecksum
-        objectChecksum.data_sent = try encoder.encode(beamObject)
-        objectChecksum.updated_at = BeamDate.now
+        try context.performAndWait {
+            objectChecksum.previous_checksum = previousChecksum
+            objectChecksum.data_sent = try encoder.encode(beamObject)
+            objectChecksum.updated_at = BeamDate.now
 
-        Logger.shared.logDebug("Saving previous checksum for \(object.description): \(objectChecksum.previous_checksum ?? "-")",
-                               category: .beamObjectChecksum)
+            Logger.shared.logDebug("Saving previous checksum for \(object.description): \(objectChecksum.previous_checksum ?? "-")",
+                                   category: .beamObjectChecksum)
 
-        try CoreDataManager.save(context)
+            try CoreDataManager.save(context)
+        }
     }
 
     // MARK: -
@@ -293,14 +333,16 @@ extension BeamObjectChecksum {
     private static func objectWithObject(object: BeamObject) -> (BeamObjectChecksum, NSManagedObjectContext) {
         let (result, context) = findObjectWithObject(object: object, create: true)
 
-        guard let result = result else {
-            let result = BeamObjectChecksum(context: context)
-            result.id = object.id
-            result.object_type = object.beamObjectType
+        return context.performAndWait {
+            guard let result = result else {
+                let result = BeamObjectChecksum(context: context)
+                result.id = object.id
+                result.object_type = object.beamObjectType
+                return (result, context)
+            }
+
             return (result, context)
         }
-
-        return (result, context)
     }
 
     private static func findChecksumsForBeamObjects(beamObjects: [BeamObject]) -> ([BeamObject: BeamObjectChecksum], NSManagedObjectContext) {
@@ -331,26 +373,33 @@ extension BeamObjectChecksum {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         do {
-            let storedChecksums: [String: BeamObjectChecksum] = try context.fetch(request).reduce(into: [:], { dict, checksum in
-                guard let id = checksum.id, let object_type = checksum.object_type else { return }
-
-                dict["\(id.uuidString)::\(object_type)"] = checksum
-            })
-
             var result: [BeamObject: BeamObjectChecksum] = [:]
-            beamObjects.forEach {
-                var checksum = storedChecksums["\($0.id.uuidString)::\($0.beamObjectType)"] ?? BeamObjectChecksum(context: context)
 
-                if let object_type = checksum.object_type, object_type != $0.beamObjectType {
-                    // Congrats, you found an unexpected issue with a beam object ID and a different type
-                    assert(false)
+            try context.performAndWait {
+                // Fetch all checksums
+                let storedChecksums: [String: BeamObjectChecksum] = try context.fetch(request).reduce(into: [:], { dict, checksum in
+                    guard let id = checksum.id, let object_type = checksum.object_type else { return }
 
-                    checksum = BeamObjectChecksum(context: context)
+                    dict["\(id.uuidString)::\(object_type)"] = checksum
+                })
+
+                // Set all checksums for objects
+                for beamOject in beamObjects {
+                    guard let checksum = storedChecksums["\(beamOject.id.uuidString)::\(beamOject.beamObjectType)"] else {
+                        continue
+                    }
+
+                    if let object_type = checksum.object_type, object_type != beamOject.beamObjectType {
+                        Logger.shared.logError("Very weird, types don't match: \(object_type) != \(beamOject.beamObjectType)",
+                                               category: .beamObjectChecksum)
+
+                        // Congrats, you found an unexpected issue with a beam object ID and a different type
+                        assert(false)
+                        continue
+                    }
+
+                    result[beamOject] = checksum
                 }
-
-                checksum.id = checksum.id ?? $0.id
-                checksum.object_type = checksum.object_type ?? $0.beamObjectType
-                result[$0] = checksum
             }
 
             return (result, context)
@@ -399,24 +448,32 @@ extension BeamObjectChecksum {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         do {
-            let storedChecksums: [String: BeamObjectChecksum] = try context.fetch(request).reduce(into: [:], { dict, checksum in
-                guard let id = checksum.id, let object_type = checksum.object_type else { return }
-
-                dict["\(id.uuidString)::\(object_type)"] = checksum
-            })
-
             var result: [T: BeamObjectChecksum] = [:]
-            objects.forEach {
-                let checksum = storedChecksums["\($0.beamObjectId.uuidString)::\(type(of: $0).beamObjectType.rawValue)"] ?? BeamObjectChecksum(context: context)
 
-                if let object_type = checksum.object_type, object_type != type(of: $0).beamObjectType.rawValue {
-                    // Congrats, you found an unexpected issue with a beam object ID and a different type
-                    assert(false)
+            try context.performAndWait {
+                let storedChecksums: [String: BeamObjectChecksum] = try context.fetch(request).reduce(into: [:], { dict, checksum in
+                    guard let id = checksum.id, let object_type = checksum.object_type else { return }
+
+                    dict["\(id.uuidString)::\(object_type)"] = checksum
+                })
+
+                for object in objects {
+                    guard let checksum = storedChecksums["\(object.beamObjectId.uuidString)::\(type(of: object).beamObjectType.rawValue)"] else {
+                        continue
+                    }
+
+                    if let object_type = checksum.object_type, object_type != type(of: object).beamObjectType.rawValue {
+                        Logger.shared.logError("Very weird, types don't match: \(object_type) != \(type(of: object).beamObjectType.rawValue)",
+                                               category: .beamObjectChecksum)
+
+                        // Congrats, you found an unexpected issue with a beam object ID and a different type
+                        assert(false)
+
+                        continue
+                    }
+
+                    result[object] = checksum
                 }
-
-                checksum.id = checksum.id ?? $0.beamObjectId
-                checksum.object_type = checksum.object_type ?? type(of: $0).beamObjectType.rawValue
-                result[$0] = checksum
             }
 
             return (result, context)
@@ -438,7 +495,6 @@ extension BeamObjectChecksum {
     }
 
     private static func findObjectWithObject(object: BeamObject, create: Bool = false) -> (BeamObjectChecksum?, NSManagedObjectContext) {
-
         let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
         request.fetchLimit = 1
 
@@ -453,20 +509,24 @@ extension BeamObjectChecksum {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        return ((try? context.fetch(request))?.first, context)
+        return context.performAndWait {
+            ((try? context.fetch(request))?.first, context)
+        }
     }
 
     private static func objectWithObject<T: BeamObjectProtocol>(object: T) -> (BeamObjectChecksum, NSManagedObjectContext) {
         let (result, context) = findObjectWithObject(object: object, create: true)
 
-        guard let result = result else {
-            let result = BeamObjectChecksum(context: context)
-            result.id = object.beamObjectId
-            result.object_type = type(of: object).beamObjectType.rawValue
+        return context.performAndWait {
+            guard let result = result else {
+                let result = BeamObjectChecksum(context: context)
+                result.id = object.beamObjectId
+                result.object_type = type(of: object).beamObjectType.rawValue
+                return (result, context)
+            }
+
             return (result, context)
         }
-
-        return (result, context)
     }
 
     private static func findObjectWithObject<T: BeamObjectProtocol>(object: T, create: Bool = false) -> (BeamObjectChecksum?, NSManagedObjectContext) {
@@ -476,7 +536,9 @@ extension BeamObjectChecksum {
 
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        return ((try? context.fetch(request))?.first, context)
+        return context.performAndWait {
+            ((try? context.fetch(request))?.first, context)
+        }
     }
 
     private static func predicates(id: UUID, type: BeamObjectObjectType) -> NSPredicate {

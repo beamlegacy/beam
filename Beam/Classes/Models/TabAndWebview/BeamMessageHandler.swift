@@ -32,12 +32,14 @@ class BeamMessageHandler<T: RawRepresentable & CaseIterable> : NSObject, WKScrip
     }
 
     private func injectScripts() {
-        if cssFileName != nil {
-            let cssCode = loadFile(from: cssFileName!, fileType: "css")
+        if let cssFileName = cssFileName,
+           let cssCode = loadFile(from: cssFileName, fileType: "css") {
             config.addCSS(source: cssCode, when: .atDocumentEnd)
         }
-        let jsCode = loadFile(from: jsFileName, fileType: "js")
-        config.addJS(source: jsCode, when: jsCodePosition, forMainFrameOnly: forMainFrameOnly)
+
+        if let jsCode = loadFile(from: jsFileName, fileType: "js") {
+            config.addJS(source: jsCode, when: jsCodePosition, forMainFrameOnly: forMainFrameOnly)
+        }
     }
 
     func unregister(from webView: WKWebView) {

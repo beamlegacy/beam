@@ -54,11 +54,11 @@ class HelpAndFeedbackTests: BaseTest {
         let cmdLabel = helpView.image(HelpViewLocators.Images.cmdLabel.accessibilityIdentifier)
         testRailPrint("Then I am on Shortcusts menu")
         XCTAssertTrue(cmdLabel.waitForExistence(timeout: minimumWaitTimeout))
-        XCTAssertEqual(helpView.getNumberOfCMDLabels(), 26)
+        XCTAssertEqual(helpView.getNumberOfCMDLabels(), 24)
         
         testRailPrint("When I close shortcuts help menu")
         helpView.closeShortcuts()
-        testRailPrint("Then I broght back to a card view")
+        testRailPrint("Then I broght back to a note view")
         XCTAssertTrue(journalView.getHelpButton().waitForExistence(timeout: minimumWaitTimeout))
     }
     

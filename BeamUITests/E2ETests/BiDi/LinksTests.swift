@@ -10,8 +10,8 @@ import XCTest
 
 class LinksTests: BaseTest {
     
-    let cardName1 = "Card Link 1"
-    let cardName2 = "Card Link 2"
+    let cardName1 = "Note Link 1"
+    let cardName2 = "Note Link 2"
     let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
     let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
     let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
@@ -21,11 +21,11 @@ class LinksTests: BaseTest {
     private func createCardsAndLinkThem() -> CardTestView {
         let journalView = launchApp()
         
-        testRailPrint("Given I create 2 cards")
+        testRailPrint("Given I create 2 notes")
         journalView.createCardViaOmniboxSearch(cardName1)
         let cardView = journalView.createCardViaOmniboxSearch(cardName2)
         
-        testRailPrint("Then I link card 2 to card 1")
+        testRailPrint("Then I link note 2 to note 1")
         cardView.createBiDiLink(cardName1).openBiDiLink(0)
         
         return cardView
@@ -39,7 +39,7 @@ class LinksTests: BaseTest {
         XCTAssertEqual(cardView.getLinkContentByIndex(0), cardName1 + " ") //looks like a bug
         cardView.assertLinksCounterTitle(expectedNumber: 1)
 
-        testRailPrint("Then I can navigate to a card by Link both sides")
+        testRailPrint("Then I can navigate to a note by Link both sides")
         cardView.openLinkByIndex(0)
         XCTAssertEqual(cardView.getLinksNamesNumber(), 0)
         cardView.openBiDiLink(0)
@@ -51,21 +51,21 @@ class LinksTests: BaseTest {
         let cardView = createCardsAndLinkThem()
         
         testRailPrint("When I delete the link between \(cardName2) and \(cardName1)")
-        cardView.getLinksContentElement()[0].tapInTheMiddle()
+        cardView.getFirstLinksContentElement().tapInTheMiddle()
         shortcutsHelper.shortcutActionInvoke(action: .selectAll)
         cardView.typeKeyboardKey(.delete)
         
         testRailPrint("When I open \(cardName2)")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         
-        testRailPrint("Then card 2 has no links available")
+        testRailPrint("Then note 2 has no links available")
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString)
         
         testRailPrint("Given I open \(cardName1) and I link \(cardName2)")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1)
         cardView.createBiDiLink(cardName2)
         
-        testRailPrint("Given I refresh the view switching cards")
+        testRailPrint("Given I refresh the view switching notes")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1)
@@ -75,23 +75,23 @@ class LinksTests: BaseTest {
         cardView.typeKeyboardKey(.leftArrow)
         cardView.typeKeyboardKey(.delete)
         
-        testRailPrint("Then card 2 has no links available")
+        testRailPrint("Then note 2 has no links available")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString)
         
         testRailPrint("Given I link \(cardName1) and I link \(cardName2)")
         cardView.createBiDiLink(cardName1)
         
-        testRailPrint("Given I refresh the view switching cards")
+        testRailPrint("Given I refresh the view switching notes")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1)
         XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         
-        testRailPrint("When I delete card 1")
+        testRailPrint("When I delete note 1")
         cardView.clickDeleteButton().confirmDeletion()
         
-        testRailPrint("Then card 2 has no links available")
-        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardName1), "\(cardName1) card is failed to load")
+        testRailPrint("Then note 2 has no links available")
+        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardName1), "\(cardName1) note is failed to load")
         XCTAssertEqual(cardView.getLinksNamesNumber(), 0)
     }
     
@@ -104,14 +104,14 @@ class LinksTests: BaseTest {
         cardView.makeCardTitleEditable().typeText(textToType)
         cardView.typeKeyboardKey(.enter)
         
-        testRailPrint("Then card name changes are applied in links for card 1")
+        testRailPrint("Then note name changes are applied in links for note 1")
         let expectedEditedName1 = cardName1 + textToType + " "
         XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
         XCTAssertEqual(cardView.getLinksContentNumber(), 1)
         XCTAssertEqual(cardView.getLinkNameByIndex(0), cardName2)
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedEditedName1, cardView.getLinkContentElementByIndex(0), minimumWaitTimeout), "\(cardView.getLinkContentByIndex(0)) is not equal to \(expectedEditedName1)")
        
-        testRailPrint("Then card name changes are applied for card 2 note")
+        testRailPrint("Then note name changes are applied for note 2 note")
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName2)
         XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 1)
         XCTAssertEqual(cardView.getCardNoteValueByIndex(0), expectedEditedName1)
@@ -121,7 +121,7 @@ class LinksTests: BaseTest {
         cardView.typeKeyboardKey(.enter)
         cardView.openCardFromRecentsList(cardTitleToOpen: cardName1 + textToType)
         
-        testRailPrint("Then card name changes are applied in links for card 1")
+        testRailPrint("Then note name changes are applied in links for note 1")
         XCTAssertEqual(cardView.getLinksNamesNumber(), 1)
         XCTAssertEqual(cardView.getLinksContentNumber(), 1)
         XCTAssertEqual(cardView.getLinkNameByIndex(0), cardName2 + renamingErrorHandling)

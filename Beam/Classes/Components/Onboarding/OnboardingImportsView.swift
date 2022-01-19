@@ -118,10 +118,17 @@ struct OnboardingImportsView: View {
         }
     }
 
+    private var loadingDetails: [String] {
+        var result = [String]()
+        if checkHistory { result.append("history") }
+        if checkPassword { result.append("password") }
+        return result
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             if isLoading {
-                OnboardingView.LoadingView(message: "Importing your data...")
+                OnboardingView.LoadingView(randomDetails: loadingDetails)
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 OnboardingView.TitleText(title: "Import your data")
@@ -155,11 +162,10 @@ struct OnboardingImportsView: View {
             updateActions()
         }
         .onChange(of: checkPassword) { newValue in
-            if newValue {
-                updateActions()
-            } else {
+            if !newValue {
                 passwordImportURL = nil
             }
+            updateActions()
         }
         .onChange(of: passwordImportURL) { _ in
             updateActions()
@@ -175,8 +181,8 @@ struct OnboardingImportsView: View {
     private func updateAvailableSources() {
         availableSources = ImportSource.allCases.filter { $0.isAvailable }
     }
-    private let skipActionId = UUID()
-    private let importActionId = UUID()
+    private let skipActionId = "skip_action"
+    private let importActionId = "import_action"
 
     private var shoudlEnableImportButton: Bool {
         if checkPassword {
@@ -240,7 +246,7 @@ extension OnboardingImportsView {
         // show the loading view at least 2s, at most 10s
         let forceFinishAfter: Int
         if importsManager.isImporting {
-            let cancellable = importsManager.$isImporting.first { $0 == false }.sink { _ in
+            let cancellable = importsManager.$isImporting.first { $0 == false }.receive(on: DispatchQueue.main).sink { _ in
                 sendFinish()
             }
             viewModel.importCancellable = cancellable
@@ -270,7 +276,7 @@ extension OnboardingImportsView {
     class ImportSourceIconCache {
         private var cache: [ImportSource: NSImage] = [:]
         private let iconSize: CGFloat = 16
-        func getIconForSource(_ source: ImportSource) -> NSImage? {
+        func getIconForSource(_ source: OnboardingImportsView.ImportSource) -> NSImage? {
             if let image = cache[source] {
                 return image
             }
@@ -393,7 +399,8 @@ extension OnboardingImportsView {
 
 struct OnboardingImportsView_Previews: PreviewProvider {
     static var previews: some View {
-        OnboardingImportsView(actions: .constant([]), finish: nil, selectedSource: .safari)
-            .frame(width: 600, height: 600)
+        OnboardingImportsView(actions: .constant([]), finish: nil, selectedSource: .safariOld)
+            .padding(20)
+            .background(BeamColor.Generic.background.swiftUI)
     }
 }

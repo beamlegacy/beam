@@ -1,6 +1,12 @@
 import Foundation
 import BeamCore
 
+enum BranchType: String {
+    case develop
+    case beta
+    case publicRelease = "public"
+}
+
 struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
@@ -21,6 +27,8 @@ struct Configuration {
 
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
+
+    static private(set) var branchType = BranchType(rawValue: EnvironmentVariables.branchType)
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
@@ -122,11 +130,10 @@ struct Configuration {
     }
 }
 
-
 extension Configuration {
     enum Env: String {
-        case debug = "debug"
-        case test = "test"
-        case release = "release"
+        case debug
+        case test
+        case release
     }
 }

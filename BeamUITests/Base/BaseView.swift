@@ -198,7 +198,7 @@ class BaseView {
         let cardView = CardTestView()
         let cardSwitcherButton = cardView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.cardSwitcher.accessibilityIdentifier)' AND value = '\(cardTitleToOpen)'")).firstMatch
         cardSwitcherButton.clickOnExistence()
-        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardTitleToOpen), "\(cardTitleToOpen) card is failed to load")
+        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardTitleToOpen), "\(cardTitleToOpen) note is failed to load")
         return cardView
     }
 }

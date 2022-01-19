@@ -82,7 +82,7 @@ class OnboardingLandingTestView: BaseView {
     
     @discardableResult
     func clickContinueWithEmailButton() -> OnboardingUsernameTestView {
-        staticText(OnboardingLandingViewLocators.Buttons.continueWithEmailButton.accessibilityIdentifier).clickOnExistence()
+        button(OnboardingLandingViewLocators.Buttons.continueWithEmailButton.accessibilityIdentifier).clickOnExistence()
         return OnboardingUsernameTestView()
     }
 }

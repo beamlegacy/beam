@@ -177,15 +177,15 @@ struct ToolbarCapsuleButton_Previews: PreviewProvider {
         Group {
             HStack {
                 VStack {
-                    ToolbarCapsuleButton(text: "Card 1", isHovering: false)
-                    ToolbarCapsuleButton(text: "Card 1", isHovering: true)
-                    ToolbarCapsuleButton(text: "Card 1", isHovering: true, isPressed: true)
+                    ToolbarCapsuleButton(text: "Note 1", isHovering: false)
+                    ToolbarCapsuleButton(text: "Note 1", isHovering: true)
+                    ToolbarCapsuleButton(text: "Note 1", isHovering: true, isPressed: true)
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 VStack {
-                    ToolbarCapsuleButton(text: "Card 1", isSelected: true, isHovering: false)
-                    ToolbarCapsuleButton(text: "Card 1", isSelected: true, isHovering: true)
-                    ToolbarCapsuleButton(text: "Card 1", isSelected: true, isHovering: true, isPressed: true)
+                    ToolbarCapsuleButton(text: "Note 1", isSelected: true, isHovering: false)
+                    ToolbarCapsuleButton(text: "Note 1", isSelected: true, isHovering: true)
+                    ToolbarCapsuleButton(text: "Note 1", isSelected: true, isHovering: true, isPressed: true)
                 }
                 .fixedSize(horizontal: true, vertical: false)
             }
@@ -195,15 +195,15 @@ struct ToolbarCapsuleButton_Previews: PreviewProvider {
         Group {
             HStack {
                 VStack {
-                    ToolbarCapsuleButton(text: "Card 1", isHovering: false)
-                    ToolbarCapsuleButton(text: "Card 1", isHovering: true)
-                    ToolbarCapsuleButton(text: "Card 1", isHovering: true, isPressed: true)
+                    ToolbarCapsuleButton(text: "Note 1", isHovering: false)
+                    ToolbarCapsuleButton(text: "Note 1", isHovering: true)
+                    ToolbarCapsuleButton(text: "Note 1", isHovering: true, isPressed: true)
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 VStack {
-                    ToolbarCapsuleButton(text: "Card 1", isSelected: true, isHovering: false)
-                    ToolbarCapsuleButton(text: "Card 1", isSelected: true, isHovering: true)
-                    ToolbarCapsuleButton(text: "Card 1", isSelected: true, isHovering: true, isPressed: true)
+                    ToolbarCapsuleButton(text: "Note 1", isSelected: true, isHovering: false)
+                    ToolbarCapsuleButton(text: "Note 1", isSelected: true, isHovering: true)
+                    ToolbarCapsuleButton(text: "Note 1", isSelected: true, isHovering: true, isPressed: true)
                 }
                 .fixedSize(horizontal: true, vertical: false)
             }

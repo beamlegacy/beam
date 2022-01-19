@@ -19,7 +19,6 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     @Published fileprivate var username: String?
     @Published fileprivate var isAuthenticated: Bool = false
     private var signinScope = Set<AnyCancellable>()
-    private var onboardingManager: OnboardingManager?
 
     @Published fileprivate var allNotesItems = [NoteTableViewItem]()
     @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
@@ -130,14 +129,9 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     }
 
     fileprivate func showConnectWindow() {
-        let model = OnboardingManager(onlyLogin: true)
-        onboardingManager = model
-        model.$needsToDisplayOnboard.sink { result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-            }
-        }.store(in: &signinScope)
-        AppDelegate.main.showOnboardingWindow(model: model)
+        let onboardingManager = data?.onboardingManager
+        onboardingManager?.prepareForConnectOnly()
+        onboardingManager?.presentOnboardingWindow()
     }
 }
 
@@ -244,7 +238,7 @@ struct AllCardsPageContentView: View {
 
     private var pageTitle: String {
         guard model.isAuthenticated, let username = model.username else {
-            return "All Cards"
+            return "All Notes"
         }
         return username
     }
@@ -254,7 +248,7 @@ struct AllCardsPageContentView: View {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
                 HStack(spacing: BeamSpacing._20) {
                     Text(pageTitle)
-                        .font(BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).swiftUI)
+                        .font(BeamFont.medium(size: PreferencesManager.editorFontSizeHeadingOne).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .padding(.leading, 35)
                     Icon(name: "editor-breadcrumb_down", width: 12, color: BeamColor.LightStoneGray.swiftUI)
@@ -266,7 +260,7 @@ struct AllCardsPageContentView: View {
                 if model.isAuthenticated {
                     cardsFilters
                 } else {
-                    ButtonLabel("Connect to Beam to publish your cards") {
+                    ButtonLabel("Connect to Beam to publish your notes") {
                         model.showConnectWindow()
                     }
                 }
@@ -275,7 +269,7 @@ struct AllCardsPageContentView: View {
             .padding(.top, 85)
             .padding(.trailing, 20)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: listType == .publicNotes ? "New Published Card" : "New Private Card",
+                      creationRowTitle: listType == .publicNotes ? "New Published Note" : "New Private Note",
                       shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in

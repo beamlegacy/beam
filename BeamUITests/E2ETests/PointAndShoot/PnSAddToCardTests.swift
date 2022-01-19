@@ -10,7 +10,7 @@ import XCTest
 
 class PnSAddToCardTests: BaseTest {
        
-    let cardNameToBeCreated = "PnS Card"
+    let cardNameToBeCreated = "PnS Note"
     let shortcutsHelper = ShortcutsHelper()
         let waitHelper = WaitHelper()
         let pnsView = PnSTestView()
@@ -40,13 +40,13 @@ class PnSAddToCardTests: BaseTest {
         pnsView.addToTodayCard(textElement)
         let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
         
-        print("Then it is successfully added to the card")
+        print("Then it is successfully added to the note")
         XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(todaysDateInCardTitleFormat))
         OmniBoxTestView().navigateToCardViaPivotButton()
         journalView.waitForJournalViewToLoad()
         let cardNotes = CardTestView().getCardNotesForVisiblePart()
         
-        print("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the card")
+        print("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the note")
         XCTAssertEqual(cardNotes.count, 2)
         XCTAssertEqual(cardNotes[0].value as? String, expectedItemText1)
         XCTAssertEqual(cardNotes[1].value as? String, expectedItemText2)
@@ -64,7 +64,7 @@ class PnSAddToCardTests: BaseTest {
         
         pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, "", true)
         
-        print("Then it is successfully added to the card")
+        print("Then it is successfully added to the note")
         // Commented out as far as it is too unreliable
         //XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(cardNameToBeCreated))
         OmniBoxTestView().navigateToCardViaPivotButton()
@@ -80,8 +80,8 @@ class PnSAddToCardTests: BaseTest {
     func testAddTextToExistingCard() {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(pnsView.app)
-        print("Given I create \(cardNameToBeCreated) card")
-        //To be replaced with UITests helper - card creation
+        print("Given I create \(cardNameToBeCreated) note")
+        //To be replaced with UITests helper - note creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         print("Given I open Test page")
@@ -91,7 +91,7 @@ class PnSAddToCardTests: BaseTest {
         
         pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
         
-        print("Then it is successfully added to the card")
+        print("Then it is successfully added to the note")
         XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         OmniBoxTestView().navigateToCardViaPivotButton()
         _ = cardView.waitForCardViewToLoad()
@@ -113,8 +113,8 @@ class PnSAddToCardTests: BaseTest {
         let noteText = "this is a note"
         let journalView = launchApp()
         let helper = BeamUITestsHelper(pnsView.app)
-        print("Given I create \(cardNameToBeCreated) card")
-        //To be replaced with UITests helper - card creation
+        print("Given I create \(cardNameToBeCreated) note")
+        //To be replaced with UITests helper - note creation
         let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         print("Given I open Test page")
@@ -125,7 +125,7 @@ class PnSAddToCardTests: BaseTest {
         
         pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, noteText)
         
-        print("Then it is successfully added to the card")
+        print("Then it is successfully added to the note")
         OmniBoxTestView().navigateToCardViaPivotButton()
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
@@ -137,7 +137,7 @@ class PnSAddToCardTests: BaseTest {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
         helper.tapCommand(.resizeSquare1000)
-        print("Given I create \(cardNameToBeCreated) card")
+        print("Given I create \(cardNameToBeCreated) note")
         journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         
         testRailPrint("Then I successfully collect gif")

@@ -55,6 +55,20 @@ extension UserSessionRequest {
             }
     }
 
+    func resendVerificationEmail(email: String) -> Promise<ResendVerificationEmail> {
+        let variables = ResendVerificationEmailParameters(email: email)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "resend_verification_email", variables: variables)
+
+        let promise: PromiseKit.Promise<ResendVerificationEmail> = performRequest(bodyParamsRequest: bodyParamsRequest,
+                                                                                  authenticatedCall: false)
+        return promise.get { (result: ResendVerificationEmail) in
+            guard result.success == true else {
+                throw UserSessionRequestError.resendVerificationEmailFailed
+            }
+        }
+    }
+
     @discardableResult
     func refreshToken(accessToken: String,
                       refreshToken: String) -> Promise<RenewCredentials> {

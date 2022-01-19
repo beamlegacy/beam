@@ -353,6 +353,10 @@ class ClusteringManager: ObservableObject {
         }
     }
 
+    func removeNote(noteId: UUID) {
+        cluster.removeNote(noteId: noteId)
+    }
+
     func change(candidate: Int, weightNavigation: Double, weightText: Double, weightEntities: Double) {
         isClustering = true
         cluster.changeCandidate(to: candidate, with: weightNavigation, with: weightText, with: weightEntities, activeSources: Array(Set(activeSources.urls))) { result in

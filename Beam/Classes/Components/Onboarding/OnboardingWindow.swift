@@ -8,21 +8,36 @@
 import Foundation
 
 class OnboardingWindow: NSWindow, NSWindowDelegate {
-    init(contentRect: NSRect, model: OnboardingManager) {
-        super.init(contentRect: contentRect,
-                   styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView],
+    override var isResizable: Bool { false }
+
+    weak var model: OnboardingManager?
+
+    init(model: OnboardingManager) {
+        super.init(contentRect: CGRect(x: 0, y: 0, width: 512, height: 600),
+                   styleMask: [.titled, .closable, .miniaturizable, .fullSizeContentView],
                    backing: .buffered,
                    defer: false)
 
-        let onboardingView = OnboardingView(model: model)
         titlebarAppearsTransparent = true
         titleVisibility = .hidden
-        contentView = BeamHostingView(rootView: onboardingView)
+        let customToolbar = NSToolbar()
+        customToolbar.showsBaselineSeparator = false
+        toolbar = customToolbar
+        collectionBehavior = .fullScreenNone
         isMovableByWindowBackground = false
+
+        let button = standardWindowButton(.zoomButton)
+        button?.isEnabled = false
+
+        self.model = model
+        let onboardingView = OnboardingView(model: model)
+        contentView = BeamHostingView(rootView: onboardingView)
+
         delegate = self
     }
 
-    deinit {
-        AppDelegate.main.onboardingWindow = nil
+    override func close() {
+        super.close()
+        model?.windowDidClose()
     }
 }

@@ -60,6 +60,7 @@ class BeamWebView: WKWebView {
         allowsBackForwardNavigationGestures = true
         allowsLinkPreview = true
         allowsMagnification = true
+        customUserAgent = Constants.SafariUserAgent
 
         monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
             guard let self = self, self.page != nil else { return event }
@@ -188,6 +189,7 @@ class BeamWebView: WKWebView {
     }
 
     public override func mouseMoved(with theEvent: NSEvent) {
+        guard page?.allowsMouseMoved(with: theEvent) != false else { return }
         super.mouseMoved(with: theEvent)
         mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }

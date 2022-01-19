@@ -89,7 +89,7 @@ struct ToolbarModeSwitcher: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityAddTraits(.isButton)
-        .accessibilityLabel(modeWeb ? "\(tabsCount)" : "card")
+        .accessibilityLabel(modeWeb ? "\(tabsCount)" : "note")
         .accessibilityIdentifier(modeWeb ? "pivot-web" : "pivot-card")
     }
 }

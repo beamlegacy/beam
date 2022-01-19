@@ -90,7 +90,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         ContentBlockingManager.shared.setup()
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
-        moveLinkDB()
         BeamObjectManager.setup()
 
         data = BeamData()
@@ -98,6 +97,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if !isRunningTests {
             createWindow(frame: nil, restoringTabs: true)
         }
+
+        Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
 
         // So we remember we're not currently using the default api server
         if Configuration.apiHostnameDefault != Configuration.apiHostname {
@@ -143,7 +144,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     // MARK: - Database
-    func syncDataWithBeamObject(force: Bool = false, _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    func syncDataWithBeamObject(force: Bool = false,
+                                showAlert: Bool = true,
+                                _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         guard Configuration.env != .test,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
@@ -166,7 +169,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                                       category: .beamObjectNetwork,
                                       localTimer: localTimer)
 
-                self.deleteEmptyDatabases { _ in
+                self.deleteEmptyDatabases(showAlert: showAlert) { _ in
                     switch result {
                     case .success:
                         DatabaseManager.changeDefaultDatabaseIfNeeded()
@@ -187,7 +190,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    private func deleteEmptyDatabases(_ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
+    private func deleteEmptyDatabases(showAlert: Bool = true,
+                                      _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
         let localTimer = BeamDate.now
         let previousDefaultDatabase = DatabaseManager.defaultDatabase
 
@@ -211,13 +215,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                     Logger.shared.logError(error.localizedDescription, category: .database)
                 }
 
-                DispatchQueue.main.async {
-                    if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id, self.window?.state.isShowingOnboarding != true {
-                        Logger.shared.logWarning("Default database changed, showing alert",
-                                                 category: .database,
-                                                 localTimer: localTimer)
-                        DatabaseManager.showRestartAlert(previousDefaultDatabase,
-                                                         DatabaseManager.defaultDatabase)
+                guard showAlert else {
+                    completionHandler?(.success(success))
+                    return
+                }
+
+                // `DispatchQueue.main.async` doesn't call its block once we called terminate...
+                DispatchQueue.main.async { [unowned self] in
+                    if previousDefaultDatabase.id != DatabaseManager.defaultDatabase.id {
+                        if self.data.onboardingManager.needsToDisplayOnboard == true {
+                            Logger.shared.logWarning("Default database changed after onboarding",
+                                                    category: .database, localTimer: localTimer)
+                        } else {
+                            Logger.shared.logWarning("Default database changed, showing alert",
+                                                    category: .database, localTimer: localTimer)
+
+                            DatabaseManager.showRestartAlert(previousDefaultDatabase, DatabaseManager.defaultDatabase)
+                        }
                     }
                     completionHandler?(.success(success))
                 }
@@ -262,7 +276,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow {
+    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow? {
+        guard !data.onboardingManager.needsToDisplayOnboard else {
+            data.onboardingManager.delegate = self
+            data.onboardingManager.presentOnboardingWindow()
+            return nil
+        }
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
                                 data: data,
@@ -362,10 +381,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     var documentsWindow: DocumentsWindow?
+    var omniboxContentDebuggerWindow: OmniboxContentDebuggerWindow?
     var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
-    var onboardingWindow: OnboardingWindow?
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
@@ -409,7 +428,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
-        syncDataWithBeamObject { _ in
+        syncDataWithBeamObject(force: false, showAlert: false) { _ in
             Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
             RunLoop.main.perform(inModes: [.modalPanel]) {
                 Logger.shared.logDebug("Sending toApplicationShouldTerminate true (main thread)")
@@ -417,6 +436,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
+        Logger.shared.logDebug("applicationShouldTerminate: terminateLater")
         return .terminateLater
     }
 
@@ -466,8 +486,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         PasswordsPreferencesViewController,
         AccountsPreferenceViewController,
         AboutPreferencesViewController,
-        AdvancedPreferencesViewController,
-        EditorDebugPreferencesViewController
+        BetaPreferencesViewController,
+        AdvancedPreferencesViewController
+        // Commented it since right now we don't need it at all
+        // Will see if we can delete it anytime soon
+//        EditorDebugPreferencesViewController
     ]
 
     lazy var preferencesWindowController = PreferencesWindowController(
