@@ -144,15 +144,16 @@ class EmbedNode: ResizableNode {
         updateResizableElementContentSize()
         self.updateLayout()
         switch embedContent.type {
-        case .url, .link:
+        case .page, .audio, .rich, .video, .photo, .image:
+            guard let content = embedContent.html else {
+                fallthrough
+            }
+            let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
+            let headContent = self.getHeadContent(theme: theme)
+            self.webView?.loadHTMLString(headContent + "<div class=\"iframe \(embedContent.type.rawValue)\">" + content + "</div>", baseURL: nil)
+        default:
             if let url = embedContent.embedURL {
                 self.webView?.load(URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad))
-            }
-        case .page, .audio, .rich, .video, .photo, .image:
-            if let content = embedContent.html {
-                let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
-                let headContent = self.getHeadContent(theme: theme)
-                self.webView?.loadHTMLString(headContent + "<div class=\"iframe \(embedContent.type.rawValue)\">" + content + "</div>", baseURL: nil)
             }
         }
     }
