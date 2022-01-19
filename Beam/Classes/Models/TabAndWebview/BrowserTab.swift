@@ -421,10 +421,11 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
             webView.load(URLRequest(url: url))
         }
         Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .passwordManagerInternal)
+        passwordOverlayController?.prepareForLoading()
         $isLoading.sink { [unowned passwordOverlayController] loading in
             if !loading {
-                Logger.shared.logDebug("BrowserTab loading \(url.absoluteString)", category: .passwordManagerInternal)
-                passwordOverlayController?.detectInputFields()
+                Logger.shared.logDebug("BrowserTab finished loading \(url.absoluteString)", category: .passwordManagerInternal)
+                passwordOverlayController?.webViewFinishedLoading()
             }
         }.store(in: &scope)
 
