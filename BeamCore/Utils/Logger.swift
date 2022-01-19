@@ -39,6 +39,7 @@ public enum LogCategory: String, CaseIterable {
     case passwordManager
     case passwordManagerInternal
     case passwordNetwork
+    case frecencyNetwork
     case fileNetwork
     case linkNetwork
     case clustering
@@ -80,7 +81,7 @@ public final class Logger {
     // it will overwrite this `hideCategories`
     private var hideCategories: [LogCategory] = [.web, .coredataDebug, .documentDebug, .commandManager, .autocompleteManager, .favIcon, .passwordManagerInternal]
 
-    private let hideLumberCategories: [LogCategory] = [.documentDebug]
+    private let hideLumberCategories: [LogCategory] = [.documentDebug, .passwordManagerInternal]
 
     private var ddFileLogger = DDFileLogger()
 

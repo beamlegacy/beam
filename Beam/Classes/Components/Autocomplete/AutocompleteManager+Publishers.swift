@@ -10,7 +10,11 @@ import Combine
 import BeamCore
 
 extension AutocompleteManager {
-    typealias AutocompletePublisherSourceResults = (source: AutocompleteResult.Source, results: [AutocompleteResult])
+    struct AutocompletePublisherSourceResults: Identifiable {
+        var id = UUID()
+        var source: AutocompleteResult.Source
+        var results: [AutocompleteResult]
+    }
 
     private func logIntermediate(step: String, stepShortName: String, results: [AutocompleteResult], startedAt: DispatchTime) {
         Self.logIntermediate(step: step, stepShortName: stepShortName, results: results, startedAt: startedAt)
@@ -28,6 +32,7 @@ extension AutocompleteManager {
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
+            futureToPublisher(autocompleteMnemonicResults(for: searchText), source: .mnemonic),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteAliasHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
@@ -36,10 +41,10 @@ extension AutocompleteManager {
                 .map { canCreate in
                     let createResult = AutocompleteResult(text: searchText,
                                                           source: .createCard,
-                                                          information: "New card",
+                                                          information: "New note",
                                                           completingText: searchText)
                     let results = canCreate ? [createResult] : []
-                    return (AutocompleteResult.Source.createCard, results)
+                    return AutocompletePublisherSourceResults(source: AutocompleteResult.Source.createCard, results: results)
                 }.eraseToAnyPublisher()
         ]
     }
@@ -60,7 +65,7 @@ extension AutocompleteManager {
                 return Just([]).eraseToAnyPublisher()
             }
             .map { someResults in
-                return (source, someResults)
+                return AutocompletePublisherSourceResults(source: source, results: someResults)
             }
             .eraseToAnyPublisher()
     }
@@ -76,7 +81,7 @@ extension AutocompleteManager {
                     let ids = documentStructs.map { $0.id }
                     let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
                     let autocompleteResults = documentStructs.map {
-                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id])
+                        AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: query, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
                     }.sorted(by: >).prefix(6)
                     let autocompleteResultsArray = Array(autocompleteResults)
                     self?.logIntermediate(step: "NoteTitle", stepShortName: "NT", results: autocompleteResultsArray, startedAt: start)
@@ -112,23 +117,24 @@ extension AutocompleteManager {
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
-            GRDBDatabase.shared.searchHistory(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
+            GRDBDatabase.shared.searchLink(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
                 case .success(let historyResults):
                     let autocompleteResults = historyResults.map { result -> AutocompleteResult in
-                        var information: String? = result.url
+                        var information = result.url
                         let url = URL(string: result.url)
                         if let url = url {
-                            information = url.urlStringWithoutScheme.removingPercentEncoding
+                            information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
                         }
-                        return AutocompleteResult(text: result.title, source: .history,
-                                                  url: url, information: information, completingText: query, score: result.frecency?.frecencySortScore)
+                        return AutocompleteResult(text: information, source: .history,
+                                                  url: url, information: result.title, completingText: query, score: result.frecency?.frecencySortScore, urlFields: [.text])
                     }
                     self.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults, startedAt: start)
                     promise(.success(autocompleteResults))
                 }
             }
+
         }
     }
 
@@ -137,22 +143,22 @@ extension AutocompleteManager {
             GRDBDatabase.shared.searchAlias(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
-                case .success(let historyResult):
-                    guard let historyResult = historyResult else {
+                case .success(let linkResult):
+                    guard let linkResult = linkResult else {
                         promise(.success([]))
                         return
                     }
-                    var information: String? = historyResult.url
-                    let url = URL(string: historyResult.url)
+                    var information = linkResult.url
+                    let url = URL(string: linkResult.url)
                     if let url = url {
-                        information = url.urlStringWithoutScheme.removingPercentEncoding
+                        information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
                     }
-                    promise(.success([AutocompleteResult(text: historyResult.title,
+                    promise(.success([AutocompleteResult(text: information,
                                                          source: .history,
                                                          url: url,
-                                                         information: information,
+                                                         information: linkResult.title,
                                                          completingText: query,
-                                                         score: historyResult.frecency?.frecencySortScore)
+                                                         score: linkResult.frecency?.frecencySortScore, urlFields: [.text])
                                      ]))
                 }
             }
@@ -165,10 +171,10 @@ extension AutocompleteManager {
             let scoredLinks = GRDBDatabase.shared.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6)
             let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
                 let url = URL(string: scoredLink.link.url)
-                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? scoredLink.link.url
+                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? URL(string: scoredLink.link.url)?.urlStringWithoutScheme.removingPercentEncoding ?? ""
                 return AutocompleteResult(text: text, source: .url, url: url,
                                           information: scoredLink.link.title, completingText: query,
-                                          score: scoredLink.frecency?.frecencySortScore)
+                                          score: scoredLink.frecency?.frecencySortScore, urlFields: .text)
             }.sorted(by: >)
             self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results, startedAt: start)
             promise(.success(results))
@@ -201,11 +207,43 @@ extension AutocompleteManager {
                         promise(.failure(TopDomainDatabaseError.notFound))
                         return
                     }
-                    let ac = AutocompleteResult(text: url.absoluteString, source: .topDomain, url: url, completingText: query)
+
+                    let text = url.absoluteString
+                    var information: String?
+                    let linkId = LinkStore.shared.getOrCreateIdFor(url: url.urlWithScheme.absoluteString, title: nil)
+                    if let link = LinkStore.shared.linkFor(id: linkId),
+                       let title = link.title {
+                        information = title
+                    }
+                    let ac = AutocompleteResult(text: text, source: .topDomain, url: url, information: information, completingText: query, urlFields: .text)
                     self.logIntermediate(step: "TopDomain", stepShortName: "TD", results: [ac], startedAt: start)
                     promise(.success([ac]))
                 }
             }
+        }
+    }
+
+    // Mnemonics are disabled for now. It is an experiment on how to find shortcuts for recently visited sites, but in the end the new scoring system seems to be good enough for most cases. I will rework it to use it as a score booster that enables taking over the omnibox when there is no url prefix takeover. For example when you always visit the merge request page, an often type "merg..." and would like that to directly take you to the correct web page even though the URL starts with gitlab instead of merge. More work to be done on that later. https://linear.app/beamapp/issue/BE-3010/reworke-the-mnemonic-system-in-the-omnibox
+    static let enableMmnemonics = false
+    private func autocompleteMnemonicResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            guard Self.enableMmnemonics else { return promise(.success([])) }
+            let start = DispatchTime.now()
+            guard let url = GRDBDatabase.shared.getMnemonic(text: query) else {
+                promise(.failure(TopDomainDatabaseError.notFound))
+                return
+            }
+
+            let text = url.absoluteString
+            var information: String?
+            let linkId = LinkStore.shared.getOrCreateIdFor(url: url.urlWithScheme.absoluteString, title: nil)
+            if let link = LinkStore.shared.linkFor(id: linkId),
+               let title = link.title {
+                information = title
+            }
+            let ac = AutocompleteResult(text: text, source: .mnemonic, url: url, information: information, completingText: query, urlFields: .text)
+            self.logIntermediate(step: "Mnemonic", stepShortName: "MN", results: [ac], startedAt: start)
+            promise(.success([ac]))
         }
     }
 
@@ -259,7 +297,7 @@ extension AutocompleteManager {
             let ids = documentStructs.map { $0.id }
             let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
             let autocompleteResults = documentStructs.map {
-                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id])
+                AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }.sorted(by: >).prefix(limit)
             let autocompleteResultsArray = Array(autocompleteResults)
             self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray, startedAt: start)
@@ -267,3 +305,33 @@ extension AutocompleteManager {
         }
     }
 }
+
+// MARK: - Quickly mock results for debugging
+#if DEBUG
+extension AutocompleteManager {
+
+    private func mockResultsPublisher(_ results: [AutocompleteResult]) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            promise(.success(results))
+        }
+    }
+
+    func getMockAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
+        if searchText.count == 1 {
+            return [
+                futureToPublisher(mockResultsPublisher([
+                    .init(text: "netflix.com", source: .topDomain, url: URL(string: "netflix.com")!, completingText: searchText, urlFields: .text)
+                ]), source: .topDomain)
+            ]
+        } else {
+            return [
+                futureToPublisher(mockResultsPublisher([
+                    .init(text: "eloquentjavascript.net", source: .url, url: URL(string: "https://eloquentjavascript.net")!, information: "Eloquent Javascript", completingText: searchText, score: 190, urlFields: .text),
+                    .init(text: "eloquentjavascript.net/test", source: .url, url: URL(string: "https://eloquentjavascript.net/test")!, information: "Other Javascript", completingText: searchText, score: 110, urlFields: .text)
+                ]), source: .url)
+            ]
+        }
+    }
+}
+
+#endif

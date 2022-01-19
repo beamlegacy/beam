@@ -291,7 +291,11 @@ public extension CALayer {
 
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
-        layer?.backgroundColor = BeamColor.Generic.background.cgColor
+
+        NSAppearance.withAppAppearance {
+            layer?.backgroundColor = BeamColor.Generic.background.cgColor
+        }
+
         layer?.setNeedsDisplay()
         setupCardHeader()
         updateLayersColorsForAppearance()
@@ -1245,7 +1249,7 @@ public extension CALayer {
                 }
             }
             for selectedNode in selection.nodes {
-                if !textNodes.contains(selectedNode) && selectedNode != focussedNode {
+                if !textNodes.contains(selectedNode) && selectedNode != focussedNode && !selectedNode.parentIsSelectedAndClosed {
                     selection.remove(selectedNode)
                 }
             }

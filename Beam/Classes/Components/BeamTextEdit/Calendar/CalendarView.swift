@@ -39,7 +39,6 @@ struct CalendarView: View {
     @State var isHoveringNotConnect = false
 
     @EnvironmentObject var state: BeamState
-
     @ObservedObject var viewModel: CalendarGutterViewModel
 
     private var transitionInOutHiddenView: AnyTransition {

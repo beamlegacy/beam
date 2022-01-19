@@ -14,7 +14,7 @@ class ResizableNode: ElementNode {
     var canBeResized = true {
         didSet {
             if !canBeResized {
-                removeLayer("handle")
+                removeHandles()
             } else {
                 setupContentSizing()
                 setupResizeHandleLayer()
@@ -55,7 +55,7 @@ class ResizableNode: ElementNode {
     var minWidth: CGFloat = 48
     var minHeight: CGFloat = 48
     var maxWidth: CGFloat?
-    var maxHeight: CGFloat = 700
+    var maxHeight: CGFloat = 1200
     var keepAspectRatio: Bool = true
     var responsiveStrategy: ResponsiveType = .horizontal
     var visibleSize: CGSize = .zero
@@ -74,7 +74,10 @@ class ResizableNode: ElementNode {
 
     func setVisibleWidth(_ width: CGFloat? = nil) {
         guard let width = width else { return }
-        let clampedWidth = width.clamp(minWidth, maxWidth ?? fallBackWidth)
+        // clamp the maximum width at the maxWidth of the element or
+        //at the fallBackWidth which ever is smallest
+        let maxWidthClamp = min(maxWidth ?? fallBackWidth, fallBackWidth)
+        let clampedWidth = width.clamp(minWidth, maxWidthClamp)
         visibleSize.width = clampedWidth
 
         if keepAspectRatio {
@@ -91,7 +94,10 @@ class ResizableNode: ElementNode {
         if keepAspectRatio {
             let originalAspectRatio = resizableElementContentSize.width / resizableElementContentSize.height
             let computedWidth = height * originalAspectRatio
-            visibleSize.width = computedWidth.clamp(minWidth, maxWidth ?? fallBackWidth)
+            // clamp the maximum width at the maxWidth of the element or
+            //at the fallBackWidth which ever is smallest
+            let maxWidthClamp = min(maxWidth ?? fallBackWidth, fallBackWidth)
+            visibleSize.width = computedWidth.clamp(minWidth, maxWidthClamp)
         }
     }
 
@@ -273,7 +279,7 @@ class ResizableNode: ElementNode {
         addLayer(handle, origin: .zero)
     }
 
-    func setupVerticalResizeHandleLayer() {
+    private func setupVerticalResizeHandleLayer() {
         guard canBeResized else {
             return
         }
@@ -316,6 +322,11 @@ class ResizableNode: ElementNode {
         }
         handle.cursor = NSCursor.resizeUpDown
         addLayer(handle, origin: .zero)
+    }
+
+    private func removeHandles() {
+        removeLayer("handle_vertical")
+        removeLayer("handle_horizontal")
     }
 
     private func invalidateLayout(animated: Bool) {

@@ -51,7 +51,7 @@ class JournalTestView: BaseView {
     @discardableResult
     func getNoteByIndex(_ i: Int) -> XCUIElement {
         let index = i - 1
-        return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).children(matching: .textView).matching(identifier: CardViewLocators.TextFields.noteField.accessibilityIdentifier).element(boundBy: index)
+        return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).children(matching: .textView).matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).element(boundBy: index)
     }
     
     @discardableResult

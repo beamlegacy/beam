@@ -10,14 +10,16 @@ import SwiftUI
 struct ShortcutView: View {
 
     let shortcut: Shortcut
+    var spacing: Double = 3
+    var withBackground = true
 
     var body: some View {
-        HStack(spacing: 3) {
+        HStack(spacing: spacing) {
             ForEach(shortcut.modifiers, id: \.self) { modif in
-                modif.symbol
+                modif.symbol(withBackground: withBackground)
             }
             ForEach(shortcut.keys, id: \.self) { key in
-                key.symbol
+                key.symbol(withBackground: withBackground)
             }
         }
     }

@@ -213,16 +213,21 @@ class BeamUITestsMenuGenerator {
     }
 
     private func fillHistory(longTitle: Bool = false) {
-        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world", id: UUID())
+        addPageToHistory(url: "https://fr.wikipedia.org/wiki/Hello_world", title: "Hello world")
         addPageToHistory(url: "https://en.wikipedia.org/wiki/Hubert_Blaine_Wolfeschlegelsteinhausenbergerdorff_Sr.",
-                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.", id: UUID())
-        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser", id: UUID())
-        addPageToHistory(url: "https://beamapp.co", aliasUrl: "https://alternateurl.com", title: "Beam", id: UUID())
+                         title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.")
+        addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser")
+        addPageToHistory(url: "https://beamapp.co", aliasUrl: "https://alternateurl.com", title: "Beam")
     }
 
-    private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String, id: UUID) {
+    private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String) {
         _ = IndexDocument(source: url, title: title, contents: title)
-        try? GRDBDatabase.shared.insertHistoryUrl(urlId: id, url: url, aliasDomain: aliasUrl, title: title, content: title)
+        let id: UUID = {
+            if let alias = aliasUrl {
+                return BeamLinkDB.shared.visitId(alias, title: title, content: title, destination: url)
+            }
+            return BeamLinkDB.shared.visitId(url, title: title, content: title)
+        }()
         let frecency = FrecencyUrlRecord(urlId: id, lastAccessAt: BeamDate.now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: AutocompleteManager.urlFrecencyParamKey)
         try? GRDBDatabase.shared.saveFrecencyUrl(frecency)
     }
@@ -256,7 +261,12 @@ class BeamUITestsMenuGenerator {
     private func showOnboarding() {
         logout()
         AuthenticationManager.shared.username = nil
-        AppDelegate.main.window?.state.data.onboardingManager.resetOnboarding()
+        let onboarding = AppDelegate.main.window?.state.data.onboardingManager
+        onboarding?.forceDisplayOnboarding()
+        AppDelegate.main.windows.forEach { window in
+            window.close()
+        }
+        AppDelegate.main.createWindow(frame: nil, restoringTabs: false)
     }
 
     private func clearPasswordsDatabase() {

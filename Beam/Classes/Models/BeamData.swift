@@ -175,21 +175,21 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             guard let id = currentId else { return }
             if tabToIndex.shouldBeIndexed {
                 self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                _ = LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title)
+                _ = LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
             }
 
             // Update history record
-            do {
-                if tabToIndex.shouldBeIndexed {
-                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
-                                                             url: tabToIndex.url.string,
-                                                             aliasDomain: tabToIndex.userTypedDomain?.absoluteString,
-                                                             title: tabToIndex.document.title,
-                                                             content: nil)
-                }
-            } catch {
-                Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
-            }
+//            do {
+//                if tabToIndex.shouldBeIndexed {
+//                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
+//                                                             url: tabToIndex.url.string,
+//                                                             aliasDomain: tabToIndex.requestedUrl?.absoluteString,
+//                                                             title: tabToIndex.document.title,
+//                                                             content: nil)
+//                }
+//            } catch {
+//                Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
+//            }
         }.store(in: &scope)
 
         $newDay.sink { [weak self] newDay in
@@ -217,7 +217,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 Self.noteUpdated.send(documentStruct)
                 switch documentStruct.documentType {
                 case .note:
-                    break
+                    if documentStruct.deletedAt != nil {
+                        self.clusteringManager.removeNote(noteId: documentStruct.id)
+                        self.activeSources.removeNote(noteId: documentStruct.id)
+                    }
                 case .journal:
                     // Only send journal updates to this one
                     Self.journalNoteUpdated.send(documentStruct)
@@ -352,9 +355,11 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     private func observeCalendarManager(_ calendarManager: CalendarManager) {
-        calendarManager.$connectedSources.dropFirst().sink { [weak self] _ in
+        calendarManager.$updated.sink { [weak self] updated in
             guard let self = self else { return }
-            self.reloadAllEvents()
+            if updated {
+                self.reloadAllEvents()
+            }
         }.store(in: &scope)
     }
 

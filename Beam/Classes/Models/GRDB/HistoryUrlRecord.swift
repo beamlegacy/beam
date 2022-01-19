@@ -21,7 +21,7 @@ extension HistoryUrlRecord: TableRecord {
     static let frecencyForeign = "frecency"
     static let frecency = hasOne(FrecencyUrlRecord.self,
                                  key: frecencyForeign,
-                                 using: ForeignKey([Columns.urlId], to: [FrecencyUrlRecord.Columns.urlId]))
+                                 using: ForeignKey([FrecencyUrlRecord.Columns.urlId], to: [Columns.urlId]))
 }
 
 // Fetching methods

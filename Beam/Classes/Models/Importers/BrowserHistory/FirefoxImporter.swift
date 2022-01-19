@@ -9,6 +9,7 @@ import Foundation
 import Combine
 import GRDB
 import INI
+import BeamCore
 
 /*
  History database schema:
@@ -72,6 +73,7 @@ struct FirefoxHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 }
 
 final class FirefoxImporter: BrowserHistoryImporter {
+    let sourceBrowser: BrowserType = .firefox
     enum ImportError: Error {
         case pathNotFoundInDefaultProfile
         case countNotAvailable
@@ -93,8 +95,8 @@ final class FirefoxImporter: BrowserHistoryImporter {
         let directoryPath = try defaultDirectoryPath(profilesFile: firefoxProfile)
         let defaultDirectory = firefoxDirectory.appendingPathComponent(directoryPath, isDirectory: true)
         guard let databaseURL = try SandboxEscape.endorsedURL(for: defaultDirectory.appendingPathComponent("places.sqlite")) else { return nil }
-        guard try SandboxEscape.endorsedURL(for: defaultDirectory.appendingPathComponent("places.sqlite-shm")) != nil else { return nil }
-        guard try SandboxEscape.endorsedURL(for: defaultDirectory.appendingPathComponent("places.sqlite-wal")) != nil else { return nil }
+        guard SandboxEscape.endorsedIfExists(url: defaultDirectory.appendingPathComponent("places.sqlite-shm")) else { return nil }
+        guard SandboxEscape.endorsedIfExists(url: defaultDirectory.appendingPathComponent("places.sqlite-wal")) else { return nil }
         return databaseURL
     }
 
@@ -117,7 +119,9 @@ final class FirefoxImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from dbPath: String) throws {
-        let dbQueue = try DatabaseQueue(path: dbPath)
+        var configuration = GRDB.Configuration()
+        configuration.readonly = true
+        let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
         try dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM moz_historyvisits") else {

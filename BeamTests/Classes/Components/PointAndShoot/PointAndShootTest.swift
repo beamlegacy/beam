@@ -15,7 +15,7 @@ class TestWebPage: WebPage {
     private(set) var title: String = "PNS MockPage"
     static let urlStr = "https://webpage.com"
     var url: URL? = URL(string: urlStr)
-    var userTypedDomain: URL?
+    var requestedUrl: URL?
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
     var webPositions: WebPositions?
@@ -40,12 +40,13 @@ class TestWebPage: WebPage {
             return BeamNote(title: "activeNote backup")
         }
     }
-    var testNotes: [String: BeamCore.BeamNote] = ["Card A": BeamNote(title: "Card A")]
+    var testNotes: [String: BeamCore.BeamNote] = ["Note A": BeamNote(title: "Note A")]
     var fileStorage: BeamFileStorage? {
         storage
     }
     var authenticationViewModel: AuthenticationViewModel?
     var searchViewModel: SearchViewModel?
+    var mouseHoveringLocation: MouseHoveringLocation = .none
 
     init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
          fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationController: WebNavigationController?) {

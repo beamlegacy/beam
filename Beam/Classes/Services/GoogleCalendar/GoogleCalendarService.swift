@@ -237,9 +237,10 @@ class GoogleCalendarService {
                           return
                 }
                 googleTokens.removeValue(forKey: accessToken)
-                googleTokens.updateValue(response.credential.oauthToken, forKey: refreshToken)
-                Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleTokens)
+                googleTokens.updateValue(refreshToken, forKey: response.credential.oauthToken)
 
+                self.accessToken = response.credential.oauthToken
+                Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleTokens)
                 completionHandler(.success(true))
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .eventCalendar)

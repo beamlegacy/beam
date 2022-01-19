@@ -42,7 +42,7 @@
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
           "branch": null,
-          "revision": "e952b98b9d2db8036199a12a018f79eb148f5e38",
+          "revision": "57cf0f8c46ecb1688987d5e1b382ae93799c87f3",
           "version": null
         }
       },
@@ -357,8 +357,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "a68422852a7695a6ebb427a7d9ec5c1deae12fa4",
-          "version": "7.6.1"
+          "revision": "5dcd5c245545a03a27988dcdb1a53f78fbee12a1",
+          "version": "7.8.0"
         }
       },
       {

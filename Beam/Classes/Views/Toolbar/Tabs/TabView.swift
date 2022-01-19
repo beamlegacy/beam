@@ -193,8 +193,13 @@ struct TabView: View {
         .lineLimit(1)
     }
 
-    // swiftlint:disable:next function_body_length
-    private func label(isHovering: Bool, containerGeometry: GeometryProxy) -> some View {
+    // swiftlint:disable function_body_length
+    ///  Layout of leading views, title and trailing views together.
+    ///
+    ///  To maintain a perfectly centered title
+    ///  and have no jumps between different hover and animation states,
+    ///  we often need to display a hidden version of leading or trailing views.
+    private func content(isHovering: Bool, containerGeometry: GeometryProxy) -> some View {
         let isHovering = isEnabled && (isHovering || isDragging)
         let shouldShowTitle = shouldShowTitle(geometry: containerGeometry)
         let shouldShowSecurity = isHovering && tab.url != nil && isSelected
@@ -217,6 +222,14 @@ struct TabView: View {
             // Leading Content
             if showForegroundHoverStyle {
                 leadingViews.transition(sideViewsTransition).padding(.leading, hPadding)
+                Spacer(minLength: BeamSpacing._40)
+            } else if isSingleTab {
+                ZStack {
+                    // make space for the non-active-single hover style
+                    self.leadingViews(shouldShowClose: true).opacity(0).accessibility(hidden: true)
+                    leadingViews.transition(sideViewsTransition)
+                }
+                .padding(.leading, hPadding)
                 Spacer(minLength: BeamSpacing._40)
             } else {
                 Rectangle().fill(Color.clear).frame(minWidth: hPadding)
@@ -248,7 +261,12 @@ struct TabView: View {
             }
             ZStack {
                 if showForegroundHoverStyle {
-                    trailingViews.padding(.trailing, hPadding).opacity(0) // hidden, to push content
+                    // make space for the active hover style
+                    trailingViews.padding(.trailing, hPadding).opacity(0)
+                } else if isSingleTab {
+                    // make space for the non-active-single hover style
+                    self.trailingViews(shouldShowCopy: true, shouldShowMedia: shouldShowMedia)
+                        .padding(.trailing, hPadding).opacity(0).accessibilityHidden(true)
                 } else {
                     Rectangle().fill(Color.clear)
                         .frame(minWidth: hPadding)
@@ -257,16 +275,18 @@ struct TabView: View {
             .overlay(ZStack {
                 trailingViews
             }.padding(.trailing, hPadding), alignment: .trailing)
+
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .fixedSize(horizontal: isSingleTab && !isPinned, vertical: false)
         .coordinateSpace(name: localCoordinateSpaceName)
     }
+    //swiftlint:enable function_body_length
 
     var body: some View {
         GeometryReader { proxy in
             HStack {
-                label(isHovering: isHovering, containerGeometry: proxy)
+                content(isHovering: isHovering, containerGeometry: proxy)
                     .font(font)
                     .foregroundColor(foregroundColor)
                     .if(!isDragging || colorScheme == .dark) {

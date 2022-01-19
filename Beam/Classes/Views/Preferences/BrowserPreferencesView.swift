@@ -17,14 +17,6 @@ class BrowserPreferencesViewModel: ObservableObject {
     @ObservedObject var onboardingManager: OnboardingManager = OnboardingManager(onlyImport: true)
 
     var scope = Set<AnyCancellable>()
-
-    init() {
-        onboardingManager.$needsToDisplayOnboard.sink { result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-            }
-        }.store(in: &scope)
-    }
 }
 
 struct BrowserPreferencesView: View {
@@ -34,7 +26,7 @@ struct BrowserPreferencesView: View {
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section {
+            Preferences.Section(verticalAlignment: .top) {
                 Text("Default Browser:")
                     .frame(width: 250, alignment: .trailing)
             } content: {
@@ -46,7 +38,7 @@ struct BrowserPreferencesView: View {
                 SearchEngineSection()
             }
 
-            Preferences.Section(bottomDivider: true) {
+            Preferences.Section(bottomDivider: true, verticalAlignment: .top) {
                 Text("Bookmarks & Settings:")
             } content: {
                 BookmarksSection(viewModel: viewModel)
@@ -64,7 +56,7 @@ struct BrowserPreferencesView: View {
                 TabsSection()
             }
 
-            Preferences.Section {
+            Preferences.Section(verticalAlignment: .top) {
                 Text("Clear Caches:")
             } content: {
                 ClearCachesSection()
@@ -122,7 +114,7 @@ struct SearchEngineSection: View {
     var body: some View {
         VStack(alignment: .leading) {
             Picker("", selection: $selectedSearchEngine) {
-                ForEach(SearchEnginesPreferences.allCases) { engine in
+                ForEach(SearchEngineProvider.allCases) { engine in
                     Text(engine.name)
                 }
             }.labelsHidden()
@@ -148,7 +140,7 @@ struct BookmarksSection: View {
     var body: some View {
         VStack(alignment: .leading) {
             Button {
-                AppDelegate.main.showOnboardingWindow(model: viewModel.onboardingManager)
+                viewModel.onboardingManager.presentOnboardingWindow()
             } label: {
                 Text("Import...")
                     .font(BeamFont.regular(size: 13).swiftUI)

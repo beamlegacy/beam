@@ -9,7 +9,7 @@ struct KeychainStorable<T> {
     let useCache: Bool = true
     let label: String?
     let comment: String?
-    private let store = Keychain(service: Configuration.bundleIdentifier).synchronizable(true)
+    private var store = Keychain(service: Configuration.bundleIdentifier)
 
     private class InternalValueCache {
         var hasSetValue = false
@@ -19,10 +19,11 @@ struct KeychainStorable<T> {
     }
     private var cache = InternalValueCache()
 
-    init(_ key: String, _ label: String? = nil, _ comment: String? = nil) {
+    init(_ key: String, _ label: String? = nil, _ comment: String? = nil, synchronizable: Bool = true) {
         self.key = Configuration.env.rawValue + "." + key
         self.label = label
         self.comment = comment
+        self.store = self.store.synchronizable(synchronizable)
     }
 
     var wrappedValue: T? {

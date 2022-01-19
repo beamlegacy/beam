@@ -13,12 +13,23 @@ extension BeamTextEdit {
     @discardableResult
     public func makeInternalLinkForSelectionOrShowFormatter(for node: TextNode, applyFormat: Bool = true) -> BeamText.Attribute? {
         guard let rootNode = rootNode else { return nil }
-        let title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
-        guard !title.isEmpty, let doc = documentManager.loadDocumentByTitle(title: title) else {
-            let text = selectedText
+        var title = node.root?.state.nodeSelection != nil ? node.text.text : selectedText
+        title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cmdManager = rootNode.focusedCmdManager
+        guard !title.isEmpty else {
+            cmdManager.beginGroup(with: "Prepare Internal Link From Empty")
+            let selectedRange = selectedTextRange
+            cmdManager.cancelSelection(node)
+            cmdManager.replaceText(in: node, for: selectedRange, with: BeamText(text: "@", attributes: []))
+            cmdManager.focusElement(node, cursorPosition: selectedRange.lowerBound + 1)
+            cmdManager.endGroup()
+            showCardReferenceFormatter(atPosition: node.cursorPosition, prefix: 1, suffix: 0)
+            return nil
+        }
+        guard let doc = documentManager.loadDocumentByTitle(title: title) else {
+            let text = selectedText.trimmingCharacters(in: .whitespacesAndNewlines)
             let pos = selectedTextRange.lowerBound
             let previousSelectedRange = selectedTextRange
-            let cmdManager = rootNode.focusedCmdManager
             cmdManager.beginGroup(with: "Prepare Internal Link Search")
             cmdManager.cancelSelection(node)
             cmdManager.focusElement(node, cursorPosition: previousSelectedRange.upperBound)
@@ -78,7 +89,7 @@ extension BeamTextEdit {
         let replacementEnd = rootNode.cursorPosition + suffix
         let linkEnd = replacementStart + title.count
         let cmdManager = rootNode.focusedCmdManager
-        cmdManager.beginGroup(with: "Card Link Insert")
+        cmdManager.beginGroup(with: "Note Link Insert")
         defer { cmdManager.endGroup() }
         cmdManager.replaceText(in: node, for: replacementStart..<replacementEnd, with: BeamText(text: title, attributes: []))
 

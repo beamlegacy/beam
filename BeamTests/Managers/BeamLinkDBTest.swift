@@ -13,7 +13,7 @@ class BeamLinkDBTests: XCTestCase {
     func testDomain() throws {
         //not a domain case
         let url0 = "http://123.fr/yourdestiny.html"
-        let id0 = BeamLinkDB.shared.getOrCreateIdFor(url: url0, title: nil)
+        let id0 = BeamLinkDB.shared.getOrCreateIdFor(url: url0, title: nil, content: nil, destination: nil)
         var isDomain = BeamLinkDB.shared.isDomain(id: id0)
         XCTAssertFalse(isDomain)
         var domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id0))
@@ -22,7 +22,7 @@ class BeamLinkDBTests: XCTestCase {
 
         //domain case
         let url1 = "http://depannage.com"
-        let id1 = BeamLinkDB.shared.getOrCreateIdFor(url: url1, title: nil)
+        let id1 = BeamLinkDB.shared.getOrCreateIdFor(url: url1, title: nil, content: nil, destination: nil)
         isDomain = BeamLinkDB.shared.isDomain(id: id1)
         XCTAssert(isDomain)
         domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id1))
@@ -36,11 +36,11 @@ class BeamLinkDBTests: XCTestCase {
 
     func testTopFrecenciesMatching() throws {
         let links = [
-            Link(url: "http://animal.com/cat", title: nil),
-            Link(url: "http://animal.com/dog", title: nil), //is missing frecency
-            Link(url: "http://animal.com/cow", title: nil),
-            Link(url: "http://animal.com/pig", title: nil),
-            Link(url: "http://blabla.fr/", title: nil),
+            Link(url: "http://animal.com/cat", title: nil, content: nil, destination: nil),
+            Link(url: "http://animal.com/dog", title: nil, content: nil, destination: nil), //is missing frecency
+            Link(url: "http://animal.com/cow", title: nil, content: nil, destination: nil),
+            Link(url: "http://animal.com/pig", title: nil, content: nil, destination: nil),
+            Link(url: "http://blabla.fr/", title: nil, content: nil, destination: nil),
         ]
         let now = BeamDate.now
         let frecencies = [
@@ -64,12 +64,12 @@ class BeamLinkDBTests: XCTestCase {
     }
     func testMissingLinkHandling() {
         //when getting id for missing url, it retreives the link but doesn't save it in db
-        let createdLinkId: UUID = BeamLinkDB.shared.getOrCreateIdFor(url: "<???>", title: nil)
+        let createdLinkId: UUID = BeamLinkDB.shared.getOrCreateIdFor(url: "<???>", title: nil, content: nil, destination: nil)
         XCTAssertEqual(createdLinkId, Link.missing.id)
         XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
 
         //when visiting missing url, it retreives the link but doesn't save it in db
-        let visitedLinkId: UUID = BeamLinkDB.shared.visit("<???>", title: nil)
+        let visitedLinkId: UUID = BeamLinkDB.shared.visit("<???>", title: nil, content: nil, destination: nil).id
         XCTAssertEqual(visitedLinkId, Link.missing.id)
         XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
     }

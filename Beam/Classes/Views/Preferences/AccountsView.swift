@@ -10,11 +10,9 @@ let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.bu
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
-    @ObservedObject var onboardingManager = OnboardingManager(onlyLogin: true)
     @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @Published var accountsCalendar: [AccountCalendar] = []
 
-    private var onboardingScope = Set<AnyCancellable>()
     private var scope = Set<AnyCancellable>()
 
     init(calendarManager: CalendarManager) {
@@ -39,15 +37,9 @@ class AccountsViewModel: ObservableObject {
     }
 
     fileprivate func showOnboarding() {
-        let onboardingManager = OnboardingManager(onlyLogin: true)
-        onboardingScope.removeAll()
-        onboardingManager.$needsToDisplayOnboard.sink { result in
-            if !result {
-                AppDelegate.main.closeOnboardingWindow()
-            }
-        }.store(in: &onboardingScope)
-        self.onboardingManager = onboardingManager
-        AppDelegate.main.showOnboardingWindow(model: onboardingManager)
+        let onboardingManager = AppDelegate.main.data.onboardingManager
+        onboardingManager.prepareForConnectOnly()
+        onboardingManager.presentOnboardingWindow()
     }
 }
 
@@ -73,10 +65,11 @@ struct AccountsView: View {
 
     private let accountManager = AccountManager()
     private let contentWidth: Double = PreferencesManager.contentWidth
+    private let checkboxHelper = NSButtonCheckboxHelper()
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: false, verticalAlignment: .firstTextBaseline) {
+            Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
                 Text("Account:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -91,7 +84,7 @@ struct AccountsView: View {
             Preferences.Section(title: "") {
                 Spacer(minLength: 26).frame(maxHeight: 26)
             }
-            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
+            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .top) {
                 Text("Calendars & Contacts:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -112,11 +105,12 @@ struct AccountsView: View {
                             }.padding(.bottom, 20)
 
                             Button(action: {
-                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in
+                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                                    if connected { viewModel.calendarManager.updated = true }
                                 }
                             }, label: {
                                 // TODO: loc
-                                Text("Connect Another Google Account...")
+                                Text("Connect Another Google Calendar...")
                                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                                     .frame(width: 236)
                                     .padding(.top, -4)
@@ -169,10 +163,12 @@ struct AccountsView: View {
 
     private var accountLoggedInView: some View {
         VStack(alignment: .leading) {
-            Text(AuthenticationManager.shared.username ?? "Username not defined")
-                .font(BeamFont.regular(size: 13).swiftUI)
-                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .frame(height: 16)
+            if let username = AuthenticationManager.shared.username {
+                Text(username)
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(height: 16)
+            }
             LogoutButton
         }
     }
@@ -189,7 +185,7 @@ struct AccountsView: View {
         })
                 .padding(.bottom, 6)
             VStack {
-                Text("Connect to Beam to publish your cards and sync your notes between your devices.")
+                Text("Sync your notes between device and share them easily")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
@@ -202,7 +198,8 @@ struct AccountsView: View {
     private var connectGoogleCalendarView: some View {
         VStack(alignment: .leading) {
             Button(action: {
-                viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in
+                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                    if connected { viewModel.calendarManager.updated = true }
                 }
             }, label: {
                 // TODO: loc
@@ -211,11 +208,6 @@ struct AccountsView: View {
                     .frame(width: 208)
                     .padding(.top, -4)
             })
-            VStack {
-                Text("Import your Calendar and Contacts and easily take meeting notes.")
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.frame(width: 344, height: 26, alignment: .leading)
         }
     }
 
@@ -253,7 +245,7 @@ struct AccountsView: View {
                     .frame(width: 132)
                     .padding(.top, -4)
             })
-            Text("All your cards will be deleted and cannot be recovered.")
+            Text("All your notes will be deleted and cannot be recovered.")
                 .font(BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(width: 286, alignment: .leading)
@@ -270,7 +262,7 @@ struct AccountsView: View {
 
             })
             VStack {
-                Text("Your account, your database and all your cards will be deleted and cannot be recovered.")
+                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .multilineTextAlignment(.leading)
@@ -328,7 +320,7 @@ struct AccountsView: View {
                         }
                     })
 
-            Text("Your encryption key is used to decrypt your cards on Beam Web. Click to copy it and paste it on Beam Web.")
+            Text("Your encryption key is used to decrypt your notes on Beam Web. Click to copy it and paste it on Beam Web.")
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)
@@ -340,7 +332,13 @@ struct AccountsView: View {
 
     private func promptLogoutAlert() {
         let alert = NSAlert()
-        alert.messageText = "Are you sure you want to sign out from your Beam account?"
+        alert.messageText = "Are you sure you want to sign out ?"
+        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 16))
+        let checkBox = NSButton(checkboxWithTitle: "Delete all my notes & data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
+        checkBox.frame.origin = CGPoint(x: 17, y: 0)
+        checkBox.font = BeamFont.regular(size: 12).nsFont
+        customView.addSubview(checkBox)
+        alert.accessoryView = customView
         alert.addButton(withTitle: "Sign Out")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
@@ -348,6 +346,9 @@ struct AccountsView: View {
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
             AccountManager.logout()
+            if self.checkboxHelper.isOn {
+                AppDelegate.main.deleteAllLocalContent()
+            }
             viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated
         }
     }
@@ -355,7 +356,7 @@ struct AccountsView: View {
     // TODO: Implement when endpoint is ready
     private func promptDeleteAllGraphAlert() {
         UserAlert.showMessage(message: "Are you sure you want to delete all your graphs?",
-                              informativeText: "All your cards will be deleted and cannot be recovered.",
+                              informativeText: "All your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
             // TODO: Implement when endpoint is ready
@@ -365,7 +366,7 @@ struct AccountsView: View {
     // TODO: Implement when endpoint is ready
     private func promptDeleteAccountActionAlert() {
         UserAlert.showMessage(message: "Are you sure you want to delete your Beam account?",
-                              informativeText: "Your account, all your graphs and all your cards will be deleted and cannot be recovered.",
+                              informativeText: "Your account, all your graphs and all your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
             // TODO: Implement when endpoint is ready
@@ -387,7 +388,9 @@ struct GoogleAccountView: View {
                 if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
                     Button {
                         onDisconnect?()
-                        viewModel.calendarManager.requestAccess(from: .googleCalendar) { _ in}
+                        viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                            if connected { viewModel.calendarManager.updated = true }
+                        }
                     } label: {
                         Text("Fix Permissions...")
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -427,8 +430,6 @@ struct GoogleAccountView: View {
 struct AccountsView_Previews: PreviewProvider {
     static var previews: some View {
         AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
-        AccountsView(viewModel: AccountsViewModel(calendarManager: AppDelegate.main.data.calendarManager))
-
     }
     // swiftlint:disable:next file_length
 }

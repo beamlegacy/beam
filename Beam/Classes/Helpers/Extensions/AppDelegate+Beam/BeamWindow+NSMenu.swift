@@ -63,8 +63,8 @@ extension BeamWindow {
         for windowCommand in windowCommands.keys {
             guard var beamWindow = AppDelegate.main.windows.first,
                     let command = windowCommands[windowCommand] else { continue }
-            if windowCommand > 0 {
-                beamWindow = AppDelegate.main.createWindow(frame: nil, restoringTabs: false)
+            if windowCommand > 0, let newWindow = AppDelegate.main.createWindow(frame: nil, restoringTabs: false) {
+                beamWindow = newWindow
             }
             beamWindow.state.cmdManager.appendToDone(command: command)
 
@@ -128,6 +128,10 @@ extension BeamWindow {
 
     @IBAction func showHelp(_ sender: Any?) {
         state.navigateToPage(.shortcutsWindowPage)
+    }
+
+    @IBAction func toggleStatusBar(_ sender: Any?) {
+        PreferencesManager.showsStatusBar.toggle()
     }
 
     // MARK: Navigation

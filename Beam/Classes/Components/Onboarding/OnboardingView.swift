@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 struct OnboardingView: View {
 
@@ -20,45 +21,48 @@ struct OnboardingView: View {
     }
     @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [:]
     @State private var stepOpacity: [OnboardingStep.StepType: CGFloat] = [:]
+    private let estimatedSafeAreaInsets = NSEdgeInsets(top: 38, left: 0, bottom: 0, right: 0) // invisible toolbar
 
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 Spacer(minLength: 0)
-                switch currentStep.type {
-                case .profile:
-                    OnboardingProfileCreationView(actions: $model.actions) { nextStep in
-                        model.advanceToNextStep(nextStep)
+                Group {
+                    switch currentStep.type {
+                    case .profile:
+                        OnboardingProfileCreationView(actions: $model.actions) { nextStep in
+                            model.advanceToNextStep(nextStep)
+                        }
+                    case .emailConnect:
+                        OnboardingEmailConnectView(actions: $model.actions) { nextStep in
+                            model.advanceToNextStep(nextStep)
+                        }
+                    case .emailConfirm:
+                        OnboardingEmailConfirmationView(actions: $model.actions) { nextStep in
+                            model.advanceToNextStep(nextStep)
+                        }
+                    case .imports:
+                        OnboardingImportsView(actions: $model.actions) { nextStep in
+                            model.advanceToNextStep(nextStep)
+                        }
+                    default:
+                        OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading) { nextStep in
+                            model.advanceToNextStep(nextStep)
+                        }
                     }
-                    .offset(x: 0, y: stepOffset[.profile] ?? 0)
-                    .opacity(stepOpacity[.profile] ?? 1)
-                case .emailConnect:
-                    OnboardingEmailConnectView { nextStep in
-                        model.advanceToNextStep(nextStep)
-                    }
-                    .offset(x: 0, y: stepOffset[.emailConnect] ?? 0)
-                    .opacity(stepOpacity[.emailConnect] ?? 1)
-                case .imports:
-                    OnboardingImportsView(actions: $model.actions) { nextStep in
-                        model.advanceToNextStep(nextStep)
-                    }
-                        .offset(x: 0, y: stepOffset[.imports] ?? 0)
-                        .opacity(stepOpacity[.imports] ?? 1)
-                default:
-                    OnboardingWelcomeView(welcoming: !model.onlyLogin) { nextStep in
-                        model.advanceToNextStep(nextStep)
-                    }
-                    .offset(x: 0, y: stepOffset[.welcome] ?? 0)
-                    .opacity(stepOpacity[.welcome] ?? 1)
                 }
+                .offset(x: 0, y: stepOffset[currentStep.type] ?? 0)
+                .opacity(stepOpacity[currentStep.type] ?? 1)
                 Spacer(minLength: 0)
             }
             .frame(minWidth: 280)
             .padding(.top, BeamSpacing._100)
             .fixedSize(horizontal: true, vertical: false)
+            .environmentObject(model)
             bottomBar
         }
         .background(BeamColor.Generic.background.swiftUI.edgesIgnoringSafeArea(.all))
+        .frame(width: 512, height: 600 - estimatedSafeAreaInsets.top)
         .onAppear {
             displayedStep = model.currentStep
         }
@@ -98,59 +102,64 @@ struct OnboardingView: View {
         }
     }
 
-    private let customButtonStyle = ButtonLabelStyle(font: BeamFont.regular(size: 10).swiftUI, activeBackgroundColor: .clear)
-    private let bottomBarHeight: CGFloat = 76
+    private let bottomBarHeight: CGFloat = 94
+    private let buttonsHeight: CGFloat = 34
     private var secondarActionVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.secondary.style
         style.icon = .init(name: "shortcut-bttn_space", size: 16, palette: style.icon?.palette, alignment: .trailing)
         return .custom(style)
     }
+
     private var bottomBar: some View {
-        GeometryReader { proxy in
+        ZStack(alignment: .bottom) {
+            if !model.viewIsLoading && [.welcome].contains(currentStep.type) {
+                HStack(spacing: 0) {
+                    Text("Terms and Conditions").onTapGesture {
+                        openExternalURL(Configuration.beamTermsConditionsLink, title: "Terms and Conditions")
+                    }
+                    Text(" • ")
+                    Text("Privacy Policy").onTapGesture {
+                        openExternalURL(Configuration.beamPrivacyPolicyLink, title: "Privacy Policy")
+                    }
+                }
+                .font(BeamFont.medium(size: 11).swiftUI)
+                .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
+                .padding(.bottom, 30)
+            }
             HStack(spacing: 0) {
                 if model.stepsHistory.count > 0 {
-                    ButtonLabel(nil, icon: "onboarding-back", customStyle: customButtonStyle) {
-                        model.backToPreviousStep()
-                    }
-                    .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
-                }
-                Spacer()
-                if [.welcome, .emailConnect].contains(currentStep.type) {
-                    GlobalCenteringContainer(containerGeometry: proxy) {
-                        HStack(spacing: 0) {
-                            Text("Terms and Conditions").onTapGesture {
-                                openExternalURL(Configuration.beamTermsConditionsLink, title: "Terms and Conditions")
-                            }
-                            Text(" • ")
-                            Text("Privacy Policy").onTapGesture {
-                                openExternalURL(Configuration.beamPrivacyPolicyLink, title: "Privacy Policy")
-                            }
+                    BackButton()
+                        .onTapGesture {
+                            model.backToPreviousStep()
                         }
-                    }
-                    .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
+                        .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15).delay(0.2)))
                 }
                 Spacer()
                 HStack(spacing: BeamSpacing._200) {
                     ForEach(model.actions) { action in
                         ActionableButton(text: action.title, defaultState: !action.enabled ? .disabled : .normal,
-                                         variant: action.secondary ? secondarActionVariant : .gradient(icon: "shortcut-return"),
-                                         minWidth: action.secondary ? 110 : 146,
+                                         variant: action.secondary ? secondarActionVariant : .primaryPurple,
+                                         minWidth: action.secondary ? 100 : 150,
+                                         height: buttonsHeight,
                                          action: !action.enabled ? nil : {
                             if action.onClick?() != false {
                                 model.advanceToNextStep()
                             }
                         })
+                            .disabled(!action.enabled)
+                            .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.15).delay(0.2)))
+                            .accessibilityIdentifier(action.id)
                     }
                 }
             }
-            .font(BeamFont.medium(size: 10).swiftUI)
-            .foregroundColor(BeamColor.AlphaGray.swiftUI)
-            .padding(.horizontal, BeamSpacing._400)
-            .frame(maxHeight: .infinity)
+            .frame(height: buttonsHeight)
+            .padding([.trailing, .bottom], BeamSpacing._400)
+            .padding(.leading, 30)
         }
-        .animation(BeamAnimation.easeInOut(duration: 0.3), value: model.actions)
-        .frame(height: bottomBarHeight)
+        .animation(BeamAnimation.easeInOut(duration: 0.15), value: model.actions)
         .frame(maxWidth: .infinity)
+        .frame(height: bottomBarHeight, alignment: .bottom)
     }
 
     private func openExternalURL(_ urlString: String, title: String) {
@@ -162,33 +171,85 @@ struct OnboardingView: View {
         var title: String
         var body: some View {
             Text(title)
-                .font(BeamFont.medium(size: 20).swiftUI)
+                .font(BeamFont.medium(size: 24).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .padding(.bottom, 34)
+                .padding(.bottom, 40)
         }
     }
 
     struct LoadingView: View {
         var message: String = "Importing your data..."
+        private var subtitle: String {
+            "Syncing \(detailToDisplay)"
+        }
+        var randomDetails = [
+            "notes", "passwords", "images", "embeds"
+        ]
+        @State private var detailToDisplay = ""
+        @State private var detailLoopCancellable: Cancellable?
+
         var body: some View {
-            VStack(spacing: BeamSpacing._200) {
-                Rectangle()
-                    .fill(BeamColor.Mercury.swiftUI)
-                    .frame(width: 175, height: 128)
-                    .cornerRadius(10)
-                Text(message)
-                    .font(BeamFont.medium(size: 17).swiftUI)
-                    .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+            VStack(spacing: BeamSpacing._140) {
+                ProgressView()
+                    .progressViewStyle(CircularProgressViewStyle(tint: BeamColor.Niobium.swiftUI))
+                    .scaleEffect(1.75, anchor: .center)
+                    .frame(width: 64, height: 64)
+                VStack(spacing: BeamSpacing._100) {
+                    Text(message)
+                        .font(BeamFont.medium(size: 24).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    Text(subtitle)
+                        .font(BeamFont.regular(size: 14).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                }
             }
+            .onAppear {
+                if let first = randomDetails.first {
+                    detailToDisplay = first
+                }
+                detailLoopCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
+                    var newDetail = randomDetails.randomElement()
+                    while newDetail == detailToDisplay {
+                        newDetail = randomDetails.randomElement()
+                    }
+                    guard let newDetail = newDetail else { return }
+
+                    detailToDisplay = newDetail
+                })
+            }
+            .onDisappear {
+                detailLoopCancellable?.cancel()
+            }
+        }
+    }
+
+    struct BackButton: View {
+        @State private var isHovering = false
+        private var foregroundColor: Color {
+            (isHovering ? BeamColor.Niobium : BeamColor.AlphaGray).swiftUI
+        }
+        var body: some View {
+            HStack(spacing: 1) {
+                Icon(name: "nav-back", size: CGSize(width: 20, height: 24), color: foregroundColor)
+                Text("Back")
+                    .foregroundColor(foregroundColor)
+                    .font(BeamFont.regular(size: 14).swiftUI)
+            }
+            .onHover { isHovering = $0 }
         }
     }
 }
 
 struct OnboardingView_Previews: PreviewProvider {
+
+    static var onboardingManager: OnboardingManager {
+        let mngr = OnboardingManager()
+        mngr.advanceToNextStep(.init(type: .welcome))
+        return mngr
+    }
     static var previews: some View {
         Group {
-            OnboardingView(model: OnboardingManager())
-                .frame(width: 800, height: 512)
+            OnboardingView(model: onboardingManager)
                 .background(BeamColor.Generic.background.swiftUI)
         }
 

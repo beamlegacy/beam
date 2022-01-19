@@ -98,12 +98,14 @@ public class SuggestedNoteSourceUpdater {
         var sourcesToAdd: [UUID: Set<UUID>] = [:]
         var sourcesToRemove: [UUID: Set<UUID>] = [:]
         let allSources = self.allSourcesPerNote(urlGroups: urlGroups, noteGroups: noteGroups, activeSources: activeSources)
-        let allNotes = Set(self.oldAllSources.keys).union(allSources.keys)
+        let allNotes = allSources.keys // A note that appeared before would "disappear" only if it is deleted by the user
+        let allPages = Set(urlGroups.flatMap { $0 })
         for note in allNotes {
             let allSourcesForNote = allSources[note] ?? Set([])
             let allOldSourcesForNote = self.oldAllSources[note] ?? Set([])
             let sourcesToAddForNote = allSourcesForNote.subtracting(allOldSourcesForNote)
-            let sourcesToRemoveForNote = allOldSourcesForNote.subtracting(allSourcesForNote)
+            let sourcesToRemoveForNote = allOldSourcesForNote.subtracting(allSourcesForNote.intersection(allPages))
+            // We don't want to remove a page that has disappeared because it was removed from clustering
             if sourcesToAddForNote.count > 0 {
                 sourcesToAdd[note] = sourcesToAddForNote
             }

@@ -66,20 +66,25 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
 
     private func updateMenuItems(items: [NSMenuItem], for state: BeamState?) {
         for item in items {
-            if item.title == "Recent Cards" && item.hasSubmenu {
+            switch item.identifier {
+            case Self.recentNoteItemIdentifier where item.hasSubmenu:
                 item.submenu?.removeAllItems()
                 for recentCard in recentCardsItems() {
                     item.submenu?.addItem(recentCard)
                 }
+
+            case Self.collectPageToCardItemIdentifier, Self.collectPageToCardAlternateItemIdentifier:
+                updateFullPageCollectMenu(item)
+
+            case Self.statusBarItemIdentifier:
+                updateStatusBarMenu(item)
+
+            default: break
             }
 
             if item.tag == 0 { continue }
             let value = abs(item.tag)
             item.isEnabled = passConditionTag(tag: value, for: state)
-
-            if item.action == #selector(BeamWindow.collectPageToCard(_:)) {
-                updateFullPageCollectMenu(item)
-            }
         }
     }
 
@@ -88,8 +93,18 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         if let note = currentTab.noteController.note {
             menuItem.title = "Capture Page to \(note.title)"
         } else {
-            menuItem.title = "Capture Page to Card…"
+            menuItem.title = "Capture Page to Note…"
         }
+    }
+
+    private func updateStatusBarMenu(_ menuItem: NSMenuItem) {
+        let title: String
+        if PreferencesManager.showsStatusBar {
+            title = NSLocalizedString("Hide Status Bar", comment: "Hide Status Bar menu item")
+        } else {
+            title = NSLocalizedString("Show Status Bar", comment: "Show Status Bar Menu item")
+        }
+        menuItem.title = title
     }
 
     // MARK: - NSMenu Delegate
@@ -113,12 +128,12 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         return passConditionTag(tag: value, for: window?.state)
     }
 
-    func recentCardsItems() -> [NSMenuItem] {
+    private func recentCardsItems() -> [NSMenuItem] {
         var recentItems: [NSMenuItem] = []
 
         guard let recentsNotes = window?.state.recentsManager.recentNotes else {
             let emptyItem = NSMenuItem()
-            emptyItem.title = "No recent Cards"
+            emptyItem.title = "No recent Notes"
             emptyItem.tag = 0
             emptyItem.isEnabled = false
             recentItems.append(emptyItem)
@@ -135,6 +150,16 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         }
         return recentItems
     }
+}
+
+// MARK: - Menu Item Identifiers
+extension AppDelegate {
+
+    private static let recentNoteItemIdentifier = NSUserInterfaceItemIdentifier("recent_notes")
+    private static let statusBarItemIdentifier = NSUserInterfaceItemIdentifier("toggle_status_bar")
+    private static let collectPageToCardItemIdentifier = NSUserInterfaceItemIdentifier("collect_page")
+    private static let collectPageToCardAlternateItemIdentifier = NSUserInterfaceItemIdentifier("collect_page_alternate")
+
 }
 
 // MARK: - Custom Item Validation

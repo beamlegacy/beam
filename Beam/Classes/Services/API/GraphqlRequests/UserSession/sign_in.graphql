@@ -5,6 +5,7 @@ mutation SignIn($email: Email!, $password: String!) {
     errors {
       path
       message
+      code
     }
   }
 }

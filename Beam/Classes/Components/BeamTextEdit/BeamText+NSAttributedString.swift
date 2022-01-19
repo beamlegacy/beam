@@ -116,7 +116,7 @@ extension BeamText {
         if strong && emphasis {
             font = BeamFont.mediumItalic(size: fontSize)
         } else if strong {
-            font = BeamFont.medium(size: fontSize)
+            font = BeamFont.semibold(size: fontSize)
         } else if emphasis {
             font = BeamFont.regularItalic(size: fontSize) //NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
         } else {

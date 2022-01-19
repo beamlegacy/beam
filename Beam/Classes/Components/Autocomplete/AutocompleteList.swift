@@ -16,19 +16,25 @@ struct AutocompleteList: View {
 
     @State private var hoveredItemIndex: Int?
 
+    private func isItemSelectedByHovering(_ item: AutocompleteResult) -> Bool {
+        hoveredItemIndex != nil && hoveredItemIndex != selectedIndex && hoveredItemIndex == indexFor(item: item)
+    }
+
     var body: some View {
         VStack(spacing: 0) {
             ForEach(elements) { i in
+                let isSelected = isSelectedItem(i)
+                let isCreateCard = i.source == .createCard
+                let allowsShortcut = isCreateCard || (isSelected && !isItemSelectedByHovering(i))
                 if i.source == .createCard && elements.count > 1 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
-                        .padding(.vertical, BeamSpacing._60)
+                        .padding(.vertical, BeamSpacing._40)
                 }
-                AutocompleteItem(item: i, selected: isSelectedItem(i),
+                AutocompleteItem(item: i, selected: isSelected, allowsShortcut: allowsShortcut,
                                  colorPalette: i.source == .createCard ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
                                     AutocompleteItem.defaultColorPalette)
-                    .frame(height: 36)
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
@@ -76,8 +82,8 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "Search Result 1", source: .autocomplete),
         AutocompleteResult(text: "Search Result 2", source: .autocomplete),
         AutocompleteResult(text: "Site Visited", source: .history, url: URL(string: "https://apple.com")),
-        AutocompleteResult(text: "result.com", source: .url),
-        AutocompleteResult(text: "My Own Card", source: .createCard)]
+        AutocompleteResult(text: "result.com", source: .url, urlFields: .text),
+        AutocompleteResult(text: "My Own Note", source: .createCard)]
     static var previews: some View {
         AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
     }

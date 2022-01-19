@@ -8,6 +8,7 @@
 import Foundation
 import Combine
 import GRDB
+import BeamCore
 
 /*
  History database schema:
@@ -40,6 +41,8 @@ struct SafariHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 }
 
 final class SafariImporter: BrowserHistoryImporter {
+    let sourceBrowser: BrowserType = .safari
+
     enum ImportError: Error {
         case countNotAvailable
     }
@@ -56,8 +59,8 @@ final class SafariImporter: BrowserHistoryImporter {
         let safariDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Safari")
         let historyDatabase = safariDirectory.appendingPathComponent("History.db")
         let databaseURL = try SandboxEscape.endorsedURL(for: historyDatabase)
-        guard try SandboxEscape.endorsedURL(for: safariDirectory.appendingPathComponent("History.db-shm")) != nil else { return nil }
-        guard try SandboxEscape.endorsedURL(for: safariDirectory.appendingPathComponent("History.db-wal")) != nil else { return nil }
+        guard SandboxEscape.endorsedIfExists(url: safariDirectory.appendingPathComponent("History.db-shm")) else { return nil }
+        guard SandboxEscape.endorsedIfExists(url: safariDirectory.appendingPathComponent("History.db-wal")) else { return nil }
         return databaseURL
     }
 
@@ -66,7 +69,9 @@ final class SafariImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from dbPath: String) throws {
-        let dbQueue = try DatabaseQueue(path: dbPath)
+        var configuration = GRDB.Configuration()
+        configuration.readonly = true
+        let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
         try? dbQueue.read { db in
             do {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM history_visits") else {

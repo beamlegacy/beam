@@ -11,10 +11,6 @@ import XCTest
 
 class EmbedContentAPIStrategyTests: XCTestCase {
 
-    override func setUpWithError() throws {
-        SupportedEmbedDomains.shared.pattern = "(?:https?:\\/\\/(?:www\\.)?(?:instagr\\.am|instagram\\.com)\\/p\\/([\\w-]+))|(?:https?:\\/\\/(?:www\\.)?(?:flic\\.kr\\/p|flickr.com\\/photos)\\/[^\\s]+)|(?:https?:\\/\\/(?:www\\.)?deviantart\\.com\\/([a-z0-9_-]+)\\/art\\/([a-z0-9_-]+)+)|(?:https?:\\/\\/(?:www\\.)?twitch\\.tv\\/([a-z0-9_-]+)\\/video\\/([a-z0-9_-]+)+)|(?:https?:\\/\\/(?:www\\.)?soundcloud\\.com\\/([a-z0-9_-]+)\\/([a-z0-9_-]+))|(?:https?:\\/\\/(www|open|play)\\.?spotify\\.com\\/(artist|track|playlist|show)\\/([\\w\\-/]+))|(?:https?:\\/\\/(?:www\\.)?ted\\.com\\/talks\\/[\\w]+)|(?:https?:\\/\\/(?:www\\.)?vimeo\\.com\\/(?:(album)\\/(\\w+)\\/video\\/([0-9]+)|(groups)\\/(\\w+)\\/videos\\/([0-9]+)|(channels)\\/(\\w+)\\/([0-9]+)|(ondemand)\\/(\\w+)\\/([0-9]+)|(\\w+)))|(?:https?:\\/\\/(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([\\w-]+)(?:&(.*=.+))*)|(?:https?:\\/\\/(?:www\\.)?slideshare\\.net\\/([\\w\\-]+)\\/([\\w\\-]+))|(?:https:\\/\\/public\\.beamapp\\.co\\/([a-zA-Z0-9._-]+)\\/note\\/([0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12})\\/([A-z0-1-]+))|(?:https?:\\/\\/(?:www\\.)?twitter\\.com\\/\\w+\\/status\\/[0-9]+(?:\\?s=[0-9]+)?)|(?:https?:\\/\\/(?:[\\w.-]+\\.)?figma.com\\/(?:file|proto)\\/([0-9a-zA-Z]{22,128})\\/(.*)?$)|(?:https:\\/\\/sketchfab.com\\/models\\/(\\w+))"
-    }
-
     func testCanEmbed() {
         let st = EmbedContentAPIStrategy()
         let strings = [
@@ -31,7 +27,6 @@ class EmbedContentAPIStrategyTests: XCTestCase {
             "https://vimeo.com/286898202",
             "https://www.instagram.com/p/CQrBE1RDCKf",
             "https://www.twitch.tv/cocoatype/video/1221611733",
-            "https://public.beamapp.co/jeromebeam/note/c71239ba-9d75-433b-a776-f75d2640e260/Baudrillard",
             "https://sketchfab.com/models/dGUrytaktlDeNudCEGKk31oTJY",
             "http://www.slideshare.net/haraldf/business-quotes-for-2011",
             "https://www.deviantart.com/fi2-shift/art/Apple-Metal-107692353",
@@ -43,7 +38,7 @@ class EmbedContentAPIStrategyTests: XCTestCase {
 
         for string in strings {
             let url = URL(string: string)!
-            XCTAssertTrue(st.canBuildEmbeddableContent(for: url))
+            XCTAssertTrue(st.canBuildEmbeddableContent(for: url), "failed to build embbedable content for url: \(url)")
         }
     }
 
