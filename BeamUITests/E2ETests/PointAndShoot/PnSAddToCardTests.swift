@@ -170,12 +170,11 @@ class PnSAddToCardTests: BaseTest {
 
         testRailPrint("Then the note contains video link")
         let cardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertEqual(cardNotes.count, 2)
-        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), "Media Player Test Page")
-        if let videoNote = cardNotes[1].value as? String {
+        XCTAssertEqual(cardNotes.count, 1)
+        if let videoNote = cardNotes[0].value as? String {
             XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
         } else {
-            XCTFail("expected cardNote[1].value to be a string")
+            XCTFail("expected cardNote[0].value to be a string")
         }
     }
 
@@ -224,35 +223,8 @@ class PnSAddToCardTests: BaseTest {
         let cardView = CardTestView()
         let cardNotes = cardView.getCardNotesForVisiblePart()
         //To be refactored once BE-2117 merged
-        XCTAssertEqual(cardNotes.count, 2)
+        XCTAssertEqual(cardNotes.count, 1)
         XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
-        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), expectedNoteText)
-    }
-    
-    func testAddLinksToJournalInOrder() {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        helper.tapCommand(.enableBrowsingSessionCollection)
-        
-        testRailPrint("Then first collected element is on top")
-        helper.openTestPage(page: .page1)
-        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-        journalView.waitForJournalViewToLoad()
-        let cardView = CardTestView()
-        XCTAssertEqual(titles[0], cardView.getCardNoteValueByIndex(0))
-
-        testRailPrint("Then first collected element is on top, second is below")
-        helper.openTestPage(page: .page2)
-        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-        XCTAssertEqual(titles[0], cardView.getCardNoteValueByIndex(0))
-        XCTAssertEqual(titles[1], cardView.getCardNoteValueByIndex(1))
-        
-        testRailPrint("Then first collected element is on top, second and third are below")
-        helper.openTestPage(page: .page3)
-        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-        XCTAssertEqual(titles[0], cardView.getCardNoteValueByIndex(0))
-        XCTAssertEqual(titles[1], cardView.getCardNoteValueByIndex(1))
-        XCTAssertEqual(titles[2], cardView.getCardNoteValueByIndex(2))
     }
     
     func testFramePositionPlacementOnSelect() {
@@ -260,8 +232,8 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         helper.tapCommand(.resizeWindowLandscape)
         helper.openTestPage(page: .page1)
-        let searchText = "The True Story Of Kanye West's “Ultralight Beam,\" As Told By Fonzworth Bentley"
-        let parentElement = webView.staticText(searchText)
+        let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
+        let parentElement = pnsView.staticText(searchText).firstMatch
 
         testRailPrint("When I click and drag between start and end of full text")
         webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
@@ -302,7 +274,7 @@ class PnSAddToCardTests: BaseTest {
         helper.tapCommand(.resizeWindowLandscape)
         helper.openTestPage(page: .page1)
         
-        let searchText = "The True Story Of Kanye West's “Ultralight Beam,\" As Told By Fonzworth Bentley"
+        let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
         let parent = webView.staticText(searchText).firstMatch
 
         //let child = parent.staticTexts[searchText]
@@ -459,13 +431,11 @@ class PnSAddToCardTests: BaseTest {
         helper.addNote()
         // Confirm text is saved in Journal
         helper.showJournal()
-        let title3Predicate = NSPredicate(format: "value = %@", titles[2])
+        let title3Predicate = NSPredicate(format: "value = %@", prefix + linkText)
         XCTAssertTrue(journalChildren.element(matching: title3Predicate).waitForExistence(timeout: 4))
-        XCTAssertEqual(journalChildren.count, 2)
-        XCTAssertEqual(journalChildren.element(boundBy: 0).value as? String, titles[2])
-        XCTAssertTrue((((journalChildren.element(boundBy: 1).value as? String)?.contains(prefix + linkText)) != nil))
+        XCTAssertEqual(journalChildren.count, 1)
         // tap on collected sublink (end of new bullet)
-        let linkWord = journalChildren.element(boundBy: 1).buttons[linkText]
+        let linkWord = journalChildren.element(matching: title3Predicate).buttons[linkText]
         XCTAssertTrue(linkWord.waitForExistence(timeout: 5))
         linkWord.tapInTheMiddle()
 
