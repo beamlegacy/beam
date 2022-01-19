@@ -66,7 +66,7 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
 
     @Published var windowIsResizing = false
-    var undraggableWindowRect: CGRect = .zero
+    var undraggableWindowRects: [CGRect] = []
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {

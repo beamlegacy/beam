@@ -25,6 +25,11 @@ struct TabsListView: View {
     @State private var hoveredIndex: Int?
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollContentSize: CGFloat = 0
+    @State private var draggableTabsAreas: [CGRect] = [] {
+        didSet {
+            state.undraggableWindowRects = draggableTabsAreas
+        }
+    }
 
     @StateObject private var viewModel = ViewModel()
     private class ViewModel: ObservableObject {
@@ -137,7 +142,7 @@ struct TabsListView: View {
                 .onHover { h in
                     if h { hoveredIndex = index }
                 }
-                .background(!selected ? nil : GeometryReader { prxy in
+                .background(!selected || isSingle ? nil : GeometryReader { prxy in
                     Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: index, frame: prxy.safeTopLeftGlobalFrame(in: nil).rounded()))
                 })
                 .contextMenu { tabContextMenuItems(forTabAtIndex: index) }
@@ -233,7 +238,10 @@ struct TabsListView: View {
                 }
                 // Dragged Tab over
                 if let currentTab = currentTab, isDraggingATab {
-                    TabView(tab: currentTab, isSelected: true, isPinned: dragModel.draggingOverPins, isSingleTab: hasSingleOtherTab, isDragging: true)
+                    TabView(tab: currentTab, isSelected: true,
+                            isPinned: dragModel.draggingOverPins,
+                            isSingleTab: !dragModel.draggingOverPins && tabsSections.otherTabs.count <= 1,
+                            isDragging: true)
                         .offset(x: dragModel.offset.x, y: dragModel.offset.y)
                         .frame(width: dragModel.widthForDraggingTab)
                         .transition(.asymmetric(insertion: .scale(scale: 0.98).animation(BeamAnimation.easeInOut(duration: 0.08)), removal: .opacity.combined(with: .scale(scale: 0.98)).animation(BeamAnimation.easeInOut(duration: 0.08))))
@@ -242,44 +250,71 @@ struct TabsListView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .contentShape(Path(CGRect(x: 0, y: 12, width: geometry.size.width, height: TabView.height))) // limit the drag gesture space
-            .if(tabsSections.otherTabs.count > 1) { // disabling single tab drag gesture for now -> https://linear.app/beamapp/issue/BE-2692/web-tabs-design-review
-                $0.simultaneousGesture(
-                    DragGesture(minimumDistance: 1)
-                        .onChanged { dragGestureOnChange(gestureValue: $0, containerGeometry: geometry) }
-                        .onEnded { dragGestureOnEnded(gestureValue: $0) }
-                )
-            }
-            .onChange(of: geometry.size) { _ in
-                updateDraggableWindowRect(with: geometry, otherTabsCount: tabsSections.otherTabs.count)
-            }
-            .onChange(of: tabsSections.otherTabs.count) { newValue in
-                updateDraggableWindowRect(with: geometry, otherTabsCount: newValue)
-            }
+            .contentShape(
+                // limit the drag gesture space
+                Path(draggableContentPath(tabsSections: tabsSections, geometry: geometry))
+            )
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 1)
+                    .onChanged { dragGestureOnChange(gestureValue: $0, containerGeometry: geometry) }
+                    .onEnded { dragGestureOnEnded(gestureValue: $0) }
+            )
             .onAppear {
-                updateDraggableWindowRect(with: geometry, otherTabsCount: tabsSections.otherTabs.count)
+                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
             }
             .onDisappear {
-                updateDraggableWindowRect(with: nil, otherTabsCount: tabsSections.otherTabs.count)
+                updateDraggableTabsAreas(with: nil, tabsSections: tabsSections)
             }
             .onPreferenceChange(CurrentTabGlobalFrameKey.self) { [weak state] newValue in
-                guard !isDraggingATab else { return }
-                guard newValue == nil || newValue?.index == selectedIndex else { return }
+                guard !isDraggingATab && newValue != nil else { return }
+                guard newValue?.index == selectedIndex else { return }
                 state?.browserTabsManager.currentTabUIFrame = newValue?.frame
+                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
+            }
+            .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
+                guard !isDraggingATab, let newValue = newValue else { return }
+                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: newValue)
             }
         }
     }
 
     // MARK: - Actions
-    private func updateDraggableWindowRect(with geometry: GeometryProxy?, otherTabsCount: Int) {
-        guard let geometry = geometry, otherTabsCount > 1 else {
-            state.undraggableWindowRect = .zero
+    private func updateDraggableTabsAreas(with geometry: GeometryProxy?, tabsSections: TabsSections, singleTabFrame: CGRect? = nil) {
+        guard let geometry = geometry else {
+            draggableTabsAreas = []
             return
         }
-        var frame = geometry.safeTopLeftGlobalFrame(in: nil)
-        frame.origin.y = 12
-        frame.size.height = TabView.height
-        state.undraggableWindowRect = frame
+        var globalFrame = geometry.safeTopLeftGlobalFrame(in: nil)
+        globalFrame.origin.y = 12
+        globalFrame.size.height = TabView.height
+
+        var areas: [CGRect] = []
+        if tabsSections.pinnedTabs.count > 0 {
+            var pinnedFrame = globalFrame
+            pinnedFrame.size.width = CGFloat(tabsSections.pinnedTabs.count) * (TabView.pinnedWidth + 4)
+            areas.append(pinnedFrame)
+        }
+        if tabsSections.otherTabs.count == 1, let singleTabFrame = singleTabFrame {
+            areas.append(singleTabFrame)
+        } else if tabsSections.otherTabs.count != 0 {
+            areas = [globalFrame]
+        }
+        draggableTabsAreas = areas
+    }
+
+    private func draggableContentPath(tabsSections: TabsSections, geometry: GeometryProxy) -> CGPath {
+        var path = CGMutablePath(rect: CGRect(x: 0, y: 12, width: geometry.size.width, height: TabView.height), transform: nil)
+        if tabsSections.otherTabs.count <= 1 {
+            path = CGMutablePath()
+            let relativeOrigin = geometry.safeTopLeftGlobalFrame(in: nil).origin
+            draggableTabsAreas.forEach { r in
+                var addRect = r
+                addRect.origin.x -= relativeOrigin.x
+                addRect.origin.y -= relativeOrigin.y
+                path.addRect(addRect)
+            }
+        }
+        return path
     }
 
     private func onTabTouched(at index: Int) {
@@ -352,14 +387,20 @@ struct TabsListView: View {
     }
 }
 
-private struct CurrentTabGlobalFrameKey: PreferenceKey {
-
+struct CurrentTabGlobalFrameKey: PreferenceKey {
     struct TabFrame: Equatable {
         var index: Int
         var frame: CGRect
     }
     static let defaultValue: TabFrame? = nil
     static func reduce(value: inout TabFrame?, nextValue: () -> TabFrame?) {
+        value = nextValue() ?? value
+    }
+}
+
+struct SingleTabGlobalFrameKey: PreferenceKey {
+    static let defaultValue: CGRect? = nil
+    static func reduce(value: inout CGRect?, nextValue: () -> CGRect?) {
         value = nextValue() ?? value
     }
 }

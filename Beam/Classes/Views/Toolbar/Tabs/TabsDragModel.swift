@@ -138,11 +138,9 @@ class TabsDragModel: ObservableObject {
         let minOverlap: CGFloat = 10
         if !dragStartedFromPinnedTab {
             self.draggingOverPins = locationX <= minOffsetXBeforePinning
-            if offsetX < (pinnedTabsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
+            if unpinnedTabsCount > 1 && offsetX < (pinnedTabsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
                 // resistance to convert a tab to a pinned tab.
-                if 1 == 1 && unpinnedTabsCount > 1 {
-                    offsetX = pinnedTabsMaxX - minOverlap
-                }
+                offsetX = pinnedTabsMaxX - minOverlap
             } else if locationX < minOffsetXBeforePinning {
                 let locationInTab = startLocationX - currentTabOrigin
                 if locationInTab > pinnedTabWidth {
@@ -164,7 +162,8 @@ class TabsDragModel: ObservableObject {
         guard let dragStartIndex = dragStartIndex else { return }
 
         let offsetX = calculateNewOffsetXOnDrag(fromGesture: gestureValue, scrollContentOffset: scrollContentOffset)
-        let offset = CGPoint(x: offsetX.clamp(0, containerGeometry.size.width - activeTabWidth), y: 0)
+        let minX: CGFloat = unpinnedTabsCount == 1 && !draggingOverPins ? -60 : 0
+        let offset = CGPoint(x: offsetX.clamp(minX, containerGeometry.size.width - activeTabWidth), y: 0)
 
         var newDragIndex: Int?
         if let draggingOverIndex = self.draggingOverIndex {
