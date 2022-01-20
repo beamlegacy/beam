@@ -64,6 +64,7 @@ import Sentry
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: Range<Int>?
+    var keepDestinationNote: Bool = false
 
     @Published var windowIsResizing = false
     var undraggableWindowRect: CGRect = .zero
@@ -303,10 +304,10 @@ import Sentry
         _ = addNewTab(origin: nil)
     }
 
-    func createEmptyTabWithCurrentDestinationCard() {
+    func startNewSearchWithCurrentDestinationCard() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        guard let destinationNote = BeamNote.fetch(title: destinationCardName) else { return }
-        _ = addNewTab(origin: nil, note: destinationNote)
+        keepDestinationNote = true
+        startNewSearch()
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
@@ -446,7 +447,7 @@ import Sentry
             if  mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
-                _ = createTab(withURL: url, originalQuery: result.text)
+                _ = createTab(withURL: url, originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
             }
             mode = .web
 
@@ -482,7 +483,7 @@ import Sentry
         if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
-            _ = createTab(withURL: url, originalQuery: queryString)
+            _ = createTab(withURL: url, originalQuery: queryString, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
         }
         autocompleteManager.clearAutocompleteResults()
         mode = .web
