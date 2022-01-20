@@ -10,7 +10,7 @@ import BeamCore
 
 struct Omnibox: View {
 
-    static let defaultHeight: CGFloat = 50
+    static let defaultHeight: CGFloat = 56
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
@@ -67,7 +67,7 @@ struct Omnibox: View {
                             })
                     }
                 }
-                .padding(.horizontal, 15)
+                .padding(.horizontal, BeamSpacing._200)
                 .overlay(!shouldShowAutocompleteResults ? nil :
                             Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                             .blendModeLightMultiplyDarkScreen(),
@@ -95,7 +95,7 @@ struct OmniboxContainer: View {
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
-    private let boxWidth: CGFloat = 680
+    private let boxWidth: CGFloat = 760
     private let boxMinX: CGFloat = 11
     private let boxMinXInToolBar: CGFloat = 87
     private let boxMaxX: CGFloat = 11
