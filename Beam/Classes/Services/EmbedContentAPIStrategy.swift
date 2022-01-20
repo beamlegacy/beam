@@ -152,8 +152,6 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
 
         guard let mediaRawType = apiResult.type,
               let typeEnum = EmbedContent.MediaType(rawValue: mediaRawType),
-              let responsiveRawType = apiResult.responsive,
-              let responsive = ResponsiveType(rawValue: responsiveRawType),
               let url = URL(string: apiResult.url) else {
                   if let url = URL(string: apiResult.url) {
                       // if we have no matching MediaType, for example when `apiResult.type` is `text/html`, default to MediaType.url
@@ -164,6 +162,7 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
 
         let thumbnail = getThumbnailURL(url: apiResult.thumbnail) ?? url
         let aspectRatio = apiResult.keepAspectRatio ?? true
+        let responsive = ResponsiveType.fromString(apiResult.responsive)
         let embed = EmbedContent(
             title: title,
             type: typeEnum,
