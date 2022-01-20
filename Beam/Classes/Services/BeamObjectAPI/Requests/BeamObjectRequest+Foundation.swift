@@ -181,9 +181,7 @@ extension BeamObjectRequest {
     func prepare(_ beamObject: BeamObject,
                  _ completion: @escaping (Swift.Result<BeamObjectUpload, Error>) -> Void) throws -> URLSessionDataTask? {
 
-        let saveObject = beamObject.copy()
-
-        let parameters = try prepareBeamObjectParameters(saveObject)
+        let parameters = try prepareBeamObjectParameters(beamObject)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_object", variables: parameters)
 
@@ -192,12 +190,12 @@ extension BeamObjectRequest {
             case .failure(let error):
                 completion(.failure(error))
             case .success(let prepareBeamObjects):
-                guard let beamObject = prepareBeamObjects.beamObjectUpload else {
+                guard let beamObjectUpload = prepareBeamObjects.beamObjectUpload else {
                     completion(.failure(APIRequestError.parserError))
                     return
                 }
 
-                completion(.success(beamObject))
+                completion(.success(beamObjectUpload))
             }
         }
     }
@@ -599,7 +597,7 @@ extension BeamObjectRequest {
         var request = URLRequest(url: url)
 
         var headers = putHeaders
-        headers["User-Agent"] = "Beam client, \(Information.appVersionAndBuild)"
+//        headers["User-Agent"] = "Beam client, \(Information.appVersionAndBuild)"
         headers["Content-Length"] = String(data.count)
         request.httpMethod = "PUT"
         request.httpBody = data
@@ -613,9 +611,15 @@ extension BeamObjectRequest {
                                    category: .network,
                                    localTimer: localTimer)
 
-            guard let httpResponse = response as? HTTPURLResponse,
-                  httpResponse.statusCode == 200,
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completionHandler(.failure(error ?? BeamObjectRequestError.not200))
+                return
+            }
+
+            guard httpResponse.statusCode == 200,
                   let data = data else {
+                      Logger.shared.logError("Error while uploading data: \(data?.asString ?? "-")", category: .network)
+                      Logger.shared.logDebug("Sent headers: \(headers)", category: .network)
                       completionHandler(.failure(error ?? BeamObjectRequestError.not200))
 
                       return

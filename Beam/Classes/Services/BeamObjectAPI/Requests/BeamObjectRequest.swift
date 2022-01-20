@@ -86,6 +86,7 @@ class BeamObjectRequest: APIRequest {
 
     struct BeamObjectUploadParameters: Codable {
         let id: UUID
+        let type: String
         let byteSize: Int
         let checksum: String
     }
@@ -100,11 +101,10 @@ class BeamObjectRequest: APIRequest {
 
     internal func prepareBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> PrepareBeamObjectsUploadParameters {
         let encryptedBeamObjects: [BeamObjectUploadParameters] = try beamObjects.compactMap {
-            try $0.encrypt()
-
             guard let data = $0.data else { return nil }
 
             return BeamObjectUploadParameters(id: $0.id,
+                                              type: $0.beamObjectType,
                                               byteSize: data.count,
                                               checksum: data.md5Base64)
         }
@@ -113,10 +113,10 @@ class BeamObjectRequest: APIRequest {
     }
 
     internal func prepareBeamObjectParameters(_ beamObject: BeamObject) throws -> PrepareBeamObjectUploadParameters {
-        try beamObject.encrypt()
         guard let data = beamObject.data else { throw BeamObjectRequestError.noData }
 
         let parameter = BeamObjectUploadParameters(id: beamObject.id,
+                                                   type: beamObject.beamObjectType,
                                                    byteSize: data.count,
                                                    checksum: data.md5Base64)
 
