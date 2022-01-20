@@ -10,6 +10,7 @@ import BeamCore
 import Combine
 
 class CalendarGutterViewModel: ObservableObject {
+    weak var textRoot: TextRoot?
     @Published var calendarManager: CalendarManager
     var noteId: UUID
     var todaysCalendar: Bool
@@ -22,7 +23,8 @@ class CalendarGutterViewModel: ObservableObject {
     @Published var meetings: [Meeting] = []
     var scope = Set<AnyCancellable>()
 
-    init(calendarManager: CalendarManager, noteId: UUID, todaysCalendar: Bool) {
+    init(root: TextRoot?, calendarManager: CalendarManager, noteId: UUID, todaysCalendar: Bool) {
+        self.textRoot = root
         self.calendarManager = calendarManager
         self.noteId = noteId
         self.todaysCalendar = todaysCalendar
@@ -182,6 +184,9 @@ struct CalendarView: View {
         } else {
             note.insert(BeamElement(text), after: note.children.last)
         }
+
+        guard let lastElement = note.children.last, let root = viewModel.textRoot else { return }
+        note.cmdManager.focus(lastElement, in: root)
     }
 
     private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
