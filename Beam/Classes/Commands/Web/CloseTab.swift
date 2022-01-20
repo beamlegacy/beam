@@ -61,9 +61,7 @@ class CloseTab: WebCommand {
             context.browserTabsManager.unpinTab(tab)
         }
 
-        if appIsClosing {
-            tab.closeApp()
-        } else {
+        if !appIsClosing {
             tab.closeTab()
         }
         tab.cancelObservers()
