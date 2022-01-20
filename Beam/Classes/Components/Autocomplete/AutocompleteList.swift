@@ -29,13 +29,13 @@ struct AutocompleteList: View {
                 if i.source == .createCard && elements.count > 1 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
-                        .padding(.vertical, BeamSpacing._40)
+                        .padding(.vertical, BeamSpacing._60)
                 }
                 AutocompleteItem(item: i, selected: isSelected, allowsShortcut: allowsShortcut,
                                  colorPalette: i.source == .createCard ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
                                     AutocompleteItem.defaultColorPalette)
-                    .padding(.horizontal, BeamSpacing._60)
+                    .padding(.horizontal, BeamSpacing._80)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
                             selectedIndex = indexFor(item: i)
