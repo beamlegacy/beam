@@ -37,11 +37,13 @@ export class EmbedNode<UI extends EmbedNodeUI> {
   onLoad(): void {
     // assign resize obserer to iframe element
     const el = this.win.document.querySelector("body > .iframe")
-    this.resizeObserver.observe(el as unknown as Element)
-    this.mutationObserver.observe(
-      el as unknown as Element,
-      this.mutationObserverOptions
-    )
+    if (el) {
+      this.resizeObserver.observe(el as unknown as Element)
+      this.mutationObserver.observe(
+        el as unknown as Element,
+        this.mutationObserverOptions
+      )
+    }
   }
 
   /**
