@@ -145,7 +145,7 @@ struct AccountsView: View {
                 }
             }
 
-            Preferences.Section(bottomDivider: false, verticalAlignment: .firstTextBaseline) {
+            Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
                 Text("Manage:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -381,9 +381,9 @@ struct GoogleAccountView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            HStack {
+            HStack(alignment: .top) {
                 Text(account.name)
-                    .frame(width: 227, alignment: .leading)
+                    .frame(width: 227, alignment: .topLeading)
                     .padding(.trailing, 12)
                 if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
                     Button {
