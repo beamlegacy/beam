@@ -78,7 +78,7 @@ struct OmniboxSearchField: View {
     private var textSelectionColor: BeamColor {
         BeamColor.Generic.blueTextSelection
     }
-    private let textFont = BeamFont.regular(size: 16)
+    private let textFont = BeamFont.regular(size: 17)
 
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
