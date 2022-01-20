@@ -94,6 +94,7 @@ class BeamObject: Codable {
         case dataChecksum = "checksum"
         case previousChecksum
         case privateKeySignature
+        case largeDataBlobId
     }
 
     init(id: UUID, beamObjectType: String) {
@@ -169,7 +170,7 @@ class BeamObject: Codable {
         result.dataChecksum = dataChecksum
         result.encrypted = encrypted
         result.largeDataBlobId = largeDataBlobId
-        
+
         return result
     }
 
@@ -307,9 +308,9 @@ extension BeamObject {
     }
 
     func encrypt() throws {
-        assert(!encrypted)
-
         guard let clearData = data else { return }
+
+        assert(!encrypted)
 
         if Configuration.env == .test,
            EncryptionManager.shared.privateKey().asString() != Configuration.testPrivateKey {
