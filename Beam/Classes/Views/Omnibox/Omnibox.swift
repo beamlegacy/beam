@@ -144,6 +144,9 @@ struct OmniboxContainer: View {
                 .transition(customTranstion)
                 .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
                 .onDisappear {
+                    if state.keepDestinationNote {
+                        state.keepDestinationNote = false
+                    }
                     guard isFirstLaunchAppear else { return }
                     DispatchQueue.main.async {
                         isFirstLaunchAppear = false

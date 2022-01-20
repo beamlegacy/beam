@@ -108,10 +108,9 @@ extension BeamText {
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
         var font: BeamFont
-        var strong = strong
         switch elementKind {
         case .heading:
-            strong = true
+            font = BeamFont.medium(size: fontSize)
         case .bullet, .code, .quote, .check, .divider, .image, .embed, .blockReference:
             break
         }
