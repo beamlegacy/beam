@@ -18,6 +18,7 @@ private enum MenuEnablingConditionTag: Int {
     // other conditions
     case hasBrowserTab = 1001 // enable only if browser tabs are open
     case hasTabGroupingWindowPrefOn = 1011
+    case isDebugMode = 1111
 }
 
 extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
@@ -44,6 +45,9 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
     private func toggleVisibility(_ visible: Bool, ofAlternatesKeyEquivalentsItems items: [NSMenuItem]) {
         for item in items.filter({ $0.tag < 0 }) {
             item.isHidden = !visible
+            if item.tag == -MenuEnablingConditionTag.isDebugMode.rawValue {
+                item.isHidden = Configuration.branchType == .beta || Configuration.branchType == .publicRelease
+            }
         }
     }
 
@@ -60,6 +64,11 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return state?.hasBrowserTabs ?? false
         } else if tagEnum == .hasTabGroupingWindowPrefOn {
             return PreferencesManager.showTabGrougpingMenuItem
+        } else if tagEnum == .isDebugMode {
+            if Configuration.branchType == .beta || Configuration.branchType == .publicRelease {
+                return false
+            }
+            return true
         }
         return false
     }

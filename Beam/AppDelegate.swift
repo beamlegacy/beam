@@ -488,15 +488,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         PasswordsPreferencesViewController,
         AccountsPreferenceViewController,
         AboutPreferencesViewController,
+        BetaPreferencesViewController
+    ]
+
+    lazy var debugPreferences: [PreferencePane] = [
+        GeneralPreferencesViewController,
+        BrowserPreferencesViewController,
+        CardsPreferencesViewController,
+        PrivacyPreferencesViewController,
+        PasswordsPreferencesViewController,
+        AccountsPreferenceViewController,
+        AboutPreferencesViewController,
         BetaPreferencesViewController,
-        AdvancedPreferencesViewController
-        // Commented it since right now we don't need it at all
-        // Will see if we can delete it anytime soon
-//        EditorDebugPreferencesViewController
+        AdvancedPreferencesViewController,
+        EditorDebugPreferencesViewController
     ]
 
     lazy var preferencesWindowController = PreferencesWindowController(
-        preferencePanes: preferences,
+        preferencePanes: Configuration.branchType == .beta || Configuration.branchType == .publicRelease ? preferences : debugPreferences,
         style: .toolbarItems,
         animated: true,
         hidesToolbarForSingleItem: true

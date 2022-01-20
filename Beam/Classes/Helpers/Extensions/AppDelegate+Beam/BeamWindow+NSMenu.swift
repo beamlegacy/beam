@@ -21,6 +21,11 @@ extension BeamWindow {
         state.showNextTab()
     }
 
+    @IBAction func duplicateTab(_ sender: Any?) {
+        guard let currentTab = state.browserTabsManager.currentTab else { return }
+        state.duplicate(tab: currentTab)
+    }
+
     @IBAction func showJournal(_ sender: Any?) {
         state.navigateToJournal(note: nil, clearNavigation: true)
     }
@@ -38,7 +43,7 @@ extension BeamWindow {
     }
 
     @IBAction func createEmptyTabWithCurrentNote(_ sender: Any?) {
-        state.createEmptyTabWithCurrentDestinationCard()
+        state.startNewSearchWithCurrentDestinationCard()
     }
 
     @IBAction func reOpenClosedTab(_ sender: Any?) {
