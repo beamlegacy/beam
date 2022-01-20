@@ -1,6 +1,6 @@
-          mutation PrepareBeamObjectUpload($beamObjectsMetadata: [BeamObjectMetadata!]!) {
-            prepareBeamObjectUpload(input: {beamObjectsMetadata: $beamObjectsMetadata}) {
-              beamObjectUpload {
+          mutation PrepareBeamObjectsUpload($beamObjectsMetadata: [BeamObjectMetadata!]!) {
+            prepareBeamObjectsUpload(input: {beamObjectsMetadata: $beamObjectsMetadata}) {
+              beamObjectsUpload {
                 id
                 uploadUrl
                 uploadHeaders

@@ -49,8 +49,12 @@ class BeamObjectRequest: APIRequest {
     }
 
     struct PrepareBeamObjectUpload: Codable, Errorable {
-        let beamObjectUploads: [BeamObjectUpload]?
         let beamObjectUpload: BeamObjectUpload?
+        var errors: [UserErrorData]?
+    }
+
+    struct PrepareBeamObjectsUpload: Codable, Errorable {
+        let beamObjectsUpload: [BeamObjectUpload]?
         var errors: [UserErrorData]?
     }
 
@@ -100,7 +104,7 @@ class BeamObjectRequest: APIRequest {
     }
 
     internal func prepareBeamObjectsParameters(_ beamObjects: [BeamObject]) throws -> PrepareBeamObjectsUploadParameters {
-        let encryptedBeamObjects: [BeamObjectUploadParameters] = try beamObjects.compactMap {
+        let encryptedBeamObjects: [BeamObjectUploadParameters] = beamObjects.compactMap {
             guard let data = $0.data else { return nil }
 
             return BeamObjectUploadParameters(id: $0.id,
