@@ -307,7 +307,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
+        if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
+            data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
+        }
         data.clusteringManager.exportSummaryForNextSession()
     }
 
