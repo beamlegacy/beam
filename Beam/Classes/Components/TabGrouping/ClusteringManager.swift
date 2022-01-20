@@ -242,7 +242,7 @@ class ClusteringManager: ObservableObject {
     func addPage(id: UUID, parentId: UUID?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
         if let value = value {
-            pageToAdd = Page(id: id, parentId: parentId, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
+            pageToAdd = Page(id: id, parentId: parentId, url: value.url, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
             tabsInfo.append(value)
         } else if let newContent = newContent {
             pageToAdd = Page(id: id, parentId: nil, title: nil, cleanedContent: newContent)
