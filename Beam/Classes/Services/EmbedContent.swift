@@ -11,6 +11,14 @@ enum ResponsiveType: String {
     case horizontal
     case vertical
     case both
+
+    static func fromString(_ string: String?) -> ResponsiveType? {
+        guard let string = string,
+              let type = ResponsiveType(rawValue: string) else {
+                  return nil
+              }
+        return type
+    }
 }
 
 struct EmbedContent: Equatable {
@@ -54,5 +62,5 @@ struct EmbedContent: Equatable {
     var minHeight: CGFloat?
     var maxHeight: CGFloat?
     var keepAspectRatio: Bool = true
-    var responsive: ResponsiveType = .both
+    var responsive: ResponsiveType?
 }

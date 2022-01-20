@@ -32,7 +32,7 @@ html, body, .twitter-tweet, .twitter-tweet-rendered, iframe {
   width: 100%;
 }
 
-.iframe iframe {
+.iframe.resizable iframe {
   background: transparent;
   display: block;
   height: 100%;
