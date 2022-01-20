@@ -19,17 +19,17 @@ extension Omnibox {
         private let strokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
         private let backgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
 
-        private let baseShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.32), darkColor: .From(color: .black, alpha: 0.7))
+        private let baseShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.36), darkColor: .From(color: .black, alpha: 0.7))
         private let pulledShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.07), darkColor: .From(color: .black, alpha: 0.3))
 
         private var shadowColor: Color {
             (isLow ? pulledShadowColor : baseShadowColor).swiftUI
         }
         private var shadowRadius: CGFloat {
-            (isLow ? 20 : 60) * (isPressingCharacter ? 1/3 : 1.0)
+            (isLow ? 10 : 32) * (isPressingCharacter ? 1/3 : 1.0)
         }
         private var shadowOffsetY: CGFloat {
-            (isLow ? 4 : 24) * (isPressingCharacter ? 1/3 : 1.0)
+            (isLow ? 3 : 14) * (isPressingCharacter ? 1/3 : 1.0)
         }
 
         private let animationDuration: Double = 0.3
