@@ -305,6 +305,9 @@ struct TabView: View {
                                 onTap?()
                             })
                     )
+                    .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
+                        Color.clear.preference(key: SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
+                    })
                     .if(isDragging) {
                         $0.opacity(0.9).scaleEffect(1.07)
                             .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 6)

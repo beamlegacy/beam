@@ -67,7 +67,7 @@ import Sentry
     var keepDestinationNote: Bool = false
 
     @Published var windowIsResizing = false
-    var undraggableWindowRect: CGRect = .zero
+    var undraggableWindowRects: [CGRect] = []
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {
