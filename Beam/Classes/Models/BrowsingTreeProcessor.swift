@@ -39,6 +39,5 @@ class BrowsingTreeProcessor {
         visitFrecencyUpdater.saveAll()
         readingTimeFrecencyUpdater.saveAll()
         Logger.shared.logInfo("Completed post sync tree processing: rootId \(tree.root.id)", category: .browsingTreeNetwork, localTimer: startedAt)
-
     }
 }
