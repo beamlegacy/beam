@@ -76,7 +76,7 @@ struct BeamAboutSection: View {
                             .font(BeamFont.medium(size: 20).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                             .frame(height: 24, alignment: .center)
-                        Text("Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0"))")
+                        Text("Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0")) \(buildTypeSuffix())")
                             .font(BeamFont.medium(size: 10).swiftUI)
                             .foregroundColor(BeamColor.Corduroy.swiftUI)
                             .frame(height: 12, alignment: .center)
@@ -122,6 +122,11 @@ struct BeamAboutSection: View {
                 Spacer()
             }
         }
+    }
+
+    private func buildTypeSuffix() -> String {
+        guard let type = Configuration.branchType, type != .publicRelease else { return "" }
+        return "\(type.rawValue)"
     }
 }
 

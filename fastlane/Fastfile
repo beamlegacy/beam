@@ -248,9 +248,11 @@ platform :mac do
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
     end
 
+    scheme = "Beam"
+
     build_mac_app(
       workspace: "Beam.xcworkspace",
-      scheme: "Beam",
+      scheme: scheme,
       silent: true,
       clean: true,
       output_directory: "builds",
@@ -265,6 +267,7 @@ platform :mac do
       skip_package_pkg: true,
       use_system_scm: true
     )
+
   end
 
   ## To release DeveloperId signed builds
@@ -310,9 +313,11 @@ platform :mac do
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
     end
 
+    scheme = scheme_name_for_branch_and_set_in_plist(Actions.git_branch)
+
     build_mac_app(
       workspace: "Beam.xcworkspace",
-      scheme: ENV["SCHEME"],
+      scheme: scheme,
       silent: true,
       clean: true,
       output_directory: "builds",
@@ -570,7 +575,7 @@ platform :mac do
   private_lane :ping_slack do
     git_branch
 
-    next unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch)
+    next unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch) || Actions.git_branch.start_with?("beta")
 
 		attachments = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].map do |file|
       {
@@ -616,11 +621,7 @@ platform :mac do
     # disable_automatic_code_signing(path: "Beam.xcodeproj")
     # clear_derived_data
 
-    scheme = if branch.start_with?("beta")
-      "Beam beta release"
-    else
-      "Beam release"
-    end
+    scheme = scheme_name_for_branch_and_set_in_plist(Actions.git_branch)
 
     build_mac_app(
       workspace: "Beam.xcworkspace",
@@ -634,6 +635,18 @@ platform :mac do
       # mac_app_installer_cert_name: "foobar"
     )
     # enable_automatic_code_signing(path: "Beam.xcodeproj")
+  end
+
+  def scheme_name_for_branch_and_set_in_plist(branch)
+    scheme = if branch.start_with?("beta")
+      "Beam beta release"
+    else
+      "Beam release"
+    end
+
+    set_info_plist_value(path: "Beam/Configuration/Info.plist", key: "SchemeName", value: scheme)
+
+    return scheme
   end
 
 end
