@@ -81,10 +81,21 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     var completingText: String?
     var uuid: UUID
     var score: Float?
+
+    /// [0..1] depending on the comparison of the query vs the content of the text field. Can be compared to rawInfoPrefixScore
+    var rawTextPrefixScore: Float
+    /// [0..1] depending on the comparison of the query vs the content of the info field. Can be compared to rawTextPrefixScore
+    var rawInfoPrefixScore: Float
+
+    /// rawTextPrefixScore boosted by the type of the field (source kind + is it an url?)
     var textPrefixScore: Float
+    /// rawInfoPrefixScore boosted by the type of the field (source kind + is it an url?)
     var infoPrefixScore: Float
+    /// textPrefixScore and infoPrefixScore Combined
     var prefixScore: Float
-    var urlFields: URLFields ///< This option set tell us which of the String fields of this struct contains an URL. Right now only the "text" and "information" field can be a textual url. We use this to match the query with the start of the url (ignoring the scheme).
+    /// This option set tell us which of the String fields of this struct contains an URL. Right now only the "text" and "information" field can be a textual url. We use this to match the query with the start of the url (ignoring the scheme).
+    var urlFields: URLFields
+    var takeOverCandidate = false
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, information: String? = nil, completingText: String? = nil, uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = []) {
         self.text = text
@@ -97,35 +108,100 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         self.score = score
         self.urlFields = urlFields
 
-        textPrefixScore = Self.boosterScore(prefix: completingText, base: text, isURL: urlFields.contains(.text))
-        infoPrefixScore = Self.boosterScore(prefix: completingText, base: information, isURL: urlFields.contains(.info))
+        let textResult = Self.boosterScore(prefix: completingText, base: text, isURL: urlFields.contains(.text), source: source)
+        self.text = textResult.base ?? text
+        rawTextPrefixScore = textResult.score
+        textPrefixScore = textResult.boostedScore
+        takeOverCandidate = takeOverCandidate || textResult.takeOverCandidate
+
+        let infoResult = Self.boosterScore(prefix: completingText, base: information, isURL: urlFields.contains(.info), source: source)
+        self.information = infoResult.base
+        rawInfoPrefixScore = infoResult.score
+        infoPrefixScore = infoResult.boostedScore
+        takeOverCandidate = takeOverCandidate || infoResult.takeOverCandidate
+
         prefixScore = 1.0 + textPrefixScore + infoPrefixScore
     }
 
-    static func boosterScore(prefix: String?, base: String?, isURL: Bool) -> Float {
-        guard let base = base?.lowercased(),
-              !base.isEmpty,
-              let comp = prefix?.lowercased() else {
-            return 0.0
+    private struct BoosterResult {
+        var base: String?
+        var score: Float
+        var boostedScore: Float
+        var takeOverCandidate = false
+    }
+
+    private static func simpleBoosterScore(prefix: String?, base: String?, isURL: Bool) -> BoosterResult {
+        guard let lcbase = base?.lowercased(),
+              !lcbase.isEmpty,
+              let comp = prefix?.lowercased()
+        else {
+            return BoosterResult(base: base, score: 0.0, boostedScore: 0.0)
         }
 
-        let booster: Float = isURL ? 0.1 : 0.05
-        let hsr = base.commonPrefix(with: comp)
-        return booster * Float(hsr.count) / Float(comp.count)
+        let booster: Float = isURL ? 0.2 : 0.1
+        let hsr = lcbase.commonPrefix(with: comp)
+        let score = Float(hsr.count) / Float(comp.count)
+        return BoosterResult(base: base, score: score, boostedScore: booster * score, takeOverCandidate: score >= 1.0)
     }
 
+    private static func boosterScore(prefix: String?, base: String?, isURL: Bool, source: Source) -> BoosterResult {
+        var canMatchInside = !isURL
+
+        switch source {
+        case .note, .createCard:
+            canMatchInside = false
+        default:
+            break
+        }
+
+        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base, isURL: isURL) }
+
+        guard let base = base,
+              !base.isEmpty,
+              let comp = prefix else {
+                  return BoosterResult(base: base, score: 0.0, boostedScore: 0.0)
+        }
+
+        // look for a common prefix:
+        let hsr = base.longestCommonPrefixRange(comp)
+
+        let maxSubstringIndex = 10
+
+        let skipScoreWeight = Float(canMatchInside ? 0.1 : 0)
+        let typeWeight = Float(isURL ? 0.1 : 0.05)
+        // Skip score, [0-1] is a penalty computed on the position of the substring in the main string.
+        let fullMatch = hsr?.count == comp.count
+        let matchInRange = (hsr?.lowerBound ?? maxSubstringIndex + 1) <= maxSubstringIndex
+        let skipScore = skipScoreWeight * Float(maxSubstringIndex - min(hsr?.lowerBound ?? 0, maxSubstringIndex)) / Float(maxSubstringIndex)
+
+        var newBase = base
+
+        if canMatchInside, let hsr = hsr, hsr.lowerBound <= maxSubstringIndex {
+            newBase = String(base.suffix(from: base.index(at: hsr.lowerBound)))
+        }
+
+        let commonPrefixScore = skipScore + (1 - skipScoreWeight) * Float(hsr?.count ?? 0) / Float(comp.count)
+        let score = commonPrefixScore
+        let boosterWeight = typeWeight * (commonPrefixScore)
+
+        // Only take over if we have a full match of the query and if the match is in the start of the string
+        return BoosterResult(base: newBase, score: score, boostedScore: boosterWeight * score, takeOverCandidate: fullMatch && matchInRange)
+    }
+
+    /// The weighted score is used to sort AutocompleResults. It combines all subscore, higher is better. Can be nil if there is no original score.
     var weightedScore: Float? {
-        guard let score = score else { return prefixScore }
-        return score * prefixScore
+        return (score ?? 1.0) * prefixScore
     }
 
+    /// This is the main text to display.
     var displayText: String {
         [.note, .createCard].contains(source) ? text :
-        (infoPrefixScore > 0 ? information ?? text : text)
+        (rawInfoPrefixScore > rawTextPrefixScore ? information ?? text : text)
     }
 
+    /// This is the secondary text to display.
     var displayInformation: String? {
-        infoPrefixScore > 0 ? text : information
+        rawInfoPrefixScore > rawTextPrefixScore ? text : information
     }
 
     static func < (lhs: AutocompleteResult, rhs: AutocompleteResult) -> Bool {

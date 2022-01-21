@@ -21,23 +21,24 @@ struct AutocompleteResultDebugView: View {
         }
     }
 
-    func scoreLabel(_ score: Float?) -> some View {
-        Group {
+    func scoreLabel(_ label: String, _ score: Float?) -> some View {
+        HStack {
+            Text("\(label): ").font(.caption)
             if let score = score {
                 Text("\(score)")
             } else {
                 Text("-")
             }
         }
-        .frame(width: 100, alignment: .center)
+        .frame(width: 150, alignment: .center)
     }
 
     var body: some View {
         HStack {
             VStack {
-                scoreLabel(item.score)
-                scoreLabel(item.weightedScore)
-                scoreLabel(item.prefixScore)
+                scoreLabel("Final", item.weightedScore)
+                scoreLabel("Frecency", item.score)
+                scoreLabel("Prefix boost", item.prefixScore)
             }
 
             VStack(alignment: .leading) {
@@ -45,11 +46,11 @@ struct AutocompleteResultDebugView: View {
                     label(url, "url:")
                         .font(.headline)
                 }
-                if let information = item.information {
-                    label(information, item.urlFields.contains(.info) ? "uinfo:" : "info:")
-                }
                 if !item.text.isEmpty {
-                    label(item.text, item.urlFields.contains(.text) ? "utext:" : "text:")
+                    label(item.displayText, item.urlFields.contains(.text) ? "utext:" : "text:")
+                }
+                if let information = item.displayInformation {
+                    label(information, item.urlFields.contains(.info) ? "uinfo:" : "info:")
                 }
             }
         }
