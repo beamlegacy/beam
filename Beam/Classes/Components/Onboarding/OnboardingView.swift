@@ -26,7 +26,7 @@ struct OnboardingView: View {
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
-                Spacer(minLength: 0)
+                Spacer(minLength: 100)
                 Group {
                     switch currentStep.type {
                     case .profile:
@@ -110,15 +110,27 @@ struct OnboardingView: View {
         return .custom(style)
     }
 
+    private struct TextLink: View {
+        var text: String
+        var action: () -> Void
+        @State private var isHovering = false
+        var body: some View {
+            Text(text)
+                .foregroundColor((isHovering ? BeamColor.Corduroy : BeamColor.AlphaGray).swiftUI)
+                .onTapGesture(perform: action)
+                .onHover { isHovering = $0 }
+        }
+    }
+
     private var bottomBar: some View {
         ZStack(alignment: .bottom) {
             if !model.viewIsLoading && [.welcome].contains(currentStep.type) {
                 HStack(spacing: 0) {
-                    Text("Terms and Conditions").onTapGesture {
+                    TextLink(text: "Terms and Conditions") {
                         openExternalURL(Configuration.beamTermsConditionsLink, title: "Terms and Conditions")
                     }
                     Text(" • ")
-                    Text("Privacy Policy").onTapGesture {
+                    TextLink(text: "Privacy Policy") {
                         openExternalURL(Configuration.beamPrivacyPolicyLink, title: "Privacy Policy")
                     }
                 }
@@ -178,7 +190,7 @@ struct OnboardingView: View {
     }
 
     struct LoadingView: View {
-        var message: String = "Importing your data..."
+        var message: String = "Setting up your beam"
         private var subtitle: String {
             "Syncing \(detailToDisplay)"
         }
@@ -190,17 +202,22 @@ struct OnboardingView: View {
 
         var body: some View {
             VStack(spacing: BeamSpacing._140) {
-                ProgressView()
-                    .progressViewStyle(CircularProgressViewStyle(tint: BeamColor.Niobium.swiftUI))
-                    .scaleEffect(1.75, anchor: .center)
+                Image("preferences-about-beam-beta")
+                    .resizable()
                     .frame(width: 64, height: 64)
                 VStack(spacing: BeamSpacing._100) {
                     Text(message)
                         .font(BeamFont.medium(size: 24).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    Text(subtitle)
-                        .font(BeamFont.regular(size: 14).swiftUI)
-                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                    HStack(spacing: BeamSpacing._40) {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: BeamColor.LightStoneGray.swiftUI))
+                            .scaleEffect(0.5, anchor: .center)
+                            .frame(width: 16, height: 16)
+                        Text(subtitle)
+                            .font(BeamFont.regular(size: 14).swiftUI)
+                            .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                    }
                 }
             }
             .onAppear {
