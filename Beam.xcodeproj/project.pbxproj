@@ -638,6 +638,8 @@
 		9691C2BC2645F93100F70DA1 /* EmbedNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2BB2645F93100F70DA1 /* EmbedNode.swift */; };
 		9691E3D825AD9F3300A13080 /* TextRoot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E3D725AD9F3300A13080 /* TextRoot.swift */; };
 		9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E40125AE5D2C00A13080 /* NodeSelection.swift */; };
+		9693FD4B279892A500EB024A /* String+CommonPrefix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD4A279892A500EB024A /* String+CommonPrefix.swift */; };
+		9693FD5227995D7A00EB024A /* StringCommonPrefixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */; };
 		9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
@@ -1901,6 +1903,8 @@
 		9691E3D725AD9F3300A13080 /* TextRoot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextRoot.swift; sourceTree = "<group>"; };
 		9691E40125AE5D2C00A13080 /* NodeSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NodeSelection.swift; sourceTree = "<group>"; };
 		9691E41325AF61BA00A13080 /* BrowsingTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTree.swift; sourceTree = "<group>"; };
+		9693FD4A279892A500EB024A /* String+CommonPrefix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+CommonPrefix.swift"; sourceTree = "<group>"; };
+		9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCommonPrefixTests.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePicker.swift; sourceTree = "<group>"; };
 		969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteType.swift; sourceTree = "<group>"; };
@@ -4348,6 +4352,7 @@
 				0D45BA2E26949EF100D4E8A5 /* DispatchTime+Chrono.swift */,
 				522BC3D626A6EAEE0018B51E /* Date+IntValue.swift */,
 				521351CF27737303001922FD /* Array+Chunked.swift */,
+				9693FD4A279892A500EB024A /* String+CommonPrefix.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4416,6 +4421,7 @@
 				963DBB3A2698605600080928 /* BeamText+LinksTests.swift */,
 				8ABC651A274FD7AE0068166E /* BeamText+SourcesTests.swift */,
 				33AA4ED1270DD43900B74868 /* String+SearchTests.swift */,
+				9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */,
 			);
 			path = BeamCoreTests;
 			sourceTree = "<group>";
@@ -6251,6 +6257,7 @@
 				96319D412616233E00D1CF31 /* Logger.swift in Sources */,
 				96319D442616233E00D1CF31 /* RWLock.swift in Sources */,
 				DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */,
+				9693FD4B279892A500EB024A /* String+CommonPrefix.swift in Sources */,
 				0D45BA2F26949EF100D4E8A5 /* DispatchTime+Chrono.swift in Sources */,
 				96319D472616233E00D1CF31 /* String+Data.swift in Sources */,
 				9609AF502617159B00322141 /* URL+Beam.swift in Sources */,
@@ -6304,6 +6311,7 @@
 				A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */,
 				8ABC651B274FD7AE0068166E /* BeamText+SourcesTests.swift in Sources */,
 				0DF3376D26948BAB0024C504 /* String+SliceTests.swift in Sources */,
+				9693FD5227995D7A00EB024A /* StringCommonPrefixTests.swift in Sources */,
 				96851B3926D55772008032E4 /* String+NLTests.swift in Sources */,
 				A06D5FA32683454C009D7C38 /* DeepCopyTests.swift in Sources */,
 				8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */,
