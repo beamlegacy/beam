@@ -15,7 +15,7 @@ class RecentsManager: ObservableObject {
     private let documentManager: DocumentManager
     private var recentsScores = [UUID: Int]()
     private var notesCancellables = Set<AnyCancellable>()
-    private var deletionsCancellables = Set<AnyCancellable>()
+    private var documentManagerCancellables = Set<AnyCancellable>()
 
     @Published private(set) var recentNotes = [BeamNote]() {
         didSet { updateNotesObservers() }
@@ -24,7 +24,7 @@ class RecentsManager: ObservableObject {
     init(with documentManager: DocumentManager) {
         self.documentManager = documentManager
         self.fetchRecents()
-        self.observeCoreDataChanges()
+        self.observeDocumentManager()
 
         NotificationCenter.default
             .publisher(for: .defaultDatabaseUpdate, object: nil)
@@ -38,6 +38,12 @@ class RecentsManager: ObservableObject {
         recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, sortingKey: .updatedAt(false)).compactMap {
             // Maybe we could `instancateNote` automatically, to avoid refetching the CD object in `fetch`?
             // try? BeamNote.instanciateNote(documentManager, $0)
+            BeamNote.fetch(id: $0.id, includeDeleted: false)
+        }
+    }
+
+    private func updateVisibleRecents() {
+        recentNotes = recentNotes.compactMap {
             BeamNote.fetch(id: $0.id, includeDeleted: false)
         }
     }
@@ -79,16 +85,18 @@ class RecentsManager: ObservableObject {
         }
     }
 
-    private func observeCoreDataChanges() {
+    private func observeDocumentManager() {
+        documentManagerCancellables.removeAll()
         DocumentManager.documentSaved.receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.fetchRecents()
-            }.store(in: &deletionsCancellables)
+            .sink { [weak self] doc in
+                guard self?.recentNotes.contains(where: { $0.id == doc.id }) == true else { return }
+                self?.updateVisibleRecents()
+            }.store(in: &documentManagerCancellables)
 
         DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
             .sink { [weak self] _ in
                 self?.fetchRecents()
-            }.store(in: &deletionsCancellables)
+            }.store(in: &documentManagerCancellables)
 
     }
 }
