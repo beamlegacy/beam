@@ -10,7 +10,6 @@ struct GRDBDatabase {
     /// Creates a `GRDBDatabase`, and make sure the database schema is ready.
     //swiftlint:disable:next function_body_length
     public init(_ dbWriter: DatabaseWriter) throws {
-
         self.dbWriter = dbWriter
 
         // Initialize DB schema
@@ -367,6 +366,12 @@ struct GRDBDatabase {
             try db.alter(table: BeamLinkDB.tableName, body: { tableAlteration in
                 tableAlteration.add(column: "destination", .blob).indexed()
             })
+        }
+
+        migrator.registerMigration("addTreeProcessingStatus") { db in
+            try db.alter(table: "BrowsingTreeRecord") { table in
+                table.add(column: "processingStatus", .integer).notNull().indexed().defaults(to: 2)
+            }
         }
 
         #if DEBUG
@@ -1193,6 +1198,25 @@ extension GRDBDatabase {
         _ = try dbWriter.write { db in
             try BrowsingTreeRecord.deleteAll(db, ids: ids)
         }
+    }
+    func browsingTreeProcessingStatuses(ids: [UUID]) -> [UUID: BrowsingTreeRecord.ProcessingStatus] {
+        (try? dbReader.read { (db) -> [UUID: BrowsingTreeRecord.ProcessingStatus]? in
+            let cursor = try BrowsingTreeRecord.fetchCursor(db).map { ($0.rootId, $0.processingStatus) }
+            let statuses: [UUID: BrowsingTreeRecord.ProcessingStatus]? = try? Dictionary(uniqueKeysWithValues: cursor)
+            return statuses
+        }) ?? [UUID: BrowsingTreeRecord.ProcessingStatus]()
+    }
+    func update(record: BrowsingTreeRecord, status: BrowsingTreeRecord.ProcessingStatus) {
+        var updatedRecord = record
+        updatedRecord.processingStatus = status
+        do {
+            _ = try dbWriter.write { db in
+                try updatedRecord.updateChanges(db, from: record)
+            }
+        } catch {
+            Logger.shared.logInfo("Couldn't update tree record id: \(record.rootId) \(error)", category: .browsingTreeNetwork)
+        }
+
     }
     // MARK: - LinkStore
     func getLinks(matchingUrl url: String) -> [UUID: Link] {
