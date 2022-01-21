@@ -10,12 +10,22 @@ import SwiftUI
 extension ActionableButtonVariant {
     private struct GradientActionableButtonCustomBackground: View {
         var state: ActionableButtonState
+        private var overlayOpacity: Double {
+            switch state {
+            case .clicked:
+                return 0.4
+            case .hovered:
+                return 0.22
+            default:
+                return 0
+            }
+        }
         var body: some View {
             Group {
                 if state != .disabled {
                     AnimatedGradient()
                         .overlay(
-                            Color.black.opacity(state == .hovered || state == .clicked ? 0.05 : 0)
+                            Color.black.opacity(overlayOpacity)
                         )
                 }
             }
