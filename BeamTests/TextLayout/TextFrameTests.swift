@@ -248,4 +248,102 @@ class TextFrameTests: XCTestCase {
         cursor = previousCaret(for: cursor, in: carets)
         expect(self.cursor) == 0
     }
+
+    // swiftlint:disable:next function_body_length
+    func testLinkLayoutForOneLineWithSpaces() {
+        let fontSize = CGFloat(12)
+        let elementKind = ElementKind.bullet
+        let textWidth = CGFloat(400)
+
+        var text = BeamText(text: "1")
+        expect(text.links.count) == 0
+        let position1 = text.count
+        text.append(BeamText(text: "2", attributes: [.link("http://somelink.com")]))
+        let position2 = text.count
+        text.append(BeamText(text: " 3"))
+//        let position3 = text.count
+        actualString = text.text
+        expect(text.links.count) == 1
+
+        let config = BeamTextAttributedStringBuilder.Config(elementKind: elementKind,
+                                                            ranges: text.ranges,
+                                                            fontSize: fontSize, fontColor: .white,
+                                                            searchedRanges: [])
+        let asBuilder = BeamTextAttributedStringBuilder()
+        attributedString = asBuilder.build(config: config)
+        let position = NSPoint(x: 0, y: 0)
+
+        let textFrame = TextFrame.create(string: attributedString, atPosition: position, textWidth: textWidth, singleLineHeightFactor: nil, maxHeight: nil)
+        carets = textFrame.carets
+
+        expect(textFrame.frame.origin) == position
+        XCTAssertLessThanOrEqual(textFrame.frame.width, textWidth + 3)
+        expect(textFrame.frame.height).to(beCloseTo(15, within: 0.1))
+        expect(textFrame.lines.count) == 1
+
+        expect(textFrame.carets.count) == actualString.count * 2 + 2 // * 2 because two edges per character, + 2 because the link add the virtual image character
+
+        expect(textFrame.caretIndexForSourcePosition(0)) == 0
+        expect(textFrame.caretIndexForSourcePosition(1)) == 2
+        expect(textFrame.caretIndexForSourcePosition(position1)) == position1 * 2
+        expect(textFrame.caretIndexForSourcePosition(position2)) == position2 * 2
+        expect(textFrame.caretIndexForSourcePosition(position2 + 2)) == (position2 + 2) * 2 + 1
+
+        //swiftlint:disable:next print
+//        print("Carets:\n\(dumpCarets())")
+
+        // Check all carets:
+        checkCaret(0, 0, 0, .leading, true, "", "")
+        checkCaret(1, 1, 0, .trailing, true, "1", "1")
+        checkCaret(2, 2, 1, .leading, true, "1", "1")
+        checkCaret(3, 3, 1, .trailing, true, "12", "12")
+        checkCaret(4, 4, 2, .leading, false, "12", "12")
+        checkCaret(5, 5, 2, .trailing, false, "12 ", "12")
+        checkCaret(6, 6, 2, .leading, true, "12 ", "12")
+        checkCaret(7, 7, 2, .trailing, true, "12  ", "12 ")
+        checkCaret(8, 8, 3, .leading, true, "12  ", "12 ")
+        checkCaret(9, 9, 3, .trailing, true, "12  3", "12 3")
+
+        // Now test cursor movements:
+        cursor = 0
+        checkCaret(cursor, 0, 0, .leading, true, "", "")
+
+        cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 2
+
+        cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 4
+
+        cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 6
+
+        cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 8
+
+        cursor = nextCaret(for: cursor, in: carets)
+        expect(self.cursor) == 9
+
+        //////////////////////////////////////////////////////
+        // Now go back:
+        //////////////////////////////////////////////////////
+        checkCaret(cursor, 9, 3, .trailing, true, "12  3", "12 3")
+
+        cursor = previousCaret(for: cursor, in: carets)
+        checkCaret(cursor, 8, 3, .leading, true, "12  ", "12 ")
+
+        cursor = previousCaret(for: cursor, in: carets)
+        checkCaret(cursor, 6, 2, .leading, true, "12 ", "12")
+
+        cursor = previousCaret(for: cursor, in: carets)
+        checkCaret(cursor, 4, 2, .leading, false, "12", "12")
+
+        cursor = previousCaret(for: cursor, in: carets)
+        checkCaret(cursor, 2, 1, .leading, true, "1", "1")
+
+        cursor = previousCaret(for: cursor, in: carets)
+        checkCaret(cursor, 0, 0, .leading, true, "", "")
+
+        cursor = previousCaret(for: cursor, in: carets)
+        checkCaret(cursor, 0, 0, .leading, true, "", "")
+    }
 }
