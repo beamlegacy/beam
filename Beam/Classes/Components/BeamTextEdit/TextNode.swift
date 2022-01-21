@@ -48,8 +48,6 @@ public class TextNode: ElementNode {
         Self.fontSizeFor(kind: elementKind)
     }
 
-    private var isCursorInsideUneditableRange = false
-
     static let cmdEnterLayer = "CmdEnterLayer"
 
     override var parent: Widget? {
@@ -853,8 +851,7 @@ public class TextNode: ElementNode {
         }
 
         if after {
-            guard let newIndex = caretIndexForSourcePosition(sourceRange.upperBound)
-            else { return nil }
+            guard let newIndex = caretIndexForSourcePosition(sourceRange.upperBound) else { return nil }
             return nextInSourceCaretIndex(at: newIndex)
         } else {
             return caretIndexForSourcePosition(sourceRange.lowerBound)
@@ -1135,7 +1132,8 @@ public class TextNode: ElementNode {
     public func uneditableRangeAt(index: Int) -> Range<Int>? {
         let range = elementText.rangeAt(position: index)
         let isNotEditable = range.attributes.first { $0.isEditable == false }
-        return isNotEditable != nil ? range.position..<range.end : nil
+        guard isNotEditable != nil else { return nil }
+        return range.position..<range.end
     }
 
     // MARK: - Print
