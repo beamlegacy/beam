@@ -10,6 +10,10 @@ import XCTest
 @testable import Beam
 
 class FrecencyNoteStorageTest: XCTestCase {
+    override func setUp() {
+        super.setUp()
+        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+    }
 
     func testSaveFetch() throws {
         //Checks that createdAt is written once at creation and then updated at each create/Update

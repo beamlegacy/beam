@@ -37,6 +37,13 @@ extension BrowsingTree: Hashable {
 }
 
 struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
+
+    enum ProcessingStatus: Int, Codable, DatabaseValueConvertible {
+        case toDo = 0
+        case started = 1
+        case done = 2
+    }
+
     static var beamObjectType = BeamObjectObjectType.browsingTree
 
     public enum CodingKeys: String, CodingKey {
@@ -51,6 +58,7 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
     var deletedAt: Date?
+    var processingStatus: ProcessingStatus = .done
     var beamObjectId: UUID {
         get { rootId }
         set { rootId = newValue }
@@ -64,7 +72,8 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
             data: data,
             createdAt: createdAt,
             updatedAt: updatedAt,
-            deletedAt: deletedAt
+            deletedAt: deletedAt,
+            processingStatus: processingStatus
         )
     }
 }
@@ -83,6 +92,7 @@ extension BrowsingTreeRecord: FetchableRecord {
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
+        processingStatus = row[Columns.processingStatus]
     }
 }
 
@@ -95,13 +105,14 @@ extension BrowsingTreeRecord: PersistableRecord {
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
+        container[Columns.processingStatus] = processingStatus
     }
 }
 
 extension BrowsingTreeRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case rootId, rootCreatedAt, appSessionId, data, createdAt, updatedAt, deletedAt
+        case rootId, rootCreatedAt, appSessionId, data, processingStatus, createdAt, updatedAt, deletedAt
     }
 }
 
@@ -113,6 +124,7 @@ protocol BrowsingTreeStoreProtocol {
 
 class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     let db: GRDBDatabase
+    public var treeProcessingCompleted = false
     public let group = DispatchGroup()
     static let shared = BrowsingTreeStoreManager()
     let groupTimeOut: Double = 2
@@ -224,11 +236,23 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ records: [BrowsingTreeRecord]) throws {
-        let newRecords = try records.filter { try !db.exists(browsingTreeRecord: $0) }
-        for rec in newRecords {
-            process(tree: rec.data)
+        treeProcessingCompleted = false
+        let statuses = db.browsingTreeProcessingStatuses(ids: records.map { $0.rootId })
+        let recordsWithDbStatus = records.map { (record) -> BrowsingTreeRecord in
+            var newRecord = record
+            newRecord.processingStatus = statuses[record.rootId] ?? .toDo //record not already in db are to be processed
+            return newRecord
         }
-        try save(browsingTreeRecords: records)
+        try save(browsingTreeRecords: recordsWithDbStatus)
+        let recordsToProcess = recordsWithDbStatus.filter { $0.processingStatus == .toDo }
+        Self.backgroundQueue.async {
+            for record in recordsToProcess {
+                self.db.update(record: record, status: .started)
+                self.process(tree: record.data)
+                self.db.update(record: record, status: .done)
+            }
+            self.treeProcessingCompleted = true
+        }
     }
 
     func allObjects(updatedSince: Date?) throws -> [BrowsingTreeRecord] {
