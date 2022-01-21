@@ -153,7 +153,7 @@ class AutocompleteManager: ObservableObject {
         case .mnemonic: return true // a mnemonic is by definition something that can take over the result
         case .topDomain: return result.text.lowercased().starts(with: searchText.lowercased())
         case .history, .url:
-            return result.prefixScore > 1.0
+            return result.takeOverCandidate
         case .autocomplete:
             return autocompleteResults.count == 2 // 1 search engine result + 1 create note
             && !searchQuery.mayBeURL && result.text == searchQuery

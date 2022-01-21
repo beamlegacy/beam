@@ -37,7 +37,7 @@ class noteIndexingTests: XCTestCase {
     }
 
     func testReferencesAndLinks() {
-        let title1 = "test prout"
+        let title1 = "test proud"
         let title2 = "Test Bleh"
 
         let note1 = BeamNote.fetchOrCreate(title: title1)

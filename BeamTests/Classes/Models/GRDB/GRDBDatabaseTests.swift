@@ -200,7 +200,7 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
 }
 
 class GRDBDatabaseBeamElementTests: XCTestCase {
-    ///< Basic note content to check FTS behaviour.
+    /// Basic note content to check FTS behaviour.
     lazy var note: BeamNote = {
         let note = BeamNote(title: "My bar note")
 
