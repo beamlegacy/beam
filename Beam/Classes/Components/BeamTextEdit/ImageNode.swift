@@ -74,6 +74,8 @@ class ImageNode: ResizableNode {
             return
         }
 
+        responsiveStrategy = .horizontal
+
         imageName = imageRecord.name
         imageSourceURL = URL(string: self.element.text.text)
 
