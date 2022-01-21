@@ -47,9 +47,12 @@ enum DocumentFilter {
     case beforeJournalDate(Int64)
     case nonFutureJournalDate(Int64)
     case type(DocumentType)
-    case nonDeleted ///< filter out deleted notes (the default if nothing is explicitely requested)
-    case deleted ///< filter out non delete notes
-    case includeDeleted ///< don't filter out anything
+    /// filter out deleted notes (the default if nothing is explicitely requested)
+    case nonDeleted
+    /// filter out non delete notes
+    case deleted
+    /// don't filter out anything
+    case includeDeleted
     case updatedSince(Date)
 
     case limit(Int)
@@ -930,8 +933,10 @@ extension DocumentManager {
     }
 
     enum SortingKey {
-        case title(Bool) ///< Ascending = true, Descending = false
-        case journal_day(Bool) ///< Ascending = true, Descending = false
+        /// Ascending = true, Descending = false
+        case title(Bool)
+        /// Ascending = true, Descending = false
+        case journal_day(Bool)
         case journal(Bool)
         case updatedAt(Bool)
     }

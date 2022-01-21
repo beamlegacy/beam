@@ -492,10 +492,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var childInset: CGFloat = 18 { didSet { invalidateRendering() } }
     var childAvailableWidth: CGFloat { availableWidth - childInset }
 
-    var padding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around the Widget + its children
-    var contentsPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around this widget's contents
-    var childrenPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } } ///< Padding around this widget's children
-    var childrenSpacing: CGFloat = PreferencesManager.editorChildSpacing { didSet { invalidateRendering() } } ///< Space in between two children
+    /// Padding around the Widget + its children
+    var padding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } }
+    /// Padding around this widget's contents
+    var contentsPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } }
+    /// Padding around this widget's children
+    var childrenPadding: NSEdgeInsets = NSEdgeInsetsZero { didSet { invalidateRendering() } }
+    /// Space in between two children
+    var childrenSpacing: CGFloat = PreferencesManager.editorChildSpacing { didSet { invalidateRendering() } }
 
     final func updateChildrenLayout() {
         guard open else { return }

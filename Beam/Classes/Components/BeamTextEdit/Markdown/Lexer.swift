@@ -28,9 +28,12 @@ class Lexer {
     }
 
     struct Token: Codable {
-        var type: TokenType ///< the recognized type of the token
-        var string: String ///< The textual value of the token
-        var start: Int = 0 ///< The position of the token in the original input string
+        /// the recognized type of the token
+        var type: TokenType
+        /// The textual value of the token
+        var string: String
+        /// The position of the token in the original input string
+        var start: Int = 0
         var line: Int = 0
         var column: Int = 0
 
