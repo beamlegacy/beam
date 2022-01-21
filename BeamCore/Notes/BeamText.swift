@@ -290,10 +290,17 @@ public struct BeamText: Codable {
             let newRanges = ranges.map({ $0.resolved() })
             if newRanges != ranges {
                 ranges = newRanges
+                return true
             }
-            return true
         }
         return false
+    }
+
+    /// resolvedNotesNames returns a copy of self with the notes names resolved
+    public func resolvedNotesNames() -> BeamText? {
+        var text = self
+
+        return text.resolveNotesNames() ? text : nil
     }
 
     public var ranges: [Range]
