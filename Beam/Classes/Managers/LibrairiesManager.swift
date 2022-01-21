@@ -61,7 +61,7 @@ extension LibrariesManager {
                 scope.setTag(value: "https://gitlab.com/beamgroup/beam/-/jobs/\(ciJobId)", key: "CI_JOB_ID")
             }
 
-            if let scheme = ProcessInfo.processInfo.environment["SCHEME"] {
+            if let scheme = Configuration.buildSchemeName {
                 scope.setTag(value: scheme, key: "SCHEME")
             }
         }
