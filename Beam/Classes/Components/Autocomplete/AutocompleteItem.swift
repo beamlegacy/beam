@@ -150,7 +150,7 @@ struct AutocompleteItem: View {
 
                 if PreferencesManager.showOmniboxScoreSection {
                     Spacer()
-                    Text(debugString(score: item.score))
+                    Text(debugString(score: item.weightedScore))
                         .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
                         .layoutPriority(10)
