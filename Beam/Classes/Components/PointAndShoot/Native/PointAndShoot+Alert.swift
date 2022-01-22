@@ -16,64 +16,53 @@ extension PointAndShoot {
     ///   - elements: Array of collected BeamElements
     ///   - message: optional message to provide additional information
     func showAlert(_ group: ShootGroup, _ elements: [BeamElement], _ message: String = "", completion: @escaping () -> Void) {
-        if UserDefaults.standard.bool(forKey: "PNS_AlertSuppression") {
+        guard PreferencesManager.showsCollectFeedbackAlert else {
+            self.sendFeedback(group, elements, message)
             completion()
-        } else {
-            // Set the message as the NSAlert text
-            let alert = NSAlert()
-            alert.messageText = "Collect failed"
-            alert.informativeText = "We don't support collecting the content you targeted. If you would like us to support this content please send us a bug report"
-            // Add an input NSTextField for the prompt
-            let inputFrame = NSRect(
-                x: 0,
-                y: 0,
-                width: 400,
-                height: 70
-            )
+            return
+        }
+        // Set the message as the NSAlert text
+        let alert = NSAlert()
+        alert.messageText = "Ooops..."
+        alert.informativeText = "Beam failed to capture this item. \n To help us do better next time, please send us a bug report."
+        alert.showsSuppressionButton = true
+        alert.suppressionButton?.state = .on
+        // Store the message on the clipboard
+        let pasteboard = NSPasteboard.general
+        pasteboard.declareTypes([.string], owner: nil)
+        pasteboard.setString(message, forType: .string)
 
-            let textField = NSTextField(frame: inputFrame)
-            textField.placeholderString = "E.g. When I tried to collect the top left Beam Logo it failed."
-            // textField.stringValue = message
-            textField.isEditable = true
-            alert.accessoryView = textField
-            alert.showsSuppressionButton = true
-            // Store the message on the clipboard
-            let pasteboard = NSPasteboard.general
-            pasteboard.declareTypes([.string], owner: nil)
-            pasteboard.setString(message, forType: .string)
+        // Add a confirmation button
+        let saveButton = alert.addButton(withTitle: "Send bug report")
+        // and cancel button
+        let cancelButton = alert.addButton(withTitle: "Don't send")
+        saveButton.tag = NSApplication.ModalResponse.OK.rawValue
+        cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
 
-            // Add a confirmation button
-            let saveButton = alert.addButton(withTitle: "Send bug report")
-            // and cancel button
-            let cancelButton = alert.addButton(withTitle: "Not Now")
-            saveButton.tag = NSApplication.ModalResponse.OK.rawValue
-            cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
+        guard let window = page?.webviewWindow else {
+            completion()
+            return
+        }
 
-            guard let window = page?.webviewWindow else {
-                return
+        // Display the NSAlert
+        alert.beginSheetModal(for: window) { response in
+            if let suppressionButton = alert.suppressionButton, suppressionButton.state == .on {
+                // When suppression is enabled hide alert
+                PreferencesManager.showsCollectFeedbackAlert = false
+            } else {
+                PreferencesManager.showsCollectFeedbackAlert = true
             }
 
-            var host = group.href
-            if let url = URL(string: group.href), let urlHost = url.minimizedHost {
-                host = urlHost
+            if response == .OK {
+                // When .OK user consents to sending feedback.
+                self.sendFeedback(group, elements, message)
+                PreferencesManager.isCollectFeedbackEnabled = true
+            } else {
+                // else don't send feedback
+                PreferencesManager.isCollectFeedbackEnabled = false
             }
 
-            // Display the NSAlert
-            alert.beginSheetModal(for: window) { response in
-                if let suppressionButton = alert.suppressionButton, suppressionButton.state == .on {
-                    UserDefaults.standard.set(true, forKey: "PNS_AlertSuppression")
-                }
-
-                if response == .OK {
-                    let report = self.generateReport(group, elements, message)
-                    if Configuration.env != .test {
-                        self.sendFeedback(title: "Point and Shoot failed on: \(host)", report: report, comments: textField.stringValue)
-                    } else {
-                        Logger.shared.logDebug("Skipping sending PNS sentry report: \(report)", category: .pointAndShoot)
-                    }
-                }
-                completion()
-            }
+            completion()
         }
     }
 
@@ -101,10 +90,19 @@ extension PointAndShoot {
         """
     }
 
-    func sendFeedback(title: String, report: String, comments: String) {
+    func sendFeedback(_ group: ShootGroup, _ elements: [BeamElement], _ message: String = "") {
+        guard Configuration.env != .test else { return }
+        guard PreferencesManager.isCollectFeedbackEnabled else { return }
+        var host = group.href
+        if let url = URL(string: group.href), let urlHost = url.minimizedHost {
+            host = urlHost
+        }
+
+        let title = "Point and Shoot failed on: \(host)"
+        let report = self.generateReport(group, elements, message)
         let eventId = SentrySDK.capture(message: title + report)
         let userFeedback = UserFeedback(eventId: eventId)
-        userFeedback.comments = comments.isEmpty ? "no comments submitted..." : comments
+        userFeedback.comments = "no comments submitted..."
         userFeedback.email = "john.doe@example.com"
         userFeedback.name = "John Doe"
         SentrySDK.capture(userFeedback: userFeedback)
