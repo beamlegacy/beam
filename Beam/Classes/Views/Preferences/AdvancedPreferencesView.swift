@@ -330,6 +330,12 @@ struct AdvancedPreferencesView: View {
                     OmniboxScoreSectionCheckbox
                 }
 
+                Preferences.Section(verticalAlignment: .top) {
+                    Text("Collect Feedback:")
+                } content: {
+                    CollectFeedbackSection()
+                }
+
                 Preferences.Section(bottomDivider: false) {
                     Text("Enable Point and Shoot view")
                         .font(BeamFont.regular(size: 13).swiftUI)
@@ -715,6 +721,31 @@ struct AdvancedPreferencesView: View {
             Text("Create 10 Random notes")
         })
     }
+
+    private struct CollectFeedbackSection: View {
+        @State private var isCollectFeedbackEnabled = PreferencesManager.isCollectFeedbackEnabled
+        @State private var showsCollectFeedbackAlert = PreferencesManager.showsCollectFeedbackAlert
+
+        var body: some View {
+            Toggle(isOn: $isCollectFeedbackEnabled) {
+                Text("Send feedback of failed collect")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([isCollectFeedbackEnabled].publisher.first()) {
+                    PreferencesManager.isCollectFeedbackEnabled = $0
+                }
+            Toggle(isOn: $showsCollectFeedbackAlert) {
+                Text("Show alert before sending collect feedback")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([showsCollectFeedbackAlert].publisher.first()) {
+                    PreferencesManager.showsCollectFeedbackAlert = $0
+                }
+        }
+    }
+
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {
