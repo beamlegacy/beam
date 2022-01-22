@@ -71,6 +71,7 @@ extension PreferencesManager {
     static let showWebsiteIconTabKey = "showWebsiteIconTab"
     static let restoreLastBeamSessionKey = "restoreLastBeamSession"
     static let showsStatusBarKey = "showsStatusBar"
+    static let collectSoundsKey = "collectSounds"
 }
 
 // MARK: - Default Values
@@ -86,6 +87,7 @@ extension PreferencesManager {
     static let showWebsiteIconTabDefault = true
     static let restoreLastBeamSessionDefault = false
     static let showsStatusBarDefault = false
+    static let collectSoundsDefault = true
 }
 
 extension PreferencesManager {
@@ -121,5 +123,8 @@ extension PreferencesManager {
 
     @UserDefault(key: showsStatusBarKey, defaultValue: showsStatusBarDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showsStatusBar: Bool
+
+    @UserDefault(key: collectSoundsKey, defaultValue: collectSoundsDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var isCollectSoundsEnabled: Bool
 
 }

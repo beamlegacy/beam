@@ -56,6 +56,12 @@ struct BrowserPreferencesView: View {
                 TabsSection()
             }
 
+            Preferences.Section(bottomDivider: true) {
+                Text("Sounds:")
+            } content: {
+                SoundsSection()
+            }
+
             Preferences.Section(verticalAlignment: .top) {
                 Text("Clear Caches:")
             } content: {
@@ -279,6 +285,21 @@ struct TabsSection: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([restoreLastBeamSession].publisher.first()) {
                 PreferencesManager.restoreLastBeamSession = $0
+            }
+    }
+}
+
+struct SoundsSection: View {
+    @State private var isCollectSoundsEnabled = PreferencesManager.isCollectSoundsEnabled
+
+    var body: some View {
+        Toggle(isOn: $isCollectSoundsEnabled) {
+            Text("Enable Capture sounds")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isCollectSoundsEnabled].publisher.first()) {
+                PreferencesManager.isCollectSoundsEnabled = $0
             }
     }
 }
