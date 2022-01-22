@@ -314,19 +314,29 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         self.title = title ?? ""
     }
 
+    private var updateFavIconDispatchItem: DispatchWorkItem?
     func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
         guard let url = url else { favIcon = nil; return }
-        FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (image) in
-            guard let self = self else { return }
-            guard image != nil || !fromWebView else {
-                // no favicon found from webview, try url instead.
-                self.updateFavIcon(fromWebView: false)
-                return
-            }
-            DispatchQueue.main.async {
-                self.favIcon = image
+        updateFavIconDispatchItem?.cancel()
+        let dispatchItem = DispatchWorkItem { [weak self] in
+            guard let webView = self?.webView else { return }
+            FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
+                guard let self = self else { return }
+                guard let image = favicon?.image else {
+                    if fromWebView {
+                        // no favicon found from webview, try url instead.
+                        self.updateFavIcon(fromWebView: false)
+                    }
+                    return
+                }
+                DispatchQueue.main.async {
+                    self.favIcon = image
+                }
             }
         }
+        updateFavIconDispatchItem = dispatchItem
+        let deadline: DispatchTime = .now() + .milliseconds(fromWebView && !cacheOnly ? 500 : 0)
+        DispatchQueue.main.asyncAfter(deadline: deadline, execute: dispatchItem)
     }
 
     func updateScore() {
@@ -499,6 +509,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
             guard let webView = self?.webView, self?.isActiveTab() == true, self?.state?.focusOmniBox == false else { return }
             webView.window?.makeFirstResponder(webView)
             webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
+            self?.updateFavIcon(fromWebView: true)
         }
         refocusDispatchItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(200)), execute: workItem)
