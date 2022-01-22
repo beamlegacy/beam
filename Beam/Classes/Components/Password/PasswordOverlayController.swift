@@ -161,6 +161,10 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                           let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true)
                     else { return }
                     buttonWindow.isMovableByWindowBackground = false
+                    if let passwordMenuWindow = self.passwordMenuWindow, let parentWindow = passwordMenuWindow.parent {
+                        parentWindow.removeChildWindow(passwordMenuWindow)
+                        parentWindow.addChildWindow(passwordMenuWindow, ordered: .above)
+                    }
                     let buttonView = WebFieldAutofillButton { [weak self] in
                         if let self = self, self.passwordMenuWindow == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
                             self.requestWebFieldValue(elementId: elementId, frameInfo: frameInfo) { value in
