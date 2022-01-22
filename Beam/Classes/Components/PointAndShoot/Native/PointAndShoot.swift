@@ -2,6 +2,7 @@ import Foundation
 import BeamCore
 import SwiftSoup
 import Promises
+import AVFoundation
 
 struct PointAndShootError: LocalizedError {
     var errorDescription: String?
@@ -24,6 +25,30 @@ public struct NoteInfo: Encodable {
 
 // swiftlint:disable file_length
 class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
+
+    var shootSound: SystemSoundID = 0
+    var collectSound: SystemSoundID = 1
+
+    override init() {
+        if let soundURL = Bundle.main.url(forResource: "collect", withExtension: "aif") {
+            AudioServicesCreateSystemSoundID(soundURL as CFURL, &shootSound)
+        }
+
+        if let soundURL = Bundle.main.url(forResource: "confirm", withExtension: "aiff") {
+            AudioServicesCreateSystemSoundID(soundURL as CFURL, &collectSound)
+        }
+    }
+
+    fileprivate func playShootSound() {
+        guard PreferencesManager.isCollectSoundsEnabled else { return }
+        AudioServicesPlaySystemSound(shootSound)
+    }
+
+    fileprivate func playCollectSound() {
+        guard PreferencesManager.isCollectSoundsEnabled else { return }
+        AudioServicesPlaySystemSound(collectSound)
+    }
+
     var data: BeamData = AppDelegate.main.data
     private var scorer: BrowsingScorer? {
         page?.browsingScorer
@@ -100,7 +125,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         }
     }
 
-    let throttledHaptic = throttle(delay: 0.1, action: {
+    let throttledHaptic = throttle(delay: 0.2, action: {
         // bump trackpad haptic
         let performer = NSHapticFeedbackManager.defaultPerformer
         performer.perform(.alignment, performanceTime: .default)
@@ -159,6 +184,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
                 let text = group.text
                 self.page?.addTextToClusteringManager(text, url: sourceUrl)
             }
+            playShootSound()
             throttledHaptic()
         } else {
             if !isAltKeyDown {
@@ -236,7 +262,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         var group = group
         group.updateSelectionPath()
         activeShootGroup = group
-
+        playShootSound()
         if let sourceUrl = self.page?.url {
             let text = group.text
             self.page?.addTextToClusteringManager(text, url: sourceUrl)
@@ -351,6 +377,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         guard let confirmation = group.confirmation else {
             fatalError("ShootGroup confirmation enum should be set, instead received: \(group)")
         }
+        playCollectSound()
         var mutableGroup = group
         mutableGroup.setConfirmation(confirmation)
         self.collectedGroups.append(mutableGroup)
