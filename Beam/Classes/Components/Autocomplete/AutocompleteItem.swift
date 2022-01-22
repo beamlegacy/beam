@@ -183,8 +183,8 @@ struct AutocompleteItem: View {
         }
         .onAppear {
             if let url = item.url {
-                FaviconProvider.shared.favicon(fromURL: url, cacheOnly: item.source != .topDomain) { (image) in
-                    self.favicon = image
+                FaviconProvider.shared.favicon(fromURL: url, cacheOnly: item.source != .topDomain) { favicon in
+                    self.favicon = favicon?.image
                 }
             }
         }

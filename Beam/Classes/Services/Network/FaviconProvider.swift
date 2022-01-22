@@ -8,16 +8,18 @@
 import Foundation
 import FaviconFinder
 import BeamCore
+import WebKit
 
-final class FaviconProvider {
+class FaviconProvider {
 
     static let shared = FaviconProvider()
     private static let cacheFileName = "favicons"
     private static let cachedIconFromURLLifetime: Int = 30 // 30 days
     private static let cachedIconFromWebViewLifetime: Int = 1 // 1 day
-    typealias FaviconProviderHandler = (NSImage?) -> Void
+    typealias FaviconProviderHandler = (Favicon?) -> Void
 
     private let cache: Cache<String, Favicon>
+    private var finder = FaviconProvider.Finder()
 
     private lazy var debouncedSaveToDisk: (() -> Void)? = {
         debounce(delay: .seconds(5)) { [weak self] in
@@ -37,11 +39,33 @@ final class FaviconProvider {
         NSScreen.main?.backingScaleFactor ?? 2
     }
 
-    private func cacheKeyForURL(_ url: URL, size: Int) -> String {
+    private func cacheKeyForURLHost(_ url: URL, size: Int) -> String {
         return (url.host ?? url.urlStringWithoutScheme) + "-\(size)"
     }
 
-    private func updateCache(withIcon: Favicon, for cacheKey: String) {
+    private func cacheKeyForFullURL(_ url: URL, size: Int) -> String {
+        return url.urlStringWithoutScheme + "-\(size)"
+    }
+
+    private func getCachedIcon(for url: URL, size: Int) -> Favicon? {
+        let fullURLFavicon = cache[cacheKeyForFullURL(url, size: size)]
+        if let fullURLFavicon = fullURLFavicon, !isFaviconExpired(fullURLFavicon) {
+            return fullURLFavicon
+        }
+        let hostFavicon = cache[cacheKeyForURLHost(url, size: size)]
+        guard let hostFavicon = hostFavicon, !isFaviconExpired(hostFavicon) else {
+            return fullURLFavicon
+        }
+        return hostFavicon
+    }
+
+    private func isFaviconExpired(_ favicon: Favicon) -> Bool {
+        hasDateExceedLifetime(favicon.date,
+                              lifetime: favicon.origin == .webView ? Self.cachedIconFromWebViewLifetime : Self.cachedIconFromURLLifetime)
+    }
+
+    private func updateCache(withIcon: Favicon, originURL: URL, size: Int, useFullURL: Bool = false) {
+        let cacheKey = useFullURL ? cacheKeyForFullURL(originURL, size: size) : cacheKeyForURLHost(originURL, size: size)
         self.cache[cacheKey] = withIcon
         self.debouncedSaveToDisk?()
     }
@@ -75,29 +99,21 @@ final class FaviconProvider {
 
     func favicon(fromURL url: URL, webView: WKWebView? = nil, cacheOnly: Bool = false, handler: @escaping FaviconProviderHandler) {
         let scaledSize = defaultScaledSize
-        let cacheKey = cacheKeyForURL(url, size: scaledSize)
-        var handlerWasCalled = false
-        if let cached = cache[cacheKey] {
-            handlerWasCalled = true
-            handler(cached.image)
-            // if cached is old or not from webView, let's still retrieve a new one
-            var cacheShouldBeReplaced = false
-            if webView != nil {
-                cacheShouldBeReplaced = cached.origin != .webView || hasDateExceedLifetime(cached.date, lifetime: Self.cachedIconFromWebViewLifetime)
-            } else if hasDateExceedLifetime(cached.date, lifetime: Self.cachedIconFromURLLifetime) {
-                cacheShouldBeReplaced = true
-            }
-            if !cacheShouldBeReplaced {
+        let cached = getCachedIcon(for: url, size: scaledSize)
+        if let cached = cached {
+            handler(cached)
+            if cacheOnly || (webView == nil && !hasDateExceedLifetime(cached.date, lifetime: Self.cachedIconFromURLLifetime)) {
                 return
             }
         } else if cacheOnly {
             handler(nil)
             return
         }
+
         if let webView = webView {
-            retrieveFavicon(fromWebView: webView) { image in
-                if image != nil || !handlerWasCalled {
-                    handler(image)
+            retrieveFavicon(fromWebView: webView, url: url, currentCached: cached) { f in
+                if (f != nil && cached != f) || cached == nil {
+                    handler(f)
                 }
             }
         } else {
@@ -108,115 +124,163 @@ final class FaviconProvider {
     // MARK: - From Web URL
     private func retrieveFavicon(fromURL url: URL, handler: @escaping FaviconProviderHandler) {
         let scaledSize = defaultScaledSize
-        FaviconFinder(url: url, preferredType: .html, preferences: [
-            FaviconDownloadType.html: FaviconType.appleTouchIcon.rawValue,
-            FaviconDownloadType.ico: "favicon.ico"
-        ]).downloadFavicon { result in
+        finder.find(with: url) { [weak self] result in
+            guard let self = self else { return }
             switch result {
-            case .success(let icon):
-                let favicon = Favicon(url: icon.url, origin: .url, image: icon.image)
-                let cacheKey = self.cacheKeyForURL(url, size: scaledSize)
-                self.updateCache(withIcon: favicon, for: cacheKey)
-                handler(icon.image)
-            case .failure(let error):
-                Logger.shared.logDebug("FaviconProvider failure: \(error.localizedDescription)", category: .favIcon)
+            case .success(let favicon):
+                self.updateCache(withIcon: favicon, originURL: url, size: scaledSize)
+                handler(favicon)
+            case .failure:
                 handler(nil)
             }
         }
     }
 
     // MARK: - From WebView
-    private func retrieveFavicon(fromWebView webView: WKWebView, handler: @escaping FaviconProviderHandler) {
-
-        let originUrl = webView.url
-        webView.evaluateJavaScript(Self.GET_FAVICON_SCRIPT) { [weak self] (result, _) in
-            guard let self = self, let faviconsDics = result as? [NSDictionary] else {
+    private func retrieveFavicon(fromWebView webView: WKWebView, url originURL: URL,
+                                 currentCached: Favicon?,
+                                 handler: @escaping FaviconProviderHandler) {
+        let size = self.defaultScaledSize
+        finder.find(with: webView, url: originURL, size: size) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let favicon):
+                var useFullURL = false
+                if currentCached != nil && favicon.url != currentCached?.url {
+                    // we have a new favicon for this url. let's cache it.
+                    useFullURL = true
+                }
+                if currentCached == nil || currentCached?.origin != .webView || favicon.url != currentCached?.url {
+                    self.updateCache(withIcon: favicon, originURL: originURL, size: size, useFullURL: useFullURL)
+                }
+                handler(favicon)
+            case .failure:
                 handler(nil)
-                return
-            }
-
-            let favicons: [Favicon] = faviconsDics.compactMap { faviconDic in
-                guard let urlString = faviconDic["url"] as? String,
-                let url = URL(string: urlString, relativeTo: originUrl)
-                else { return nil }
-                var width: Double?
-                var height: Double?
-                let sizeStrings = (faviconDic["sizes"] as? String)?.components(separatedBy: "x") ?? []
-                if sizeStrings.count == 2 {
-                    width = Double(sizeStrings[0])
-                    height = Double(sizeStrings[1])
-                }
-                return Favicon(url: url, width: width, height: height, origin: .webView)
-            }
-
-            let size = self.defaultScaledSize
-            guard let favicon = self.pickBestFavicon(favicons, forSize: size), let originUrl = originUrl else {
-                handler(nil)
-                return
-            }
-            self.getData(from: favicon.url) { [weak self] data, _, _ in
-                guard let self = self, let data = data, let image = NSImage(data: data) else {
-                    handler(nil)
-                    return
-                }
-                let cacheKey = self.cacheKeyForURL(originUrl, size: size)
-                var updatedFavicon = favicon
-                updatedFavicon.image = image
-                self.updateCache(withIcon: updatedFavicon, for: cacheKey)
-                handler(image)
             }
         }
     }
-
-    /**
-     Policy to pick the best favicon as of 21/10/2021:
-     - prefer a .png with the largest size not bigger than 3x the desired size
-     - or an .ico with no size provided
-     - or the last specified
-     */
-    func pickBestFavicon(_ favicons: [Favicon], forSize: Int) -> Favicon? {
-        var bestICO: Favicon?
-        var bestOther: Favicon?
-        for f in favicons {
-            switch f.type {
-            case .ico:
-                if f.width == nil {
-                    bestICO = f
-                }
-            default:
-                guard let bestOtherWidth = bestOther?.width else {
-                    if f.width != nil {
-                        bestOther = f
-                    }
-                    continue
-                }
-                guard let fWidth = f.width, fWidth > bestOtherWidth, Int(fWidth) <= forSize * 3 else { continue }
-                bestOther = f
-            }
-        }
-        return (bestOther?.width != nil ? bestOther : bestICO) ?? favicons.last
-    }
-
-    private func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
-        URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
-    }
-
-    private static let GET_FAVICON_SCRIPT = """
-        var favicons = [];
-        var nodeList = document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
-
-        for (var i = 0; i < nodeList.length; i++) {
-            const node = nodeList[i];
-            favicons.push({
-                url: node.getAttribute('href'),
-                sizes: node.getAttribute('sizes')
-            });
-        }
-        favicons;
-    """
 }
 
-struct Favicon: Codable {
+extension FaviconProvider {
+
+    /// Provide a mock finder for tests
+    convenience init(withFinder finder: FaviconProvider.Finder) {
+        self.init()
+        self.finder = finder
+    }
+
+    enum FinderError: Error {
+        case urlNotFound
+        case dataNotFound
+    }
+
+    /// Internal favicon getter from url or webview.
+    /// Separated from Provider to allow mocking
+    class Finder {
+
+        func find(with url: URL, completion:  @escaping (Result<Favicon, FinderError>) -> Void) {
+            FaviconFinder(url: url, preferredType: .html, preferences: [
+                FaviconDownloadType.html: FaviconType.appleTouchIcon.rawValue,
+                FaviconDownloadType.ico: "favicon.ico"
+            ]).downloadFavicon { result in
+                switch result {
+                case .success(let icon):
+                    let favicon = Favicon(url: icon.url, origin: .url, image: icon.image)
+                    completion(.success(favicon))
+                case .failure(let error):
+                    Logger.shared.logDebug("FaviconFinder Package failure: \(error.localizedDescription)", category: .favIcon)
+                    completion(.failure(.dataNotFound))
+                }
+            }
+        }
+
+        func find(with webView: WKWebView, url originURL: URL, size: Int, completion:  @escaping (Result<Favicon, FinderError>) -> Void) {
+            webView.evaluateJavaScript(Self.GET_FAVICON_SCRIPT) { [weak self] (result, _) in
+                guard let self = self, let faviconsDics = result as? [NSDictionary] else {
+                    completion(.failure(.urlNotFound))
+                    return
+                }
+
+                let favicons: [Favicon] = faviconsDics.compactMap { faviconDic in
+                    guard let urlString = faviconDic["url"] as? String,
+                          let url = URL(string: urlString, relativeTo: originURL)
+                    else { return nil }
+                    var width: Double?
+                    var height: Double?
+                    let sizeStrings = (faviconDic["sizes"] as? String)?.components(separatedBy: "x") ?? []
+                    if sizeStrings.count == 2 {
+                        width = Double(sizeStrings[0])
+                        height = Double(sizeStrings[1])
+                    }
+                    return Favicon(url: url, width: width, height: height, origin: .webView)
+                }
+
+                guard let favicon = self.pickBestFavicon(favicons, forSize: size) else {
+                    completion(.failure(.urlNotFound))
+                    return
+                }
+                self.getData(from: favicon.url) { data, _, _ in
+                    guard let data = data, let image = NSImage(data: data) else {
+                        completion(.failure(.dataNotFound))
+                        return
+                    }
+                    var updatedFavicon = favicon
+                    updatedFavicon.image = image
+                    completion(.success(updatedFavicon))
+                }
+            }
+        }
+
+        /**
+         Policy to pick the best favicon as of 21/10/2021:
+         - prefer a .png with the largest size not bigger than 3x the desired size
+         - or an .ico with no size provided
+         - or the last specified
+         */
+        func pickBestFavicon(_ favicons: [Favicon], forSize: Int) -> Favicon? {
+            var bestICO: Favicon?
+            var bestOther: Favicon?
+            for f in favicons {
+                switch f.type {
+                case .ico:
+                    if f.width == nil {
+                        bestICO = f
+                    }
+                default:
+                    guard let bestOtherWidth = bestOther?.width else {
+                        if f.width != nil {
+                            bestOther = f
+                        }
+                        continue
+                    }
+                    guard let fWidth = f.width, fWidth > bestOtherWidth, Int(fWidth) <= forSize * 3 else { continue }
+                    bestOther = f
+                }
+            }
+            return (bestOther?.width != nil ? bestOther : bestICO) ?? favicons.last
+        }
+
+        private func getData(from url: URL, completion: @escaping (Data?, URLResponse?, Error?) -> Void) {
+            URLSession.shared.dataTask(with: url, completionHandler: completion).resume()
+        }
+
+        private static let GET_FAVICON_SCRIPT = """
+            var favicons = [];
+            var nodeList = document.querySelectorAll("link[rel='icon'], link[rel='shortcut icon']")
+
+            for (var i = 0; i < nodeList.length; i++) {
+                const node = nodeList[i];
+                favicons.push({
+                    url: node.getAttribute('href'),
+                    sizes: node.getAttribute('sizes')
+                });
+            }
+            favicons;
+        """
+    }
+}
+
+struct Favicon: Codable, Equatable {
 
     let url: URL
     let width: Double?
