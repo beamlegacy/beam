@@ -42,7 +42,7 @@ function config(name, mode, { TerserPlugin }) {
       ]
     },
     optimization: {
-      minimize: true,
+      minimize: Boolean(mode != "development"),
       minimizer: [
         new TerserPlugin({
           terserOptions: {
