@@ -35,7 +35,7 @@ struct AutocompleteList: View {
                                  colorPalette: i.source == .createCard ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
                                     AutocompleteItem.defaultColorPalette)
-                    .padding(.horizontal, BeamSpacing._80)
+                    .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
                             selectedIndex = indexFor(item: i)
