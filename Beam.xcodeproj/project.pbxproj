@@ -448,13 +448,15 @@
 		876856692770E239002A8069 /* ChromiumLoginData.db in Resources */ = {isa = PBXBuildFile; fileRef = 876856682770E239002A8069 /* ChromiumLoginData.db */; };
 		8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */; };
 		87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87685675277371A7002A8069 /* MockPasswordsDB.swift */; };
-		8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */; };
+		8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserImport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserImport.swift */; };
 		8770E0CB2768D9E30078288E /* WebFieldAutofillButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8770E0CA2768D9E30078288E /* WebFieldAutofillButton.swift */; };
 		8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */; };
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
 		877888D9269C743F00D703F0 /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888D1269C743F00D703F0 /* CSVParser.swift */; };
 		877888DB269C977C00D703F0 /* PasswordImporterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888DA269C977C00D703F0 /* PasswordImporterTest.swift */; };
 		878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */ = {isa = PBXBuildFile; productRef = 878417BD276FB1FB005EB5B0 /* MockHttpServer */; };
+		87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */; };
+		879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879157362799EECF00AE1040 /* BrowserImporter.swift */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
 		87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539B82616297300D51877 /* SearchPasswordsCell.swift */; };
@@ -1709,13 +1711,15 @@
 		876856682770E239002A8069 /* ChromiumLoginData.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = ChromiumLoginData.db; sourceTree = "<group>"; };
 		8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModelTests.swift; sourceTree = "<group>"; };
 		87685675277371A7002A8069 /* MockPasswordsDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockPasswordsDB.swift; sourceTree = "<group>"; };
-		8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserHistoryImport.swift"; sourceTree = "<group>"; };
+		8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserImport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImport.swift"; sourceTree = "<group>"; };
 		8770E0CA2768D9E30078288E /* WebFieldAutofillButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillButton.swift; sourceTree = "<group>"; };
 		8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredPasswordCell.swift; sourceTree = "<group>"; };
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
 		877888D1269C743F00D703F0 /* CSVParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		877888DA269C977C00D703F0 /* PasswordImporterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporterTest.swift; sourceTree = "<group>"; };
 		878417BC276FB164005EB5B0 /* MockHttpServer */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MockHttpServer; path = BeamUITests/MockHttpServer; sourceTree = "<group>"; };
+		8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImportErrors.swift"; sourceTree = "<group>"; };
+		879157362799EECF00AE1040 /* BrowserImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImporter.swift; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
 		87C539B82616297300D51877 /* SearchPasswordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPasswordsCell.swift; sourceTree = "<group>"; };
@@ -3016,6 +3020,7 @@
 		418171712581107C00317ED8 /* Importers */ = {
 			isa = PBXGroup;
 			children = (
+				879157362799EECF00AE1040 /* BrowserImporter.swift */,
 				873528B127342DE5005E7CBC /* BrowserHistory */,
 				8746CC9D266DFDB100F44D41 /* Passwords */,
 				418171722581107C00317ED8 /* Roam */,
@@ -3318,7 +3323,8 @@
 				52A8698C26CBB3C000FCCC69 /* AppDelegate+ShowError.swift */,
 				96A1C67526F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift */,
 				332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */,
-				8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift */,
+				8768D5EB2735A1100079DEC6 /* AppDelegate+BrowserImport.swift */,
+				8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */,
 				A5DE86A32692AEEC00E05C20 /* BeamWindow+NSMenu.swift */,
 				3343794227037578004EF5A4 /* BeamWindow+Search.swift */,
 				DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */,
@@ -6669,6 +6675,7 @@
 				8AF4F7CB275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift in Sources */,
 				333E4F8D270AE2B7005B72CD /* BeamTextEdit+Search.swift in Sources */,
 				5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */,
+				879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */,
 				75FD7B6F2707006400BEFBA7 /* BeamSchemeHandler.swift in Sources */,
 				52B17AC3262446B200CB4728 /* AppDelegate+Database.swift in Sources */,
 				A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */,
@@ -6934,6 +6941,7 @@
 				8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */,
 				8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */,
 				5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */,
+				87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
 				A5A2314526FB355B00D01D08 /* DividerNode.swift in Sources */,
 				52DB02662716DCE800F3881D /* LoggerRecorder.swift in Sources */,
@@ -6953,7 +6961,7 @@
 				BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */,
 				37C4130927854EAF00954FD7 /* SearchEngineDescription.swift in Sources */,
 				BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */,
-				8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserHistoryImport.swift in Sources */,
+				8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserImport.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
 				A055CE7A274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift in Sources */,
 				A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */,

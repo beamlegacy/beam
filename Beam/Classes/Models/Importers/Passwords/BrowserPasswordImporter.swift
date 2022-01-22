@@ -22,7 +22,7 @@ struct BrowserPasswordResult {
     var item: BrowserPasswordItem
 }
 
-protocol BrowserPasswordImporter {
+protocol BrowserPasswordImporter: BrowserImporter {
     var passwordsPublisher: AnyPublisher<BrowserPasswordResult, Error> { get }
     func importPasswords() throws
 }
