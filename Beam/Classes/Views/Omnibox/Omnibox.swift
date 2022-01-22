@@ -10,7 +10,7 @@ import BeamCore
 
 struct Omnibox: View {
 
-    static let defaultHeight: CGFloat = 56
+    static let defaultHeight: CGFloat = 57
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
@@ -54,7 +54,7 @@ struct Omnibox: View {
     var body: some View {
         Omnibox.Background(isLow: boxIsLow, isPressingCharacter: showPressedState) {
             VStack(spacing: 0) {
-                HStack(spacing: BeamSpacing._200) {
+                HStack(spacing: BeamSpacing._180) {
                     OmniboxSearchField(isEditing: isEditingBinding,
                                        modifierFlagsPressed: $modifierFlagsPressed,
                                        enableAnimations: false)
@@ -67,7 +67,7 @@ struct Omnibox: View {
                             })
                     }
                 }
-                .padding(.horizontal, BeamSpacing._200)
+                .padding(.horizontal, BeamSpacing._180)
                 .overlay(!shouldShowAutocompleteResults ? nil :
                             Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                             .blendModeLightMultiplyDarkScreen(),

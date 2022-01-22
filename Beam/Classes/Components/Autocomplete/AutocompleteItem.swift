@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AutocompleteItem: View {
 
-    static let defaultHeight: CGFloat = 40
+    static let defaultHeight: CGFloat = 38
 
     @State var item: AutocompleteResult
     let selected: Bool
