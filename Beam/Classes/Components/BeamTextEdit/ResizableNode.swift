@@ -57,7 +57,11 @@ class ResizableNode: ElementNode {
     var maxWidth: CGFloat?
     var maxHeight: CGFloat = 1200
     var keepAspectRatio: Bool = true
-    var responsiveStrategy: ResponsiveType?
+    var responsiveStrategy: ResponsiveType? {
+        didSet {
+            setupResizeHandleLayer()
+        }
+    }
     var visibleSize: CGSize = .zero
 
     func setVisibleSize(width: CGFloat? = nil, height: CGFloat? = nil) {
