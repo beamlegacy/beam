@@ -8,7 +8,6 @@
 import Foundation
 import Combine
 import BeamCore
-import GRDB
 
 protocol BrowserHistoryItem {
     var timestamp: Date { get }
@@ -21,8 +20,7 @@ struct BrowserHistoryResult {
     var item: BrowserHistoryItem
 }
 
-protocol BrowserHistoryImporter {
-    var sourceBrowser: BrowserType { get }
+protocol BrowserHistoryImporter: BrowserImporter {
     var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>? { get set }
     var publisher: AnyPublisher<BrowserHistoryResult, Error> { get }
     func historyDatabaseURL() throws -> URL?
