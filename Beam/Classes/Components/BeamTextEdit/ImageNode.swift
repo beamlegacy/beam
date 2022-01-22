@@ -7,7 +7,6 @@
 
 import Foundation
 import BeamCore
-import AppKit
 import Macaw
 import Lottie
 
@@ -28,7 +27,9 @@ class ImageNode: ResizableNode {
         didSet {
             element.collapsed = isCollapsed
             configureCollapsed(isCollapsed)
-            setupCollapseExpandLayer(hidden: !hover)
+            if !element.isProxy {
+                setupCollapseExpandLayer(hidden: !hover)
+            }
             if let imageLayer = imageLayer {
                 layoutCollapseExpand(contentLayer: imageLayer.layer)
             }
@@ -38,13 +39,13 @@ class ImageNode: ResizableNode {
     var isHoverCollapseExpandButton: Bool = false
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
-        self.isCollapsed = element.collapsed
+        self.isCollapsed = element.isProxy || element.collapsed
         super.init(parent: parent, element: element, availableWidth: availableWidth)
         setupImage(width: availableWidth)
     }
 
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
-        self.isCollapsed = element.collapsed
+        self.isCollapsed = element.isProxy || element.collapsed
         super.init(editor: editor, element: element, availableWidth: availableWidth)
         setupImage(width: availableWidth)
     }
@@ -85,7 +86,9 @@ class ImageNode: ResizableNode {
         setupFocusLayer()
         setupImageLayer(using: imageRecord, uid: uid, width: width)
         configureCollapsed(isCollapsed)
-        setupCollapseExpandLayer(hidden: !hover)
+        if !element.isProxy {
+            setupCollapseExpandLayer(hidden: !hover)
+        }
 
         updateLayout()
         if let imageLayer = imageLayer {
@@ -134,7 +137,7 @@ class ImageNode: ResizableNode {
         }
 
         imageLayer.mouseDown = { [weak self] mouseInfo -> Bool in
-            guard let self = self else { return false }
+            guard let self = self, !self.element.isProxy else { return false }
             if self.isCollapsed {
                 self.isCollapsed = false
                 return true
@@ -173,8 +176,7 @@ class ImageNode: ResizableNode {
 
     private func setupSourceButtonLayer() {
 
-        guard imageSourceURL != nil else { return }
-        guard let sourceImage = NSImage(named: "editor-url_big") else { return }
+        guard imageSourceURL != nil, let sourceImage = NSImage(named: "editor-url_big") else { return }
         sourceImage.isTemplate = true
         let tintedImage = sourceImage.fill(color: BeamColor.Corduroy.nsColor)
 
@@ -216,7 +218,6 @@ class ImageNode: ResizableNode {
 
         shape.addSublayer(sourceImageLayer)
         globalLayer.addSublayer(shape)
-
         globalLayer.opacity = 0.0
 
         let sourceLayer = sourceButtonLayer(with: globalLayer, shape: shape)
@@ -268,10 +269,7 @@ class ImageNode: ResizableNode {
 
     override func updateLayout() {
         super.updateLayout()
-
-        guard let imageLayer = imageLayer else {
-            return
-        }
+        guard let imageLayer = imageLayer else { return }
 
         layoutImageLayer()
         layoutCollapseExpand(contentLayer: imageLayer.layer)
@@ -352,7 +350,6 @@ class ImageNode: ResizableNode {
         didSet {
             if let source = layers["source"] {
                 source.layer.opacity = hover ? 1.0 : 0.0
-
                 if hover, let blur = CIFilter(name: "CIGaussianBlur") {
                     blur.name = "blur"
                     source.layer.backgroundFilters = [blur]
@@ -389,16 +386,13 @@ class ImageNode: ResizableNode {
 // MARK: - ImageNode + Layer
 extension ImageNode {
     override var bulletLayerPositionY: CGFloat { 9 }
-
     override var indentLayerPositionY: CGFloat { 28 }
 }
 
 extension ImageNode: Collapsable {
-
     var mediaName: String {
         imageSourceURL?.absoluteString ?? imageName ?? "Image"
     }
-
     var mediaURL: URL? {
         imageSourceURL
     }
