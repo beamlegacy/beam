@@ -111,13 +111,37 @@ export class PointAndShoot {
    * @memberof PointAndShoot
    */
   sendBounds(): void {
-    // First send Boolean flags
+    // Remove DOM elements that are disconnected from the DOM
+    this.removeDisconnectedDOMElements()
+    // Send Boolean flags
     this.ui.hasSelection(PointAndShootHelper.hasSelection(this.win))
     this.ui.typingOnWebView(this.isTypingOnWebView)
     // Lastly send positioning bounds
     this.ui.pointBounds(this.pointTarget)
     this.ui.shootBounds(this.shootTargets)
     this.ui.selectBounds(this.selectionRangeGroups)
+  }
+
+  /**
+   * DOM elements can be removed from the page. If we lose the reference to
+   * any DOM elements in our stored targets. Remove them from the stored targets.
+   * 
+   * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected
+   *
+   * @memberof PointAndShoot
+   */
+  removeDisconnectedDOMElements() {
+    this.selectionRangeGroups = this.selectionRangeGroups.filter(target => {
+      const startNodeIsConnected = target.range.startContainer.isConnected
+      const endNodeIsConnected = target.range.endContainer.isConnected
+      // Keep group if both start and end are connected
+      return startNodeIsConnected && endNodeIsConnected
+    })
+
+    this.shootTargets = this.shootTargets.filter(target => {
+      // Keep element if it's connected
+      return target.element.isConnected
+    })
   }
   /**
    * Upserts the target element to the shootTargets Array. Then triggers

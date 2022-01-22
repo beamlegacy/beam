@@ -187,6 +187,7 @@ export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
 export type BeamDOMRect = DOMRect
 
 export interface BeamNode extends BeamEventTarget {
+  isConnected?: boolean
   offsetHeight: number
   offsetWidth: number
   textContent: string
