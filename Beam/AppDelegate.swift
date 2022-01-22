@@ -45,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     var data: BeamData!
     var cancellableScope = Set<AnyCancellable>()
-    var cancellableImportsScope = Set<AnyCancellable>()
+    var importErrorCancellable: AnyCancellable?
 
     private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     private let defaultWindowSize = CGSize(width: 800, height: 600)
@@ -93,6 +93,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         BeamObjectManager.setup()
 
         data = BeamData()
+        startDisplayingBrowserImportErrors()
 
         if !isRunningTests {
             createWindow(frame: nil, restoringTabs: true)
