@@ -159,6 +159,10 @@ final class ChromiumPasswordImporter {
 }
 
 extension ChromiumPasswordImporter: BrowserPasswordImporter {
+    var sourceBrowser: BrowserType {
+        browser.browserType
+    }
+
     var passwordsPublisher: AnyPublisher<BrowserPasswordResult, Swift.Error> {
         let subject = currentSubject ?? PassthroughSubject<BrowserPasswordResult, Swift.Error>()
         currentSubject = subject
