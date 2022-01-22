@@ -8,6 +8,7 @@ export class BeamHTMLElementMock extends BeamElementMock implements BeamHTMLElem
   dataset = {
     "beam-mock": "uuid-uuid-uuid-uuid"
   }
+  isConnected: boolean
 
   constructor(nodeName: string, attributes = {}) {
     super(nodeName, new BeamNamedNodeMap(attributes))
