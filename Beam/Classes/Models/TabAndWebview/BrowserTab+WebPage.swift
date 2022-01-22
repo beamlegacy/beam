@@ -180,8 +180,8 @@ extension BrowserTab: WebPage {
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
         logInNote(url: url, title: title, reason: reason)
-        updateFavIcon(fromWebView: true)
         updateScore()
+        updateFavIcon(fromWebView: true)
     }
 
     /// When using Point and Shoot to capture text in a webpage, notify the
