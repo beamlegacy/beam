@@ -510,6 +510,8 @@
 		8ABC6519274FD7230068166E /* SourceMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC6518274FD7230068166E /* SourceMetadata.swift */; };
 		8ABC651B274FD7AE0068166E /* BeamText+SourcesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC651A274FD7AE0068166E /* BeamText+SourcesTests.swift */; };
 		8ABC651D274FE08E0068166E /* SourceMetadataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABC651C274FE08E0068166E /* SourceMetadataTests.swift */; };
+		8ABFD6A02791D82B001E35DE /* confirm.aiff in Resources */ = {isa = PBXBuildFile; fileRef = 8ABFD6992791D82B001E35DE /* confirm.aiff */; };
+		8ABFD6A12791D82B001E35DE /* collect.aif in Resources */ = {isa = PBXBuildFile; fileRef = 8ABFD69F2791D82B001E35DE /* collect.aif */; };
 		8AC2EFDB266F8A0800049005 /* PointAndShootPointingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */; };
 		8AC2EFDD266F8A1400049005 /* PointAndShootShootingTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */; };
 		8AC2EFDF266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AC2EFDE266F8A6F00049005 /* PointAndShootPersistToJournalTest.swift */; };
@@ -1786,6 +1788,8 @@
 		8ABC6518274FD7230068166E /* SourceMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceMetadata.swift; sourceTree = "<group>"; };
 		8ABC651A274FD7AE0068166E /* BeamText+SourcesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamText+SourcesTests.swift"; sourceTree = "<group>"; };
 		8ABC651C274FE08E0068166E /* SourceMetadataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SourceMetadataTests.swift; sourceTree = "<group>"; };
+		8ABFD6992791D82B001E35DE /* confirm.aiff */ = {isa = PBXFileReference; lastKnownFileType = audio.aiff; path = confirm.aiff; sourceTree = "<group>"; };
+		8ABFD69F2791D82B001E35DE /* collect.aif */ = {isa = PBXFileReference; lastKnownFileType = file; path = collect.aif; sourceTree = "<group>"; };
 		8AC2EFD1266F86F500049005 /* yarn.lock */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = yarn.lock; sourceTree = "<group>"; };
 		8AC2EFDA266F8A0800049005 /* PointAndShootPointingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPointingTest.swift; sourceTree = "<group>"; };
 		8AC2EFDC266F8A1400049005 /* PointAndShootShootingTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootShootingTest.swift; sourceTree = "<group>"; };
@@ -2839,6 +2843,7 @@
 		41816FD02581046F00317ED8 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				8ABFD6A22791D833001E35DE /* Sounds */,
 				A5F47EC626F8D70F004B7CDE /* Lotties */,
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
 				418171112581082200317ED8 /* Assets.xcassets */,
@@ -4137,6 +4142,23 @@
 				8AA2BC58270339DD00B99B71 /* ScrollCaptureView.swift */,
 			);
 			path = LayoutHelpers;
+			sourceTree = "<group>";
+		};
+		8ABFD6A22791D833001E35DE /* Sounds */ = {
+			isa = PBXGroup;
+			children = (
+				8ABFD6A32791D843001E35DE /* PointAndShoot */,
+			);
+			path = Sounds;
+			sourceTree = "<group>";
+		};
+		8ABFD6A32791D843001E35DE /* PointAndShoot */ = {
+			isa = PBXGroup;
+			children = (
+				8ABFD69F2791D82B001E35DE /* collect.aif */,
+				8ABFD6992791D82B001E35DE /* confirm.aiff */,
+			);
+			path = PointAndShoot;
 			sourceTree = "<group>";
 		};
 		8AC2EFCF266F837C00049005 /* Native */ = {
@@ -5860,6 +5882,7 @@
 				8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
+				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
 				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
@@ -5912,6 +5935,7 @@
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				8AFE8354276B248B00D4B560 /* UITests-Password.html in Resources */,
 				375D83B8278D634C0064C246 /* LinkMouseOver.js in Resources */,
+				8ABFD6A02791D82B001E35DE /* confirm.aiff in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
 				8AFE835A276B248B00D4B560 /* UITests-Media.html in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
