@@ -315,7 +315,7 @@ class ImageNode: ResizableNode {
         let containerLayer = isCollapsed ? layers["collapsed-text"]?.layer : layers["image"]?.layer
         let bounds = containerLayer?.bounds ?? .zero
         let offset = isCollapsed ? 20.0 : 0.0
-        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2 + offset), y: isCollapsed ? -focusMargin + 7 : -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
+        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2 + offset), y: -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
         layoutCursor(cursorRect)
     }
 
