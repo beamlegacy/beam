@@ -607,6 +607,15 @@ extension BeamObjectRequest {
         let localTimer = BeamDate.now
 
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
+            #if DEBUG
+            // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
+            APIRequest.networkCallFilesSemaphore.wait()
+            APIRequest.networkCallFiles.append("direct_upload")
+            APIRequest.networkCallFilesSemaphore.signal()
+            #endif
+
+            APIRequest.callsCount += 1
+
             Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
                                    category: .network,
                                    localTimer: localTimer)
