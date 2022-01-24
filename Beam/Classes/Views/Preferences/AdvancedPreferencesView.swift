@@ -32,6 +32,8 @@ struct AdvancedPreferencesView: View {
     @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
+    @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
+    @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -96,6 +98,12 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "Network Enabled") {
                     NetworkEnabledButton
+                }
+                Preferences.Section(title: "Direct Upload") {
+                    DirectUpload
+                }
+                Preferences.Section(title: "Direct Download") {
+                    DirectDownload
                 }
                 Preferences.Section(title: "", bottomDivider: true) {
                     Button(action: {
@@ -459,6 +467,28 @@ struct AdvancedPreferencesView: View {
                 PreferencesManager.showTabGrougpingMenuItem = $0
             }
 
+    }
+
+    private var DirectDownload: some View {
+        return Toggle(isOn: $isDirectDownloadOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isDirectDownloadOn].publisher.first()) {
+                Configuration.beamObjectDataOnSeparateCall = $0
+            }
+    }
+
+    private var DirectUpload: some View {
+        return Toggle(isOn: $isDirectUploadOn) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([isDirectUploadOn].publisher.first()) {
+                Configuration.beamObjectDataUploadOnSeparateCall = $0
+            }
     }
 
     private var AutomaticBackupBeforeUpdate: some View {

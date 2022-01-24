@@ -22,8 +22,6 @@ struct Configuration {
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
     static private(set) var topDomainDBMaxSize = 10000
-    static private(set) var beamObjectDataOnSeparateCall = false
-    static private(set) var beamObjectDataUploadOnSeparateCall = true
 
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
@@ -43,6 +41,42 @@ struct Configuration {
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
     static private(set) var apiHostnameDefault = "http://api.beam.lvh.me" // "https://api.beamapp.co" // "http://api.beam.lvh.me"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
+
+    static private(set) var beamObjectDataOnSeparateCallDefault = false
+
+    static private var beamObjectDataOnSeparateCallKey = "beamObjectDataOnSeparateCall"
+    static var beamObjectDataOnSeparateCall: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: beamObjectDataOnSeparateCallKey) != nil {
+                return UserDefaults.standard.bool(forKey: beamObjectDataOnSeparateCallKey)
+            }
+
+            return beamObjectDataOnSeparateCallDefault
+        }
+        set {
+            if newValue != beamObjectDataOnSeparateCall {
+                UserDefaults.standard.set(newValue, forKey: beamObjectDataOnSeparateCallKey)
+            }
+        }
+    }
+
+    static private(set) var beamObjectDataUploadOnSeparateCallDefault = false
+
+    static private var beamObjectDataUploadOnSeparateCallKey = "beamObjectDataUploadOnSeparateCall"
+    static var beamObjectDataUploadOnSeparateCall: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: beamObjectDataUploadOnSeparateCallKey) != nil {
+                return UserDefaults.standard.bool(forKey: beamObjectDataUploadOnSeparateCallKey)
+            }
+
+            return beamObjectDataUploadOnSeparateCallDefault
+        }
+        set {
+            if newValue != beamObjectDataUploadOnSeparateCall {
+                UserDefaults.standard.set(newValue, forKey: beamObjectDataUploadOnSeparateCallKey)
+            }
+        }
+    }
 
     static private var apiHostnameKey = "apiHostname"
     static var apiHostname: String {
