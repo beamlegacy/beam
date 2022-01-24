@@ -3138,46 +3138,112 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             context("when object doesn't exist on the API") {
                 context("when we don't send previousChecksum") {
                     context("Foundation") {
-                        fit("saves new object") {
-                            let networkCalls = APIRequest.callsCount
+                        context("without direct upload") {
+                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveOnBeamObjectAPI(object) { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
+                            beforeEach {
+                                Configuration.beamObjectDataUploadOnSeparateCall = false
                             }
 
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object"]
+                            afterEach {
+                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            }
 
-                            let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-                            expect(object) == remoteObject
+                            fit("saves new object") {
+                                let networkCalls = APIRequest.callsCount
 
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]) == object
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    do {
+                                        _ = try sut.saveOnBeamObjectAPI(object) { result in
+                                            expect { try result.get() }.toNot(throwError())
+
+                                            done()
+                                        }
+                                    } catch {
+                                        fail(error.localizedDescription)
+                                    }
+                                }
+
+                                expect(APIRequest.callsCount - networkCalls) == 1
+                                expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_object"]
+
+                                let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                                expect(object) == remoteObject
+
+                                expect(MyRemoteObjectManager.store[object.beamObjectId]) == object
+                            }
+
+                            fit("stores previousChecksum") {
+                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    do {
+                                        _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
+                                            expect { try result.get() }.toNot(throwError())
+
+                                            done()
+                                        }
+                                    } catch {
+                                        fail(error.localizedDescription)
+                                    }
+                                }
+
+                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try self.checksum(object))
+                            }
                         }
 
-                        fit("stores previousChecksum") {
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
+                        context("with direct upload") {
+                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
+                            beforeEach {
+                                Configuration.beamObjectDataUploadOnSeparateCall = true
                             }
 
-                            expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try self.checksum(object))
+                            afterEach {
+                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            }
+
+                            fit("saves new object") {
+                                let networkCalls = APIRequest.callsCount
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    do {
+                                        _ = try sut.saveOnBeamObjectAPI(object) { result in
+                                            expect { try result.get() }.toNot(throwError())
+
+                                            done()
+                                        }
+                                    } catch {
+                                        fail(error.localizedDescription)
+                                    }
+                                }
+
+                                expect(APIRequest.callsCount - networkCalls) == 3
+                                expect(APIRequest.networkCallFiles) == ["sign_in", "prepare_beam_object", "direct_upload", "update_beam_object"]
+
+                                let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                                expect(object) == remoteObject
+
+                                expect(MyRemoteObjectManager.store[object.beamObjectId]) == object
+                            }
+
+                            fit("stores previousChecksum") {
+                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
+
+                                waitUntil(timeout: .seconds(10)) { done in
+                                    do {
+                                        _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
+                                            expect { try result.get() }.toNot(throwError())
+
+                                            done()
+                                        }
+                                    } catch {
+                                        fail(error.localizedDescription)
+                                    }
+                                }
+
+                                expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try self.checksum(object))
+                            }
                         }
                     }
                     context("PromiseKit") {
