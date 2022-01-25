@@ -15,8 +15,448 @@ private func checksum(_ object: MyRemoteObject) throws -> String? {
 }
 
 class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
+    private class func objectForUUID(_ uuid: String) -> MyRemoteObject? {
+        Array(MyRemoteObjectManager.store.values).first(where: { $0.beamObjectId.uuidString.lowercased() == uuid })
+    }
+
     override class func configure(_ configuration: Quick.Configuration) {
         let beamObjectHelper = BeamObjectTestsHelper()
+
+        sharedExamples("saveAllOnBeamObjectApi with Foundation") { (sharedExampleContext: @escaping SharedExampleContext) in
+            var networkCalls = APIRequest.callsCount
+
+            beforeEach {
+                networkCalls = APIRequest.callsCount
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    do {
+                        _ = try sut.saveAllOnBeamObjectApi { result in
+                            expect { try result.get() }.toNot(throwError())
+
+                            done()
+                        }
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
+                }
+            }
+
+            it("saves all objects") {
+                let block = sharedExampleContext()
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
+
+                if let callsCount = block["callsCount"] as? Int {
+                    expect(APIRequest.callsCount - networkCalls) == callsCount
+                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
+                } else {
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                }
+
+                for index in 1...3 {
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String,
+                       let object = block["object\(index)"] as? MyRemoteObject {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                        expect(expectedResult) == remoteObject
+                    }
+                }
+
+                for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
+                            UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
+                            UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
+                    let object = MyRemoteObjectManager.store[key]
+                    expect(object) == (try beamObjectHelper.fetchOnAPI(object))
+                }
+            }
+
+            it("stores previousChecksum") {
+                for (_, object) in MyRemoteObjectManager.store {
+                    expect(object.previousChecksum).toNot(beNil())
+                }
+            }
+        }
+
+        sharedExamples("saveAllOnBeamObjectApi with Promises") { (sharedExampleContext: @escaping SharedExampleContext) in
+            var networkCalls = APIRequest.callsCount
+
+            beforeEach {
+                networkCalls = APIRequest.callsCount
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+
+                let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    promise.then { success in
+                        done()
+                    }.catch { error in
+                        fail("Should not happen: \(error)")
+                        done()
+                    }
+                }
+            }
+
+            it("saves all objects") {
+                let block = sharedExampleContext()
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
+
+                if let callsCount = block["callsCount"] as? Int {
+                    expect(APIRequest.callsCount - networkCalls) == callsCount
+                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
+                } else {
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                }
+
+                for index in 1...3 {
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String,
+                       let object = block["object\(index)"] as? MyRemoteObject {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                        expect(expectedResult) == remoteObject
+                    }
+                }
+
+                for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
+                            UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
+                            UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
+                    let object = MyRemoteObjectManager.store[key]
+                    expect(object) == (try beamObjectHelper.fetchOnAPI(object))
+                }
+            }
+
+            it("stores previousChecksum") {
+                for (_, object) in MyRemoteObjectManager.store {
+                    expect(object.previousChecksum).toNot(beNil())
+                }
+            }
+        }
+
+        sharedExamples("saveAllOnBeamObjectApi with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
+            var networkCalls = APIRequest.callsCount
+
+            beforeEach {
+                networkCalls = APIRequest.callsCount
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+
+                let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    promise.done { success in
+                        done()
+                    }.catch { error in
+                        fail("Should not happen: \(error)")
+                        done()
+                    }
+                }
+            }
+
+            it("saves all objects") {
+                let block = sharedExampleContext()
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
+
+                if let callsCount = block["callsCount"] as? Int {
+                    expect(APIRequest.callsCount - networkCalls) == callsCount
+                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
+                } else {
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                }
+
+                for index in 1...3 {
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String,
+                       let object = block["object\(index)"] as? MyRemoteObject {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                        expect(expectedResult) == remoteObject
+                    }
+                }
+
+                for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
+                            UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
+                            UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
+                    let object = MyRemoteObjectManager.store[key]
+                    expect(object) == (try beamObjectHelper.fetchOnAPI(object))
+                }
+            }
+
+            it("stores previousChecksum") {
+                for (_, object) in MyRemoteObjectManager.store {
+                    expect(object.previousChecksum).toNot(beNil())
+                }
+            }
+        }
+
+        sharedExamples("saveOnBeamObjectsAPI with Foundation") { (sharedExampleContext: @escaping SharedExampleContext) in
+            it("saves all objects") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let networkCalls = APIRequest.callsCount
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
+
+                let object1 = block["object1"] as! MyRemoteObject
+                let object2 = block["object2"] as! MyRemoteObject
+                let object3 = block["object3"] as! MyRemoteObject
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    do {
+                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                            expect { try result.get() }.toNot(throwError())
+
+                            done()
+                        }
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
+                }
+
+                if let callsCount = block["callsCount"] as? Int {
+                    expect(APIRequest.callsCount - networkCalls) == callsCount
+                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
+                } else {
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                }
+
+                for index in 1...3 {
+                    let object = block["object\(index)"] as! MyRemoteObject
+                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        expect(expectedResult) == remoteObject
+                    } else {
+                        expect(object) == remoteObject
+                    }
+                }
+
+//                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
+//                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
+//                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
+
+//                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+//                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+//                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+//
+//                expect(newObject1) == remoteObject1
+//                expect(newObject2) == remoteObject2
+//                expect(newObject3) == remoteObject3
+            }
+
+            it("stores previousChecksum") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let object1 = block["object1"] as! MyRemoteObject
+                let object2 = block["object2"] as! MyRemoteObject
+                let object3 = block["object3"] as! MyRemoteObject
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    do {
+                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
+                            expect { try result.get() }.toNot(throwError())
+
+                            done()
+                        }
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
+                }
+
+                for index in 1...3 {
+                    let object = block["object\(index)"] as! MyRemoteObject
+
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(expectedResult))
+                    } else {
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
+                    }
+                }
+            }
+        }
+
+        sharedExamples("saveOnBeamObjectsAPI with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
+            it("saves all objects") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let networkCalls = APIRequest.callsCount
+                let object1 = block["object1"] as! MyRemoteObject
+                let object2 = block["object2"] as! MyRemoteObject
+                let object3 = block["object3"] as! MyRemoteObject
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
+
+                let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    promise.done { remoteObject in
+                        done()
+                    }.catch { error in
+                        fail("Should not happen: \(error)")
+                        done()
+                    }
+                }
+
+                if let callsCount = block["callsCount"] as? Int {
+                    expect(APIRequest.callsCount - networkCalls) == callsCount
+                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
+                } else {
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                }
+
+                for index in 1...3 {
+                    let object = block["object\(index)"] as! MyRemoteObject
+                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        expect(expectedResult) == remoteObject
+                    } else {
+                        expect(object) == remoteObject
+                    }
+                }
+
+//                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
+//                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
+//                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
+//
+//                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+//                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+//                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+//
+//                expect(newObject1) == remoteObject1
+//                expect(newObject2) == remoteObject2
+//                expect(newObject3) == remoteObject3
+            }
+
+            it("stores previousChecksum") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let object1 = block["object1"] as! MyRemoteObject
+                let object2 = block["object2"] as! MyRemoteObject
+                let object3 = block["object3"] as! MyRemoteObject
+
+                let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
+                waitUntil(timeout: .seconds(10)) { done in
+                    promise.done { remoteObject in
+                        done()
+                    }.catch { error in
+                        fail("Should not happen: \(error)")
+                        done()
+                    }
+                }
+
+                for index in 1...3 {
+                    let object = block["object\(index)"] as! MyRemoteObject
+
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(expectedResult))
+                    } else {
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
+                    }
+                }
+            }
+        }
+
+        sharedExamples("saveOnBeamObjectsAPI with Promises") { (sharedExampleContext: @escaping SharedExampleContext) in
+            it("saves all objects") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let networkCalls = APIRequest.callsCount
+                let object1 = block["object1"] as! MyRemoteObject
+                let object2 = block["object2"] as! MyRemoteObject
+                let object3 = block["object3"] as! MyRemoteObject
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
+
+                let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
+                waitUntil(timeout: .seconds(10)) { done in
+                    promise.then { remoteObject in
+                        done()
+                    }.catch { error in
+                        fail("Should not happen: \(error)")
+                        done()
+                    }
+                }
+
+                if let callsCount = block["callsCount"] as? Int {
+                    expect(APIRequest.callsCount - networkCalls) == callsCount
+                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
+                } else {
+                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
+                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
+                }
+
+                for index in 1...3 {
+                    let object = block["object\(index)"] as! MyRemoteObject
+                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        expect(expectedResult) == remoteObject
+                    } else {
+                        expect(object) == remoteObject
+                    }
+                }
+
+//                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
+//                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
+//                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
+//
+//                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+//                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+//                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+//
+//                expect(newObject1) == remoteObject1
+//                expect(newObject2) == remoteObject2
+//                expect(newObject3) == remoteObject3
+            }
+
+            it("stores previousChecksum") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let object1 = block["object1"] as! MyRemoteObject
+                let object2 = block["object2"] as! MyRemoteObject
+                let object3 = block["object3"] as! MyRemoteObject
+
+                let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
+                waitUntil(timeout: .seconds(10)) { done in
+                    promise.then { remoteObject in
+                        done()
+                    }.catch { error in
+                        fail("Should not happen: \(error)")
+                        done()
+                    }
+                }
+
+                for index in 1...3 {
+                    let object = block["object\(index)"] as! MyRemoteObject
+
+                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(expectedResult))
+                    } else {
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
+                    }
+                }
+            }
+        }
 
         sharedExamples("saveOnBeamObjectAPI with Foundation") { (sharedExampleContext: @escaping SharedExampleContext) in
             it("saves new object") {
@@ -24,6 +464,7 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                 let sut = block["sut"] as! MyRemoteObjectManager
                 let object = block["object"] as! MyRemoteObject
                 let networkCalls = APIRequest.callsCount
+                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
 
                 waitUntil(timeout: .seconds(10)) { done in
                     do {
@@ -36,8 +477,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         fail(error.localizedDescription)
                     }
                 }
-
-                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
 
                 if let callsCount = block["callsCount"] as? Int {
                     expect(APIRequest.callsCount - networkCalls) == callsCount
@@ -609,150 +1048,31 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             context("when objects don't exist on the API") {
                 context("when we don't send previousChecksum") {
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
-                    }
-                    context("with PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
-                    }
-                    context("with Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
+                    it("doesn't have previousChecksum") {
+                        for (_, object) in MyRemoteObjectManager.store {
+                            expect(object.previousChecksum).to(beNil())
                         }
                     }
 
-                    context("Foundation") {
-                        it("stores previousChecksum") {
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).to(beNil())
-                            }
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).toNot(beNil())
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
-                    context("PromiseKit") {
-                        it("stores previousChecksum") {
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).to(beNil())
-                            }
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).toNot(beNil())
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("stores previousChecksum") {
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).to(beNil())
-                            }
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).toNot(beNil())
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
                 }
 
@@ -765,149 +1085,22 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
-                    }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
-                    }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects"]
+                        ]
                     }
 
-                    context("Foundation") {
-                        it("stores previousChecksum") {
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).toNot(beNil())
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects"]
+                        ]
                     }
-                    context("with PromiseKit") {
-                        it("stores previousChecksum") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).toNot(beNil())
-                            }
-                        }
-                    }
-                    context("with Promises") {
-                        it("stores previousChecksum") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).toNot(beNil())
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -939,99 +1132,28 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_object"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_object"]
+                        ]
                     }
-                    context("with PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_object"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_object"]
+                        ]
                     }
-                    context("with Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_object"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_object"]
+                        ]
                     }
                 }
 
@@ -1042,117 +1164,29 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("with PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("with Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { success in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -1196,99 +1230,28 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
 
@@ -1299,135 +1262,41 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -1476,99 +1345,28 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
 
@@ -1576,156 +1374,54 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
+
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
-                    context("Foundation") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(60)) { done in
-                                do {
-                                    _ = try sut.saveAllOnBeamObjectApi { result in
-                                        expect { try result.get() }.toNot(throwError())
+                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
 
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(expectedResult3) == remoteObject3
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
+                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(expectedResult3) == remoteObject3
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
+                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(expectedResult3) == remoteObject3
-
-                            for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                                        UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                                let object = MyRemoteObjectManager.store[key]
-                                expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                            }
-                        }
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -1759,239 +1455,79 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             context("when objects don't exist on the API") {
                 context("when we don't send previousChecksum") {
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
-
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            it("saves all objects") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(APIRequest.callsCount - networkCalls) == 1
-                                expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                                expect(newObject1) == remoteObject1
-                                expect(newObject2) == remoteObject2
-                                expect(newObject3) == remoteObject3
-                            }
-                        }
-
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
-
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            it("saves all objects") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(APIRequest.callsCount - networkCalls) == 5
-                                expect(APIRequest.networkCallFiles) == ["sign_in",
-                                                                        "prepare_beam_objects",
-                                                                        "direct_upload",
-                                                                        "direct_upload",
-                                                                        "direct_upload",
-                                                                        "update_beam_objects"]
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                                expect(newObject1) == remoteObject1
-                                expect(newObject2) == remoteObject2
-                                expect(newObject3) == remoteObject3
-                            }
+                    it("doesn't have previousChecksums") {
+                        for (_, object) in MyRemoteObjectManager.store {
+                            expect(object.previousChecksum).to(beNil())
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
+                    context("without direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                        }
 
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1) == remoteObject1
-                            expect(newObject2) == remoteObject2
-                            expect(newObject3) == remoteObject3
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
                         }
                     }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
+                    context("with direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                        }
 
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1) == remoteObject1
-                            expect(newObject2) == remoteObject2
-                            expect(newObject3) == remoteObject3
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 5,
+                             "networkCallFiles": ["sign_in",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
-                    context("Foundation") {
-                        it("stores previousChecksum") {
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).to(beNil())
-                            }
 
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
-                    context("PromiseKit") {
-                        it("stores previousChecksum") {
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).to(beNil())
-                            }
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1?.previousChecksum) == (try self.checksum(object1))
-                            expect(newObject2?.previousChecksum) == (try self.checksum(object2))
-                            expect(newObject3?.previousChecksum) == (try self.checksum(object3))
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
-                    }
-                    context("Promises") {
-                        it("stores previousChecksum") {
-                            for (_, object) in MyRemoteObjectManager.store {
-                                expect(object.previousChecksum).to(beNil())
-                            }
-
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1?.previousChecksum) == (try self.checksum(object1))
-                            expect(newObject2?.previousChecksum) == (try self.checksum(object2))
-                            expect(newObject3?.previousChecksum) == (try self.checksum(object3))
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
                 }
 
@@ -2002,236 +1538,74 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                                          previousChecksum: "foobar".SHA256())
                         }
                     }
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
+                    context("without direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            it("saves all objects") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(APIRequest.callsCount - networkCalls) == 1
-                                expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                                expect(newObject1) == remoteObject1
-                                expect(newObject2) == remoteObject2
-                                expect(newObject3) == remoteObject3
-                            }
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
-
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            it("saves all objects") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(APIRequest.callsCount - networkCalls) == 5
-                                expect(APIRequest.networkCallFiles) == ["sign_in",
-                                                                        "prepare_beam_objects",
-                                                                        "direct_upload",
-                                                                        "direct_upload",
-                                                                        "direct_upload",
-                                                                        "update_beam_objects"]
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                                expect(newObject1) == remoteObject1
-                                expect(newObject2) == remoteObject2
-                                expect(newObject3) == remoteObject3
-                            }
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                         }
-                    }
-                    context("PromiseKit") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1) == remoteObject1
-                            expect(newObject2) == remoteObject2
-                            expect(newObject3) == remoteObject3
-                        }
-                    }
-                    context("Promises") {
-                        it("saves all objects") {
-                            let networkCalls = APIRequest.callsCount
-
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 1
-                            expect(APIRequest.networkCallFiles) == ["sign_in", "update_beam_objects"]
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1) == remoteObject1
-                            expect(newObject2) == remoteObject2
-                            expect(newObject3) == remoteObject3
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    context("PromiseKit") {
-                        it("stores previousChecksum") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
+                    context("with direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                        }
 
-                            expect(newObject1?.previousChecksum) == (try self.checksum(object1))
-                            expect(newObject2?.previousChecksum) == (try self.checksum(object2))
-                            expect(newObject3?.previousChecksum) == (try self.checksum(object3))
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 5,
+                             "networkCallFiles": ["sign_in",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    context("Foundation") {
-                        it("stores previousChecksum") {
-                            waitUntil(timeout: .seconds(10)) { done in
-                                do {
-                                    _ = try sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values)) { result in
-                                        expect { try result.get() }.toNot(throwError())
-
-                                        done()
-                                    }
-                                } catch {
-                                    fail(error.localizedDescription)
-                                }
-                            }
-
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1?.previousChecksum) == (try self.checksum(object1))
-                            expect(newObject2?.previousChecksum) == (try self.checksum(object2))
-                            expect(newObject3?.previousChecksum) == (try self.checksum(object3))
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("stores previousChecksum") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI(Array(MyRemoteObjectManager.store.values))
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
 
-                            let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                            let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                            expect(newObject1?.previousChecksum) == (try self.checksum(object1))
-                            expect(newObject2?.previousChecksum) == (try self.checksum(object2))
-                            expect(newObject3?.previousChecksum) == (try self.checksum(object3))
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "callsCount": 1,
+                         "networkCallFiles": ["sign_in", "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -2410,54 +1784,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with their new content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                            "update_beam_object"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(object1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with their new content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "networkCallFiles": ["update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "update_beam_object"]
+                                ]
                             }
                         }
 
@@ -2472,154 +1807,43 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with their new content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                            "prepare_beam_object",
-                                                            "direct_upload",
-                                                            "update_beam_object"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(object1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with their new content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "networkCallFiles": ["prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "prepare_beam_object",
+                                                      "direct_upload",
+                                                      "update_beam_object"]
+                                ]
                             }
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves all objects with their new content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_object"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(object1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with their new content") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_object"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects with their new content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_object"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(object1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with their new content") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_object"]
+                        ]
                     }
                 }
 
@@ -2642,60 +1866,16 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves objects") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(expectedResult1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-                            }
-
-                            it("stores previousChecksum") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            if let objects = try? result.get() {
-                                                Logger.shared.logWarning("Received objects:", category: .beamObjectNetwork)
-                                                dump(objects)
-                                            }
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                                 "networkCallFiles": ["update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
 
@@ -2710,164 +1890,46 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves objects") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                            "prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(expectedResult1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-                            }
-
-                            it("stores previousChecksum") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            if let objects = try? result.get() {
-                                                Logger.shared.logWarning("Received objects:", category: .beamObjectNetwork)
-                                                dump(objects)
-                                            }
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                                 "networkCallFiles": ["prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-                        }
-
-                        it("stores previousChecksum") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves objects") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-                        }
-
-                        it("stores previousChecksum") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -2916,56 +1978,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves objects with their new content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(object1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with their new content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "networkCallFiles": ["update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
 
@@ -2980,164 +2001,45 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves objects with their new content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects"]
-
-                                dump(APIRequest.networkCallFiles)
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(object1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with their new content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "networkCallFiles": ["prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves objects with their new content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(object1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with their new content") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves objects with their new content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(object1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with their new content") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
 
@@ -3160,66 +2062,17 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with merged content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(expectedResult1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(expectedResult2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with merged content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                                 "networkCallFiles": ["update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
 
@@ -3234,194 +2087,51 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with merged content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(expectedResult1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(expectedResult2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with merged content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                                 "networkCallFiles": ["prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves all objects with merged content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with merged content") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects with merged content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with merged content") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -3474,55 +2184,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with their new content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(object1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with their new content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "networkCallFiles": ["update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
 
@@ -3537,162 +2207,47 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with their new content") {
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(object1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(object2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(object3) == remoteObject3
-                            }
-
-                            it("stores all objects previousChecksum with their new content") {
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "networkCallFiles": ["prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves all objects with their new content") {
-                            let networkCalls = APIRequest.callsCount
 
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(object1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with their new content") {
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
 
-                    context("Promises") {
-                        it("saves all objects with their new content") {
-                            let networkCalls = APIRequest.callsCount
-
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(object1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(object2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(object3) == remoteObject3
-                        }
-
-                        it("stores all objects previousChecksum with their new content") {
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(object1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(object2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(object3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
 
@@ -3715,85 +2270,18 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with merged content") {
-                                object1.title = newTitle1
-                                object2.title = newTitle2
-                                object3.title = newTitle3
-
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                var expectedResult3 = object3.copy()
-                                expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(expectedResult1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(expectedResult2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(expectedResult3) == remoteObject3
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]) == expectedResult1
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]) == expectedResult2
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]) == expectedResult3
-                            }
-
-                            it("stores all objects previousChecksum with merged content") {
-                                object1.title = newTitle1
-                                object2.title = newTitle2
-                                object3.title = newTitle3
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                var expectedResult3 = object3.copy()
-                                expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                                 "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                                 "networkCallFiles": ["update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
 
@@ -3808,251 +2296,56 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
                             }
 
-                            it("saves all objects with merged content") {
-                                object1.title = newTitle1
-                                object2.title = newTitle2
-                                object3.title = newTitle3
-
-                                let networkCalls = APIRequest.callsCount
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                let expectedNetworkCalls = ["prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects",
-                                                            Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                            "prepare_beam_objects",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "direct_upload",
-                                                            "update_beam_objects"]
-
-                                expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                var expectedResult3 = object3.copy()
-                                expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                                expect(expectedResult1) == remoteObject1
-
-                                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                                expect(expectedResult2) == remoteObject2
-
-                                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                                expect(expectedResult3) == remoteObject3
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]) == expectedResult1
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]) == expectedResult2
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]) == expectedResult3
-                            }
-
-                            it("stores all objects previousChecksum with merged content") {
-                                object1.title = newTitle1
-                                object2.title = newTitle2
-                                object3.title = newTitle3
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    do {
-                                        _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
-                                            expect { try result.get() }.toNot(throwError())
-
-                                            done()
-                                        }
-                                    } catch {
-                                        fail(error.localizedDescription)
-                                    }
-                                }
-
-                                var expectedResult1 = object1.copy()
-                                expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                                var expectedResult2 = object2.copy()
-                                expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                                var expectedResult3 = object3.copy()
-                                expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                                expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                                expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                                expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult3))
+                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object1": object1 as MyRemoteObject,
+                                 "object2": object2 as MyRemoteObject,
+                                 "object3": object3 as MyRemoteObject,
+                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                                 "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                                 "networkCallFiles": ["prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                      "prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "direct_upload",
+                                                      "update_beam_objects"]
+                                ]
                             }
                         }
                     }
-                    context("PromiseKit") {
-                        it("saves all objects with merged content") {
-                            object1.title = newTitle1
-                            object2.title = newTitle2
-                            object3.title = newTitle3
 
-                            let networkCalls = APIRequest.callsCount
-
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(expectedResult3) == remoteObject3
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]) == expectedResult1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]) == expectedResult2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]) == expectedResult3
-                        }
-
-                        it("stores all objects previousChecksum with merged content") {
-                            object1.title = newTitle1
-                            object2.title = newTitle2
-                            object3.title = newTitle3
-
-                            let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
-                    context("Promises") {
-                        it("saves all objects with merged content") {
-                            object1.title = newTitle1
-                            object2.title = newTitle2
-                            object3.title = newTitle3
 
-                            let networkCalls = APIRequest.callsCount
-
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            let expectedNetworkCalls = ["update_beam_objects",
-                                                        "beam_objects",
-                                                        "update_beam_objects"]
-
-                            expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-                            expect(expectedResult1) == remoteObject1
-
-                            let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-                            expect(expectedResult2) == remoteObject2
-
-                            let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-                            expect(expectedResult3) == remoteObject3
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]) == expectedResult1
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]) == expectedResult2
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]) == expectedResult3
-                        }
-
-                        it("stores all objects previousChecksum with merged content") {
-                            object1.title = newTitle1
-                            object2.title = newTitle2
-                            object3.title = newTitle3
-
-                            let promise: Promises.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.then { remoteObject in
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            var expectedResult1 = object1.copy()
-                            expectedResult1.title = "merged: \(newTitle1)\(title1!)"
-
-                            var expectedResult2 = object2.copy()
-                            expectedResult2.title = "merged: \(newTitle2)\(title2!)"
-
-                            var expectedResult3 = object3.copy()
-                            expectedResult3.title = "merged: \(newTitle3)\(title3!)"
-
-                            expect(MyRemoteObjectManager.store[object1.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult1))
-                            expect(MyRemoteObjectManager.store[object2.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult2))
-                            expect(MyRemoteObjectManager.store[object3.beamObjectId]?.previousChecksum) == (try self.checksum(expectedResult3))
-                        }
+                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                        ["sut": sut as MyRemoteObjectManager,
+                         "object1": object1 as MyRemoteObject,
+                         "object2": object2 as MyRemoteObject,
+                         "object3": object3 as MyRemoteObject,
+                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                         "networkCallFiles": ["update_beam_objects",
+                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                              "update_beam_objects"]
+                        ]
                     }
                 }
             }
@@ -4236,7 +2529,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         object.title = newTitle
                     }
 
-                    fcontext("with replace policy") {
+                    context("with replace policy") {
                         itBehavesLike("saveOnBeamObjectAPI with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object": object as MyRemoteObject,
@@ -4265,7 +2558,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    fcontext("with fetch and raise error policy") {
+                    context("with fetch and raise error policy") {
                         beforeEach {
                             MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                         }
