@@ -182,6 +182,7 @@ class PnSAddToCardTests: BaseTest {
         // If this test is flakey, make sure browsing collect is disabled first
         let journalView = launchApp()
         let helper = BeamUITestsHelper(pnsView.app)
+        helper.tapCommand(.resetCollectAlert)
 
         testRailPrint("When the journal is first loaded the note is empty by default")
         let cardView = CardTestView()
