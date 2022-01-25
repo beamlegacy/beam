@@ -63,6 +63,12 @@ class BeamObjectTestsHelper {
             let beamObject = try BeamObject(object)
             beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)
             _ = try beamObjectRequest.save(beamObject) { result in
+
+                switch result {
+                case .failure(let error):
+                    dump(error)
+                case .success: break
+                }
                 expect { returnedBeamObject = try result.get() }.toNot(throwError())
                 semaphore.signal()
             }
@@ -104,7 +110,7 @@ class BeamObjectTestsHelper {
             semaphore.signal()
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
 
         if case .timedOut = semaResult {
             fail("Timedout")
