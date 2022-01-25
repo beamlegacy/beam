@@ -48,7 +48,14 @@ class WebTestView: BaseView {
     @discardableResult
     func selectCreateCard(_ searchText: String) -> CardTestView {
         XCTContext.runActivity(named: "Click on proposed New note option for '\(searchText)' search keyword") {_ in
-        let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createCard'")
+        // The mouse could overlap the autocomplete result so we should also match on "selected" results
+        let predicate = NSCompoundPredicate(
+            type: .or,
+            subpredicates: [
+                NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createCard'"),
+                NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-" + searchText + "-createCard'")
+            ]
+        )
         let cardCreationElement = app.otherElements.matching(predicate).firstMatch
         //Try out to replace additional waiting
         //XCTAssertTrue(cardCreationElement.waitForExistence(timeout: minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
