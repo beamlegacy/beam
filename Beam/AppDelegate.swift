@@ -70,8 +70,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
-        if Configuration.env.rawValue == "$(ENV)" || Configuration.sentryKey == "$(SENTRY_KEY)", !isSwiftUIPreview {
-            fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
+        if Configuration.env.rawValue == "$(ENV)" || Configuration.Sentry.key == "$(SENTRY_KEY)", !isSwiftUIPreview {
+            fatalError("The ENV wasn't detected properly, please run `direnv allow` and restart your build. (Should only happen in SwiftUI Previews)")
         }
 
         if !isSwiftUIPreview {
@@ -79,7 +79,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
         }
 
-        LibrariesManager.shared.configure()
+        ThirdPartyLibrariesManager.shared.configure()
         // We set our own ExceptionHandler but first we get the already set one in that case Sentry
         // We do what we want when there is an exception, in this case saving the tabs then we pass it back to Sentry
         NSSetUncaughtExceptionHandler { _ in
@@ -350,7 +350,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
+        if !flag && data != nil {
             createWindow(frame: nil, restoringTabs: true)
         }
 
