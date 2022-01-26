@@ -18,19 +18,31 @@ private func nilMax(date: Date?, otherDate: Date?) -> Date? {
     return max(unwrappedDate, unwrappedOtherDate)
 }
 
+extension Float {
+    func almostEqual(_ other: Float, K: Float = 1) -> Bool {
+        return abs(self - other) < K * .ulpOfOne * abs(self + other) || abs(self - other) < .leastNormalMagnitude
+    }
+}
+
+extension Double {
+    func almostEqual(_ other: Double, K: Double = 1) -> Bool {
+        return abs(self - other) < K * .ulpOfOne * abs(self + other) || abs(self - other) < .leastNormalMagnitude
+    }
+}
+
 public class Score: Codable, Equatable {
     public static func == (lhs: Score, rhs: Score) -> Bool {
-        return lhs.readingTimeToLastEvent == rhs.readingTimeToLastEvent
+        return lhs.readingTimeToLastEvent.almostEqual(rhs.readingTimeToLastEvent)
         && lhs.textSelections == rhs.textSelections
-        && lhs.scrollRatioX == rhs.scrollRatioX
-        && lhs.scrollRatioY == rhs.scrollRatioY
+        && lhs.scrollRatioX.almostEqual(rhs.scrollRatioX)
+        && lhs.scrollRatioY.almostEqual(rhs.scrollRatioY)
         && lhs.openIndex == rhs.openIndex
         && lhs.outbounds == rhs.outbounds
         && lhs.textAmount == rhs.textAmount
-        && lhs.area == rhs.area
+        && lhs.area.almostEqual(rhs.area)
         && lhs.inbounds == rhs.inbounds
-        && lhs.videoTotalDuration == rhs.videoTotalDuration
-        && lhs.videoReadingDuration == rhs.videoReadingDuration
+        && lhs.videoTotalDuration.almostEqual(rhs.videoTotalDuration)
+        && lhs.videoReadingDuration.almostEqual(rhs.videoReadingDuration)
         && lhs.id == rhs.id
     }
 

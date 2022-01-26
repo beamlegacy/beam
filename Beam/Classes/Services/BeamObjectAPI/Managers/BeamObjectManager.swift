@@ -105,7 +105,7 @@ class BeamObjectManager {
              We must therefor save object's previousChecksums *before* calling the manager.
              */
 
-            let _ = try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
+            _ = try BeamObjectChecksum.savePreviousChecksums(beamObjects: toSaveObjects)
 
             do {
                 try manager.parse(objects: encapsulatedObjects)
