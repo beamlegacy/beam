@@ -12,7 +12,7 @@ extension AccountManager {
             Persistence.Authentication.email = email
             Persistence.Authentication.password = password
             AuthenticationManager.shared.persistenceDidUpdate()
-            LibrariesManager.shared.setSentryUser()
+            ThirdPartyLibrariesManager.shared.updateUser()
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
@@ -37,7 +37,7 @@ extension AccountManager {
                 Persistence.Authentication.password = nil
             }
             AuthenticationManager.shared.persistenceDidUpdate()
-            LibrariesManager.shared.setSentryUser()
+            ThirdPartyLibrariesManager.shared.updateUser()
             // Syncing with remote API, AppDelegate needs to be called in mainthread
             // TODO: move this syncData to a manager instead.
             // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
