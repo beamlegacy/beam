@@ -240,18 +240,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         expect(object) == remoteObject
                     }
                 }
-
-//                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-//                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-//                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-
-//                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-//                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-//                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-//
-//                expect(newObject1) == remoteObject1
-//                expect(newObject2) == remoteObject2
-//                expect(newObject3) == remoteObject3
             }
 
             it("stores previousChecksum") {
@@ -401,18 +389,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         expect(object) == remoteObject
                     }
                 }
-
-//                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-//                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-//                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-//
-//                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-//                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-//                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-//
-//                expect(newObject1) == remoteObject1
-//                expect(newObject2) == remoteObject2
-//                expect(newObject3) == remoteObject3
             }
 
             it("stores previousChecksum") {
@@ -484,35 +460,33 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                     let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
                     expect(object) == remoteObject
                 }
-
-//                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == object
             }
 
-//            it("stores previousChecksum") {
-//                let block = sharedExampleContext()
-//                let sut = block["sut"] as! MyRemoteObjectManager
-//                let object = block["object"] as! MyRemoteObject
-//
-//                waitUntil(timeout: .seconds(10)) { done in
-//                    do {
-//                        _ = try sut.saveOnBeamObjectAPI(object) { result in
-//                            expect { try result.get() }.toNot(throwError())
-//
-//                            done()
-//                        }
-//                    } catch {
-//                        fail(error.localizedDescription)
-//                    }
-//                }
-//
-//                if let expectedTitle = block["expectedTitle"] as? String {
-//                    var expectedResult = object.copy()
-//                    expectedResult.title = expectedTitle
-//                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
-//                } else {
-//                    expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
-//                }
-//            }
+            it("stores previousChecksum") {
+                let block = sharedExampleContext()
+                let sut = block["sut"] as! MyRemoteObjectManager
+                let object = block["object"] as! MyRemoteObject
+
+                waitUntil(timeout: .seconds(10)) { done in
+                    do {
+                        _ = try sut.saveOnBeamObjectAPI(object) { result in
+                            expect { try result.get() }.toNot(throwError())
+
+                            done()
+                        }
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
+                }
+
+                if let expectedTitle = block["expectedTitle"] as? String {
+                    var expectedResult = object.copy()
+                    expectedResult.title = expectedTitle
+                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
+                } else {
+                    expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
+                }
+            }
         }
 
         sharedExamples("saveOnBeamObjectAPI with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
@@ -672,7 +646,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
 
-            Configuration.beamObjectDataUploadOnSeparateCall = false
+            Configuration.beamObjectDirectCall = false
         }
 
         afterEach {
@@ -688,6 +662,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             beforeEach {
                 self.createObjects()
                 object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                Configuration.beamObjectDirectCall = false
             }
 
             afterEach {
@@ -1086,33 +1061,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
                     }
-
-//                    context("with direct upload and direct download") {
-//                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
-//                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
-//
-//                        beforeEach {
-//                            Configuration.beamObjectDataUploadOnSeparateCall = true
-//                            Configuration.beamObjectDataOnSeparateCall = true
-//                        }
-//
-//                        afterEach {
-//                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
-//                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
-//                        }
-//
-//                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-//                            ["sut": sut as MyRemoteObjectManager,
-//                             "callsCount": 5,
-//                             "networkCallFiles": ["sign_in",
-//                                                  "prepare_beam_objects",
-//                                                  "direct_upload",
-//                                                  "direct_upload",
-//                                                  "direct_upload",
-//                                                  "update_beam_objects"]
-//                            ]
-//                        }
-//                    }
                 }
 
                 context("when we send a previousChecksum") {
@@ -2326,7 +2274,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
@@ -2450,7 +2398,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
@@ -2540,7 +2488,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
@@ -2660,7 +2608,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
@@ -2730,7 +2678,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
