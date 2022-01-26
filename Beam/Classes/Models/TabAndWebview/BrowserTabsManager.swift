@@ -59,17 +59,37 @@ class BrowserTabsManager: ObservableObject {
         tabsGroup[tabId] = tabs
     }
 
-    public func removeTabFromGroup(tabId: UUID) {
-        guard let groupKey = currentTabGroupKey else { return }
+    @discardableResult
+    // Remove the TabId from the Group and return the next TabId to show
+    public func removeFromTabGroup(tabId: UUID) -> UUID? {
+        guard let groupKey = currentTabGroupKey else { return nil }
         if tabId == groupKey {
-            guard var group = tabsGroup.removeValue(forKey: groupKey), !group.isEmpty else { return }
-            let firstTab = group.removeFirst()
-            tabsGroup[firstTab] = group
+            guard var group = tabsGroup.removeValue(forKey: groupKey), !group.isEmpty else { return nil }
+            let firstTabId = group.removeFirst()
+            tabsGroup[firstTabId] = group
+            return firstTabId
         } else {
+            guard let index = tabsGroup[groupKey]?.firstIndex(of: tabId),
+                    let tabGroup = tabsGroup[groupKey] else { return nil }
+            let nextTabToGo = nextTabToGo(from: index, of: tabGroup)
+
             tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
             if let group = tabsGroup[groupKey], group.isEmpty {
                 tabsGroup.removeValue(forKey: groupKey)
             }
+            return nextTabToGo ?? groupKey
+        }
+    }
+
+    private func nextTabToGo(from index: Int, of group: [UUID]) -> UUID? {
+        let afterIdx = group.index(after: index)
+        let beforeIdx = group.index(before: index)
+        if afterIdx < group.count {
+            return group[afterIdx]
+        } else if beforeIdx < group.count && beforeIdx >= 0 {
+            return group[beforeIdx]
+        } else {
+            return nil
         }
     }
 
@@ -302,7 +322,7 @@ extension BrowserTabsManager {
 
     func pinTab(_ tabToPin: BrowserTab) {
         updateIsPinned(for: tabToPin, isPinned: true)
-        removeTabFromGroup(tabId: tabToPin.id)
+        removeFromTabGroup(tabId: tabToPin.id)
     }
 
     func unpinTab(_ tabToUnpin: BrowserTab) {

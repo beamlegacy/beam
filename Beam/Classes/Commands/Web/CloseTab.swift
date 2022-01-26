@@ -55,6 +55,7 @@ class CloseTab: WebCommand {
         try container.encode(wasCurrentTab, forKey: .wasCurrentTab)
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     override func run(context: BeamState?) -> Bool {
         guard let context = context, let tab = self.tab else { return false }
         if tab.isPinned {
@@ -72,18 +73,23 @@ class CloseTab: WebCommand {
             var tabParentToGo: BrowserTab?
             switch tab.browsingTreeOrigin {
             case .browsingNode(_, _, _, let rootId):
+                // If user cmd+click from a tab we want to go back to this tab
                 tabParentToGo = context.browserTabsManager.tabs.first(where: {$0.browsingTree.rootId == rootId})
+            case .searchBar(_, referringRootId: let referringRootId):
+                // If user cmd+T from a current tab we want to comeback to that origin tab
+                tabParentToGo = context.browserTabsManager.tabs.first(where: {$0.browsingTree.rootId == referringRootId})
             default: break
             }
 
             context.browserTabsManager.tabs.remove(at: i)
-            context.browserTabsManager.removeTabFromGroup(tabId: tab.id)
+            let nextTabIdFromGroup = context.browserTabsManager.removeFromTabGroup(tabId: tab.id)
+            let nextTabIndex = min(i, context.browserTabsManager.tabs.count - 1)
 
             if context.browserTabsManager.currentTab === tab {
-
-                let nextTabIndex = min(i, context.browserTabsManager.tabs.count - 1)
-                if let tabParentToGo = tabParentToGo, tabParentToGo.isPinned {
+                if let tabParentToGo = tabParentToGo, nextTabIdFromGroup == nil {
                     context.browserTabsManager.currentTab = tabParentToGo
+                } else if let nextTabIdFromGroup = nextTabIdFromGroup {
+                    context.browserTabsManager.currentTab = context.browserTabsManager.tabs.first(where: {$0.id == nextTabIdFromGroup})
                 } else if nextTabIndex >= 0 {
                     context.browserTabsManager.currentTab = context.browserTabsManager.tabs[nextTabIndex]
                 } else {
