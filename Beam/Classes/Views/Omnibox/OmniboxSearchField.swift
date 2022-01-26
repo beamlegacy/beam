@@ -99,6 +99,7 @@ struct OmniboxSearchField: View {
                     placeholder: "Search the web and your notes",
                     font: textFont.nsFont,
                     textColor: textColor.nsColor,
+                    placeholderFont: BeamFont.light(size: 17).nsFont,
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
                     selectedRange: autocompleteManager.searchQuerySelectedRange,
                     selectedRangeColor: textSelectionColor.nsColor,
@@ -116,6 +117,7 @@ struct OmniboxSearchField: View {
                     .frame(maxHeight: .infinity)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "OmniboxSearchField")
+                    .padding(.top, 0.25)
                 if let subtitle = resultSubtitle, !textFieldText.wrappedValue.isEmpty {
                     HStack(spacing: 0) {
                         Text(textFieldText.wrappedValue)
