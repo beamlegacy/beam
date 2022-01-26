@@ -225,7 +225,7 @@
 		4181725D2581107C00317ED8 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E72581107C00317ED8 /* AuthenticationManager.swift */; };
 		4181725E2581107C00317ED8 /* AccountManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E82581107C00317ED8 /* AccountManager.swift */; };
 		4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171E92581107C00317ED8 /* DocumentManager.swift */; };
-		418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171EA2581107C00317ED8 /* LibrairiesManager.swift */; };
+		418172602581107C00317ED8 /* ThirdPartyLibrariesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418171EA2581107C00317ED8 /* ThirdPartyLibrariesManager.swift */; };
 		4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41817277258110D100317ED8 /* AppDelegate+Data.swift */; };
 		4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181727A258110D100317ED8 /* AppDelegate+URL.swift */; };
 		418172AA25811A3A00317ED8 /* BeamTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 418172A825811A3A00317ED8 /* BeamTextField.swift */; };
@@ -818,6 +818,8 @@
 		A5208E27261F7419006193AF /* String+Calculations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5208E26261F7419006193AF /* String+Calculations.swift */; };
 		A520D8DF25F8DF8D00400720 /* TouchDownModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */; };
 		A5233DE525FB682700BE6F05 /* FaviconProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5233DE425FB682700BE6F05 /* FaviconProvider.swift */; };
+		A523402E279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A523402D279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift */; };
+		A5234030279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift in Sources */ = {isa = PBXBuildFile; fileRef = A523402F279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift */; };
 		A52393A826541A06008D4C85 /* ModeViewTransitions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A726541A06008D4C85 /* ModeViewTransitions.swift */; };
 		A52393AA26541A18008D4C85 /* ModeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52393A926541A18008D4C85 /* ModeView.swift */; };
 		A52596E3273EAA75004B27E4 /* OnboardingEmailConnectView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */; };
@@ -851,6 +853,7 @@
 		A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */; };
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
 		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
+		A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */; };
 		A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54936C5260B721600EF7622 /* WindowBottomToolBar.swift */; };
 		A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */ = {isa = PBXBuildFile; fileRef = A54A452927677F9A00B9AE1B /* set_username.graphql */; };
 		A54A45312767970E00B9AE1B /* UserInfoRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A54A45302767970E00B9AE1B /* UserInfoRequest+Foundation.swift */; };
@@ -1481,7 +1484,7 @@
 		418171E72581107C00317ED8 /* AuthenticationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		418171E82581107C00317ED8 /* AccountManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AccountManager.swift; sourceTree = "<group>"; };
 		418171E92581107C00317ED8 /* DocumentManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DocumentManager.swift; sourceTree = "<group>"; };
-		418171EA2581107C00317ED8 /* LibrairiesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LibrairiesManager.swift; sourceTree = "<group>"; };
+		418171EA2581107C00317ED8 /* ThirdPartyLibrariesManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThirdPartyLibrariesManager.swift; sourceTree = "<group>"; };
 		41817277258110D100317ED8 /* AppDelegate+Data.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Data.swift"; sourceTree = "<group>"; };
 		4181727A258110D100317ED8 /* AppDelegate+URL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+URL.swift"; sourceTree = "<group>"; };
 		418172A825811A3A00317ED8 /* BeamTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamTextField.swift; sourceTree = "<group>"; };
@@ -2084,6 +2087,8 @@
 		A5208E26261F7419006193AF /* String+Calculations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Calculations.swift"; sourceTree = "<group>"; };
 		A520D8DE25F8DF8D00400720 /* TouchDownModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TouchDownModifier.swift; sourceTree = "<group>"; };
 		A5233DE425FB682700BE6F05 /* FaviconProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProvider.swift; sourceTree = "<group>"; };
+		A523402D279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThirdPartyLibrariesManager+Sentry.swift"; sourceTree = "<group>"; };
+		A523402F279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ThirdPartyLibrariesManager+Firebase.swift"; sourceTree = "<group>"; };
 		A52393A726541A06008D4C85 /* ModeViewTransitions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeViewTransitions.swift; sourceTree = "<group>"; };
 		A52393A926541A18008D4C85 /* ModeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModeView.swift; sourceTree = "<group>"; };
 		A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingEmailConnectView.swift; sourceTree = "<group>"; };
@@ -2480,6 +2485,7 @@
 				3315DC952667859A002A47CF /* GRDB in Frameworks */,
 				52466B22270DA966002D1716 /* Clustering in Frameworks */,
 				33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */,
+				A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				3315DC932667859A002A47CF /* Promises in Frameworks */,
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
 				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
@@ -3280,6 +3286,7 @@
 			isa = PBXGroup;
 			children = (
 				5298EADE26272C2C0033862C /* CoreData */,
+				A523402C279DED950027E339 /* ThirdPartyLibraries */,
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
 				418171E82581107C00317ED8 /* AccountManager.swift */,
 				5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */,
@@ -3300,7 +3307,6 @@
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
 				52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
-				418171EA2581107C00317ED8 /* LibrairiesManager.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 				5291CEE7268B5969001645A2 /* PasswordManager.swift */,
 				A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */,
@@ -4469,15 +4475,15 @@
 		965A781C2514F147009980D4 = {
 			isa = PBXGroup;
 			children = (
-				87B00A78276F97A6003BE016 /* Packages */,
-				B5EEBFE82757D98B00DA9782 /* BeamTestPlans */,
 				965A78272514F147009980D4 /* Beam */,
 				965A78402514F149009980D4 /* BeamTests */,
 				965A784B2514F149009980D4 /* BeamUITests */,
+				B5EEBFE82757D98B00DA9782 /* BeamTestPlans */,
 				96319C9C261614CB00D1CF31 /* BeamCore */,
 				96319D1D2616232700D1CF31 /* BeamCoreTests */,
 				A07E94A8276A01D70094117C /* BeamHelper */,
 				965A78262514F147009980D4 /* Products */,
+				87B00A78276F97A6003BE016 /* Packages */,
 				24EFBA757ACC5310A2D800B2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
@@ -4789,6 +4795,16 @@
 				A53B43F226B0946B0043D37A /* NoteListMetadataCache.swift */,
 			);
 			path = AllCards;
+			sourceTree = "<group>";
+		};
+		A523402C279DED950027E339 /* ThirdPartyLibraries */ = {
+			isa = PBXGroup;
+			children = (
+				418171EA2581107C00317ED8 /* ThirdPartyLibrariesManager.swift */,
+				A523402D279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift */,
+				A523402F279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift */,
+			);
+			path = ThirdPartyLibraries;
 			sourceTree = "<group>";
 		};
 		A5239392265419DD008D4C85 /* ContentView */ = {
@@ -5666,6 +5682,7 @@
 				33B2FF2C274C3F8500518F12 /* Lottie */,
 				8A0DFAD4275664090044515B /* FaviconFinder */,
 				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
+				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -5809,6 +5826,7 @@
 				9624A65527431B4200B8D012 /* XCRemoteSwiftPackageReference "swift-atomics" */,
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
+				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -6877,6 +6895,7 @@
 				524299C725A47D2600F4DBF5 /* AppDelegate+Preferences.swift in Sources */,
 				522969E226669016005067A6 /* APIWebSocketRequest.swift in Sources */,
 				418172452581107C00317ED8 /* SearchBar.swift in Sources */,
+				A5234030279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift in Sources */,
 				8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */,
@@ -6884,7 +6903,7 @@
 				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
 				A043B800265A547100E267E5 /* TabGroupingContentView.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
-				418172602581107C00317ED8 /* LibrairiesManager.swift in Sources */,
+				418172602581107C00317ED8 /* ThirdPartyLibrariesManager.swift in Sources */,
 				032562B126051D3B006513E4 /* RBStat.m in Sources */,
 				0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */,
 				33353ED826F367FF00063078 /* ShortcutView.swift in Sources */,
@@ -6910,6 +6929,7 @@
 				A51559892677AC99006F6D6F /* MediaPlayerController.swift in Sources */,
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				A0C77A2226694D2300DCC85C /* AllowListModalView.swift in Sources */,
+				A523402E279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift in Sources */,
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				52842D462715B2610099602C /* AppDelegate+File.swift in Sources */,
@@ -7425,7 +7445,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -7649,7 +7672,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -7881,7 +7907,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -8120,7 +8149,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -8352,7 +8384,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -8747,7 +8782,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -8797,7 +8835,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -9014,7 +9055,10 @@
 				MACOSX_DEPLOYMENT_TARGET = 11.0;
 				MARKETING_VERSION = 0.1.0;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
-				OTHER_LDFLAGS = "-liconv";
+				OTHER_LDFLAGS = (
+					"-ObjC",
+					"-liconv",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -9523,6 +9567,14 @@
 				kind = branch;
 			};
 		};
+		A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
+			requirement = {
+				kind = upToNextMinorVersion;
+				minimumVersion = 8.9.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -9694,6 +9746,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */;
 			productName = Nimble;
+		};
+		A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalyticsWithoutAdIdSupport;
 		};
 		A5946845265E30350044A892 /* Fakery */ = {
 			isa = XCSwiftPackageProductDependency;
