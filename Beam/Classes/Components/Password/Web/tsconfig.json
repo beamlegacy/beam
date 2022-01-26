@@ -1,0 +1,13 @@
+{
+  "include": ["**/*", ".prettierrc.js"],
+  "compilerOptions": {
+    "target": "ES2018",
+    "types": ["jest", "node"],
+    "sourceMap": true,
+    "typeRoots": ["node_modules/@types"],
+    "moduleResolution": "node",
+    "lib": ["ES2019", "DOM"],
+    "esModuleInterop": true
+  },
+  "types": ["jest"]
+}

@@ -5,7 +5,7 @@ const path = require("path")
 function config(name, mode, { TerserPlugin }) {
   return {
     mode,
-    devtool: "cheap-module-source-map",
+    devtool: Boolean(mode != "development") ? undefined : "inline-source-map",
     devServer: {
       contentBase: "./dist",
       https: false, // Required by service workers if we don't use localhost

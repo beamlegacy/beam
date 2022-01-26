@@ -2,7 +2,7 @@ import {BeamNodeMock} from "./BeamNodeMock"
 import {BeamElement, BeamElementCSSInlineStyle, BeamNode, BeamNodeType} from "../../BeamTypes"
 import {BeamNamedNodeMap} from "../../BeamNamedNodeMap"
 import {BeamHTMLCollection} from "./BeamHTMLCollection"
-import {Util} from "../../../../../Components/PointAndShoot/Web/Util"
+import {PointAndShootHelper} from "../../../../../Components/PointAndShoot/Web/PointAndShootHelper"
 import {BeamDOMRectMock} from "./BeamDOMRectMock"
 import {BeamDOMRectList} from "./BeamDOMRectList"
 
@@ -116,7 +116,7 @@ export class BeamElementMock extends BeamNodeMock implements BeamElement, BeamEl
   }
 
   getBoundingClientRect(): DOMRect {
-    const xy = Util.getTopLeft(this)
+    const xy = PointAndShootHelper.getTopLeft(this)
     return new BeamDOMRectMock(xy.x, xy.y, this.width, this.height)
   }
 

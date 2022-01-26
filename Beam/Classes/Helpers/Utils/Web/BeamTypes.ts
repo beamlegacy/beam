@@ -526,5 +526,7 @@ export enum BeamLogCategory {
   embedNode = "embedNode",
   webpositions = "webpositions",
   navigation = "navigation",
-  native = "native"
+  native = "native",
+  passwordManager = "passwordManager",
+  passwordManagerInternal = "passwordManagerInternal"
 }

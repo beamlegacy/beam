@@ -48,3 +48,20 @@ export BROWSING_TREE_URL="https://url"
 
 * Create a test account on https://app.beamapp.co, add its credentials in
 	`.envrc.private` with `TEST_ACCOUNT_EMAIL` and `TEST_ACCOUNT_PASSWORD`.
+
+### Creating a new Web component with build step
+- Make Components/<name>/Web folder
+- add .eslintrc.js
+- add package.json
+- add jest.config.js
+- add tsconfig.json
+- add webpack.config.js
+- add <name>.js
+- add <name>.ts
+- add <name>UI.ts
+- add <name>UI_native.ts
+- add "Test" folder
+- add build_js_<name>.sh
+- add build_xcfilelist_<name>.sh
+- add build step in xcode
+- add xcfilelist step in xcode
