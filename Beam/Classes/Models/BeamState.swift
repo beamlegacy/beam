@@ -260,7 +260,7 @@ import Sentry
         currentTab?.load(url: url)
 
         guard let currentTabId = currentTab?.id else { return }
-        browserTabsManager.removeTabFromGroup(tabId: currentTabId)
+        browserTabsManager.removeFromTabGroup(tabId: currentTabId)
         browserTabsManager.createNewGroup(for: currentTabId)
     }
 
@@ -283,7 +283,7 @@ import Sentry
     /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
     @discardableResult func createTab(withURL url: URL, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
-        let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
+        let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>", referringRootId: browserTabsManager.currentTab?.browsingTree.rootId)
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
