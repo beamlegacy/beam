@@ -86,9 +86,19 @@ class BaseTest: XCTestCase {
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         return AllCardsTestView().openFirstCard()
     }
-    
-    func testRailPrint(_ text: String) { print(text) }
-    
+
+    /// Uses XCTContext internally to log to the `.xcresult` steps.
+    ///
+    /// More information:
+    /// - https://qualitytesting.tumblr.com/post/161515906184/easier-debugging-with-xctactivity-and
+    /// - https://developer.apple.com/documentation/xctest/activities_and_attachments/grouping_tests_into_substeps_with_activities
+    /// 
+    /// - Parameter text: String to log. Will be prefixed with `testRail: `
+    func testRailPrint(_ text: String) {
+        print(text)
+        XCTContext.runActivity(named: "testRail: " + text) { _ in }
+    }
+
     func terminateAppInstance() {
         if isAppRunning() {
             beamAppInstance.terminate()
