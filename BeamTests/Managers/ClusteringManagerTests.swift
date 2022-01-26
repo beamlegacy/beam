@@ -131,7 +131,7 @@ class ClusteringManagerTests: XCTestCase {
         nodes.append(anotherNewTabTree.current)
         informations[3].tabTree = anotherNewTabTree
         informations[3].currentTabTree = tree
-        self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3])
+        _ = self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3])
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
     }

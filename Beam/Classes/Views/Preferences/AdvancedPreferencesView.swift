@@ -291,8 +291,10 @@ struct AdvancedPreferencesView: View {
                     })
                     Button(action: {
                         self.loading = true
-                        BrowsingTreeStoreManager.shared.legacyCleanup { _ in
-                            self.loading = false
+                        DispatchQueue.global().async {
+                            BrowsingTreeStoreManager.shared.legacyCleanup { _ in
+                                self.loading = false
+                            }
                         }
                     }, label: {
                         Text("Legacy browsing trees").frame(minWidth: 100)

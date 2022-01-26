@@ -131,7 +131,7 @@ let ClosingEventTypes: Set = [
     ReadingEventType.searchBarNavigation
 ]
 
-public struct ReadingEvent: Codable {
+public struct ReadingEvent: Codable, Equatable {
     public var id: UUID? = UUID()
     public var type: ReadingEventType
     public var date: Date
@@ -150,7 +150,6 @@ public struct ReadingEvent: Codable {
     public func readingTime(isForeground: Bool, toDate: Date) -> CFTimeInterval {
         return isForeground ? toDate.timeIntervalSince(date) : 0
     }
-
 }
 
 public struct ScoredLink: Hashable {
@@ -273,6 +272,13 @@ public class BrowsingNode: ObservableObject, Codable {
             }
         longTermScoreApply { $0.visitCount += 1 }
     }
+    init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool) {
+        self.id = id
+        self.link = link
+        self.events = events
+        self.legacy = legacy
+        self.isLinkActivation = isLinkActivation
+    }
 
     // Codable:
     enum CodingKeys: String, CodingKey {
@@ -319,6 +325,7 @@ public class BrowsingNode: ObservableObject, Codable {
         if !children.isEmpty {
             try container.encode(children, forKey: .children)
         }
+        try container.encode(isLinkActivation, forKey: .isLinkActivation)
     }
 
     public func deepCopy() -> BrowsingNode? {
@@ -408,6 +415,13 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         self.longTermScoreStore = longTermScoreStore
         self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
+    }
+
+    public init(origin: BrowsingTreeOrigin, root: BrowsingNode, current: BrowsingNode, scores: [UUID: Score]) {
+        self.origin = origin
+        self.root = root
+        self.scores = scores
+        self.current = current
     }
 
     // Codable:
@@ -602,4 +616,36 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         return score
     }
     public var rootId: UUID? { root?.id }
+
+    // MARK: - Conversion from/to serializable format
+    public convenience init?(flattenedTree: FlatennedBrowsingTree) {
+        let flattenedTreeCopy = flattenedTree.copy //avoids mutating original flattenedTree
+        guard let root = flattenedTreeCopy.root else { return nil }
+        let current = flattenedTreeCopy.current ?? root
+        self.init(origin: flattenedTreeCopy.origin, root: root, current: current, scores: flattenedTreeCopy.scores)
+        for (node, parentIndex) in zip(flattenedTreeCopy.nodes, flattenedTreeCopy.parentIndexes) {
+            if let parentIndex = parentIndex,
+               let parentNode = flattenedTreeCopy.node(index: parentIndex) {
+                parentNode.children.append(node)
+                node.parent = parentNode
+            }
+        }
+        root.tree = self
+    }
+
+    public var flattened: FlatennedBrowsingTree {
+        var nodes = [BrowsingNode]()
+        var parentIndexes = [Int?]()
+        var currentIndex: Int = 0
+        var nodesToVisit: [(BrowsingNode, Int?)] = [(root, nil)]
+        while !nodesToVisit.isEmpty {
+            let (node, parentIndex) = nodesToVisit.removeLast()
+            let index = nodes.count
+            if node.id == current.id { currentIndex = index }
+            nodes.append(node.serializable)
+            parentIndexes.append(parentIndex)
+            nodesToVisit.append(contentsOf: node.children.reversed().map { ($0, index) })
+        }
+        return FlatennedBrowsingTree(currentIndex: currentIndex, scores: scores, origin: origin, nodes: nodes, parentIndexes: parentIndexes)
+    }
 }

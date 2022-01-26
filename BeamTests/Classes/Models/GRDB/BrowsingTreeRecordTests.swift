@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import GRDB
 @testable import Beam
 @testable import BeamCore
 
@@ -59,5 +60,45 @@ class BrowsingTreeRecordTests: XCTestCase {
         XCTAssertEqual(db.countBrowsingTrees, 2)
         try db.deleteBrowsingTrees(ids: [rootId, anotherRootId])
         XCTAssertEqual(db.countBrowsingTrees, 0)
+    }
+
+    func testFlattenTreeMigration() throws {
+        func isEqual(_ lhs: ReadingEvent, _ rhs: ReadingEvent) {
+            XCTAssertEqual(lhs.id, rhs.id)
+            XCTAssertEqual(lhs.type, rhs.type)
+            XCTAssert(abs(lhs.date.timeIntervalSince(rhs.date)) < 0.001)
+            XCTAssertEqual(lhs.webSessionId, rhs.webSessionId)
+            XCTAssertEqual(lhs.pageLoadId, rhs.pageLoadId)
+        }
+
+        let dbQueue = DatabaseQueue()
+        let inMemoryGrdb = try GRDBDatabase(dbQueue, migrate: false)
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .millisecondsSince1970 //to be on par with grdb date coding strategy
+        try inMemoryGrdb.migrate(upTo: "addTreeProcessingStatus")
+
+        //we insert a recursive tree in db before tree flattening migration
+        let tree = BrowsingTree(nil)
+        let data = try encoder.encode(tree)
+        let rootId = try XCTUnwrap(tree.rootId)
+        let rootCreatedAt = try XCTUnwrap(tree.root.events.first?.date)
+        try dbQueue.write { db in
+            try db.execute(sql: """
+            INSERT INTO BrowsingTreeRecord (rootId, rootCreatedAt, data)
+             VALUES (:id, :createdAt, :data)
+            """, arguments: ["id": rootId, "createdAt": rootCreatedAt, "data": data])
+        }
+        try inMemoryGrdb.migrate(upTo: "flattenBrowsingTrees")
+
+        //post migration the same tree is stored in flattened format
+        let record = try XCTUnwrap(try inMemoryGrdb.getBrowsingTree(rootId: rootId))
+        XCTAssertNil(record.data)
+        let flattenedData = try XCTUnwrap(record.flattenedData)
+        let migratedTree = try XCTUnwrap(BrowsingTree(flattenedTree: flattenedData))
+        XCTAssertEqual(tree.root.id, migratedTree.root.id)
+        XCTAssertEqual(tree.origin, migratedTree.origin)
+        XCTAssertEqual(tree.root.link, migratedTree.root.link)
+        XCTAssertEqual(migratedTree.root.events.count, 1)
+        isEqual(tree.root.events[0], migratedTree.root.events[0])
     }
 }
