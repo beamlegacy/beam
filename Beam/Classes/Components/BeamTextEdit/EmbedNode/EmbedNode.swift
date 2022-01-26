@@ -55,7 +55,8 @@ class EmbedNode: ResizableNode {
         }
 
         setupResizeHandleLayer()
-
+        self.canBeResized = true
+        
         guard let sourceURL = sourceURL else { return }
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
@@ -144,15 +145,18 @@ class EmbedNode: ResizableNode {
         updateResizableElementContentSize()
         self.updateLayout()
         switch embedContent.type {
-        case .url, .link:
+        case .page, .audio, .rich, .video, .photo, .image:
+            guard let content = embedContent.html else {
+                fallthrough
+            }
+            let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
+            let headContent = self.getHeadContent(theme: theme)
+            let resizableClass = embedContent.responsive != nil ? "resizable" : "non-resizable"
+            let html = headContent + "<div class=\"iframe \(embedContent.type.rawValue) \(resizableClass)\">" + content + "</div>"
+            self.webView?.loadHTMLString(html, baseURL: URL(string: "https://example.com"))
+        default:
             if let url = embedContent.embedURL {
                 self.webView?.load(URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad))
-            }
-        case .page, .audio, .rich, .video, .photo, .image:
-            if let content = embedContent.html {
-                let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
-                let headContent = self.getHeadContent(theme: theme)
-                self.webView?.loadHTMLString(headContent + "<div class=\"iframe \(embedContent.type.rawValue)\">" + content + "</div>", baseURL: nil)
             }
         }
     }

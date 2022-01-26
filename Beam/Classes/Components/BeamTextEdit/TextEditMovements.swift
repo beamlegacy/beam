@@ -274,6 +274,9 @@ extension TextRoot {
     }
 
     public func cancelSelection(_ position: CursorPositionAfterSelection) {
+
+        guard selectedTextRange.startIndex != selectedTextRange.endIndex else { return }
+
         switch position {
         case .current:
             break

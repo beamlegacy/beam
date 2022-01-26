@@ -1,5 +1,6 @@
-import type {
+import {
   BeamHTMLIFrameElement,
+  BeamLogCategory,
   BeamMutationObserver,
   BeamNode,
   BeamResizeInfo,
@@ -8,6 +9,8 @@ import type {
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import type {WebPositionsUI as WebPositionsUI} from "./WebPositionsUI"
 import debounce from "debounce"
+import {dequal as isDeepEqual} from "dequal"
+import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 
 export class WebPositions<UI extends WebPositionsUI> {
   win: BeamWindow
@@ -33,6 +36,7 @@ export class WebPositions<UI extends WebPositionsUI> {
    */
   touchDuration = 2500
   mutationObserver: BeamMutationObserver
+  logger: BeamLogger
 
   /**
    * @param win {(BeamWindow)}
@@ -40,15 +44,15 @@ export class WebPositions<UI extends WebPositionsUI> {
    */
   constructor(win: BeamWindow<any>, protected ui: UI) {
     this.win = win
+    this.logger = new BeamLogger(win, BeamLogCategory.webpositions)
     this.onScroll() // Init/refresh scroll info
+    this.installFrameObserver()
     this.sendFramesInfo()
     this.registerEventListeners()
     this.setObserver("body", this.zoomMutationCallback)
   }
 
-  log(...args): void {
-    console.log(this.toString(), args)
-  }
+  framesInfo = []
 
   registerEventListeners(): void {
     this.win.addEventListener("load", this.onLoad.bind(this))
@@ -81,6 +85,15 @@ export class WebPositions<UI extends WebPositionsUI> {
     })
   }
 
+  installFrameObserver(): void {
+    const observer = this.createMutationObserver((changes) => this.sendFramesInfo())
+    const options = {
+      childList: true,
+      subtree: true
+    }
+    observer.observe(this.win.document, options)
+  }
+
   sendFramesInfo(): void {
     const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
     const framesInfo: FrameInfo[] = []
@@ -108,7 +121,10 @@ export class WebPositions<UI extends WebPositionsUI> {
         height: this.win.innerHeight
       }
     })
-    this.ui.setFramesInfo(framesInfo)
+    if (!isDeepEqual(framesInfo, this.framesInfo)) {
+      this.framesInfo = framesInfo
+      this.ui.setFramesInfo(framesInfo)
+    }
   }
 
   onScroll(_ev?): void {

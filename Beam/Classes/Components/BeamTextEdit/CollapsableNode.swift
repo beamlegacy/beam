@@ -46,7 +46,7 @@ extension Collapsable where Self: ElementNode {
     }
 
     var contentPosition: CGPoint {
-        CGPoint(x: contentsLead, y: isCollapsed ? contentsTop + 7 : contentsTop)
+        CGPoint(x: contentsLead, y: contentsTop)
     }
 
     func setupCollapsedLayer(title: String, thumbnailLayer: Layer?, or thumbnailImage: NSImage?) {
@@ -195,7 +195,6 @@ extension Collapsable where Self: ElementNode {
         let mouseHover: (Bool) -> Void = { [weak self] isHover in
             guard let collapseExpand = self?.layers["global-expand"],
                   let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer else { return }
-//            collapseExpand.layer.opacity = isHover ? 1.0 : 0.0
             textLayer.opacity = isHover ? 1.0 : 0.0
             let hoverColor = isHover ? BeamColor.Editor.collapseExpandButtonHover : BeamColor.Editor.collapseExpandButton
             textLayer.foregroundColor = hoverColor.cgColor
@@ -231,14 +230,14 @@ extension Collapsable where Self: ElementNode {
                 let caretsCount = frame.carets.count
                 let imageCarret = frame.carets[caretsCount - 2]
 
-                arrow.frame.origin = CGPoint(x: imageCarret.offset.x - lastLine.frame.origin.x, y: imageCarret.offset.y - 11)
+                arrow.frame.origin = CGPoint(x: imageCarret.offset.x - lastLine.frame.origin.x, y: imageCarret.offset.y - 5)
             }
         }
 
         if let expandButtonLayer = layers["global-expand"]?.layer,
            let textLayer = expandButtonLayer.sublayers?.first(where: {$0 is CATextLayer}) as? CATextLayer {
             let margin: CGFloat = 11.0
-            expandButtonLayer.frame.origin = CGPoint(x: availableWidth + childInset + margin, y: contentsTop + 10)
+            expandButtonLayer.frame.origin = CGPoint(x: availableWidth + childInset + margin, y: contentsTop)
 
             let title = isCollapsed ? "to Image" : collapsedTitle
             textLayer.string = title

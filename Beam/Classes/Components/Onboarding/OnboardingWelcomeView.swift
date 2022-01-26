@@ -61,7 +61,7 @@ struct OnboardingWelcomeView: View {
                 if welcoming {
                     Separator(horizontal: true)
                         .padding(.vertical, BeamSpacing._40)
-                    ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.medium(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                    ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         finish(nil)
                     }
                 }

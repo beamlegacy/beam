@@ -1,4 +1,4 @@
-import {BeamWindow, MessagePayload} from "./BeamTypes"
+import {BeamLogCategory, BeamWindow, MessagePayload} from "./BeamTypes"
 
 export class Native<M> {
   /**
@@ -21,10 +21,6 @@ export class Native<M> {
     return Native.instance
   }
 
-  log(...args): void {
-    console.log(this.toString(), args)
-  }
-
   /**
    * @param win {BeamWindow}
    */
@@ -36,7 +32,6 @@ export class Native<M> {
     if (!this.messageHandlers) {
       throw Error("Could not find webkit message handlers")
     }
-    console.log(componentPrefix, `${this.toString()} instantiated ${componentPrefix} in ${this.href}`)
   }
 
   /**

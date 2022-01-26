@@ -10,7 +10,7 @@ import BeamCore
 
 struct Omnibox: View {
 
-    static let defaultHeight: CGFloat = 50
+    static let defaultHeight: CGFloat = 57
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
@@ -54,7 +54,7 @@ struct Omnibox: View {
     var body: some View {
         Omnibox.Background(isLow: boxIsLow, isPressingCharacter: showPressedState) {
             VStack(spacing: 0) {
-                HStack(spacing: BeamSpacing._200) {
+                HStack(spacing: BeamSpacing._180) {
                     OmniboxSearchField(isEditing: isEditingBinding,
                                        modifierFlagsPressed: $modifierFlagsPressed,
                                        enableAnimations: false)
@@ -67,7 +67,7 @@ struct Omnibox: View {
                             })
                     }
                 }
-                .padding(.horizontal, 15)
+                .padding(.horizontal, BeamSpacing._180)
                 .overlay(!shouldShowAutocompleteResults ? nil :
                             Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                             .blendModeLightMultiplyDarkScreen(),
@@ -95,21 +95,22 @@ struct OmniboxContainer: View {
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
-    private let boxWidth: CGFloat = 680
-    private let boxMinX: CGFloat = 87
+    private let boxWidth: CGFloat = 760
+    private let boxMinX: CGFloat = 11
+    private let boxMinXInToolBar: CGFloat = 87
+    private let boxMaxX: CGFloat = 11
+    private let boxMinY: CGFloat = 11
 
     @State private var isFirstLaunchAppear = true
-    private func boxOffset(with containerGeometry: GeometryProxy) -> CGSize {
+    private var boxOffset: CGSize {
         var offset: CGSize = CGSize(width: 0, height: 190)
 
         if boxIsInsideNote {
             offset.height = 140
         } else if state.mode == .web && state.focusOmniBoxFromTab && browserTabsManager.currentTab?.url != nil,
                     let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
-            var x = currentTabUIFrame.midX - boxWidth / 2
-            x = max(boxMinX, x)
-            x = min(containerGeometry.size.width - boxWidth - 11, x)
-            offset = CGSize(width: x, height: 11)
+            let x = max(boxMinXInToolBar, currentTabUIFrame.midX - boxWidth / 2)
+            offset = CGSize(width: x, height: boxMinY)
         }
         return offset
     }
@@ -125,24 +126,27 @@ struct OmniboxContainer: View {
     var body: some View {
         Group {
             if state.focusOmniBox {
-                GeometryReader { proxy in
-                    let offset = boxOffset(with: proxy)
+                let offset = boxOffset
+                VStack(spacing: 0) {
+                    Spacer(minLength: boxMinY)
+                        .frame(maxHeight: offset.height)
                     HStack(spacing: 0) {
-                        if offset.width != 0 {
-                            Rectangle().stroke(Color.clear).frame(width: offset.width, height: 1)
-                        } else {
-                            Spacer(minLength: 0)
-                        }
+                        Spacer(minLength: boxMinX)
+                            .if(offset.width != 0) {
+                                $0.frame(maxWidth: offset.width != 0 ? offset.width : .infinity)
+                            }
                         Omnibox(isInsideNote: boxIsInsideNote)
                             .frame(width: boxWidth)
-                            .padding(.top, offset.height)
-                        Spacer(minLength: 0)
+                        Spacer(minLength: boxMaxX)
                     }
+                    Spacer(minLength: boxMinY)
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                 .transition(customTranstion)
                 .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
                 .onDisappear {
+                    if state.keepDestinationNote {
+                        state.keepDestinationNote = false
+                    }
                     guard isFirstLaunchAppear else { return }
                     DispatchQueue.main.async {
                         isFirstLaunchAppear = false

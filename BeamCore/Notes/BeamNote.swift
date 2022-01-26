@@ -99,8 +99,10 @@ public class BeamNote: BeamElement {
     @Published public var publicationStatus: PublicationStatus = .unpublished { didSet { change(.meta) } }
     public var ongoingPublicationOperation = false
 
-    @Published public var searchQueries: [String] = [] { didSet { change(.meta) } } ///< Search queries whose results were used to populate this note
-    @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } } ///< URLs whose content were used to create this note
+    /// Search queries whose results were used to populate this note
+    @Published public var searchQueries: [String] = [] { didSet { change(.meta) } }
+    /// URLs whose content were used to create this note
+    @Published public var visitedSearchResults: [VisitedPage] = [] { didSet { change(.meta) } }
     public var browsingSessionIds = [UUID]() { didSet { change(.meta) } }
     public var sources = NoteSources()
     @Published public var version = ManagedAtomic<Int64>(0)

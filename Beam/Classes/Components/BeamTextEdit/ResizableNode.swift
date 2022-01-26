@@ -57,7 +57,11 @@ class ResizableNode: ElementNode {
     var maxWidth: CGFloat?
     var maxHeight: CGFloat = 1200
     var keepAspectRatio: Bool = true
-    var responsiveStrategy: ResponsiveType = .horizontal
+    var responsiveStrategy: ResponsiveType? {
+        didSet {
+            setupResizeHandleLayer()
+        }
+    }
     var visibleSize: CGSize = .zero
 
     func setVisibleSize(width: CGFloat? = nil, height: CGFloat? = nil) {
@@ -66,7 +70,7 @@ class ResizableNode: ElementNode {
             setVisibleWidth(width)
         case .vertical:
             setVisibleHeight(height)
-        case .both:
+        default:
             setVisibleWidth(width)
             setVisibleHeight(height)
         }
@@ -185,6 +189,8 @@ class ResizableNode: ElementNode {
                     handleLayer.position = layerPosition
                     handleLayer.bounds = handleBounds
                 }
+            case .none:
+                return
             }
     }
 
@@ -197,6 +203,8 @@ class ResizableNode: ElementNode {
         case .both:
             setupHorizontalResizeHandleLayer()
             setupVerticalResizeHandleLayer()
+        case .none:
+            return
         }
     }
 

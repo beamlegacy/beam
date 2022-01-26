@@ -187,6 +187,7 @@ export interface BeamEventTarget<E extends BeamEvent = BeamEvent> {
 export type BeamDOMRect = DOMRect
 
 export interface BeamNode extends BeamEventTarget {
+  isConnected?: boolean
   offsetHeight: number
   offsetWidth: number
   textContent: string
@@ -483,7 +484,6 @@ export interface BeamMutationRecord {
 
 export class BeamMutationObserver {
   constructor(public fn) {
-    console.log("BeamMutationObserver init")
     new fn()
   }
   disconnect(): void {
@@ -510,4 +510,21 @@ export class FrameInfo {
   /**
    */
   bounds: BeamRect
+}
+
+export enum BeamLogLevel {
+  log = "log",
+  warning = "warning",
+  error = "error",
+  debug = "debug"
+}
+
+
+export enum BeamLogCategory {
+  general = "general",
+  pointAndShoot = "pointAndShoot",
+  embedNode = "embedNode",
+  webpositions = "webpositions",
+  navigation = "navigation",
+  native = "native"
 }

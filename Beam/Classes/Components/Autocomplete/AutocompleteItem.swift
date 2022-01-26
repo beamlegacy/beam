@@ -9,7 +9,7 @@ import SwiftUI
 
 struct AutocompleteItem: View {
 
-    static let defaultHeight: CGFloat = 36
+    static let defaultHeight: CGFloat = 38
 
     @State var item: AutocompleteResult
     let selected: Bool
@@ -133,16 +133,16 @@ struct AutocompleteItem: View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
                     StyledText(verbatim: mainText)
-                        .style(.font(BeamFont.semibold(size: 13).swiftUI), ranges: highlightedTextRanges)
-                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges)
+                        .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(mainTextColor)
                 }
                 .layoutPriority(10)
                 if let info = secondaryText {
                     HStack {
                         StyledText(verbatim: info)
-                            .style(.font(BeamFont.semibold(size: 13).swiftUI), ranges: highlightedTextRanges)
-                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges)
+                            .font(BeamFont.regular(size: 14).swiftUI)
                             .foregroundColor(informationColor)
                     }
                     .layoutPriority(0)
@@ -150,8 +150,8 @@ struct AutocompleteItem: View {
 
                 if PreferencesManager.showOmniboxScoreSection {
                     Spacer()
-                    Text(debugString(score: item.score))
-                        .font(BeamFont.regular(size: 13).swiftUI)
+                    Text(debugString(score: item.weightedScore))
+                        .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
                         .layoutPriority(10)
                 }
@@ -172,19 +172,19 @@ struct AutocompleteItem: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(.vertical, 10)
-        .padding(.horizontal, 9)
+        .padding(.vertical, BeamSpacing._100)
+        .padding(.horizontal, BeamSpacing._120)
         .padding(.leading, additionalLeadingPadding)
         .frame(height: Self.defaultHeight)
-        .background(backgroundColor)
+        .background(backgroundColor.blendModeLightMultiplyDarkScreen())
         .cornerRadius(cornerRadius)
         .onTouchDown { t in
             isTouchDown = t && !disabled
         }
         .onAppear {
             if let url = item.url {
-                FaviconProvider.shared.favicon(fromURL: url, cacheOnly: item.source != .topDomain) { (image) in
-                    self.favicon = image
+                FaviconProvider.shared.favicon(fromURL: url, cacheOnly: item.source != .topDomain) { favicon in
+                    self.favicon = favicon?.image
                 }
             }
         }

@@ -69,7 +69,7 @@ extension BrowserTab: WebPage {
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         guard let state = state else { return nil }
         if let currentTab = state.browserTabsManager.currentTab, !currentTab.isPinned && !setCurrent && state.browserTabsManager.currentTabGroupKey != currentTab.id {
-            state.browserTabsManager.removeTabFromGroup(tabId: currentTab.id)
+            state.browserTabsManager.removeFromTabGroup(tabId: currentTab.id)
             state.browserTabsManager.createNewGroup(for: currentTab.id)
         }
         return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
@@ -180,8 +180,8 @@ extension BrowserTab: WebPage {
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
         logInNote(url: url, title: title, reason: reason)
-        updateFavIcon(fromWebView: true)
         updateScore()
+        updateFavIcon(fromWebView: true)
     }
 
     /// When using Point and Shoot to capture text in a webpage, notify the

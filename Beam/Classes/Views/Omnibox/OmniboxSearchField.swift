@@ -42,8 +42,8 @@ struct OmniboxSearchField: View {
         var icon: NSImage?
         if let autocompleteResult = selectedAutocompleteResult, let url = autocompleteResult.url,
            [.history, .url, .topDomain, .mnemonic].contains(autocompleteResult.source) {
-            FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { (image) in
-                icon = image
+            FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { favicon in
+                icon = favicon?.image
             }
         } else if state.focusOmniBoxFromTab,
                   let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
@@ -78,7 +78,7 @@ struct OmniboxSearchField: View {
     private var textSelectionColor: BeamColor {
         BeamColor.Generic.blueTextSelection
     }
-    private let textFont = BeamFont.regular(size: 16)
+    private let textFont = BeamFont.regular(size: 17)
 
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
@@ -99,6 +99,7 @@ struct OmniboxSearchField: View {
                     placeholder: "Search the web and your notes",
                     font: textFont.nsFont,
                     textColor: textColor.nsColor,
+                    placeholderFont: BeamFont.light(size: 17).nsFont,
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
                     selectedRange: autocompleteManager.searchQuerySelectedRange,
                     selectedRangeColor: textSelectionColor.nsColor,
@@ -116,6 +117,7 @@ struct OmniboxSearchField: View {
                     .frame(maxHeight: .infinity)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "OmniboxSearchField")
+                    .padding(.top, 0.25)
                 if let subtitle = resultSubtitle, !textFieldText.wrappedValue.isEmpty {
                     HStack(spacing: 0) {
                         Text(textFieldText.wrappedValue)

@@ -771,3 +771,27 @@ test("Remove target from selectionRangeGroups array without changing shootGroups
   // Expect full array of 3 shoot targets
   expect(pns.shootTargets.length).toEqual(3)
 })
+
+test("element should be removed when it isn't connected anymore", () => {
+  const { pns, testUI } = pointAndShootTestBed()
+  const element = new BeamHTMLElementMock("p")
+  element.bounds = {
+    width: 130,
+    height: 120,
+    x: 11,
+    y: 12
+  }
+  element.width = 130
+  element.height = 120
+  element.isConnected = true
+
+  pns.shoot(element)
+
+  expect(pns.shootTargets).toHaveLength(1)
+  pns.sendBounds()
+  // Disconnect element
+  element.isConnected = false
+  pns.sendBounds()
+  // Expect element to be removed
+  expect(pns.shootTargets).toHaveLength(0)
+})

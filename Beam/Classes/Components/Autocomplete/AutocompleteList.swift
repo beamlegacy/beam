@@ -29,7 +29,7 @@ struct AutocompleteList: View {
                 if i.source == .createCard && elements.count > 1 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
-                        .padding(.vertical, BeamSpacing._40)
+                        .padding(.vertical, BeamSpacing._60)
                 }
                 AutocompleteItem(item: i, selected: isSelected, allowsShortcut: allowsShortcut,
                                  colorPalette: i.source == .createCard ?

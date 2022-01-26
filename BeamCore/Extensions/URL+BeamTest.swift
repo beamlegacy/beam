@@ -68,11 +68,11 @@ class URLBeamTest: XCTestCase {
 
     func testSchemeAndHost() {
         XCTAssertEqual(URL(string: "http://google.com/")!.schemeAndHost, "http://google.com")
-        XCTAssertEqual(URL(string: "http://google.com/search?prout")!.schemeAndHost, "http://google.com")
-        XCTAssertEqual(URL(string: "http://www.google.com/search?prout")!.schemeAndHost, "http://www.google.com")
-        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?prout")!.schemeAndHost, "http://search.somedomain.google.com")
-        XCTAssertEqual(URL(string: "http://google/search?prout")!.schemeAndHost, "http://google")
-        XCTAssertNil(URL(string: "google/search?prout")!.schemeAndHost)
+        XCTAssertEqual(URL(string: "http://google.com/search?proud")!.schemeAndHost, "http://google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com/search?proud")!.schemeAndHost, "http://www.google.com")
+        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?proud")!.schemeAndHost, "http://search.somedomain.google.com")
+        XCTAssertEqual(URL(string: "http://google/search?proud")!.schemeAndHost, "http://google")
+        XCTAssertNil(URL(string: "google/search?proud")!.schemeAndHost)
     }
 
     func testRootPathRemoved() {

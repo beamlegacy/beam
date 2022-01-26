@@ -16,7 +16,7 @@ extension ElementNode {
     }
     private static var bulletLayerPositionX = CGFloat(-4)
     @objc var bulletLayerPositionY: CGFloat {
-        firstLineBaseline - 15
+        firstLineBaseline - 14
     }
 
     @objc var indentLayerPositionY: CGFloat { 3 }
@@ -112,7 +112,7 @@ extension ElementNode {
     private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + indentLayerPositionY
-        indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y, width: 0.5, height: frame.height - y)
+        indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y - 4, width: 0.5, height: frame.height - y)
         indentLayer.layer.isHidden = !(showDisclosureButton && self.open)
     }
 

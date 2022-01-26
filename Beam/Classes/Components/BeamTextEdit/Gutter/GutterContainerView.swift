@@ -115,6 +115,18 @@ class GutterContainerView: NSView {
         addSubviewWithConstraintsOnEachSide(subView: view)
     }
 
+    override var intrinsicContentSize: NSSize {
+        switch leadingGutterViewType {
+        case .calendarGutterView(let viewModel):
+            if viewModel.meetings.count > 0 {
+                return NSSize(width: 0, height: 20 * viewModel.meetings.count)
+            }
+            return NSSize(width: 0, height: 20)
+        case .none:
+            return .zero
+        }
+    }
+
     func addItem(_ item: GutterItem) {
         trailingGutterViewModel.items.append(item)
     }

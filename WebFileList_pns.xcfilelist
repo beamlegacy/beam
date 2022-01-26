@@ -36,6 +36,7 @@
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamRangeMock.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamWebFactoryMock.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamNamedNodeMap.ts
+./Beam/Classes/Helpers/Utils/Web/BeamLogger.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamRectHelper.ts
 ./Beam/Classes/Helpers/Utils/Web/Native.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamUIEvent.ts

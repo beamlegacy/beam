@@ -4,6 +4,3 @@ module.exports = {
   preset: "ts-jest", // preset is optional, you don't need it in case you use babel preset typescript
   modulePaths: ["node_modules", "src"]
 }
-process.env = Object.assign(process.env, {
-  PNS_STATUS: "0"
-})

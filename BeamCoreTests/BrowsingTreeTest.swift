@@ -136,7 +136,7 @@ class BrowsingTreeTest: XCTestCase {
         let decoder = JSONDecoder()
 
         //decode(encode(x)) is identity
-        let origin: BrowsingTreeOrigin = .browsingNode(id: UUID(), pageLoadId: UUID(), rootOrigin: .searchBar(query: "rolex pas cher"), rootId: UUID())
+        let origin: BrowsingTreeOrigin = .browsingNode(id: UUID(), pageLoadId: UUID(), rootOrigin: .searchBar(query: "rolex pas cher", referringRootId: nil), rootId: UUID())
         let encoded = try encoder.encode(origin)
         let decoded = try decoder.decode(BrowsingTreeOrigin.self, from: encoded)
         XCTAssertEqual(origin, decoded)
@@ -245,5 +245,74 @@ class BrowsingTreeTest: XCTestCase {
         XCTAssertEqual(foregoundSegments[1].duration, 3)
 
         BeamDate.reset()
+    }
+
+    func testFlattenUnflatten() throws {
+
+        func isEqual(_ leftNode: BrowsingNode, _ rightNode: BrowsingNode) {
+            XCTAssertEqual(leftNode.id, rightNode.id)
+            XCTAssertEqual(leftNode.link, rightNode.link)
+            XCTAssertEqual(leftNode.events, rightNode.events)
+            XCTAssertEqual(leftNode.legacy, rightNode.legacy)
+            XCTAssertEqual(leftNode.isLinkActivation, rightNode.isLinkActivation)
+
+        }
+        func isSerializable(node: BrowsingNode) {
+            XCTAssertNil(node.parent)
+            XCTAssertEqual(node.children.count, 0)
+        }
+
+        let urls = [
+            "http://awesome.com",
+            "http://fantastic.co.uk",
+            "http://amazing.org",
+            "http://greeeat.fr"
+        ]
+        let tree = BrowsingTree(nil)
+        tree.navigateTo(url: urls[0], title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        let node0 = try XCTUnwrap(tree.current)
+        tree.navigateTo(url: urls[1], title: nil, startReading: true, isLinkActivation: true, readCount: 5)
+        tree.navigateTo(url: urls[2], title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+        let node2 = try XCTUnwrap(tree.current)
+        tree.goBack()
+        let node1 = try XCTUnwrap(tree.current)
+        tree.goBack()
+        tree.navigateTo(url: urls[3], title: nil, startReading: true, isLinkActivation: true, readCount: 20)
+        let node3 = try XCTUnwrap(tree.current)
+        //Tree stucture is
+        //root--node0--node1--node2
+        //            \_node3
+
+        let flattened = tree.flattened
+        XCTAssertEqual(flattened.nodes.count, 5)
+        let encoder = JSONEncoder()
+        let decoder = JSONDecoder()
+        let data = try encoder.encode(flattened)
+        let decoded = try decoder.decode(FlatennedBrowsingTree.self, from: data)
+
+        //check that reconstructed tree structure is similar to initial tree
+        let unflattened = try XCTUnwrap(BrowsingTree(flattenedTree: decoded))
+        let unflattenedRoot = try XCTUnwrap(unflattened.root)
+        isEqual(tree.root, unflattened.root)
+        XCTAssertEqual(unflattenedRoot.children.count, 1)
+        let unflattenedNode0 = unflattenedRoot.children[0]
+        isEqual(unflattenedNode0, node0)
+        XCTAssertEqual(unflattenedNode0.children.count, 2)
+        let unflattenedNode1 = unflattenedNode0.children[0]
+        isEqual(unflattenedNode1, node1)
+        XCTAssertEqual(unflattenedNode1.children.count, 1)
+        let unflattenedNode2 = unflattenedNode1.children[0]
+        isEqual(unflattenedNode2, node2)
+        XCTAssertEqual(unflattenedNode2.children.count, 0)
+        let unflattenedNode3 = unflattenedNode0.children[1]
+        isEqual(unflattenedNode3, node3)
+        XCTAssertEqual(unflattenedNode3.children.count, 0)
+        XCTAssertIdentical(unflattenedNode3, unflattened.current)
+        XCTAssertEqual(tree.scores, unflattened.scores)
+
+        //checks that decoded wasn't mutated when given as input of BrowsingTree(flattenedTree:)
+        for node in decoded.nodes {
+            isSerializable(node: node)
+        }
     }
 }

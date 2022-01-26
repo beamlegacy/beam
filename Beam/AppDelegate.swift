@@ -45,7 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     var data: BeamData!
     var cancellableScope = Set<AnyCancellable>()
-    var cancellableImportsScope = Set<AnyCancellable>()
+    var importErrorCancellable: AnyCancellable?
 
     private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     private let defaultWindowSize = CGSize(width: 800, height: 600)
@@ -93,9 +93,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         BeamObjectManager.setup()
 
         data = BeamData()
+        startDisplayingBrowserImportErrors()
 
         if !isRunningTests {
             createWindow(frame: nil, restoringTabs: true)
+            windows.first?.showUpdateAlert(onStartUp: true)
         }
 
         Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
@@ -307,7 +309,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
-        data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
+        if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
+            data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
+        }
         data.clusteringManager.exportSummaryForNextSession()
     }
 
@@ -323,6 +327,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             for tab in window.state.browserTabsManager.tabs.reversed() {
                 guard !tab.isPinned, tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
                 let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
+                // Since we don't run the cmd when closing the app we need to do this out of the CloseTab Cmd
+                if onExit {
+                    tab.closeApp()
+                }
                 tmpCmdManager.appendToDone(command: closeTabCmd)
             }
             tmpCmdManager.endGroup(forceGroup: true)
@@ -486,15 +494,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         PasswordsPreferencesViewController,
         AccountsPreferenceViewController,
         AboutPreferencesViewController,
+        BetaPreferencesViewController
+    ]
+
+    lazy var debugPreferences: [PreferencePane] = [
+        GeneralPreferencesViewController,
+        BrowserPreferencesViewController,
+        CardsPreferencesViewController,
+        PrivacyPreferencesViewController,
+        PasswordsPreferencesViewController,
+        AccountsPreferenceViewController,
+        AboutPreferencesViewController,
         BetaPreferencesViewController,
-        AdvancedPreferencesViewController
-        // Commented it since right now we don't need it at all
-        // Will see if we can delete it anytime soon
-//        EditorDebugPreferencesViewController
+        AdvancedPreferencesViewController,
+        EditorDebugPreferencesViewController
     ]
 
     lazy var preferencesWindowController = PreferencesWindowController(
-        preferencePanes: preferences,
+        preferencePanes: Configuration.branchType == .beta || Configuration.branchType == .publicRelease ? preferences : debugPreferences,
         style: .toolbarItems,
         animated: true,
         hidesToolbarForSingleItem: true
