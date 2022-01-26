@@ -18,21 +18,33 @@ extension BrowsingTree {
             rootId: root.id,
             rootCreatedAt: rootCreatedAt,
             appSessionId: appSessionId,
-            data: self
+            flattenedData: self.flattened
         )
     }
 }
 extension BrowsingTree: DatabaseValueConvertible {}
+extension FlatennedBrowsingTree: DatabaseValueConvertible {}
 
 extension BrowsingTree: Equatable {
     static public func == (lhs: BrowsingTree, rhs: BrowsingTree) -> Bool {
         lhs.rootId == rhs.rootId
     }
 }
+extension FlatennedBrowsingTree: Equatable {
+    static public func == (lhs: FlatennedBrowsingTree, rhs: FlatennedBrowsingTree) -> Bool {
+        lhs.root?.id == rhs.root?.id
+    }
+}
 
 extension BrowsingTree: Hashable {
     public func hash(into hasher: inout Hasher) {
        hasher.combine(rootId)
+    }
+}
+
+extension FlatennedBrowsingTree: Hashable {
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(root?.id)
     }
 }
 
@@ -47,13 +59,14 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
     static var beamObjectType = BeamObjectObjectType.browsingTree
 
     public enum CodingKeys: String, CodingKey {
-        case rootId, rootCreatedAt, appSessionId, data, createdAt, updatedAt, deletedAt
+        case rootId, rootCreatedAt, appSessionId, data, flattenedData, createdAt, updatedAt, deletedAt
     }
 
     var rootId: UUID
     let rootCreatedAt: Date
     let appSessionId: UUID?
-    var data: BrowsingTree
+    var data: BrowsingTree?
+    var flattenedData: FlatennedBrowsingTree?
 
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
@@ -63,6 +76,18 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
         get { rootId }
         set { rootId = newValue }
     }
+    var flattened: BrowsingTreeRecord {
+        BrowsingTreeRecord(
+            rootId: rootId,
+            rootCreatedAt: rootCreatedAt,
+            appSessionId: appSessionId,
+            data: nil,
+            flattenedData: flattenedData ?? data?.flattened,
+            createdAt: createdAt,
+            updatedAt: flattenedData == nil ? BeamDate.now : updatedAt, //triggers a later upward sync if data was unflattened
+            deletedAt: deletedAt
+        )
+    }
 
     func copy() throws -> BrowsingTreeRecord {
         return BrowsingTreeRecord(
@@ -70,6 +95,7 @@ struct BrowsingTreeRecord: Decodable, BeamObjectProtocol {
             rootCreatedAt: rootCreatedAt,
             appSessionId: appSessionId,
             data: data,
+            flattenedData: flattenedData,
             createdAt: createdAt,
             updatedAt: updatedAt,
             deletedAt: deletedAt,
@@ -88,7 +114,7 @@ extension BrowsingTreeRecord: FetchableRecord {
         rootId = row[Columns.rootId]
         rootCreatedAt = row[Columns.rootCreatedAt]
         appSessionId = row[Columns.appSessionId]
-        data = row[Columns.data]
+        flattenedData = row[Columns.flattenedData]
         createdAt = row[Columns.createdAt]
         updatedAt = row[Columns.updatedAt]
         deletedAt = row[Columns.deletedAt]
@@ -101,7 +127,7 @@ extension BrowsingTreeRecord: PersistableRecord {
         container[Columns.rootId] = rootId
         container[Columns.rootCreatedAt] = rootCreatedAt
         container[Columns.appSessionId] = appSessionId
-        container[Columns.data] = data
+        container[Columns.flattenedData] = flattenedData
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
@@ -112,7 +138,7 @@ extension BrowsingTreeRecord: PersistableRecord {
 extension BrowsingTreeRecord: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case rootId, rootCreatedAt, appSessionId, data, processingStatus, createdAt, updatedAt, deletedAt
+        case rootId, rootCreatedAt, appSessionId, flattenedData, processingStatus, createdAt, updatedAt, deletedAt
     }
 }
 
@@ -238,18 +264,21 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     func receivedObjects(_ records: [BrowsingTreeRecord]) throws {
         treeProcessingCompleted = false
         let statuses = db.browsingTreeProcessingStatuses(ids: records.map { $0.rootId })
-        let recordsWithDbStatus = records.map { (record) -> BrowsingTreeRecord in
-            var newRecord = record
+        let flattenedRecordsWithDbStatus = records.map { (record) -> BrowsingTreeRecord in
+            var newRecord = record.flattened
             newRecord.processingStatus = statuses[record.rootId] ?? .toDo //record not already in db are to be processed
             return newRecord
         }
-        try save(browsingTreeRecords: recordsWithDbStatus)
-        let recordsToProcess = recordsWithDbStatus.filter { $0.processingStatus == .toDo }
+        try save(browsingTreeRecords: flattenedRecordsWithDbStatus)
+        let recordsToProcess = flattenedRecordsWithDbStatus.filter { $0.processingStatus == .toDo }
         Self.backgroundQueue.async {
             for record in recordsToProcess {
-                self.db.update(record: record, status: .started)
-                self.process(tree: record.data)
-                self.db.update(record: record, status: .done)
+                if let flattenedTree = record.flattenedData,
+                   let tree = BrowsingTree(flattenedTree: flattenedTree) {
+                    self.db.update(record: record, status: .started)
+                    self.process(tree: tree)
+                    self.db.update(record: record, status: .done)
+                }
             }
             self.treeProcessingCompleted = true
         }
@@ -327,11 +356,13 @@ extension BrowsingTreeStoreManager {
             return
         }
         let legacyObjects = treeRecords.compactMap { record -> BrowsingTreeRecord? in
-            let tree = record.data
-            return tree.root.legacy ? record : nil
+            guard let flattenedTree = record.flattenedData,
+            let root = flattenedTree.root else { return nil }
+            return root.legacy ? record : nil
         }
         if legacyObjects.isEmpty {
             Logger.shared.logInfo("No legacy tree to clean", category: .browsingTreeNetwork)
+            completion?(.success(true))
             return
         }
         //local cleanup

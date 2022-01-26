@@ -75,9 +75,11 @@ class BrowserImportManagerTest: XCTestCase {
         //expects one tree to be saved
         XCTAssertEqual(BrowsingTreeStoreManager.shared.countBrowsingTrees, 1)
         let treeRecord = try BrowsingTreeStoreManager.shared.allObjects(updatedSince: nil)[0]
+        let flattenedData = try XCTUnwrap(treeRecord.flattenedData)
         //with right tree origin
-        XCTAssertEqual(treeRecord.data.origin, .historyImport(sourceBrowser: .firefox))
-        let root = treeRecord.data.root
+        let tree = try XCTUnwrap(BrowsingTree(flattenedTree: flattenedData))
+        XCTAssertEqual(tree.origin, .historyImport(sourceBrowser: .firefox))
+        let root = tree.root
         let node0 = try XCTUnwrap(root?.children[0])
         let node1 = try XCTUnwrap(root?.children[1])
         XCTAssertEqual(node0.events.first?.date, Date(timeIntervalSinceReferenceDate: Double(0)))
