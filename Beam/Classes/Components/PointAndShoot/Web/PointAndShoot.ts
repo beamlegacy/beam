@@ -8,7 +8,6 @@ import {
   BeamShootGroup,
   BeamWindow
 } from "../../../Helpers/Utils/Web/BeamTypes"
-import { Util } from "./Util"
 import { BeamUIEvent } from "../../../Helpers/Utils/Web/BeamUIEvent"
 import { BeamMouseEvent } from "../../../Helpers/Utils/Web/BeamMouseEvent"
 import { debounce } from "debounce"
@@ -58,7 +57,7 @@ export class PointAndShoot {
     this.win = win
     this.ui = ui
     this.logger = new BeamLogger(this.win, BeamLogCategory.pointAndShoot)
-    this.selectionUUID = Util.uuid(win)
+    this.selectionUUID = PointAndShootHelper.uuid(win)
     this.registerEventListeners()
     this.sendBounds = this.sendBounds.bind(this)
   }
@@ -152,7 +151,7 @@ export class PointAndShoot {
    */
   shoot(targetEl: BeamHTMLElement): void {
     const shootGroup = {
-      id: Util.uuid(this.win),
+      id: PointAndShootHelper.uuid(this.win),
       element: targetEl
     }
     PointAndShootHelper.upsertShootGroup(shootGroup, this.shootTargets)
@@ -169,7 +168,7 @@ export class PointAndShoot {
     // only assign new pointTarget when pointTarget is different
     if (this.pointTarget?.element != targetEl) {
       this.pointTarget = {
-        id: Util.uuid(this.win),
+        id: PointAndShootHelper.uuid(this.win),
         element: targetEl
       }
     }
@@ -196,7 +195,7 @@ export class PointAndShoot {
     if (selection.isCollapsed) {
       // clear selectionTarget when we have a stored value
       this.ui.clearSelection(this.selectionUUID)
-      this.selectionUUID = Util.uuid(this.win)
+      this.selectionUUID = PointAndShootHelper.uuid(this.win)
       return
     }
     // Rangecount is always array of 1, unless programatically modified
@@ -232,7 +231,7 @@ export class PointAndShoot {
    */
   removeShootTarget(id: string): void {
     // Use removeFromArray so it exists after finding a match
-    this.shootTargets = Util.removeFromArray((target) => {
+    this.shootTargets = PointAndShootHelper.removeFromArray((target) => {
       return target.id === id
     }, this.shootTargets) as BeamShootGroup[]
   }
@@ -244,7 +243,7 @@ export class PointAndShoot {
    */
   removeSelectRangeGroup(id: string): void {
     // Use removeFromArray so it exists after finding a match
-    this.selectionRangeGroups = Util.removeFromArray((target) => {
+    this.selectionRangeGroups = PointAndShootHelper.removeFromArray((target) => {
       return target.id === id
     }, this.selectionRangeGroups) as BeamRangeGroup[]
   }
