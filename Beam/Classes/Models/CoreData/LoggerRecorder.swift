@@ -42,29 +42,47 @@ class LoggerRecorder {
                                                         object: object)
                     }
                 } catch {
-                    //swiftlint:disable:next print
-                    print("Unable to save LoggerRecorder context: \(error.localizedDescription)")
+                    Logger.shared.logDebug("Unable to save LoggerRecorder context: \(error.localizedDescription)", category: .coredata)
                 }
             }
         }
     }
 
-    public func deleteOldEntries() {
+    public func getEntries(with predicate: NSCompoundPredicate, and sortDescriptors: [NSSortDescriptor], for limit: Int = 500) -> [LogEntry]? {
+        let request: NSFetchRequest<LogEntry> = LogEntry.fetchRequest()
+        request.fetchLimit = limit
+        request.predicate = predicate
+        request.sortDescriptors = sortDescriptors
+        do {
+            return try CoreDataManager.shared.mainContext.fetch(request).reversed()
+        } catch {
+            Logger.shared.logDebug("Unable to get LogEntry: \(error.localizedDescription)", category: .coredata)
+        }
+        return nil
+    }
+
+    public func deleteEntries(olderThan: DateComponents) {
+        guard let previousDate = Calendar.current.date(byAdding: olderThan, to: BeamDate.now) else { return }
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
-        context.perform {
-            let fetchRequest: NSFetchRequest<LogEntry> = LogEntry.fetchRequest()
-            fetchRequest.predicate = NSPredicate(format: "created_at < %@", BeamDate.now as NSDate)
+        do {
+            try context.performAndWait {
+                let localTimer = BeamDate.now
 
-            do {
-                for logEntry in try context.fetch(fetchRequest) {
-                    context.delete(logEntry)
-                }
-                try context.save()
-            } catch {
-                //swiftlint:disable:next print
-                print("Unable to delete LogEntry: \(error.localizedDescription)")
+                let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "LogEntry")
+                fetchRequest.predicate = NSPredicate(format: "created_at < %@", previousDate as NSDate)
+
+                let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
+                deleteRequest.resultType = .resultTypeObjectIDs
+
+                let batchDelete = try context.execute(deleteRequest) as? NSBatchDeleteResult
+                guard let deleteResult = batchDelete?.result as? [NSManagedObjectID] else { return }
+                let deletedObjects: [AnyHashable: Any] = [NSDeletedObjectsKey: deleteResult]
+                NSManagedObjectContext.mergeChanges(fromRemoteContextSave: deletedObjects, into: [CoreDataManager.shared.mainContext])
+                Logger.shared.logInfo("Execution time to delete Beam logs", category: .coredataDebug, localTimer: localTimer)
             }
+        } catch {
+            Logger.shared.logDebug("Unable to delete older Logs entries: \(error.localizedDescription)", category: .coredata)
         }
     }
 
@@ -83,8 +101,7 @@ class LoggerRecorder {
                 }
                 try context.save()
             } catch {
-                //swiftlint:disable:next print
-                print("Unable to delete all LogEntry: \(error.localizedDescription)")
+                Logger.shared.logDebug("Unable to delete all LogEntry: \(error.localizedDescription)", category: .coredata)
             }
         }
     }
