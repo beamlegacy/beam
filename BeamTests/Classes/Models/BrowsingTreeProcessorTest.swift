@@ -26,7 +26,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
         //processing an internal browsingTree
         let processor = BrowsingTreeProcessor()
-        let tree = BrowsingTree(.searchBar(query: "hot to get a ps5 before christmas"))
+        let tree = BrowsingTree(.searchBar(query: "hot to get a ps5 before christmas", referringRootId: nil))
         tree.navigateTo(url: "http://www.search.com/ps5", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
         BeamDate.travel(2)
         tree.switchToBackground()
