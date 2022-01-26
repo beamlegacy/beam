@@ -915,7 +915,7 @@ extension BeamObjectManager {
                                 try request.save(beamObject) { result in
                                     switch result {
                                     case .failure(let error):
-                                        completion(.failure(error))
+                                        self.saveToAPIFailure(object, beamObject, error, completion)
                                     case .success:
                                         do {
                                             try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)

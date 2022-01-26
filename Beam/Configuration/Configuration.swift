@@ -44,6 +44,15 @@ struct Configuration {
 
     static private(set) var beamObjectDataOnSeparateCallDefault = false
 
+    static var beamObjectDirectCall: Bool {
+        get { fatalError("Don't use this") }
+
+        set {
+            beamObjectDataOnSeparateCall = newValue
+            beamObjectDataUploadOnSeparateCall = newValue
+        }
+    }
+
     static private var beamObjectDataOnSeparateCallKey = "beamObjectDataOnSeparateCall"
     static var beamObjectDataOnSeparateCall: Bool {
         get {
