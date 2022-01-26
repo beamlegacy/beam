@@ -1266,6 +1266,12 @@
                                                 <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Download Logs" id="TI6-U6-Nl2">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="obtainLogs:" target="Ady-hI-5gd" id="ukb-wv-cuk"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Ldo-Gm-MtW"/>
                                         <menuItem title="Show All Notes" id="KUY-Ll-jZL">
                                             <modifierMask key="keyEquivalentModifierMask"/>

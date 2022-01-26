@@ -32,37 +32,7 @@ class LoggerNSTableController: NSViewController {
     }
 
     public func exportLogs() {
-        let savePanel = NSSavePanel()
-        savePanel.canCreateDirectories = true
-        savePanel.showsTagField = false
-        savePanel.nameFieldStringValue = "BeamLogs.csv"
-        savePanel.begin { result in
-            guard result == .OK, let url = savePanel.url else {
-                savePanel.close()
-                return
-            }
-
-            Logger.shared.logDebug("Writing logs at \(url)", category: .general)
-            do {
-                FileManager.default.createFile(atPath: url.path,
-                                               contents: nil,
-                                               attributes: nil)
-                let fileHandle = try FileHandle(forWritingTo: url)
-                self.logEntries.forEach { logEntry in
-                    let csvLine = [logEntry.created_at?.iso8601withFractionalSeconds ?? "",
-                                   logEntry.level ?? "",
-                                   logEntry.category ?? "",
-                                   logEntry.log?.quotedForCSV ?? ""].joined(separator: ",")
-
-                    fileHandle.write(csvLine.asData)
-                    fileHandle.write("\n".asData)
-                }
-                Logger.shared.logDebug("Wrote \(self.logEntries.count) log entries", category: .general)
-                fileHandle.closeFile()
-            } catch {
-                Logger.shared.logError("Error opening \(url): \(error.localizedDescription)", category: .general)
-            }
-        }
+        AppDelegate.main.export(logEntries: logEntries)
     }
 
     public func importLogs() {
@@ -129,9 +99,6 @@ class LoggerNSTableController: NSViewController {
     }
 
     private func loadData() {
-        let request: NSFetchRequest<LogEntry> = LogEntry.fetchRequest()
-
-        request.fetchLimit = 500
 
         var predicates: [NSPredicate] = []
         if !selectedCategories.isEmpty {
@@ -156,19 +123,10 @@ class LoggerNSTableController: NSViewController {
                                                                                      levelPredicate]))
             }
         }
-
-        request.predicate = NSCompoundPredicate(andPredicateWithSubpredicates: predicates)
-
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \LogEntry.created_at,
-                                                    ascending: false)]
-
-        do {
-            logEntries = try CoreDataManager.shared.mainContext.fetch(request).reversed()
-        } catch {
-            //swiftlint:disable:next print
-            print(error.localizedDescription)
-        }
+        logEntries = LoggerRecorder.shared.getEntries(with: NSCompoundPredicate(andPredicateWithSubpredicates: predicates),
+                                                      and: [NSSortDescriptor(keyPath: \LogEntry.created_at, ascending: false)]) ?? []
     }
+
     private var cancellables: [AnyCancellable] = []
     private func observeNotification() {
         NotificationCenter.default.publisher(for: .loggerInsert)
