@@ -25,6 +25,7 @@ class BrowsingTreeRecordTests: XCTestCase {
         let appSessionId = UUID()
         let tree = BrowsingTree(nil)
         let rootId = tree.root.id
+        BeamDate.freeze("2001-01-01T00:00:00+000") //ensures createdAt/updatedAt uniqueness
 
         //test save/get of one tree
         let record = try XCTUnwrap(tree.toRecord(appSessionId: appSessionId))
@@ -36,6 +37,7 @@ class BrowsingTreeRecordTests: XCTestCase {
         try db.save(browsingTreeRecord: record)
 
         //test saveMany/getMany trees
+        BeamDate.travel(1)
         let anotherTree = BrowsingTree(nil)
         let anotherRootId = anotherTree.root.id
         let anotherRecord = try XCTUnwrap(anotherTree.toRecord(appSessionId: appSessionId))
@@ -53,13 +55,15 @@ class BrowsingTreeRecordTests: XCTestCase {
         XCTAssertEqual(fetchedRecords[1].rootId, anotherRootId)
 
         fetchedRecords = try XCTUnwrap(try? db.getAllBrowsingTrees(updatedSince: sortedRecords[1].updatedAt))
-        XCTAssertEqual(sortedRecords.count, 2)
+        XCTAssertEqual(fetchedRecords.count, 1)
         XCTAssertEqual(fetchedRecords[0].rootId, anotherRootId)
 
         //test delete
         XCTAssertEqual(db.countBrowsingTrees, 2)
         try db.deleteBrowsingTrees(ids: [rootId, anotherRootId])
         XCTAssertEqual(db.countBrowsingTrees, 0)
+
+        BeamDate.reset()
     }
 
     func testFlattenTreeMigration() throws {
