@@ -123,6 +123,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         fetchTopDomains()
         getUserInfos()
+        LoggerRecorder.shared.deleteEntries(olderThan: DateComponents(hour: -2))
     }
 
     // Work around to fix odd animation in Preferences Panes
