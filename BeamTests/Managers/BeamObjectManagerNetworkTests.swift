@@ -34,6 +34,9 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             MyRemoteObjectManager().registerOnBeamObjectManager()
 
             MyRemoteObjectManager.store.removeAll()
+
+            Configuration.beamObjectDirectCall = false
+
             try? BeamObjectChecksum.deleteAll()
 
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)

@@ -53,6 +53,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             helper.createDefaultDatabase("00000000-e0df-4eca-93e6-8778984bcd18")
 
+            Configuration.beamObjectDirectCall = false
+
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
