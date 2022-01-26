@@ -11,7 +11,7 @@ import Foundation
 import Combine
 
 public indirect enum BrowsingTreeOrigin: Codable, Equatable {
-    case searchBar(query: String)
+    case searchBar(query: String, referringRootId: UUID?)
     case searchFromNode(nodeText: String)
     case linkFromNote(noteName: String)
     case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?, rootId: UUID?) //following a cmd + click on link
@@ -25,15 +25,18 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     }
 
     enum CodingKeys: CodingKey {
-        case type, value, rootOrigin, pageLoadId, rootId
+        case type, value, rootOrigin, pageLoadId, rootId, referringRootId
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
-        case .searchBar(let query):
+        case .searchBar(let query, let referringRootId):
             try container.encode("searchBar", forKey: .type)
             try container.encode(query, forKey: .value)
+            if let referringRootId = referringRootId {
+                try container.encode(referringRootId, forKey: .referringRootId)
+            }
         case .searchFromNode(let nodeText):
             try container.encode("searchFromNode", forKey: .type)
             try container.encode(nodeText, forKey: .value)
@@ -63,7 +66,8 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         let type = try container.decode(String.self, forKey: .type)
         switch type {
         case "searchBar":
-            self = .searchBar(query: try container.decode(String.self, forKey: .value))
+            self = .searchBar(query: try container.decode(String.self, forKey: .value),
+                              referringRootId: try? container.decodeIfPresent(UUID.self, forKey: .referringRootId))
         case "searchFromNode":
             self = .searchFromNode(nodeText: try container.decode(String.self, forKey: .value))
         case "linkFromNote":
@@ -388,7 +392,7 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 }
 
-private let defaultOrigin = BrowsingTreeOrigin.searchBar(query: "<???>")
+private let defaultOrigin = BrowsingTreeOrigin.searchBar(query: "<???>", referringRootId: nil)
 
 public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     @Published public private(set) var root: BrowsingNode!
