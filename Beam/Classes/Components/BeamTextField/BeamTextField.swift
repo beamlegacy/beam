@@ -18,6 +18,7 @@ struct BeamTextField: NSViewRepresentable {
     var placeholder: String
     var font: NSFont?
     var textColor: NSColor?
+    var placeholderFont: NSFont?
     var placeholderColor: NSColor?
 
     var selectedRange: Range<Int>?
@@ -72,7 +73,7 @@ struct BeamTextField: NSViewRepresentable {
             textField.updateTextSelectionColor(selectedRangeColor)
         }
         textField.setText(text, font: font, icon: nil, skipGuards: false)
-        textField.setPlaceholder(placeholder, font: font, icon: nil)
+        textField.setPlaceholder(placeholder, font: placeholderFont ?? font, icon: nil)
 
         textField.onPerformKeyEquivalent = { [weak coordinator] event in
             coordinator?.performKeyEquivalentHandler(event: event) ?? false
