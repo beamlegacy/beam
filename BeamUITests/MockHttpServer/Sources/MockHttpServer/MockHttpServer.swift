@@ -37,13 +37,44 @@ public class MockHttpServer {
         router.setDefault(templateEngine: StencilTemplateEngine())
         router.viewsPath = templatesPath
         router.get("/", handler: rootHandler)
+        installFormHandlers(to: router)
         router.all("/view", middleware: BodyParser())
         router.post("/view", handler: submitHandler)
         Kitura.addHTTPServer(onPort: port, with: router)
     }
 
+    private func installFormHandlers(to router: Router) {
+        for form in formNames {
+            router.get("/\(form)") { request, response, next in
+                let style = request.parameters["style"] ?? "default"
+                let parameters = ["style": style]
+                do {
+                    try response.render("\(form).stencil", with: parameters, forKey: "params")
+                }
+                catch {
+                    response.status(.internalServerError).send(String(describing: error))
+                }
+                next()
+            }
+        }
+    }
+
     private func rootHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
         guard let form = request.hostname.removingSuffix(".form.lvh.me") else {
+            return listHandler(request: request, response: response, next: next)
+        }
+        let style = request.queryParameters["style"] ?? "default"
+        let parameters = ["style": style]
+        do {
+            try response.render("\(form).stencil", with: parameters, forKey: "params")
+        } catch {
+            response.status(.notFound).send(String(describing: error))
+        }
+        next()
+    }
+
+    private func formPathHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        guard let form = request.parameters["form"] else {
             return listHandler(request: request, response: response, next: next)
         }
         let style = request.queryParameters["style"] ?? "default"
@@ -62,14 +93,7 @@ public class MockHttpServer {
             var styles: [String]
             var port: Int
         }
-        let forms = Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates")
-            .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
-            .filter { $0 != "main" && $0 != "view" }
-            .sorted()
-        let styles = Bundle.module.paths(forResourcesOfType: "css", inDirectory: "/Resources/static")
-            .compactMap { $0.lastPathComponent.removingSuffix(".css") }
-            .sorted()
-        let parameters = Parameters(forms: forms, styles: styles, port: request.port)
+        let parameters = Parameters(forms: formNames.sorted(), styles: styleNames.sorted(), port: request.port)
         do {
             try response.render("main.stencil", with: parameters, forKey: "params")
         }
@@ -91,6 +115,17 @@ public class MockHttpServer {
             response.status(.internalServerError).send(String(describing: error))
         }
         next()
+    }
+
+    private var formNames: [String] {
+        Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates")
+            .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
+            .filter { $0 != "main" && $0 != "view" }
+    }
+
+    private var styleNames: [String] {
+        Bundle.module.paths(forResourcesOfType: "css", inDirectory: "/Resources/static")
+            .compactMap { $0.lastPathComponent.removingSuffix(".css") }
     }
 }
 

@@ -299,8 +299,10 @@ struct AdvancedPreferencesView: View {
                     })
                     Button(action: {
                         self.loading = true
-                        BrowsingTreeStoreManager.shared.legacyCleanup { _ in
-                            self.loading = false
+                        DispatchQueue.global().async {
+                            BrowsingTreeStoreManager.shared.legacyCleanup { _ in
+                                self.loading = false
+                            }
                         }
                     }, label: {
                         Text("Legacy browsing trees").frame(minWidth: 100)
@@ -336,6 +338,12 @@ struct AdvancedPreferencesView: View {
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     OmniboxScoreSectionCheckbox
+                }
+
+                Preferences.Section(verticalAlignment: .top) {
+                    Text("Collect Feedback:")
+                } content: {
+                    CollectFeedbackSection()
                 }
 
                 Preferences.Section(bottomDivider: false) {
@@ -650,23 +658,7 @@ struct AdvancedPreferencesView: View {
     private var PasswordBraveImporter: some View {
         Button(action: {
             let importer = ChromiumPasswordImporter(browser: .brave)
-            importer.passwordsPublisher
-                .sink(receiveCompletion: { completion in
-                    switch completion {
-                    case .finished:
-                        Logger.shared.logInfo("Finished importing Brave Browser passwords", category: .browserImport)
-                    case .failure(let error):
-                        Logger.shared.logError(error.localizedDescription, category: .browserImport)
-                    }
-                }, receiveValue: { record in
-                    if let hostname = record.item.url.minimizedHost, let password = String(data: record.item.password, encoding: .utf8) {
-                        PasswordManager.shared.save(hostname: hostname, username: record.item.username, password: password)
-                    } else {
-                        Logger.shared.logError("Password could not be imported for \(record.item.username) at \(record.item.url)", category: .browserImport)
-                    }
-                })
-                .store(in: &cancellables)
-            try? importer.importPasswords()
+            AppDelegate.main.data.importsManager.startBrowserPasswordImport(from: importer)
         }, label: {
             Text("Import Passwords from Brave Browser")
         })
@@ -745,6 +737,31 @@ struct AdvancedPreferencesView: View {
             Text("Create 10 Random notes")
         })
     }
+
+    private struct CollectFeedbackSection: View {
+        @State private var isCollectFeedbackEnabled = PreferencesManager.isCollectFeedbackEnabled
+        @State private var showsCollectFeedbackAlert = PreferencesManager.showsCollectFeedbackAlert
+
+        var body: some View {
+            Toggle(isOn: $isCollectFeedbackEnabled) {
+                Text("Send feedback of failed collect")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([isCollectFeedbackEnabled].publisher.first()) {
+                    PreferencesManager.isCollectFeedbackEnabled = $0
+                }
+            Toggle(isOn: $showsCollectFeedbackAlert) {
+                Text("Show alert before sending collect feedback")
+            }.toggleStyle(CheckboxToggleStyle())
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .onReceive([showsCollectFeedbackAlert].publisher.first()) {
+                    PreferencesManager.showsCollectFeedbackAlert = $0
+                }
+        }
+    }
+
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {

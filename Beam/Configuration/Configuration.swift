@@ -26,6 +26,10 @@ struct Configuration {
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
 
+    static var buildSchemeName: String? {
+        Bundle.main.infoDictionary?["SchemeName"] as? String
+    }
+
     static private(set) var branchType = BranchType(rawValue: EnvironmentVariables.branchType)
 
     static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"

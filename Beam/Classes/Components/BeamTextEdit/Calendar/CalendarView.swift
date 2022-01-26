@@ -10,6 +10,7 @@ import BeamCore
 import Combine
 
 class CalendarGutterViewModel: ObservableObject {
+    weak var textRoot: TextRoot?
     @Published var calendarManager: CalendarManager
     var noteId: UUID
     var todaysCalendar: Bool
@@ -22,7 +23,8 @@ class CalendarGutterViewModel: ObservableObject {
     @Published var meetings: [Meeting] = []
     var scope = Set<AnyCancellable>()
 
-    init(calendarManager: CalendarManager, noteId: UUID, todaysCalendar: Bool) {
+    init(root: TextRoot?, calendarManager: CalendarManager, noteId: UUID, todaysCalendar: Bool) {
+        self.textRoot = root
         self.calendarManager = calendarManager
         self.noteId = noteId
         self.todaysCalendar = todaysCalendar
@@ -64,7 +66,7 @@ struct CalendarView: View {
                             CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
                                             meetingLink: meeting.meetingLink, title: meeting.name, onClick: {
                                 prompt(meeting)
-                            })
+                            }).padding(.bottom, 4)
                         }
                     }.transition(AnyTransition.asymmetric(
                         insertion: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15).delay(0.15))
@@ -77,7 +79,7 @@ struct CalendarView: View {
                         ForEach(viewModel.meetings) { meeting in
                             CalendarItemHiddenView(meetingDuration: meeting.duration)
                                 .frame(minHeight: 16, maxHeight: 16)
-                                .padding(.top, 4)
+                                .padding(.bottom, 4)
                         }
                     }.transition(transitionInOutHiddenView)
                 }
@@ -182,6 +184,9 @@ struct CalendarView: View {
         } else {
             note.insert(BeamElement(text), after: note.children.last)
         }
+
+        guard let lastElement = note.children.last, let root = viewModel.textRoot else { return }
+        note.cmdManager.focus(lastElement, in: root)
     }
 
     private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
@@ -267,7 +272,6 @@ struct CalendarIemView: View {
                 }
             }
         }.frame(minHeight: 16, maxHeight: 16)
-        .padding(.top, 4)
         .padding(.leading, 14)
         .onHover { isHovering in
             isHoveringItem = isHovering

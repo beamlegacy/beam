@@ -68,9 +68,15 @@ extension PointAndShoot {
         guard isDifferentUrl || scale != 1 else {
             return nil
         }
-        let (xDelta, yDelta) = deltaForWebPositions(href: href)
+        let offset: CGPoint
+        if let webPositions = page.webPositions {
+            offset = webPositions.viewportPosition(href: href)
+        } else {
+            Logger.shared.logError("webPositions is required to scale target correctly", category: .pointAndShoot)
+            offset = .zero
+        }
         return targets.map({ target in
-            translateAndScaleTarget(target, xDelta: xDelta, yDelta: yDelta, scale: scale, isDifferentUrl: isDifferentUrl)
+            translateAndScaleTarget(target, xDelta: offset.x, yDelta: offset.y, scale: scale, isDifferentUrl: isDifferentUrl)
         })
     }
 
@@ -89,20 +95,5 @@ extension PointAndShoot {
             return target.translateTarget(0, 0, scale: scale)
         }
         return target.translateTarget(xDelta, yDelta, scale: scale)
-    }
-
-    private func deltaForWebPositions(href: String) -> (x: CGFloat, y: CGFloat) {
-        guard let page = self.page,
-              let webPositions = page.webPositions else {
-                  Logger.shared.logError("webPositions is required to scale target correctly", category: .pointAndShoot)
-                  return (x: 0, y: 0)
-              }
-        let frameOffsetX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.x).reduce(0, +)
-        let frameOffsetY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.y).reduce(0, +)
-        let frameScrollX = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollX)
-        let frameScrollY = webPositions.viewportPosition(href, prop: WebPositions.FramePosition.scrollY)
-        let xDelta = frameOffsetX - frameScrollX.reduce(0, +)
-        let yDelta = frameOffsetY - frameScrollY.reduce(0, +)
-        return (x: xDelta, y: yDelta)
     }
 }

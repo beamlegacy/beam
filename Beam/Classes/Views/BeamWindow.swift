@@ -320,8 +320,10 @@ extension BeamWindow {
         if state.mode == .web && state.focusOmniBox && state.focusOmniBoxFromTab, let searchField = self.firstResponder as? BeamTextFieldViewFieldEditor {
             let omniboxFrame = omniboxFrameFromSearchField(searchField)
             return !omniboxFrame.contains(event.locationInWindow)
-        } else if state.mode == .web && state.undraggableWindowRect != .zero &&
-            state.undraggableWindowRect.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: self)) {
+        } else if state.mode == .web && !state.undraggableWindowRects.isEmpty &&
+                    state.undraggableWindowRects.contains(where: {
+                        $0.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: self))
+                    }) {
             return false
         }
         return true

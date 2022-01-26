@@ -41,6 +41,7 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
+    // swiftlint:disable_next cyclomatic_complexity
     func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
         guard let page = self.page else {
             return

@@ -318,6 +318,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     @Published open var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
     @Published open private(set) var textStats: ElementTextStats = ElementTextStats(wordsCount: 0)
     @Published open var query: String?
+    private var warmingUp = true
 
     open var note: BeamNote? {
         return parent?.note
@@ -348,24 +349,36 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     public init() {
-        defer { changePropagationEnabled = true }
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
         updateTextStats()
     }
 
     public init(_ text: String) {
-        defer { changePropagationEnabled = true }
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
         self.text = BeamText(text: text, attributes: [])
         updateTextStats()
     }
 
     public init(_ text: BeamText) {
-        defer { changePropagationEnabled = true }
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
         self.text = text
         updateTextStats()
     }
 
     public required init(from decoder: Decoder) throws {
-        defer { changePropagationEnabled = true }
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
         let container = try decoder.container(keyedBy: CodingKeys.self)
         let recursive = decoder.userInfo[Self.recursiveCoding] as? Bool ?? true
 
@@ -630,8 +643,11 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         case text, meta, tree
     }
     open func change(_ type: ChangeType) {
-        updateDate = BeamDate.now
-        lastChangeType = type
+        if !warmingUp {
+            updateDate = BeamDate.now
+            lastChangeType = type
+        }
+        
         if changePropagationEnabled {
             changed.send((self, type))
         }

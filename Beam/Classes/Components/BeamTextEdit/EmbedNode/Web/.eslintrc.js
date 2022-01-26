@@ -18,7 +18,8 @@ module.exports = {
     "@typescript-eslint/no-this-alias": ["off"],
     semi: ["warn", "never"],
     quotes: ["warn", "double"],
-    "comma-dangle": ["warn", "never"]
+    "comma-dangle": ["warn", "never"],
+    "no-console": 2
   },
   "ignorePatterns": ["*_prod.js"]
 }

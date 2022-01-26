@@ -98,7 +98,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         }
 
         // Second case: root direct children
-        testRootChildVisitType(origin: BrowsingTreeOrigin.searchBar(query: "beam"), expected: FrecencyEventType.webSearchBar)
+        testRootChildVisitType(origin: BrowsingTreeOrigin.searchBar(query: "beam", referringRootId: nil), expected: FrecencyEventType.webSearchBar)
         testRootChildVisitType(origin: BrowsingTreeOrigin.searchFromNode(nodeText: "beam"), expected: FrecencyEventType.webFromNote)
         testRootChildVisitType(origin: BrowsingTreeOrigin.linkFromNote(noteName: "beam beam"), expected: FrecencyEventType.webFromNote)
         testRootChildVisitType(origin: BrowsingTreeOrigin.browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: nil, rootId: UUID()), expected: FrecencyEventType.webLinkActivation)
@@ -141,7 +141,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         }
 
         let fakeScorer = FakeFrecencyScorer()
-        let tree = BrowsingTree(BrowsingTreeOrigin.searchBar(query: "some weird keywords"), frecencyScorer: fakeScorer)
+        let tree = BrowsingTree(BrowsingTreeOrigin.searchBar(query: "some weird keywords", referringRootId: nil), frecencyScorer: fakeScorer)
         let root = tree.root!
         let rootCreationDate = root.events[0].date
         tree.navigateTo(url: "http://www.somesite.com/", title: nil, startReading: true, isLinkActivation: true, readCount: 10)

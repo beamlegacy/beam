@@ -15,6 +15,19 @@ class ProxyTextNode: TextNode, ProxyNode {
     // MARK: - Properties
     let linkTextLayer = CATextLayer()
 
+    var referencesRanges: [Range<Int>]? {
+        var result: [Range<Int>] = []
+        for range in text.ranges {
+            if let noteTitle = editor?.note.note?.title {
+                let cleanRanges = range.string.lowercased().ranges(of: noteTitle.lowercased())
+                for cleanRange in cleanRanges {
+                    result.append(range.string.range(from: cleanRange))
+                }
+            }
+        }
+        return result.isEmpty ?  nil : result
+    }
+
     // MARK: - Initializer
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
@@ -43,20 +56,12 @@ class ProxyTextNode: TextNode, ProxyNode {
     }
 
     // MARK: TextConfig and Paddings
-    override var config: TextConfig {
-        var config = TextConfig()
-        if !isLink {
-            config.color = BeamColor.Editor.reference.staticColor
-        }
-        return config
-    }
-
     override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
         switch elementKind {
         case .check:
-            return NSEdgeInsets(top: 0, left: 20, bottom: 0, right: isLink ? 10 : 50)
+            return NSEdgeInsets(top: 0, left: 20, bottom: 0, right: isContainedInLink ? 20 : 50)
         default:
-            return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: isLink ? 10 : 50)
+            return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: isContainedInLink ? 20 : 50)
         }
     }
 
@@ -64,7 +69,7 @@ class ProxyTextNode: TextNode, ProxyNode {
 
     override func updateSelectionLayer() {
         super.updateSelectionLayer()
-        selectionLayer.bounds.size.width -= 20
+        selectionLayer.bounds.size.width -= isContainedInLink ? 20 : 50
     }
 
     override func isLinkToNote(_ text: BeamText) -> Bool {

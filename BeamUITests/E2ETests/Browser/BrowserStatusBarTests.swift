@@ -7,11 +7,13 @@ class BrowserStatusBarTests: BaseTest {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
 
+        helper.tapCommand(.resizeSquare1000)
+
         testRailPrint("Given I open a web page")
         helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
 
         let webView = WebTestView()
-        let link = webView.staticText("a fashion show")
+        let link = webView.staticText("on Twitter")
 
         testRailPrint("Given I enable the status bar")
         UITestsMenuBar().menuItem("Show Status Bar").clickIfExists()
@@ -22,7 +24,7 @@ class BrowserStatusBarTests: BaseTest {
         testRailPrint("Then the status bar must appear")
         XCTAssertTrue(webView.statusText.waitForExistence(timeout: implicitWaitTimeout))
         let statusText = try XCTUnwrap(webView.statusText.value as? String)
-        XCTAssertEqual(statusText, "http://www.thefader.com/2016/02/11/yeezy-season-3-pablo-album-msg-recap-live")
+        XCTAssertEqual(statusText, "https://twitter.com/kanyewest/status/692435575836676097?lang=en")
     }
 
     func testShowStatusBarForLinkOpeningInNewTab() throws {

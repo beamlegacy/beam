@@ -365,6 +365,7 @@ final class WebAutocompleteContext {
     }
 
     func clear() {
+        Logger.shared.logDebug("Clearing autocomplete context", category: .passwordManagerInternal)
         autocompleteFields.removeAll()
         autocompleteGroups.removeAll()
     }
@@ -396,7 +397,7 @@ final class WebAutocompleteContext {
             Logger.shared.logDebug("Tagged candidates: \(candidateFields.map { $0.debugDescription })", category: .passwordManagerInternal)
             fieldIds = update(withTagged: candidateFields)
         }
-        Logger.shared.logDebug("Autocomplete groups: \(autocompleteGroups)", category: .passwordManagerInternal)
+        Logger.shared.logDebug("Merged autocomplete groups: \(autocompleteGroups)", category: .passwordManagerInternal)
         return fieldIds
     }
 
@@ -405,16 +406,16 @@ final class WebAutocompleteContext {
         switch passwordFields.count {
         case 1:
             return update(withUntagged: fields, action: .login)
-        case 2:
+        case 2...:
             return update(withUntagged: fields, action: .createAccount)
         default:
-            clear()
             return []
         }
     }
 
     private func update(withUntagged fields: [DOMInputElement], action: WebAutocompleteAction) -> [String] {
         guard let passwordIndex = fields.firstIndex(where: { $0.type == .password }) else {
+            Logger.shared.logDebug("No password field, ignoring", category: .passwordManagerInternal)
             clear()
             return []
         }
@@ -431,9 +432,11 @@ final class WebAutocompleteContext {
         let autocompleteGroup = WebAutocompleteGroup(action: action, relatedFields: autocompleteUsernamePasswordFields, isAmbiguous: true)
         let autocompleteIds = autocompleteUsernamePasswordFields.map(\.id)
         let addedIds = autocompleteIds.filter { autocompleteGroups[$0] == nil }
-        autocompleteGroups = autocompleteIds.reduce(into: [:]) { dict, id in
+        Logger.shared.logDebug("Autocomplete ids: \(autocompleteIds), added: \(addedIds)", category: .passwordManagerInternal)
+        let newAutocompleteGroups = autocompleteIds.reduce(into: [:]) { dict, id in
             dict[id] = autocompleteGroup
         }
+        autocompleteGroups.merge(newAutocompleteGroups) { (_, new) in new }
         return addedIds
     }
 
@@ -442,7 +445,7 @@ final class WebAutocompleteContext {
         Logger.shared.logDebug("Autocomplete Fields: \(autocompleteFields)", category: .passwordManagerInternal)
         let fieldGroups = getAutocompleteGroups(fields) // FIXME: for some strange reason getAutocompleteGroups() ignores fields, and used autocompleteFields
         let addedIds = fieldGroups.keys.filter { autocompleteGroups[$0] == nil }
-        autocompleteGroups = fieldGroups
+        autocompleteGroups.merge(fieldGroups) { (_, new) in new }
         return addedIds
     }
 

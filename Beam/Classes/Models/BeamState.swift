@@ -64,9 +64,10 @@ import Sentry
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: Range<Int>?
+    var keepDestinationNote: Bool = false
 
     @Published var windowIsResizing = false
-    var undraggableWindowRect: CGRect = .zero
+    var undraggableWindowRects: [CGRect] = []
     @Published var windowIsMain = true
     @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {
@@ -94,6 +95,9 @@ import Sentry
     weak var currentEditor: BeamTextEdit?
     var editorShouldAllowMouseEvents: Bool {
         overlayViewModel.modalView == nil
+    }
+    var editorShouldAllowMouseHoverEvents: Bool {
+        !focusOmniBox
     }
     var isShowingOnboarding: Bool {
         data.onboardingManager.needsToDisplayOnboard
@@ -256,7 +260,7 @@ import Sentry
         currentTab?.load(url: url)
 
         guard let currentTabId = currentTab?.id else { return }
-        browserTabsManager.removeTabFromGroup(tabId: currentTabId)
+        browserTabsManager.removeFromTabGroup(tabId: currentTabId)
         browserTabsManager.createNewGroup(for: currentTabId)
     }
 
@@ -279,7 +283,7 @@ import Sentry
     /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
     @discardableResult func createTab(withURL url: URL, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
-        let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>")
+        let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>", referringRootId: browserTabsManager.currentTab?.browsingTree.rootId)
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
@@ -300,10 +304,10 @@ import Sentry
         _ = addNewTab(origin: nil)
     }
 
-    func createEmptyTabWithCurrentDestinationCard() {
+    func startNewSearchWithCurrentDestinationCard() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        guard let destinationNote = BeamNote.fetch(title: destinationCardName) else { return }
-        _ = addNewTab(origin: nil, note: destinationNote)
+        keepDestinationNote = true
+        startNewSearch()
     }
 
     func createTabFromNode(_ node: TextNode, withURL url: URL) {
@@ -443,7 +447,7 @@ import Sentry
             if  mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
-                _ = createTab(withURL: url, originalQuery: result.text)
+                _ = createTab(withURL: url, originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
             }
             mode = .web
 
@@ -479,7 +483,7 @@ import Sentry
         if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
-            _ = createTab(withURL: url, originalQuery: queryString)
+            _ = createTab(withURL: url, originalQuery: queryString, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
         }
         autocompleteManager.clearAutocompleteResults()
         mode = .web
@@ -543,6 +547,13 @@ import Sentry
     func setup(data: BeamData) {
         destinationCardName = data.todaysName
         backForwardList.push(.journal)
+
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] id in
+                guard let self = self else { return }
+                self.backForwardList.purgeDeletedNote(withId: id)
+                self.updateCanGoBackForward()
+            }.store(in: &scope)
     }
 
     func setup(webView: WKWebView) {

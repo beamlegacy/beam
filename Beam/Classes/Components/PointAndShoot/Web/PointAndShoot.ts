@@ -1,6 +1,7 @@
 import { PointAndShootUI } from "./PointAndShootUI"
 import {
   BeamHTMLElement,
+  BeamLogCategory,
   BeamMouseLocation,
   BeamRange,
   BeamRangeGroup,
@@ -13,6 +14,7 @@ import { BeamMouseEvent } from "../../../Helpers/Utils/Web/BeamMouseEvent"
 import { debounce } from "debounce"
 import { BeamKeyEvent } from "../../../Helpers/Utils/Web/BeamKeyEvent"
 import { PointAndShootHelper } from "./PointAndShootHelper"
+import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 
 /**
  * Listen to events that hover and select web blocks with Option.
@@ -22,6 +24,7 @@ export class PointAndShoot {
   ui: PointAndShootUI
   static instance: PointAndShoot
   prefix = "__ID__"
+  logger: BeamLogger
   timer
   touchDuration = 2500
   mouseLocation: BeamMouseLocation = { x: 0, y: 0 }
@@ -54,6 +57,7 @@ export class PointAndShoot {
   constructor(win: BeamWindow, ui: PointAndShootUI) {
     this.win = win
     this.ui = ui
+    this.logger = new BeamLogger(this.win, BeamLogCategory.pointAndShoot)
     this.selectionUUID = Util.uuid(win)
     this.registerEventListeners()
     this.sendBounds = this.sendBounds.bind(this)
@@ -101,23 +105,43 @@ export class PointAndShoot {
       debounce(this.onResize.bind(this), debounceTimeout, immediate)
     )
   }
-
-  log(...args: unknown[]): void {
-    console.log(this.toString(), args)
-  }
   /**
    * Send updates to the UI.
    *
    * @memberof PointAndShoot
    */
   sendBounds(): void {
-    // First send Boolean flags
+    // Remove DOM elements that are disconnected from the DOM
+    this.removeDisconnectedDOMElements()
+    // Send Boolean flags
     this.ui.hasSelection(PointAndShootHelper.hasSelection(this.win))
     this.ui.typingOnWebView(this.isTypingOnWebView)
     // Lastly send positioning bounds
     this.ui.pointBounds(this.pointTarget)
     this.ui.shootBounds(this.shootTargets)
     this.ui.selectBounds(this.selectionRangeGroups)
+  }
+
+  /**
+   * DOM elements can be removed from the page. If we lose the reference to
+   * any DOM elements in our stored targets. Remove them from the stored targets.
+   * 
+   * https://developer.mozilla.org/en-US/docs/Web/API/Node/isConnected
+   *
+   * @memberof PointAndShoot
+   */
+  removeDisconnectedDOMElements() {
+    this.selectionRangeGroups = this.selectionRangeGroups.filter(target => {
+      const startNodeIsConnected = target.range.startContainer.isConnected
+      const endNodeIsConnected = target.range.endContainer.isConnected
+      // Keep group if both start and end are connected
+      return startNodeIsConnected && endNodeIsConnected
+    })
+
+    this.shootTargets = this.shootTargets.filter(target => {
+      // Keep element if it's connected
+      return target.element.isConnected
+    })
   }
   /**
    * Upserts the target element to the shootTargets Array. Then triggers

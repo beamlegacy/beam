@@ -2,6 +2,7 @@ import Foundation
 import BeamCore
 
 enum PasswordMessages: String, CaseIterable {
+    case password_loaded
     case password_textInputFields
     case password_textInputFocusIn
     case password_textInputFocusOut
@@ -28,12 +29,16 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
         guard let passwordOverlayController = webPage.passwordOverlayController else { return }
         switch messageKey {
 
+        case .password_loaded:
+            Logger.shared.logDebug("JavaScript loaded for frame \(messageBody as? String ?? "<no url>")", category: .passwordManagerInternal)
+            passwordOverlayController.requestInputFields(frameInfo: frameInfo)
+
         case .password_textInputFields:
             guard let jsonString = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.updateInputFields(with: jsonString)
+            passwordOverlayController.updateInputFields(with: jsonString, frameInfo: frameInfo)
 
         case .password_textInputFocusIn:
             guard let dict = messageBody as? [String: AnyObject],
@@ -43,21 +48,21 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
                 return
             }
             let text = dict["text"] as? String
-            passwordOverlayController.inputFieldDidGainFocus(elementId, contents: text)
+            passwordOverlayController.inputFieldDidGainFocus(elementId, frameInfo: frameInfo, contents: text)
 
         case .password_textInputFocusOut:
             guard let elementId = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.inputFieldDidLoseFocus(elementId)
+            passwordOverlayController.inputFieldDidLoseFocus(elementId, frameInfo: frameInfo)
 
         case .password_formSubmit:
             guard let elementId = messageBody as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.handleWebFormSubmit(with: elementId)
+            passwordOverlayController.handleWebFormSubmit(with: elementId, frameInfo: frameInfo)
 
         case .password_scroll:
             let passwordBody = messageBody as? [String: AnyObject]

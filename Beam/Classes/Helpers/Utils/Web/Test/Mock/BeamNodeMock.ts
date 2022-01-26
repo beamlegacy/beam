@@ -14,6 +14,7 @@ export class BeamNodeMock extends BeamEventTargetMock implements BeamNode {
   childNodes: BeamNode[] = []
   parentNode?: BeamNode
   parentElement?: BeamElement
+  isConnected: boolean = true
 
   /**
    * @deprecated Not standard, for test purpose

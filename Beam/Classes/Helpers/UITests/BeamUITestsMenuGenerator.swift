@@ -41,6 +41,7 @@ class BeamUITestsMenuGenerator {
         case .signInWithTestAccount: signInWithTestAccount()
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()
+        case .resetCollectAlert: resetCollectAlert()
         case .clearPasswordsDB: clearPasswordsDatabase()
         case .startMockHttpServer: startMockHttpServer()
         case .stopMockHttpServer: stopMockHttpServer()
@@ -279,5 +280,10 @@ class BeamUITestsMenuGenerator {
 
     private func stopMockHttpServer() {
         MockHttpServer.stop()
+    }
+
+    private func resetCollectAlert() {
+        PreferencesManager.isCollectFeedbackEnabled = true
+        PreferencesManager.showsCollectFeedbackAlert = true
     }
 }
