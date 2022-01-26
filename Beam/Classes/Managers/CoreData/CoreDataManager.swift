@@ -197,7 +197,7 @@ class CoreDataManager {
                     completionHandler?(.success(true))
                 } catch {
                     perf.debug("Error: \(error)")
-                    LibrariesManager.nonFatalError(error: error)
+                    ThirdPartyLibrariesManager.shared.nonFatalError(error: error)
                     completionHandler?(.failure(error))
                 }
             }

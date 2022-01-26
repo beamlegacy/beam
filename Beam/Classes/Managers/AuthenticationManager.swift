@@ -128,7 +128,7 @@ class AuthenticationManager {
     }
 
     private func handleUpdateAccessTokenFailure(_ error: Error) {
-        LibrariesManager.nonFatalError("Can't refresh token, removing existing tokens", error: error)
+        ThirdPartyLibrariesManager.shared.nonFatalError("Can't refresh token, removing existing tokens", error: error)
         EventsTracker.logBreadcrumb(message: "Can't refresh token, removing existing tokens",
                                            category: "app.lifecycle",
                                            type: "system")
@@ -139,7 +139,7 @@ class AuthenticationManager {
     private func handleUpdateAccessTokenSuccess(_ refresh: UserSessionRequest.RenewCredentials, accessToken: String) {
         guard let newAccessToken = refresh.accessToken,
               let newRefreshToken = refresh.refreshToken else {
-            LibrariesManager.nonFatalError("Can't refresh token, returned success, no error and no token. Removing existing tokens")
+                  ThirdPartyLibrariesManager.shared.nonFatalError("Can't refresh token, returned success, no error and no token. Removing existing tokens")
                   EventsTracker.logBreadcrumb(message: "Can't refresh token, returned success, no error and no token. Removing existing tokens",
                                                category: "app.lifecycle",
                                                type: "system")

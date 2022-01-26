@@ -10,9 +10,6 @@ enum BranchType: String {
 struct Configuration {
     // Build configuration
     static private(set) var bundleIdentifier: String = Configuration.value(for: "CFBundleIdentifier")
-    static private(set) var sentryKey = EnvironmentVariables.Sentry.key
-    static private(set) var sentryHostname = "o477543.ingest.sentry.io"
-    static private(set) var sentryProject = "5518785"
     static private(set) var env = Configuration.Env(rawValue: EnvironmentVariables.env) ?? .debug
     static private(set) var testAccountEmail = EnvironmentVariables.Account.testEmail
     static private(set) var testAccountPassword = EnvironmentVariables.Account.testPassword
@@ -31,8 +28,6 @@ struct Configuration {
     }
 
     static private(set) var branchType = BranchType(rawValue: EnvironmentVariables.branchType)
-
-    static private(set) var sentryDsn = "https://\(sentryKey)@\(sentryHostname)/\(sentryProject)"
 
     static private(set) var testPrivateKey = "j6tifPZTjUtGoz+1RJkO8dOMlu48MUUSlwACw/fCBw0="
 
@@ -137,5 +132,40 @@ extension Configuration {
         case debug
         case test
         case release
+    }
+}
+
+extension Configuration {
+    struct Sentry {
+        static let key = EnvironmentVariables.Sentry.key
+        static let hostname = "o477543.ingest.sentry.io"
+        static let projectID = "5518785"
+        static let DSN = "https://\(key)@\(hostname)/\(projectID)"
+    }
+}
+
+extension Configuration {
+    struct Firebase {
+        static let clientID = env == .release ? EnvironmentVariables.Firebase.clientID : EnvironmentVariables.Firebase.clientIDDev
+        static let apiKey =  env == .release ? EnvironmentVariables.Firebase.apiKey : EnvironmentVariables.Firebase.apiKeyDev
+        static let googleAppID =  env == .release ? EnvironmentVariables.Firebase.googleAppID : EnvironmentVariables.Firebase.googleAppIDDev
+        static let projectID =  env == .release ? EnvironmentVariables.Firebase.projectID : EnvironmentVariables.Firebase.projectIDDev
+        static let reversedClientID = clientID.split(separator: ".").reversed().joined(separator: ".")
+
+        static let plistDictionary: [String: Any] = [
+            "API_KEY": apiKey,
+            "BUNDLE_ID": bundleIdentifier,
+            "CLIENT_ID": clientID,
+            "GOOGLE_APP_ID": googleAppID,
+            "PLIST_VERSION": "1",
+            "PROJECT_ID": projectID,
+            "REVERSED_CLIENT_ID": reversedClientID,
+            "STORAGE_BUCKET": "\(projectID).appspot.com",
+            "IS_ADS_ENABLED": 0,
+            "IS_ANALYTICS_ENABLED": 1,
+            "IS_APPINVITE_ENABLED": 0,
+            "IS_GCM_ENABLED": 0,
+            "IS_SIGNIN_ENABLED": 1
+        ]
     }
 }
