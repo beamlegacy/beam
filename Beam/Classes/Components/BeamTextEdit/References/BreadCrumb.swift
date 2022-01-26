@@ -48,7 +48,7 @@ class BreadCrumb: Widget {
     private let maxBreadCrumbWidth: CGFloat = 100
     private let breadCrumbYPosition: CGFloat = 1
     private let spaceBreadcrumbIcon: CGFloat = 3
-    private var containerPadding: CGFloat = 8
+    private var containerPadding: CGFloat = 4
 
     init(parent: Widget, sourceNote: BeamNote, element: BeamElement, availableWidth: CGFloat) {
         self.sourceNote = sourceNote
@@ -78,7 +78,7 @@ class BreadCrumb: Widget {
         setupLayers(with: note)
         selectCrumb(crumbChain.count - 1)
         padding = NSEdgeInsets(top: 0, left: 0, bottom: 8, right: 0)
-        contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 0 : 1, right: 0)
+        contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: crumbChain.count > 1 ? 0 : 2, right: 0)
         childrenPadding = NSEdgeInsets(top: 0, left: 7, bottom: 3, right: 0)
 
         proxy.proxy.treeChanged.receive(on: DispatchQueue.main).sink { [weak self] _ in
