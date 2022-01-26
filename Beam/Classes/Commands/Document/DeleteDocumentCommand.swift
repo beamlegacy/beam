@@ -44,6 +44,9 @@ class DeleteDocument: DocumentCommand {
             }
         }
 
+        DocumentManager.disableNotifications()
+        defer { DocumentManager.enableNotifications() }
+        
         if allDocuments {
             let ids = documents.map { $0.id }
             removeNotesFromIndex(ids)
@@ -55,20 +58,28 @@ class DeleteDocument: DocumentCommand {
             saveDocumentsLinks().forEach { notesToUpdate.insert($0.noteID) }
             unpublishNotes(in: documents)
 
+            var notes = Set<BeamNote>()
             for id in documentIds {
                 guard let note = BeamNote.getFetchedNote(id) else { continue }
                 note.recursiveChangePropagationEnabled = false
+                note.deleted = true
+                notes.insert(note)
             }
 
-            context?.softDelete(ids: documentIds) { _ in
-                completion?(true)
-            }
-
-            removeNotesFromIndex(documentIds)
-
-            for id in documentIds {
-                guard let note = BeamNote.getFetchedNote(id) else { continue }
-                note.recursiveChangePropagationEnabled = true
+            context?.softDelete(ids: documentIds) { result in
+                switch result {
+                case .failure(let error):
+                    Logger.shared.logError("Error while softDeleting \(self.documentIds): \(error)", category: .document)
+                    completion?(false)
+                case .success(let res):
+                    if res {
+                        removeNotesFromIndex(self.documentIds)
+                        for note in notes {
+                            note.recursiveChangePropagationEnabled = true
+                        }
+                    }
+                    completion?(res)
+                }
             }
         }
 

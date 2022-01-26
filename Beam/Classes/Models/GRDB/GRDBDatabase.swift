@@ -9,13 +9,11 @@ import Foundation
 struct GRDBDatabase {
     /// Creates a `GRDBDatabase`, and make sure the database schema is ready.
     //swiftlint:disable:next function_body_length
-    public init(_ dbWriter: DatabaseWriter) throws {
-
+    public init(_ dbWriter: DatabaseWriter, migrate: Bool = true) throws {
         self.dbWriter = dbWriter
 
         // Initialize DB schema
         var needsCardReindexing = false
-        var migrator = DatabaseMigrator()
         migrator.registerMigration("createBase") { db in
             if try db.tableExists("BeamElementRecord") {
                 try db.execute(sql: "DROP TABLE BeamElementRecord")
@@ -369,12 +367,42 @@ struct GRDBDatabase {
             })
         }
 
+        migrator.registerMigration("addTreeProcessingStatus") { db in
+            try db.alter(table: "BrowsingTreeRecord") { table in
+                table.add(column: "processingStatus", .integer).notNull().indexed().defaults(to: 2)
+            }
+        }
+
+        migrator.registerMigration("flattenBrowsingTrees") { db in
+            let rows = try Row.fetchAll(db, sql: "SELECT rootId, data from BrowsingTreeRecord")
+            let decoder = JSONDecoder()
+            let encoder = JSONEncoder()
+            let now = BeamDate.now
+            for row in rows {
+                let rootId = row["rootId"] as UUID
+                let data = row["data"] as Data
+                let tree = try decoder.decode(BrowsingTree.self, from: data)
+                let flattened = tree.flattened
+                let flattenedData = try encoder.encode(flattened)
+                try db.execute(sql: """
+                    UPDATE BrowsingTreeRecord
+                    SET data = :data, updatedAt = :updatedAt
+                    WHERE rootId = :rootId
+                """, arguments: ["data": flattenedData, "rootId": rootId, "updatedAt": now])
+            }
+            try db.alter(table: "BrowsingTreeRecord") { t in
+                t.rename(column: "data", to: "flattenedData")
+            }
+        }
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
         #endif
 
-        try migrator.migrate(dbWriter)
+        if migrate {
+            try self.migrate()
+        }
 
         if needsCardReindexing {
             DispatchQueue.main.async {
@@ -388,6 +416,15 @@ struct GRDBDatabase {
     /// Application can use a `DatabasePool`.
     /// SwiftUI previews and tests can use a fast in-memory `DatabaseQueue`.
     private let dbWriter: DatabaseWriter
+    private var migrator = DatabaseMigrator()
+
+    func migrate(upTo: String? = nil) throws {
+        if let upTo = upTo {
+            try migrator.migrate(dbWriter, upTo: upTo)
+        } else {
+            try migrator.migrate(dbWriter)
+        }
+    }
 }
 
 // MARK: - Database Access: Writes
@@ -1193,6 +1230,25 @@ extension GRDBDatabase {
         _ = try dbWriter.write { db in
             try BrowsingTreeRecord.deleteAll(db, ids: ids)
         }
+    }
+    func browsingTreeProcessingStatuses(ids: [UUID]) -> [UUID: BrowsingTreeRecord.ProcessingStatus] {
+        (try? dbReader.read { (db) -> [UUID: BrowsingTreeRecord.ProcessingStatus]? in
+            let cursor = try BrowsingTreeRecord.fetchCursor(db).map { ($0.rootId, $0.processingStatus) }
+            let statuses: [UUID: BrowsingTreeRecord.ProcessingStatus]? = try? Dictionary(uniqueKeysWithValues: cursor)
+            return statuses
+        }) ?? [UUID: BrowsingTreeRecord.ProcessingStatus]()
+    }
+    func update(record: BrowsingTreeRecord, status: BrowsingTreeRecord.ProcessingStatus) {
+        var updatedRecord = record
+        updatedRecord.processingStatus = status
+        do {
+            _ = try dbWriter.write { db in
+                try updatedRecord.updateChanges(db, from: record)
+            }
+        } catch {
+            Logger.shared.logInfo("Couldn't update tree record id: \(record.rootId) \(error)", category: .browsingTreeNetwork)
+        }
+
     }
     // MARK: - LinkStore
     func getLinks(matchingUrl url: String) -> [UUID: Link] {

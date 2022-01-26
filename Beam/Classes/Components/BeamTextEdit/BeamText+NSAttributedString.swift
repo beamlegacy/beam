@@ -70,14 +70,17 @@ extension BeamText {
                                caret: Caret?,
                                selectedRange: Swift.Range<Int>?,
                                mouseInteraction: MouseInteraction? = nil) -> NSMutableAttributedString {
-
+        var referencesRanges: [Swift.Range<Int>]?
+        if let proxyNode = node as? ProxyTextNode, !proxyNode.isLink {
+            referencesRanges = proxyNode.referencesRanges
+        }
         let config = BeamTextAttributedStringBuilder.Config(elementKind: node.elementKind,
                                                             ranges: ranges,
                                                             fontSize: node.fontSize,
                                                             fontColor: node.color,
                                                             caret: caret,
                                                             markedRange: node.markedTextRange,
-                                                            selectedRange: selectedRange,
+                                                            selectedRange: selectedRange, referencesRanges: referencesRanges,
                                                             searchedRanges: node.searchHighlightRanges,
                                                             currentSearchRangeIndex: node.currentSearchHightlight,
                                                             mouseInteraction: mouseInteraction)
@@ -105,10 +108,9 @@ extension BeamText {
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
         var font: BeamFont
-        var strong = strong
         switch elementKind {
         case .heading:
-            strong = true
+            font = BeamFont.medium(size: fontSize)
         case .bullet, .code, .quote, .check, .divider, .image, .embed, .blockReference:
             break
         }

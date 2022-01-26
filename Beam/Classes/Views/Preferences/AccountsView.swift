@@ -145,7 +145,7 @@ struct AccountsView: View {
                 }
             }
 
-            Preferences.Section(bottomDivider: false, verticalAlignment: .firstTextBaseline) {
+            Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
                 Text("Manage:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -333,11 +333,12 @@ struct AccountsView: View {
     private func promptLogoutAlert() {
         let alert = NSAlert()
         alert.messageText = "Are you sure you want to sign out ?"
-        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 16))
-        let checkBox = NSButton(checkboxWithTitle: "Delete all my notes & data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
-        checkBox.frame.origin = CGPoint(x: 17, y: 0)
+        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 252, height: 16))
+        let checkBox = NSButton(checkboxWithTitle: "Delete all data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
+        checkBox.frame.origin = CGPoint(x: 0, y: 0)
         checkBox.font = BeamFont.regular(size: 12).nsFont
         customView.addSubview(checkBox)
+        checkBox.frame.origin = CGPoint(x: customView.frame.width / 2 - checkBox.fittingSize.width / 2, y: 0)
         alert.accessoryView = customView
         alert.addButton(withTitle: "Sign Out")
         alert.addButton(withTitle: "Cancel")
@@ -381,9 +382,9 @@ struct GoogleAccountView: View {
 
     var body: some View {
         VStack(alignment: .leading) {
-            HStack {
+            HStack(alignment: .top) {
                 Text(account.name)
-                    .frame(width: 227, alignment: .leading)
+                    .frame(width: 227, alignment: .topLeading)
                     .padding(.trailing, 12)
                 if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
                     Button {

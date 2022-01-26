@@ -16,6 +16,8 @@ extension PreferencesManager {
     static let showPNSKey = "showPNSview"
     static let PnsJSIsOnKey = "PnsJSIsOn"
     static let SpaIndexingKey = "SpaIndexing"
+    static let collectFeedbackKey = "collectFeedback"
+    static let showsCollectFeedbackAlertKey = "showsCollectFeedbackAlert"
 }
 
 // MARK: - Default Values
@@ -29,6 +31,8 @@ extension PreferencesManager {
     static let showOmniboxScoreSectionDefault = false
     static let showPNSDefault = true
     static let PnsJSIsOnDefault = true
+    static let collectFeedbackDefault = true
+    static let showsCollectFeedbackAlertDefault = true
 }
 
 extension PreferencesManager {
@@ -49,4 +53,11 @@ extension PreferencesManager {
 
     @UserDefault(key: PnsJSIsOnKey, defaultValue: PnsJSIsOnDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var PnsJSIsOn: Bool
+
+    @UserDefault(key: collectFeedbackKey, defaultValue: collectFeedbackDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var isCollectFeedbackEnabled: Bool
+
+    @UserDefault(key: showsCollectFeedbackAlertKey, defaultValue: showsCollectFeedbackAlertDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var showsCollectFeedbackAlert: Bool
+
 }

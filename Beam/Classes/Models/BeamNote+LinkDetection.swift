@@ -86,7 +86,12 @@ public extension BeamElement {
     }
 
     private func _updateNoteNamesInInternalLinks(recursive: Bool) -> Bool {
-        var res = text.resolveNotesNames()
+        var res = false
+        // Only update the text if it has changed
+        if let resolved = text.resolvedNotesNames() {
+            text = resolved
+            res = true
+        }
 
         if recursive {
             for child in children {

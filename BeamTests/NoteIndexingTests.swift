@@ -37,7 +37,7 @@ class noteIndexingTests: XCTestCase {
     }
 
     func testReferencesAndLinks() {
-        let title1 = "test prout"
+        let title1 = "test proud"
         let title2 = "Test Bleh"
 
         let note1 = BeamNote.fetchOrCreate(title: title1)
@@ -74,7 +74,13 @@ class noteIndexingTests: XCTestCase {
         element1_1.text = BeamText(text: "removing a reference by using another text...")
 
         // Explicitely sleep to let the full text search engine index things
-        Thread.sleep(forTimeInterval: 1)
+        var index = 0
+        while note1.references.count != 0 && index < 5 {
+          Thread.sleep(forTimeInterval: 1)
+          index += 1
+        }
+
+        expect(note1.references.count) == 0
 
         expect(note1.references.count) == 0
         expect(note2.references.count) == 0
@@ -84,7 +90,11 @@ class noteIndexingTests: XCTestCase {
         element1_2.text.append(" let's add a reference to '\(title1)' the second note")
 
         // Explicitely sleep to let the full text search engine index things
-        Thread.sleep(forTimeInterval: 1)
+        index = 0
+        while note1.references.count != 1 && index < 5 {
+          Thread.sleep(forTimeInterval: 1)
+          index += 1
+        }
 
         expect(note1.references.count) == 1
         expect(note2.references.count) == 0
@@ -95,7 +105,11 @@ class noteIndexingTests: XCTestCase {
         element1_2.text.append(note1.title, withAttributes: [.internalLink(note1.id)])
 
         // Explicitely sleep to let the full text search engine index things
-        Thread.sleep(forTimeInterval: 1)
+        index = 0
+        while note1.links.count != 1 && index < 5 {
+          Thread.sleep(forTimeInterval: 1)
+          index += 1
+        }
 
         expect(note1.references.count) == 1
         expect(note2.references.count) == 0

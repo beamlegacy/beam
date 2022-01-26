@@ -3,11 +3,12 @@
 const path = require("path")
 const webpack = require("webpack")
 const sharedConfig = require("../../../Helpers/Utils/Web/webpack.config")
+const TerserPlugin = require("terser-webpack-plugin");
 
-function config(name, mode = "production") {
-  console.log(`Building WebPositions for ${mode}`)
+function config(name, mode) {
+  console.log(`Building ${name} for ${mode}`)
   return {
-    ...sharedConfig(name, mode),
+    ...sharedConfig(name, mode, { TerserPlugin }),
     entry: {
       index: {
         import: "./WebPositions.js"
@@ -20,7 +21,11 @@ function config(name, mode = "production") {
   }
 }
 
-module.exports = (env, argv) => {
-  const mode = argv.mode || "production"
-  return config(mode)
+module.exports = () => {
+  const isDebugOrTest = process.env.ENV == "debug" || process.env.ENV == "test"
+  if (isDebugOrTest) {
+    return config("WebPositions", "development")
+  } else {
+    return config("WebPositions", "production")
+  }
 }

@@ -38,7 +38,7 @@ class LinksSection: Widget {
     override var open: Bool {
         didSet {
             openedOnce = openedOnce || open
-            self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 0, right: 0)
+            self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 7 : 0, right: 0)
         }
     }
 
@@ -89,7 +89,7 @@ class LinksSection: Widget {
         self.layer.addSublayer(separatorLayer)
         childInset = 9
 
-        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 5 : 0, right: 0)
+        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 7 : 0, right: 0)
     }
 
     var links: [BeamNoteReference] { note.links }
@@ -275,7 +275,7 @@ class LinksSection: Widget {
             )
         )
 
-        layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height / 2 - 9), size: CGSize(width: 20, height: 20))
+        layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height / 2 - 8.5), size: CGSize(width: 20, height: 20))
     }
 
     override func updateRendering() -> CGFloat {

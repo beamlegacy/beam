@@ -37,7 +37,7 @@ class String_URLTests: XCTestCase {
     }
 
     func testUrlRangesInside() {
-        XCTAssertEqual("prout".urlRangesInside(), [])
+        XCTAssertEqual("proud".urlRangesInside(), [])
         XCTAssertEqual("".urlRangesInside(), [])
         XCTAssertEqual("some garbage".urlRangesInside(), [])
 
@@ -71,19 +71,19 @@ class String_URLTests: XCTestCase {
     }
 
     func testURLMinimizeHost() {
-        XCTAssertEqual(URL(string: "http://google.com/search?prout")!.minimizedHost, "google.com")
-        XCTAssertEqual(URL(string: "http://www.google.com/search?prout")!.minimizedHost, "google.com")
-        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?prout")!.minimizedHost, "search.somedomain.google.com")
-        XCTAssertEqual(URL(string: "http://google/search?prout")!.minimizedHost, "google")
-        XCTAssertNil(URL(string: "google/search?prout")!.minimizedHost)
+        XCTAssertEqual(URL(string: "http://google.com/search?proud")!.minimizedHost, "google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com/search?proud")!.minimizedHost, "google.com")
+        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?proud")!.minimizedHost, "search.somedomain.google.com")
+        XCTAssertEqual(URL(string: "http://google/search?proud")!.minimizedHost, "google")
+        XCTAssertNil(URL(string: "google/search?proud")!.minimizedHost)
     }
 
     func testURLMainHost() {
-        XCTAssertEqual(URL(string: "http://google.com/search?prout")!.mainHost, "google.com")
-        XCTAssertEqual(URL(string: "http://www.google.com/search?prout")!.mainHost, "google.com")
-        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?sprout")!.mainHost, "google.com")
-        XCTAssertEqual(URL(string: "http://google/search?prout")!.mainHost, "google")
-        XCTAssertNil(URL(string: "google/search?prout")!.mainHost)
+        XCTAssertEqual(URL(string: "http://google.com/search?proud")!.mainHost, "google.com")
+        XCTAssertEqual(URL(string: "http://www.google.com/search?proud")!.mainHost, "google.com")
+        XCTAssertEqual(URL(string: "http://search.somedomain.google.com/search?sproud")!.mainHost, "google.com")
+        XCTAssertEqual(URL(string: "http://google/search?proud")!.mainHost, "google")
+        XCTAssertNil(URL(string: "google/search?proud")!.mainHost)
     }
 
     func testUrlWithScheme() {

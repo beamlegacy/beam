@@ -158,7 +158,7 @@ struct ToolbarContentView_Previews: PreviewProvider {
         state.focusOmniBox = false
         focusedState.focusOmniBox = true
         focusedState.mode = .web
-        let origin = BrowsingTreeOrigin.searchBar(query: "query")
+        let origin = BrowsingTreeOrigin.searchBar(query: "query", referringRootId: nil)
         focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Note title"))
         return Group {
             ToolbarContentView()

@@ -38,7 +38,7 @@ class HtmlVisitorTests: XCTestCase {
             XCTAssertEqual(base64, data)
             XCTAssertEqual(mimeType, "image/png;base64")
         } else {
-            XCTFail("expected getBase64 to return tuple, recieved nil")
+            XCTFail("expected getBase64 to return tuple, received nil")
         }
     }
 

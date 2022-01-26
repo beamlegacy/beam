@@ -11,7 +11,7 @@ import Foundation
 import Combine
 
 public indirect enum BrowsingTreeOrigin: Codable, Equatable {
-    case searchBar(query: String)
+    case searchBar(query: String, referringRootId: UUID?)
     case searchFromNode(nodeText: String)
     case linkFromNote(noteName: String)
     case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?, rootId: UUID?) //following a cmd + click on link
@@ -25,15 +25,18 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     }
 
     enum CodingKeys: CodingKey {
-        case type, value, rootOrigin, pageLoadId, rootId
+        case type, value, rootOrigin, pageLoadId, rootId, referringRootId
     }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         switch self {
-        case .searchBar(let query):
+        case .searchBar(let query, let referringRootId):
             try container.encode("searchBar", forKey: .type)
             try container.encode(query, forKey: .value)
+            if let referringRootId = referringRootId {
+                try container.encode(referringRootId, forKey: .referringRootId)
+            }
         case .searchFromNode(let nodeText):
             try container.encode("searchFromNode", forKey: .type)
             try container.encode(nodeText, forKey: .value)
@@ -63,7 +66,8 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         let type = try container.decode(String.self, forKey: .type)
         switch type {
         case "searchBar":
-            self = .searchBar(query: try container.decode(String.self, forKey: .value))
+            self = .searchBar(query: try container.decode(String.self, forKey: .value),
+                              referringRootId: try? container.decodeIfPresent(UUID.self, forKey: .referringRootId))
         case "searchFromNode":
             self = .searchFromNode(nodeText: try container.decode(String.self, forKey: .value))
         case "linkFromNote":
@@ -127,7 +131,7 @@ let ClosingEventTypes: Set = [
     ReadingEventType.searchBarNavigation
 ]
 
-public struct ReadingEvent: Codable {
+public struct ReadingEvent: Codable, Equatable {
     public var id: UUID? = UUID()
     public var type: ReadingEventType
     public var date: Date
@@ -146,7 +150,6 @@ public struct ReadingEvent: Codable {
     public func readingTime(isForeground: Bool, toDate: Date) -> CFTimeInterval {
         return isForeground ? toDate.timeIntervalSince(date) : 0
     }
-
 }
 
 public struct ScoredLink: Hashable {
@@ -269,6 +272,13 @@ public class BrowsingNode: ObservableObject, Codable {
             }
         longTermScoreApply { $0.visitCount += 1 }
     }
+    init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool) {
+        self.id = id
+        self.link = link
+        self.events = events
+        self.legacy = legacy
+        self.isLinkActivation = isLinkActivation
+    }
 
     // Codable:
     enum CodingKeys: String, CodingKey {
@@ -315,6 +325,7 @@ public class BrowsingNode: ObservableObject, Codable {
         if !children.isEmpty {
             try container.encode(children, forKey: .children)
         }
+        try container.encode(isLinkActivation, forKey: .isLinkActivation)
     }
 
     public func deepCopy() -> BrowsingNode? {
@@ -388,7 +399,7 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 }
 
-private let defaultOrigin = BrowsingTreeOrigin.searchBar(query: "<???>")
+private let defaultOrigin = BrowsingTreeOrigin.searchBar(query: "<???>", referringRootId: nil)
 
 public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     @Published public private(set) var root: BrowsingNode!
@@ -404,6 +415,13 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         self.longTermScoreStore = longTermScoreStore
         self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
+    }
+
+    public init(origin: BrowsingTreeOrigin, root: BrowsingNode, current: BrowsingNode, scores: [UUID: Score]) {
+        self.origin = origin
+        self.root = root
+        self.scores = scores
+        self.current = current
     }
 
     // Codable:
@@ -598,4 +616,36 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         return score
     }
     public var rootId: UUID? { root?.id }
+
+    // MARK: - Conversion from/to serializable format
+    public convenience init?(flattenedTree: FlatennedBrowsingTree) {
+        let flattenedTreeCopy = flattenedTree.copy //avoids mutating original flattenedTree
+        guard let root = flattenedTreeCopy.root else { return nil }
+        let current = flattenedTreeCopy.current ?? root
+        self.init(origin: flattenedTreeCopy.origin, root: root, current: current, scores: flattenedTreeCopy.scores)
+        for (node, parentIndex) in zip(flattenedTreeCopy.nodes, flattenedTreeCopy.parentIndexes) {
+            if let parentIndex = parentIndex,
+               let parentNode = flattenedTreeCopy.node(index: parentIndex) {
+                parentNode.children.append(node)
+                node.parent = parentNode
+            }
+        }
+        root.tree = self
+    }
+
+    public var flattened: FlatennedBrowsingTree {
+        var nodes = [BrowsingNode]()
+        var parentIndexes = [Int?]()
+        var currentIndex: Int = 0
+        var nodesToVisit: [(BrowsingNode, Int?)] = [(root, nil)]
+        while !nodesToVisit.isEmpty {
+            let (node, parentIndex) = nodesToVisit.removeLast()
+            let index = nodes.count
+            if node.id == current.id { currentIndex = index }
+            nodes.append(node.serializable)
+            parentIndexes.append(parentIndex)
+            nodesToVisit.append(contentsOf: node.children.reversed().map { ($0, index) })
+        }
+        return FlatennedBrowsingTree(currentIndex: currentIndex, scores: scores, origin: origin, nodes: nodes, parentIndexes: parentIndexes)
+    }
 }
