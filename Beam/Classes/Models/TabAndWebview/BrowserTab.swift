@@ -203,9 +203,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         noteController = WebNoteController(note: nil, rootElement: nil)
 
         super.init()
-        DispatchQueue.main.async {
-            self.updateFavIcon(fromWebView: false)
-        }
+        updateFavIcon(fromWebView: false)
     }
 
     private static func newBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
@@ -319,8 +317,8 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         guard let url = url else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
         let dispatchItem = DispatchWorkItem { [weak self] in
-            guard let webView = self?.webView else { return }
-            FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
+            guard !fromWebView || cacheOnly || self?.webView != nil else { return }
+            FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
                 guard let self = self else { return }
                 guard let image = favicon?.image else {
                     if fromWebView {
