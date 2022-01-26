@@ -20,6 +20,10 @@ extension ProxyNode {
         }
         return self
     }
+
+    var isContainedInLink: Bool {
+        self.highestParent().isLink || self.highestParent().childrenIsLink()
+    }
 }
 
 // swiftlint:disable file_length
