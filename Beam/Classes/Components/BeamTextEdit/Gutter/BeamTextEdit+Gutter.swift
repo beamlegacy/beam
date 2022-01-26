@@ -30,28 +30,38 @@ extension BeamTextEdit {
     }
 
     private var leadingGutter: GutterContainerView? {
-        var gutter = subviews.first { $0 is GutterContainerView && ($0 as? GutterContainerView)?.isLeading == true} as? GutterContainerView
-        if gutter == nil {
-            gutter = setupLeadingGutter()
+        let isLeadingGutter: (NSView) -> Bool = { view in
+            guard let gutterContainerView = view as? GutterContainerView else { return false }
+            return gutterContainerView.isLeading
         }
-        return gutter
+
+        return subviews.first(where: isLeadingGutter) as? GutterContainerView
     }
 
-    private func setupLeadingGutter() -> GutterContainerView? {
-        guard let calendarManager = state?.data.calendarManager else { return nil }
+    var leadingGutterSize: NSSize {
+        guard let gutter = leadingGutter else { return .zero }
+        return gutter.intrinsicContentSize
+    }
+
+    func setupLeadingGutter(textRect: NSRect) {
+        guard let calendarManager = data?.calendarManager, leadingGutter == nil else { return }
         let viewModel = CalendarGutterViewModel(root: self.rootNode, calendarManager: calendarManager, noteId: self.note.id, todaysCalendar: state?.data.todaysNote.id == self.note.id)
-        let gutter = GutterContainerView(frame: NSRect.zero, isLeading: true, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType.calendarGutterView(viewModel: viewModel))
+        let gutter = GutterContainerView(frame: .zero, isLeading: true, leadingGutterViewType: LeadingGutterView.LeadingGutterViewType.calendarGutterView(viewModel: viewModel))
+        gutter.frame.origin = CGPoint(x: 0, y: textRect.minY)
+        gutter.frame.size = CGSize(width: textRect.minX, height: gutter.intrinsicContentSize.height)
         self.addSubview(gutter, positioned: .above, relativeTo: nil)
-        return gutter
+        observeLeading(gutter: gutter)
     }
 
-    func updateLeadingGutterLayout(textRect: NSRect) {
-        let containerSize = frame.size
-        var gutterFrame = CGRect.zero
-        gutterFrame.origin = CGPoint(x: 0, y: textRect.minY)
-        gutterFrame.size = CGSize(width: gutterFrame.minX + textRect.minX, height: containerSize.height - gutterFrame.minY)
-        DispatchQueue.main.async { [weak self] in
-            self?.leadingGutter?.frame = gutterFrame
+    private func observeLeading(gutter: GutterContainerView) {
+        switch gutter.leadingGutterViewType {
+        case .calendarGutterView(let viewModel):
+            viewModel.$meetings.dropFirst().sink { meetings in
+                if viewModel.meetings.count != meetings.count {
+                    self.superview?.invalidateIntrinsicContentSize()
+                }
+            }.store(in: &scope)
+        case .none: break
         }
     }
 
