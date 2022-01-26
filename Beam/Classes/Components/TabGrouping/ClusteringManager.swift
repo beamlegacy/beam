@@ -178,7 +178,7 @@ class ClusteringManager: ObservableObject {
         // Check the case where a link is opened from a note
         switch tabToIndex.tabTree?.origin {
         case .linkFromNote(let noteName):
-            if let root = tabToIndex.tabTree?.root,
+            if let noteName = noteName, let root = tabToIndex.tabTree?.root,
                tabToIndex.parentBrowsingNode?.id == root.id,
                let id = id,
                let note = BeamNote.fetch(title: noteName) {
