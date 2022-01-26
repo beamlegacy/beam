@@ -151,7 +151,7 @@ struct AdvancedPreferencesView: View {
                     Text(String(describing: sentryEnabled)).fixedSize(horizontal: false, vertical: true)
                 }
                 Preferences.Section(title: "Sentry dsn", bottomDivider: true) {
-                    Text(Configuration.sentryDsn)
+                    Text(Configuration.Sentry.DSN)
                         .fixedSize(horizontal: false, vertical: true)
                         .lineLimit(4)
                         .frame(maxWidth: 387)
