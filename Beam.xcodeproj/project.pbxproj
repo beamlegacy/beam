@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		022843362617C4C3001C062E /* Readability.js in Resources */ = {isa = PBXBuildFile; fileRef = 418172FD25811DB200317ED8 /* Readability.js */; };
 		022843372617C4C3001C062E /* OverrideConsole.js in Resources */ = {isa = PBXBuildFile; fileRef = 418171912581107C00317ED8 /* OverrideConsole.js */; };
-		027CB665263163AC001311A0 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = BAA67AD6C73B8B9546778E72 /* PasswordManager.js */; };
 		0325628E26051D3B006513E4 /* RBZip.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624A26051D3A006513E4 /* RBZip.m */; };
 		0325628F26051D3B006513E4 /* RBSQLite.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624B26051D3A006513E4 /* RBSQLite.m */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325624D26051D3A006513E4 /* RBCodeSignature.m */; };
@@ -497,6 +496,19 @@
 		8A7F949826A8694600270A74 /* PointAndShootSelectTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F949726A8694600270A74 /* PointAndShootSelectTest.swift */; };
 		8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F949926A8750A00270A74 /* PointAndShootCreateTargetTest.swift */; };
 		8A8CD64F274D146D00DEB52B /* WebNoteControllerTest+setContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */; };
+		8A9309FD27A04E2C00064133 /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309EF27A04E2B00064133 /* tsconfig.json */; };
+		8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */; };
+		8A9309FF27A04E2C00064133 /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F227A04E2B00064133 /* jest.config.js */; };
+		8A930A0127A04E2C00064133 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F427A04E2B00064133 /* webpack.config.js */; };
+		8A930A0227A04E2C00064133 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F527A04E2C00064133 /* PasswordManager.js */; };
+		8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */; };
+		8A930A0427A04E2C00064133 /* PasswordManagerTypes.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F727A04E2C00064133 /* PasswordManagerTypes.ts */; };
+		8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */; };
+		8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F927A04E2C00064133 /* PasswordManager.ts */; };
+		8A930A0727A04E2C00064133 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FA27A04E2C00064133 /* package.json */; };
+		8A930A0827A04E2C00064133 /* yarn.lock in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FB27A04E2C00064133 /* yarn.lock */; };
+		8A930A0927A04E2C00064133 /* PasswordManager_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FC27A04E2C00064133 /* PasswordManager_prod.js */; };
+		8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A930A0E27A0519200064133 /* PasswordManagerHelper.ts */; };
 		8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */; };
 		8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */; };
 		8AA2431626E63A5F002A553A /* SwiftSoup+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */; };
@@ -1780,6 +1792,19 @@
 		8A7F949726A8694600270A74 /* PointAndShootSelectTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootSelectTest.swift; sourceTree = "<group>"; };
 		8A7F949926A8750A00270A74 /* PointAndShootCreateTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootCreateTargetTest.swift; sourceTree = "<group>"; };
 		8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebNoteControllerTest+setContents.swift"; sourceTree = "<group>"; };
+		8A9309EF27A04E2B00064133 /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = tsconfig.json; path = Web/tsconfig.json; sourceTree = "<group>"; };
+		8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PasswordManagerUIMock.ts; sourceTree = "<group>"; };
+		8A9309F227A04E2B00064133 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = jest.config.js; path = Web/jest.config.js; sourceTree = "<group>"; };
+		8A9309F427A04E2B00064133 /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = webpack.config.js; path = Web/webpack.config.js; sourceTree = "<group>"; };
+		8A9309F527A04E2C00064133 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = PasswordManager.js; path = Web/PasswordManager.js; sourceTree = "<group>"; };
+		8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerUI_native.ts; path = Web/PasswordManagerUI_native.ts; sourceTree = "<group>"; };
+		8A9309F727A04E2C00064133 /* PasswordManagerTypes.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerTypes.ts; path = Web/PasswordManagerTypes.ts; sourceTree = "<group>"; };
+		8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerUI.ts; path = Web/PasswordManagerUI.ts; sourceTree = "<group>"; };
+		8A9309F927A04E2C00064133 /* PasswordManager.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManager.ts; path = Web/PasswordManager.ts; sourceTree = "<group>"; };
+		8A9309FA27A04E2C00064133 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = package.json; path = Web/package.json; sourceTree = "<group>"; };
+		8A9309FB27A04E2C00064133 /* yarn.lock */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = yarn.lock; path = Web/yarn.lock; sourceTree = "<group>"; };
+		8A9309FC27A04E2C00064133 /* PasswordManager_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = PasswordManager_prod.js; path = Web/PasswordManager_prod.js; sourceTree = "<group>"; };
+		8A930A0E27A0519200064133 /* PasswordManagerHelper.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerHelper.ts; path = Web/PasswordManagerHelper.ts; sourceTree = "<group>"; };
 		8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+ShootGroup.swift"; sourceTree = "<group>"; };
 		8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Target.swift"; sourceTree = "<group>"; };
 		8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SwiftSoup+Beam.swift"; sourceTree = "<group>"; };
@@ -2366,7 +2391,6 @@
 		BAA67A4B26FC61E9505EF7DB /* BeamMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67A5430B54889A3648D2A /* BeamWindowMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamWindowMock.ts; sourceTree = "<group>"; };
 		BAA67AA62453F20EF28B447F /* BeamRangeMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamRangeMock.ts; sourceTree = "<group>"; };
-		BAA67AD6C73B8B9546778E72 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = PasswordManager.js; sourceTree = "<group>"; };
 		BAA67B138DFC6DBC31D184E0 /* PointAndShootMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PointAndShootMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = TextSelectorUI.scss; sourceTree = "<group>"; };
 		BAA67BA9AB0BCEAF1F915459 /* BeamTextMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamTextMock.ts; sourceTree = "<group>"; };
@@ -2387,7 +2411,6 @@
 		BAA67E899E0DEB27DFE32C9E /* PointAndShootUI_web.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PointAndShootUI_web.ts; sourceTree = "<group>"; };
 		BAA67EA80CD97EDF95F98D66 /* Beam.scss */ = {isa = PBXFileReference; lastKnownFileType = text; path = Beam.scss; sourceTree = "<group>"; };
 		BAA67EC028563EAFFF3502FA /* BeamElementMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamElementMock.ts; sourceTree = "<group>"; };
-		BAA67EF0075AA8C7D276DEDC /* Util.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = Util.ts; sourceTree = "<group>"; };
 		BAA67F4FA344471FF8691E1A /* BrowserTabConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowserTabConfiguration.swift; sourceTree = "<group>"; };
 		BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebNavigationMessageHandler.swift; sourceTree = "<group>"; };
 		BAA67F65A4275DE0B884B933 /* index_native.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index_native.js; sourceTree = "<group>"; };
@@ -4128,6 +4151,15 @@
 			path = PointAndShoot;
 			sourceTree = "<group>";
 		};
+		8A9309F027A04E2B00064133 /* Test */ = {
+			isa = PBXGroup;
+			children = (
+				8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */,
+			);
+			name = Test;
+			path = Web/Test;
+			sourceTree = "<group>";
+		};
 		8AA2430B26E638A9002A553A /* HtmlConverter */ = {
 			isa = PBXGroup;
 			children = (
@@ -4193,32 +4225,31 @@
 		8AC2EFD0266F840D00049005 /* Web */ = {
 			isa = PBXGroup;
 			children = (
-				8AD2633C26F4A0480074D673 /* Test */,
-				8AF0E335268F30E0007C75D8 /* pns_prod.js */,
-				8AC2EFD1266F86F500049005 /* yarn.lock */,
-				BAA67494A353CE9F59952C32 /* PointAndShootUI_web.scss */,
-				BAA6721A918F405B16F39D59 /* PointAndShootUI_debug.ts */,
-				BAA676A6408390EB6F10B7D6 /* README.md */,
-				BAA672B83C933052676D43C2 /* index_web.js */,
-				BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */,
-				BAA6719ECB481D659C210913 /* index_native.scss */,
-				BAA67EF0075AA8C7D276DEDC /* Util.ts */,
-				BAA679370284CA3AB35EC0FD /* index_debug.scss */,
-				BAA67F65A4275DE0B884B933 /* index_native.js */,
-				BAA67E65CFE073BC56B23C55 /* PointAndShootUI.ts */,
-				BAA67D4F02B489A221B47CBB /* index_debug.js */,
-				BAA672D65AB9D06DFEBA3EF2 /* index_web.scss */,
-				BAA67E555FFA88F96CBBEC3A /* PointAndShoot.ts */,
-				BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */,
-				BAA67E899E0DEB27DFE32C9E /* PointAndShootUI_web.ts */,
-				BAA67EA80CD97EDF95F98D66 /* Beam.scss */,
-				BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */,
-				BAA670DDAA16ED17F69AA6C4 /* jest.config.js */,
 				BAA67E77EF273CA502E66A58 /* .gitignore */,
 				BAA679E2DF3556E0E444844D /* .sassrc */,
+				BAA67EA80CD97EDF95F98D66 /* Beam.scss */,
+				BAA67D4F02B489A221B47CBB /* index_debug.js */,
+				BAA679370284CA3AB35EC0FD /* index_debug.scss */,
+				BAA67F65A4275DE0B884B933 /* index_native.js */,
+				BAA6719ECB481D659C210913 /* index_native.scss */,
+				BAA672B83C933052676D43C2 /* index_web.js */,
+				BAA672D65AB9D06DFEBA3EF2 /* index_web.scss */,
+				BAA670DDAA16ED17F69AA6C4 /* jest.config.js */,
+				BAA67D2FC7A644FB3E1C05E6 /* mixins.scss */,
+				8AF0E335268F30E0007C75D8 /* pns_prod.js */,
+				BAA67E555FFA88F96CBBEC3A /* PointAndShoot.ts */,
+				1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */,
+				BAA6721A918F405B16F39D59 /* PointAndShootUI_debug.ts */,
+				BAA677C8DE42140C0F0BD535 /* PointAndShootUI_native.ts */,
+				BAA67494A353CE9F59952C32 /* PointAndShootUI_web.scss */,
+				BAA67E899E0DEB27DFE32C9E /* PointAndShootUI_web.ts */,
+				BAA67E65CFE073BC56B23C55 /* PointAndShootUI.ts */,
 				BAA679D78927DFBF9EB1B0E5 /* PopupUI_web.js */,
 				BAA678F0976FD26A8BF9B2CA /* PopupUI_web.scss */,
-				1A5601F85613AA978F874B3E /* PointAndShootHelper.ts */,
+				BAA676A6408390EB6F10B7D6 /* README.md */,
+				8AD2633C26F4A0480074D673 /* Test */,
+				BAA67B6D4C4A10AA8B362C0B /* TextSelectorUI.scss */,
+				8AC2EFD1266F86F500049005 /* yarn.lock */,
 			);
 			path = Web;
 			sourceTree = "<group>";
@@ -5022,10 +5053,22 @@
 		A5D8A6D826724E2600CEC37E /* Password */ = {
 			isa = PBXGroup;
 			children = (
+				8A930A0E27A0519200064133 /* PasswordManagerHelper.ts */,
+				8A9309F227A04E2B00064133 /* jest.config.js */,
+				8A9309FA27A04E2C00064133 /* package.json */,
+				8A9309FC27A04E2C00064133 /* PasswordManager_prod.js */,
+				8A9309F527A04E2C00064133 /* PasswordManager.js */,
+				8A9309F927A04E2C00064133 /* PasswordManager.ts */,
+				8A9309F727A04E2C00064133 /* PasswordManagerTypes.ts */,
+				8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */,
+				8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */,
+				8A9309F027A04E2B00064133 /* Test */,
+				8A9309EF27A04E2B00064133 /* tsconfig.json */,
+				8A9309F427A04E2B00064133 /* webpack.config.js */,
+				8A9309FB27A04E2C00064133 /* yarn.lock */,
 				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
 				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
 				BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */,
-				BAA67AD6C73B8B9546778E72 /* PasswordManager.js */,
 				8726448E26199B8F0070E83D /* OptionSelector.swift */,
 			);
 			path = Password;
@@ -5630,10 +5673,12 @@
 				8A0D274726D5338600CE0AC9 /* Write xcfilelist: Point and Shoot */,
 				8AE0E6F5271D9C01004B22FB /* Write xcfilelist: Navigation */,
 				8AE1496627551D2900C71304 /* Write xcfilelist: EmbedNode */,
+				8A930A0C27A04F7A00064133 /* Write xcfilelist: PasswordManager */,
 				8ADD05EC27296396004C3EC9 /* Build Web: WebPositions */,
 				0274A217261212DC00DA35CE /* Build Web: Point and Shoot */,
 				8AE0E6F4271D9AF7004B22FB /* Build Web: Navigation */,
 				8AE1496727551D7D00C71304 /* Build Web: EmbedNode */,
+				8A930A0D27A04FD200064133 /* Build Web: PasswordManager */,
 				965A78232514F147009980D4 /* Resources */,
 				5259C3AA258A7DC300DD67E7 /* Embed Frameworks */,
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
@@ -5896,10 +5941,11 @@
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
+				8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */,
+				8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
-				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
 				A07B03EE279AF1D200D14C45 /* Inter-LightItalic.otf in Resources */,
 				022843372617C4C3001C062E /* OverrideConsole.js in Resources */,
@@ -5915,19 +5961,24 @@
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
+				8A930A0927A04E2C00064133 /* PasswordManager_prod.js in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				418170FF2581060A00317ED8 /* Colors.xcassets in Resources */,
 				52F4E49826417EF00067B017 /* create_identity.graphql in Resources */,
 				52F4E4A226417F210067B017 /* sign_in_with_provider.graphql in Resources */,
 				8AFE834F276B248B00D4B560 /* UITests-4.html in Resources */,
 				75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */,
+				8A930A0227A04E2C00064133 /* PasswordManager.js in Resources */,
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
 				8AFE8358276B248B00D4B560 /* video.mov in Resources */,
 				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
+				8A930A0427A04E2C00064133 /* PasswordManagerTypes.ts in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */,
+				8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
+				8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */,
@@ -5944,11 +5995,13 @@
 				A07B03EF279AF1D200D14C45 /* Inter-BoldItalic.otf in Resources */,
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
+				8A9309FD27A04E2C00064133 /* tsconfig.json in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
 				8AFE8353276B248B00D4B560 /* Beam.css in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */,
 				A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */,
+				8A9309FF27A04E2C00064133 /* jest.config.js in Resources */,
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				8AFE8354276B248B00D4B560 /* UITests-Password.html in Resources */,
@@ -5960,15 +6013,19 @@
 				8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */,
 				52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */,
 				52EA56D5274F8FA400F092C8 /* beam_objects_data_url.graphql in Resources */,
+				8A930A0727A04E2C00064133 /* package.json in Resources */,
 				52EA56CE274F8F8B00F092C8 /* beam_object_data_url.graphql in Resources */,
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */,
+				8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */,
 				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
 				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
+				8A930A0127A04E2C00064133 /* webpack.config.js in Resources */,
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */,
+				8A930A0827A04E2C00064133 /* yarn.lock in Resources */,
 				8AFE8357276B248B00D4B560 /* UITests-Alerts.html in Resources */,
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
 				A07B03F1279AF1D200D14C45 /* Inter-SemiBoldItalic.otf in Resources */,
@@ -6163,6 +6220,48 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_xcfilelist_pns.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+		};
+		8A930A0C27A04F7A00064133 /* Write xcfilelist: PasswordManager */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/scripts/build_xcfilelist_passwordmanager.sh",
+			);
+			name = "Write xcfilelist: PasswordManager";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/WebFileList_passwordmanager.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    export PATH=\"$PATH:/opt/homebrew/bin\"\n    ./scripts/build_xcfilelist_passwordmanager.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
+		};
+		8A930A0D27A04FD200064133 /* Build Web: PasswordManager */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"$(SRCROOT)/WebFileList_passwordmanager.xcfilelist",
+			);
+			inputPaths = (
+			);
+			name = "Build Web: PasswordManager";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(SRCROOT)/Beam/Classes/Components/Password/Web/PasswordManager_prod.js",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ $ENABLE_PREVIEWS == \"NO\" ]\nthen\n    ./scripts/build_js_passwordmanager.sh\n \nelse\n    echo \"Skipping the script because of SwiftUI preview mode\"\nfi\n";
+			showEnvVarsInLog = 0;
 		};
 		8ADD05EC27296396004C3EC9 /* Build Web: WebPositions */ = {
 			isa = PBXShellScriptBuildPhase;
