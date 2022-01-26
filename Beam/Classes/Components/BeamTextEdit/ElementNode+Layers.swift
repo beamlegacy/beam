@@ -112,7 +112,7 @@ extension ElementNode {
     private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + indentLayerPositionY
-        indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y, width: 0.5, height: frame.height - y)
+        indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y - 4, width: 0.5, height: frame.height - y)
         indentLayer.layer.isHidden = !(showDisclosureButton && self.open)
     }
 
