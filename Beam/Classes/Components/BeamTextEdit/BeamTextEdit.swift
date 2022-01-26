@@ -188,6 +188,7 @@ public extension CALayer {
     public private (set) var journalMode: Bool
 
     public override var wantsUpdateLayer: Bool { true }
+    internal var scope = Set<AnyCancellable>()
 
     public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool) {
         self.enableDelayedInit = enableDelayedInit
@@ -470,7 +471,9 @@ public extension CALayer {
             self.updateCardHearderLayer(rect)
             self.rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
-            self.updateLeadingGutterLayout(textRect: rect)
+            if let cardNote = self.note as? BeamNote, cardNote.type.isJournal {
+                _ = self.setupLeadingGutter(textRect: rect)
+            }
 
             self.doRunAfterNextLayout()
         }
@@ -580,8 +583,9 @@ public extension CALayer {
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
-        let height = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
-        realContentSize = NSSize(width: textNodeWidth, height: height)
+        let noteHeight = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
+        let leadingGutterHeight = leadingGutterSize.height + topOffsetActual + footerHeight + cardTopSpace + cardHeaderPosY
+        realContentSize = NSSize(width: textNodeWidth, height: max(noteHeight, leadingGutterHeight))
         safeContentSize = realContentSize
         if !journalMode {
             safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)

@@ -66,7 +66,7 @@ struct CalendarView: View {
                             CalendarIemView(allDayEvent: meeting.allDayEvent, time: meeting.startTime,
                                             meetingLink: meeting.meetingLink, title: meeting.name, onClick: {
                                 prompt(meeting)
-                            })
+                            }).padding(.bottom, 4)
                         }
                     }.transition(AnyTransition.asymmetric(
                         insertion: .move(edge: .leading).animation(BeamAnimation.easingBounce(duration: 0.15).delay(0.15))
@@ -79,7 +79,7 @@ struct CalendarView: View {
                         ForEach(viewModel.meetings) { meeting in
                             CalendarItemHiddenView(meetingDuration: meeting.duration)
                                 .frame(minHeight: 16, maxHeight: 16)
-                                .padding(.top, 4)
+                                .padding(.bottom, 4)
                         }
                     }.transition(transitionInOutHiddenView)
                 }
@@ -272,7 +272,6 @@ struct CalendarIemView: View {
                 }
             }
         }.frame(minHeight: 16, maxHeight: 16)
-        .padding(.top, 4)
         .padding(.leading, 14)
         .onHover { isHovering in
             isHoveringItem = isHovering
