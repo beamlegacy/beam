@@ -34,7 +34,7 @@ class BeamTestsHelper {
             fullFilename = "\(recordingPath)/Logs/Beam/Vinyl/\(jobId)/\(filename).json"
         }
 
-        Logger.shared.logDebug("Vinyl: Using \(fullFilename)", category: .network)
+        Logger.shared.logDebug("Vinyl: Using \(fullFilename) from \(testName.c99ExtendedIdentifier)", category: .network)
 
         let recordingMode = RecordingMode.missingVinyl(recordingPath: fullFilename)
         let configuration = TurntableConfiguration(matchingStrategy: .trackOrder,

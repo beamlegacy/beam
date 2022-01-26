@@ -328,18 +328,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         expect(object) == remoteObject
                     }
                 }
-
-//                let remoteObject1: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object1)
-//                let remoteObject2: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object2)
-//                let remoteObject3: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object3)
-//
-//                let newObject1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-//                let newObject2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-//                let newObject3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-//
-//                expect(newObject1) == remoteObject1
-//                expect(newObject2) == remoteObject2
-//                expect(newObject3) == remoteObject3
             }
 
             it("stores previousChecksum") {
@@ -500,31 +488,31 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
 //                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == object
             }
 
-            it("stores previousChecksum") {
-                let block = sharedExampleContext()
-                let sut = block["sut"] as! MyRemoteObjectManager
-                let object = block["object"] as! MyRemoteObject
-
-                waitUntil(timeout: .seconds(10)) { done in
-                    do {
-                        _ = try sut.saveOnBeamObjectAPI(object) { result in
-                            expect { try result.get() }.toNot(throwError())
-
-                            done()
-                        }
-                    } catch {
-                        fail(error.localizedDescription)
-                    }
-                }
-
-                if let expectedTitle = block["expectedTitle"] as? String {
-                    var expectedResult = object.copy()
-                    expectedResult.title = expectedTitle
-                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
-                } else {
-                    expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
-                }
-            }
+//            it("stores previousChecksum") {
+//                let block = sharedExampleContext()
+//                let sut = block["sut"] as! MyRemoteObjectManager
+//                let object = block["object"] as! MyRemoteObject
+//
+//                waitUntil(timeout: .seconds(10)) { done in
+//                    do {
+//                        _ = try sut.saveOnBeamObjectAPI(object) { result in
+//                            expect { try result.get() }.toNot(throwError())
+//
+//                            done()
+//                        }
+//                    } catch {
+//                        fail(error.localizedDescription)
+//                    }
+//                }
+//
+//                if let expectedTitle = block["expectedTitle"] as? String {
+//                    var expectedResult = object.copy()
+//                    expectedResult.title = expectedTitle
+//                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
+//                } else {
+//                    expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
+//                }
+//            }
         }
 
         sharedExamples("saveOnBeamObjectAPI with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
@@ -671,7 +659,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             BeamTestsHelper.logout()
 
             APIRequest.networkCallFiles = []
-//            beamHelper.beginNetworkRecording()
+            beamHelper.beginNetworkRecording()
             BeamURLSession.shouldNotBeVinyled = true
 
             BeamTestsHelper.login()
@@ -684,12 +672,12 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
 
-//            Configuration.beamObjectDataUploadOnSeparateCall = false
+            Configuration.beamObjectDataUploadOnSeparateCall = false
         }
 
         afterEach {
             BeamObjectManager.clearNetworkCalls()
-//            beamHelper.endNetworkRecording()
+            beamHelper.endNetworkRecording()
 
             BeamDate.reset()
         }
@@ -1054,26 +1042,77 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
+                    context("without direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = false }
+                        afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
+                    context("with direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = true }
+                        afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "callsCount": 5,
+                             "networkCallFiles": ["sign_in",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
-                    }
+//                    context("with direct upload and direct download") {
+//                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+//                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
+//
+//                        beforeEach {
+//                            Configuration.beamObjectDataUploadOnSeparateCall = true
+//                            Configuration.beamObjectDataOnSeparateCall = true
+//                        }
+//
+//                        afterEach {
+//                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+//                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+//                        }
+//
+//                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+//                            ["sut": sut as MyRemoteObjectManager,
+//                             "callsCount": 5,
+//                             "networkCallFiles": ["sign_in",
+//                                                  "prepare_beam_objects",
+//                                                  "direct_upload",
+//                                                  "direct_upload",
+//                                                  "direct_upload",
+//                                                  "update_beam_objects"]
+//                            ]
+//                        }
+//                    }
                 }
 
                 context("when we send a previousChecksum") {
@@ -1085,22 +1124,46 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects"]
-                        ]
+                    context("without direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = false }
+                        afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = true }
+                        afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects"]
-                        ]
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "callsCount": 5,
+                             "networkCallFiles": ["sign_in",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -1132,28 +1195,59 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_object"]
-                        ]
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_object"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_object"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_object"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_object"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_object"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_object_data_url",
+                                                  "direct_download",
+                                                  "prepare_beam_object",
+                                                  "direct_upload",
+                                                  "update_beam_object"]
+                            ]
+                        }
                     }
                 }
 
@@ -1165,28 +1259,59 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_objects"]
-                        ]
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_object_data_url",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -1230,28 +1355,62 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
 
@@ -1263,40 +1422,78 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)",
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)",
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)",
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)",
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)",
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)",
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)",
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -1345,28 +1542,65 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
 
@@ -1379,49 +1613,93 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
 
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+
+                             "networkCallFiles": ["update_beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+
+                             "networkCallFiles": ["update_beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveAllOnBeamObjectApi with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+
+                             "networkCallFiles": ["update_beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
 
-                    itBehavesLike("saveAllOnBeamObjectApi with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
 
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -1461,11 +1739,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    context("without direct upload") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
@@ -1481,17 +1759,39 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "networkCallFiles": ["sign_in", "update_beam_objects"]
                             ]
                         }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    context("with direct upload") {
-                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDirectCall = true
                         }
 
                         afterEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
@@ -1508,26 +1808,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "update_beam_objects"]
                             ]
                         }
-                    }
-
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
-                    }
-
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
                     }
                 }
 
@@ -1539,11 +1819,11 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    context("without direct upload") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                            Configuration.beamObjectDirectCall = false
                         }
 
                         afterEach {
@@ -1559,17 +1839,39 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "networkCallFiles": ["sign_in", "update_beam_objects"]
                             ]
                         }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_objects"]
+                            ]
+                        }
                     }
 
-                    context("with direct upload") {
-                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDirectCall = true
                         }
 
                         afterEach {
-                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
@@ -1586,26 +1888,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "update_beam_objects"]
                             ]
                         }
-                    }
-
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
-                    }
-
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_objects"]
-                        ]
                     }
                 }
             }
@@ -1772,78 +2054,71 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "networkCallFiles": ["update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                      "update_beam_object"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_object"]
+                            ]
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                  "update_beam_object"]
+                            ]
+                        }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "networkCallFiles": ["prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                      "prepare_beam_object",
-                                                      "direct_upload",
-                                                      "update_beam_object"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                  "update_beam_object"]
+                            ]
                         }
                     }
 
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_object"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_object"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_object_data_url",
+                                                  "direct_download",
+                                                  "prepare_beam_object",
+                                                  "direct_upload",
+                                                  "update_beam_object"]
+                            ]
+                        }
                     }
                 }
 
@@ -1854,82 +2129,84 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
+                    context("without direct upload neither direct download") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                                 "networkCallFiles": ["update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                                 "networkCallFiles": ["prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                      "prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_object",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_object_data_url",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -1966,80 +2243,74 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                    context("without direct upload neither direct download") {
+                        beforeEach { Configuration.beamObjectDirectCall = false }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "networkCallFiles": ["update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "networkCallFiles": ["prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
 
@@ -2050,88 +2321,91 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
+                    context("without direct upload neither direct download") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                                 "networkCallFiles": ["update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                                 "networkCallFiles": ["prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -2172,82 +2446,85 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
 
                 context("with replace policy") {
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                    context("without direct upload neither direct download") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
-
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "networkCallFiles": ["update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "networkCallFiles": ["prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
 
@@ -2258,94 +2535,98 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
-                    context("Foundation") {
-                        context("without direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = false
-                            }
+                    context("without direct upload neither direct download") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
-
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                                 "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
-                                 "networkCallFiles": ["update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
                         }
 
-                        context("with direct upload") {
-                            let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
 
-                            beforeEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = true
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            afterEach {
-                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
+                        }
 
-                            itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object1": object1 as MyRemoteObject,
-                                 "object2": object2 as MyRemoteObject,
-                                 "object3": object3 as MyRemoteObject,
-                                 "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                                 "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                                 "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
-                                 "networkCallFiles": ["prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                                      "prepare_beam_objects",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "direct_upload",
-                                                      "update_beam_objects"]
-                                ]
-                            }
+                        itBehavesLike("saveOnBeamObjectsAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                             "networkCallFiles": ["update_beam_objects",
+                                                  "beam_objects",
+                                                  "update_beam_objects"]
+                            ]
                         }
                     }
 
-                    itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
-                    }
+                    context("with direct upload and direct download") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectsAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object1": object1 as MyRemoteObject,
-                         "object2": object2 as MyRemoteObject,
-                         "object3": object3 as MyRemoteObject,
-                         "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                         "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                         "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
-                         "networkCallFiles": ["update_beam_objects",
-                                              Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
-                                              "update_beam_objects"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object1": object1 as MyRemoteObject,
+                             "object2": object2 as MyRemoteObject,
+                             "object3": object3 as MyRemoteObject,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
+                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
+                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
+                             "networkCallFiles": ["prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects",
+                                                  "beam_objects_data_url",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "direct_download",
+                                                  "prepare_beam_objects",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "direct_upload",
+                                                  "update_beam_objects"]
+                            ]
+                        }
                     }
                 }
             }
@@ -2393,6 +2674,22 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "networkCallFiles": ["sign_in", "update_beam_object"]
                             ]
                         }
+
+                        itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object": object as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_object"]
+                            ]
+                        }
+
+                        itBehavesLike("saveOnBeamObjectAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object": object as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_object"]
+                            ]
+                        }
                     }
 
                     context("with direct upload") {
@@ -2417,22 +2714,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
                     }
-
-                    itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object": object as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_object"]
-                        ]
-                    }
-
-                    itBehavesLike("saveOnBeamObjectAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object": object as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_object"]
-                        ]
-                    }
                 }
 
                 context("when we send a previousChecksum") {
@@ -2445,28 +2726,63 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).notTo(beNil())
                     }
 
-                    itBehavesLike("saveOnBeamObjectAPI with Foundation") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object": object as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_object"]
-                        ]
+                    context("without direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = false
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object": object as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_object"]
+                            ]
+                        }
+
+                        itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object": object as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_object"]
+                            ]
+                        }
+
+                        itBehavesLike("saveOnBeamObjectAPI with Promises") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object": object as MyRemoteObject,
+                             "callsCount": 1,
+                             "networkCallFiles": ["sign_in", "update_beam_object"]
+                            ]
+                        }
                     }
 
-                    itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object": object as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_object"]
-                        ]
-                    }
+                    context("with direct upload") {
+                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
-                    itBehavesLike("saveOnBeamObjectAPI with Promises") {
-                        ["sut": sut as MyRemoteObjectManager,
-                         "object": object as MyRemoteObject,
-                         "callsCount": 1,
-                         "networkCallFiles": ["sign_in", "update_beam_object"]
-                        ]
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                        }
+
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                        }
+
+                        itBehavesLike("saveOnBeamObjectAPI with Foundation") {
+                            ["sut": sut as MyRemoteObjectManager,
+                             "object": object as MyRemoteObject,
+                             "callsCount": 3,
+                             "networkCallFiles": ["sign_in",
+                                                  "prepare_beam_object",
+                                                  "direct_upload",
+                                                  "update_beam_object"]
+                            ]
+                        }
                     }
                 }
             }
@@ -2530,31 +2846,63 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
 
                     context("with replace policy") {
-                        itBehavesLike("saveOnBeamObjectAPI with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "networkCallFiles": ["update_beam_object",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_object"]
-                            ]
+                        context("without direct upload neither direct download") {
+                            beforeEach { Configuration.beamObjectDirectCall = false }
+
+                            itBehavesLike("saveOnBeamObjectAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "networkCallFiles": ["update_beam_object",
+                                                      "beam_object",
+                                                      "update_beam_object"]
+                                ]
+                            }
+
+                            itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "networkCallFiles": ["update_beam_object",
+                                                      "beam_object",
+                                                      "update_beam_object"]
+                                ]
+                            }
+
+                            itBehavesLike("saveOnBeamObjectAPI with Promises") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "networkCallFiles": ["update_beam_object",
+                                                      "beam_object",
+                                                      "update_beam_object"]
+                                ]
+                            }
                         }
 
-                        itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "networkCallFiles": ["update_beam_object",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_object"]
-                            ]
-                        }
+                        context("with direct upload and direct download") {
+                            let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                            let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                        itBehavesLike("saveOnBeamObjectAPI with Promises") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "networkCallFiles": ["update_beam_object",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_object"]
-                            ]
+                            beforeEach {
+                                Configuration.beamObjectDirectCall = true
+                            }
+
+                            afterEach {
+                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                                Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                            }
+
+                            itBehavesLike("saveOnBeamObjectAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "networkCallFiles": ["prepare_beam_object",
+                                                      "direct_upload",
+                                                      "update_beam_object",
+                                                      "beam_object_data_url",
+                                                      "direct_download",
+                                                      "prepare_beam_object",
+                                                      "direct_upload",
+                                                      "update_beam_object"]
+                                ]
+                            }
                         }
                     }
 
@@ -2566,34 +2914,67 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             MyRemoteObjectManager.conflictPolicy = .replace
                         }
 
-                        itBehavesLike("saveOnBeamObjectAPI with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "expectedTitle": "merged: \(newTitle)\(title)",
-                             "networkCallFiles": ["update_beam_object",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_objects"]
-                            ]
+                        context("without direct upload neither direct download") {
+                            beforeEach { Configuration.beamObjectDirectCall = false }
+
+                            itBehavesLike("saveOnBeamObjectAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "expectedTitle": "merged: \(newTitle)\(title)",
+                                 "networkCallFiles": ["update_beam_object",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "update_beam_objects"]
+                                ]
+                            }
+
+                            itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "expectedTitle": "merged: \(newTitle)\(title)",
+                                 "networkCallFiles": ["update_beam_object",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "update_beam_objects"]
+                                ]
+                            }
+
+                            itBehavesLike("saveOnBeamObjectAPI with Promises") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "expectedTitle": "merged: \(newTitle)\(title)",
+                                 "networkCallFiles": ["update_beam_object",
+                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
+                                                      "update_beam_objects"]
+                                ]
+                            }
                         }
 
-                        itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "expectedTitle": "merged: \(newTitle)\(title)",
-                             "networkCallFiles": ["update_beam_object",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_objects"]
-                            ]
-                        }
+                        context("with direct upload and direct download") {
+                            let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                            let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
-                        itBehavesLike("saveOnBeamObjectAPI with Promises") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "expectedTitle": "merged: \(newTitle)\(title)",
-                             "networkCallFiles": ["update_beam_object",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_objects"]
-                            ]
+                            beforeEach {
+                                Configuration.beamObjectDirectCall = true
+                            }
+
+                            afterEach {
+                                Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                                Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                            }
+
+                            itBehavesLike("saveOnBeamObjectAPI with Foundation") {
+                                ["sut": sut as MyRemoteObjectManager,
+                                 "object": object as MyRemoteObject,
+                                 "expectedTitle": "merged: \(newTitle)\(title)",
+                                 "networkCallFiles": ["prepare_beam_object",
+                                                      "direct_upload",
+                                                      "update_beam_object",
+                                                      "beam_object_data_url",
+                                                      "direct_download",
+                                                      "prepare_beam_objects",
+                                                      "direct_upload",
+                                                      "update_beam_objects"]
+                                ]
+                            }
                         }
                     }
                 }

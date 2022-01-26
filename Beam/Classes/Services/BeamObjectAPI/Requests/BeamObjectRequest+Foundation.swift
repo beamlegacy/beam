@@ -567,6 +567,15 @@ extension BeamObjectRequest {
         let session = BeamURLSession.shared
         let localTimer = BeamDate.now
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
+            #if DEBUG
+            // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
+            APIRequest.networkCallFilesSemaphore.wait()
+            APIRequest.networkCallFiles.append("direct_download")
+            APIRequest.networkCallFilesSemaphore.signal()
+            #endif
+
+            APIRequest.callsCount += 1
+
             Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
                                    category: .network,
                                    localTimer: localTimer)
@@ -625,7 +634,13 @@ extension BeamObjectRequest {
                 return
             }
 
-            guard httpResponse.statusCode == 200, data != nil else {
+            /*
+             S3 direct upload returns 0 byte for `data`, Vinyl will not store it at all. Don't match on it as:
+
+             `data != nil == true` on the first call, but false when going through Vinyl
+             */
+
+            guard httpResponse.statusCode == 200 else {
                 Logger.shared.logError("Error while uploading data: \(data?.asString ?? "-")", category: .network)
                 Logger.shared.logDebug("Sent headers: \(headers)", category: .network)
                 completionHandler(.failure(error ?? BeamObjectRequestError.not200))
