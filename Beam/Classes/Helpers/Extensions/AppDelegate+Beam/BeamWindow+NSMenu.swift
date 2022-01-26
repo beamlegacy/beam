@@ -13,6 +13,29 @@ import Foundation
 /// has a method with that exact name, it will be called instead of the window's implementation.
 /// Sometimes it can be a desired effect, sometimes not.
 extension BeamWindow {
+    @IBAction func checkForUpdate(_ sender: Any?) {
+        showUpdateAlert()
+    }
+
+    func showUpdateAlert(onStartUp: Bool = false) {
+        state.data.versionChecker.areAnyUpdatesAvailable { isThereAnUpdate in
+            if onStartUp && !isThereAnUpdate { return }
+            let updateAlertMessage = isThereAnUpdate ? "A new version of beam is available!" : "You’re up-to-date!"
+            let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the lastest version of beam."
+            let updateAlertButtonTitle = isThereAnUpdate ? "Update Now" : "OK"
+            let updateAlertSecondaryButtonTitle = isThereAnUpdate ? onStartUp ? "Update Later" : "Cancel" : ""
+
+            UserAlert.showMessage(message: updateAlertMessage,
+                                  informativeText: updateAlertInformativeText,
+                                  buttonTitle: updateAlertButtonTitle,
+                                  secondaryButtonTitle: updateAlertSecondaryButtonTitle) {
+                if isThereAnUpdate {
+                    self.state.data.versionChecker.checkForUpdates()
+                }
+            }
+        }
+    }
+
     @IBAction func showPreviousTab(_ sender: Any?) {
         state.showPreviousTab()
     }
@@ -150,10 +173,6 @@ extension BeamWindow {
 
     @IBAction func toggleBetweenWebAndNote(_ sender: Any) {
         state.toggleBetweenWebAndNote()
-    }
-
-    @IBAction private func checkForUpdates(_ sender: Any) {
-        data.versionChecker.checkForUpdates()
     }
 
     // MARK: Web loading
