@@ -350,5 +350,7 @@
 	<string>The website you are visiting is requesting to see your current location (only when in use)</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>The website you are visiting is requesting to always see your location</string>
+	<key>GOOGLE_ANALYTICS_REGISTRATION_WITH_AD_NETWORK_ENABLED</key>
+	<false/>
 </dict>
 </plist>
