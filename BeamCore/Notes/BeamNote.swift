@@ -358,7 +358,7 @@ public class BeamNote: BeamElement {
     public func isEntireNoteEmpty() -> Bool {
         if children.count > 1 { return false }
 
-        if let child = children.first, !child.text.isEmpty || children.count > 1 {
+        if let child = children.first, !child.text.isEmpty || child.children.count > 0 {
             return false
         }
 
