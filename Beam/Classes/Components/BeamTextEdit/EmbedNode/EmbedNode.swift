@@ -55,7 +55,8 @@ class EmbedNode: ResizableNode {
         }
 
         setupResizeHandleLayer()
-
+        self.canBeResized = true
+        
         guard let sourceURL = sourceURL else { return }
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
