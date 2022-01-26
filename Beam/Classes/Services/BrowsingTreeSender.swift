@@ -13,7 +13,6 @@ struct BrowsingTreeSendData: Codable {
     let rootId: UUID
     let userId: UUID
     let appSessionId: UUID
-    let idUrlMapping: [UUID: String]
     let data: BrowsingTree
 
     enum CodingKeys: String, CodingKey {
@@ -22,7 +21,6 @@ struct BrowsingTreeSendData: Codable {
             case userId = "user_id"
             case appSessionId = "app_session_id"
             case data = "data"
-            case idUrlMapping = "id_url_mapping"
         }
 }
 
@@ -100,8 +98,7 @@ class BrowsingTreeSender {
             rootId: browsingTree.root.id,
             userId: userId,
             appSessionId: appSessionId,
-            idUrlMapping: browsingTree.idUrlMapping,
-            data: browsingTree
+            data: browsingTree.anonymized
         )
         return try? encoder.encode(dataToSend)
     }
