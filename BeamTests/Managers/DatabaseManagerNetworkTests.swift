@@ -42,6 +42,8 @@ class DatabaseManagerNetworkTests: QuickSpec {
             helper.deleteAllDatabases()
             helper.deleteAllDocuments()
 
+            Configuration.beamObjectDirectCall = false
+
             try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
