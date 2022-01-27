@@ -295,6 +295,8 @@ platform :mac do
       app_identifier: ENV["APP_IDENTIFIER"]
     )
 
+    scheme = scheme_name_for_branch_and_set_in_plist(Actions.git_branch)
+
     check_certs(cert_development: false,
                 cert_type: "developer_id_application",
                 profile_filename: "developer_id.co.beamapp.macos.mobileprovision",
@@ -303,7 +305,7 @@ platform :mac do
                 profile_cert_id: ENV["CERT_ID"],
                 code_sign_identity: "Developer ID Application",
                 profile_name: ENV["PROVISION_NAME"],
-                build_configurations: ["Release"])
+                build_configurations: config_name_for_scheme(scheme))
 
     UI.message "Branch is #{Actions.git_branch}"
     unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch) || Actions.git_branch.start_with?("beta")
@@ -312,8 +314,6 @@ platform :mac do
                 grayscale: false,
                 glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
     end
-
-    scheme = scheme_name_for_branch_and_set_in_plist(Actions.git_branch)
 
     build_mac_app(
       workspace: "Beam.xcworkspace",
@@ -647,6 +647,11 @@ platform :mac do
     set_info_plist_value(path: "Beam/Configuration/Info.plist", key: "SchemeName", value: scheme)
 
     return scheme
+  end
+
+  def config_name_for_scheme(scheme_name)
+    mapping = {"Beam beta release" => "BetaRelease"}
+    mapping[scheme_name] || "Release"
   end
 
 end
