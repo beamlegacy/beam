@@ -471,6 +471,27 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             return false
         }
 
+        // If the element is a external link of a single embeddable url and
+        // the convertLinksToEmbed preference is disabled. The link element should
+        // be inserted without source bullet.
+        for link in first.outLinks {
+            if let url = URL(string: link) {
+                let canEmbed = EmbedContentBuilder().canBuildEmbed(for: url)
+                let disabledConvertingLinksToEmbed = HtmlVisitor.allowConvertToEmbed == false
+                if canEmbed && disabledConvertingLinksToEmbed {
+                    // If the element text is the same as the url target
+                    // update the set the page title to the element text
+                    if first.text.text == link,
+                       let pageTitle = self.page?.title {
+                        var linkWithPageTitle = BeamText(text: pageTitle)
+                        linkWithPageTitle.addAttributes([.link(link)], to: linkWithPageTitle.wholeRange)
+                        first.text = linkWithPageTitle
+                    }
+                    return false
+                }
+            }
+        }
+
         // A single link matching the source bullet link should be inserted without source bullet
         guard let pageUrl = self.page?.url?.absoluteString else {
             Logger.shared.logDebug("Could not find page url while checking text links", category: .pointAndShoot)
