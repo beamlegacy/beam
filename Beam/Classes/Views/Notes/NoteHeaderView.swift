@@ -112,6 +112,25 @@ struct NoteHeaderView: View {
             .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
     }
 
+    private struct AnimatedActionButton: View {
+        let iconName: String
+        let lottieName: String
+        let action: () -> Void
+        @State private var isHovering = false
+
+        var body: some View {
+            ButtonLabel(icon: isHovering ? "transparent" : iconName, action: action)
+                .overlay(
+                    !isHovering ? nil :
+                        LottieView(name: lottieName, playing: true,
+                                   color: BeamColor.Niobium.nsColor, loopMode: .playOnce)
+                        .frame(width: 16, height: 16)
+                        .allowsHitTesting(false)
+                )
+                .onHover { isHovering = $0 }
+        }
+    }
+
     private var actionsView: some View {
         HStack(spacing: BeamSpacing._100) {
             NoteHeaderPublishButton(publishState: model.publishState,
@@ -132,7 +151,9 @@ struct NoteHeaderView: View {
                                     })
 //            Feature not available yet.
 //            ButtonLabel(icon: "editor-sources", state: .disabled)
-            ButtonLabel(icon: "editor-delete", action: model.promptConfirmDelete)
+            AnimatedActionButton(iconName: "editor-delete", lottieName: "editor-delete",
+                                 action: model.promptConfirmDelete)
+                .offset(x: 0, y: -1) // alignment adjustment for the eye
         }
     }
 
