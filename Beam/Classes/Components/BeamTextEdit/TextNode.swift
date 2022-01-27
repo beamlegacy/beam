@@ -695,8 +695,7 @@ public class TextNode: ElementNode {
         editor.detectTextFormatterType()
 
         if mouseIsDragged {
-            editor.detectTextFormatterType()
-            editor.showOrHideInlineFormatter(isPresent: true)
+            editor.showInlineFormatterOnKeyEventsAndClick(isKeyEvent: false)
             mouseIsDragged = false
         }
         return false
