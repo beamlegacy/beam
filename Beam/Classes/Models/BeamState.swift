@@ -61,6 +61,8 @@ import Sentry
     @Published var focusOmniBox: Bool = true
     @Published var focusOmniBoxFromTab: Bool = false
 
+    @Published var showHelpAndFeedback: Bool = false
+
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: Range<Int>?
