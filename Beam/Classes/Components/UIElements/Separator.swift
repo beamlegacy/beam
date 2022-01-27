@@ -40,6 +40,16 @@ struct Separator: View {
     }
 }
 
+struct PopupSeparator: View {
+    @Environment(\.colorScheme) var colorScheme
+
+    var body: some View {
+        Separator(horizontal: true)
+            .blendModeLightMultiplyDarkScreen()
+            .opacity(colorScheme == .dark ? 0.3 : 0.8)
+    }
+}
+
 struct Separator_Previews: PreviewProvider {
     static var previews: some View {
         Separator()
