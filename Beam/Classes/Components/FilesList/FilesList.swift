@@ -10,7 +10,7 @@ struct FilesList: View {
     @State private var cancellable: DatabaseCancellable?
     @State private var searchText: String = ""
 
-    private let fileManager = BeamFileDBManager()
+    private let fileManager = BeamFileDBManager.shared
 
     var body: some View {
         NavigationView {
@@ -33,7 +33,7 @@ struct FilesList: View {
                 .tracking { db in
                     try BeamFileRecord.fetchAll(db)
                 }
-                .start(in: BeamFileDBManager.fileDB.dbPool,
+                .start(in: BeamFileDBManager.shared.dbPool,
                        onError: { Logger.shared.logError($0.localizedDescription, category: .fileDB) },
                        onChange: { self.files = $0 })
         }

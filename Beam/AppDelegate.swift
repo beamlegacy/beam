@@ -310,6 +310,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
         // Insert code here to tear down your application
+        do {
+            try BeamFileDBManager.shared.purgeUndo()
+            try BeamFileDBManager.shared.purgeUnlinkedFiles()
+        } catch {
+            Logger.shared.logError("Unable to purge unused files: \(error)", category: .fileDB)
+        }
         if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
             data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
