@@ -59,10 +59,15 @@ extension ThirdPartyLibrariesManager {
             // Disabling Firebase for tests build because it would require another setup (different bundle id)
             return
         }
+        guard Configuration.env != .debug || !Configuration.Firebase.clientID.hasPrefix("$(") else {
+            // In debug, we allow no firebase config.
+            Logger.shared.logDebug("Firebase Analytics not enabled", category: .tracking)
+            return
+        }
         DispatchQueue.global(qos: .utility).async { [weak self] in
             guard let filePath = self?.getFirebaseConfigFilePath(),
                   let fileopts = FirebaseOptions(contentsOfFile: filePath) else {
-                      assert(false, "Firebase config file couldn't load")
+                    assert(false, "Firebase config file couldn't load")
                       return
                   }
             DispatchQueue.main.async {
