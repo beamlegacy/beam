@@ -335,6 +335,8 @@ struct AccountsView: View {
         alert.messageText = "Are you sure you want to sign out ?"
         let customView = NSView(frame: NSRect(x: 0, y: 0, width: 252, height: 16))
         let checkBox = NSButton(checkboxWithTitle: "Delete all data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
+        checkBox.state = .on
+        self.checkboxHelper.isOn = checkBox.state == .on
         checkBox.frame.origin = CGPoint(x: 0, y: 0)
         checkBox.font = BeamFont.regular(size: 12).nsFont
         customView.addSubview(checkBox)
