@@ -118,6 +118,14 @@ public extension String {
         return position(at: r.lowerBound)..<position(at: r.upperBound)
     }
 
+    func utf16Range(from range: Range<String.Index>) -> Range<Int>? {
+        let utf16View = utf16
+        guard let from = range.lowerBound.samePosition(in: utf16View),
+              let to = range.upperBound.samePosition(in: utf16View) else { return nil }
+        let startInt = utf16View.distance(from: utf16View.startIndex, to: from)
+        let endInt = utf16View.distance(from: from, to: to) + startInt
+        return startInt..<endInt
+    }
 }
 
 public extension String {

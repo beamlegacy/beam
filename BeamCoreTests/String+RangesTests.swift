@@ -29,4 +29,19 @@ class StringRangesTests: XCTestCase {
         XCTAssertEqual(text.indexForCharactersGroup(after: 53), 53)
     }
 
+    func testUTF16NSRange() {
+
+        let text = "some text"
+        // whole range
+        XCTAssertEqual(text.utf16Range(from: text.startIndex..<text.endIndex), 0..<text.count)
+        // range of "text"
+        XCTAssertEqual(text.utf16Range(from: text.firstIndex(of: "t")!..<text.endIndex), 5..<text.count)
+
+        let emojiText = "roller 🛼 skate 🛹"
+        XCTAssertEqual(emojiText.count + 2, emojiText.utf16.count)
+        // whole range
+        XCTAssertEqual(emojiText.utf16Range(from: emojiText.startIndex..<emojiText.endIndex), 0..<emojiText.utf16.count)
+        // range of "skate 🛹"
+        XCTAssertEqual(emojiText.utf16Range(from: emojiText.firstIndex(of: "s")!..<emojiText.endIndex), 10..<emojiText.utf16.count)
+    }
 }
