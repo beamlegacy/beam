@@ -46,7 +46,7 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         for item in items.filter({ $0.tag < 0 }) {
             item.isHidden = !visible
             if item.tag == -MenuEnablingConditionTag.isDebugMode.rawValue {
-                item.isHidden = Configuration.branchType == .beta || Configuration.branchType == .publicRelease
+                item.isHidden = Configuration.branchType != .develop
             }
         }
     }
@@ -65,7 +65,7 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
         } else if tagEnum == .hasTabGroupingWindowPrefOn {
             return PreferencesManager.showTabGrougpingMenuItem
         } else if tagEnum == .isDebugMode {
-            if Configuration.branchType == .beta || Configuration.branchType == .publicRelease {
+            if Configuration.branchType != .develop {
                 return false
             }
             return true
