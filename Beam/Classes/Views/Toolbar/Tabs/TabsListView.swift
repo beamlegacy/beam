@@ -83,6 +83,10 @@ struct TabsListView: View {
         return tab.id == ctab.id
     }
 
+    private func isSingleTab(atIndex: Int, in tabsSections: TabsSections) -> Bool {
+        tabsSections.otherTabs.count == 1 && atIndex == tabsSections.pinnedTabs.count
+    }
+
     // MARK: - Rendering
     private var emptyDragSpacer: some View {
         Rectangle().fill(.clear)
@@ -137,12 +141,12 @@ struct TabsListView: View {
                     onClose: { onTabClose(at: index) },
                     onCopy: { onTabCopy(at: index)},
                     onToggleMute: { onTabToggleMute(at: index) })
-                .frame(width: isTheDraggedTab ? 0 : widthProvider.widthForTab(selected: selected, pinned: tab.isPinned) - centeringAdjustment)
+                .frame(width: isTheDraggedTab ? 0 : max(0, widthProvider.widthForTab(selected: selected, pinned: tab.isPinned) - centeringAdjustment))
                 .opacity(isTheDraggedTab ? 0 : 1)
                 .onHover { h in
                     if h { hoveredIndex = index }
                 }
-                .background(!selected || isSingle ? nil : GeometryReader { prxy in
+                .background(!selected ? nil : GeometryReader { prxy in
                     Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: index, frame: prxy.safeTopLeftGlobalFrame(in: nil).rounded()))
                 })
                 .contextMenu { tabContextMenuItems(forTabAtIndex: index) }
@@ -269,6 +273,7 @@ struct TabsListView: View {
                 guard !isDraggingATab && newValue != nil else { return }
                 guard newValue?.index == selectedIndex else { return }
                 state?.browserTabsManager.currentTabUIFrame = newValue?.frame
+                guard !isSingleTab(atIndex: selectedIndex, in: tabsSections) else { return }
                 updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
             }
             .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
