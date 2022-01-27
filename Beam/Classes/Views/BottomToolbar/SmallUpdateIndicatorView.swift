@@ -112,7 +112,11 @@ struct SmallUpdateIndicatorView: View {
                                                          buttonFont: BeamFont.medium(size: 12).swiftUI, buttonColor: BeamColor.LightStoneGray.swiftUI,
                                                          buttonHoverColor: BeamColor.Niobium.swiftUI, closeButtonColor: BeamColor.LightStoneGray.swiftUI,
                                                          closeButtonHoverColor: BeamColor.Niobium.swiftUI, dateFont: BeamFont.medium(size: 12).swiftUI,
-                                                         dateColor: BeamColor.AlphaGray.swiftUI, versionNameFont: BeamFont.medium(size: 13).swiftUI, versionNameColor: BeamColor.Niobium.swiftUI, backgroundColor: BeamColor.Generic.secondaryBackground.swiftUI, cellHoverColor: BeamColor.Nero.swiftUI, separatorColor: BeamColor.Mercury.swiftUI, parmaRenderer: BeamRender())
+                                                         dateColor: BeamColor.AlphaGray.swiftUI, versionNameFont: BeamFont.medium(size: 13).swiftUI,
+                                                         versionNameColor: BeamColor.Niobium.swiftUI,
+                                                         backgroundColor: BeamColor.Generic.secondaryBackground.swiftUI, cellHoverColor: BeamColor.Nero.swiftUI,
+                                                         separatorView: AnyView(PopupSeparator()),
+                                                         parmaRenderer: BeamRender())
 
         return style
     }

@@ -64,7 +64,7 @@ struct HelpAndFeedbackMenuView: View {
                 }
             }.padding(.horizontal, 12)
             .frame(height: 41)
-            Separator(horizontal: true)
+            PopupSeparator()
                 .padding(.vertical, 0)
                 .padding(.horizontal, 12)
             ForEach(HelpMenuSection.allCases) { section in
@@ -78,7 +78,7 @@ struct HelpAndFeedbackMenuView: View {
                     .padding(.top, 10)
                     Spacer()
                     if let last = HelpMenuSection.allCases.last, last != section {
-                        Separator(horizontal: true)
+                        PopupSeparator()
                             .padding(.vertical, 0)
                             .padding(.horizontal, 12)
                     }
@@ -91,7 +91,6 @@ struct HelpAndFeedbackMenuView: View {
                     }
                 })
                 .background(hoveredSection == section ? BeamColor.Nero.swiftUI : backgroundColor)
-                .animation(.easeIn, value: hoveredSection)
                 .onTapGesture {
                     if let link = section.url {
                         state.mode = .web
