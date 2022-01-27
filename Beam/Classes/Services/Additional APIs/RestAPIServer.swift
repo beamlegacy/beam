@@ -126,7 +126,7 @@ class RestAPIServer {
             let lineBreak = "\r\n"
 
             let body = NSMutableData()
-            guard let fileDB = try? BeamFileDB(path: BeamData.fileDBPath) else { return nil }
+            let fileDB = BeamFileDBManager.shared
 
             let note = createMultipartBody(data: encodedPublicNote, documentName: "note", fileNameAndExtension: nil, mimetype: "application/json")
             body.append(note)

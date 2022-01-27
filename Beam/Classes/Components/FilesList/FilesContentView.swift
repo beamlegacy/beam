@@ -5,7 +5,7 @@ import GRDB
 struct FilesContentView: View {
     @State private var selectedFile: BeamFileRecord?
 
-    private let fileManager = BeamFileDBManager()
+    private let fileManager = BeamFileDBManager.shared
 
     var body: some View {
         FilesList(selectedFile: $selectedFile,

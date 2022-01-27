@@ -1,5 +1,5 @@
 //
-//  BeamFileDB.swift
+//  BeamFileDBManager.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 06/05/2021.
@@ -30,6 +30,7 @@ extension BeamFileRecord: TableRecord {
     enum Columns: String, ColumnExpression {
         case name, uid, data, type, createdAt, updatedAt, deletedAt, previousChecksum
     }
+    static let tableName = "beamFileRecord"
 }
 
 // Fetching methods
@@ -110,35 +111,95 @@ extension BeamFileRecord: BeamObjectProtocol {
     }
 }
 
+/// References from notes to files:
+struct BeamFileRefRecord: Equatable, Hashable {
+    var noteId: UUID
+    var elementId: UUID
+    var fileId: UUID
+}
+
+// SQL generation
+extension BeamFileRefRecord: TableRecord {
+    /// The table columns
+    enum Columns: String, ColumnExpression {
+        case noteId, elementId, fileId
+    }
+    static let tableName = "beamFileRefRecord"
+}
+
+// Fetching methods
+extension BeamFileRefRecord: FetchableRecord {
+    /// Creates a record from a database row
+    init(row: Row) {
+        noteId = row[Columns.noteId]
+        elementId = row[Columns.elementId]
+        fileId = row[Columns.fileId]
+    }
+}
+
+// Persistence methods
+extension BeamFileRefRecord: MutablePersistableRecord {
+    /// The values persisted in the database
+    static let persistenceConflictPolicy = PersistenceConflictPolicy(
+            insert: .replace,
+            update: .replace)
+
+    func encode(to container: inout PersistenceContainer) {
+        container[Columns.noteId] = noteId
+        container[Columns.elementId] = elementId
+        container[Columns.fileId] = fileId
+    }
+}
+
 protocol BeamFileStorage {
     func fetch(uid: UUID) throws -> BeamFileRecord?
     func insert(name: String, data: Data, type: String?) throws -> UUID
     func remove(uid: UUID) throws
     func clear() throws
+
+    func addReference(fromNote: UUID, element: UUID, to: UUID) throws
+    func removeReference(fromNote: UUID, element: UUID?, to: UUID?) throws
+    func purgeUnlinkedFiles() throws
+    func purgeUndo() throws
+    func clearFileReferences() throws
+    func referenceCount(fileId: UUID) throws -> Int
+    func referencesFor(fileId: UUID) throws -> [BeamNoteReference]
 }
 
-class BeamFileDB: BeamFileStorage {
-    static let tableName = "beamFileRecord"
-    var dbPool: DatabasePool
+class BeamFileDBManager: BeamFileStorage {
+    static let shared: BeamFileDBManager = {
+        do {
+            return try BeamFileDBManager(path: BeamData.fileDBPath)
+        } catch {
+            Logger.shared.logError("Unable to create shared BeamFileDBManager: \(error)", category: .fileDB)
+            let alert = NSAlert(error: error)
+            alert.runModal()
+            exit(0)
+        }
+    }()
+
+    var dbPool: DatabaseWriter
 
     //swiftlint:disable:next function_body_length
     init(path: String) throws {
         let configuration = GRDB.Configuration()
 
-        dbPool = try DatabasePool(path: path, configuration: configuration)
+        if path == ":memory:" {
+            // we use memory for tests, but DatabasePool doesn't work in memory apparently
+            dbPool = try DatabaseQueue(path: path, configuration: configuration)
+        } else {
+            dbPool = try DatabasePool(path: path, configuration: configuration)
+        }
 
         var migrator = DatabaseMigrator()
 
-        var rows: [Row]?
-        migrator.registerMigration("saveOldData2") { db in
-            rows = try? Row.fetchAll(db, sql: "SELECT id, name, uid, data, type FROM BeamFileRecord")
-        }
-
         migrator.registerMigration("migrateToUUID2") { db in
-            if try db.tableExists("BeamFileRecord") {
-                try db.drop(table: "BeamFileRecord")
+            let rows = try? Row.fetchAll(db, sql: "SELECT id, name, uid, data, type FROM BeamFileRecord")
+
+            if try db.tableExists(BeamFileRecord.tableName) {
+                try db.drop(table: BeamFileRecord.tableName)
             }
-            try db.create(table: BeamFileDB.tableName, ifNotExists: true) { table in
+            try db.create(table: BeamFileRecord.tableName, ifNotExists: true) { table in
                 table.column("name", .text).notNull().collate(.localizedCaseInsensitiveCompare)
                 table.column("uid", .text).notNull().primaryKey().unique()
                 table.column("data", .blob)
@@ -168,10 +229,29 @@ class BeamFileDB: BeamFileStorage {
         }
 
         migrator.registerMigration("addUpdatedAtIndex") { db in
-            try db.create(index: "byUpdatedAt", on: BeamFileDB.tableName, columns: ["updatedAt"], unique: false)
+            try db.create(index: "byUpdatedAt", on: BeamFileRecord.tableName, columns: ["updatedAt"], unique: false)
+        }
+
+        migrator.registerMigration("addReferenceTable") { db in
+            try db.create(table: BeamFileRefRecord.tableName, ifNotExists: true) { table in
+                table.column("noteId", .blob).notNull().indexed()
+                table.column("elementId", .blob).notNull().indexed()
+                table.column("fileId", .blob).notNull().indexed()
+            }
+
+            DispatchQueue.main.async {
+                do {
+                    try AppDelegate.main.data.reindexFileReferences()
+                } catch {
+                    Logger.shared.logError("Error while reindexing all file references: \(error)", category: .fileDB)
+                }
+            }
         }
 
         try migrator.migrate(dbPool)
+
+        try purgeUndo()
+        try purgeUnlinkedFiles()
     }
 
     func fetch(uid: UUID) throws -> BeamFileRecord? {
@@ -200,15 +280,18 @@ class BeamFileDB: BeamFileStorage {
         })
     }
 
-    func insert(name: String, data: Data, type: String?) throws -> UUID {
+    func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
         let uid = UUID.v5(name: data.SHA256, namespace: .url)
         let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
-
-        return try dbPool.write { db -> UUID in
+        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
+        try dbPool.write { db in
             var f = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
             try f.insert(db)
-            return uid
         }
+        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+            try self.saveOnNetwork(file)
+        }
+        return uid
     }
 
     func insert(files: [BeamFileRecord]) throws {
@@ -218,6 +301,10 @@ class BeamFileDB: BeamFileStorage {
                     var fileToInsert = file
                     try fileToInsert.insert(db)
                 }
+            }
+
+            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                try self.saveAllOnNetwork(files)
             }
         } catch let error {
             Logger.shared.logError("Error while inserting files \(files): \(error)", category: .fileDB)
@@ -245,34 +332,109 @@ class BeamFileDB: BeamFileStorage {
             return try BeamFileRecord.fetchAll(db)
         }
     }
-}
 
-class BeamFileDBManager: BeamFileStorage {
-    static let shared = BeamFileDBManager()
-    //swiftlint:disable:next force_try
-    static var fileDB: BeamFileDB = try! BeamFileDB(path: BeamData.fileDBPath)
-
-    func insert(name: String, data: Data, type: String? = nil) throws -> UUID {
-        let uid = UUID.v5(name: data.SHA256, namespace: .url)
-        let mimeType = type ?? Swime.mimeType(data: data)?.mime ?? "application/octet-stream"
-        let file = BeamFileRecord(name: name, uid: uid, data: data, type: mimeType, size: data.count)
-        try Self.fileDB.insert(files: [file])
-        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
-            try self.saveOnNetwork(file)
+    func fileCount() throws -> Int {
+        try dbPool.read { db in
+            return try BeamFileRecord.fetchCount(db)
         }
-        return uid
     }
 
-    func fetch(uid: UUID) throws -> BeamFileRecord? {
-        try Self.fileDB.fetch(uid: uid)
+    func addReference(fromNote: UUID, element: UUID, to: UUID) throws {
+        try dbPool.write { db in
+            var ref = BeamFileRefRecord(noteId: fromNote, elementId: element, fileId: to)
+            try ref.insert(db)
+        }
     }
 
-    func remove(uid: UUID) throws {
-        try Self.fileDB.remove(uid: uid)
+    func removeReference(fromNote: UUID, element: UUID?, to: UUID? = nil) throws {
+        try dbPool.write { db in
+            defer {
+                do {
+                    if try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == to).fetchCount(db) == 0 {
+                        if var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == to).fetchOne(db) {
+                            file.deletedAt = BeamDate.now
+                            try file.save(db)
+                            if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                                try self.saveOnNetwork(file)
+                            }
+                        }
+                    }
+                } catch {
+                    Logger.shared.logError("Unable to delete unreferenced file \(to)", category: .fileDB)
+                }
+            }
+            guard let to = to else {
+                if let element = element {
+                    try BeamFileRefRecord
+                        .filter(BeamFileRefRecord.Columns.noteId == fromNote)
+                        .filter(BeamFileRefRecord.Columns.elementId == element)
+                        .deleteAll(db)
+                } else {
+                    try BeamFileRefRecord
+                        .filter(BeamFileRefRecord.Columns.noteId == fromNote)
+                        .deleteAll(db)
+                }
+                return
+            }
+            if let element = element {
+                try BeamFileRefRecord
+                    .filter(BeamFileRefRecord.Columns.noteId == fromNote)
+                    .filter(BeamFileRefRecord.Columns.elementId == element)
+                    .filter(BeamFileRefRecord.Columns.fileId == to)
+                    .deleteAll(db)
+            } else {
+                try BeamFileRefRecord
+                    .filter(BeamFileRefRecord.Columns.noteId == fromNote)
+                    .filter(BeamFileRefRecord.Columns.fileId == to)
+                    .deleteAll(db)
+            }
+        }
     }
 
-    func clear() throws {
-        try Self.fileDB.clear()
+    func purgeUnlinkedFiles() throws {
+        _ = try dbPool.write { db in
+            let rows = try Row.fetchCursor(db, sql: "SELECT uid FROM \(BeamFileRecord.tableName)")
+            while let row = try rows.next() {
+                let fileId: UUID = row[BeamFileRecord.Columns.uid]
+                if try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == fileId).fetchCount(db) == 0 {
+                    do {
+                        guard var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == fileId).fetchOne(db) else { continue }
+                        file.deletedAt = BeamDate.now
+                        try file.save(db)
+                        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+                            try self.saveOnNetwork(file)
+                        }
+
+                    } catch {
+                        Logger.shared.logError("Unable to delete unreferenced file \(fileId)", category: .fileDB)
+                    }
+                }
+            }
+        }
+    }
+
+    func purgeUndo() throws {
+        try removeReference(fromNote: UUID.null, element: nil)
+    }
+
+    func referenceCount(fileId: UUID) throws -> Int {
+        try dbPool.read { db in
+            try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == fileId).fetchCount(db)
+        }
+    }
+
+    func referencesFor(fileId: UUID) throws -> [BeamNoteReference] {
+        try dbPool.read { db in
+            (try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == fileId).fetchAll(db)).map { record in
+                BeamNoteReference(noteID: record.noteId, elementID: record.elementId)
+            }
+        }
+    }
+
+    func clearFileReferences() throws {
+        _ = try dbPool.write { db in
+            try BeamFileRefRecord.deleteAll(db)
+        }
     }
 
     func refresh(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -281,7 +443,7 @@ class BeamFileDBManager: BeamFileStorage {
             case .success(let remoteFile):
                 if let remoteFile = remoteFile {
                     do {
-                        try Self.fileDB.insert(files: [remoteFile])
+                        try self.insert(files: [remoteFile])
                     } catch {
                         networkCompletion?(.failure(error))
                     }
@@ -305,11 +467,11 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ files: [BeamFileRecord]) throws {
-        try Self.fileDB.insert(files: files)
+        try insert(files: files)
     }
 
     func allObjects(updatedSince: Date?) throws -> [BeamFileRecord] {
-        try Self.fileDB.allRecords(updatedSince)
+        try allRecords(updatedSince)
     }
 
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -364,7 +526,7 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     func saveObjectsAfterConflict(_ objects: [BeamFileRecord]) throws {
-        try Self.fileDB.insert(files: objects)
+        try insert(files: objects)
     }
 
 }
