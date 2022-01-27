@@ -56,12 +56,12 @@ class OnboardingManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
 
     init(onlyImport: Bool = false) {
-        var needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
+        let needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
             if AuthenticationManager.shared.isAuthenticated {
                 if AuthenticationManager.shared.username != nil {
-                    needsToDisplayOnboard = false
+                    step = OnboardingStep(type: .imports)
                 } else {
                     step = OnboardingStep(type: .profile)
                 }
