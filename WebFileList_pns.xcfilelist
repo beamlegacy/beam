@@ -1,4 +1,3 @@
-./Beam/Classes/Components/PointAndShoot/Web/Helpers.ts
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShootUI.ts
 ./Beam/Classes/Components/PointAndShoot/Web/Test/Native.test.ts
 ./Beam/Classes/Components/PointAndShoot/Web/Test/BeamNode.test.ts
