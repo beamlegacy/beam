@@ -152,7 +152,7 @@ class BeamTextTests: XCTestCase {
     func testLoadFromJSon1() {
         guard let validText =
         """
-        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"\(UUID.nullString)"}]},{"string":" test"}]}
+        {"ranges":[{"string":"some "},{"string":"link","attributes":[{"type":4,"payload":"\(UUID.null.uuidString)"}]},{"string":" test"}]}
         """.toBeamText else { fatalError() }
 
         let links2 = validText.internalLinkRanges
