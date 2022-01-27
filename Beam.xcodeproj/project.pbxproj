@@ -648,7 +648,7 @@
 		9686B47B26D6B9A400749455 /* NoteIndexingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */; };
 		968A2DCA263973540021107F /* TextFrameTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968A2DC9263973540021107F /* TextFrameTests.swift */; };
 		969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969084CB25365AAE009D3C96 /* ParserTests.swift */; };
-		9691C2592644948200F70DA1 /* BeamFileDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2582644948200F70DA1 /* BeamFileDB.swift */; };
+		9691C2592644948200F70DA1 /* BeamFileDBManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2582644948200F70DA1 /* BeamFileDBManager.swift */; };
 		9691C28B2645369100F70DA1 /* ElementNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C28A2645369100F70DA1 /* ElementNode.swift */; };
 		9691C2A62645F90600F70DA1 /* ImageNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2A52645F90600F70DA1 /* ImageNode.swift */; };
 		9691C2BC2645F93100F70DA1 /* EmbedNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691C2BB2645F93100F70DA1 /* EmbedNode.swift */; };
@@ -656,6 +656,7 @@
 		9691E40225AE5D2C00A13080 /* NodeSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9691E40125AE5D2C00A13080 /* NodeSelection.swift */; };
 		9693FD4B279892A500EB024A /* String+CommonPrefix.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD4A279892A500EB024A /* String+CommonPrefix.swift */; };
 		9693FD5227995D7A00EB024A /* StringCommonPrefixTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */; };
+		9693FD5D27A07CAD00EB024A /* BeamFileDBManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9693FD5C27A07CAC00EB024A /* BeamFileDBManagerTests.swift */; };
 		9694B28F26FDD59C008AD52B /* BeamCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 96319D0F2616232600D1CF31 /* BeamCore.framework */; };
 		96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */; };
 		969CE3EA26CB7B01000AEF37 /* BeamNoteType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */; };
@@ -1938,7 +1939,7 @@
 		9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteIndexingTests.swift; sourceTree = "<group>"; };
 		968A2DC9263973540021107F /* TextFrameTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextFrameTests.swift; sourceTree = "<group>"; };
 		969084CB25365AAE009D3C96 /* ParserTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParserTests.swift; sourceTree = "<group>"; };
-		9691C2582644948200F70DA1 /* BeamFileDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFileDB.swift; sourceTree = "<group>"; };
+		9691C2582644948200F70DA1 /* BeamFileDBManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFileDBManager.swift; sourceTree = "<group>"; };
 		9691C28A2645369100F70DA1 /* ElementNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ElementNode.swift; sourceTree = "<group>"; };
 		9691C2A52645F90600F70DA1 /* ImageNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageNode.swift; sourceTree = "<group>"; };
 		9691C2BB2645F93100F70DA1 /* EmbedNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNode.swift; sourceTree = "<group>"; };
@@ -1947,6 +1948,7 @@
 		9691E41325AF61BA00A13080 /* BrowsingTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTree.swift; sourceTree = "<group>"; };
 		9693FD4A279892A500EB024A /* String+CommonPrefix.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+CommonPrefix.swift"; sourceTree = "<group>"; };
 		9693FD5127995D7A00EB024A /* StringCommonPrefixTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringCommonPrefixTests.swift; sourceTree = "<group>"; };
+		9693FD5C27A07CAC00EB024A /* BeamFileDBManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamFileDBManagerTests.swift; sourceTree = "<group>"; };
 		96956D30258BF3F50069C9C1 /* LinkStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStore.swift; sourceTree = "<group>"; };
 		96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePicker.swift; sourceTree = "<group>"; };
 		969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteType.swift; sourceTree = "<group>"; };
@@ -2712,6 +2714,7 @@
 				0DEE978C2642965600AB95AE /* GRDBDatabaseTests.swift */,
 				0D4EC94426838FA800487B75 /* FrecencyUrlRecordTests.swift */,
 				0D700434269764BD00C7B243 /* TopDomainDatabaseTests.swift */,
+				9693FD5C27A07CAC00EB024A /* BeamFileDBManagerTests.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -3047,7 +3050,7 @@
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
 				8ADD05E927295A67004C3EC9 /* WebPositions */,
-				9691C2582644948200F70DA1 /* BeamFileDB.swift */,
+				9691C2582644948200F70DA1 /* BeamFileDBManager.swift */,
 				A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */,
 				87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */,
 				87F47CC82669415800D01960 /* WebAutocompleteContext.swift */,
@@ -6606,7 +6609,7 @@
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */,
 				96A06EBD27836F69006ECF46 /* MnemonicRecord.swift in Sources */,
-				9691C2592644948200F70DA1 /* BeamFileDB.swift in Sources */,
+				9691C2592644948200F70DA1 /* BeamFileDBManager.swift in Sources */,
 				A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */,
 				4131F16825BEC48C006473CD /* SpacerWidget.swift in Sources */,
 				96A1C67626F8ABBF006AFF88 /* AppDelegate+JsonImportExport.swift in Sources */,
@@ -7185,6 +7188,7 @@
 				562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */,
 				8A7F949026A85D7600270A74 /* PointAndShootShootGroupTest.swift in Sources */,
 				52A7DE2826AECFAC003E770E /* MyRemoteObject.swift in Sources */,
+				9693FD5D27A07CAD00EB024A /* BeamFileDBManagerTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				5227B2CF26DD12EF0006FA7D /* ZZZTests.swift in Sources */,
 				8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */,
