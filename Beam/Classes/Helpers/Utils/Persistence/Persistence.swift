@@ -13,9 +13,8 @@ enum Persistence {
         @KeychainStorable("authentication.password") static var password: String?
 
         @KeychainStorable("authentication.google.tokens", synchronizable: false) static var googleCalendarTokens: String?
-        //For now, we just store the username in-memory.
-        //This have to change when we can have a better sync of it, to ensure it's always in sync with the backend
-        static var username: String?
+
+        @StandardStorable("authentication.username") static var username: String?
         @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
     }
 
