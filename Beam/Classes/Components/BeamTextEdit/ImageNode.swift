@@ -50,8 +50,8 @@ class ImageNode: ResizableNode {
         setupImage(width: availableWidth)
     }
 
-    override func setBottomPaddings(withDefault: CGFloat) {
-        super.setBottomPaddings(withDefault: 14)
+    override func setBottomPaddings(withDefault: CGFloat = 0) {
+        super.setBottomPaddings(withDefault: isCollapsed ? 6 : 14)
     }
 
     private func setupImage(width: CGFloat) {
