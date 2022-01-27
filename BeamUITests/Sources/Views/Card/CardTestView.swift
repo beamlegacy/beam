@@ -10,12 +10,18 @@ import XCTest
 
 class CardTestView: BaseView {
     
-    var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
-    var cardTitleStatic: XCUIElement { return staticText(CardViewLocators.TextFields.cardTitle.accessibilityIdentifier)}
+    var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)}
+    var cardTitleStatic: XCUIElement { return staticText(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)}
 
     @discardableResult
     func waitForCardViewToLoad() -> Bool {
         return scrollView(CardViewLocators.ScrollViews.noteView.accessibilityIdentifier)
+            .waitForExistence(timeout: implicitWaitTimeout)
+    }
+
+    @discardableResult
+    func waitForCardTitleToBeVisible() -> Bool {
+        return scrollView(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)
             .waitForExistence(timeout: implicitWaitTimeout)
     }
     
