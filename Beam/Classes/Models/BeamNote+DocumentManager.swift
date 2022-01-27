@@ -306,6 +306,13 @@ extension BeamNote: BeamNoteDocument {
                                 }
 
                                 self.saving.store(false, ordering: .relaxed)
+                                // remove all file references:
+                                do {
+                                    try BeamFileDBManager.shared.removeReference(fromNote: self.id, element: nil)
+                                } catch {
+                                    Logger.shared.logError("Error while updating file references for note \(self.titleAndId)", category: .document)
+                                }
+
                                 completion?(result)
                             }
 
@@ -354,6 +361,16 @@ extension BeamNote: BeamNoteDocument {
                 }
             }
 
+            // remove all file references:
+            do {
+                try BeamFileDBManager.shared.removeReference(fromNote: self.id, element: nil)
+                // and recreate them:
+                for fileElement in self.allFileElements {
+                    try BeamFileDBManager.shared.addReference(fromNote: self.id, element: fileElement.1.id, to: fileElement.0)
+                }
+            } catch {
+                Logger.shared.logError("Error while updating file references for note \(self.titleAndId)", category: .document)
+            }
             self.saving.store(false, ordering: .relaxed)
             completion?(result)
             Self.signPost.end(Signs.save, id: self.sign)

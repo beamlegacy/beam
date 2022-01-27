@@ -500,3 +500,26 @@ extension BeamData {
         pinnedTabs = pinnedTabsManager.getPinnedTabs()
     }
 }
+
+extension BeamData {
+    func reindexFileReferences() throws {
+        do {
+            try BeamFileDBManager.shared.clearFileReferences()
+            for noteId in DocumentManager().allDocumentsIds(includeDeletedNotes: false) {
+                guard let note = BeamNote.fetch(id: noteId, includeDeleted: false) else { continue }
+
+                note.visitAllElements { element in
+                    guard case let .image(fileId, origin: _, displayInfos: _) = element.kind else { return }
+                    do {
+                        try BeamFileDBManager.shared.addReference(fromNote: noteId, element: element.id, to: fileId)
+                    } catch {
+                        Logger.shared.logError("Unable to add reindexed reference to file \(fileId) from element \(element.id) of note \(element.note?.id ?? UUID.null)", category: .fileDB)
+                    }
+                }
+            }
+        } catch {
+            Logger.shared.logError("Couldn't reindex all files from notes: \(error)", category: .fileDB)
+        }
+    }
+
+}

@@ -1858,12 +1858,13 @@ public extension CALayer {
                 return false
             }
 
-            let fileManager = BeamFileDBManager()
+            let fileManager = BeamFileDBManager.shared
             do {
                 let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
                 let newElement = BeamElement()
                 newElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
                 rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
+                try fileManager.addReference(fromNote: rootNode.elementId, element: newElement.id, to: uid)
                 Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
             } catch {
                 Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)

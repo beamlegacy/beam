@@ -182,6 +182,16 @@ class FileStorageMock: BeamFileStorage {
     func remove(uid: UUID) throws {}
 
     func clear() throws {}
+
+    func addReference(fromNote: UUID, element: UUID, to: UUID) throws {}
+    func removeReference(fromNote: UUID, element: UUID?, to: UUID?) throws {}
+    func referenceCount(fileId: UUID) throws -> Int { 0 }
+
+    func referencesFor(fileId: UUID) throws -> [BeamNoteReference] { [] }
+
+    func purgeUnlinkedFiles() throws {}
+    func purgeUndo() throws {}
+    func clearFileReferences() throws {}
 }
 
 class DownloadManagerMock: DownloadManager {
