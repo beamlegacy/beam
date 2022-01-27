@@ -11,6 +11,7 @@ import AppKit
 import WebKit
 import Combine
 
+// swiftlint:disable file_length
 class EmbedNode: ResizableNode {
 
     private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
@@ -56,7 +57,7 @@ class EmbedNode: ResizableNode {
 
         setupResizeHandleLayer()
         self.canBeResized = true
-        
+
         guard let sourceURL = sourceURL else { return }
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
@@ -462,4 +463,5 @@ extension EmbedNode: WKNavigationDelegate {
 // MARK: - EmbedNode + Layer
 extension EmbedNode {
     override var bulletLayerPositionY: CGFloat { 9 }
+    override var indentLayerPositionY: CGFloat { 28 }
 }

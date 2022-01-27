@@ -1298,25 +1298,25 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
-                                        <menuItem title="Show Omnibox Content Debugger" tag="-1111" id="pqi-wg-6Kg" userLabel="Show Omnibox Content Debugger">
+                                        <menuItem title="Show Omnibox Content Debugger" tag="-1111" enabled="NO" id="pqi-wg-6Kg" userLabel="Show Omnibox Content Debugger">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showOmnibarContentDebugger:" target="Voe-Tx-rLC" id="1yn-LY-88I"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Toggle score card" tag="-1111" id="AED-TZ-YmC" userLabel="Toggle score card">
+                                        <menuItem title="Toggle score card" tag="-1111" enabled="NO" id="AED-TZ-YmC" userLabel="Toggle score card">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="toggleScoreCard:" target="Ady-hI-5gd" id="RTT-Uf-Jy7"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Dump browsing tree" tag="-1111" id="Fu6-WY-AjE">
+                                        <menuItem title="Dump browsing tree" tag="-1111" enabled="NO" id="Fu6-WY-AjE">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="dumpBrowsingTree:" target="Ady-hI-5gd" id="syH-w2-mx5"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show TabGrouping" tag="-1111" id="uXo-6f-A9j" userLabel="Show TabGrouping">
+                                        <menuItem title="Show TabGrouping" tag="-1111" enabled="NO" id="uXo-6f-A9j" userLabel="Show TabGrouping">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showTabGroupingWindow:" target="Ady-hI-5gd" id="7JO-gB-gJr"/>
@@ -1354,13 +1354,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="708"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="703"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="706"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="701"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="706"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="701"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1522,7 +1522,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="691" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="686" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">
