@@ -36,6 +36,19 @@ class DeleteElement: TextEditorCommand {
         self.indexInParent = indexInParent
         parentId = parent.id
         data = encode(element: elementInstance.element)
+
+        if case let .image(uid, origin: _, displayInfos: _) = elementInstance.element.kind {
+            do {
+                // Add a fake reference so that we don't destroy the associated file too early
+                // We'll remove all fake instances when exiting (and relaunching the app)
+                try BeamFileDBManager.shared.addReference(fromNote: UUID.null, element: UUID.null, to: uid)
+                // Remove the actual reference:
+                try BeamFileDBManager.shared.removeReference(fromNote: noteId, element: elementId)
+            } catch {
+                Logger.shared.logError("Unable to handle removal of fileId \(uid)", category: .fileDB)
+            }
+        }
+
         parent.removeChild(elementInstance.element)
 
         return true
@@ -49,6 +62,14 @@ class DeleteElement: TextEditorCommand {
               let parentElementInstance = getElement(for: noteId, and: parentId) else { return false }
 
         parentElementInstance.element.insert(deletedElement, at: indexInParent)
+        if case let .image(uid, origin: _, displayInfos: _) = deletedElement.kind {
+            // Add back the actual file reference:
+            do {
+                try BeamFileDBManager.shared.addReference(fromNote: noteId, element: elementId, to: uid)
+            } catch {
+                Logger.shared.logError("Unable to undo delete reference of fileId \(uid)", category: .fileDB)
+            }
+        }
 
         return true
     }
