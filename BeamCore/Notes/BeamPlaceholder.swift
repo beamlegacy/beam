@@ -9,7 +9,6 @@ import Foundation
 
 enum BeamPlaceholder {
     static let allPlaceholders: [String] = [
-        "You can write here and press ⌘⏎ to search the web",
         "Here you are",
         "Here you are. What now?",
         "Let's go",
