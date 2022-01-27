@@ -576,30 +576,29 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Database related
-    func moveAllOrphanNotes(databaseId: UUID, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        backgroundQueue.async {
-            let documentManager = DocumentManager()
-            do {
-                let databaseIds = DatabaseManager().all().map { $0.id }
-
-                let orphanDocuments = try documentManager.fetchAll(filters: [.notDatabaseIds(databaseIds), .includeDeleted])
-
-                for document in orphanDocuments {
-                    document.database_id = databaseId
-                }
-
-                try documentManager.context.save()
-
-                if !orphanDocuments.isEmpty {
-                    UserAlert.showMessage(message: "\(orphanDocuments.count) documents impacted, must exit.", buttonTitle: "Exit now")
-                    NSApplication.shared.terminate(nil)
-                } else {
-                    UserAlert.showMessage(message: "no document impacted")
-                }
-                completion(.success(true))
-            } catch {
-                completion(.failure(error))
+    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        let documentManager = DocumentManager()
+        do {
+            let databaseIds = DatabaseManager().all().map { $0.id }
+            let filters: [DocumentFilter] = onlyOrphans ? [.notDatabaseIds(databaseIds), .includeDeleted] : [.allDatabases, .includeDeleted]
+            var count = 0
+            for document in try documentManager.fetchAll(filters: filters) {
+                let noteId = document.id
+                guard let note = BeamNote.fetch(id: noteId, includeDeleted: true) else { continue }
+                note.databaseId = databaseId
+                _ = note.syncedSave()
+                count += 1
             }
+
+            if count != 0 {
+                UserAlert.showMessage(message: "\(count) documents impacted, must exit.", buttonTitle: "Exit now")
+                NSApplication.shared.terminate(nil)
+            } else {
+                UserAlert.showMessage(message: "no document impacted")
+            }
+            completion(.success(true))
+        } catch {
+            completion(.failure(error))
         }
     }
 }
