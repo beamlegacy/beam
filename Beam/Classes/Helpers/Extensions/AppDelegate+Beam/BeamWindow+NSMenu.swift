@@ -155,7 +155,10 @@ extension BeamWindow {
     }
 
     @IBAction func showHelp(_ sender: Any?) {
-        state.navigateToPage(.shortcutsWindowPage)
+        if state.mode == .web {
+            state.mode = .today
+        }
+        self.state.showHelpAndFeedback = true
     }
 
     @IBAction func toggleStatusBar(_ sender: Any?) {
