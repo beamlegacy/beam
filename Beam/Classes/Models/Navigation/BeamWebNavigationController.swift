@@ -134,6 +134,10 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         case .other:
             // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
             break
+        case .formSubmitted, .formResubmitted:
+            Logger.shared.logDebug("Form submitted for \(action.sourceFrame.request.url?.absoluteString ?? "(no source frame URL)")", category: .web)
+            page?.handleFormSubmit(frameInfo: action.sourceFrame)
+            fallthrough
         default:
             // update the requested url as it is not from a redirection but from a user action:
             if let url = action.request.url {
