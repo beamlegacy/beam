@@ -1,0 +1,16 @@
+<html>
+
+<head>
+<title>Sign In Step 1</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Sign in to your account (step 1)</h1>
+<form action="/signinstep2" method="POST">
+<div>Username: <input type="text" autocomplete="username" name="username" id="username"></input></div>
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>

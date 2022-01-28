@@ -90,6 +90,16 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
 
         let addedIds = autocompleteContext.update(with: elements, on: getPageHost())
+        let values = [String: String](uniqueKeysWithValues: elements.compactMap { element in
+            if let value = element.value {
+                return (element.beamId, value)
+            } else {
+                return nil
+            }
+        })
+        if !values.isEmpty {
+            self.updateStoredValues(with: values, userInput: false)
+        }
         if !addedIds.isEmpty {
             self.page?.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { _ in
                 self.installFocusHandlers(addedIds: addedIds, frameInfo: frameInfo)
@@ -140,7 +150,11 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     func inputFieldDidLoseFocus(_ elementId: String, frameInfo: WKFrameInfo?) {
         Logger.shared.logDebug("Text field \(elementId) lost focus.", category: .passwordManagerInternal)
         requestValuesFromTextFields(frameInfo: frameInfo) { dict in
-            self.valuesOnFocusOut = dict
+            if let dict = dict {
+                self.valuesOnFocusOut = dict
+                self.updateStoredValues(with: dict, userInput: true)
+                self.saveCredentialsIfChanged(allowEmptyUsername: false)
+            }
         }
         dismissPasswordManagerMenu()
         lastFocusOutTimestamp = BeamDate.now
@@ -307,9 +321,11 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     func handleWebFormSubmit(with elementId: String, frameInfo: WKFrameInfo?) {
         Logger.shared.logDebug("Submit: \(elementId)", category: .passwordManagerInternal)
         disabledForSubmit = true // disable focus handler temporarily, to prevent the password manager menu from reappearing if the JS code triggers a selection in a text field
+        dismissPasswordManagerMenu()
         requestValuesFromTextFields(frameInfo: frameInfo) { dict in
             if let values = dict ?? self.valuesOnFocusOut {
-                self.updateStoredValues(with: values)
+                self.updateStoredValues(with: values, userInput: true)
+                self.saveCredentialsIfChanged(allowEmptyUsername: true)
             }
         }
     }
@@ -360,38 +376,38 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    private func updateStoredValues(with values: [String: String]) {
-        guard let hostname = getPageHost() else { return }
-        guard let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage() else {
-            Logger.shared.logDebug("Login/password fields not found", category: .passwordManagerInternal)
-            return
-        }
+    private func updateStoredValues(with values: [String: String], userInput: Bool) {
+        let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage()
         let firstNonEmptyLogin = values.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
         let firstNonEmptyPassword = values.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
-        guard let login = credentialsBuilder.updatedUsername(firstNonEmptyLogin), let password = firstNonEmptyPassword else {
-            Logger.shared.logDebug("No field match for submitted values in \(values)", category: .passwordManagerInternal)
-            return
-        }
-        Logger.shared.logDebug("FOUND login: \(login), password: (redacted)", category: .passwordManagerInternal)
-        if password.count > 2 && login.count > 2 {
-            var saveAction: PasswordSaveAction?
-            if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: login) {
-                if password != storedPassword {
-                    saveAction = .update
-                }
-            } else {
-                saveAction = .save
+        credentialsBuilder.updateValues(username: firstNonEmptyLogin, password: firstNonEmptyPassword, userInput: userInput)
+    }
+
+    private func saveCredentialsIfChanged(allowEmptyUsername: Bool) {
+        guard let hostname = getPageHost(),
+              let credentials = credentialsBuilder.unsavedCredentials(allowEmptyUsername: allowEmptyUsername),
+              let saveAction = saveCredentialsAction(hostname: hostname, username: credentials.username ?? "", password: credentials.password)
+        else { return }
+        // This code may be called multiple times for a given submit action.
+        // Here we must mark credentials as saved regardless of the user's choice (if the user decides not to save, we don't want to present the dialog again, until the credentials have been changed again.)
+        credentialsBuilder.markSaved()
+        // TODO: make special case for credentials.username == nil
+        Logger.shared.logDebug("Saving password for \(credentials.username ?? "<empty username>")", category: .passwordManagerInternal)
+        confirmSavePassword(username: credentials.username ?? "", action: saveAction) { save in
+            guard save else { return }
+            if let browserTab = (self.page as? BrowserTab) {
+                browserTab.passwordManagerToast(saved: saveAction == .save)
             }
-            if let action = saveAction {
-                confirmSavePassword(username: login, action: action) { save in
-                    guard save else { return }
-                    if let browserTab = (self.page as? BrowserTab) {
-                        browserTab.passwordManagerToast(saved: action == .save)
-                    }
-                    PasswordManager.shared.save(hostname: hostname, username: login, password: password)
-                }
-            }
+            PasswordManager.shared.save(hostname: hostname, username: credentials.username ?? "", password: credentials.password)
         }
+    }
+
+    private func saveCredentialsAction(hostname: String, username: String, password: String) -> PasswordSaveAction? {
+        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: username) {
+            guard password != storedPassword else { return nil }
+            return .update
+        }
+        return .save
     }
 
     private func confirmSavePassword(username: String, action: PasswordSaveAction, onDismiss: @escaping (Bool) -> Void) {
@@ -420,16 +436,11 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    private func passwordFieldIdsForStorage() -> (usernameIds: [String], passwordIds: [String])? {
+    private func passwordFieldIdsForStorage() -> (usernameIds: [String], passwordIds: [String]) {
         let inputFields = autocompleteContext.allInputFields
         let newPasswordIds = inputFields.filter { $0.role == .newPassword }.map(\.id)
         let currentPasswordIds = inputFields.filter { $0.role == .currentPassword }.map(\.id)
         let passwordIds = newPasswordIds + currentPasswordIds
-        guard !passwordIds.isEmpty else {
-            Logger.shared.logWarning("Storage: password fields not found", category: .passwordManager)
-            dumpInputFields(inputFields)
-            return nil
-        }
         var usernameIds: [String]
         if !newPasswordIds.isEmpty {
             Logger.shared.logDebug("Storage: new password field(s) found", category: .passwordManagerInternal)
@@ -440,11 +451,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         usernameIds += inputFields.filter { $0.role == .currentUsername }.map(\.id)
         usernameIds += inputFields.filter { $0.role == .email }.map(\.id)
-        guard !usernameIds.isEmpty else {
-            Logger.shared.logWarning("Storage: login fields not found", category: .passwordManager)
-            dumpInputFields(inputFields)
-            return nil
-        }
         return (usernameIds: usernameIds, passwordIds: passwordIds)
     }
 
@@ -473,7 +479,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             return
         }
         currentPasswordManagerViewModel?.revertToFirstItem()
-        credentialsBuilder.selectCredentials(entry)
+        credentialsBuilder.autofill(host: entry.minimizedHost, username: entry.username, password: password)
         Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManagerInternal)
         let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
@@ -502,6 +508,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManagerMenu()
             return
         }
+        credentialsBuilder.storeGeneratedPassword(password)
         let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
             switch field.role {
