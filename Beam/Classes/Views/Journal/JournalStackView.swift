@@ -213,7 +213,7 @@ class JournalSimpleStackView: NSView {
         }
         textEditView.minimumWidth = 800
         textEditView.maximumWidth = 1024
-        textEditView.footerHeight = 0
+        textEditView.footerHeight = 73
         textEditView.topOffset = 0
         textEditView.leadingPercentage = PreferencesManager.editorLeadingPercentage
         textEditView.centerText = PreferencesManager.editorIsCentered
