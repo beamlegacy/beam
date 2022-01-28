@@ -20,7 +20,7 @@ extension AppDelegate {
         case .fileNotFound:
             UserAlert.showError(message: "\(error.failureDescription): the database file couldn't be found.", informativeText: nil)
         case .databaseInUse:
-            UserAlert.showError(message: "\(error.failureDescription): the database is already in use.", informativeText: "Please quit \(error.browser.description) and try again.")
+            UserAlert.showError(message: "Please quit \(error.browser.description).", informativeText: "Beam can only \(error.actionDescription) if \(error.browser.description) is closed. Close it and try again.")
         case .keychainError:
             UserAlert.showError(message: "\(error.failureDescription): unable to extract the encryption key from the keychain.", informativeText: nil)
         case .invalidFormat:
@@ -55,6 +55,15 @@ extension ImportsManager.ImportError {
             return "Importing \(browser.description) passwords failed"
         case .history:
             return "Importing \(browser.description) history failed"
+        }
+    }
+
+    var actionDescription: String {
+        switch action {
+        case .passwords:
+            return "import your passwords"
+        case .history:
+            return "import your history"
         }
     }
 }
