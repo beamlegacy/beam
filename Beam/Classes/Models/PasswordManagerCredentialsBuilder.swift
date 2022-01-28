@@ -6,11 +6,41 @@
 //
 
 import Foundation
+import BeamCore
 
 final class PasswordManagerCredentialsBuilder {
-    private var currentHost: String?
-    private var selectedCredentials: PasswordManagerEntry?
-    private var storedUsername: String?
+    struct StoredCredentials {
+        var username: String?
+        var password: String
+    }
+
+    private enum FieldContents {
+        case none
+        case initial(String)
+        case autofilled(String)
+        case userInput(String)
+        case generated(String)
+
+        var value: String? {
+            switch self {
+            case .none:
+                return nil
+            case .initial(let value), .autofilled(let value), .userInput(let value), .generated(let value):
+                return value
+            }
+        }
+    }
+
+    private var passwordManager: PasswordManager
+    private var currentHost: String? // actual minimized host (from current page)
+    private var autofilledHost: String? // minimized host from selected credentials, needed to fetch password
+    private var usernameField: FieldContents = .none
+    private var passwordField: FieldContents = .none
+    private var isDirty = false
+
+    init(passwordManager: PasswordManager = .shared) {
+        self.passwordManager = passwordManager
+    }
 
     func enterPage(url: URL?) {
         let newHost = url?.minimizedHost
@@ -20,27 +50,72 @@ final class PasswordManagerCredentialsBuilder {
         }
     }
 
-    func suggestedEntry() -> PasswordManagerEntry? {
-        return selectedCredentials
+    func autofill(host: String, username: String, password: String) {
+        autofilledHost = host == currentHost ? nil : host
+        isDirty = autofilledHost != nil
+        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing autofill for \(host) (current: \(currentHost ?? "nil")): dirty = \(isDirty)", category: .passwordManagerInternal)
+        usernameField = .autofilled(username)
+        passwordField = .autofilled(password)
     }
 
-    var hasManualInput: Bool {
-        storedUsername != nil
-    }
-
-    func selectCredentials(_ entry: PasswordManagerEntry) {
-        selectedCredentials = entry
-    }
-
-    func updatedUsername(_ username: String?) -> String? {
-        if let username = username {
-            storedUsername = username
+    func updateValues(username: String?, password: String?, userInput: Bool) {
+        if let username = username, !username.isEmpty, username != usernameField.value {
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing new username from submit: \(username)", category: .passwordManagerInternal)
+            if userInput {
+                usernameField = .userInput(username)
+                isDirty = true
+            } else {
+                usernameField = .initial(username)
+            }
         }
-        return storedUsername
+        if let password = password, !password.isEmpty, password != passwordField.value {
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing new password from submit", category: .passwordManagerInternal)
+            if userInput {
+                passwordField = .userInput(password)
+                isDirty = true
+            } else {
+                passwordField = .initial(password)
+            }
+        }
+    }
+
+    func suggestedEntry() -> PasswordManagerEntry? {
+        guard let minimizedHost = autofilledHost ?? currentHost,
+              let username = usernameField.value
+        else { return nil }
+        switch usernameField {
+        case .autofilled:
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entry: \(username) on \(minimizedHost)", category: .passwordManagerInternal)
+            return PasswordManagerEntry(minimizedHost: minimizedHost, username: username)
+        default:
+            let matchingEntries = passwordManager.bestMatchingEntries(hostname: minimizedHost, username: username)
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entries: \(matchingEntries)", category: .passwordManagerInternal)
+            return matchingEntries.first
+        }
+    }
+
+    func storeGeneratedPassword(_ password: String) {
+        passwordField = .generated(password)
+        isDirty = true
+    }
+
+    func unsavedCredentials(allowEmptyUsername: Bool) -> StoredCredentials? {
+        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Checking unsaved status: dirty = \(isDirty), has password = \(passwordField.value != nil)", category: .passwordManagerInternal)
+        guard isDirty else { return nil }
+        guard let password = passwordField.value else { return nil }
+        guard allowEmptyUsername || !(usernameField.value?.isEmpty ?? true) else { return nil }
+        return StoredCredentials(username: usernameField.value, password: password)
+    }
+
+    func markSaved() {
+        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Saved", category: .passwordManagerInternal)
+        isDirty = false
     }
 
     private func reset() {
-        selectedCredentials = nil
-        storedUsername = nil
+        autofilledHost = nil
+        usernameField = .none
+        passwordField = .none
+        isDirty = false
     }
 }

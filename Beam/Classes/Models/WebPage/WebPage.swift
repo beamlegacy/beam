@@ -144,6 +144,10 @@ extension WebPage {
 
     func addTextToClusteringManager(_ text: String, url: URL) { }
     func allowsMouseMoved(with event: NSEvent) -> Bool { true }
+
+    func handleFormSubmit(frameInfo: WKFrameInfo) {
+        passwordOverlayController?.handleWebFormSubmit(with: "", frameInfo: frameInfo)
+    }
 }
 
 extension WebPage {
