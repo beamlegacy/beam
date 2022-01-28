@@ -21,6 +21,7 @@ class EmbedNode: ResizableNode {
     private var webPage: EmbedNodeWebPage?
     private var embedCancellables = Set<AnyCancellable>()
     private let defaultSizeRatio = 240.0/320.0
+    private let cornerRadius = CGFloat(3)
     private var loadingView: NSView?
     private var isLoadingEmbed = false {
         didSet {
@@ -57,7 +58,6 @@ class EmbedNode: ResizableNode {
 
         setupResizeHandleLayer()
         self.canBeResized = true
-
         guard let sourceURL = sourceURL else { return }
 
         let webviewConfiguration = EmbedNode.webViewConfiguration
@@ -88,11 +88,12 @@ class EmbedNode: ResizableNode {
             embedView.frame = webFrame
             webView.frame = CGRect(origin: .zero, size: webFrame.size)
             webView.autoresizingMask = [.width, .height]
+            webView.layer?.cornerRadius = cornerRadius
+            webView.layer?.masksToBounds = true
             embedView.alphaValue = 0
             embedView.addSubview(webView)
             editor?.addSubview(embedView)
         }
-
         self.webView = webView
 
         setAccessibilityLabel("EmbedNode")
@@ -152,8 +153,9 @@ class EmbedNode: ResizableNode {
             }
             let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
             let headContent = self.getHeadContent(theme: theme)
-            let resizableClass = embedContent.responsive != nil ? "resizable" : "non-resizable"
-            let html = headContent + "<div class=\"iframe \(embedContent.type.rawValue) \(resizableClass)\">" + content + "</div>"
+            let resizableClass = embedContent.responsive != nil ? "resize-" + embedContent.responsive!.rawValue : "non-resizable"
+            let aspectRatioClass = embedContent.keepAspectRatio ? "aspectRatio" : "noAspectRatio"
+            let html = headContent + "<div class=\"iframe \(embedContent.type.rawValue) \(aspectRatioClass) \(resizableClass)\">" + content + "</div>"
             self.webView?.loadHTMLString(html, baseURL: URL(string: "https://example.com"))
         default:
             if let url = embedContent.embedURL {
@@ -203,45 +205,13 @@ class EmbedNode: ResizableNode {
     /// - Parameter theme: The inital "dark" or "light" theme
     /// - Returns: html `<head>`tag as String
     private func getHeadContent(theme: String) -> String {
-        let cssStyle = getCSSStyle(width: embedContent?.width, height: embedContent?.height)
         return """
             <head>
                 <meta name="twitter:dnt" content="on" />
                 <meta name="twitter:widgets:theme" content="\(theme)" />
                 <meta name="twitter:widgets:chrome" content="transparent" />
-                \(cssStyle)
             </head>
         """
-    }
-
-    /// Returns html `<style>` tag with provided width and height values as css :root values.
-    /// - Parameters:
-    ///   - width:
-    ///   - height:
-    /// - Returns: html `<style>` tag as string or empty string if both width and height are nil
-    func getCSSStyle(width: CGFloat? = nil, height: CGFloat? = nil) -> String {
-        // If both width and height are nil return empty string
-        guard height != nil, width != nil else { return "" }
-        // build up width and height string
-        var widthVar = ""
-        if let width = width {
-            widthVar = "--width: \(width);"
-        }
-
-        var heightVar = ""
-        if let height = height {
-            heightVar = "--height: \(height);"
-        }
-
-        // return css style with css variables
-        return """
-                <style>
-                    :root {
-                        \(widthVar)
-                        \(heightVar)
-                    }
-                </style>
-            """
     }
 
     private func clearWebViewAndStopPlaying() {
@@ -276,27 +246,25 @@ class EmbedNode: ResizableNode {
     /// - Parameter content: EmbedContent of this EmbedNode
     func updateResizableElementContentSize() {
         if let content = self.embedContent {
-            if let minWidth = embedContent?.minWidth {
+            if let minWidth = content.minWidth {
                 self.minWidth = minWidth
             }
 
-            if let minHeight = embedContent?.minHeight {
+            if let minHeight = content.minHeight {
                 self.minHeight = minHeight
             }
 
-            if let maxWidth = embedContent?.maxWidth {
+            if let maxWidth = content.maxWidth {
                 self.maxWidth = maxWidth
             }
 
-            if let maxHeight = embedContent?.maxHeight {
+            if let maxHeight = content.maxHeight {
                 self.maxHeight = maxHeight
             }
 
-            if let keepAspectRatio = embedContent?.keepAspectRatio {
-                self.keepAspectRatio = keepAspectRatio
-            }
+            self.keepAspectRatio = content.keepAspectRatio
 
-            if let responsiveStrategy = embedContent?.responsive {
+            if let responsiveStrategy = content.responsive {
                 self.responsiveStrategy = responsiveStrategy
             }
 
