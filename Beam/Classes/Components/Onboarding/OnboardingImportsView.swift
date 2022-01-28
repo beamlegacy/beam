@@ -180,6 +180,9 @@ struct OnboardingImportsView: View {
 
     private func updateAvailableSources() {
         availableSources = ImportSource.allCases.filter { $0.isAvailable }
+        if !availableSources.contains(selectedSource), let newSource = availableSources.first {
+            selectedSource = newSource
+        }
     }
     private let skipActionId = "skip_action"
     private let importActionId = "import_action"
