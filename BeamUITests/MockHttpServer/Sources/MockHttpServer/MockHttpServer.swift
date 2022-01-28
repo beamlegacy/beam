@@ -40,6 +40,8 @@ public class MockHttpServer {
         installFormHandlers(to: router)
         router.all("/view", middleware: BodyParser())
         router.post("/view", handler: submitHandler)
+        router.all("/signinstep2", middleware: BodyParser())
+        router.post("/signinstep2", handler: step2Handler)
         Kitura.addHTTPServer(onPort: port, with: router)
     }
 
@@ -108,9 +110,27 @@ public class MockHttpServer {
             response.status(.badRequest)
             return next()
         }
-        let parameters = formParams.map { ["key": $0.key, "value": $0.value] }.sorted { $0["key"]! < $1["key"]! }
+        let parameters = formParams.map { ["key": $0.key, "value": $0.value] }
+        let cookies = request.cookies.map { ["key": $0.key, "value": $0.value.value] }
+        let merged = (parameters + cookies).sorted { $0["key"]! < $1["key"]! }
         do {
-            try response.render("view.stencil", with: parameters, forKey: "params")
+            try response.render("view.stencil", with: merged, forKey: "params")
+        } catch {
+            response.status(.internalServerError).send(String(describing: error))
+        }
+        next()
+    }
+
+    private func step2Handler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        guard let formParams = request.body?.asURLEncoded, let username = formParams["username"] else {
+            response.status(.badRequest)
+            return next()
+        }
+        response.headers.append("Set-Cookie", value: "username=\(username)")
+        let style = request.queryParameters["style"] ?? "default"
+        let parameters = ["style": style]
+        do {
+            try response.render("signinstep2.stencil", with: parameters, forKey: "params")
         } catch {
             response.status(.internalServerError).send(String(describing: error))
         }
