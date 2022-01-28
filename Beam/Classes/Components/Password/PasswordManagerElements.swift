@@ -16,13 +16,13 @@ enum DOMInputElementType: String, Codable {
 
 struct DOMInputElement: Codable, Equatable, Hashable {
     var type: DOMInputElementType?
-    //var id: String
     var beamId: String
     var autocomplete: String?
     var autofocus: String?
     var elementClass: String?
     var name: String?
     var required: String?
+    var value: String?
 
     private enum CodingKeys: String, CodingKey {
         case type
@@ -32,12 +32,13 @@ struct DOMInputElement: Codable, Equatable, Hashable {
         case elementClass = "class"
         case name
         case required
+        case value
     }
 }
 
 extension DOMInputElement {
     var debugDescription: String {
-        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)")"
+        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
     }
 }
 

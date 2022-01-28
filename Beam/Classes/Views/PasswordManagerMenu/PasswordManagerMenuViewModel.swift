@@ -110,7 +110,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
     private func loadEntries() {
         if options.showExistingCredentials {
-            if !credentialsBuilder.hasManualInput, let bestEntry = credentialsBuilder.suggestedEntry() {
+            if let bestEntry = credentialsBuilder.suggestedEntry() {
                 self.entriesForHost = [bestEntry]
             } else {
                 self.entriesForHost = PasswordManager.shared.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
