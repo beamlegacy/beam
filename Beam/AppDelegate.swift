@@ -33,6 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
+    var skipTerminateMethods = false
     var window: BeamWindow? {
         (NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow) as? BeamWindow
     }
@@ -309,6 +310,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
+        guard !skipTerminateMethods else { return }
         // Insert code here to tear down your application
         do {
             try BeamFileDBManager.shared.purgeUndo()
@@ -403,6 +405,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard !skipTerminateMethods else { return .terminateNow }
         data.saveData()
         saveCloseTabsCmd(onExit: true)
         _ = self.data.browsingTreeSender?.groupWait()

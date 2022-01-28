@@ -400,6 +400,8 @@ struct GRDBDatabase {
         migrator.eraseDatabaseOnSchemaChange = false
         #endif
 
+        try checkCurrentMigrationStatus(dbReader: dbReader)
+
         if migrate {
             try self.migrate()
         }
@@ -423,6 +425,18 @@ struct GRDBDatabase {
             try migrator.migrate(dbWriter, upTo: upTo)
         } else {
             try migrator.migrate(dbWriter)
+        }
+    }
+    private func checkCurrentMigrationStatus(dbReader: DatabaseReader) throws {
+        try dbReader.read { db in
+            if try migrator.hasBeenSuperseded(db) {
+                Logger.shared.logError("GRDB migration status is ahead of registred migrations.", category: .database)
+                UserAlert.showError(message: "Application version is too old, please reinstall lastest version.",
+                                    informativeText: "Database version is ahead of application version.",
+                                    buttonTitle: "Exit now")
+                AppDelegate.main.skipTerminateMethods = true
+                NSApplication.shared.terminate(nil)
+            }
         }
     }
 }
