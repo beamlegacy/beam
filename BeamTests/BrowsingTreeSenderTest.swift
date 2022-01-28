@@ -67,14 +67,13 @@ class BrowsingTreeSenderTest: XCTestCase {
 
         XCTAssertEqual(unwrappedData.rootCreatedAt, tree.root.events.first!.date.timeIntervalSince1970)
         XCTAssertEqual(unwrappedData.rootId, tree.root.id)
-        let unflattened = try XCTUnwrap(BrowsingTree(flattenedTree: unwrappedData.data))
-        if case .searchBar(query: let query, referringRootId: _) = unflattened.origin {
+        XCTAssertEqual(unwrappedData.data.root.id, tree.root.id)
+        if case .searchBar(query: let query, referringRootId: _) = unwrappedData.data.origin {
             XCTAssertNil(query)
         } else {
             XCTFail("Sent data tree origin anonymization issue")
         }
-        XCTAssertEqual(unflattened.root.id, tree.root.id)
-        XCTAssertEqual(unflattened.current.id, tree.current.id)
+        XCTAssertEqual(unwrappedData.data.current.id, tree.current.id)
         XCTAssertEqual(unwrappedData.appSessionId, appSessionId)
 
         let anotherTree = BrowsingTree(nil)
@@ -83,14 +82,13 @@ class BrowsingTreeSenderTest: XCTestCase {
 
         XCTAssertEqual(otherUnwrappedData.rootCreatedAt, anotherTree.root.events.first!.date.timeIntervalSince1970)
         XCTAssertEqual(otherUnwrappedData.rootId, anotherTree.root.id)
-        let anotherUnflattened = try XCTUnwrap(BrowsingTree(flattenedTree: otherUnwrappedData.data))
-        if case .searchBar(query: let query, referringRootId: _) = anotherUnflattened.origin {
+        XCTAssertEqual(otherUnwrappedData.data.root.id, anotherTree.root.id)
+        XCTAssertEqual(otherUnwrappedData.data.current.id, anotherTree.current.id)
+        if case .searchBar(query: let query, referringRootId: _) = otherUnwrappedData.data.origin {
             XCTAssertNil(query)
         } else {
             XCTFail("Sent data tree origin anonymization issue")
         }
-        XCTAssertEqual(anotherUnflattened.root.id, anotherTree.root.id)
-        XCTAssertEqual(anotherUnflattened.current.id, anotherTree.current.id)
         XCTAssertEqual(unwrappedData.userId, otherUnwrappedData.userId)
         XCTAssertEqual(unwrappedData.appSessionId, otherUnwrappedData.appSessionId)
 
