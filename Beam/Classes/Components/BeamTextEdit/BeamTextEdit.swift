@@ -548,7 +548,7 @@ public extension CALayer {
     }
 
     private var cardHeaderPosY: CGFloat {
-        return journalMode ? 63 : 127
+        return journalMode ? 0 : 127
     }
 
     private var cardTimePosY: CGFloat {
