@@ -68,13 +68,19 @@ class PasswordManager {
         return []
     }
 
+    func bestMatchingEntries(hostname: String, username: String) -> [PasswordManagerEntry] {
+        entries(for: hostname, exact: false)
+            .filter { username.hasPrefix($0.username) }
+            .sorted(by: { $0.username.count > $1.username.count })
+    }
+
     func credentials(for host: String, completion: @escaping ([Credential]) -> Void) {
         passwordsDB.credentials(for: host) { credentials in
             completion(credentials)
         }
     }
 
-    func password(hostname: String, username: String ) -> String? {
+    func password(hostname: String, username: String) -> String? {
         do {
             let password = try passwordsDB.password(hostname: hostname, username: username)
             return password
