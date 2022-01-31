@@ -23,6 +23,13 @@ private enum MenuEnablingConditionTag: Int {
 
 extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
 
+    func applicationDockMenu(_ sender: NSApplication) -> NSMenu? {
+        let dockMenu = NSMenu(title: "Dock Menu")
+        let newWindowItem = NSMenuItem(title: "New Window", action: #selector(self.newWindow(_:)), keyEquivalent: "")
+        dockMenu.addItem(newWindowItem)
+        return dockMenu
+    }
+
     func subscribeToStateChanges(for state: BeamState) {
         state.$mode
             .receive(on: DispatchQueue.main)
