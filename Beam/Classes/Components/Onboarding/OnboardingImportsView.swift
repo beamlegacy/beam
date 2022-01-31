@@ -187,7 +187,7 @@ struct OnboardingImportsView: View {
     private let skipActionId = "skip_action"
     private let importActionId = "import_action"
 
-    private var shoudlEnableImportButton: Bool {
+    private var shouldEnableImportButton: Bool {
         if checkPassword {
             return passwordImportURL != nil || selectedSource.supportsAutomaticPasswordImport
         } else {
@@ -202,7 +202,7 @@ struct OnboardingImportsView: View {
         }
         actions = [
             .init(id: skipActionId, title: "Skip", enabled: true, secondary: true),
-            .init(id: importActionId, title: "Import", enabled: shoudlEnableImportButton) {
+            .init(id: importActionId, title: "Import", enabled: shouldEnableImportButton) {
                 startImports()
                 return false
             }
@@ -228,7 +228,13 @@ extension OnboardingImportsView {
     }
 
     private func startImports() {
-        guard !isLoading && shoudlEnableImportButton else { return }
+        guard !isLoading && shouldEnableImportButton else { return }
+        guard selectedSource.readyToImport(passwords: checkPassword, history: checkHistory) else {
+            if let applicationName = selectedSource.applicationName {
+                UserAlert.showError(message: "\(applicationName) should be closed during import.", informativeText: "Please quit \(applicationName) and try again.")
+            }
+            return
+        }
         isLoading = true
         updateActions()
         let importsManager = AppDelegate.main.data.importsManager
@@ -314,6 +320,21 @@ extension OnboardingImportsView {
             }
         }
 
+        var applicationName: String? {
+            switch self {
+            case .safari, .safariOld:
+                return "Safari"
+            case .chrome:
+                return "Google Chrome"
+            case .firefox:
+                return "Firefox"
+            case .brave:
+                return "Brave Browser"
+            case .passwordsCSV:
+                return nil
+            }
+        }
+
         private var bundleIdentifier: String? {
             switch self {
             case .safari, .safariOld:
@@ -328,6 +349,7 @@ extension OnboardingImportsView {
                 return nil
             }
         }
+
         var appURL: URL? {
             guard let bundleIdentifier = bundleIdentifier else { return nil }
             return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier)
@@ -396,6 +418,39 @@ extension OnboardingImportsView {
             case .passwordsCSV:
                 return nil
             }
+        }
+
+        func readyToImport(passwords: Bool, history: Bool) -> Bool {
+            guard needsExclusiveAccess(passwords: passwords, history: history) else {
+                return true
+            }
+            guard let bundleIdentifier = bundleIdentifier else {
+                return true
+            }
+            let applicationIsRunning = NSWorkspace.shared.runningApplications.contains {
+                $0.bundleIdentifier == bundleIdentifier
+            }
+            return !applicationIsRunning
+        }
+
+        private func needsExclusiveAccess(passwords: Bool, history: Bool) -> Bool {
+            if passwords {
+                switch self {
+                case .chrome, .brave, .firefox:
+                    return true
+                case .safari, .safariOld, .passwordsCSV:
+                    return false
+                }
+            }
+            if history {
+                switch self {
+                case .safari, .safariOld, .chrome, .brave, .firefox:
+                    return true
+                case .passwordsCSV:
+                    return false
+                }
+            }
+            return false
         }
     }
 }
