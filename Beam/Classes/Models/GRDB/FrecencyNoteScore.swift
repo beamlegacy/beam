@@ -92,8 +92,42 @@ extension FrecencyNoteRecord: TableRecord {
     }
 }
 
+class NoteFrecencyApiSaveLimiter {
+    private let saveOnApiLimit: Int // Save on Api every x local saves
+    private var saveCount: Int = 0
+    private var records = [UUID: FrecencyNoteRecord]()
+
+    init(saveOnApiLimit: Int = 10) {
+        self.saveOnApiLimit = saveOnApiLimit
+    }
+
+    func add(record: FrecencyNoteRecord) {
+        if let previousRecord = records[record.id],
+           record.lastAccessAt >= previousRecord.lastAccessAt {
+            records[record.id] = record
+        }
+        if records[record.id] == nil {
+            records[record.id] = record
+        }
+        saveCount += 1
+    }
+    private func reset() {
+        saveCount = 0
+        records = [UUID: FrecencyNoteRecord]()
+    }
+    var recordsToSave: [FrecencyNoteRecord]? {
+        guard saveCount >= saveOnApiLimit else { return nil }
+        defer { reset() }
+        return Array(records.values)
+    }
+}
+
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
     let db: GRDBDatabase
+    private static let apiSaveLimiter = NoteFrecencyApiSaveLimiter()
+
+    private(set) var batchSaveOnApiCompleted = false
+
     init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
     }
@@ -127,15 +161,21 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
             return createdRecord
         }
     }
-
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
         let existingRecord = try? db.fetchOneFrecencyNote(noteId: score.id, paramKey: paramKey)
         let recordToSave = createOrUpdate(record: existingRecord, score: score, paramKey: paramKey)
         try db.saveFrecencyNote(recordToSave)
+        Self.apiSaveLimiter.add(record: recordToSave)
 
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
-        try saveOnNetwork(recordToSave)
+        if AuthenticationManager.shared.isAuthenticated,
+           Configuration.networkEnabled,
+           let recordsToSaveOnNetwork = Self.apiSaveLimiter.recordsToSave {
+            batchSaveOnApiCompleted = false
+            try saveAllOnNetwork(recordsToSaveOnNetwork) { _ in
+                self.batchSaveOnApiCompleted = true
+            }
         }
+    }
 
     public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
         let noteIds = scores.map { $0.id }
