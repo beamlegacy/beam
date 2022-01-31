@@ -450,7 +450,7 @@ extension GRDBDatabase {
         let pivotDate = lastIndexingFor(note: note)
         guard note.updateDate > pivotDate else { return }
 
-        let databaseId =  note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString
+        let databaseId = note.databaseId?.uuidString ?? DatabaseManager.defaultDatabase.id.uuidString
         let noteTitle = note.title
         let noteIdStr = note.id.uuidString
         let records = note.allTextElements.map { BeamElementRecord(title: noteTitle, text: $0.text.text, uid: $0.id.uuidString, noteId: noteIdStr, databaseId: databaseId) }
