@@ -19,6 +19,7 @@
         "BaseTest",
         "BlockReferenceTests",
         "BrowserShortcutsTests",
+        "BrowserStatusBarTests",
         "BrowserTabViewTests",
         "CardCreationTests",
         "CardEditTests",
