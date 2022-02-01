@@ -331,9 +331,15 @@ extension TextRoot {
                 } else {
                     // If the previous node is not a text node with text
                     // then we must remove the node altogether and leave the cursor where it is
-                    focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
-                    deleteBackward()
-                    focusedCmdManager.focusElement(node, cursorPosition: 0)
+                    if prevNode.parent as? TextRoot != nil {
+                        moveChildrenOf(prevNode, to: self, atOffset: prevNode.displayedElement.indexInParent)
+                        focusedCmdManager.deleteElement(for: prevNode)
+                        focusedCmdManager.focusElement(node, cursorPosition: 0)
+                    } else {
+                        focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                        deleteBackward()
+                        focusedCmdManager.focusElement(node, cursorPosition: 0)
+                    }
                 }
             } else {
                 // we are at the end of the element node, we can just delete it and move all its children to the previous node
