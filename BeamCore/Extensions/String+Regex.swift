@@ -77,7 +77,7 @@ public extension String {
     }
 
     var isLocalhost: Bool {
-        self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)(localhost)", options: .caseInsensitive)
+        self.matches(withRegex: "^(http:\\/\\/|https:\\/\\/)*(localhost)", options: .caseInsensitive)
     }
 
     // MARK: - Strings checking
