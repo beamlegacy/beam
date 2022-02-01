@@ -647,7 +647,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             updateDate = BeamDate.now
             lastChangeType = type
         }
-        
+
         if changePropagationEnabled {
             changed.send((self, type))
         }
