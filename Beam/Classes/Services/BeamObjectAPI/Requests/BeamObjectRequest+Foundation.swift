@@ -576,7 +576,8 @@ extension BeamObjectRequest {
 
             APIRequest.callsCount += 1
 
-            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
+            // I only enable those log manually, they're very verbose!
+            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) download \(urlString)",
                                    category: .network,
                                    localTimer: localTimer)
 
@@ -615,7 +616,7 @@ extension BeamObjectRequest {
         let session = BeamURLSession.shared
         let localTimer = BeamDate.now
 
-        let task = session.dataTask(with: request) { (data, response, error) -> Void in
+        let task = session.dataTask(with: request) { (_, response, error) -> Void in
             #if DEBUG
             // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
             APIRequest.networkCallFilesSemaphore.wait()
@@ -625,7 +626,8 @@ extension BeamObjectRequest {
 
             APIRequest.callsCount += 1
 
-            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
+            // I only enable those log manually, they're very verbose!
+            Logger.shared.logDebug("[\(data.count.byteSize)] \((response as? HTTPURLResponse)?.statusCode ?? 0) upload \(urlString)",
                                    category: .network,
                                    localTimer: localTimer)
 
@@ -635,13 +637,13 @@ extension BeamObjectRequest {
             }
 
             /*
-             S3 direct upload returns 0 byte for `data`, Vinyl will not store it at all. Don't match on it as:
+             S3 direct upload returns 0 byte for `data` (now named `_`), Vinyl will not store it at all. Don't match on it as:
 
              `data != nil == true` on the first call, but false when going through Vinyl
              */
 
-            guard httpResponse.statusCode == 200 else {
-                Logger.shared.logError("Error while uploading data: \(data?.asString ?? "-")", category: .network)
+            guard [200, 204].contains(httpResponse.statusCode) else {
+                Logger.shared.logError("Error while uploading data: \(httpResponse.statusCode)", category: .network)
                 Logger.shared.logDebug("Sent headers: \(headers)", category: .network)
                 completionHandler(.failure(error ?? BeamObjectRequestError.not200))
 
