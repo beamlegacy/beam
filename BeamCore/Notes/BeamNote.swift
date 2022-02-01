@@ -311,7 +311,6 @@ public class BeamNote: BeamElement {
 
         fetchedNotesCancellables[cancellableKey] =
             note.changed
-            .dropFirst(1)
             .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
                 guard let note = note as? BeamNoteDocument else { return }
