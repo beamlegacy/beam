@@ -419,6 +419,7 @@ extension BeamObjectManager {
         return request
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ objects: [T],
                                                           force: Bool = false,
                                                           _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
@@ -484,7 +485,9 @@ extension BeamObjectManager {
         try request.prepare(objectsToSave) { requestResult in
             switch requestResult {
             case .failure(let error):
-                Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                Logger.shared.logError("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API: \(error.localizedDescription)",
+                                       category: .beamObjectNetwork,
+                                       localTimer: localTimer)
                 completion(.failure(error))
             case .success(let beamObjectsUpload):
                 do {
@@ -493,41 +496,52 @@ extension BeamObjectManager {
                         Logger.shared.logError("We don't get the same object counts", category: .beamObjectNetwork)
                     }
 
-                    let group = DispatchGroup()
                     let decoder = JSONDecoder()
                     var errors: [Error] = []
                     let lock = DispatchSemaphore(value: 1)
 
-                    // TODO: limit parallelization, will explode with 8k objects
-                    for beamObjectUpload in beamObjectsUpload {
-                        let headers: [String: String] = try decoder.decode([String: String].self,
-                                                                           from: beamObjectUpload.uploadHeaders.asData)
+                    Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: starting",
+                                           category: .beamObjectNetwork)
 
-                        guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
-                            assert(false)
-                            Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
-                            continue
-                        }
+                    localTimer = BeamDate.now
+                    var totalSize = 0
 
-                        group.enter()
-                        try request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
-                                                  putHeaders: headers,
-                                                  data: data) { result in
-                            switch result {
-                            case .failure(let error):
-                                lock.wait()
-                                errors.append(error)
-                                lock.signal()
-                            case .success: break
+                    // TODO: limit parallelization?
+                    for beamObjectsUploadChunk in beamObjectsUpload.chunked(into: 10) {
+                        let group = DispatchGroup()
+                        for beamObjectUpload in beamObjectsUploadChunk {
+                            let headers: [String: String] = try decoder.decode([String: String].self,
+                                                                               from: beamObjectUpload.uploadHeaders.asData)
+
+                            guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
+                                assert(false)
+                                Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
+                                continue
                             }
 
-                            group.leave()
+                            totalSize += data.count
+                            group.enter()
+                            try request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
+                                                      putHeaders: headers,
+                                                      data: data) { result in
+                                switch result {
+                                case .failure(let error):
+                                    lock.wait()
+                                    errors.append(error)
+                                    lock.signal()
+                                case .success: break
+                                }
+
+                                group.leave()
+                            }
                         }
+
+                        group.wait()
                     }
 
-                    group.wait()
-
-                    Logger.shared.logDebug("Waited for all binary uploads", category: .beamObjectNetwork)
+                    Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: finished uploading \(totalSize.byteSize)",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
 
                     guard errors.isEmpty else {
                         Logger.shared.logError(BeamObjectManagerError.multipleErrors(errors).localizedDescription,
@@ -543,10 +557,14 @@ extension BeamObjectManager {
                     }
 
                     let request = BeamObjectRequest()
+                    localTimer = BeamDate.now
 
                     try request.save(objectsToSave) { result in
                         switch result {
                         case .failure(let error):
+                            Logger.shared.logError("Error while saving \(objectsToSave.count) \(T.beamObjectType)",
+                                                   category: .beamObjectNetwork,
+                                                   localTimer: localTimer)
                             self.saveToAPIFailure(objects, error, completion)
                         case .success:
                             do {
@@ -899,8 +917,6 @@ extension BeamObjectManager {
                             Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
                             completion(.failure(error))
                         case .success:
-                            Logger.shared.logDebug(data.asString ?? "-", category: .beamObjectNetwork)
-
                             do {
                                 let request = BeamObjectRequest()
 

@@ -35,9 +35,8 @@ class CoreDataMigrator: CoreDataMigratorProtocol {
             let mappingModel = migrationStep.mappingModel
             // Set policy here (I have one policy per migration, so this works)
             mappingModel.entityMappings.forEach {
-                Logger.shared.logDebug($0.sourceEntityName ?? "-", category: .coredataDebug)
-                Logger.shared.logDebug($0.destinationEntityName ?? "-", category: .coredataDebug)
-                Logger.shared.logDebug($0.entityMigrationPolicyClassName ?? "-", category: .coredataDebug)
+                Logger.shared.logDebug("EntityMapping. sourceEntityName: \($0.sourceEntityName ?? "-"), destinationEntityName: \($0.destinationEntityName ?? "-"), entityMigrationPolicyClassName: \($0.entityMigrationPolicyClassName ?? "-")",
+                                       category: .coredataDebug)
             }
         }
 
