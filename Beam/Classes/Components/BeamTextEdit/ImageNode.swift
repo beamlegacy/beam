@@ -10,10 +10,14 @@ import BeamCore
 import Macaw
 import Lottie
 
+// swiftlint:disable file_length
 class ImageNode: ResizableNode {
 
     private let focusMargin = CGFloat(3)
     private let cornerRadius = CGFloat(3)
+    private var imageVerticalOffset: CGFloat {
+        isCollapsed ? 1 : 0
+    }
 
     private var sourceImageLayer: CALayer?
     private var imageLayer: Layer?
@@ -31,7 +35,7 @@ class ImageNode: ResizableNode {
                 setupCollapseExpandLayer(hidden: !hover)
             }
             if let imageLayer = imageLayer {
-                layoutCollapseExpand(contentLayer: imageLayer.layer)
+                layoutCollapseExpand(contentLayer: imageLayer.layer, verticalOffset: imageVerticalOffset)
             }
             self.invalidateLayout()
         }
@@ -51,7 +55,7 @@ class ImageNode: ResizableNode {
     }
 
     override func setBottomPaddings(withDefault: CGFloat = 0) {
-        super.setBottomPaddings(withDefault: isCollapsed ? 6 : 14)
+        super.setBottomPaddings(withDefault: isCollapsed ? 2 : 14)
     }
 
     private func setupImage(width: CGFloat) {
@@ -80,7 +84,7 @@ class ImageNode: ResizableNode {
         imageName = imageRecord.name
         imageSourceURL = URL(string: self.element.text.text)
 
-        contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
+        contentsPadding = NSEdgeInsets(top: 0, left: contentsPadding.left + 4, bottom: 14, right: 4)
 
         setAccessibilityLabel("ImageNode")
         setAccessibilityRole(.textArea)
@@ -154,15 +158,9 @@ class ImageNode: ResizableNode {
         imageLayer.layer.masksToBounds = true
         imageLayer.layer.zPosition = 1
         imageLayer.layer.contentsGravity = .resizeAspectFill
+        imageLayer.layer.borderColor = NSColor.black.withAlphaComponent(0.1).cgColor
 
         self.imageLayer = imageLayer
-        setupImageLayer(imageLayer)
-    }
-
-    private func setupImageLayer(_ imageLayer: Layer) {
-        imageLayer.layer.cornerRadius = cornerRadius
-        imageLayer.layer.masksToBounds = true
-        imageLayer.layer.zPosition = 1
         addLayer(imageLayer, origin: .zero)
     }
 
@@ -172,6 +170,7 @@ class ImageNode: ResizableNode {
         borderLayer.strokeColor = selectionColor.cgColor
         borderLayer.fillColor = NSColor.clear.cgColor
         borderLayer.zPosition = 0
+        borderLayer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
         let focusLayer = Layer(name: "focus", layer: borderLayer)
         addLayer(focusLayer, origin: .zero)
     }
@@ -274,16 +273,15 @@ class ImageNode: ResizableNode {
         guard let imageLayer = imageLayer else { return }
 
         layoutImageLayer()
-        layoutCollapseExpand(contentLayer: imageLayer.layer)
+        layoutCollapseExpand(contentLayer: imageLayer.layer, verticalOffset: imageVerticalOffset)
         layoutFocus(contentLayer: imageLayer.layer)
     }
 
     private func layoutImageLayer() {
         if let imageLayer = layers["image"] {
-            let position = contentPosition
             let contentBounds = CGRect(origin: .zero, size: isCollapsed ? CGSize(width: 16, height: 16) : visibleSize)
-            imageLayer.layer.position = position
             imageLayer.layer.bounds = contentBounds
+            imageLayer.layer.position = CGPoint(x: contentPosition.x, y: isCollapsed ? contentPosition.y + imageVerticalOffset : contentPosition.y)
 
             if let source = layers["source"] {
                 let margin: CGFloat = 6.0
@@ -304,7 +302,7 @@ class ImageNode: ResizableNode {
             borderLayer.path = borderPath.cgPath
 
             let offset = isCollapsed ? 3.0 : 0.0
-            let focusOrigin = CGPoint(x: contentLayer.position.x - offset, y: contentLayer.frame.minY - offset )
+            let focusOrigin = CGPoint(x: contentLayer.position.x - offset, y: contentLayer.frame.minY - offset - imageVerticalOffset)
             borderLayer.frame = CGRect(origin: focusOrigin, size: focusBounds.size)
             borderLayer.lineWidth = isCollapsed ? 0 : 5
             borderLayer.fillColor = tokenColor
@@ -376,19 +374,21 @@ class ImageNode: ResizableNode {
             self.removeLayer("source")
             let thumbnail = NSImage(named: "field-web")!
             self.setupCollapsedLayer(title: mediaName, thumbnailLayer: imageLayer, or: thumbnail)
+            self.imageLayer?.layer.borderWidth = 1
         } else {
             self.cleanCollapsedLayer()
             self.canBeResized = true
             self.setupResizeHandleLayer()
             self.setupSourceButtonLayer()
+            self.imageLayer?.layer.borderWidth = 0
         }
     }
 }
 
 // MARK: - ImageNode + Layer
 extension ImageNode {
-    override var bulletLayerPositionY: CGFloat { 9 }
-    override var indentLayerPositionY: CGFloat { 28 }
+    override var bulletLayerPositionY: CGFloat { 0 }
+    override var indentLayerPositionY: CGFloat { 20 }
 }
 
 extension ImageNode: Collapsable {
