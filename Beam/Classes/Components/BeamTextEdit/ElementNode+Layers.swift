@@ -9,7 +9,8 @@ import Foundation
 
 extension ElementNode {
 
-    static var indentLayerPosX: CGFloat = 5
+    static var indentLayerPositionX: CGFloat = 5
+    @objc var indentLayerPositionY: CGFloat { 3 }
 
     @objc var shouldDisplayBullet: Bool {
         true
@@ -18,8 +19,6 @@ extension ElementNode {
     @objc var bulletLayerPositionY: CGFloat {
         firstLineBaseline - 14
     }
-
-    @objc var indentLayerPositionY: CGFloat { 3 }
 
     private enum LayerName: String {
         case indentLayer
@@ -112,7 +111,7 @@ extension ElementNode {
     private func updateIndentLayer() {
         guard let indentLayer = layers[LayerName.indentLayer.rawValue] else { return }
         let y = firstLineHeight + indentLayerPositionY
-        indentLayer.frame = NSRect(x: Self.indentLayerPosX, y: y - 4, width: 0.5, height: frame.height - y)
+        indentLayer.frame = NSRect(x: Self.indentLayerPositionX, y: y - 4, width: 0.5, height: frame.height - y)
         indentLayer.layer.isHidden = !(showDisclosureButton && self.open)
     }
 
