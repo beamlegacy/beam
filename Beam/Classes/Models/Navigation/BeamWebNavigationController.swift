@@ -155,6 +155,11 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        if navigationAction.shouldPerformDownload {
+            decisionHandler(.download, preferences)
+            return
+        }
+
         handleNavigationAction(navigationAction)
         switch navigationAction.navigationType {
         case .backForward:
@@ -192,22 +197,16 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-
-        if let response = navigationResponse.response as? HTTPURLResponse,
-           let url = response.url,
-           shouldDownloadFile(for: navigationResponse) {
-            decisionHandler(.cancel)
-            var headers: [String: String] = [:]
-            if let sourceURL = webView.url {
-                headers["Referer"] = sourceURL.absoluteString
-            }
-            page?.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
-        } else {
-            if let response = navigationResponse.response as? HTTPURLResponse, webView.url == response.url {
-                page?.responseStatusCode = response.statusCode
-            }
-            decisionHandler(.allow)
+        if shouldDownloadFile(for: navigationResponse) {
+            decisionHandler(.download)
+            return
         }
+
+        if let response = navigationResponse.response as? HTTPURLResponse, webView.url == response.url {
+            page?.responseStatusCode = response.statusCode
+        }
+
+        decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) { }
@@ -314,5 +313,13 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        page?.downloadManager?.download(download)
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        page?.downloadManager?.download(download)
+    }
 
 }

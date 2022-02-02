@@ -199,7 +199,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }
         }.store(in: &scope)
 
-        downloadManager.$downloads.sink { [weak self] _ in
+        downloadManager.downloadList.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
 
