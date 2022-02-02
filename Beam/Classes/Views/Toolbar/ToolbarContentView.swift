@@ -9,9 +9,10 @@ import Foundation
 import SwiftUI
 import BeamCore
 
-struct ToolbarContentView: View {
+struct ToolbarContentView<List: DownloadListProtocol>: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
+    @ObservedObject private var downloadList: List
     @Environment(\.isMainWindow) private var isMainWindow: Bool
     @Environment(\.colorScheme) private var colorScheme
 
@@ -23,13 +24,17 @@ struct ToolbarContentView: View {
         state.hasBrowserTabs
     }
     private var showDownloadsButton: Bool {
-        let showButton = !state.data.downloadManager.downloads.isEmpty
+        let showButton = !downloadList.downloads.isEmpty
         if !showButton {
             DispatchQueue.main.asyncAfter(deadline: .now()) {
                 state.downloaderWindow?.close()
             }
         }
         return showButton
+    }
+
+    init(downloadList: List) {
+        self.downloadList = downloadList
     }
 
     // MARK: Views
@@ -80,7 +85,7 @@ struct ToolbarContentView: View {
     private func rightActionsView(containerGeometry: GeometryProxy) -> some View {
         HStack(alignment: .center, spacing: BeamSpacing._100) {
             if showDownloadsButton {
-                ToolbarDownloadButton(downloadManager: state.data.downloadManager, action: {
+                ToolbarDownloadButton(downloadList: downloadList, action: {
                     onDownloadButtonPressed(containerGeometry: containerGeometry)
                 })
                     .background(GeometryReader { proxy -> Color in
@@ -133,11 +138,11 @@ struct ToolbarContentView: View {
         if let downloaderWindow = state.downloaderWindow {
             downloaderWindow.close()
         } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow() {
-            let downloaderView = DownloaderView(downloader: state.data.downloadManager) { [weak window] in
+            let downloaderView = DownloaderView(downloadList: downloadList) { [weak window] in
                 window?.close()
             }
             let toolbarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
-            var origin = CGPoint(x: toolbarFrame.origin.x + toolbarFrame.width - DownloaderView.width - 18, y: toolbarFrame.maxY)
+            var origin = CGPoint(x: toolbarFrame.origin.x + toolbarFrame.width - downloaderView.preferredWidth - 18, y: toolbarFrame.maxY)
             if let parentWindow = window.parent {
                 origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
             }
@@ -155,16 +160,36 @@ struct ToolbarContentView_Previews: PreviewProvider {
     static let browserTabManager = BrowserTabsManager(with: beamData, state: state)
 
     static var previews: some View {
+        let emptyDownloadList = DownloadListFake(isDownloading: false)
+
+        let runningDownloadList = DownloadListFake(
+            isDownloading: true,
+            progressFractionCompleted: 0.5
+        )
+
+        runningDownloadList.downloads = [
+            DownloadListItemFake(
+                filename: "Uno.txt",
+                fileExtension: "txt"
+            )
+        ]
+
         state.focusOmniBox = false
         focusedState.focusOmniBox = true
         focusedState.mode = .web
         let origin = BrowsingTreeOrigin.searchBar(query: "query", referringRootId: nil)
         focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Note title"))
         return Group {
-            ToolbarContentView()
+            ToolbarContentView(downloadList: emptyDownloadList)
                 .environmentObject(state)
                 .environmentObject(browserTabManager)
-            ToolbarContentView()
+            ToolbarContentView(downloadList: runningDownloadList)
+                .environmentObject(state)
+                .environmentObject(browserTabManager)
+            ToolbarContentView(downloadList: emptyDownloadList)
+                .environmentObject(focusedState)
+                .environmentObject(browserTabManager)
+            ToolbarContentView(downloadList: runningDownloadList)
                 .environmentObject(focusedState)
                 .environmentObject(browserTabManager)
         }.previewLayout(.fixed(width: 500, height: 60))
