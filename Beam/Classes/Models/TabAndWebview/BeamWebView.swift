@@ -198,6 +198,21 @@ class BeamWebView: WKWebView {
         super.mouseDragged(with: theEvent)
         mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }
+
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        let menuItemIdentifiersToDisable: [NSUserInterfaceItemIdentifier] = [
+            .webKitCopyImage,
+            .webKitDownloadImage
+        ]
+
+        let filteredItems = menu.items.filter { menuItem in
+            guard let identifier = menuItem.identifier else { return true }
+            return !menuItemIdentifiersToDisable.contains(identifier)
+        }
+
+        menu.items = filteredItems
+    }
+
 }
 
 extension WKWebView {
