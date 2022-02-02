@@ -430,12 +430,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        if data.downloadManager.ongoingDownload {
-            let downloads = data.downloadManager.downloads.filter { d in
-                d.state == .running
-            }
-
-            let alert = buildAlertForDownloadInProgress(downloads)
+        let runningDownloads = data.downloadManager.downloadList.runningDownloads
+        if !runningDownloads.isEmpty {
+            let alert = buildAlertForDownloadInProgress(runningDownloads)
             let answer = alert.runModal()
             if answer == .alertSecondButtonReturn {
                 return .terminateCancel
@@ -574,13 +571,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {
         let url = URL(fileURLWithPath: filename)
-        if url.pathExtension == BeamDownloadDocument.downloadDocumentFileExtension {
+        if url.pathExtension == BeamDownloadDocument.fileExtension {
             let documentURL = URL(fileURLWithPath: filename)
             if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
                 do {
-                    let doc = BeamDownloadDocument()
+                    let doc = try BeamDownloadDocument(fileWrapper: wrapper)
                     doc.fileURL = documentURL
-                    try doc.read(from: wrapper, ofType: "co.beamapp.download")
                     try self.data.downloadManager.downloadFile(from: doc)
                 } catch {
                     Logger.shared.logError("Can't open Download Document from disk", category: .downloader)
@@ -627,14 +623,14 @@ extension AppDelegate {
 // MARK: - Downloads
 extension AppDelegate {
 
-    fileprivate func buildAlertForDownloadInProgress(_ downloads: [Download]) -> NSAlert {
+    fileprivate func buildAlertForDownloadInProgress(_ downloads: [DownloadItem]) -> NSAlert {
         let message: String
         let question: String
 
         if let uniqueDownload = downloads.first, downloads.count == 1 {
             question = NSLocalizedString("A download is in progress", comment: "Quit during download")
             message = """
-                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.suggestedFileName)".
+                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.filename ?? "")".
                         If you quit now, Beam won’t finish downloading this file.
                         """
         } else {
