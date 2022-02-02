@@ -7,7 +7,7 @@ import Combine
 /**
  This is derived from FavIcon's download test code
  */
-class DownloadManagerTest: XCTestCase {
+class DownloadManagerTests: XCTestCase {
 
     var scope: Set<AnyCancellable> = []
 
@@ -57,46 +57,6 @@ class DownloadManagerTest: XCTestCase {
 
         XCTAssertEqual("image/x-icon", mimeType)
         XCTAssertTrue(data.count > 0)
-    }
-
-    // Disabled as failing due to network conditions/availability/timeout
-    // See https://linear.app/beamapp/issue/BE-1039/file-download-test-fails
-    func notestFileDownload() {
-
-        let fileManager = FileManager.default
-        let tempURL = fileManager.urls(for: .cachesDirectory, in: .userDomainMask).first!
-        let timeout: TimeInterval = 45.0
-
-        let downloadManager = BeamDownloadManager()
-        let urlToDownload = URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols.dmg")!
-        XCTAssertTrue(downloadManager.downloads.isEmpty)
-        downloadManager.downloadFile(at: urlToDownload, headers: [:], suggestedFileName: nil, destinationFoldedURL: tempURL)
-
-        let exp = expectation(description: "downloads \(urlToDownload)")
-
-        XCTAssertFalse(downloadManager.downloads.isEmpty)
-        if let download = downloadManager.downloads.first {
-            XCTAssertTrue(download.downloadURL == urlToDownload)
-
-            download
-                .downloadTask?
-                .publisher(for: \.state)
-                .receive(on: RunLoop.main)
-                .sink { state in
-                    if state == .completed {
-                        let fileExists = fileManager.fileExists(atPath: download.fileSystemURL.path)
-                        XCTAssertTrue(fileExists)
-                        exp.fulfill()
-                        self.scope.removeAll()
-                        try? fileManager.removeItem(at: download.fileSystemURL)
-                    }
-                }
-                .store(in: &scope)
-        } else {
-            XCTFail("expected a download in the download array")
-        }
-        wait(for: [exp], timeout: timeout)
-
     }
 
     private func performDownloads(urls: [String], timeout: TimeInterval = 15.0) -> [DownloadManagerResult]? {
