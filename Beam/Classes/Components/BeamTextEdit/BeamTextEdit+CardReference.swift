@@ -77,7 +77,7 @@ extension BeamTextEdit {
         inlineFormatter = menuView
         prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
         DispatchQueue.main.async {
-            self.showOrHideInlineFormatter(isPresent: true)
+            self.showInlineFormatter()
         }
     }
 

@@ -1371,25 +1371,6 @@ public extension CALayer {
         rootNode?.note?.save()
     }
 
-    func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
-        initInlineTextFormatter()
-        updateInlineFormatterView(isKeyEvent: isKeyEvent)
-
-        if isInlineFormatterHidden {
-            showOrHideInlineFormatter(isPresent: true)
-        }
-    }
-
-    func updateInlineFormatterOnDrag(isDragged: Bool = false) {
-        initInlineTextFormatter()
-        updateInlineFormatterView(isDragged: isDragged)
-    }
-
-    func hideInlineFormatter() {
-        guard inlineFormatter != nil else { return }
-        showOrHideInlineFormatter(isPresent: false)
-    }
-
     @IBAction func selectAllHierarchically(_ sender: Any?) {
         rootNode?.selectAllNodesHierarchically()
     }
