@@ -19,6 +19,14 @@ class ImageNode: ResizableNode {
         isCollapsed ? 1 : 0
     }
 
+    override var selectionLayerPosY: CGFloat {
+        selectedAlone ? -5 : super.selectionLayerPosY
+    }
+
+    override var selectionLayerHeight: CGFloat {
+        selectedAlone && isCollapsed ? super.selectionLayerHeight - 2 : super.selectionLayerHeight
+    }
+
     private var sourceImageLayer: CALayer?
     private var imageLayer: Layer?
 

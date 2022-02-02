@@ -63,6 +63,8 @@ import AVFoundation
             layer.delegate = self
         }
 
+        self.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
+
         setAccessibilityRole(.button)
         setAccessibilityLabel(name)
     }
