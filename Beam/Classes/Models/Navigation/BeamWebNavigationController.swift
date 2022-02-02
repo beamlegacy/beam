@@ -115,9 +115,12 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
 
         guard let response = navigationResponse.response as? HTTPURLResponse else { return false }
 
+        let contentType = BeamDownloadManager.contentType(from: response.allHeaderFields)
         let contentDisposition = BeamDownloadManager.contentDisposition(from: response.allHeaderFields)
 
-        if let disposition = contentDisposition {
+        if contentType == .forceDownload {
+            return true
+        } else if let disposition = contentDisposition {
             return disposition == .attachment
         } else if !navigationResponse.canShowMIMEType {
             return true
