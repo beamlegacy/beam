@@ -55,7 +55,7 @@ extension BeamTextEdit {
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
         DispatchQueue.main.async {
-            self.showOrHideInlineFormatter(isPresent: true)
+            self.showInlineFormatter()
         }
     }
 
@@ -64,7 +64,7 @@ extension BeamTextEdit {
               let initialRange = formatterTargetRange,
               initialRange.lowerBound <= node.cursorPosition
               else { return }
-        showOrHideInlineFormatter(isPresent: false)
+        hideInlineFormatter()
 
         node.cmdManager.beginGroup(with: "Slash Menu Formatting")
         let range = initialRange.lowerBound..<node.cursorPosition
@@ -204,7 +204,7 @@ extension BeamTextEdit {
         moveInlineFormatterAtSelection(below: true)
         node.focus(position: editableRange.upperBound - 1)
         DispatchQueue.main.async {
-            self.showOrHideInlineFormatter(isPresent: true)
+            self.showInlineFormatter()
         }
     }
 
@@ -279,7 +279,7 @@ extension BeamTextEdit {
         node.focus(position: endPlaceholderCursorPosition)
         prepareInlineFormatterWindowBeforeShowing(meetingPicker, atPoint: atPoint)
         DispatchQueue.main.async {
-            self.showOrHideInlineFormatter(isPresent: true)
+            self.showInlineFormatter()
         }
     }
 

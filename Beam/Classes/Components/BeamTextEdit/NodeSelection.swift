@@ -47,6 +47,11 @@ class NodeSelection {
         }
     }
 
+    /// Return true if at least one TextNode is inside the selection
+    public var hasTextNode: Bool {
+        nodes.contains(where: { $0 is TextNode })
+    }
+
     init(start: ElementNode, end: ElementNode, elements: Set<ElementNode> = Set<ElementNode>()) {
         self.start = start
         self.end = end
