@@ -199,7 +199,9 @@ class DownloadManagerMock: DownloadManager {
 
     var fractionCompleted: Double = 0.0
     var overallProgress: Progress = Progress()
-    var downloads: [Download] = []
+    var downloadList = DownloadList<DownloadItem>()
+
+    func download(_ download: WKDownload) {}
 
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {}
 
@@ -208,11 +210,10 @@ class DownloadManagerMock: DownloadManager {
         completion(DownloadManagerResult.binary(data: Data([0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
     }
 
-    func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?) {}
     func downloadFile(from document: BeamDownloadDocument) throws {}
 
     func clearAllFileDownloads() {}
-    func clearFileDownload(_ download: Download) -> Download? { return nil }
+    func clearFileDownload(_ download: DownloadItem) -> DownloadItem? { return nil }
 
     func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
         let headers = ["Referer": pageUrl.absoluteString]
