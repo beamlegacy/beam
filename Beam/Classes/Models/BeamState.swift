@@ -499,7 +499,7 @@ import Sentry
         super.init()
         setup(data: data)
 
-        data.downloadManager.$downloads.sink { [weak self] _ in
+        data.downloadManager.downloadList.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
     }
