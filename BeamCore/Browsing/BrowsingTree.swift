@@ -25,7 +25,7 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     }
     public var anonymized: BrowsingTreeOrigin {
         switch self {
-        case .searchBar(query:_, referringRootId: let id): return .searchBar(query: nil, referringRootId: id)
+        case .searchBar(query: _, referringRootId: let id): return .searchBar(query: nil, referringRootId: id)
         case .searchFromNode: return .searchFromNode(nodeText: nil)
         case .linkFromNote: return .linkFromNote(noteName: nil)
         case .browsingNode(id: let id, pageLoadId: let pageLoadId, rootOrigin: let rootOrigin, rootId: let rootId):

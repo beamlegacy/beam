@@ -46,9 +46,9 @@ extension AutocompleteManager {
         let urlResultsTruncated = Array(urlResults.prefix(6))
 
         var sortableResults = [AutocompleteResult]()
-        let uniqueUrls = autocompleteResultsUniqueUrls(sequence: historyResultsTruncated + urlResultsTruncated)
-        self.rawSortedURLResults = uniqueUrls
-        sortableResults.append(contentsOf: uniqueUrls)
+        let uniqueURLs = autocompleteResultsUniqueURLs(sequence: historyResultsTruncated + urlResultsTruncated)
+        self.rawSortedURLResults = uniqueURLs
+        sortableResults.append(contentsOf: uniqueURLs)
         sortableResults.append(contentsOf: notesResultsTruncated)
 
         sortableResults.sort(by: >)
@@ -57,9 +57,13 @@ extension AutocompleteManager {
         sortableResults = boostResult(topDomainResults, results: sortableResults)
         sortableResults = boostResult(mnemonicResults, results: sortableResults)
 
+        let searchEngineResultsWithoutUniqueURLs = searchEngineResults.filter { r in
+            guard r.source == .url, let url = r.url else { return true }
+            return !uniqueURLs.contains { $0.url?.urlStringByRemovingUnnecessaryCharacters == url.urlStringByRemovingUnnecessaryCharacters }
+        }
         let resultLimit = 8
         let results = merge(sortableResults: sortableResults,
-                            searchEngineResults: searchEngineResults,
+                            searchEngineResults: searchEngineResultsWithoutUniqueURLs,
                             createCardResults: createCardResults,
                             limit: resultLimit)
         return results
@@ -99,19 +103,20 @@ extension AutocompleteManager {
         return sequence.filter { seenText.update(with: $0.text) == nil && seenUUID.update(with: $0.uuid) == nil }
     }
 
-    private func autocompleteResultsUniqueUrls(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
+    private func autocompleteResultsUniqueURLs(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
         // Take all the results and deduplicate the results based on their urls and source priorities:
-        var uniqueUrls = [String: AutocompleteResult]()
+        var uniqueURLs = [String: AutocompleteResult]()
         for result in sequence {
             let id = result.url?.urlStringByRemovingUnnecessaryCharacters ?? result.text
-            if let existing = uniqueUrls[id] {
-                if result.source.priority < existing.source.priority {
-                    uniqueUrls[id] = result
+            if let existing = uniqueURLs[id] {
+                if result.source.priority < existing.source.priority ||
+                    (result.score != nil && (existing.score == nil || result.score ?? 0 > existing.score ?? 0)) {
+                    uniqueURLs[id] = result
                 }
             } else {
-                uniqueUrls[id] = result
+                uniqueURLs[id] = result
             }
         }
-        return Array(uniqueUrls.values).sorted(by: >)
+        return Array(uniqueURLs.values).sorted(by: >)
     }
 }
