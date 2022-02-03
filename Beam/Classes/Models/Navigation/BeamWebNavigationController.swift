@@ -11,7 +11,6 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
     public var isNavigatingFromNote: Bool = false
     private var isNavigatingFromSearchBar: Bool = false
     private weak var webView: WKWebView?
-    var requestedUrl: URL?
 
     init(browsingTree: BrowsingTree, noteController: WebNoteController, webView: WKWebView) {
         self.browsingTree = browsingTree
@@ -41,22 +40,22 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
-    // swiftlint:disable_next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity
     func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
         guard let page = self.page else {
             return
         }
-        //If the webview is loading, we should not index the content.
-        //We will be called by the webView delegate at the end of the loading
+        // If the webview is loading, we should not index the content.
+        // We will be called by the webView delegate at the end of the loading
         guard !webView.isLoading else {
             return
         }
 
-        //Only register navigation if the page was successfully loaded
+        // Only register navigation if the page was successfully loaded
         guard page.responseStatusCode == 200 else { return }
 
         // handle the case where a redirection happened and we never get a title for the original url:
-        if let requestedUrl = requestedUrl, requestedUrl != url {
+        if let requestedUrl = page.requestedURL, requestedUrl != url {
             Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedUrl) - \(String(describing: webView.title))")
             let link = GRDBDatabase.shared.visit(url: requestedUrl.absoluteString, title: webView.title, content: nil, destination: url.absoluteString)
             ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()).update(id: link.id, value: 0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
@@ -144,7 +143,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         default:
             // update the requested url as it is not from a redirection but from a user action:
             if let url = action.request.url {
-                requestedUrl = url
+                self.page?.requestedURL = url
             }
         }
     }
@@ -246,7 +245,6 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         guard let webviewUrl = webView.url else {
             return // webview probably failed to load
         }
-        self.page?.requestedUrl = webviewUrl
 
         if BeamURL(webviewUrl).isErrorPage {
             let beamSchemeUrl = BeamURL(webviewUrl)

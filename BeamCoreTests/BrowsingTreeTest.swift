@@ -247,6 +247,7 @@ class BrowsingTreeTest: XCTestCase {
         BeamDate.reset()
     }
 
+    //swiftlint:disable:next function_body_length
     func testFlattenUnflatten() throws {
 
         func isEqual(_ leftNode: BrowsingNode, _ rightNode: BrowsingNode) {

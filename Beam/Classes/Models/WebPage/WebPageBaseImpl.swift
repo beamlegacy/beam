@@ -31,7 +31,7 @@ class WebPageBaseImpl: WebPage {
 
     var title: String = ""
     var url: URL?
-    var requestedUrl: URL?
+    var requestedURL: URL?
     var hasError: Bool = false
     var responseStatusCode: Int = 200
 

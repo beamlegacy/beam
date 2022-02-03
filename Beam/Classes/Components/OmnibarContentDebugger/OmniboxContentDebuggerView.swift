@@ -102,7 +102,7 @@ struct OmniboxContentDebuggerView: View {
     }
 
     func onEnterPressed(modifierFlags: NSEvent.ModifierFlags?) {
-        let isCreateCardShortcut = modifierFlags?.contains(.option) == true
+//        let isCreateCardShortcut = modifierFlags?.contains(.option) == true
 //        if isCreateCardShortcut {
 //            if let createCardIndex = autocompleteManager.autocompleteResults.firstIndex(where: { (result) -> Bool in
 //                return result.source == .createCard
