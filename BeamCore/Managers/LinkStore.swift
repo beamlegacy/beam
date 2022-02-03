@@ -24,14 +24,12 @@ public struct Link: Codable {
     public var updatedAt: Date
     public var deletedAt: Date?
 
-    public init(url: String, title: String?, content: String?, destination: String? = nil, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
+    public init(url: String, title: String?, content: String?, destination: UUID? = nil, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
         self.id = UUID.v5(name: url, namespace: .url)
         self.url = url
         self.title = title
         self.content = content
-        if let destination = destination {
-            self.destination = UUID.v5(name: destination, namespace: .url)
-        }
+        self.destination = destination
 
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -64,7 +62,7 @@ public class FakeLinkManager: LinkManager {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
     public func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID { UUID.null }
     public func linkFor(id: UUID) -> Link? { nil }
-    public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link { Link(url: url, title: title, content: content, destination: destination) }
+    public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link { Link(url: url, title: title, content: content, destination: nil) }
     public func deleteAll() throws { }
     public func isDomain(id: UUID) -> Bool { false }
     public func getDomainId(id: UUID) -> UUID? { UUID.null }

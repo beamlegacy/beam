@@ -1320,7 +1320,8 @@ extension GRDBDatabase {
     func visit(url: String, title: String? = nil, content: String?, destination: String?) -> Link {
         guard var link = linkFor(url: url) else {
             // The link doesn't exist, create it and return the id
-            var link = Link(url: url, title: title, content: content, destination: destination)
+            var link = Link(url: url, title: title, content: content)
+            link.setDestination(destination)
             _ = try? dbWriter.write { db in
                 try link.insert(db)
             }
@@ -1436,7 +1437,7 @@ extension GRDBDatabase {
 
     func searchAlias(query: String,
                      enabledFrecencyParam: FrecencyParamKey? = nil,
-                     completion: @escaping (Result<LinkSearchResult?, Error>) -> Void) {
+                     completion: @escaping (Result<(link: LinkSearchResult?, destination: LinkSearchResult?)?, Error>) -> Void) {
         dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
             do {
                 let db = try dbResult.get()
@@ -1452,20 +1453,22 @@ extension GRDBDatabase {
                 let result = try request
                     .asRequest(of: LinkWithFrecency.self)
                     .fetchOne(db)
-                    .map { record -> LinkSearchResult in
+                    .map { record -> (link: LinkSearchResult, destination: LinkSearchResult?) in
                         if let destination = record.link.destination,
-                           let searchResult = getLinkFrecency(db, id: destination, enabledFrecencyParam: enabledFrecencyParam) {
+                           let destinationResult = getLinkFrecency(db, id: destination, enabledFrecencyParam: enabledFrecencyParam) {
                             // If we found a destination, try to use the destinations frecency as it will probably be more accurate (and visited more times)
-                            Logger.shared.logDebug("Found \(record.link) has a destination: \(record.link.destination) and frecency \(searchResult.frecency) - use frecency from destination instead: \(record.frecency)", category: .search)
-                            return LinkSearchResult(title: record.link.title ?? record.link.url,
-                                                       url: record.link.url,
-                                                       frecency: searchResult.frecency ?? record.frecency)
+                            Logger.shared.logDebug("Found \(record.link.url) has a destination: \(destination) and frecency \(destinationResult.frecency.debugDescription) - use frecency from destination instead: \(record.frecency.debugDescription)", category: .search)
+                            return (LinkSearchResult(title: record.link.title ?? record.link.url,
+                                                     url: record.link.url,
+                                                     frecency: destinationResult.frecency ?? record.frecency),
+                                    destinationResult)
+
                         }
 
-                        Logger.shared.logDebug("Found \(record.link) - with frecency: \(record.frecency)", category: .search)
-                        return LinkSearchResult(title: record.link.title ?? record.link.url,
-                                            url: record.link.url,
-                                            frecency: record.frecency)
+                        Logger.shared.logDebug("Found \(record.link.url) - with frecency: \(record.frecency.debugDescription)", category: .search)
+                        return (LinkSearchResult(title: record.link.title ?? record.link.url,
+                                                 url: record.link.url,
+                                                 frecency: record.frecency), nil)
                     }
                 completion(.success(result))
             } catch {

@@ -13,10 +13,12 @@ protocol WebPage: AnyObject, Scorable {
 
     var frame: NSRect { get }
 
-    var originalQuery: String? { get }
-    var requestedUrl: URL? { get set }
     var title: String { get }
     var url: URL? { get set }
+    /// The URL before any website implicit redirection. (ex: gmail.com redirects to mail.google.com)
+    var requestedURL: URL? { get set }
+    /// The user typed text that ended up opening this page.
+    var originalQuery: String? { get }
     var hasError: Bool { get set }
     var responseStatusCode: Int { get set }
 
