@@ -64,6 +64,10 @@ class FaviconProvider {
                               lifetime: favicon.origin == .webView ? Self.cachedIconFromWebViewLifetime : Self.cachedIconFromURLLifetime)
     }
 
+    public func registerFavicon(_ favicon: Favicon, for url: URL) {
+        updateCache(withIcon: favicon, originURL: url, size: defaultScaledSize)
+    }
+
     private func updateCache(withIcon: Favicon, originURL: URL, size: Int, useFullURL: Bool = false) {
         let cacheKey = useFullURL ? cacheKeyForFullURL(originURL, size: size) : cacheKeyForURLHost(originURL, size: size)
         self.cache[cacheKey] = withIcon

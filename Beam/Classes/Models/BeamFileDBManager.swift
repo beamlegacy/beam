@@ -360,7 +360,7 @@ class BeamFileDBManager: BeamFileStorage {
                         }
                     }
                 } catch {
-                    Logger.shared.logError("Unable to delete unreferenced file \(to)", category: .fileDB)
+                    Logger.shared.logError("Unable to delete unreferenced file \(String(describing: to))", category: .fileDB)
                 }
             }
             guard let to = to else {

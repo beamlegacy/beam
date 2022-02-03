@@ -143,8 +143,8 @@ extension AutocompleteManager {
             GRDBDatabase.shared.searchAlias(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
                 case .failure(let error): promise(.failure(error))
-                case .success(let linkResult):
-                    guard let linkResult = linkResult else {
+                case .success(let r):
+                    guard let linkResult = r?.link else {
                         promise(.success([]))
                         return
                     }
@@ -153,9 +153,14 @@ extension AutocompleteManager {
                     if let url = url {
                         information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
                     }
+                    var aliasForDestinationURL: URL?
+                    if let destinationURLString = r?.destination?.url, let destinationURL = URL(string: destinationURLString) {
+                        aliasForDestinationURL = destinationURL
+                    }
                     promise(.success([AutocompleteResult(text: information,
                                                          source: .history,
                                                          url: url,
+                                                         aliasForDestinationURL: aliasForDestinationURL,
                                                          information: linkResult.title,
                                                          completingText: query,
                                                          score: linkResult.frecency?.frecencySortScore, urlFields: [.text])
