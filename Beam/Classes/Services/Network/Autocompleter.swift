@@ -77,6 +77,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     var source: Source
     var disabled: Bool = false
     var url: URL?
+    var aliasForDestinationURL: URL?
     var information: String?
     var completingText: String?
     var uuid: UUID
@@ -97,11 +98,14 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     var urlFields: URLFields
     var takeOverCandidate = false
 
-    init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, information: String? = nil, completingText: String? = nil, uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = []) {
+    init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
+         information: String? = nil, completingText: String? = nil,
+         uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = []) {
         self.text = text
         self.source = source
         self.disabled = disabled
         self.url = url
+        self.aliasForDestinationURL = aliasForDestinationURL
         self.information = information
         self.completingText = completingText
         self.uuid = uuid
