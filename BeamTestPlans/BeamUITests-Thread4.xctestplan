@@ -40,7 +40,9 @@
         "OmniboxDestinationTests",
         "OmniboxViewTests",
         "OnboardingTests",
+        "PasswordPreferencesTests",
         "PnSAddToCardTests",
+        "ReferencesTests",
         "WaitHelper",
         "dummytests"
       ],

@@ -13,16 +13,24 @@ class PasswordManagerHelper: BaseView {
     let login = "qa@beamapp.co"
     let password = "somePassword"
     
-    func doesAutofillPopupExist() -> Bool {
-        return getAutofillPopupElement().waitForExistence(timeout: minimumWaitTimeout)
+    func doesAutofillPopupExist(login: String) -> Bool {
+        return getAutofillPopupElement(login: login).waitForExistence(timeout: minimumWaitTimeout)
     }
     
-    func getAutofillPopupElement() -> XCUIElement {
-        return app.dialogs.containing(.staticText, identifier:login).element
+    func clickPopupLoginText(login: String) {
+        app.dialogs.staticTexts[login].clickOnExistence()
+    }
+    
+    func getAutofillPopupElement(login: String) -> XCUIElement {
+        return app.dialogs.containing(.staticText, identifier: login).element
     }
     
     func getOtherPasswordsOptionElement() -> XCUIElement {
         return app.staticTexts["Other Passwords..."]
+    }
+    
+    func getOtherPasswordsOptionElementFor(hostName: String) -> XCUIElement {
+        return app.staticTexts["Other Passwords for " + hostName]
     }
     
     @discardableResult
