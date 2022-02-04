@@ -440,7 +440,7 @@ public extension CALayer {
         updateLayout(nodesRect)
     }
 
-    private var nodesRect: NSRect {
+    internal var nodesRect: NSRect {
         let r = bounds
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         var rect = NSRect()
@@ -472,7 +472,8 @@ public extension CALayer {
             self.rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
             if let cardNote = self.note as? BeamNote, cardNote.type.isJournal {
-                _ = self.setupLeadingGutter(textRect: rect)
+                self.setupLeadingGutter(textRect: rect)
+                self.updateLeadingGutterLayout(textRect: rect)
             }
 
             self.doRunAfterNextLayout()
