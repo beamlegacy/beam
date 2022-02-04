@@ -15,6 +15,7 @@ protocol SearchEngineDescription {
 
     func searchQueryItems(for query: String) -> [URLQueryItem]
     func suggestionsQueryItems(for query: String) -> [URLQueryItem]
+    func queryFromURL(_ url: URL) -> String?
 
     /// Decodes the suggestions from the response returned by a search engine provider.
     func decodeSuggestions(from data: Data) throws -> [String]
@@ -35,6 +36,14 @@ extension SearchEngineDescription {
 
     func suggestionsQueryItems(for query: String) -> [URLQueryItem] {
         [URLQueryItem(name: "q", value: query)]
+    }
+
+    func queryFromURL(_ url: URL) -> String? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let queryItem = components.queryItems?.first(where: { $0.name == "q" }) else {
+                  return nil
+              }
+        return queryItem.value
     }
 
     func decodeSuggestions(from data: Data) throws -> [String] { [] }

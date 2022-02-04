@@ -15,6 +15,7 @@ struct AutocompleteItem: View {
     let selected: Bool
     var disabled: Bool = false
     var displayIcon: Bool = true
+    var displaySubtitle: Bool = true
     var alwaysHighlightCompletingText: Bool = false
     var allowsShortcut: Bool = true
 
@@ -88,33 +89,44 @@ struct AutocompleteItem: View {
         }
     }
 
-    private func highlightedTextRanges(in text: String) -> [Range<String.Index>] {
-        guard let completingText = item.completingText, item.source != .createCard else {
+    private func highlightedTextRanges(secondaryText: Bool = false) -> ((String) -> [Range<String.Index>]) {
+        { text in
+            guard let completingText = item.completingText,
+                  item.source != .createCard,
+                  (item.source != .autocomplete || !secondaryText)
+            else {
+                return []
+            }
+            if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain, .mnemonic].contains(item.source) {
+                return text.ranges(of: completingText, options: .caseInsensitive)
+            }
+            if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
+                return [firstRange.upperBound..<text.endIndex]
+            }
             return []
         }
-        if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain, .mnemonic].contains(item.source) {
-            return text.ranges(of: completingText, options: .caseInsensitive)
-        }
-        if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
-            return [firstRange.upperBound..<text.endIndex]
-        }
-        return []
     }
 
     var mainText: String {
-        if item.source == .createCard {
+        switch item.source {
+        case .createCard:
             return "New Note:"
+        default:
+            return item.displayText
         }
-        return item.displayText
     }
 
     var secondaryText: String? {
-        if item.source == .createCard {
+        guard displaySubtitle else { return nil }
+        switch item.source {
+        case .createCard:
             return " " + item.text
-        } else if let info = item.displayInformation {
-            return " - " + info
+        default:
+            if let info = item.displayInformation {
+                return " - " + info
+            }
+            return nil
         }
-        return nil
     }
 
     var body: some View {
@@ -133,7 +145,7 @@ struct AutocompleteItem: View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
                     StyledText(verbatim: mainText)
-                        .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges)
+                        .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges())
                         .font(BeamFont.regular(size: 14).swiftUI)
                         .foregroundColor(mainTextColor)
                 }
@@ -141,7 +153,7 @@ struct AutocompleteItem: View {
                 if let info = secondaryText {
                     HStack {
                         StyledText(verbatim: info)
-                            .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges)
+                            .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
                             .font(BeamFont.regular(size: 14).swiftUI)
                             .foregroundColor(informationColor)
                     }
