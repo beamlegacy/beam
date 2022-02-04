@@ -12,19 +12,33 @@ extension AutocompleteManager {
     func mergeAndSortPublishersResults(publishersResults: [AutocompletePublisherSourceResults],
                                        for searchText: String) -> (results: [AutocompleteResult], canCreateNote: Bool) {
         var autocompleteResults = [AutocompleteResult.Source: [AutocompleteResult]]()
+        var additionalSearchEngineResults = [AutocompleteResult]()
         publishersResults.forEach { someResults in
-            autocompleteResults[someResults.source, default: []].append(contentsOf: someResults.results)
+            switch someResults.source {
+            case .history, .url: // these sources can contain search engine like results.
+                someResults.results.forEach { result in
+                    switch result.source {
+                    case .autocomplete:
+                        additionalSearchEngineResults.append(result)
+                    default:
+                        autocompleteResults[result.source, default: []].append(result)
+                    }
+                }
+            default:
+                autocompleteResults[someResults.source, default: []].append(contentsOf: someResults.results)
+            }
         }
-        if let noteResults = autocompleteResults[.note] {
-            autocompleteResults[AutocompleteResult.Source.note] = self.autocompleteResultsUniqueNotes(sequence: noteResults)
+        if !additionalSearchEngineResults.isEmpty {
+            autocompleteResults[.autocomplete, default: []].insert(contentsOf: additionalSearchEngineResults.sorted(by: >), at: 0)
         }
+
         let finalResults = sortResults(notesResults: autocompleteResults[.note, default: []],
-                                            historyResults: autocompleteResults[.history] ?? [],
-                                            urlResults: autocompleteResults[.url] ?? [],
-                                            topDomainResults: autocompleteResults[.topDomain] ?? [],
-                                            mnemonicResults: autocompleteResults[.mnemonic] ?? [],
-                                            searchEngineResults: autocompleteResults[.autocomplete] ?? [],
-                                            createCardResults: autocompleteResults[.createCard] ?? [])
+                                       historyResults: autocompleteResults[.history] ?? [],
+                                       urlResults: autocompleteResults[.url] ?? [],
+                                       topDomainResults: autocompleteResults[.topDomain] ?? [],
+                                       mnemonicResults: autocompleteResults[.mnemonic] ?? [],
+                                       searchEngineResults: autocompleteResults[.autocomplete] ?? [],
+                                       createCardResults: autocompleteResults[.createCard] ?? [])
 
         let canCreateNote = autocompleteResults[.createCard]?.isEmpty == false
         return (results: finalResults, canCreateNote: canCreateNote)
@@ -42,7 +56,7 @@ extension AutocompleteManager {
         let historyResultsTruncated = Array(historyResults.prefix(6))
 
         // but prioritize title match over content match ?
-        let notesResultsTruncated = Array(notesResults.prefix(6))
+        let notesResultsTruncated = Array(autocompleteResultsUniqueNotes(sequence: notesResults).prefix(6))
         let urlResultsTruncated = Array(urlResults.prefix(6))
 
         var sortableResults = [AutocompleteResult]()
@@ -57,13 +71,12 @@ extension AutocompleteManager {
         sortableResults = boostResult(topDomainResults, results: sortableResults)
         sortableResults = boostResult(mnemonicResults, results: sortableResults)
 
-        let searchEngineResultsWithoutUniqueURLs = searchEngineResults.filter { r in
-            guard r.source == .url, let url = r.url else { return true }
-            return !uniqueURLs.contains { $0.url?.urlStringByRemovingUnnecessaryCharacters == url.urlStringByRemovingUnnecessaryCharacters }
-        }
+        var filteredSearchEngineResults = filterOutSearchEngineURLResults(from: searchEngineResults, forURLAlreadyIn: uniqueURLs)
+        filteredSearchEngineResults = autocompleteResultsUniqueSearchEngine(sequence: filteredSearchEngineResults)
+
         let resultLimit = 8
         let results = merge(sortableResults: sortableResults,
-                            searchEngineResults: searchEngineResultsWithoutUniqueURLs,
+                            searchEngineResults: filteredSearchEngineResults,
                             createCardResults: createCardResults,
                             limit: resultLimit)
         return results
@@ -96,14 +109,34 @@ extension AutocompleteManager {
         return results
     }
 
-    private func autocompleteResultsUniqueNotes(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
+    func insertSearchEngineResults(_ searchEngineResults: [AutocompleteResult], in results: [AutocompleteResult]) -> [AutocompleteResult] {
+        var finalResults = results
+        let canCreate = finalResults.firstIndex { $0.source == .createCard } != nil
+        let existingAutocompleteResult = finalResults.filter { $0.source == .autocomplete }
+
+        let maxGuesses = finalResults.count > 2 ? 4 : 6
+        let toInsert = searchEngineResults.filter { result in
+            !existingAutocompleteResult.contains { $0.text == result.text }
+        }.prefix(maxGuesses)
+        let atIndex = max(0, finalResults.count - (canCreate ? 1 : 0))
+        if atIndex <= finalResults.count {
+            finalResults.insert(contentsOf: toInsert, at: atIndex)
+        }
+        return finalResults
+    }
+}
+
+// MARK: - Deduplicate
+extension AutocompleteManager {
+
+    internal func autocompleteResultsUniqueNotes(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
         var seenText = Set<String>()
         var seenUUID = Set<UUID>()
 
         return sequence.filter { seenText.update(with: $0.text) == nil && seenUUID.update(with: $0.uuid) == nil }
     }
 
-    private func autocompleteResultsUniqueURLs(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
+    internal func autocompleteResultsUniqueURLs(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
         // Take all the results and deduplicate the results based on their urls and source priorities:
         var uniqueURLs = [String: AutocompleteResult]()
         for result in sequence {
@@ -118,5 +151,37 @@ extension AutocompleteManager {
             }
         }
         return Array(uniqueURLs.values).sorted(by: >)
+    }
+
+    internal func autocompleteResultsUniqueSearchEngine(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
+        // Take all the results and deduplicate the results based on their search text and engine
+        var uniqueResults = [String: AutocompleteResult]()
+        var toRemoveIndexes = [Int]()
+        for (index, result) in sequence.enumerated() {
+            let id = result.text + (result.information ?? "")
+            if let existing = uniqueResults[id] {
+                if result.score != nil && (existing.score == nil || result.score ?? 0 > existing.score ?? 0) {
+                    if let existingIndex = sequence.firstIndex(of: existing) {
+                        toRemoveIndexes.append(existingIndex)
+                    }
+                    uniqueResults[id] = result
+                } else {
+                    toRemoveIndexes.append(index)
+                }
+            } else {
+                uniqueResults[id] = result
+            }
+        }
+        let finalResult = sequence.enumerated().compactMap {
+            toRemoveIndexes.contains($0.0) ? nil : $0.1
+        }
+        return finalResult
+    }
+
+    internal func filterOutSearchEngineURLResults(from sequence: [AutocompleteResult], forURLAlreadyIn urlResults: [AutocompleteResult]) -> [AutocompleteResult] {
+        sequence.filter { r in
+            guard r.source == .url, let url = r.url else { return true }
+            return !urlResults.contains { $0.url?.urlStringByRemovingUnnecessaryCharacters == url.urlStringByRemovingUnnecessaryCharacters }
+        }
     }
 }
