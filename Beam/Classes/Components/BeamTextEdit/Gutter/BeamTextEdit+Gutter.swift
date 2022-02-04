@@ -56,13 +56,21 @@ extension BeamTextEdit {
     private func observeLeading(gutter: GutterContainerView) {
         switch gutter.leadingGutterViewType {
         case .calendarGutterView(let viewModel):
-            viewModel.$meetings.dropFirst().sink { meetings in
-                if viewModel.meetings.count != meetings.count {
-                    self.superview?.invalidateIntrinsicContentSize()
-                }
+            viewModel.$meetings.dropFirst().sink { [weak self] _ in
+                guard let self = self else { return }
+                self.updateLeadingGutterLayout(textRect: self.nodesRect)
+                self.superview?.invalidateIntrinsicContentSize()
             }.store(in: &scope)
         case .none: break
         }
+    }
+
+    func updateLeadingGutterLayout(textRect: NSRect) {
+        guard leadingGutter?.frame.height != leadingGutterSize.height else { return }
+        var gutterFrame = CGRect.zero
+        gutterFrame.origin = CGPoint(x: 0, y: textRect.minY)
+        gutterFrame.size = CGSize(width: textRect.minX, height: leadingGutterSize.height)
+        leadingGutter?.frame = gutterFrame
     }
 
     func updateCalendarLeadingGutter(for noteId: UUID) {
