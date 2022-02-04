@@ -15,7 +15,7 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
         super.init()
 
         debouncedUpdateScrollingScore
-            .debounce(for: .seconds(200), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(200), scheduler: RunLoop.main)
             .sink { [weak self] frame in
                 self?.updateScrollingScore(frame)
             }
