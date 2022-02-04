@@ -64,8 +64,36 @@ public extension String {
         return mayBeWebURL || mayBeFileURL || mayBeIP || isLocalhost
     }
 
+    // pre-build the most common data detectors for faster performance
+    private static let linkDataDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+    private func dataDetectorMatchesType(_ checkingType: NSTextCheckingResult.CheckingType) -> (Bool, Any?) {
+        let detector: NSDataDetector?
+        switch checkingType {
+        case .link:
+            detector = Self.linkDataDetector
+        default:
+            detector = try? NSDataDetector(types: checkingType.rawValue)
+        }
+        let textLength = self.utf16.count
+        if let detector = detector,
+            let match = detector.firstMatch(in: self, options: [], range: NSRange(location: 0, length: textLength)) {
+            let result: Any?
+            switch checkingType {
+            case .link:
+                result = match.url
+            default:
+                result = nil
+            }
+            return (match.range.length == textLength, result)
+        } else {
+            return (false, nil)
+        }
+    }
+
     var mayBeWebURL: Bool {
-        self.matches(withRegex: "^(http:\\/\\/www\\.|https:\\/\\/www\\.|http:\\/\\/|https:\\/\\/)?[a-z0-9]+([\\-\\.]+[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?$", options: .caseInsensitive)
+        let (matches, url) = dataDetectorMatchesType(.link)
+        guard matches, let url = url as? URL else { return false }
+        return url.scheme?.hasPrefix("http") != false
     }
 
     var mayBeFileURL: Bool {

@@ -9,12 +9,12 @@ import XCTest
 
 class StringRegexTests: XCTestCase {
 
-    let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr", "http://the-super--swift.fr"]
+    let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr", "http://the-super--swift.fr", "https://atlas.engineer", "https://swift.org/רפאל_נדאל"]
     let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html", "file:///some-dir/some-swift--file.html"]
     let validEmails = ["swift@beamapp.co", "s@b.co", "john-swift--the3rd@beamapp.co"]
     let validUsernames = ["tyler", "tyler_joseph", "josh-dun-09", "ty", "username20characters"]
 
-    let invalidWebURLs = ["http://swift", "swift"]
+    let invalidWebURLs = ["thhs://swift", "swift", "file://swift.html"]
     let invalidFileURLs = ["file://swift.html", "file://path/swift.html", "file"]
     let invalidEmails = ["swift", "https://swift", "@swift.co", "mailto:swift@beamapp.co", "swift@beamapp.co:wrong"]
     let invalidUsernames = ["tyler joseph", "tyler.joseph", "t", "usernameislongerthan30characters", ""]
