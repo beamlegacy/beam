@@ -127,8 +127,13 @@ extension AutocompleteManager {
                         if let url = url {
                             information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
                         }
-                        return AutocompleteResult(text: information, source: .history,
-                                                  url: url, information: result.title, completingText: query, score: result.frecency?.frecencySortScore, urlFields: [.text])
+
+                        let result = AutocompleteResult(text: information, source: .history, url: url, information: result.title,
+                                                        completingText: query, score: result.frecency?.frecencySortScore, urlFields: [.text])
+                        if let searchEngineResult = self.convertResultToSearchEngineResultIfNeeded(result) {
+                            return searchEngineResult
+                        }
+                        return result
                     }
                     self.logIntermediate(step: "HistoryContent", stepShortName: "HC", results: autocompleteResults, startedAt: start)
                     promise(.success(autocompleteResults))
@@ -177,9 +182,13 @@ extension AutocompleteManager {
             let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
                 let url = URL(string: scoredLink.link.url)
                 let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? URL(string: scoredLink.link.url)?.urlStringWithoutScheme.removingPercentEncoding ?? ""
-                return AutocompleteResult(text: text, source: .url, url: url,
-                                          information: scoredLink.link.title, completingText: query,
-                                          score: scoredLink.frecency?.frecencySortScore, urlFields: .text)
+                let result = AutocompleteResult(text: text, source: .url, url: url,
+                                                information: scoredLink.link.title, completingText: query,
+                                                score: scoredLink.frecency?.frecencySortScore, urlFields: .text)
+                if let searchEngineResult = self.convertResultToSearchEngineResultIfNeeded(result) {
+                    return searchEngineResult
+                }
+                return result
             }.sorted(by: >)
             self.logIntermediate(step: "HistoryTitle", stepShortName: "HT", results: results, startedAt: start)
             promise(.success(results))
@@ -215,8 +224,7 @@ extension AutocompleteManager {
 
                     let text = url.absoluteString
                     var information: String?
-                    let linkId = LinkStore.shared.getOrCreateIdFor(url: url.urlWithScheme.absoluteString, title: nil)
-                    if let link = LinkStore.shared.linkFor(id: linkId),
+                    if let link = LinkStore.shared.getLinks(matchingUrl: url.urlWithScheme.absoluteString).values.first,
                        let title = link.title {
                         information = title
                     }
@@ -281,15 +289,7 @@ extension AutocompleteManager {
     }
 
     private func searchEngineArrivedTooLate(_ results: [AutocompleteResult]) {
-        var finalResults = self.autocompleteResults
-        let canCreate = finalResults.firstIndex { $0.source == .createCard } != nil
-        let maxGuesses = finalResults.count > 2 ? 4 : 6
-        let toInsert = results.prefix(maxGuesses)
-        let atIndex = max(0, finalResults.count - (canCreate ? 1 : 0))
-        if atIndex < finalResults.count {
-            finalResults.insert(contentsOf: toInsert, at: atIndex)
-            self.autocompleteResults = finalResults
-        }
+        self.autocompleteResults = insertSearchEngineResults(results, in: autocompleteResults)
     }
 
     // MARK: - Empty Query Suggestions
@@ -308,6 +308,21 @@ extension AutocompleteManager {
             self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray, startedAt: start)
             promise(.success(autocompleteResultsArray))
         }
+    }
+
+    // MARK: - Helpers
+    private func convertResultToSearchEngineResultIfNeeded(_ result: AutocompleteResult) -> AutocompleteResult? {
+        guard let url = result.url,
+              let searchEngine = searchEngine.canHandle(url) ? searchEngine : SearchEngineProvider.provider(for: url)?.searchEngine
+        else { return nil }
+        var text = result.text
+        var information: String?
+        if let query = searchEngine.queryFromURL(url) {
+            text = query
+            information = searchEngine.description
+        }
+        return AutocompleteResult(text: text, source: .autocomplete, url: url, information: information,
+                                  completingText: result.completingText, score: result.score, urlFields: [])
     }
 }
 
