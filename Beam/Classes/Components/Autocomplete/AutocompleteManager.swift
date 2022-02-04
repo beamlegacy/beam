@@ -151,12 +151,13 @@ class AutocompleteManager: ObservableObject {
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
         case .mnemonic: return true // a mnemonic is by definition something that can take over the result
-        case .topDomain: return result.text.lowercased().starts(with: searchText.lowercased())
+        case .topDomain:
+            return result.text.lowercased().starts(with: searchText.lowercased())
         case .history, .url:
             return result.takeOverCandidate
         case .autocomplete:
-            return autocompleteResults.count == 2 // 1 search engine result + 1 create note
-            && !searchQuery.mayBeURL && result.text == searchQuery
+            return result.takeOverCandidate && result.url != nil || // search engine result found in history 
+            (autocompleteResults.count == 2 && !searchQuery.mayBeURL && result.text == searchQuery) // 1 search engine result + 1 create note
         default:
             return false
         }

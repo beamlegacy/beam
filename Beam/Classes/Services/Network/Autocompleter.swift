@@ -150,10 +150,12 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
     private static func boosterScore(prefix: String?, base: String?, isURL: Bool, source: Source) -> BoosterResult {
         var canMatchInside = !isURL
-
+        var canReplaceBase = true
         switch source {
         case .note, .createCard:
             canMatchInside = false
+        case .autocomplete:
+            canReplaceBase = false
         default:
             break
         }
@@ -180,7 +182,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
         var newBase = base
 
-        if canMatchInside, let hsr = hsr, hsr.lowerBound <= maxSubstringIndex {
+        if canMatchInside, canReplaceBase, let hsr = hsr, hsr.lowerBound <= maxSubstringIndex {
             newBase = String(base.suffix(from: base.index(at: hsr.lowerBound)))
         }
 
@@ -260,25 +262,23 @@ class Autocompleter: ObservableObject {
 
                 var res = [AutocompleteResult]()
                 if query.containsCharacters {
-                    res.append(AutocompleteResult(text: query, source: .autocomplete, url: url, information: description))
+                    res.append(AutocompleteResult(text: query, source: .autocomplete, url: nil, information: description))
                 }
                 guard let data = data else {
                     promise(.success(res))
                     return
                 }
 
-                res = []
-
-                for (index, str) in self.searchEngine.suggestions(from: data).enumerated() {
+                res = self.searchEngine.suggestions(from: data).map { str in
                     let isURL = str.mayBeWebURL
                     let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
                     let url = isURL ? URL(string: str) : nil
                     var text = str
-                    let info = (index == 0 && url == nil) ? description : nil
+                    let info = description//(index == 0 && url == nil) ? description : nil
                     if let url = url {
                         text = url.urlStringWithoutScheme
                     }
-                    let result = AutocompleteResult(
+                    return AutocompleteResult(
                         text: text,
                         source: source,
                         url: url,
@@ -286,7 +286,6 @@ class Autocompleter: ObservableObject {
                         completingText: query,
                         urlFields: []
                     )
-                    res.append(result)
                 }
                 promise(.success(res))
             }
