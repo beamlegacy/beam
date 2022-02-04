@@ -160,6 +160,7 @@ class BeamUITestsHelper {
         let expectedTextAfterChange = "Type xt at"
         return expectedTextAfterChange
     }
+    
 }
 
 extension BeamUITestsHelper {
