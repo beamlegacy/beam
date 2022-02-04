@@ -20,30 +20,37 @@ struct AutocompleteList: View {
         hoveredItemIndex != nil && hoveredItemIndex != selectedIndex && hoveredItemIndex == indexFor(item: item)
     }
 
+    private func shouldItemDisplaySubtitle(_ item: AutocompleteResult, atIndex: Int) -> Bool {
+        item.source != .autocomplete || atIndex <= 0 || elements[atIndex-1].information != item.information
+    }
+
     var body: some View {
         VStack(spacing: 0) {
-            ForEach(elements) { i in
-                let isSelected = isSelectedItem(i)
-                let isCreateCard = i.source == .createCard
-                let allowsShortcut = isCreateCard || (isSelected && !isItemSelectedByHovering(i))
-                if i.source == .createCard && elements.count > 1 {
+            ForEach(Array(elements.enumerated()), id: \.1.id) { (index, item) in
+                let isSelected = isSelectedItem(item)
+                let isCreateCard = item.source == .createCard
+                let displaySubtitle = shouldItemDisplaySubtitle(item, atIndex: index)
+                let allowsShortcut = isCreateCard || (isSelected && !isItemSelectedByHovering(item))
+                if item.source == .createCard && elements.count > 1 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
                 }
-                AutocompleteItem(item: i, selected: isSelected, allowsShortcut: allowsShortcut,
-                                 colorPalette: i.source == .createCard ?
+                AutocompleteItem(item: item, selected: isSelected,
+                                 displaySubtitle: displaySubtitle,
+                                 allowsShortcut: allowsShortcut,
+                                 colorPalette: item.source == .createCard ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
                                     AutocompleteItem.defaultColorPalette)
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
-                            selectedIndex = indexFor(item: i)
+                            selectedIndex = indexFor(item: item)
                             state.startQuery()
                         }
                     )
                     .onHoverOnceVisible { hovering in
-                        let index = indexFor(item: i)
+                        let index = indexFor(item: item)
                         if hovering {
                             hoveredItemIndex = index
                         } else if hoveredItemIndex == index {
