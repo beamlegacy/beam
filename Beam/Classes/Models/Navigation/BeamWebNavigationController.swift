@@ -137,14 +137,14 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
             break
         case .formSubmitted, .formResubmitted:
-            // We found at that `action.sourceFrame.request` can be null even if it's not an optional
+            // We found at that `action.sourceFrame` can be null for `.formResubmitted` even if it's not an optional
             // Assigning it to an optional to check if we have a value
-            // https://linear.app/beamapp/issue/BE-3180/exc-breakpoint-exception-6-code-3431810664-subcode-8
-            let request: URLRequest? = action.sourceFrame.request
-            if request != nil {
-                Logger.shared.logDebug("Form submitted for \(request?.url?.absoluteString ?? "(no source frame URL)")", category: .web)
+            // see https://linear.app/beamapp/issue/BE-3180/exc-breakpoint-exception-6-code-3431810664-subcode-8
+            let sourceFrame: WKFrameInfo? = action.sourceFrame
+            if let sourceFrame = sourceFrame {
+                Logger.shared.logDebug("Form submitted for \(sourceFrame.request.url?.absoluteString ?? "(no source frame URL)")", category: .web)
+                page?.handleFormSubmit(frameInfo: sourceFrame)
             }
-            page?.handleFormSubmit(frameInfo: action.sourceFrame)
             fallthrough
         default:
             // update the requested url as it is not from a redirection but from a user action:
