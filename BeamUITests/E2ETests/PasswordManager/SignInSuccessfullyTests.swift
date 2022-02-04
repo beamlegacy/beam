@@ -10,18 +10,22 @@ import XCTest
 
 class SignInSucessfullyTests: BaseTest {
     
-    func testSignInGoogle() throws {
-        try XCTSkipIf(true, "Skipped so far, until we can clean cookies")
-        let journalView = launchApp()
-        journalView.searchInOmniBox("gmail", true)
-        testRailPrint("Then I sucessfully sign in Google")
-        XCTAssertTrue(PasswordManagerHelper().signInGoogle(), "Failed to sign in")
+    override func setUpWithError() throws {
+        try super.setUpWithError()
+        testRailPrint("Given I start mock server")
+        launchApp()
+        UITestsMenuBar().startMockHTTPServer()
     }
     
-    func testSignInFacebook() throws {
-        try XCTSkipIf(true, "Skipped so far, until we can clean cookies")
-        let journalView = launchApp()
-        journalView.searchInOmniBox("https://www.facebook.com/login/", true)
+    override func tearDown() {
+        testRailPrint("Given I stop mock server")
+        UITestsMenuBar().stopMockHTTPServer()
+        super.tearDown()
+    }
+    
+    func testSigninPage1() throws {
+        try XCTSkipIf(true, "WIP")
+        testRailPrint("Given I ")
     }
     
     
