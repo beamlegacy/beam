@@ -6,15 +6,15 @@ import Combine
 
 @testable import Beam
 
-class AutocompleteTests: QuickSpec {
+class SearchEngineAutocompleterTests: QuickSpec {
     override func spec() {
         var scope = Set<AnyCancellable>()
-        var sut: Autocompleter!
+        var sut: SearchEngineAutocompleter!
         let beamHelper = BeamTestsHelper()
         let searchEngine = GoogleSearch()
 
         beforeEach {
-            sut = Autocompleter(searchEngine: searchEngine)
+            sut = SearchEngineAutocompleter(searchEngine: searchEngine)
         }
 
         describe(".complete(query)") {

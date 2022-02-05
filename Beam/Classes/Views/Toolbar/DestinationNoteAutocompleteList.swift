@@ -21,7 +21,7 @@ struct DestinationNoteAutocompleteList: View {
     var allowScroll: Bool = false
     internal var onSelectAutocompleteResult: (() -> Void)?
 
-    private let itemHeight: CGFloat = AutocompleteItem.defaultHeight
+    private let itemHeight: CGFloat = AutocompleteItemView.defaultHeight
     private let customColorPalette = AutocompleteItemColorPalette(
         textColor: BeamColor.Beam,
         informationTextColor: BeamColor.LightStoneGray,
@@ -35,7 +35,7 @@ struct DestinationNoteAutocompleteList: View {
         touchdownBackgroundColor: BeamColor.NotePicker.active)
 
     private var colorPalette: AutocompleteItemColorPalette {
-        guard !model.searchCardContent else { return AutocompleteItem.defaultColorPalette }
+        guard !model.searchCardContent else { return AutocompleteItemView.defaultColorPalette }
         if case .TextEditor = variation { return customTextEditorColorPalette}
         return customColorPalette
     }
@@ -69,7 +69,7 @@ struct DestinationNoteAutocompleteList: View {
     var list: some View {
         VStack(spacing: 0) {
             ForEach(model.results, id: \.id) { i in
-                return AutocompleteItem(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
+                return AutocompleteItemView(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
                                         alwaysHighlightCompletingText: alwaysHighlightCompletingText,
                                         allowsShortcut: i.source != .createCard || model.allowNewCardShortcut, colorPalette: colorPalette,
                                         additionalLeadingPadding: additionLeadingPadding, cornerRadius: 0)
@@ -286,13 +286,13 @@ extension DestinationNoteAutocompleteList {
                     switch replacement {
                     case .today:
                         autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.today.rawValue,
-                                                                      source: .autocomplete))
+                                                                      source: .note))
                     case .tomorrow:
                         autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.tomorrow.rawValue,
-                                                                      source: .autocomplete))
+                                                                      source: .note))
                     case .yesterday:
                         autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.yesterday.rawValue,
-                                                                      source: .autocomplete))
+                                                                      source: .note))
                     }
                 }
             }
@@ -372,9 +372,9 @@ extension DestinationNoteAutocompleteList {
 
 struct DestinationNoteAutocompleteList_Previews: PreviewProvider {
     static var elements = [
-        AutocompleteResult(text: "Result", source: .autocomplete),
-        AutocompleteResult(text: "Result 2", source: .autocomplete),
-        AutocompleteResult(text: "Result third", source: .autocomplete)]
+        AutocompleteResult(text: "Result", source: .note),
+        AutocompleteResult(text: "Result 2", source: .note),
+        AutocompleteResult(text: "Result third", source: .note)]
     static let model = DestinationNoteAutocompleteList.Model()
     static var previews: some View {
         model.data = BeamData()

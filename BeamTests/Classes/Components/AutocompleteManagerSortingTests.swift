@@ -71,12 +71,12 @@ class AutocompleteManagerSortingTests: XCTestCase {
         let engine1 = "Google"
         let engine2 = "Ecosia"
         let notes: [AutocompleteResult] = [
-            .init(text: "A", source: .autocomplete, information: engine1, score: 10),
-            .init(text: "B", source: .autocomplete, information: engine1, score: nil),
-            .init(text: "A", source: .autocomplete, information: engine1, score: 9),
-            .init(text: "A", source: .autocomplete, information: engine2, score: 9),
-            .init(text: "B", source: .autocomplete, information: engine1, score: 10),
-            .init(text: "C", source: .autocomplete, information: engine1, score: nil),
+            .init(text: "A", source: .searchEngine, information: engine1, score: 10),
+            .init(text: "B", source: .searchEngine, information: engine1, score: nil),
+            .init(text: "A", source: .searchEngine, information: engine1, score: 9),
+            .init(text: "A", source: .searchEngine, information: engine2, score: 9),
+            .init(text: "B", source: .searchEngine, information: engine1, score: 10),
+            .init(text: "C", source: .searchEngine, information: engine1, score: nil),
         ]
         let result = manager.autocompleteResultsUniqueSearchEngine(sequence: notes)
         XCTAssertEqual(result.count, 4)
@@ -104,7 +104,7 @@ class AutocompleteManagerSortingTests: XCTestCase {
         let searchEngineResults: [AutocompleteResult] = [
             .init(text: "URL A", source: .url, url: urlA),
             .init(text: "URL B", source: .url, url: URL(string: "https://beamapp.co/B/Other")),
-            .init(text: "Result C", source: .autocomplete)
+            .init(text: "Result C", source: .searchEngine)
         ]
 
         let result = manager.filterOutSearchEngineURLResults(from: searchEngineResults, forURLAlreadyIn: urls)
@@ -113,19 +113,19 @@ class AutocompleteManagerSortingTests: XCTestCase {
     }
 
     private let searchEngineResults: [AutocompleteResult] = [
-        .init(text: "B1", source: .autocomplete),
-        .init(text: "B2", source: .autocomplete),
-        .init(text: "B3", source: .autocomplete),
-        .init(text: "B4", source: .autocomplete),
-        .init(text: "B5", source: .autocomplete),
-        .init(text: "B6", source: .autocomplete),
+        .init(text: "B1", source: .searchEngine),
+        .init(text: "B2", source: .searchEngine),
+        .init(text: "B3", source: .searchEngine),
+        .init(text: "B4", source: .searchEngine),
+        .init(text: "B5", source: .searchEngine),
+        .init(text: "B6", source: .searchEngine),
     ]
 
     func testInsertSearchEngineResults() {
 
         let base: [AutocompleteResult] = [
             .init(text: "URL1", source: .url),
-            .init(text: "B3", source: .autocomplete),
+            .init(text: "B3", source: .searchEngine),
             .init(text: "History1", source: .history),
             .init(text: "History2", source: .history),
         ]
@@ -139,7 +139,7 @@ class AutocompleteManagerSortingTests: XCTestCase {
     func testInsertSearchEngineResultsBeforeCreateCard() {
         let base: [AutocompleteResult] = [
             .init(text: "URL1", source: .url),
-            .init(text: "B3", source: .autocomplete),
+            .init(text: "B3", source: .searchEngine),
             .init(text: "History1", source: .history),
             .init(text: "New Card", source: .createCard),
         ]

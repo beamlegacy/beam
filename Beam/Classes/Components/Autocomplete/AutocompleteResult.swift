@@ -28,7 +28,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     enum Source: Equatable, Hashable {
         case history
         case note(noteId: UUID? = nil, elementId: UUID? = nil)
-        case autocomplete
+        case searchEngine
         case url
         case createCard
         case topDomain
@@ -38,7 +38,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             switch self {
             case .history:
                 return "field-history"
-            case .autocomplete:
+            case .searchEngine:
                 return "field-search"
             case .createCard:
                 return "field-card_new"
@@ -58,7 +58,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return 0
             case .url:
                 return 1
-            case .autocomplete:
+            case .searchEngine:
                 return 2
             case .note:
                 return 3
@@ -154,7 +154,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         switch source {
         case .note, .createCard:
             canMatchInside = false
-        case .autocomplete:
+        case .searchEngine:
             canReplaceBase = false
         default:
             break
@@ -231,69 +231,5 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             urlToPrint = "<???>"
         }
         return "id: \(id) text: \(text) - source: \(source) - url: \(urlToPrint) - score: \(score ?? Float.nan)"
-    }
-}
-
-class Autocompleter: ObservableObject {
-
-    private(set) var searchEngine: SearchEngineDescription
-
-    private var lastDataTask: URLSessionDataTask?
-
-    init(searchEngine: SearchEngineDescription) {
-        self.searchEngine = searchEngine
-    }
-
-    public func complete(query: String) -> Future<[AutocompleteResult], Never> {
-        Future { promise in
-            guard !query.isEmpty,
-                  let url = self.searchEngine.suggestionsURL(forQuery: query)
-            else {
-                promise(.success([]))
-                return
-            }
-
-            self.lastDataTask?.cancel()
-            let description = self.searchEngine.description
-            self.lastDataTask = BeamURLSession.shared.dataTask(with: url) { data, _, error in
-                if let error = error as? URLError, error.code == .cancelled {
-                    return
-                }
-
-                var res = [AutocompleteResult]()
-                if query.containsCharacters {
-                    res.append(AutocompleteResult(text: query, source: .autocomplete, url: nil, information: description))
-                }
-                guard let data = data else {
-                    promise(.success(res))
-                    return
-                }
-
-                res = self.searchEngine.suggestions(from: data).map { str in
-                    let isURL = str.mayBeWebURL
-                    let source: AutocompleteResult.Source = isURL ? .url : .autocomplete
-                    let url = isURL ? URL(string: str) : nil
-                    var text = str
-                    let info = description//(index == 0 && url == nil) ? description : nil
-                    if let url = url {
-                        text = url.urlStringWithoutScheme
-                    }
-                    return AutocompleteResult(
-                        text: text,
-                        source: source,
-                        url: url,
-                        information: info,
-                        completingText: query,
-                        urlFields: []
-                    )
-                }
-                promise(.success(res))
-            }
-            self.lastDataTask?.resume()
-        }
-    }
-
-    public func clear() {
-        lastDataTask?.cancel()
     }
 }

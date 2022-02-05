@@ -18,7 +18,7 @@ extension AutocompleteManager {
             case .history, .url: // these sources can contain search engine like results.
                 someResults.results.forEach { result in
                     switch result.source {
-                    case .autocomplete:
+                    case .searchEngine:
                         additionalSearchEngineResults.append(result)
                     default:
                         autocompleteResults[result.source, default: []].append(result)
@@ -29,7 +29,7 @@ extension AutocompleteManager {
             }
         }
         if !additionalSearchEngineResults.isEmpty {
-            autocompleteResults[.autocomplete, default: []].insert(contentsOf: additionalSearchEngineResults.sorted(by: >), at: 0)
+            autocompleteResults[.searchEngine, default: []].insert(contentsOf: additionalSearchEngineResults.sorted(by: >), at: 0)
         }
 
         let finalResults = sortResults(notesResults: autocompleteResults[.note, default: []],
@@ -37,7 +37,7 @@ extension AutocompleteManager {
                                        urlResults: autocompleteResults[.url] ?? [],
                                        topDomainResults: autocompleteResults[.topDomain] ?? [],
                                        mnemonicResults: autocompleteResults[.mnemonic] ?? [],
-                                       searchEngineResults: autocompleteResults[.autocomplete] ?? [],
+                                       searchEngineResults: autocompleteResults[.searchEngine] ?? [],
                                        createCardResults: autocompleteResults[.createCard] ?? [])
 
         let canCreateNote = autocompleteResults[.createCard]?.isEmpty == false
@@ -112,7 +112,7 @@ extension AutocompleteManager {
     func insertSearchEngineResults(_ searchEngineResults: [AutocompleteResult], in results: [AutocompleteResult]) -> [AutocompleteResult] {
         var finalResults = results
         let canCreate = finalResults.firstIndex { $0.source == .createCard } != nil
-        let existingAutocompleteResult = finalResults.filter { $0.source == .autocomplete }
+        let existingAutocompleteResult = finalResults.filter { $0.source == .searchEngine }
 
         let maxGuesses = finalResults.count > 2 ? 4 : 6
         let toInsert = searchEngineResults.filter { result in
