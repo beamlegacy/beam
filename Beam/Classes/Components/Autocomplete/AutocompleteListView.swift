@@ -1,5 +1,5 @@
 //
-//  AutocompleteList.swift
+//  AutocompleteListView.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 21/09/2020.
@@ -8,7 +8,7 @@
 import SwiftUI
 import AppKit
 
-struct AutocompleteList: View {
+struct AutocompleteListView: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
     @Binding var elements: [AutocompleteResult]
@@ -21,7 +21,7 @@ struct AutocompleteList: View {
     }
 
     private func shouldItemDisplaySubtitle(_ item: AutocompleteResult, atIndex: Int) -> Bool {
-        item.source != .autocomplete || atIndex <= 0 || elements[atIndex-1].information != item.information
+        item.source != .searchEngine || atIndex <= 0 || elements[atIndex-1].information != item.information
     }
 
     var body: some View {
@@ -36,12 +36,12 @@ struct AutocompleteList: View {
                         .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
                 }
-                AutocompleteItem(item: item, selected: isSelected,
+                AutocompleteItemView(item: item, selected: isSelected,
                                  displaySubtitle: displaySubtitle,
                                  allowsShortcut: allowsShortcut,
                                  colorPalette: item.source == .createCard ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
-                                    AutocompleteItem.defaultColorPalette)
+                                    AutocompleteItemView.defaultColorPalette)
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
@@ -86,12 +86,12 @@ struct AutocompleteList: View {
 
 struct AutocompleteList_Previews: PreviewProvider {
     static var elements = [
-        AutocompleteResult(text: "Search Result 1", source: .autocomplete),
-        AutocompleteResult(text: "Search Result 2", source: .autocomplete),
+        AutocompleteResult(text: "Search Result 1", source: .searchEngine),
+        AutocompleteResult(text: "Search Result 2", source: .searchEngine),
         AutocompleteResult(text: "Site Visited", source: .history, url: URL(string: "https://apple.com")),
         AutocompleteResult(text: "result.com", source: .url, urlFields: .text),
         AutocompleteResult(text: "My Own Note", source: .createCard)]
     static var previews: some View {
-        AutocompleteList(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
+        AutocompleteListView(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
     }
 }
