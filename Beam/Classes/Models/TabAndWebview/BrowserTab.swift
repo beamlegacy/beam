@@ -316,7 +316,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
         guard let url = url else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
-        let dispatchItem = DispatchWorkItem { [weak self, requestedURL] in
+        let dispatchItem = DispatchWorkItem { [weak self] in
             guard !fromWebView || cacheOnly || self?.webView != nil else { return }
             FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
                 guard let self = self else { return }
@@ -326,9 +326,6 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
                         self.updateFavIcon(fromWebView: false)
                     }
                     return
-                }
-                if let requestedURL = requestedURL, let favicon = favicon {
-                    FaviconProvider.shared.registerFavicon(favicon, for: requestedURL)
                 }
                 DispatchQueue.main.async {
                     self.favIcon = image

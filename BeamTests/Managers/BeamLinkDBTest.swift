@@ -57,9 +57,9 @@ class BeamLinkDBTests: XCTestCase {
         }
         let results = db.getTopScoredLinks(matchingUrl: "animal", frecencyParam: .webVisit30d0, limit: 2)
         XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results[0].link.id, links[0].id)
+        XCTAssertEqual(results[0].url, links[0].url)
         XCTAssertEqual(results[0].frecency?.frecencySortScore, frecencies[0].frecencySortScore)
-        XCTAssertEqual(results[1].link.id, links[1].id)
+        XCTAssertEqual(results[1].url, links[1].url)
         XCTAssertEqual(results[1].frecency?.frecencySortScore, frecencies[2].frecencySortScore)
     }
     func testMissingLinkHandling() {

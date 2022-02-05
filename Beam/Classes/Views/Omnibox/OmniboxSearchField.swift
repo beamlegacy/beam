@@ -44,6 +44,11 @@ struct OmniboxSearchField: View {
            [.history, .url, .topDomain, .mnemonic].contains(autocompleteResult.source) {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { favicon in
                 icon = favicon?.image
+                if favicon == nil, let aliasDestinationURL = autocompleteResult.aliasForDestinationURL {
+                    FaviconProvider.shared.favicon(fromURL: aliasDestinationURL, cacheOnly: true) { favicon in
+                        icon = favicon?.image
+                    }
+                }
             }
         } else if state.focusOmniBoxFromTab,
                   let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
