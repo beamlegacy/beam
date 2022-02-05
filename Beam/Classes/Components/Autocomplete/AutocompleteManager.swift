@@ -35,7 +35,7 @@ class AutocompleteManager: ObservableObject {
     @Published var animateInputingCharacter = false
     let beamData: BeamData
 
-    private let searchEngineCompleter: Autocompleter
+    private let searchEngineCompleter: SearchEngineAutocompleter
     var searchEngine: SearchEngineDescription {
         searchEngineCompleter.searchEngine
     }
@@ -44,7 +44,7 @@ class AutocompleteManager: ObservableObject {
 
     init(with data: BeamData, searchEngine: SearchEngineDescription) {
         beamData = data
-        searchEngineCompleter = Autocompleter(searchEngine: searchEngine)
+        searchEngineCompleter = SearchEngineAutocompleter(searchEngine: searchEngine)
 
         $searchQuery
             .dropFirst()
@@ -84,7 +84,7 @@ class AutocompleteManager: ObservableObject {
         if let realText = replacedProposedText {
             searchText = realText
             replacedProposedText = nil
-        } else if !isRemovingCharacters && autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .autocomplete {
+        } else if !isRemovingCharacters && autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .searchEngine {
             // if we autoselect a search engine result that is alone,
             // let's the keep selection until have new results.
         } else {
@@ -155,7 +155,7 @@ class AutocompleteManager: ObservableObject {
             return result.text.lowercased().starts(with: searchText.lowercased())
         case .history, .url:
             return result.takeOverCandidate
-        case .autocomplete:
+        case .searchEngine:
             return result.takeOverCandidate && result.url != nil || // search engine result found in history 
             (autocompleteResults.count == 2 && !searchQuery.mayBeURL && result.text == searchQuery) // 1 search engine result + 1 create note
         default:
