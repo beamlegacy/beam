@@ -34,7 +34,6 @@ extension AutocompleteManager {
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteMnemonicResults(for: searchText), source: .mnemonic),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
-            futureToPublisher(autocompleteAliasHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
             self.autocompleteCanCreateNoteResult(for: searchText)
                 .replaceError(with: false)
@@ -128,7 +127,13 @@ extension AutocompleteManager {
                             information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
                         }
 
-                        let result = AutocompleteResult(text: information, source: .history, url: url, information: result.title,
+                        var aliasForDestinationURL: URL?
+                        if let destinationURLString = result.destinationURL, let destinationURL = URL(string: destinationURLString) {
+                            aliasForDestinationURL = destinationURL
+                        }
+                        let result = AutocompleteResult(text: information, source: .history, url: url,
+                                                        aliasForDestinationURL: aliasForDestinationURL,
+                                                        information: result.title,
                                                         completingText: query, score: result.frecency?.frecencySortScore, urlFields: [.text])
                         if let searchEngineResult = self.convertResultToSearchEngineResultIfNeeded(result) {
                             return searchEngineResult
@@ -143,47 +148,21 @@ extension AutocompleteManager {
         }
     }
 
-    private func autocompleteAliasHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
-        Future { promise in
-            GRDBDatabase.shared.searchAlias(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
-                switch result {
-                case .failure(let error): promise(.failure(error))
-                case .success(let r):
-                    guard let linkResult = r?.link else {
-                        promise(.success([]))
-                        return
-                    }
-                    var information = linkResult.url
-                    let url = URL(string: linkResult.url)
-                    if let url = url {
-                        information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
-                    }
-                    var aliasForDestinationURL: URL?
-                    if let destinationURLString = r?.destination?.url, let destinationURL = URL(string: destinationURLString) {
-                        aliasForDestinationURL = destinationURL
-                    }
-                    promise(.success([AutocompleteResult(text: information,
-                                                         source: .history,
-                                                         url: url,
-                                                         aliasForDestinationURL: aliasForDestinationURL,
-                                                         information: linkResult.title,
-                                                         completingText: query,
-                                                         score: linkResult.frecency?.frecencySortScore, urlFields: [.text])
-                                     ]))
-                }
-            }
-        }
-    }
-
     private func autocompleteLinkStoreResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
             let scoredLinks = GRDBDatabase.shared.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6)
             let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
-                let url = URL(string: scoredLink.link.url)
-                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? URL(string: scoredLink.link.url)?.urlStringWithoutScheme.removingPercentEncoding ?? ""
+                let url = URL(string: scoredLink.url)
+                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? URL(string: scoredLink.url)?.urlStringWithoutScheme.removingPercentEncoding ?? ""
+                let info = scoredLink.title?.isEmpty == false ? scoredLink.title : nil
+                var aliasForDestinationURL: URL?
+                if let destinationURLString = scoredLink.destinationURL, let destinationURL = URL(string: destinationURLString) {
+                    aliasForDestinationURL = destinationURL
+                }
                 let result = AutocompleteResult(text: text, source: .url, url: url,
-                                                information: scoredLink.link.title, completingText: query,
+                                                aliasForDestinationURL: aliasForDestinationURL,
+                                                information: info, completingText: query,
                                                 score: scoredLink.frecency?.frecencySortScore, urlFields: .text)
                 if let searchEngineResult = self.convertResultToSearchEngineResultIfNeeded(result) {
                     return searchEngineResult

@@ -199,9 +199,9 @@ class OmniboxAutocompleteTests: BaseTest {
     }
 
     func testAutoCompleteHistoryFromAliasUrlSelection() {
-        let partiallyTypedSearchText = "alternateurl.co"
+        let partiallyTypedSearchText = "alter"
         let expectedSearchFieldText = "alternateurl.com"
-        let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
+        let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-url"
         let waitHelper = WaitHelper()
 
         launchApp()
