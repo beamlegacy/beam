@@ -49,8 +49,8 @@ extension AutocompleteManager {
     }
 
     func getSearchEnginePublisher(for searchText: String,
-                                  searchEngine: Autocompleter) -> AnyPublisher<AutocompletePublisherSourceResults, Never> {
-        futureToPublisher(autocompleteSearchEngineResults(for: searchText, searchEngine: searchEngine), source: .autocomplete).handleEvents(receiveCancel: { [weak searchEngine] in
+                                  searchEngine: SearchEngineAutocompleter) -> AnyPublisher<AutocompletePublisherSourceResults, Never> {
+        futureToPublisher(autocompleteSearchEngineResults(for: searchText, searchEngine: searchEngine), source: .searchEngine).handleEvents(receiveCancel: { [weak searchEngine] in
             searchEngine?.clear()
         }).eraseToAnyPublisher()
     }
@@ -239,7 +239,7 @@ extension AutocompleteManager {
         }
     }
 
-    private func autocompleteSearchEngineResults(for searchText: String, searchEngine: Autocompleter) -> Future<[AutocompleteResult], Error> {
+    private func autocompleteSearchEngineResults(for searchText: String, searchEngine: SearchEngineAutocompleter) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
             var promiseReturnedAlready = false
@@ -300,7 +300,7 @@ extension AutocompleteManager {
             text = query
             information = searchEngine.description
         }
-        return AutocompleteResult(text: text, source: .autocomplete, url: url, information: information,
+        return AutocompleteResult(text: text, source: .searchEngine, url: url, information: information,
                                   completingText: result.completingText, score: result.score, urlFields: [])
     }
 }

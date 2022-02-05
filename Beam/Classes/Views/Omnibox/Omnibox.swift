@@ -74,7 +74,7 @@ struct Omnibox: View {
                          alignment: .bottom)
                 .frame(height: Self.defaultHeight, alignment: .top)
                 if shouldShowAutocompleteResults {
-                    AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
+                    AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
                 }
             }
         }
@@ -177,10 +177,10 @@ struct Omnibox_Previews: PreviewProvider {
         mngr.setQuery("Res", updateAutocompleteResults: false)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(100)) {
             mngr.autocompleteResults = [
-                .init(text: "Result A", source: .autocomplete),
-                .init(text: "Result B", source: .autocomplete),
-                .init(text: "Result C", source: .autocomplete),
-                .init(text: "Result D", source: .autocomplete)
+                .init(text: "Result A", source: .searchEngine),
+                .init(text: "Result B", source: .searchEngine),
+                .init(text: "Result C", source: .searchEngine),
+                .init(text: "Result D", source: .searchEngine)
             ]
         }
         return mngr
