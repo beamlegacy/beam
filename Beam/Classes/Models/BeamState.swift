@@ -419,7 +419,7 @@ import Sentry
     private func selectAutocompleteResult(_ result: AutocompleteResult) {
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
-        case .autocomplete:
+        case .searchEngine:
             guard let url = searchEngine.searchURL(forQuery: result.text) else {
                 Logger.shared.logError("Couldn't retrieve search URL from search engine description", category: .search)
                 break

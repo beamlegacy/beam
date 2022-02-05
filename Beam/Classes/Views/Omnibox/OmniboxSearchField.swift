@@ -31,7 +31,7 @@ struct OmniboxSearchField: View {
         if let autocompleteResult = selectedAutocompleteResult {
             return autocompleteResult.source.iconName
         }
-        return AutocompleteResult.Source.autocomplete.iconName
+        return AutocompleteResult.Source.searchEngine.iconName
     }
 
     private var selectedAutocompleteResult: AutocompleteResult? {
@@ -63,7 +63,7 @@ struct OmniboxSearchField: View {
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
         if let info = autocompleteResult.displayInformation {
             return info
-        } else if autocompleteResult.source == .autocomplete {
+        } else if autocompleteResult.source == .searchEngine {
             return autocompleteManager.searchEngine.description
         }
         return nil
