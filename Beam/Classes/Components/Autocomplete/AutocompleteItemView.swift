@@ -1,5 +1,5 @@
 //
-//  AutocompleteItem.swift
+//  AutocompleteItemView.swift
 //  Beam
 //
 //  Created by Sebastien Metrot on 21/09/2020.
@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct AutocompleteItem: View {
+struct AutocompleteItemView: View {
 
     static let defaultHeight: CGFloat = 38
 
@@ -39,7 +39,7 @@ struct AutocompleteItem: View {
         switch item.source {
         case .history:
             return "field-history"
-        case .autocomplete, .url, .topDomain, .mnemonic:
+        case .searchEngine, .url, .topDomain, .mnemonic:
             return "field-search"
         case .createCard:
             return "field-card_new"
@@ -93,11 +93,11 @@ struct AutocompleteItem: View {
         { text in
             guard let completingText = item.completingText,
                   item.source != .createCard,
-                  (item.source != .autocomplete || !secondaryText)
+                  (item.source != .searchEngine || !secondaryText)
             else {
                 return []
             }
-            if alwaysHighlightCompletingText || [.autocomplete, .history, .url, .topDomain, .mnemonic].contains(item.source) {
+            if alwaysHighlightCompletingText || [.searchEngine, .history, .url, .topDomain, .mnemonic].contains(item.source) {
                 return text.ranges(of: completingText, options: .caseInsensitive)
             }
             if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
@@ -227,7 +227,7 @@ struct AutocompleteItemColorPalette {
     var touchdownCardBackgroundColor = BeamColor.Autocomplete.clickedCardBackground
 }
 
-extension AutocompleteItem {
+extension AutocompleteItemView {
     static let defaultColorPalette = AutocompleteItemColorPalette()
 }
 
@@ -235,7 +235,7 @@ struct AutocompleteItem_Previews: PreviewProvider {
     static let items = [
         AutocompleteResult(text: "James Dean", source: .createCard, information: "New Note"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
-        AutocompleteResult(text: "James Dean", source: .autocomplete, information: "Google Search"),
+        AutocompleteResult(text: "James Dean", source: .searchEngine, information: "Google Search"),
         AutocompleteResult(text: "jamesdean.com", source: .url, urlFields: .text),
         AutocompleteResult(text: "James Dean", source: .history, information: "https://wikipedia.com/James+Dean")
     ]
@@ -243,7 +243,7 @@ struct AutocompleteItem_Previews: PreviewProvider {
     static var previews: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.0) { index, item in
-                AutocompleteItem(item: item, selected: index == selectedIndex)
+                AutocompleteItemView(item: item, selected: index == selectedIndex)
                     .frame(width: 300, height: 36)
             }
         }.padding(.vertical)
