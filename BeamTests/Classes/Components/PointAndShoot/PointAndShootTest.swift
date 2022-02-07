@@ -291,7 +291,7 @@ class PointAndShootTest: XCTestCase {
             targets.append(target)
         }
 
-        return PointAndShoot.ShootGroup(UUID().uuidString, targets, "placeholder text", faker.internet.url(), shapeCache: .init())
+        return PointAndShoot.ShootGroup(id: UUID().uuidString, targets: targets, text: "placeholder text", href: faker.internet.url(), shapeCache: .init())
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

@@ -50,7 +50,7 @@ class PointAndShootRefreshTest: PointAndShootTest {
             animated: false
         )
 
-        self.pns.activeSelectGroup = PointAndShoot.ShootGroup("point-uuid", [target], "placeholder text", "https://pnshref.co", shapeCache: .init())
+        self.pns.activeSelectGroup = PointAndShoot.ShootGroup(id: "point-uuid", targets: [target], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
         self.pns.hasActiveSelection = true
 
         XCTAssertNil(self.pns.activeShootGroup)
@@ -70,7 +70,7 @@ class PointAndShootRefreshTest: PointAndShootTest {
             animated: false
         )
 
-        self.pns.activeSelectGroup = PointAndShoot.ShootGroup("point-uuid", [target], "placeholder text", "https://pnshref.co", shapeCache: .init())
+        self.pns.activeSelectGroup = PointAndShoot.ShootGroup(id: "point-uuid", targets: [target], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
         self.pns.hasActiveSelection = false
 
         XCTAssertNil(self.pns.activeShootGroup)
@@ -101,7 +101,7 @@ class PointAndShootRefreshTest: PointAndShootTest {
             animated: false
         )
 
-        self.pns.activeSelectGroup = PointAndShoot.ShootGroup("point-uuid", [target], "placeholder text", "https://pnshref.co", shapeCache: .init())
+        self.pns.activeSelectGroup = PointAndShoot.ShootGroup(id: "point-uuid", targets: [target], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
         self.pns.hasActiveSelection = true
 
         XCTAssertNil(self.pns.activeShootGroup)
@@ -121,7 +121,7 @@ class PointAndShootRefreshTest: PointAndShootTest {
             animated: false
         )
 
-        self.pns.activeSelectGroup = PointAndShoot.ShootGroup("point-uuid", [target], "placeholder text", "https://pnshref.co", shapeCache: .init())
+        self.pns.activeSelectGroup = PointAndShoot.ShootGroup(id: "point-uuid", targets: [target], text: "placeholder text", href: "https://pnshref.co", shapeCache: .init())
         self.pns.hasActiveSelection = true
 
         XCTAssertNil(self.pns.activeShootGroup)
