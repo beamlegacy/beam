@@ -1,89 +1,144 @@
 fastlane documentation
-================
+----
+
 # Installation
 
 Make sure you have the latest version of the Xcode command line tools installed:
 
-```
+```sh
 xcode-select --install
 ```
 
-Install _fastlane_ using
-```
-[sudo] gem install fastlane -NV
-```
-or alternatively using `brew install fastlane`
+For _fastlane_ installation instructions, see [Installing _fastlane_](https://docs.fastlane.tools/#installing-fastlane)
 
 # Available Actions
+
 ## Mac
+
 ### mac lint
-```
-fastlane mac lint
-```
-Run linting
-### mac register_local_device
-```
-fastlane mac register_local_device
-```
-Register Device
-### mac tests
-```
-fastlane mac tests
-```
-Run tests
-### mac uitests
-```
-fastlane mac uitests
-```
-Run UI tests
-### mac dev
-```
-fastlane mac dev
+
+```sh
+[bundle exec] fastlane mac lint
 ```
 
-### mac beta
+Run linting
+
+### mac register_local_device
+
+```sh
+[bundle exec] fastlane mac register_local_device
 ```
-fastlane mac beta
+
+Register Device
+
+### mac tests
+
+```sh
+[bundle exec] fastlane mac tests
 ```
+
+Run tests
+
+### mac uitestsThread1
+
+```sh
+[bundle exec] fastlane mac uitestsThread1
+```
+
+Run UI tests Thread1
+
+### mac uitestsThread2
+
+```sh
+[bundle exec] fastlane mac uitestsThread2
+```
+
+Run UI tests Thread2
+
+### mac uitestsThread3
+
+```sh
+[bundle exec] fastlane mac uitestsThread3
+```
+
+Run UI tests Thread3
+
+### mac uitestsThread4
+
+```sh
+[bundle exec] fastlane mac uitestsThread4
+```
+
+Run UI tests Thread4
+
+### mac build
+
+```sh
+[bundle exec] fastlane mac build
+```
+
+
 
 ### mac notarize_build
+
+```sh
+[bundle exec] fastlane mac notarize_build
 ```
-fastlane mac notarize_build
-```
+
+
 
 ### mac deploy
+
+```sh
+[bundle exec] fastlane mac deploy
 ```
-fastlane mac deploy
+
+
+
+### mac publish
+
+```sh
+[bundle exec] fastlane mac publish
 ```
+
+
+
+### mac tag_build
+
+```sh
+[bundle exec] fastlane mac tag_build
+```
+
+
 
 ### mac ping_sentry
+
+```sh
+[bundle exec] fastlane mac ping_sentry
 ```
-fastlane mac ping_sentry
-```
+
+
 
 ### mac upload_s3
-```
-fastlane mac upload_s3
+
+```sh
+[bundle exec] fastlane mac upload_s3
 ```
 
-### mac publish_release
-```
-fastlane mac publish_release
-```
+
 
 ### mac delete_s3
-```
-fastlane mac delete_s3
+
+```sh
+[bundle exec] fastlane mac delete_s3
 ```
 
-### mac release
-```
-fastlane mac release
-```
 
 
 ----
 
 This README.md is auto-generated and will be re-generated every time [_fastlane_](https://fastlane.tools) is run.
-More information about fastlane can be found on [fastlane.tools](https://fastlane.tools).
-The documentation of fastlane can be found on [docs.fastlane.tools](https://docs.fastlane.tools).
+
+More information about _fastlane_ can be found on [fastlane.tools](https://fastlane.tools).
+
+The documentation of _fastlane_ can be found on [docs.fastlane.tools](https://docs.fastlane.tools).

@@ -3,15 +3,18 @@ build:macos:
   dependencies: []
   stage: build
   artifacts:
-    expire_in: 7d
+    expire_in: 14d
     paths:
       - builds/
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
-    - time bundle exec fastlane beta
+    - time bundle exec fastlane build
   tags:
     - macos-mono
   interruptible: true
