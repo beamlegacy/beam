@@ -23,6 +23,8 @@ class ResizableNode: ElementNode {
         }
     }
 
+    var canResizeHeight = false
+
     ///The main element's real size (image or video)
     var resizableElementContentSize = CGSize.zero {
         didSet {
@@ -303,6 +305,8 @@ class ResizableNode: ElementNode {
         handleLayer.zPosition = 2
         handleLayer.opacity = 0.0
 
+        self.canResizeHeight = true
+
         let handle = Layer(name: "handle_vertical", layer: handleLayer) { [weak self] info in
             if info.event.clickCount == 2 {
                 self?.invalidateLayout(animated: true)
@@ -362,7 +366,7 @@ class ResizableNode: ElementNode {
         case .embed(let url, let sourceMetadata, _):
             /// DisplayInfo explainer for embeds:
             /// - The width is always expressed as a ratio to the available editor width stored in displayInfo.displayRatio (at least on the client)
-            /// - The height is always expressed as an absolute number of pixels stored in displayinfo.height
+            /// - The height is expressed as an absolute number of pixels stored in displayinfo.height. Height is only set when it's possible to resize the height
             /// - displayinfo.width is not used for embeds
             ///
             /// Should the embed have the preserveAspectRatio flag, the displayInfo.height will be ignored
@@ -371,7 +375,7 @@ class ResizableNode: ElementNode {
                 url,
                 origin: sourceMetadata,
                 displayInfos: MediaDisplayInfos(
-                    height: Int(self.visibleSize.height),
+                    height: canResizeHeight ? Int(self.visibleSize.height) : nil,
                     displayRatio: desiredWidthRatio
                 )
             )
