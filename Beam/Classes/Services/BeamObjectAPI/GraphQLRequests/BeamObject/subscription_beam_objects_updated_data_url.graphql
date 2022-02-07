@@ -1,6 +1,6 @@
 subscription {
   beamObjectsUpdated {
-    beamObject {
+    beamObjects {
       id
       dataUrl
       checksum
@@ -8,6 +8,7 @@ subscription {
       createdAt
       updatedAt
       deletedAt
+      privateKeySignature
     }
   }
 }

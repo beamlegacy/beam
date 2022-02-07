@@ -18,6 +18,7 @@ struct Configuration {
     static private(set) var updateFeedURL: String = Configuration.value(for: "SUFeedURL")
     static private(set) var sentryEnabled = EnvironmentVariables.sentryEnabled
     static private(set) var networkEnabledDefault = EnvironmentVariables.networkEnabled
+    static private var websocketEnabledDefault = true
     static private(set) var topDomainDBMaxSize = 10000
     static private(set) var beamObjectDataOnSeparateCall = false
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
@@ -69,6 +70,22 @@ struct Configuration {
                 if newValue {
                     AppDelegate.main.syncDataWithBeamObject()
                 }
+            }
+        }
+    }
+
+    static private var websocketEnabledKey = "websocketEnabled"
+    static var websocketEnabled: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: websocketEnabledKey) != nil {
+                return UserDefaults.standard.bool(forKey: websocketEnabledKey)
+            }
+
+            return websocketEnabledDefault
+        }
+        set {
+            if newValue != websocketEnabled {
+                UserDefaults.standard.set(newValue, forKey: websocketEnabledKey)
             }
         }
     }
