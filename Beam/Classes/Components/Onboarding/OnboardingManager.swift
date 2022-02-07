@@ -15,6 +15,7 @@ struct OnboardingStep: Equatable {
         case emailConnect
         case emailConfirm
         case imports
+        case saveEncryption
         case loading
     }
 
@@ -46,10 +47,13 @@ class OnboardingManager: ObservableObject {
     @Published var actions = [StepAction]()
     @Published var viewIsLoading = false
     @Published private(set) var stepsHistory = [OnboardingStep]()
+
     var currentStepIsFromHistory = false
     var onlyConnect: Bool = false
     var onlyImport: Bool = false
     weak var delegate: OnboardingManagerDelegate?
+    /// Did the user just signed up through the onboarding
+    var userDidSignUp: Bool = false
     var temporaryCredentials: (email: String, password: String)?
 
     private weak var window: NSWindow?
@@ -84,6 +88,7 @@ class OnboardingManager: ObservableObject {
         currentStepIsFromHistory = false
         viewIsLoading = false
         temporaryCredentials = nil
+        userDidSignUp = false
         onlyConnect = false
         onlyImport = false
     }
@@ -131,14 +136,25 @@ class OnboardingManager: ObservableObject {
             if AuthenticationManager.shared.isAuthenticated && !userHasUsername() {
                 return OnboardingStep(type: .profile)
             }
-            return importStepIfNeeded(onlyConnect: onlyConnect)
+            return stepAfterProfile()
         case .profile:
+            return stepAfterProfile()
+        case .saveEncryption:
             return importStepIfNeeded(onlyConnect: onlyConnect)
-        case .imports:
-            return nil
-        default:
+        case .imports, .loading:
             return nil
         }
+    }
+
+    private func stepAfterProfile() -> OnboardingStep? {
+        encryptionKeyStepIfNeeded() ?? importStepIfNeeded(onlyConnect: onlyConnect)
+    }
+
+    private func encryptionKeyStepIfNeeded() -> OnboardingStep? {
+        if userDidSignUp {
+            return OnboardingStep(type: .saveEncryption)
+        }
+        return nil
     }
 
     private func importStepIfNeeded(onlyConnect: Bool) -> OnboardingStep? {

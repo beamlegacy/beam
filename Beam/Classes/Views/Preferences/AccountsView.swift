@@ -289,9 +289,7 @@ struct AccountsView: View {
             Button(action: {
                 encryptionKeyIsCopied.toggle()
 
-                let pasteboard = NSPasteboard.general
-                pasteboard.clearContents()
-                pasteboard.setString(EncryptionManager.shared.privateKey().asString(), forType: .string)
+                EncryptionManager.shared.copyKeyToPasteboard()
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     encryptionKeyIsCopied.toggle()
