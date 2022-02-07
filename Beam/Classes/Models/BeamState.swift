@@ -68,10 +68,6 @@ import Sentry
     @Published var destinationCardNameSelectedRange: Range<Int>?
     var keepDestinationNote: Bool = false
 
-    @Published var windowIsResizing = false
-    var undraggableWindowRects: [CGRect] = []
-    @Published var windowIsMain = true
-    @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
     }
