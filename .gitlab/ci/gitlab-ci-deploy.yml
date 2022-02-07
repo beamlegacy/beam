@@ -1,9 +1,10 @@
 sentry:
   dependencies:
+    - build:dmg
     - build:zip
   stage: deploy
   artifacts:
-    expire_in: 7d
+    expire_in: 14d
     paths:
       - builds/
   rules:
@@ -13,9 +14,11 @@ sentry:
       when: never
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
-    - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - bundle exec fastlane ping_sentry --verbose
@@ -26,16 +29,17 @@ sentry:
   retry:
     max: 2
 
-s3:
+build:upload:
   dependencies:
-    - build:zip
+   - build:zip
+   - build:dmg
   stage: deploy
   environment:
     name: review/$CI_COMMIT_REF_NAME
-    url: https://s3.$AWS_DEFAULT_REGION.amazonaws.com/$S3_BUCKET/$CI_COMMIT_REF_NAME/Beam.dmg
-    on_stop: delete s3
+    url: https://s3.$AWS_DEFAULT_REGION.amazonaws.com/$S3_BUCKET/review/$CI_COMMIT_REF_NAME/Beam.dmg
+    on_stop: build:cleanup
   artifacts:
-    expire_in: 7d
+    expire_in: 14d
     paths:
       - builds/
   rules:
@@ -45,9 +49,11 @@ s3:
       when: never
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
-    - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - bundle exec fastlane deploy
@@ -57,7 +63,7 @@ s3:
   retry:
     max: 2
 
-delete s3:
+build:cleanup:
   dependencies: []
   stage: deploy
   variables:
@@ -65,11 +71,21 @@ delete s3:
   environment:
     name: review/$CI_COMMIT_REF_NAME
     action: stop
-  only:
-    - merge_requests
-  except:
-    - master
-    - develop
+  rules:
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+      when: manual
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "master"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+      when: never
   when: manual
   script:
     - bundle exec fastlane delete_s3
