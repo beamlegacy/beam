@@ -14,6 +14,10 @@ enum WebAutocompleteAction {
     case createAccount
     case personalInfo
     case payment
+
+    var isPasswordRelated: Bool {
+        self == .login || self == .createAccount
+    }
 }
 
 struct WebInputField {
