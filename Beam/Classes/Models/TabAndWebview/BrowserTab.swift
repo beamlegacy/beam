@@ -381,7 +381,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         state?.$focusOmniBox.sink { [weak self] value in
             guard value else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
-                self?.pointAndShoot?.dismissShoot()
+                self?.pointAndShoot?.dismissActiveShootGroup()
             }
         }.store(in: &scope)
     }

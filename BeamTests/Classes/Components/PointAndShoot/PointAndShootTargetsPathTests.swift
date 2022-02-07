@@ -46,7 +46,7 @@ class PointAndShootTargetsPathTests: PointAndShootTest {
         let targets = self.helperCreateFakeTargets(10)
         let newTargets = self.helperCreateFakeTargets(10, 5)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url(), shapeCache: nil)
+        var group = PointAndShoot.ShootGroup(id: id, targets: targets, text: "placeholder string", href: faker.internet.url(), shapeCache: nil)
         let beforeGroupPath = group.groupPath
         self.measure {
             group.updateTargets(id, newTargets)
@@ -59,7 +59,7 @@ class PointAndShootTargetsPathTests: PointAndShootTest {
         let targets = self.helperCreateFakeTargets(400)
         let newTargets = self.helperCreateFakeTargets(400, 5)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url(), shapeCache: nil)
+        var group = PointAndShoot.ShootGroup(id: id, targets: targets, text: "placeholder string", href: faker.internet.url(), shapeCache: nil)
         let beforeGroupPath = group.groupPath
         self.measure {
             group.updateTargets(id, newTargets)
@@ -72,7 +72,7 @@ class PointAndShootTargetsPathTests: PointAndShootTest {
         let targets = self.helperCreateFakeTargets(40000)
         let newTargets = self.helperCreateFakeTargets(40000, 5)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url(), shapeCache: nil)
+        var group = PointAndShoot.ShootGroup(id: id, targets: targets, text: "placeholder string", href: faker.internet.url(), shapeCache: nil)
         let beforeGroupPath = group.groupPath
         self.measure {
             group.updateTargets(id, newTargets)
@@ -85,7 +85,7 @@ class PointAndShootTargetsPathTests: PointAndShootTest {
         let shapeCache = PointAndShoot.PnSTargetsShapeCache()
         let targets = self.helperCreateFakeTargets(40000)
         let id = UUID().uuidString
-        var group = PointAndShoot.ShootGroup(id, targets, "placeholder string", faker.internet.url(), shapeCache: shapeCache)
+        var group = PointAndShoot.ShootGroup(id: id, targets: targets, text: "placeholder string", href: faker.internet.url(), shapeCache: shapeCache)
 
         // Translating the targets should produce a similar path but with different origin
         let beforeShiftPath = group.groupPath

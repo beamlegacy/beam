@@ -41,7 +41,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget], "placeholder string", page.url!.absoluteString, shapeCache: .init())
+        let group2 = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
             XCTAssertEqual(self.pns.collectedGroups.count, 1)
@@ -75,7 +75,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], "placeholder string", page.url!.absoluteString, shapeCache: .init())
+        let group = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: page.activeNote, group: group, completion: {
             XCTAssertEqual(self.pns.collectedGroups.count, 1)
@@ -100,7 +100,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         // Add shoot to note
-        let group2 = PointAndShoot.ShootGroup("id", [paragraphTarget2], "placeholder string", page.url!.absoluteString, shapeCache: .init())
+        let group2 = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget2], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
         let expectation2 = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
             XCTAssertEqual(self.pns.collectedGroups.count, 2)
@@ -137,7 +137,7 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         XCTAssertNil(nonExistentNote)
 
         // Try to add to note existent note
-        let group = PointAndShoot.ShootGroup("id", [paragraphTarget], "placeholder string", page.url!.absoluteString, shapeCache: .init())
+        let group = PointAndShoot.ShootGroup(id: "id", targets: [paragraphTarget], text: "placeholder string", href: page.url!.absoluteString, shapeCache: .init())
         let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
         self.pns.addShootToNote(targetNote: BeamNote(title: "fake non existent note title"), group: group, completion: {
             // Expect it to still work.
