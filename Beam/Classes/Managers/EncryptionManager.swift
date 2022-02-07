@@ -34,6 +34,7 @@ class EncryptionManager {
     }
 
     func clearPrivateKey() {
+        Logger.shared.logWarning("Private key has been cleared", category: .encryption)
         Persistence.Encryption.privateKey = nil
     }
 
@@ -41,20 +42,27 @@ class EncryptionManager {
         guard let key = SymmetricKey(base64EncodedString: base64EncodedString) else {
             throw EncryptionManagerError.keyError
         }
+
+        Logger.shared.logWarning("Private key has been replaced", category: .encryption)
         Persistence.Encryption.privateKey = key.asString()
     }
 
     func resetPrivateKey() {
+        Logger.shared.logWarning("Private key has been reset", category: .encryption)
         Persistence.Encryption.privateKey = nil
     }
 
     func privateKey() -> SymmetricKey {
         guard let dataKey = Persistence.Encryption.privateKey,
               let result = SymmetricKey(base64EncodedString: dataKey) else {
-            let key = generateKey()
-            Persistence.Encryption.privateKey = key.asString()
-            return key
-        }
+
+                  Logger.shared.logWarning("Private key doesn't exist or has a wrong format: \(Persistence.Encryption.privateKey ?? "-"), creating new one",
+                                           category: .encryption)
+
+                  let key = generateKey()
+                  Persistence.Encryption.privateKey = key.asString()
+                  return key
+              }
 
         return result
     }

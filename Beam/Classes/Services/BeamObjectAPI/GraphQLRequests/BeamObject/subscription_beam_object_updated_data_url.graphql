@@ -8,6 +8,7 @@ subscription ($id: ID!) {
       createdAt
       updatedAt
       deletedAt
+      privateKeySignature
     }
   }
 }
