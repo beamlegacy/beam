@@ -11,6 +11,7 @@ import BeamCore
 
 struct TabsListView: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
@@ -27,7 +28,7 @@ struct TabsListView: View {
     @State private var scrollContentSize: CGFloat = 0
     @State private var draggableTabsAreas: [CGRect] = [] {
         didSet {
-            state.undraggableWindowRects = draggableTabsAreas
+            windowInfo.undraggableWindowRects = draggableTabsAreas
         }
     }
 

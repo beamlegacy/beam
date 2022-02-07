@@ -12,6 +12,7 @@ import BeamCore
 
 struct DestinationNotePicker: View {
     @Environment(\.isMainWindow) private var isMainWindow
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     let tab: BrowserTab
     @EnvironmentObject var state: BeamState
@@ -20,7 +21,7 @@ struct DestinationNotePicker: View {
 
     @State private var _internalDisableAnimation = false
     private var enableAnimations: Bool {
-        !_internalDisableAnimation && !state.windowIsResizing
+        !_internalDisableAnimation && !windowInfo.windowIsResizing
     }
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
