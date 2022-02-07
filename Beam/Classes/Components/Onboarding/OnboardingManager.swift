@@ -128,17 +128,24 @@ class OnboardingManager: ObservableObject {
     private func stepAfter(step: OnboardingStep) -> OnboardingStep? {
         switch step.type {
         case .welcome, .emailConnect, .emailConfirm:
-            if AuthenticationManager.shared.isAuthenticated && AuthenticationManager.shared.username == nil {
+            if AuthenticationManager.shared.isAuthenticated && !userHasUsername() {
                 return OnboardingStep(type: .profile)
-            } else {
-                return onlyConnect ? nil : OnboardingStep(type: .imports)
             }
+            return importStepIfNeeded(onlyConnect: onlyConnect)
         case .profile:
-            return onlyConnect ? nil : OnboardingStep(type: .imports)
+            return importStepIfNeeded(onlyConnect: onlyConnect)
         case .imports:
             return nil
         default:
             return nil
+        }
+    }
+
+    private func importStepIfNeeded(onlyConnect: Bool) -> OnboardingStep? {
+        if onlyConnect || userHasPasswordsData() {
+            return nil
+        } else {
+            return OnboardingStep(type: .imports)
         }
     }
 
@@ -154,6 +161,14 @@ class OnboardingManager: ObservableObject {
         Persistence.Authentication.hasSeenOnboarding = true
         resetOnboarding()
         delegate?.onboardingManagerDidFinish()
+    }
+
+    func userHasUsername() -> Bool {
+        AuthenticationManager.shared.username != nil
+    }
+
+    private func userHasPasswordsData() -> Bool {
+        PasswordManager.shared.count() > 0
     }
 
 }

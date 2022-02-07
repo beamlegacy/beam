@@ -29,7 +29,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         let (_, linkFrame) = node.linkRangeAt(point: point)
         let link = node.linkAt(index: node.cursorPosition)
 
-        hideInlineFormatter() { [weak self] in
+        hideInlineFormatter { [weak self] in
             guard let self = self else { return }
             let linkTitle = self.selectedText
             let targetRange = self.selectedTextRange
@@ -109,7 +109,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             }),
 
             ContextMenuItem(title: "Edit Link...", action: {
-                self.hideInlineFormatter() {
+                self.hideInlineFormatter {
                     self.showLinkFormatterForSelection(mousePosition: .zero, showMenu: false)
                     DispatchQueue.main.asyncAfter(deadline: .now()) {
                         if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
