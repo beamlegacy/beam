@@ -139,12 +139,14 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             disabledForSubmit = false
             return
         }
-        if let contents = contents, contents.isEmpty, !autocompleteGroup.isAmbiguous {
+        if let contents = contents, contents.isEmpty, autocompleteGroup.action.isPasswordRelated, !autocompleteGroup.isAmbiguous {
             showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: true, inGroup: autocompleteGroup)
         } else {
             dismissPasswordManagerMenu()
         }
-        showIcon(onField: elementId, frameInfo: frameInfo)
+        if autocompleteGroup.action.isPasswordRelated {
+            showIcon(onField: elementId, frameInfo: frameInfo)
+        }
     }
 
     func inputFieldDidLoseFocus(_ elementId: String, frameInfo: WKFrameInfo?) {
