@@ -117,6 +117,7 @@ struct PointAndShootView: View {
             ForEach(pns.collectedGroups, id: \.id) { collectedGroup in
                 PointAndShootPathFrame(group: pns.translateAndScaleGroup(collectedGroup), isCollected: true, scrollEventCallback: webViewScrollEvent)
                     .id(collectedGroup.id)
+                    .allowsHitTesting(!pns.isAltKeyDown)
             }
         }
 
@@ -137,7 +138,7 @@ struct PointAndShootView: View {
                                     }
                                 })
                             } else {
-                                pns.dismissShoot()
+                                pns.dismissActiveShootGroup()
                             }
                             if let currentTab = browserTabsManager.currentTab {
                                 currentTab.webviewWindow?.makeFirstResponder(currentTab.webView)

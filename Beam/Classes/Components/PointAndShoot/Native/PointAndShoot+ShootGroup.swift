@@ -15,8 +15,8 @@ extension PointAndShoot {
     }
 
     struct ShootGroup {
-        init(_ id: String, _ targets: [Target], _ text: String, _ href: String,
-             _ noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache?, showRect: Bool = true, directShoot: Bool = false) {
+        init(id: String, targets: [Target] = [], text: String = "", href: String,
+             noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache? = nil, showRect: Bool = true, directShoot: Bool = false) {
             self.id = id
             self.href = href
             self.targets = targets
@@ -151,7 +151,7 @@ extension PointAndShoot {
         let circleRect = NSRect(x: mouseLocation.x - (size / 2), y: mouseLocation.y - (size / 2), width: size, height: size)
         var circleTarget = target
         circleTarget.rect = circleRect
-        return ShootGroup("point-uuid", [circleTarget], "", href, shapeCache: shapeCache)
+        return ShootGroup(id: "point-uuid", targets: [circleTarget], text: "", href: href, shapeCache: shapeCache)
     }
 }
 
