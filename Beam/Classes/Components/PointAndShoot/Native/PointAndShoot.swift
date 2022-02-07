@@ -144,7 +144,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             }
         }
 
-        activePointGroup = ShootGroup("point-uuid", [target], text, href, shapeCache: shapeCache)
+        activePointGroup = ShootGroup(id: "point-uuid", targets: [target], text: text, href: href, shapeCache: shapeCache)
 
     }
 
@@ -164,7 +164,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
         // Dismiss group when we won't we creating or updating any ShootGroup
         guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil else {
-            let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
+            let tempGroup = ShootGroup(id: groupId, targets: [], text: text, href: href, shapeCache: shapeCache)
             dismissedGroups.append(tempGroup)
             return
         }
@@ -178,7 +178,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
                   activeSelectGroup == nil,
                   activeShootGroup == nil {
 
-            activeShootGroup = ShootGroup(groupId, [target], text, href, shapeCache: shapeCache)
+            activeShootGroup = ShootGroup(id: groupId, targets: [target], text: text, href: href, shapeCache: shapeCache)
             if let group = self.activeShootGroup,
                let sourceUrl = self.page?.url {
                 let text = group.text
@@ -188,7 +188,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             throttledHaptic()
         } else {
             if !isAltKeyDown {
-                let tempGroup = ShootGroup(groupId, [], text, href, shapeCache: shapeCache)
+                let tempGroup = ShootGroup(id: groupId, targets: [], text: text, href: href, shapeCache: shapeCache)
                 dismissedGroups.append(tempGroup)
             }
         }
@@ -225,7 +225,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             return
         } else if hasActiveSelection, activeSelectGroup == nil {
             // Create a new Selection group
-            activeSelectGroup = ShootGroup(groupId, targets, text, href, shapeCache: shapeCache)
+            activeSelectGroup = ShootGroup(id: groupId, targets: targets, text: text, href: href, shapeCache: shapeCache)
             return
         }
     }
@@ -288,7 +288,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             existingGroup.updateTargets(groupId, targets)
             collectedGroups[index] = existingGroup
         } else {
-            let newGroup = ShootGroup(groupId, targets, text, href, shapeCache: shapeCache)
+            let newGroup = ShootGroup(id: groupId, targets: targets, text: text, href: href, shapeCache: shapeCache)
             collectedGroups.append(newGroup)
         }
     }
