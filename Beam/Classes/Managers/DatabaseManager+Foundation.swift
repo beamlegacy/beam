@@ -94,6 +94,24 @@ extension DatabaseManager {
         }
     }
 
+    func softDelete(_ databaseStruct: DatabaseStruct,
+                    includedRemote: Bool = true,
+                    completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        Logger.shared.logDebug("Soft Deleting database \(databaseStruct.titleAndId)", category: .database)
+
+        var databaseStruct = databaseStruct.copy()
+        databaseStruct.deletedAt = databaseStruct.deletedAt ?? BeamDate.now
+        do {
+            let documentManager = DocumentManager()
+            _ = try documentManager.softDeleteAll(databaseId: databaseStruct.id)
+        } catch {
+            Logger.shared.logError(error.localizedDescription, category: .database)
+        }
+
+        databaseStruct.deletedAt = databaseStruct.deletedAt ?? BeamDate.now
+        save(databaseStruct, includedRemote, nil, completion: completion)
+    }
+
     func delete(_ databaseStruct: DatabaseStruct,
                 includedRemote: Bool = true,
                 completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {

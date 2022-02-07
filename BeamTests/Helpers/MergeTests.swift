@@ -3,7 +3,7 @@ import XCTest
 
 @testable import Beam
 
-class mergeTests: XCTestCase {
+class MergeTests: XCTestCase {
     func testBasicMerge() {
         let ancestor = "A\nB\nC\n"
         let input1 = "NewStart\nA\nB\nC\n"

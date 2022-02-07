@@ -12,7 +12,7 @@ import Combine
 @testable import BeamCore
 @testable import Beam
 
-class noteIndexingTests: XCTestCase {    
+class NoteIndexingTests: XCTestCase {    
     override func setUpWithError() throws {
         BeamTestsHelper.logout()
 
@@ -57,9 +57,14 @@ class noteIndexingTests: XCTestCase {
         note2.addChild(element1_2)
         XCTAssert(note2.syncedSave())
 
-
         // Explicitely sleep to let the full text search engine index things
-        Thread.sleep(forTimeInterval: 1)
+        var index = 0
+        while note2.references.count != 1,
+              (try? GRDBDatabase.shared.countIndexedElements()) != 2,
+                index < 5 {
+            Thread.sleep(forTimeInterval: 0.5)
+          index += 1
+        }
 
         // I expect that no link as been added:
         expect(try GRDBDatabase.shared.countBidirectionalLinks()) == 0
@@ -74,9 +79,9 @@ class noteIndexingTests: XCTestCase {
         element1_1.text = BeamText(text: "removing a reference by using another text...")
 
         // Explicitely sleep to let the full text search engine index things
-        var index = 0
+        index = 0
         while note1.references.count != 0 && index < 5 {
-          Thread.sleep(forTimeInterval: 1)
+            Thread.sleep(forTimeInterval: 0.5)
           index += 1
         }
 

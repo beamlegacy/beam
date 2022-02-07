@@ -107,6 +107,8 @@ extension DocumentManager {
                             }
                         }
 
+                        try BeamObjectChecksum.savePreviousObject(object: remoteDocumentStruct)
+
                         #if DEBUG
                         if let localStoredDocumentStruct = documentManager.loadById(id: documentStruct.id, includeDeleted: true) {
                             dump(localStoredDocumentStruct)
@@ -234,11 +236,20 @@ extension DocumentManager {
 
                  Don't use performAndWait as it creates a DEADLOCK
                  */
+
                 self.context.perform {
+                    // Quick Fix: `self.thread` is supposed to be the one from inside the context thread, no the thread where the
+                    // document manager instance was created. This is a quick fix to not break the checks but there is
+                    // something fishy around `checkThread()` which should check the current thread is one from a `perform()`
+                    let oldThread = self.thread
+                    defer { self.thread = oldThread }
+
+                    self.thread = Thread.current
                     if let localStoredDocument = try? self.fetchWithId(documentStruct.id, includeDeleted: true) {
                         self.context.refresh(localStoredDocument, mergeChanges: false)
                     }
                 }
+
             } catch {
                 completion?(.failure(error))
                 networkCompletion?(.failure(DocumentManagerError.networkNotCalled))
@@ -346,7 +357,7 @@ extension DocumentManager {
     func softDelete(ids: [UUID], clearData: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         var errors: [Error] = []
         var goodObjects: [DocumentStruct] = []
-        backgroundQueue.async {
+        saveDocumentQueue.async {
             let documentManager = DocumentManager()
             for id in ids {
                 guard let document = try? documentManager.fetchWithId(id, includeDeleted: false) else {
@@ -419,62 +430,74 @@ extension DocumentManager {
      - you're adding this in a debug window for developers (like DocumentDetail)
      - You're deleting documents in test scenarios
      */
+    // swiftlint:disable function_body_length
     func delete(documents: [DocumentStruct], completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         documents.forEach { Self.cancelPreviousThrottledAPICall($0.beamObjectId) }
 
         var errors: [Error] = []
         var goods: [DocumentStruct] = []
-        backgroundQueue.async {
+
+        /*
+         1. Using saveDocumentQueue to ensure it's done in background else `documentManager.context` will be the main one,
+            and no RACE conditions with `save`. 
+         2. Then using `context.perform` because that's how CD should be used, always in the context's thread
+         3. Then setting `documentManager.thread` so `checkThread()` is happy
+         4. Then using `defer` to set it back to its previous value
+         */
+        saveDocumentQueue.async {
+            Logger.shared.logDebug("Deleting \(documents.map { $0.titleAndId }.joined(separator: ", "))",
+                                   category: .document)
+
             let documentManager = DocumentManager()
+            documentManager.context.performAndWait {
+                let oldThread = documentManager.thread
+                documentManager.thread = Thread.current
+                defer { documentManager.thread = oldThread }
 
-            for document in documents {
-                guard let cdDocument: Document = try? documentManager.fetchWithId(document.id, includeDeleted: true) else {
-                    errors.append(DocumentManagerError.idNotFound)
-                    continue
-                }
-
-                if let database = try? Database.fetchWithId(documentManager.context, cdDocument.database_id) {
-                    database.updated_at = BeamDate.now
-                } else {
-                    // We should always have a connected database
-                    Logger.shared.logError("No connected database", category: .document)
-                }
-
-                documentManager.context.delete(cdDocument)
-                do {
-                    try documentManager.saveContext()
-                } catch {
-                    Logger.shared.logError(error.localizedDescription, category: .coredata)
-                }
-                goods.append(document)
-            }
-
-            do {
-                try documentManager.saveContext()
-            } catch {
-                Logger.shared.logError(error.localizedDescription, category: .document)
-                completion(.failure(error))
-                return
-            }
-
-            // If not authenticated
-            guard AuthenticationManager.shared.isAuthenticated,
-                  Configuration.networkEnabled else {
-                completion(.success(false))
-                return
-            }
-
-            do {
-                try self.deleteFromBeamObjectAPI(objects: goods) { result in
-                    guard errors.isEmpty else {
-                        completion(.failure(DocumentManagerError.multipleErrors(errors)))
-                        return
+                for document in documents {
+                    guard let cdDocument: Document = try? documentManager.fetchWithId(document.id, includeDeleted: true) else {
+                        errors.append(DocumentManagerError.idNotFound)
+                        continue
                     }
 
-                    completion(result)
+                    if let database = try? Database.fetchWithId(documentManager.context, cdDocument.database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("No connected database", category: .document)
+                    }
+
+                    documentManager.context.refresh(cdDocument, mergeChanges: false)
+                    documentManager.context.delete(cdDocument)
+                    do {
+                        try documentManager.saveContext()
+                    } catch {
+                        Logger.shared.logError(error.localizedDescription, category: .coredata)
+                        completion(.failure(error))
+                        return
+                    }
+                    goods.append(document)
                 }
-            } catch {
-                completion(.failure(error))
+
+                // If not authenticated
+                guard AuthenticationManager.shared.isAuthenticated,
+                      Configuration.networkEnabled else {
+                    completion(.success(false))
+                    return
+                }
+
+                do {
+                    try self.deleteFromBeamObjectAPI(objects: goods) { result in
+                        guard errors.isEmpty else {
+                            completion(.failure(DocumentManagerError.multipleErrors(errors)))
+                            return
+                        }
+
+                        completion(result)
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
             }
         }
     }
