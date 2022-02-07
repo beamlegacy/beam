@@ -194,9 +194,14 @@ struct OnboardingView: View {
         private var subtitle: String {
             "Syncing \(detailToDisplay)"
         }
-        var randomDetails = [
-            "notes", "passwords", "images", "embeds"
+        private let defaultDetails = [
+            "account", "notes", "images", "embeds"
         ]
+        var syncingDetails: [String]?
+        private var randomDetails: [String] {
+            syncingDetails ?? defaultDetails
+        }
+
         @State private var detailToDisplay = ""
         @State private var detailLoopCancellable: Cancellable?
 

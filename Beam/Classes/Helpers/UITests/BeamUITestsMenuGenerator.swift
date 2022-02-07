@@ -261,6 +261,7 @@ class BeamUITestsMenuGenerator {
 
     private func showOnboarding() {
         logout()
+        clearPasswordsDatabase()
         AuthenticationManager.shared.username = nil
         let onboarding = AppDelegate.main.window?.state.data.onboardingManager
         onboarding?.forceDisplayOnboarding()
