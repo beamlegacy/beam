@@ -65,7 +65,7 @@ class BeamObjectManager {
                 }
             }()
 
-            Logger.shared.logDebug("Received \(objects.count) \(object.beamObjectType), filtered to \(toSaveObjects.count). Already had \(previousChecksums.count) checksums",
+            Logger.shared.logDebug("Received \(objects.count) \(object.beamObjectType), filtered to \(toSaveObjects.count) after checksum verification. \(previousChecksums.count) existing checksums",
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
 
@@ -122,6 +122,8 @@ class BeamObjectManager {
                 try BeamObjectChecksum.deletePreviousChecksums(beamObjects: toSaveObjects)
                 throw error
             }
+
+            _ = try BeamObjectChecksum.savePreviousObjects(beamObjects: toSaveObjects)
 
             Logger.shared.logDebug("Received \(encapsulatedObjects.count) \(object.beamObjectType) (\(totalSize.byteSize)). Manager done",
                                    category: .beamObjectNetwork,

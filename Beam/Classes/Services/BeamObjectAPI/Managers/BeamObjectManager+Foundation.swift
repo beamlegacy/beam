@@ -398,6 +398,7 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
+                    try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjects)
                     completion(.success(objects))
                 } catch {
                     completion(.failure(error))
@@ -655,6 +656,7 @@ extension BeamObjectManager {
 
                 do {
                     try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+                    try BeamObjectChecksum.savePreviousObject(beamObject: beamObject)
                     completion(.success(object))
                 } catch {
                     completion(.failure(error))
@@ -805,6 +807,7 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
+                    try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjects)
                     completion(.success(beamObjects))
                 } catch {
                     completion(.failure(error))
@@ -958,6 +961,7 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+                    try BeamObjectChecksum.savePreviousObject(beamObject: beamObject)
                     completion(.success(beamObject))
                 } catch {
                     completion(.failure(error))

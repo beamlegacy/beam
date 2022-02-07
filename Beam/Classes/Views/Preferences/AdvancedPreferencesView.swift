@@ -32,6 +32,7 @@ struct AdvancedPreferencesView: View {
     @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
+    @State var isWebsocketEnabled = Configuration.websocketEnabled
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -94,8 +95,12 @@ struct AdvancedPreferencesView: View {
                 } content: {
                     Text(publicHostname)
                 }
-                Preferences.Section(title: "Network Enabled") {
-                    NetworkEnabledButton
+                Preferences.Section(title: "Network") {
+                    NetworkEnabled
+                }
+
+                Preferences.Section(title: "Websocket") {
+                    WebsocketEnabled
                 }
                 Preferences.Section(title: "", bottomDivider: true) {
                     Button(action: {
@@ -393,15 +398,6 @@ struct AdvancedPreferencesView: View {
 
     @State private var showNewDatabase = false
 
-    private var NetworkEnabledButton: some View {
-        Button(action: {
-            Configuration.networkEnabled = !Configuration.networkEnabled
-            networkEnabled = Configuration.networkEnabled
-        }, label: {
-            Text(String(describing: networkEnabled)).frame(minWidth: 100)
-        })
-    }
-
     private var PnsViewEnabledCheckbox: some View {
         return Toggle(isOn: $showPNSView) {
             Text("Enabled")
@@ -470,7 +466,7 @@ struct AdvancedPreferencesView: View {
     }
 
     private var AutomaticBackupBeforeUpdate: some View {
-        return Toggle(isOn: $isDataBackupOnUpdateOn) {
+        Toggle(isOn: $isDataBackupOnUpdateOn) {
             Text("Enabled")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
@@ -478,6 +474,28 @@ struct AdvancedPreferencesView: View {
             .onReceive([isDataBackupOnUpdateOn].publisher.first()) {
                 PreferencesManager.isDataBackupOnUpdateOn = $0
             }
+    }
+
+    private var WebsocketEnabled: some View {
+        Toggle(isOn: $isWebsocketEnabled) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onChange(of: isWebsocketEnabled, perform: {
+                Configuration.websocketEnabled = $0
+            })
+    }
+
+    private var NetworkEnabled: some View {
+        Toggle(isOn: $networkEnabled) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onChange(of: networkEnabled, perform: {
+                Configuration.networkEnabled = $0
+            })
     }
 
     private var ResetAPIEndpointsButton: some View {

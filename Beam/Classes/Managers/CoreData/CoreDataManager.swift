@@ -234,6 +234,12 @@ class CoreDataManager {
         // as an option to the user through our settings.
         description.cloudKitContainerOptions = nil
 
+        // turn on remote change notifications
+        // https://developer.apple.com/documentation/coredata/consuming_relevant_store_changes
+        let remoteChangeKey = "NSPersistentStoreRemoteChangeNotificationOptionKey"
+        description.setOption(true as NSNumber,
+                              forKey: remoteChangeKey)
+
         container.persistentStoreDescriptions = [description]
 
         storeURL = containerURL

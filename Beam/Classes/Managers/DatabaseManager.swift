@@ -388,7 +388,7 @@ class DatabaseManager {
                 Logger.shared.logDebug("Deleting", category: .databaseDebug)
 
                 group.enter()
-                self.delete(DatabaseStruct(database: database)) { result in
+                self.softDelete(DatabaseStruct(database: database)) { result in
                     do { _ = try result.get() } catch { errors.append(error) }
                     group.leave()
                 }
@@ -440,13 +440,19 @@ class DatabaseManager {
             guard defaultDatabase.title.prefix(7) == "Default" else { return }
 
             deleted = true
-            Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, deleting now",
+            Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, soft deleting now",
                                      category: .database)
+
+            /*
+             When we just created a database (at boot time for example), the network save propagated this database to
+             other devices, we can't just delete it. We have to soft delete it to propagate this delete to other
+             devices.
+             */
 
             let semaphore = DispatchSemaphore(value: 0)
             var error: Error?
 
-            delete(defaultDatabase) { result in
+            softDelete(defaultDatabase) { result in
                 switch result {
                 case .failure(let deleteError): error = deleteError
                 case .success: break

@@ -106,6 +106,7 @@ class DocumentManagerTestsHelper {
 
         // We revert, the previousChecksum/previousData saved was from `docStruct` but we want `localDocumentStruct`
         try BeamObjectChecksum.savePreviousChecksum(object: localDocumentStruct)
+        try BeamObjectChecksum.savePreviousObject(object: localDocumentStruct)
     }
 
     func fetchOnAPI(_ docStruct: DocumentStruct) -> DocumentStruct? {
