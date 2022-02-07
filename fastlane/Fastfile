@@ -13,6 +13,7 @@
 # Uncomment the line if you want fastlane to automatically update itself
 # update_fastlane
 
+
 default_platform(:mac)
 xcode_file = "../.xcode_version"
 xcversion(version: File.read(xcode_file)) if File.exists?(xcode_file)
@@ -235,59 +236,81 @@ platform :mac do
     end
   end
 
-  ## To release developer version
-  lane :dev do
-    check_certs(profile_development: true)
-
-    git_branch
-
-    UI.message "Branch is #{Actions.git_branch}"
-    unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch)
-      add_badge(dark: true,
-                grayscale: true,
-                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
-    end
-
-    scheme = "Beam"
-
-    build_mac_app(
-      workspace: "Beam.xcworkspace",
-      scheme: scheme,
-      silent: true,
-      clean: true,
-      output_directory: "builds",
-      output_name: "Beam",
-      include_symbols: true,
-      # xcargs: settings_to_override,
-      # Doesn't work :(
-      export_xcargs: 'OTHER_CODE_SIGN_FLAGS="--timestamp"',
-      export_method: "development", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
-      export_options: "./ExportOptions.plist",
-      # Found this at https://github.com/fastlane/fastlane/issues/15963 or we have archive failed
-      skip_package_pkg: true,
-      use_system_scm: true
-    )
-
+  def unique_build_number
+    UI.message "Get build number for branch #{Actions.git_branch}"
+    timestamp = DateTime.parse(ENV["CI_COMMIT_TIMESTAMP"])
+    build_number = timestamp.strftime("%Y%m%d.%H%M%S")
+    UI.message "Will use build number: #{build_number}"
+    build_number
   end
 
-  ## To release DeveloperId signed builds
-  lane :beta do
-    git_branch
-    # Let's do version increment manually in Xcode
-    # increment_version_number(bump_type: "patch")
-    # Sadly we can't use anything out of a number for building number, so we
-    # can't include the current branch. The following fails:
-    # build_number = "#{Actions.git_branch}/#{ENV['CI_JOB_ID']}".gsub(/\//, "-")
+  def publishing_channel
+    case Actions.git_branch
+    when "develop"
+      # Secret channel name so that curious beta users can't easily guess it and get our internal builds
+      "bluepineapple"
+    when /\Abeta-.*/
+      "beta"
+    when /\Arelease-.*/
+      "release"
+    else
+      "review/#{Actions.git_branch}" # This is a review build
+    end
+  end
 
-    build_number = ENV['CI_JOB_ID']
+  def build_type
+    case Actions.git_branch
+    when "develop"
+      "internal"
+    when /\Abeta-.*/
+      "beta"
+    when /\Arelease-.*/
+      "release"
+    else
+      "review"
+    end
+  end
+
+  def review_build?
+    ENV["CI_MERGE_REQUEST_EVENT_TYPE"] == "merge_train" || ENV["CI_PIPELINE_SOURCE"] == "merge_request_event" || publishing_channel().match(/^review\//) || (ENV['CI_ENVIRONMENT_NAME'] && ENV['CI_ENVIRONMENT_NAME'].strip.empty?)
+  end
+
+  def publish_channel_internal?
+    review_build? || publishing_channel() == "internal"
+  end
+
+  def publish_channel_external?
+    !review_build? && ["beta", "release"].include?(publishing_channel())
+  end
+
+  # Unfortunately, Fastlane doesn't provided support for lightweight Git tags, so here it is
+  def add_lightweight_git_tag(tag, commit)
+    cmd = ['git tag']
+    cmd << tag.shellescape
+    cmd << commit.to_s
+
+    UI.message("Adding git tag '#{tag}' 🎯.")
+    Actions.sh(cmd.join(' '))
+  end
+
+  ## To create DeveloperId signed builds
+  lane :build do
+    branch = Actions.git_branch
+    
+    build_number = unique_build_number()
+    
+    # Set build number in Info.plist
     increment_build_number(build_number: build_number)
-    appcast_url = "https://s3.eu-west-3.amazonaws.com/downloads.dev.beamapp.co/#{Actions.git_branch}/AppFeed.json"
+
+    appcast_url = "https://#{ENV["AWS_DEFAULT_REGION"]}.amazonaws.com/#{ENV["S3_BUCKET"]}/#{s3_path_for_app_feed()}/AppFeed.json"
+
     info_plist = "Beam/Configuration/Info.plist"
 
-    UI.message "Set appcast url to #{appcast_url} in #{info_plist}"
+    UI.message "Set AppFeed url to #{appcast_url} in #{info_plist}"
 
     sparkle_set_url(info_plist: info_plist,
-                    appcast_url: appcast_url)
+                    appcast_url: appcast_url) 
+
 
     update_app_identifier(
       xcodeproj: "Beam.xcodeproj",
@@ -295,7 +318,7 @@ platform :mac do
       app_identifier: ENV["APP_IDENTIFIER"]
     )
 
-    scheme = scheme_name_for_branch_and_set_in_plist(Actions.git_branch)
+    scheme = set_scheme_name_in_plist()
 
     check_certs(cert_development: false,
                 cert_type: "developer_id_application",
@@ -307,13 +330,13 @@ platform :mac do
                 profile_name: ENV["PROVISION_NAME"],
                 build_configurations: config_name_for_scheme(scheme))
 
-    UI.message "Branch is #{Actions.git_branch}"
-    unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch) || Actions.git_branch.start_with?("beta")
+    UI.message "Branch is #{branch}"
+    # unless ["HEAD", "master", "develop", "release"].include?(branch) || branch.start_with?("beta")
 
-      add_badge(dark: false,
-                grayscale: false,
-                glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
-    end
+    #   add_badge(dark: false,
+    #             grayscale: false,
+    #             glob: "/Beam/Assets/Assets.xcassets/AppIcon.appiconset/*.png")
+    # end
 
     build_mac_app(
       workspace: "Beam.xcworkspace",
@@ -343,6 +366,7 @@ platform :mac do
 
       # export_xcargs: "-allowProvisioningUpdates"
     )
+
   end
 
   lane :notarize_build do
@@ -357,8 +381,37 @@ platform :mac do
   end
 
   lane :deploy do
+    tag_build
     upload_s3
+    upload_update_feed unless publish_channel_external?
     ping_slack
+  end
+
+  lane :publish do
+    if review_build?
+      upload_update_feed
+    elsif publish_channel_external?
+      tag_build(publish: true)
+      upload_s3(static_link: true)
+      upload_update_feed 
+      ping_slack(publish: true)
+    end
+  end
+
+  lane :tag_build do |params|
+    get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    publish = params[:publish] || false
+
+    if publish
+      add_lightweight_git_tag("#{lane_context[SharedValues::VERSION_NUMBER]}-#{build_type()}", ENV["CI_COMMIT_SHA"])
+    else
+      tag = "#{lane_context[SharedValues::BUILD_NUMBER]}-#{build_type()}"
+      if !git_tag_exists(tag: tag, remote: true)
+        add_lightweight_git_tag(tag, ENV["CI_COMMIT_SHA"])
+      end
+    end
+    push_git_tags
   end
 
   lane :ping_sentry do
@@ -393,7 +446,7 @@ platform :mac do
 
   private_lane :create_release_notes do |params|
     # Fetch commit from S3 if we already had one
-    download_previous_file(filename: "commit", branch: params[:branch])
+    download_previous_file(filename: "commit", channel: publishing_channel())
 
     changelog = if File.exists?("../builds/commit")
                   last_commit = File.read("../builds/commit").chomp
@@ -422,53 +475,52 @@ platform :mac do
 
   lane :upload_s3 do |params|
     # We want the build number from `builds/Beam.app/Contents/Info.plist`
-    # get_version_number
-    # get_build_number
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
-    git_branch
+    static_link = params[:static_link] || false
 
-    create_release_notes(branch: params[:branch] || Actions.git_branch)
+    files = [
+      "builds/Beam.dmg",
+      "builds/Beam.zip",
+      "builds/Beam.app.dSYM.zip",
+    ]
 
-    upload_update_feed(branch: params[:branch] || Actions.git_branch)
-    s3_path = s3_path_from_branch(params[:branch] || Actions.git_branch)
+    if publish_channel_internal?
+      create_release_notes(channel: publishing_channel())
+      # These are not used for external builds
+      files += [
+        "builds/release_notes.html",
+        "builds/commit"
+      ]
+    end
 
-    # This should be last upload, or Slack links will be wrong
+    # This should be first upload, or Slack links will be wrong
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
       bucket: ENV["S3_BUCKET"],
       region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
-      files: [
-        "builds/Beam.dmg",
-        "builds/Beam.zip",
-        "builds/Beam.app.dSYM.zip",
-        "builds/release_notes.html"
-      ],
-      # Doesn't work the way I expected
-      # endpoint: "http://downloads.dev.beamapp.co",
-      path: s3_path
+      files: files,
+      path: s3_path_for_build(static_link: static_link)
     )
+
+    # We store our own uploaded artifacts to advertise them on Slack
+    lane_context[:BEAM_UPLOADED_FILES] = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].dup
 
     lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
       UI.success "S3: #{file}"
     end
   end
 
-  lane :publish_release do
-    upload_s3(branch: "release")
-    ping_slack
-  end
-
-  private_lane :upload_update_feed do |params|
+  private_lane :upload_update_feed do
     # I have to do Sparkle at the same time, as `increment_build_number`
     # modifies Beam/Configuration/Info.plist but this file is not propagated to
     # other CI jobs
 
-    generate_update_feed(branch: params[:branch])
+    generate_update_feed()
 
-    s3_path = params[:branch]
+    s3_path = s3_path_for_app_feed()
 
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
@@ -477,11 +529,8 @@ platform :mac do
       region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
       files: [
-        "builds/AppFeed.json",
-        "builds/commit"
+        "builds/AppFeed.json"
       ],
-      # Doesn't work the way I expected
-      # endpoint: "http://downloads.dev.beamapp.co",
       path: s3_path
     )
 
@@ -490,24 +539,37 @@ platform :mac do
     end
   end
 
-  def s3_path_from_branch(branch)
-    git_branch
-    branch ||= Actions.git_branch
-    result = if ["master", "develop", "release"].include?(branch)
-      "#{branch}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+  def s3_path_for_build(static_link: false)
+    if static_link
+      # URLs that can easily be linked to (such as on a public website)
+      if review_build?
+        raise "Unsupported action"
+      else
+        publishing_channel()
+      end
     else
-      branch
+      if review_build?
+        channel = ENV['CI_ENVIRONMENT_NAME'] || "review/#{Actions.git_branch}"
+        "#{channel}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+      else
+        # By default we upload to a version & build number dependent path for precise targeting
+        "#{publishing_channel()}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+      end
     end
+  end
 
-    UI.success "s3_path_from_branch: #{result}"
-
-    result
+  def s3_path_for_app_feed
+    if review_build?
+      ENV['CI_ENVIRONMENT_NAME'] || "review/#{Actions.git_branch}"
+    else
+      publishing_channel()
+    end
   end
 
   private_lane :download_previous_file do |params|
     filename = params[:filename]
     default_file = params[:default_file]
-    s3_path = params[:branch]
+    s3_path = params[:channel]
 
     s3_client = Aws::S3::Client.new(region: ENV["AWS_DEFAULT_REGION"],
                                    access_key_id: ENV["AWS_ACCESS_KEY_ID"],
@@ -529,21 +591,23 @@ platform :mac do
     raise $!
   end
 
-  private_lane :generate_update_feed do |params|
+  private_lane :generate_update_feed do
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     
     # We store resources at different locations depending on branches (i.e. for develop/release we use version-specific folders, for others the root) 
-    resources_path = s3_path_from_branch(params[:branch])
-    # The feed is always at the root of the branch folder in s3
-    branch_root_path = params[:branch]
+    resources_path = s3_path_for_build()
 
     root_directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}"
     resources_directory = "#{root_directory}/#{resources_path}"
-    branch_root_directory = "#{root_directory}/#{branch_root_path}"
     app_download_url = "#{resources_directory}/Beam.zip"
-    update_json_url = "#{branch_root_directory}/AppFeed.json"
-    release_notes_html_url = "#{resources_directory}/release_notes.html"
+    # The feed is always at the root of the channel folder in s3
+    update_json_url = "#{root_directory}/#{s3_path_for_app_feed()}/AppFeed.json"
+    release_notes_html_url = if publish_channel_external?
+      ENV["PUBLIC_BUILD_RELEASE_NOTES_URL"]
+    else
+      "#{resources_directory}/release_notes.html"
+    end
     human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
     machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
     release_title = "Version #{human_version}, build #{machine_version}"
@@ -560,7 +624,7 @@ platform :mac do
     UI.success "#{outputBuild}"
       
     run = ["cd #{appFeedBuilder} &&",
-      "swift run AppFeedBuilder", update_json_url, "'#{release_title}'", human_version, machine_version, app_download_url, 
+      "swift run AppFeedBuilder", update_json_url, "'#{release_title}'", human_version, "'#{machine_version}'", app_download_url, 
       "--output-path", "#{rootFolder}/builds", 
       "--release-notes-url", release_notes_html_url].join(' ')
     
@@ -572,21 +636,31 @@ platform :mac do
     UI.success "AutoUpdate: Added #{human_version} #{machine_version} at #{app_download_url}"
   end
 
-  private_lane :ping_slack do
-    git_branch
+  private_lane :ping_slack do |params|
+    next if review_build?
 
-    next unless ["HEAD", "master", "develop", "release"].include?(Actions.git_branch) || Actions.git_branch.start_with?("beta")
+    publish = params[:publish] || false
 
-		attachments = lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].map do |file|
+    version = lane_context[SharedValues::VERSION_NUMBER]
+    build_number = lane_context[SharedValues::BUILD_NUMBER]
+    build_type = "#{build_type()} "
+    build_type += "candidate " unless publish_channel_internal? || publish
+
+		attachments = lane_context[:BEAM_UPLOADED_FILES].map do |file|
       {
         title: file.split("/").last,
         value: file,
         short: false
       }
 		end
+    message = if publish
+      ":package: Beam MacOS #{build_type}#{version} (#{build_number}) has shipped!"
+    else
+      ":zap: Beam MacOS #{build_type}#{version} (#{build_number}) is available!"
+    end
 
     slack(
-      message: "Beam MacOS success build",
+      message: message,
       channel: "#webhooks",
       success: true,
       default_payloads: [:git_branch, :last_git_commit], # :test_result
@@ -601,14 +675,15 @@ platform :mac do
   end
 
   lane :delete_s3 do |params|
-    git_branch
-    directory = Actions.git_branch
+    get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
 
-    unless ["HEAD", "master", "develop", "release"].include?(directory)
+    if review_build?
       s3 = Aws::S3::Resource.new(region: ENV["AWS_DEFAULT_REGION"],
                                  credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"],
                                                                    ENV["AWS_SECRET_ACCESS_KEY"]))
 
+      directory = s3_path_for_build()
       bucket = s3.bucket(ENV["S3_BUCKET"])
       UI.message "S3: deleting #{ENV["S3_BUCKET"]}/#{directory}"
       bucket.objects(prefix: directory).batch_delete!
@@ -616,29 +691,8 @@ platform :mac do
     end
   end
 
-  lane :release do
-    # sync_code_signing
-    # disable_automatic_code_signing(path: "Beam.xcodeproj")
-    # clear_derived_data
-
-    scheme = scheme_name_for_branch_and_set_in_plist(Actions.git_branch)
-
-    build_mac_app(
-      workspace: "Beam.xcworkspace",
-      scheme: scheme,
-      silent: true,
-      clean: true,
-      output_directory: "builds",
-      include_symbols: false,
-      export_method: "developer-id", # Valid values are: app-store, ad-hoc, package, enterprise, development, developer-id
-      # export_xcargs: "-allowProvisioningUpdates"
-      # mac_app_installer_cert_name: "foobar"
-    )
-    # enable_automatic_code_signing(path: "Beam.xcodeproj")
-  end
-
-  def scheme_name_for_branch_and_set_in_plist(branch)
-    scheme = if branch.start_with?("beta")
+  def set_scheme_name_in_plist
+    scheme = if Actions.git_branch.start_with?("beta")
       "Beam beta release"
     else
       "Beam release"
@@ -646,7 +700,7 @@ platform :mac do
 
     set_info_plist_value(path: "Beam/Configuration/Info.plist", key: "SchemeName", value: scheme)
 
-    return scheme
+    scheme
   end
 
   def config_name_for_scheme(scheme_name)

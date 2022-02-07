@@ -1,0 +1,22 @@
+build:publish:
+  stage: deploy
+  dependencies:
+    - build:zip
+    - build:dmg
+  artifacts:
+    expire_in: 14d
+    paths:
+      - builds/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
+      when: never
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+  when: manual
+  script:
+    - bundle exec fastlane publish
+  tags:
+    - macos
+  interruptible: true
+  allow_failure: true

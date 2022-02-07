@@ -16,3 +16,8 @@ default:
     # - git config --global url."https://${GITLAB_USERNAME}:${GITLAB_ACCESS_TOKEN}@gitlab.com/".insteadOf "git@gitlab.com:"
     - scripts/move_libgit2_step1.sh
     - scripts/move_libgit2_step2.sh
+    # So that we can push tags
+    - git config user.email "${GITLAB_USER_EMAIL}"
+    - git config user.name "${GITLAB_USER_NAME}"
+    - url_host=$(echo "${CI_REPOSITORY_URL}" | sed -re "s|https?://gitlab-ci-token:.*@|https://${GITLAB_BOT_USERNAME}:${GITLAB_BOT_ACCESS_TOKEN}@|g")
+    - git remote set-url --push origin "${url_host}"
