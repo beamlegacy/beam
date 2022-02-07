@@ -8,6 +8,7 @@ enum PointAndShootMessages: String, CaseIterable {
     case pointAndShoot_clearSelection
     case pointAndShoot_hasSelection
     case pointAndShoot_isTypingOnWebView
+    case pointAndShoot_dismissShootGroup
 }
 
 /**
@@ -79,6 +80,11 @@ class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
             case PointAndShootMessages.pointAndShoot_isTypingOnWebView:
                 let isTypingOnWebView = toBool(dict, key: "isTypingOnWebView")
                 pointAndShoot.isTypingOnWebView = isTypingOnWebView
+
+            case PointAndShootMessages.pointAndShoot_dismissShootGroup:
+                guard let id = dict["id"] as? String
+                else { throw PointAndShootError("dismiss payload incomplete") }
+                pointAndShoot.dismissShootGroup(id: id, href: href)
 
             }
 

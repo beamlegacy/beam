@@ -26,7 +26,7 @@ class PointAndShootHandleMouseClickTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        self.pns.activeShootGroup = PointAndShoot.ShootGroup("point-uuid", [target], "placeholder string", "https://pnshref.co", shapeCache: .init())
+        self.pns.activeShootGroup = PointAndShoot.ShootGroup(id: "point-uuid", targets: [target], text: "placeholder string", href: "https://pnshref.co", shapeCache: .init())
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         let mouseLocation = NSPoint(x: 201, y: 202)
@@ -42,7 +42,7 @@ class PointAndShootHandleMouseClickTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        self.pns.activeShootGroup = PointAndShoot.ShootGroup("point-uuid", [target], "placeholder string", "https://pnshref.co", shapeCache: .init())
+        self.pns.activeShootGroup = PointAndShoot.ShootGroup(id: "point-uuid", targets: [target], text: "placeholder string", href: "https://pnshref.co", shapeCache: .init())
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         let mouseLocation = NSPoint(x: 501, y: 502)
