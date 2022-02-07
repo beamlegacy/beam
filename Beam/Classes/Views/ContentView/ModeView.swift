@@ -11,6 +11,7 @@ import BeamCore
 struct ModeView: View {
 
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     var containerGeometry: GeometryProxy
     @Binding var contentIsScrolled: Bool
@@ -25,7 +26,7 @@ struct ModeView: View {
             }
         }
         .onAppear { contentIsScrolled = false }
-        .transition(.webContentTransition(state.windowIsResizing))
+        .transition(.webContentTransition(windowInfo.windowIsResizing))
     }
 
     private var noteContent: some View {

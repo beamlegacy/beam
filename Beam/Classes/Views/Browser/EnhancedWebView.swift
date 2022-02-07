@@ -12,6 +12,7 @@ struct EnhancedWebView: View {
     @ObservedObject var tab: BrowserTab
     @EnvironmentObject var data: BeamData
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     private let topContentInset: CGFloat = Toolbar.height
 
@@ -19,11 +20,11 @@ struct EnhancedWebView: View {
         GeometryReader { proxy in
             ZStack {
                 let tabBelongsToThisWindow = tab.state === state
-                if tab.isPinned && !state.windowIsMain && !tabBelongsToThisWindow, let captured = tab.screenshotCapture {
+                if tab.isPinned && !windowInfo.windowIsMain && !tabBelongsToThisWindow, let captured = tab.screenshotCapture {
                     Image(nsImage: captured).scaledToFit()
                         .opacity(0.5)
                 }
-                if state.windowIsMain || tabBelongsToThisWindow {
+                if windowInfo.windowIsMain || tabBelongsToThisWindow {
                     WebView(webView: tab.webView, topContentInset: topContentInset)
                         .webViewStatusBar(isVisible: tab.showsStatusBar) {
                             WebViewStatusText(mouseHoveringLocation: tab.mouseHoveringLocation)

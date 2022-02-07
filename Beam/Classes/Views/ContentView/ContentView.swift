@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     @State private var contentIsScrolled = false
     private var isToolbarAboveContent: Bool {
@@ -42,7 +43,7 @@ struct ContentView: View {
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
         }
-        .environment(\.isMainWindow, state.windowIsMain)
+        .environment(\.isMainWindow, windowInfo.windowIsMain)
     }
 
     private var shouldDisplayBottomBar: Bool {
