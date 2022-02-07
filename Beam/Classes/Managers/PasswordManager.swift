@@ -192,6 +192,10 @@ class PasswordManager {
         }
         networkCompletion?(.success(false))
     }
+
+    func count() -> Int {
+        fetchAll().count
+    }
 }
 
 extension PasswordManager: BeamObjectManagerDelegate {

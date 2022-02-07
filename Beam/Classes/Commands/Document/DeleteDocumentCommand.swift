@@ -46,7 +46,7 @@ class DeleteDocument: DocumentCommand {
 
         DocumentManager.disableNotifications()
         defer { DocumentManager.enableNotifications() }
-        
+
         if allDocuments {
             let ids = documents.map { $0.id }
             removeNotesFromIndex(ids)

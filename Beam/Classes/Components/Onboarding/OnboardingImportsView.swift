@@ -4,6 +4,7 @@
 //
 //  Created by Remi Santos on 12/11/2021.
 //
+// swiftlint:disable file_length
 
 import SwiftUI
 import BeamCore
@@ -121,14 +122,14 @@ struct OnboardingImportsView: View {
     private var loadingDetails: [String] {
         var result = [String]()
         if checkHistory { result.append("history") }
-        if checkPassword { result.append("password") }
+        if checkPassword { result.append("passwords") }
         return result
     }
 
     var body: some View {
         VStack(spacing: 0) {
             if isLoading {
-                OnboardingView.LoadingView(randomDetails: loadingDetails)
+                OnboardingView.LoadingView(syncingDetails: loadingDetails)
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 OnboardingView.TitleText(title: "Import your data")
@@ -235,8 +236,7 @@ extension OnboardingImportsView {
             }
             return
         }
-        isLoading = true
-        updateActions()
+
         let importsManager = AppDelegate.main.data.importsManager
         if checkPassword {
             if selectedSource.supportsAutomaticPasswordImport, let passwordImporter = selectedSource.passwordImporter {
@@ -248,6 +248,10 @@ extension OnboardingImportsView {
         if checkHistory, let importer = selectedSource.historyImporter {
             importsManager.startBrowserHistoryImport(from: importer)
         }
+
+        isLoading = true
+        updateActions()
+
         waitForImporterToFinish(importsManager)
     }
 
