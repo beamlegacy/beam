@@ -10,6 +10,7 @@ import SwiftUI
 struct DiscoverShortcutsView: View {
 
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     let sections: [SectionShortcuts] = [.browser, .editor]
 
@@ -39,14 +40,14 @@ struct DiscoverShortcutsView: View {
     }
 
     private var compactHeight: Bool {
-        if state.windowFrame.size.height < 720 {
+        if windowInfo.windowFrame.size.height < 720 {
             return true
         }
         return false
     }
 
     private var compactWidth: Bool {
-        if state.windowFrame.size.width < 810 {
+        if windowInfo.windowFrame.size.width < 810 {
             return true
         }
         return false

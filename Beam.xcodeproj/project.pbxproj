@@ -563,6 +563,7 @@
 		8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */ = {isa = PBXBuildFile; fileRef = 8ADD05F42729657D004C3EC9 /* WebPositions.js */; };
 		8ADD060A27296E00004C3EC9 /* WebPositionsMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */; };
 		8AED4FF026C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */; };
+		8AEF7FA127A2FBBD00D3E266 /* BeamWindowInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AEF7FA027A2FBBD00D3E266 /* BeamWindowInfo.swift */; };
 		8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7C3275A66DF0081B6B5 /* SupportedEmbedDomains.swift */; };
 		8AF4F7CB275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7CA275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift */; };
 		8AF4F7CD275A67190081B6B5 /* EmbedContentLocalStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AF4F7CC275A67190081B6B5 /* EmbedContentLocalStrategy.swift */; };
@@ -1914,6 +1915,7 @@
 		8ADD05FB2729657D004C3EC9 /* WebPositionsUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = WebPositionsUI.ts; sourceTree = "<group>"; };
 		8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsMessageHandler.swift; sourceTree = "<group>"; };
 		8AED4FEF26C2A3AA00E29DB7 /* PointAndShootFrameOffset.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootFrameOffset.swift; sourceTree = "<group>"; };
+		8AEF7FA027A2FBBD00D3E266 /* BeamWindowInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamWindowInfo.swift; sourceTree = "<group>"; };
 		8AF0E335268F30E0007C75D8 /* pns_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = pns_prod.js; sourceTree = "<group>"; };
 		8AF4F7C3275A66DF0081B6B5 /* SupportedEmbedDomains.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupportedEmbedDomains.swift; sourceTree = "<group>"; };
 		8AF4F7CA275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentAPIStrategy.swift; sourceTree = "<group>"; };
@@ -3117,6 +3119,7 @@
 				37C412D72785476700954FD7 /* SearchEngine */,
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181734D2581204900317ED8 /* BeamState.swift */,
+				8AEF7FA027A2FBBD00D3E266 /* BeamWindowInfo.swift */,
 				A5C9F004261353420096380F /* WindowPage.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
 				A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */,
@@ -6878,6 +6881,7 @@
 				418172192581107C00317ED8 /* Persistence.swift in Sources */,
 				418172282581107C00317ED8 /* Range+Beam.swift in Sources */,
 				52842D552715CFDF0099602C /* FileDetail.swift in Sources */,
+				8AEF7FA127A2FBBD00D3E266 /* BeamWindowInfo.swift in Sources */,
 				A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */,
 				A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */,
 				3330D7CB265E466D008C9E20 /* ToolbarDownloadButton.swift in Sources */,
