@@ -15,12 +15,13 @@ struct Omnibox: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     var isInsideNote = false
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private var enableAnimations: Bool {
-        !state.windowIsResizing
+        !windowInfo.windowIsResizing
     }
     private var isEditing: Bool {
         state.focusOmniBox

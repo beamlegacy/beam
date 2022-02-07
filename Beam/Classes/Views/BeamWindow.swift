@@ -25,6 +25,7 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
 
 class BeamWindow: NSWindow, NSDraggingDestination {
     var state: BeamState = BeamState()
+    var windowInfo: BeamWindowInfo = BeamWindowInfo()
     var data: BeamData
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
@@ -63,6 +64,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         let mainView = ContentView()
             .environmentObject(state)
             .environmentObject(data)
+            .environmentObject(windowInfo)
             .environmentObject(state.browserTabsManager)
             .frame(minWidth: minimumSize.width, maxWidth: .infinity, minHeight: minimumSize.height, maxHeight: .infinity)
 
@@ -231,7 +233,7 @@ extension BeamWindow: NSWindowDelegate {
     }
 
     func windowDidResignMain(_ notification: Notification) {
-        state.windowIsMain = highestWindowParent(for: NSApp.mainWindow) == self
+        windowInfo.windowIsMain = highestWindowParent(for: NSApp.mainWindow) == self
     }
 
     func windowDidBecomeMain(_ notification: Notification) {
@@ -241,30 +243,32 @@ extension BeamWindow: NSWindowDelegate {
             resignMain()
             return
         }
-        state.windowIsMain = true
+        windowInfo.windowIsMain = true
         for window in AppDelegate.main.windows where window != self {
-            window.state.windowIsMain = false
+            window.windowInfo.windowIsMain = false
         }
         guard state.mode == .web else { return }
         state.browserTabsManager.currentTab?.tabDidAppear(withState: state)
     }
 
     func windowDidMove(_ notification: Notification) {
-        self.state.windowFrame = self.frame
+        Logger.shared.logError("BE-007 window did move", category: .general)
+        self.windowInfo.windowFrame = self.frame
     }
 
     func windowWillStartLiveResize(_ notification: Notification) {
-        self.state.windowIsResizing = true
+        self.windowInfo.windowIsResizing = true
+        self.setTrafficLightsLayout()
     }
 
     func windowDidEndLiveResize(_ notification: Notification) {
-        self.state.windowIsResizing = false
+        self.windowInfo.windowIsResizing = false
         self.setTrafficLightsLayout()
     }
 
     func windowDidResize(_ notification: Notification) {
         self.setTrafficLightsLayout()
-        self.state.windowFrame = self.frame
+        self.windowInfo.windowFrame = self.frame
     }
 
     func windowWillEnterFullScreen(_ notification: Notification) {
@@ -320,8 +324,8 @@ extension BeamWindow {
         if state.mode == .web && state.focusOmniBox && state.focusOmniBoxFromTab, let searchField = self.firstResponder as? BeamTextFieldViewFieldEditor {
             let omniboxFrame = omniboxFrameFromSearchField(searchField)
             return !omniboxFrame.contains(event.locationInWindow)
-        } else if state.mode == .web && !state.undraggableWindowRects.isEmpty &&
-                    state.undraggableWindowRects.contains(where: {
+        } else if state.mode == .web && !windowInfo.undraggableWindowRects.isEmpty &&
+                    windowInfo.undraggableWindowRects.contains(where: {
                         $0.contains(event.locationInWindow.flippedPointToTopLeftOrigin(in: self))
                     }) {
             return false
