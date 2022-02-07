@@ -895,6 +895,8 @@
 		A53C8F532644B22B003A5DF8 /* OmniBoxUITestsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C8F522644B22B003A5DF8 /* OmniBoxUITestsHelper.swift */; };
 		A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */; };
 		A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */; };
+		A545054E27AF8296006AE756 /* OnboardingSaveEncryptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545054827AF8296006AE756 /* OnboardingSaveEncryptionView.swift */; };
+		A545055527B11F83006AE756 /* EncryptionManager+ImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */; };
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
 		A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D30525F7D93B00E68F94 /* MathsTests.swift */; };
 		A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */ = {isa = PBXBuildFile; productRef = A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */; };
@@ -2209,6 +2211,8 @@
 		A53C8F522644B22B003A5DF8 /* OmniBoxUITestsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniBoxUITestsHelper.swift; sourceTree = "<group>"; };
 		A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatableOffsetEffect.swift; sourceTree = "<group>"; };
 		A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataContextObserverTests.swift; sourceTree = "<group>"; };
+		A545054827AF8296006AE756 /* OnboardingSaveEncryptionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingSaveEncryptionView.swift; sourceTree = "<group>"; };
+		A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EncryptionManager+ImportExport.swift"; sourceTree = "<group>"; };
 		A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteList.swift; sourceTree = "<group>"; };
 		A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "BeamTests-Bridging-Header.h"; sourceTree = "<group>"; };
 		A545D30525F7D93B00E68F94 /* MathsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathsTests.swift; sourceTree = "<group>"; };
@@ -3422,6 +3426,7 @@
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
 				52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
+				A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */,
 				A0AA693225C41C9B0038F9A3 /* MouseHandler.swift */,
 				5291CEE7268B5969001645A2 /* PasswordManager.swift */,
 				A0F462342668D79E0003EAD6 /* RadBlockPreferencesManager.swift */,
@@ -4993,6 +4998,7 @@
 				A52596E2273EAA75004B27E4 /* OnboardingEmailConnectView.swift */,
 				A526E2762785BCFB00597F89 /* OnboardingEmailConfirmationView.swift */,
 				A52596E6273EB87F004B27E4 /* OnboardingProfileCreationView.swift */,
+				A545054827AF8296006AE756 /* OnboardingSaveEncryptionView.swift */,
 				A08C7FA7276CA4130006B386 /* OnboardingWindow.swift */,
 			);
 			path = Onboarding;
@@ -6865,6 +6871,7 @@
 				87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */,
 				5284895426C5650A0064878B /* Error+NotFound.swift in Sources */,
 				52019A6126DE2ACB005E8278 /* BeamObjectRequest+Promises.swift in Sources */,
+				A545054E27AF8296006AE756 /* OnboardingSaveEncryptionView.swift in Sources */,
 				418172112581107C00317ED8 /* Readability.swift in Sources */,
 				A5208D80261D231B006193AF /* BeamColor+Contexts.swift in Sources */,
 				418171F12581107C00317ED8 /* UserSessionRequest.swift in Sources */,
@@ -7049,6 +7056,7 @@
 				A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */,
 				032562B026051D3B006513E4 /* RBSynchronizeInterval.m in Sources */,
 				032562AD26051D3B006513E4 /* RBFilterBuilder.m in Sources */,
+				A545055527B11F83006AE756 /* EncryptionManager+ImportExport.swift in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				873528BC27343871005E7CBC /* SafariImporter.swift in Sources */,
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
