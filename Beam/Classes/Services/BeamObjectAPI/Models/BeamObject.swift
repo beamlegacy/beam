@@ -26,10 +26,9 @@ extension BeamObjectProtocol {
         "<BeamObjectProtocol: \(beamObjectId) [\(Self.beamObjectType.rawValue)]>"
     }
 
+    /// Do we have local changes not yet synced to the API
     var hasLocalChanges: Bool {
-        let previousChecksum = BeamObjectChecksum.previousChecksum(object: self)
-
-        return (try? BeamObject(self))?.dataChecksum != previousChecksum
+        previousSavedObject != self
     }
 
     var previousSavedObject: Self? {

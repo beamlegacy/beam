@@ -95,22 +95,21 @@ struct DocumentDetail: View {
 
                         HStack(alignment: .top) {
                             VStack(alignment: HorizontalAlignment.leading) {
-                                Text(document.data?.MD5.uppercased() ?? "No MD5")
-                                    .font(.caption)
-                                    .fontWeight(.light)
-                                    .background(Color.white)
+                                Text("Document Data")
                                 Text(document.data?.asString ?? "No data")
                                     .font(.caption)
                                     .fontWeight(.light)
                                     .background(Color.white)
                             }
+
                             Spacer()
 
                             VStack(alignment: HorizontalAlignment.leading) {
-                                Text(DocumentStruct(document: document).previousChecksum?.uppercased() ?? "No MD5")
-                                    .font(.caption)
-                                    .fontWeight(.light)
-                                    .background(Color.white)
+                                if DocumentStruct(document: document).hasLocalChanges {
+                                    Text("Document Previous Data (differs from current data)")
+                                } else {
+                                    Text("Document Previous Data")
+                                }
                                 Text(DocumentStruct(document: document).previousSavedObject?.data.asString ?? "No ancestor data")
                                     .font(.caption)
                                     .fontWeight(.light)

@@ -75,7 +75,10 @@ class APIWebSocketRequest: APIRequest {
         webSocketTask = urlSession.webSocketTask(with: request)
 
         receive_messages()
-        logDebug("Connecting to \(Self.cableRoute)")
+
+        let authorization = (try? request.value(forHTTPHeaderField: "Authorization")?.SHA256()) ?? "-"
+        let device = request.value(forHTTPHeaderField: "Device") ?? "-"
+        logDebug("Connecting to \(Self.cableRoute). origin: \(Configuration.apiHostname), auth: \(authorization), device: \(device)")
 
         // TODO: add a timer, if the welcome message doesn't come back after X second,
         // call the handler with a fail?
@@ -98,7 +101,7 @@ class APIWebSocketRequest: APIRequest {
     /// - Parameter completionHandler: the document update
     /// - Returns: The channelId used for calling `unsubscribe()`
     @discardableResult
-    func connectBeamObjects(_ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) -> UUID? {
+    func connectBeamObjects(_ completionHandler: @escaping (Swift.Result<[BeamObject], Error>) -> Void) -> UUID? {
         guard connected else {
             Logger.shared.logError("Socket isn't connected", category: .webSocket)
             completionHandler(.failure(APIWebSocketRequestError.socket_not_connected))
@@ -133,18 +136,24 @@ class APIWebSocketRequest: APIRequest {
                         guard let inputMessage = try? self?.defaultDecoder().decode(WebSocketInputReceivedMessage.self,
                                                                                     from: message.asData),
                               let inputResult = inputMessage.message?.result else {
-                            self?.logDebug("[\(channelId)] connectDocuments: \(message)")
+                                  Logger.shared.logError("Can't parse message: \(message)",
+                                                         category: .webSocket)
                             return
                         }
 
-                        guard let beamObject = inputResult.data?.beamObjectsUpdated?.beamObject else {
+                        guard let beamObjects = inputResult.data?.beamObjectsUpdated?.beamObjects else {
                             return
                         }
 
                         do {
-                            try beamObject.decrypt()
-                            try beamObject.setTimestamps()
-                            completionHandler(.success(beamObject))
+                            Logger.shared.logDebug("Received \(beamObjects.count) beam objects",
+                                                   category: .webSocket)
+
+                            for beamObject in beamObjects {
+                                try beamObject.decrypt()
+                                try beamObject.setTimestamps()
+                            }
+                            completionHandler(.success(beamObjects))
                         } catch {
                             completionHandler(.failure(error))
                         }
@@ -413,18 +422,6 @@ class APIWebSocketRequest: APIRequest {
 
     static private func makeUrlWebSocketRequest() throws -> URLRequest {
         guard let url = URL(string: Self.cableRoute) else { fatalError("Can't get URL: \(Self.cableRoute)") }
-        var request = URLRequest(url: url)
-        let headers: [String: String] = [
-            "Device": Self.deviceId.uuidString.lowercased(),
-            "Origin": Configuration.apiHostname,
-            "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
-            "Accept": "application/json",
-            "Content-Type": "application/json",
-            "Accept-Language": Locale.current.languageCode ?? "en"
-        ]
-
-        request.httpMethod = "GET"
-        request.allHTTPHeaderFields = headers
 
         AuthenticationManager.shared.updateAccessTokenIfNeeded()
 
@@ -437,7 +434,19 @@ class APIWebSocketRequest: APIRequest {
             throw APIRequestError.notAuthenticated
         }
 
-        request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
+        var request = URLRequest(url: url)
+        let headers: [String: String] = [
+            "Device": Self.deviceId.uuidString.lowercased(),
+            "Origin": Configuration.apiHostname,
+            "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+            "Accept-Language": Locale.current.languageCode ?? "en",
+            "Authorization": "Bearer " + accessToken
+        ]
+
+        request.httpMethod = "GET"
+        request.allHTTPHeaderFields = headers
 
         return request
     }
@@ -492,6 +501,7 @@ extension APIWebSocketRequest {
         // swiftlint:disable:next nesting
         struct WebSocketDataBeamObject: Decodable {
             let beamObject: BeamObject?
+            let beamObjects: [BeamObject]?
         }
 
         // We should add all subscription here
