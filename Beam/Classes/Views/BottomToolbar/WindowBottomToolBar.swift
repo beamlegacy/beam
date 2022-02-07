@@ -10,13 +10,14 @@ import BeamCore
 
 struct WindowBottomToolBar: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     private var isJournal: Bool {
         state.mode == .today
     }
 
     private var animationEnabled: Bool {
-        !state.windowIsResizing
+        !windowInfo.windowIsResizing
     }
 
     private var currentNote: BeamNote? {
