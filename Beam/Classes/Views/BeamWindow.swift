@@ -252,7 +252,6 @@ extension BeamWindow: NSWindowDelegate {
     }
 
     func windowDidMove(_ notification: Notification) {
-        Logger.shared.logError("BE-007 window did move", category: .general)
         self.windowInfo.windowFrame = self.frame
     }
 
