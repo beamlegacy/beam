@@ -31,7 +31,7 @@ class TestWebPage: WebPage {
     var hasError: Bool = false
     var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
-    var appendToIndexer: ((URL, Readability) -> Void)?
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var webView: BeamWebView!
     var activeNote: BeamNote {
         if let note = testNotes.values.first {
