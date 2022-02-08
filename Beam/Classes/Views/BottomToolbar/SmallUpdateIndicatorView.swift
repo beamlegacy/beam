@@ -50,7 +50,7 @@ struct SmallUpdateIndicatorView: View {
             case .checking:
                 EmptyView()
             case .error(errorDesc: let errorDesc):
-                ButtonLabel("Update error : \(errorDesc)", customStyle: buttonLabelStyle)
+                ButtonLabel("\(errorDesc)", customStyle: buttonLabelStyle)
                     .onReceive(opacityTimer, perform: { _ in
                         withAnimation {
                             opacity = 0
