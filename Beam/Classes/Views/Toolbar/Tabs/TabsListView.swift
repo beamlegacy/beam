@@ -37,6 +37,7 @@ struct TabsListView: View {
         var currentDragDidChangeCurrentTab = false
         var lastTouchWasOnUnselectedTab: Bool = false
         var singleTabCenteringAdjustment: CGFloat = 0
+        var singleTabCurrentFrame: CGRect?
     }
 
     private var isDraggingATab: Bool {
@@ -275,10 +276,12 @@ struct TabsListView: View {
                 guard newValue?.index == selectedIndex else { return }
                 state?.browserTabsManager.currentTabUIFrame = newValue?.frame
                 guard !isSingleTab(atIndex: selectedIndex, in: tabsSections) else { return }
-                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
+                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: viewModel.singleTabCurrentFrame)
             }
             .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
-                guard !isDraggingATab, let newValue = newValue else { return }
+                guard !isDraggingATab else { return }
+                viewModel.singleTabCurrentFrame = newValue
+                guard let newValue = newValue else { return }
                 updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: newValue)
             }
         }
