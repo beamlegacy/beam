@@ -28,27 +28,22 @@ struct OnboardingView: View {
             VStack(spacing: 0) {
                 Spacer(minLength: 100)
                 Group {
+                    let finishCallback: StepFinishCallback = { nextStep in
+                        model.advanceToNextStep(nextStep)
+                    }
                     switch currentStep.type {
                     case .profile:
-                        OnboardingProfileCreationView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingProfileCreationView(actions: $model.actions, finish: finishCallback)
                     case .emailConnect:
-                        OnboardingEmailConnectView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingEmailConnectView(actions: $model.actions, finish: finishCallback)
                     case .emailConfirm:
-                        OnboardingEmailConfirmationView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingEmailConfirmationView(actions: $model.actions, finish: finishCallback)
                     case .imports:
-                        OnboardingImportsView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingImportsView(actions: $model.actions, finish: finishCallback)
+                    case .saveEncryption:
+                        OnboardingSaveEncryptionView(actions: $model.actions, finish: finishCallback)
                     default:
-                        OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading, finish: finishCallback)
                     }
                 }
                 .offset(x: 0, y: stepOffset[currentStep.type] ?? 0)

@@ -138,6 +138,7 @@ struct OnboardingEmailConnectView: View {
         }
         .onAppear {
             updateButtonState()
+            onboardingManager.userDidSignUp = false
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                 // wait a little for the animation to finish before focusing the text field
                 isEmailEditing = true
@@ -232,6 +233,7 @@ struct OnboardingEmailConnectView: View {
                         errorState = .genericError(description: error.localizedDescription)
                     }
                 case .success:
+                    onboardingManager.userDidSignUp = true
                     showEmailConfirmationStep()
                 }
             }
