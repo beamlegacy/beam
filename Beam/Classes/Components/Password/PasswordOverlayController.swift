@@ -21,6 +21,7 @@ struct WebFieldAutofill: Codable {
 enum PasswordSaveAction {
     case save
     case update
+    case saveSilently
 }
 
 class PasswordOverlayController: NSObject, WebPageRelated {
@@ -89,7 +90,16 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             Logger.shared.logDebug("Detected fields: \(elements.map { $0.debugDescription })", category: .passwordManagerInternal)
         } catch {
             Logger.shared.logError(String(describing: error), category: .passwordManager)
+            dismissPasswordManagerMenu()
+            currentlyFocusedElementId = nil
             return
+        }
+
+        if let elementId = currentlyFocusedElementId ?? previouslyFocusedElementId, !elements.map(\.beamId).contains(elementId) {
+            Logger.shared.logDebug("Focused field just disappeared", category: .passwordManagerInternal)
+            dismissPasswordManagerMenu()
+            self.currentlyFocusedElementId = nil
+            saveCredentialsIfChanged(allowEmptyUsername: false)
         }
 
         let addedIds = autocompleteContext.update(with: elements, on: getPageHost())
@@ -142,6 +152,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             disabledForSubmit = false
             return
         }
+        currentlyFocusedElementId = elementId
         if let contents = contents, contents.isEmpty, autocompleteGroup.action.isPasswordRelated, !autocompleteGroup.isAmbiguous {
             showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: true, inGroup: autocompleteGroup)
         } else {
@@ -158,7 +169,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             if let dict = dict {
                 self.valuesOnFocusOut = dict
                 self.updateStoredValues(with: dict, userInput: true)
-                self.saveCredentialsIfChanged(allowEmptyUsername: false)
             }
         }
         dismissPasswordManagerMenu()
@@ -209,7 +219,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func showPasswordManagerMenu(for elementId: String, frameInfo: WKFrameInfo?, emptyField: Bool, inGroup autocompleteGroup: WebAutocompleteGroup) {
-        currentlyFocusedElementId = elementId
         if autocompleteGroup.isAmbiguous, let fieldWithFocus = autocompleteGroup.field(id: elementId) {
             self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, options: fieldWithFocus.role.isPassword ? .ambiguousPassword : .login)
         } else {
@@ -386,7 +395,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private func saveCredentialsIfChanged(allowEmptyUsername: Bool) {
         guard let hostname = getPageHost(),
               let credentials = credentialsBuilder.unsavedCredentials(allowEmptyUsername: allowEmptyUsername),
-              let saveAction = saveCredentialsAction(hostname: hostname, username: credentials.username ?? "", password: credentials.password)
+              let saveAction = saveCredentialsAction(hostname: hostname, credentials: credentials)
         else { return }
         // This code may be called multiple times for a given submit action.
         // Here we must mark credentials as saved regardless of the user's choice (if the user decides not to save, we don't want to present the dialog again, until the credentials have been changed again.)
@@ -395,19 +404,19 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         Logger.shared.logDebug("Saving password for \(credentials.username ?? "<empty username>")", category: .passwordManagerInternal)
         confirmSavePassword(username: credentials.username ?? "", action: saveAction) { save in
             guard save else { return }
-            if let browserTab = (self.page as? BrowserTab) {
+            if saveAction != .saveSilently, let browserTab = (self.page as? BrowserTab) {
                 browserTab.passwordManagerToast(saved: saveAction == .save)
             }
             PasswordManager.shared.save(hostname: hostname, username: credentials.username ?? "", password: credentials.password)
         }
     }
 
-    private func saveCredentialsAction(hostname: String, username: String, password: String) -> PasswordSaveAction? {
-        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: username) {
-            guard password != storedPassword else { return nil }
+    private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
+        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: credentials.username ?? "") {
+            guard credentials.password != storedPassword else { return nil }
             return .update
         }
-        return .save
+        return credentials.askSaveConfirmation ? .save : .saveSilently
     }
 
     private func confirmSavePassword(username: String, action: PasswordSaveAction, onDismiss: @escaping (Bool) -> Void) {
@@ -416,7 +425,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         let alertMessage: String
         let saveButtonTitle: String
-        let alert = NSAlert()
         switch action {
         case .save:
             alertMessage = "Would you like to save this password?"
@@ -424,7 +432,10 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         case .update:
             alertMessage = "Would you like to update the saved password for \(username)?"
             saveButtonTitle = "Update Password"
+        case .saveSilently:
+            return onDismiss(true)
         }
+        let alert = NSAlert()
         alert.messageText = alertMessage
         alert.informativeText = "You can view and remove saved passwords in Beam Passwords preferences."
         let saveButton = alert.addButton(withTitle: saveButtonTitle)

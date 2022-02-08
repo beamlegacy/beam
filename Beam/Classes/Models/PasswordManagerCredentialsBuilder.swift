@@ -12,6 +12,7 @@ final class PasswordManagerCredentialsBuilder {
     struct StoredCredentials {
         var username: String?
         var password: String
+        var askSaveConfirmation: Bool
     }
 
     private enum FieldContents {
@@ -27,6 +28,15 @@ final class PasswordManagerCredentialsBuilder {
                 return nil
             case .initial(let value), .autofilled(let value), .userInput(let value), .generated(let value):
                 return value
+            }
+        }
+
+        var isAutofilled: Bool {
+            switch self {
+            case .autofilled:
+                return true
+            default:
+                return false
             }
         }
     }
@@ -52,7 +62,7 @@ final class PasswordManagerCredentialsBuilder {
 
     func autofill(host: String, username: String, password: String) {
         autofilledHost = host == currentHost ? nil : host
-        isDirty = autofilledHost != nil
+        isDirty = autofilledHost != nil // so that the credentials will be saved with a new host -- usually after a redirect
         Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing autofill for \(host) (current: \(currentHost ?? "nil")): dirty = \(isDirty)", category: .passwordManagerInternal)
         usernameField = .autofilled(username)
         passwordField = .autofilled(password)
@@ -102,9 +112,10 @@ final class PasswordManagerCredentialsBuilder {
     func unsavedCredentials(allowEmptyUsername: Bool) -> StoredCredentials? {
         Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Checking unsaved status: dirty = \(isDirty), has password = \(passwordField.value != nil)", category: .passwordManagerInternal)
         guard isDirty else { return nil }
-        guard let password = passwordField.value else { return nil }
+        guard let password = passwordField.value, !password.isEmpty else { return nil }
         guard allowEmptyUsername || !(usernameField.value?.isEmpty ?? true) else { return nil }
-        return StoredCredentials(username: usernameField.value, password: password)
+        let unmodified = usernameField.isAutofilled && passwordField.isAutofilled
+        return StoredCredentials(username: usernameField.value, password: password, askSaveConfirmation: !unmodified)
     }
 
     func markSaved() {
