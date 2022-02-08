@@ -7,7 +7,6 @@ enum PasswordMessages: String, CaseIterable {
     case PasswordManager_textInputFocusIn
     case PasswordManager_textInputFocusOut
     case PasswordManager_formSubmit
-    case PasswordManager_scroll
     case PasswordManager_resize
 }
 
@@ -66,20 +65,6 @@ class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
                 return
             }
             passwordOverlayController.handleWebFormSubmit(with: elementId, frameInfo: frameInfo)
-
-        case .PasswordManager_scroll:
-            let passwordBody = messageBody as? [String: AnyObject]
-            guard let dict = passwordBody,
-                  let x = dict["x"] as? CGFloat,
-                  let y = dict["y"] as? CGFloat,
-                  let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat
-                    else {
-                Logger.shared.logError("Ignored scroll event: \(String(describing: messageBody))", category: .web)
-                return
-            }
-            passwordOverlayController.updateScrollPosition(x: x, y: y, width: width, height: height)
-            Logger.shared.logDebug("Password controller handled scroll: \(x), \(y)", category: .web)
 
         case .PasswordManager_resize:
             let passwordBody = messageBody as? [String: AnyObject]
