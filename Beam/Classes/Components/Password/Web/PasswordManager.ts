@@ -11,7 +11,6 @@ export class PasswordManager<UI extends PasswordManagerUI> {
   win: BeamWindow
   logger: BeamLogger
   passwordHelper: PasswordManagerHelper
-  scrollWidth: number
 
   /**
    * Singleton
@@ -36,7 +35,7 @@ export class PasswordManager<UI extends PasswordManagerUI> {
   }
 
   /**
-   * Installs window resize and scroll eventlisteners and installs focus
+   * Installs window resize eventlistener and installs focus
    * and focusout eventlisteners on each element from the provided ids
    *
    * @param {string} ids_json
@@ -54,7 +53,6 @@ export class PasswordManager<UI extends PasswordManagerUI> {
     }
 
     this.win.addEventListener("resize", this.resize.bind(this))
-    this.win.addEventListener("scroll", this.scroll.bind(this))
   }
 
   resize(event: BeamUIEvent): void {
@@ -65,36 +63,11 @@ export class PasswordManager<UI extends PasswordManagerUI> {
     }
   }
 
-  scroll(_ev): void {
-    const win = window
-    const doc = win.document
-    const body = doc.body
-    const documentEl = doc.documentElement
-    const scrollWidth = this.scrollWidth = Math.max(
-      body.scrollWidth, documentEl.scrollWidth,
-      body.offsetWidth, documentEl.offsetWidth,
-      body.clientWidth, documentEl.clientWidth
-    )
-    const scrollHeight = Math.max(
-      body.scrollHeight, documentEl.scrollHeight,
-      body.offsetHeight, documentEl.offsetHeight,
-      body.clientHeight, documentEl.clientHeight
-    )
-    const scrollInfo = {
-      x: win.scrollX,
-      y: win.scrollY,
-      width: scrollWidth,
-      height: scrollHeight,
-      scale: win.visualViewport.scale
-    }
-    this.ui.scroll(scrollInfo)
-  }
-
   elementDidGainFocus(event: BeamUIEvent): void {
     if (event.target !== null && this.passwordHelper.isTextField(event.target)) {
       const beamId = this.passwordHelper.getOrCreateBeamId(event.target)
       const text = event.target.value
-      this.ui.textInputRecievedFocus(beamId, text)
+      this.ui.textInputReceivedFocus(beamId, text)
     }
   }
 
