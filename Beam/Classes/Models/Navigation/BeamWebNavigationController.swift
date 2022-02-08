@@ -180,7 +180,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
         if let targetURL = navigationAction.request.url {
             let navigationUrlHandler = ExternalDeeplinkHandler(request: navigationAction.request)
-            let withCommandKey = navigationAction.modifierFlags.contains(.command)
+            let withCommandKey = navigationAction.modifierFlags.contains(.command) || NSEvent.modifierFlags.contains(.command)
             if navigationUrlHandler.isDeeplink() {
                 decisionHandler(.cancel, preferences)
                 if navigationUrlHandler.shouldOpenDeeplink() {
