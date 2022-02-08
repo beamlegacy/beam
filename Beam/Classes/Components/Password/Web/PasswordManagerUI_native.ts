@@ -5,7 +5,6 @@ import {
 import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 import { PasswordManagerUI } from "./PasswordManagerUI"
 import { Native } from "../../../Helpers/Utils/Web/Native"
-import { PasswordScrollInfo } from "./PasswordManagerTypes"
 
 export class PasswordManagerUI_native implements PasswordManagerUI {
   logger: BeamLogger
@@ -43,11 +42,7 @@ export class PasswordManagerUI_native implements PasswordManagerUI {
     this.native.sendMessage("resize", { width, height })
   }
 
-  scroll(scrollInfo: PasswordScrollInfo) {
-    this.native.sendMessage("scroll", { scrollInfo })
-  }
-
-  textInputRecievedFocus(id: string, text: string): void {
+  textInputReceivedFocus(id: string, text: string): void {
     this.native.sendMessage("textInputFocusIn", { id, text })
   }
 
