@@ -261,7 +261,7 @@ platform :mac do
   def build_type
     case Actions.git_branch
     when "develop"
-      "internal"
+      "develop"
     when /\Abeta-.*/
       "beta"
     when /\Arelease-.*/
@@ -276,7 +276,7 @@ platform :mac do
   end
 
   def publish_channel_internal?
-    review_build? || publishing_channel() == "internal"
+    review_build? || build_type() == "develop"
   end
 
   def publish_channel_external?
@@ -302,7 +302,7 @@ platform :mac do
     # Set build number in Info.plist
     increment_build_number(build_number: build_number)
 
-    appcast_url = "https://#{ENV["AWS_DEFAULT_REGION"]}.amazonaws.com/#{ENV["S3_BUCKET"]}/#{s3_path_for_app_feed()}/AppFeed.json"
+    appcast_url = "https://s3.#{ENV["AWS_DEFAULT_REGION"]}.amazonaws.com/#{ENV["S3_BUCKET"]}/#{s3_path_for_app_feed()}/AppFeed.json"
 
     info_plist = "Beam/Configuration/Info.plist"
 
