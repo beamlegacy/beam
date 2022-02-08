@@ -127,7 +127,9 @@ class BeamWebView: WKWebView {
 
     public override func flagsChanged(with event: NSEvent) {
         super.keyUp(with: event)
-        optionKeyToggle(event.modifierFlags)
+        if let window = event.window, window.isKeyWindow {
+            optionKeyToggle(event.modifierFlags)
+        }
     }
 
     //swiftlint:disable:next weak_delegate
