@@ -61,7 +61,7 @@ protocol WebPage: AnyObject, Scorable {
     // MARK: Navigation handling
     /// Leave the page, either by back or forward.
     func leave()
-    var appendToIndexer: ((URL, Readability) -> Void)? { get }
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)? { get }
     func shouldNavigateInANewTab(url: URL) -> Bool
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
