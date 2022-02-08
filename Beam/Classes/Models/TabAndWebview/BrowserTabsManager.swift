@@ -108,7 +108,7 @@ class BrowserTabsManager: ObservableObject {
             self.autoSave()
         }
     }
-    var currentTabUIFrame: CGRect?
+    @Published var currentTabUIFrame: CGRect?
 
     init(with data: BeamData, state: BeamState) {
         self.data = data
