@@ -17,7 +17,9 @@ class NoteEditorTests: BaseTest {
         //Blocked by BE-2500 and BE-2502
                 //"0º‚B†¹1¡ŽCçÇ2™€DÎ3£ÐE´4¢ðFƒÏ5ƒÞG©›6§þH™Ó7¶ýIˆ8•°JÔ9ª·Kš • – – endash— em dashL¬Ò=‚±MµÂ[“”OøØ]‘’P¼½´ªQœŒ‘æÆR®‰,¾SßÍ.„˜TÝ;…ÚU¨``V×/÷¿W…„X‰œY¥ÁZ‡", //åÅ for BE-2500 it was in the beginning
                 //სხივი causes additional char to appear
-        "Промінь Δέσμη 빔 ビーム 光束 Bjælke Stråle 0º‚B†¹1¡ŽCçÇ2™€DÎ3£ÐE´4¢ðFƒÏ5ƒÞG©›6§þH™Ó7¶ýIˆ8•°JÔ9ª·Kš • – – endash— em dashL¬Ò=‚±MµÂ[“”OøØ]‘’P¼½´ªQœŒ‘æÆR®‰,¾SßÍ.„˜TÝ;…ÚU¨``V×/÷¿W…„X‰œY¥ÁZ‡",
+        "Donec fringilla libero a dui tempus ornare. Nunc vestibulum at metus sit amet pellentesque. Aenean vitae nunc est. Ut et elit eu justo porttitor commodo. Curabitur egestas sem in pellentesque porta. Fusce dapibus mi nisi, non scelerisque felis rutrum vitae. Proin et libero mollis, sagittis lacus non, laoreet leo. Sed sodales scelerisque massa, quis tincidunt enim porttitor a. Donec ultricies purus ac commodo dictum. In rhoncus, massa egestas porttitor sollicitudin, purus mi luctus nisl, nec vehicula felis ante sit amet tellus. Maecenas bibendum quam tortor, consectetur suscipit lacus faucibus sed. Proin vitae imperdiet tortor, quis faucibus lectus.",
+        //The part of the string to be kept an eye on in future
+        //"Промінь Δέσμη", //빔 ビーム 光束", //Bjælke Stråle", //0º‚B†¹1¡ŽCçÇ2™€DÎ3£ÐE´4¢ðFƒÏ5ƒÞG©›6§þH™Ó7¶ýIˆ8•°JÔ9ª·Kš • – – endash— em dashL¬Ò=‚±MµÂ[“”OøØ]‘’P¼½´ªQœŒ‘æÆR®‰,¾SßÍ.„˜TÝ;…ÚU¨``V×/÷¿W…„X‰œY¥ÁZ‡",
     
         "The standard@chunk.com of Lorem Ipsum https://used.since.the 1500s is reproduced.com below for those interested. Sections 1.10.32 and 1.10.33 from de Finibus Bonorum et Malorum by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham."
     ]
@@ -38,7 +40,7 @@ class NoteEditorTests: BaseTest {
         testRailPrint("Then note displays typed text from the beginning of the note correctly")
         helper.shortcutActionInvoke(action: .beginOfNote)
         journalView.app.typeText(texts[1])
-        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + "]" + texts[0]) // "]" is a workaround for BE-2502 - to be replaced once it is fixed
+        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + texts[0])
         
         testRailPrint("Then note displays replaced typed text correctly")
         helper.shortcutActionInvoke(action: .selectAll)
