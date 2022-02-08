@@ -156,7 +156,7 @@ class BrowserTabsManager: ObservableObject {
         for tab in tabs {
             guard tab.appendToIndexer == nil else { continue }
 
-            tab.appendToIndexer = { [unowned self, weak tab] url, read in
+            tab.appendToIndexer = { [unowned self, weak tab] url, title, read in
                 guard let tab = tab else { return }
                 var textForClustering = [""]
                 let tabTree = tab.browsingTree.deepCopy()
@@ -168,7 +168,8 @@ class BrowserTabsManager: ObservableObject {
 
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
-                        let indexDocument = IndexDocument(source: url.absoluteString, title: tab.title, contents: read.textContent)
+
+                        let indexDocument = IndexDocument(source: url.absoluteString, title: title, contents: read.textContent)
                         var shouldIndexUserTypedUrl = tab.requestedURL != nil && tab.requestedURL != tab.url
 
                         // this check in case last url redirected just contains a /

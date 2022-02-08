@@ -103,11 +103,12 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
     private func indexVisit(url: URL, isLinkActivation: Bool, read: Readability? = nil) {
         guard let page = self.page else { return }
         //Alway index the visit, event if we were not able to read the content
-        self.browsingTree.navigateTo(url: url.absoluteString, title: read?.title ?? webView?.title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
+        let title = read?.title ?? webView?.title
+        self.browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
 
         guard let read = read else { return }
         try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
-        page.appendToIndexer?(url, read)
+        page.appendToIndexer?(url, title ?? "", read)
     }
 
     private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {

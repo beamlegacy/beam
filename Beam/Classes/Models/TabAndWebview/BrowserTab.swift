@@ -75,7 +75,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     }
     var webviewWindow: NSWindow? { webView.window }
     var frame: NSRect { webView.frame }
-    @Published var title: String = "New Tab"
+    @Published var title: String = ""
     @Published var originalQuery: String?
     @Published var url: URL?
     @Published var requestedURL: URL?
@@ -142,7 +142,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         webPositions.delegate = self
         return webPositions
     }()
-    var appendToIndexer: ((URL, Readability) -> Void)?
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var navigationCount: Int = 0
     // End WebPage Properties
 
