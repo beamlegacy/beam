@@ -137,7 +137,7 @@ struct OmniboxContainer: View {
                                 $0.frame(maxWidth: offset.width != 0 ? offset.width : .infinity)
                             }
                         Omnibox(isInsideNote: boxIsInsideNote)
-                            .frame(width: boxWidth)
+                            .frame(idealWidth: boxWidth, maxWidth: boxWidth)
                         Spacer(minLength: boxMaxX)
                     }
                     Spacer(minLength: boxMinY)
