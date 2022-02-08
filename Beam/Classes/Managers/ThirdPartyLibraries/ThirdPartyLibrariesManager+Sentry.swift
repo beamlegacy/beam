@@ -42,8 +42,19 @@ extension ThirdPartyLibrariesManager {
 
     private func setupSentryScope() {
         let currentHost = Host.current().name ?? ""
+
+        let sentryEnv: String = {
+            let appEnv = Configuration.env
+            switch appEnv {
+            case .release:
+                return Configuration.branchType?.rawValue ?? "develop"
+            default:
+                return appEnv.rawValue
+            }
+        }()
+
         SentrySDK.configureScope { scope in
-            scope.setEnvironment(Configuration.env.rawValue)
+            scope.setEnvironment(sentryEnv)
             scope.setDist(Information.appBuild)
             scope.setTag(value: currentHost, key: "hostname")
 
