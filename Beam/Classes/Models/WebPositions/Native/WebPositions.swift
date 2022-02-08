@@ -86,6 +86,29 @@ class WebPositions: ObservableObject {
         return positions
     }
 
+    /// Recursively generate a subset of the framesInfo dictionary with all frames from the requested frame to the root frame
+    /// - Parameters:
+    ///   - href: url of frame
+    /// - Returns: Dictionary, possibly empty if the requested url was not found
+    func framesInPath(href: HREF, childFrames: [HREF: FrameInfo] = [:], depth: Int = 0) -> [HREF: FrameInfo] {
+        // Limit recursion to a depth of 10
+        let DEPTH_LIMIT = 10
+        // by default allPositions starts as empty array []
+        // reassign allPositions to mutable value
+        var frames = childFrames
+        // get full frameInfo from framesInfo dict
+        guard let frame = framesInfo[href] else {
+            return frames
+        }
+        frames[frame.href] = frame
+        // If we aren't on the root frame, and we are below the depth recursion limit
+        if isChild(frame), depth < DEPTH_LIMIT {
+            // run this function recursively
+            return framesInPath(href: frame.parentHref, childFrames: frames, depth: depth + 1)
+        }
+        return frames
+    }
+
     /// Calculate value of property taking into account parent frame positions
     /// - Parameters:
     ///   - href: url of frame
@@ -108,6 +131,18 @@ class WebPositions: ObservableObject {
         let frameOffsetY = viewportPosition(href, prop: .y).reduce(0, +)
         let frameScrollX = viewportPosition(href, prop: .scrollX).reduce(0, +)
         let frameScrollY = viewportPosition(href, prop: .scrollY).reduce(0, +)
+        return CGPoint(x: frameOffsetX - frameScrollX, y: frameOffsetY - frameScrollY)
+    }
+
+    /// Calculate frame position relative to main frame, ignoring scroll position on target frame
+    /// - Parameters:
+    ///   - href: url of frame
+    /// - Returns: absolute position
+    func viewportOffset(href: HREF) -> CGPoint {
+        let frameOffsetX = viewportPosition(href, prop: .x).reduce(0, +)
+        let frameOffsetY = viewportPosition(href, prop: .y).reduce(0, +)
+        let frameScrollX = viewportPosition(href, prop: .scrollX).dropFirst().reduce(0, +)
+        let frameScrollY = viewportPosition(href, prop: .scrollY).dropFirst().reduce(0, +)
         return CGPoint(x: frameOffsetX - frameScrollX, y: frameOffsetY - frameScrollY)
     }
 

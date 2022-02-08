@@ -609,6 +609,7 @@ extension BrowserTab: WebPositionsDelegate {
     /// Callback will be called very often. Take care of your own debouncing or throttling
     /// - Parameter frame: WebPage frame coordinates and positions
     func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo) {
+        passwordOverlayController?.updateScrollPosition(for: frame)
         guard let scorer = browsingScorer else { return }
         scorer.debouncedUpdateScrollingScore.send(frame)
     }

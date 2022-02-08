@@ -479,6 +479,7 @@
 		878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */ = {isa = PBXBuildFile; productRef = 878417BD276FB1FB005EB5B0 /* MockHttpServer */; };
 		87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */; };
 		879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879157362799EECF00AE1040 /* BrowserImporter.swift */; };
+		87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
 		87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539B82616297300D51877 /* SearchPasswordsCell.swift */; };
@@ -525,7 +526,6 @@
 		8A930A0127A04E2C00064133 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F427A04E2B00064133 /* webpack.config.js */; };
 		8A930A0227A04E2C00064133 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F527A04E2C00064133 /* PasswordManager.js */; };
 		8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */; };
-		8A930A0427A04E2C00064133 /* PasswordManagerTypes.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F727A04E2C00064133 /* PasswordManagerTypes.ts */; };
 		8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */; };
 		8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F927A04E2C00064133 /* PasswordManager.ts */; };
 		8A930A0727A04E2C00064133 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FA27A04E2C00064133 /* package.json */; };
@@ -1798,6 +1798,7 @@
 		878417BC276FB164005EB5B0 /* MockHttpServer */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MockHttpServer; path = BeamUITests/MockHttpServer; sourceTree = "<group>"; };
 		8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImportErrors.swift"; sourceTree = "<group>"; };
 		879157362799EECF00AE1040 /* BrowserImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImporter.swift; sourceTree = "<group>"; };
+		87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPopoverContainer.swift; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
 		87C539B82616297300D51877 /* SearchPasswordsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchPasswordsCell.swift; sourceTree = "<group>"; };
@@ -1857,7 +1858,6 @@
 		8A9309F427A04E2B00064133 /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = webpack.config.js; path = Web/webpack.config.js; sourceTree = "<group>"; };
 		8A9309F527A04E2C00064133 /* PasswordManager.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = PasswordManager.js; path = Web/PasswordManager.js; sourceTree = "<group>"; };
 		8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerUI_native.ts; path = Web/PasswordManagerUI_native.ts; sourceTree = "<group>"; };
-		8A9309F727A04E2C00064133 /* PasswordManagerTypes.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerTypes.ts; path = Web/PasswordManagerTypes.ts; sourceTree = "<group>"; };
 		8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManagerUI.ts; path = Web/PasswordManagerUI.ts; sourceTree = "<group>"; };
 		8A9309F927A04E2C00064133 /* PasswordManager.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = PasswordManager.ts; path = Web/PasswordManager.ts; sourceTree = "<group>"; };
 		8A9309FA27A04E2C00064133 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = package.json; path = Web/package.json; sourceTree = "<group>"; };
@@ -5202,7 +5202,6 @@
 				8A9309FC27A04E2C00064133 /* PasswordManager_prod.js */,
 				8A9309F527A04E2C00064133 /* PasswordManager.js */,
 				8A9309F927A04E2C00064133 /* PasswordManager.ts */,
-				8A9309F727A04E2C00064133 /* PasswordManagerTypes.ts */,
 				8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */,
 				8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */,
 				8A9309F027A04E2B00064133 /* Test */,
@@ -5210,6 +5209,7 @@
 				8A9309F427A04E2B00064133 /* webpack.config.js */,
 				8A9309FB27A04E2C00064133 /* yarn.lock */,
 				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
+				87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */,
 				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
 				BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */,
 				8726448E26199B8F0070E83D /* OptionSelector.swift */,
@@ -6130,7 +6130,6 @@
 				520BC40126D7B02200A82966 /* subscription_beam_objects_updated.graphql in Resources */,
 				8AFE8358276B248B00D4B560 /* video.mov in Resources */,
 				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
-				8A930A0427A04E2C00064133 /* PasswordManagerTypes.ts in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */,
 				8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */,
@@ -7283,6 +7282,7 @@
 				A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */,
 				BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */,
 				37C4130927854EAF00954FD7 /* SearchEngineDescription.swift in Sources */,
+				87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */,
 				BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */,
 				8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserImport.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
