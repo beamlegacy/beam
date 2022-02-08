@@ -64,18 +64,27 @@ extension AccountManager {
                     DispatchQueue.main.async {
                         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
                         AppDelegate.main.beamObjectManager.liveSync { _ in
-                            var callsToWait = 2
-                            let callNetworkCompletionIfNeeded: () -> Void = {
-                                callsToWait -= 1
-                                if callsToWait == 0 {
+                            DispatchQueue.global(qos: .userInteractive).async {
+                                let group = DispatchGroup()
+
+                                group.enter()
+                                DispatchQueue.main.async {
+                                    AppDelegate.main.syncDataWithBeamObject { _ in
+                                        group.leave()
+                                    }
+                                }
+
+                                group.enter()
+                                DispatchQueue.main.async {
+                                    AppDelegate.main.getUserInfos { _ in
+                                        group.leave()
+                                    }
+                                }
+
+                                group.wait()
+                                DispatchQueue.main.async {
                                     syncCompletion?(.success(true))
                                 }
-                            }
-                            AppDelegate.main.syncDataWithBeamObject { _ in
-                                callNetworkCompletionIfNeeded()
-                            }
-                            AppDelegate.main.getUserInfos { _ in
-                                callNetworkCompletionIfNeeded()
                             }
                         }
                     }
@@ -113,20 +122,27 @@ extension AccountManager {
 
                     // Syncing with remote API, AppDelegate needs to be called in mainthread
                     // TODO: move this syncData to a manager instead.
-                    DispatchQueue.main.async {
-                        // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-                        var callsToWait = 2
-                        let callNetworkCompletionIfNeeded: () -> Void = {
-                            callsToWait -= 1
-                            if callsToWait == 0 {
-                                syncCompletion?(.success(true))
+                    // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
+                    DispatchQueue.global(qos: .userInteractive).async {
+                        let group = DispatchGroup()
+
+                        group.enter()
+                        DispatchQueue.main.async {
+                            AppDelegate.main.syncDataWithBeamObject { _ in
+                                group.leave()
                             }
                         }
-                        AppDelegate.main.syncDataWithBeamObject { _ in
-                            callNetworkCompletionIfNeeded()
+
+                        group.enter()
+                        DispatchQueue.main.async {
+                            AppDelegate.main.getUserInfos { _ in
+                                group.leave()
+                            }
                         }
-                        AppDelegate.main.getUserInfos { _ in
-                            callNetworkCompletionIfNeeded()
+
+                        group.wait()
+                        DispatchQueue.main.async {
+                            syncCompletion?(.success(true))
                         }
                     }
 
