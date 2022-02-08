@@ -549,8 +549,7 @@ platform :mac do
       end
     else
       if review_build?
-        channel = ENV['CI_ENVIRONMENT_NAME'] || "review/#{Actions.git_branch}"
-        "#{channel}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
+        ENV['CI_ENVIRONMENT_NAME'] || "review/#{Actions.git_branch}"
       else
         # By default we upload to a version & build number dependent path for precise targeting
         "#{publishing_channel()}/#{lane_context[SharedValues::VERSION_NUMBER]}/#{lane_context[SharedValues::BUILD_NUMBER]}"
