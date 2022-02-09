@@ -60,8 +60,10 @@ struct ChromiumHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
     }
 }
 
-final class ChromiumHistoryImporter: BrowserHistoryImporter {
-    let sourceBrowser: BrowserType
+final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
+    var sourceBrowser: BrowserType {
+        browser.browserType
+    }
 
     enum ImportError: Error {
         case countNotAvailable
@@ -75,17 +77,11 @@ final class ChromiumHistoryImporter: BrowserHistoryImporter {
         return subject.eraseToAnyPublisher()
     }
 
-    private var browser: ChromiumBrowserInfo
-
-    init(browser: ChromiumBrowserInfo) {
-        self.browser = browser
-        self.sourceBrowser = browser.browserType
-    }
-
     func historyDatabaseURL() throws -> URL? {
-        let applicationSupportDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Application Support")
-        let chromiumDirectory = applicationSupportDirectory.appendingPathComponent(browser.databaseDirectory).appendingPathComponent("Default")
-        return try SandboxEscape.endorsedURL(for: chromiumDirectory.appendingPathComponent("History"))
+        guard let browserDirectory = try chromiumDirectory() else {
+            return nil
+        }
+        return try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent("History"))
     }
 
     func importHistory(from databaseURL: URL) throws {

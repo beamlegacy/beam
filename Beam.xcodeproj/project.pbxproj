@@ -462,6 +462,7 @@
 		873528C127354295005E7CBC /* INI in Frameworks */ = {isa = PBXBuildFile; productRef = 873528C027354295005E7CBC /* INI */; };
 		873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
+		87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
 		8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768565C27709210002A8069 /* BrowserPasswordImporter.swift */; };
@@ -1781,6 +1782,7 @@
 		873528BD2735335F005E7CBC /* FirefoxImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirefoxImporter.swift; sourceTree = "<group>"; };
 		873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumHistoryImporter.swift; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
+		87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
 		8768565C27709210002A8069 /* BrowserPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPasswordImporter.swift; sourceTree = "<group>"; };
@@ -3157,6 +3159,7 @@
 			isa = PBXGroup;
 			children = (
 				879157362799EECF00AE1040 /* BrowserImporter.swift */,
+				87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */,
 				873528B127342DE5005E7CBC /* BrowserHistory */,
 				8746CC9D266DFDB100F44D41 /* Passwords */,
 				418171722581107C00317ED8 /* Roam */,
@@ -6910,6 +6913,7 @@
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
 				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
+				87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */,
 				962AC88A27901953001B7142 /* OmniboxContentDebuggerView.swift in Sources */,
 				DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */,
 				9678217526726005001413EF /* LockButton.swift in Sources */,
