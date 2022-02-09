@@ -25,27 +25,29 @@ struct OnboardingSaveEncryptionView: View {
         return style
     }
     private var keyField: some View {
-        HStack(spacing: BeamSpacing._100) {
-
-            if #available(macOS 12.0, *) {
-                Text(key)
-                    .textSelection(.enabled)
-            } else {
-                // Catalina won't support selecting the text
-                Text(key)
+        HStack(spacing: 0) {
+            HStack(spacing: BeamSpacing._100) {
+                if #available(macOS 12.0, *) {
+                    Text(key)
+                        .textSelection(.enabled)
+                } else {
+                    // Big Sur won't support selecting the text. Sorry.
+                    Text(key)
+                }
+                ButtonLabel(icon: "editor-url_copy", customStyle: iconButtonStyle) {
+                    copyKeyToPasteboard()
+                }
             }
-            ButtonLabel(icon: "editor-url_copy", customStyle: iconButtonStyle) {
-                copyKeyToPasteboard()
-            }
+            .font(BeamFont.medium(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Corduroy.swiftUI)
+            .padding(BeamSpacing._100)
+            .overlay(
+                RoundedRectangle(cornerRadius: 4)
+                    .stroke(BeamColor.Mercury.swiftUI, lineWidth: 1)
+            )
         }
-        .font(BeamFont.medium(size: 13).swiftUI)
-        .foregroundColor(BeamColor.Corduroy.swiftUI)
-        .padding(BeamSpacing._100)
-        .overlay(
-            RoundedRectangle(cornerRadius: 4)
-                .stroke(BeamColor.Mercury.swiftUI, lineWidth: 1)
-        )
-        .frame(maxWidth: 412)
+        .frame(maxWidth: .infinity)
+        .padding(.horizontal, BeamSpacing._100)
     }
 
     private func underlineSubtitleRange(text: String) -> [Range<String.Index>] {
@@ -67,9 +69,12 @@ struct OnboardingSaveEncryptionView: View {
                     keyField
 
                     VStack(alignment: .leading, spacing: 0) {
-                        Text(loc("The key can be required when signing in from a new device."))
-                        Text(loc("Save this key in a safe place. Do not lose it.\nBeam will not be able to reset it for you if you lose it."))
+                        Text(loc("The key can be required when signing in from a new device.\n"))
+                        +
+                        Text(loc("Save this key in a safe place. Do not lose it.\n"))
                             .font(BeamFont.semibold(size: 14).swiftUI)
+                        +
+                        Text("Beam will not be able to reset it for you if you lose it.")
                     }
                     .frame(maxWidth: defaultContentWidth, alignment: .leading)
                 }
