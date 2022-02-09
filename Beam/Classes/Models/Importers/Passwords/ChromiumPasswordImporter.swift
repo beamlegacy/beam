@@ -78,7 +78,7 @@ struct ChromiumPasswordItem: BrowserPasswordItem, Decodable, FetchableRecord {
  Implementation: https://source.chromium.org/chromium/chromium/src/+/main:components/os_crypt/os_crypt_mac.mm
  */
 
-final class ChromiumPasswordImporter {
+final class ChromiumPasswordImporter: ChromiumImporter {
     enum Error: Swift.Error {
         case secretNotFound
         case noDatabaseURL
@@ -86,12 +86,6 @@ final class ChromiumPasswordImporter {
         case unknownPasswordHeader
         case decryptionFailed(status: OSStatus)
         case countNotAvailable
-    }
-
-    private var browser: ChromiumBrowserInfo
-
-    init(browser: ChromiumBrowserInfo) {
-        self.browser = browser
     }
 
     private func secretFromKeychain() throws -> String {
@@ -152,8 +146,9 @@ final class ChromiumPasswordImporter {
     private var currentSubject: PassthroughSubject<BrowserPasswordResult, Swift.Error>?
 
     private func passwordsDatabaseURL() throws -> URL? {
-        let applicationSupportDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Application Support")
-        let browserDirectory = applicationSupportDirectory.appendingPathComponent(browser.databaseDirectory).appendingPathComponent("Default")
+        guard let browserDirectory = try chromiumDirectory() else {
+            return nil
+        }
         return try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent("Login Data"))
     }
 }
