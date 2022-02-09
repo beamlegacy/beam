@@ -39,8 +39,9 @@ extension EncryptionManager {
             }
             return
         }
-
+        let fm = FileManager.default
         let panel = NSSavePanel()
+        panel.directoryURL = fm.urls(for: .documentDirectory, in: .userDomainMask).first ?? fm.urls(for: .desktopDirectory, in: .userDomainMask).first
         panel.nameFieldStringValue = Self.defaultFilename
         panel.canCreateDirectories = true
         panel.showsTagField = false
