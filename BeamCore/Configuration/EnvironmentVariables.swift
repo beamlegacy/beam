@@ -30,6 +30,7 @@ public struct EnvironmentVariables {
     public struct BrowsingTree {
         static public private(set) var accessToken = "$(BROWSING_TREE_ACCESS_TOKEN)"
         static public private(set) var url = "$(BROWSING_TREE_URL)"
+        static public private(set) var apiSyncEnabled = NSString("$(BROWSING_TREE_API_SYNC_ENABLED)").boolValue
     }
 
     public struct PublicAPI {
