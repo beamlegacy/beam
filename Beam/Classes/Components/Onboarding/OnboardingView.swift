@@ -22,6 +22,7 @@ struct OnboardingView: View {
     @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [:]
     @State private var stepOpacity: [OnboardingStep.StepType: CGFloat] = [:]
     private let estimatedSafeAreaInsets = NSEdgeInsets(top: 38, left: 0, bottom: 0, right: 0) // invisible toolbar
+    private let contentWidth: Double = 512
 
     var body: some View {
         VStack(spacing: 0) {
@@ -50,14 +51,14 @@ struct OnboardingView: View {
                 .opacity(stepOpacity[currentStep.type] ?? 1)
                 Spacer(minLength: 0)
             }
-            .frame(minWidth: 280)
+            .frame(minWidth: 280, maxWidth: contentWidth)
             .padding(.top, BeamSpacing._100)
             .fixedSize(horizontal: true, vertical: false)
             .environmentObject(model)
             bottomBar
         }
         .background(BeamColor.Generic.background.swiftUI.edgesIgnoringSafeArea(.all))
-        .frame(width: 512, height: 600 - estimatedSafeAreaInsets.top)
+        .frame(width: contentWidth, height: 600 - estimatedSafeAreaInsets.top)
         .onAppear {
             displayedStep = model.currentStep
         }
