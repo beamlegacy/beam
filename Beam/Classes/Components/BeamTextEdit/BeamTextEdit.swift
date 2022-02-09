@@ -957,6 +957,7 @@ public extension CALayer {
         blockRefNode?.readOnly = true
     }
 
+    /// also known as instantSearch
     /// - Returns: true if action is possible
     private func triggerCmdReturn(from node: TextNode) -> Bool {
         guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode)

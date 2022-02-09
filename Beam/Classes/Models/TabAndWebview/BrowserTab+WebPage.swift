@@ -179,7 +179,9 @@ extension BrowserTab: WebPage {
     }
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
-        logInNote(url: url, title: title, reason: reason)
+        if case .searchFromNode(_) = browsingTreeOrigin {
+            logInNote(url: url, title: title, reason: reason)
+        }
         updateScore()
         updateFavIcon(fromWebView: true)
         if reason == .navigation {
