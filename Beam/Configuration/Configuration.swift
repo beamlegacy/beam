@@ -23,6 +23,7 @@ struct Configuration {
     static private(set) var beamObjectDataOnSeparateCall = false
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
+    static private(set) var browsingTreeApiSyncEnabled = EnvironmentVariables.BrowsingTree.apiSyncEnabled
 
     static var buildSchemeName: String? {
         Bundle.main.infoDictionary?["SchemeName"] as? String
