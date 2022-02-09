@@ -170,8 +170,8 @@ class PnSAddToCardTests: BaseTest {
 
         testRailPrint("Then the note contains video link")
         let cardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertEqual(cardNotes.count, 1)
-        if let videoNote = cardNotes[0].value as? String {
+        XCTAssertEqual(cardNotes.count, 2)
+        if let videoNote = cardNotes[1].value as? String {
             XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
         } else {
             XCTFail("expected cardNote[0].value to be a string")
@@ -434,7 +434,7 @@ class PnSAddToCardTests: BaseTest {
         helper.showJournal()
         let title3Predicate = NSPredicate(format: "value = %@", prefix + linkText)
         XCTAssertTrue(journalChildren.element(matching: title3Predicate).waitForExistence(timeout: 4))
-        XCTAssertEqual(journalChildren.count, 1)
+        XCTAssertEqual(journalChildren.count, 2)
         // tap on collected sublink (end of new bullet)
         let linkWord = journalChildren.element(matching: title3Predicate).buttons[linkText]
         XCTAssertTrue(linkWord.waitForExistence(timeout: 5))
