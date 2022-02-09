@@ -156,13 +156,12 @@ class WebNoteController: Encodable, Decodable {
             note = fetchedNote
             let rootId = try? container.decode(UUID.self, forKey: .rootElement)
             _rootElement = fetchedNote.findElement(rootId ?? fetchedNote.id) ?? fetchedNote.children.first!
-            if let elementId = try? container.decode(UUID.self, forKey: .element) {
-                guard let foundElement = fetchedNote.findElement(elementId) else {
-                    fatalError("Should have found referenced element \(elementId)")
-                }
+            if let elementId = try? container.decode(UUID.self, forKey: .element),
+               let foundElement = fetchedNote.findElement(elementId) {
                 _element = foundElement
             } else {
-                fatalError("Should have found referenced element id")
+                Logger.shared.logError("Should have found referenced element with id", category: .web)
+                _element = nil
             }
         }
     }
