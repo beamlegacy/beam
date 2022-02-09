@@ -137,12 +137,15 @@ class BeamObjectManager {
     }
 
     static func setup() {
+        let treeSyncEnabled = Configuration.browsingTreeApiSyncEnabled
         // Add any manager using BeamObjects here
         DocumentManager().registerOnBeamObjectManager()
         DatabaseManager().registerOnBeamObjectManager()
         PasswordManager.shared.registerOnBeamObjectManager()
         BeamFileDBManager.shared.registerOnBeamObjectManager()
-        BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
+        if treeSyncEnabled {
+            BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
+        }
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
         GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
@@ -153,8 +156,10 @@ class BeamObjectManager {
 
          We should use that order when sending objects to the API, and when receiving new objects.
          */
-        managerOrder = [.database, .contact, .file, .document, .password, .link, .browsingTree, .noteFrecency]
-
+        managerOrder = [.database, .contact, .file, .document, .password, .link, .noteFrecency]
+        if treeSyncEnabled {
+            managerOrder.append(.browsingTree)
+        }
         assert(managerOrder.count == managerInstances.count)
     }
 
