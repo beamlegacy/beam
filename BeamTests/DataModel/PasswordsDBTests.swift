@@ -188,10 +188,11 @@ class PasswordsDBTests: XCTestCase {
     }
 
     func testCount() {
+        let beforeCount = PasswordManager.shared.count()
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
         PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
         let count = PasswordManager.shared.count()
-        XCTAssertEqual(count, 2)
+        XCTAssertEqual(count - beforeCount, 2)
         cleanupPasswordsAfterTest()
     }
 
