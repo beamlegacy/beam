@@ -25,6 +25,7 @@ enum PasswordSaveAction {
 }
 
 class PasswordOverlayController: NSObject, WebPageRelated {
+    private var scope = Set<AnyCancellable>()
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let scrollUpdater = PassthroughSubject<WebPositions.FrameInfo, Never>()
@@ -51,6 +52,12 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         encoder = JSONEncoder()
         decoder = JSONDecoder()
         autocompleteContext = WebAutocompleteContext()
+        super.init()
+        PreferencesManager.$autofillUsernamePasswords.sink { [weak self] autofill in
+            if !autofill {
+                self?.dismiss()
+            }
+        }.store(in: &scope)
     }
 
     func prepareForLoading() {
@@ -95,6 +102,10 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             return
         }
 
+        guard PreferencesManager.autofillUsernamePasswords else {
+            return
+        }
+
         if let elementId = currentlyFocusedElementId ?? previouslyFocusedElementId, !elements.map(\.beamId).contains(elementId) {
             Logger.shared.logDebug("Focused field just disappeared", category: .passwordManagerInternal)
             dismissPasswordManagerMenu()
@@ -136,6 +147,9 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     func inputFieldDidGainFocus(_ elementId: String, frameInfo: WKFrameInfo?, contents: String?) {
         Logger.shared.logDebug("Text field \(elementId) gained focus.", category: .passwordManagerInternal)
+        guard PreferencesManager.autofillUsernamePasswords else {
+            return
+        }
         guard elementId != currentlyFocusedElementId else {
             return
         }
