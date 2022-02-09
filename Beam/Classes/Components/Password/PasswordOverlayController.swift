@@ -154,7 +154,9 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         currentlyFocusedElementId = elementId
         if let contents = contents, contents.isEmpty, autocompleteGroup.action.isPasswordRelated, !autocompleteGroup.isAmbiguous {
-            showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: true, inGroup: autocompleteGroup)
+            checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
+                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
+            }
         } else {
             dismissPasswordManagerMenu()
         }
@@ -199,8 +201,8 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                     self.passwordMenuPopover?.orderFront()
                     let buttonView = WebFieldAutofillButton { [weak self] in
                         if let self = self, self.passwordMenuPopover == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
-                            self.requestWebFieldValue(elementId: elementId, frameInfo: frameInfo) { value in
-                                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: value?.isEmpty ?? true, inGroup: autocompleteGroup)
+                            self.checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
+                                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
                             }
                         }
                     }
@@ -352,9 +354,18 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         return host
     }
 
-    private func requestWebFieldValue(elementId: String, frameInfo: WKFrameInfo?, completion: @escaping (String?) -> Void) {
-        requestValuesFromTextFields(ids: [elementId], frameInfo: frameInfo) { values in
-            completion(values?.first)
+    private func checkSimilarFieldsEmpty(elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?, completion: @escaping (Bool) -> Void) {
+        let similarFieldIds: [String]
+        if autocompleteGroup.field(id: elementId)?.role.isPassword ?? false {
+            similarFieldIds = autocompleteGroup.relatedFields
+                .filter { $0.role.isPassword }
+                .map(\.id)
+        } else {
+            similarFieldIds = [elementId]
+        }
+        requestValuesFromTextFields(ids: similarFieldIds, frameInfo: frameInfo) { values in
+            let allEmpty = (values?.first { !$0.isEmpty }) == nil
+            completion(allEmpty)
         }
     }
 
