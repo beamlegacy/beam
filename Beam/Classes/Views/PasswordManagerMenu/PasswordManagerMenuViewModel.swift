@@ -187,6 +187,7 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
 
     private var isLocked = false
     private var isDismissed = false
+    private var hasPendingSuggestion = false
     private var subscribers = Set<AnyCancellable>()
 
     override init() {
@@ -210,16 +211,19 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
         isDismissed = false
         generate()
         delegate?.fillNewPassword(suggestion, dismiss: false)
+        hasPendingSuggestion = true
     }
 
     func usePassword() {
         isLocked = true
+        hasPendingSuggestion = false
         dismiss()
     }
 
     func dontUsePassword() {
         isLocked = false
         emptyPasswordField()
+        hasPendingSuggestion = false
     }
 
     private func generate() {
@@ -248,7 +252,7 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
 
 extension PasswordGeneratorViewModel: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
-        if !isDismissed {
+        if !isDismissed && hasPendingSuggestion {
             dontUsePassword()
         }
     }
