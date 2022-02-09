@@ -36,7 +36,8 @@ class BeamObjectManager {
     static var networkRequests: [APIRequest] = []
     #endif
 
-    var webSocketRequest = APIWebSocketRequest()
+    var webSocketRequest: APIWebSocketRequest?
+    internal var websocketRetryDelay = 0
 
     let backgroundQueue = DispatchQueue(label: "BeamObjectManager backgroundQueue", qos: .userInitiated)
 
