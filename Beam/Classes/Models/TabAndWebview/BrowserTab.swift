@@ -305,10 +305,6 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
-        guard let url = url else {
-            return
-        }
-        logInNote(url: url, title: title, reason: .receivedPageTitle)
         self.title = title ?? ""
     }
 
