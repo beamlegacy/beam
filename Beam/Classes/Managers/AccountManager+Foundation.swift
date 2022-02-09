@@ -46,6 +46,7 @@ extension AccountManager {
                 completionHandler: ((Result<Bool, Error>) -> Void)? = nil,
                 syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> URLSessionTask? {
         do {
+            var syncCompletionCalled = false
             return try userSessionRequest.signIn(email: email, password: password) { result in
                 switch result {
                 case .failure(let error):
@@ -81,9 +82,13 @@ extension AccountManager {
                                     }
                                 }
 
+                                guard syncCompletionCalled == false else { return }
+
                                 group.wait()
+
                                 DispatchQueue.main.async {
                                     syncCompletion?(.success(true))
+                                    syncCompletionCalled = true
                                 }
                             }
                         }
