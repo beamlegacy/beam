@@ -59,12 +59,14 @@ struct WebAutocompleteRules {
     let ignoreEmailAutocompleteOff: Condition
     let ignorePasswordAutocompleteOff: Condition
     let discardAutocompleteAttribute: Condition
+    let ignoreUntaggedPasswordFieldAlone: Bool
 
-    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never) {
+    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never, ignoreUntaggedPasswordFieldAlone: Bool = false) {
         self.ignoreTextAutocompleteOff = ignoreTextAutocompleteOff
         self.ignoreEmailAutocompleteOff = ignoreEmailAutocompleteOff
         self.ignorePasswordAutocompleteOff = ignorePasswordAutocompleteOff
         self.discardAutocompleteAttribute = discardAutocompleteAttribute
+        self.ignoreUntaggedPasswordFieldAlone = ignoreUntaggedPasswordFieldAlone
     }
 
     static let `default` = Self()
@@ -120,7 +122,10 @@ struct WebAutocompleteRules {
         }
     }
 
-    func transformField(_ field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool) -> DOMInputElement {
+    func transformField(_ field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool, nonPasswordField pageContainsNonPasswordField: Bool) -> DOMInputElement? {
+        if ignoreUntaggedPasswordFieldAlone && field.type == .password && field.autocomplete == nil && !pageContainsNonPasswordField {
+            return nil
+        }
         var transformedField = field
         let ignoreAutocomplete = apply(condition: discardAutocompleteAttribute, inPageContainingPasswordField: pageContainsPasswordField)
         if ignoreAutocomplete {
@@ -378,6 +383,8 @@ final class WebAutocompleteContext {
     // If more special cases arise it could make sense to define rules in a plist file and create a separate class.
     private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
         switch host {
+        case "app.beamapp.co":
+            return WebAutocompleteRules(ignoreUntaggedPasswordFieldAlone: true)
         case "pinterest.com", "netflix.com", "maderasbarber.com":
             return WebAutocompleteRules(discardAutocompleteAttribute: .whenPasswordField)
         default:
@@ -388,7 +395,8 @@ final class WebAutocompleteContext {
     func update(with rawFields: [DOMInputElement], on host: String?) -> [String] {
         autocompleteRules = autocompleteRules(for: host)
         let pageContainsPasswordField = rawFields.contains { $0.type == .password }
-        let fields = rawFields.map { autocompleteRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField) }
+        let pageContainsNonPasswordField = rawFields.contains { $0.type != .password }
+        let fields = rawFields.compactMap { autocompleteRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField, nonPasswordField: pageContainsNonPasswordField) }
         let fieldsWithAutocompleteAttribute = fields.filter { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
         let fieldIds: [String]
         if fieldsWithAutocompleteAttribute.count == 0 {
@@ -413,6 +421,7 @@ final class WebAutocompleteContext {
         case 2...:
             return update(withUntagged: fields, action: .createAccount)
         default:
+            clear()
             return []
         }
     }
