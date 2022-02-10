@@ -421,7 +421,6 @@ final class WebAutocompleteContext {
         case 2...:
             return update(withUntagged: fields, action: .createAccount)
         default:
-            clear()
             return []
         }
     }
