@@ -302,7 +302,7 @@ platform :mac do
     # Set build number in Info.plist
     increment_build_number(build_number: build_number)
 
-    appcast_url = "https://s3.#{ENV["AWS_DEFAULT_REGION"]}.amazonaws.com/#{ENV["S3_BUCKET"]}/#{s3_path_for_app_feed()}/AppFeed.json"
+    appcast_url = "https://s3.#{ENV["AWS_DEFAULT_REGION"]}.amazonaws.com/#{s3_bucket_for_channel(publish: true)}/#{s3_path_for_app_feed()}/AppFeed.json"
 
     info_plist = "Beam/Configuration/Info.plist"
 
@@ -392,8 +392,12 @@ platform :mac do
       upload_update_feed
     elsif publish_channel_external?
       tag_build(publish: true)
-      upload_s3(static_link: true)
-      upload_update_feed 
+      # Upload the exact build
+      upload_s3(publish: true, static_link: false)
+      # Upload the aliased build
+      upload_s3(publish: true, static_link: true)
+      # Upload the auto-update feed
+      upload_update_feed(publish: true) 
       ping_slack(publish: true)
     end
   end
@@ -404,14 +408,17 @@ platform :mac do
     publish = params[:publish] || false
 
     if publish
-      add_lightweight_git_tag("#{lane_context[SharedValues::VERSION_NUMBER]}-#{build_type()}", ENV["CI_COMMIT_SHA"])
+      tag = "#{lane_context[SharedValues::VERSION_NUMBER]}-#{build_type()}"
+      add_lightweight_git_tag(tag, ENV["CI_COMMIT_SHA"])
+      push_git_tags(tag: tag)
     else
       tag = "#{lane_context[SharedValues::BUILD_NUMBER]}-#{build_type()}"
       if !git_tag_exists(tag: tag, remote: true)
         add_lightweight_git_tag(tag, ENV["CI_COMMIT_SHA"])
+        push_git_tags(tag: tag)
       end
     end
-    push_git_tags
+    
   end
 
   lane :ping_sentry do
@@ -446,7 +453,9 @@ platform :mac do
 
   private_lane :create_release_notes do |params|
     # Fetch commit from S3 if we already had one
-    download_previous_file(filename: "commit", channel: publishing_channel())
+    publish = params[:publish] || false
+
+    download_previous_file(filename: "commit", channel: publishing_channel(), publish: publish)
 
     changelog = if File.exists?("../builds/commit")
                   last_commit = File.read("../builds/commit").chomp
@@ -477,13 +486,18 @@ platform :mac do
     # We want the build number from `builds/Beam.app/Contents/Info.plist`
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+    
+    publish = params[:publish] || false
     static_link = params[:static_link] || false
 
     files = [
       "builds/Beam.dmg",
       "builds/Beam.zip",
-      "builds/Beam.app.dSYM.zip",
     ]
+    # Don't export the symbols to the production bucket, keep a copy on our dev bucket
+    unless publish && publish_channel_external?
+      files << "builds/Beam.app.dSYM.zip"
+    end
 
     if publish_channel_internal?
       create_release_notes(channel: publishing_channel())
@@ -498,7 +512,7 @@ platform :mac do
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
-      bucket: ENV["S3_BUCKET"],
+      bucket: s3_bucket_for_channel(publish: publish),
       region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
       files: files,
@@ -513,19 +527,20 @@ platform :mac do
     end
   end
 
-  private_lane :upload_update_feed do
+  private_lane :upload_update_feed do |params|
     # I have to do Sparkle at the same time, as `increment_build_number`
     # modifies Beam/Configuration/Info.plist but this file is not propagated to
     # other CI jobs
+    publish = params[:publish] || false
 
-    generate_update_feed()
+    generate_update_feed(publish: publish)
 
     s3_path = s3_path_for_app_feed()
 
     aws_s3(
       access_key: ENV["AWS_ACCESS_KEY_ID"],
       secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
-      bucket: ENV["S3_BUCKET"],
+      bucket: s3_bucket_for_channel(publish: publish),
       region: ENV["AWS_DEFAULT_REGION"],
       upload_metadata: true,
       files: [
@@ -536,6 +551,14 @@ platform :mac do
 
     lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
       UI.success "S3: #{file}"
+    end
+  end
+
+  def s3_bucket_for_channel(publish: true)
+    if publish && publish_channel_external?
+      ENV["S3_PROD_BUCKET"]
+    else
+      ENV["S3_BUCKET"]
     end
   end
 
@@ -569,6 +592,8 @@ platform :mac do
     filename = params[:filename]
     default_file = params[:default_file]
     s3_path = params[:channel]
+    publish = params[:publish] || false
+    s3_bucket = s3_bucket_for_channel(publish: publish)
 
     s3_client = Aws::S3::Client.new(region: ENV["AWS_DEFAULT_REGION"],
                                    access_key_id: ENV["AWS_ACCESS_KEY_ID"],
@@ -576,12 +601,12 @@ platform :mac do
 
     s3_client.get_object(
       response_target: "../builds/#{filename}",
-      bucket: ENV["S3_BUCKET"],
+      bucket: s3_bucket,
       key: "#{s3_path}/#{filename}"
     )
-    UI.success "S3: Fetched https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/#{filename}"
+    UI.success "S3: Fetched https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{s3_bucket}/#{s3_path}/#{filename}"
   rescue Aws::S3::Errors::NoSuchKey => e
-    UI.message "S3: https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}/#{s3_path}/#{filename} does not exist"
+    UI.message "S3: https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{s3_bucket}/#{s3_path}/#{filename} does not exist"
     if default_file
       FileUtils.cp(default_file, "../builds/#{filename}")
     end
@@ -590,14 +615,16 @@ platform :mac do
     raise $!
   end
 
-  private_lane :generate_update_feed do
+  private_lane :generate_update_feed do |params|
     get_version_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
     get_build_number_from_plist(info_plist: "builds/Beam.app/Contents/Info.plist")
+
+    publish = params[:publish] || false
     
     # We store resources at different locations depending on branches (i.e. for develop/release we use version-specific folders, for others the root) 
     resources_path = s3_path_for_build()
 
-    root_directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{ENV['S3_BUCKET']}"
+    root_directory = "https://s3.#{ENV['AWS_DEFAULT_REGION']}.amazonaws.com/#{s3_bucket_for_channel(publish: publish)}"
     resources_directory = "#{root_directory}/#{resources_path}"
     app_download_url = "#{resources_directory}/Beam.zip"
     # The feed is always at the root of the channel folder in s3
@@ -645,7 +672,15 @@ platform :mac do
     build_type = "#{build_type()} "
     build_type += "candidate " unless publish_channel_internal? || publish
 
-		attachments = lane_context[:BEAM_UPLOADED_FILES].map do |file|
+    attachments = [
+      {
+        title: "Git Pipeline",
+        value: ENV["CI_PIPELINE_URL"],
+        short: false
+      }
+    ]
+    
+    attachments += lane_context[:BEAM_UPLOADED_FILES].map do |file|
       {
         title: file.split("/").last,
         value: file,
@@ -682,11 +717,12 @@ platform :mac do
                                  credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"],
                                                                    ENV["AWS_SECRET_ACCESS_KEY"]))
 
+      s3_bucket = s3_bucket_for_channel()
       directory = s3_path_for_build()
-      bucket = s3.bucket(ENV["S3_BUCKET"])
-      UI.message "S3: deleting #{ENV["S3_BUCKET"]}/#{directory}"
+      bucket = s3.bucket(s3_bucket)
+      UI.message "S3: deleting #{s3_bucket}/#{directory}"
       bucket.objects(prefix: directory).batch_delete!
-      UI.success "S3: Removed #{ENV["S3_BUCKET"]}/#{directory}"
+      UI.success "S3: Removed #{s3_bucket}/#{directory}"
     end
   end
 
