@@ -408,14 +408,17 @@ platform :mac do
     publish = params[:publish] || false
 
     if publish
-      add_lightweight_git_tag("#{lane_context[SharedValues::VERSION_NUMBER]}-#{build_type()}", ENV["CI_COMMIT_SHA"])
+      tag = "#{lane_context[SharedValues::VERSION_NUMBER]}-#{build_type()}"
+      add_lightweight_git_tag(tag, ENV["CI_COMMIT_SHA"])
+      push_git_tags(tag: tag)
     else
       tag = "#{lane_context[SharedValues::BUILD_NUMBER]}-#{build_type()}"
       if !git_tag_exists(tag: tag, remote: true)
         add_lightweight_git_tag(tag, ENV["CI_COMMIT_SHA"])
+        push_git_tags(tag: tag)
       end
     end
-    push_git_tags
+    
   end
 
   lane :ping_sentry do
@@ -669,7 +672,15 @@ platform :mac do
     build_type = "#{build_type()} "
     build_type += "candidate " unless publish_channel_internal? || publish
 
-		attachments = lane_context[:BEAM_UPLOADED_FILES].map do |file|
+    attachments = [
+      {
+        title: "Git Pipeline",
+        value: ENV["CI_PIPELINE_URL"],
+        short: false
+      }
+    ]
+    
+    attachments += lane_context[:BEAM_UPLOADED_FILES].map do |file|
       {
         title: file.split("/").last,
         value: file,
