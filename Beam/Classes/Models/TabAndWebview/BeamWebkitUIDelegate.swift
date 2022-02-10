@@ -115,3 +115,19 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
         completionHandler(choice)
     }
 }
+
+#if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+extension BeamWebkitUIDelegateController: WKUIDelegatePrivate {
+
+    /// Sets the window frame size so `window.outerWidth` returns the frame width instead of `0`
+    /// Fixes sites like google sheets.
+    /// - Parameters:
+    ///   - webView:
+    ///   - completionHandler: 
+    func _webView(_ webView: WKWebView, getWindowFrameWithCompletionHandler completionHandler: @escaping (NSRect) -> Void) {
+        let frame = self.page?.webView.frame ?? .zero
+        completionHandler(frame)
+    }
+
+}
+#endif
