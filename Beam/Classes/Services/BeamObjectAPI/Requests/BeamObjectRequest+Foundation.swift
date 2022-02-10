@@ -550,8 +550,8 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
-    private func fetchDataFromUrl(urlString: String,
-                                  _ completionHandler: @escaping (Swift.Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
+    public func fetchDataFromUrl(urlString: String,
+                                  _ completionHandler: @escaping (Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
 
         guard let url = URL(string: urlString) else {
              throw BeamObjectRequestError.malformattedURL
