@@ -105,7 +105,12 @@ class APIWebSocketRequest: APIRequest {
             return nil
         }
 
-        guard let query = loadFile(fileName: "subscription_beam_objects_updated") else {
+        var filename = "subscription_beam_objects_updated"
+        if Configuration.beamObjectDataOnSeparateCall {
+            filename = "subscription_beam_objects_updated_data_url"
+        }
+
+        guard let query = loadFile(fileName: filename) else {
             fatalError("File not found")
         }
 
@@ -137,16 +142,42 @@ class APIWebSocketRequest: APIRequest {
                             return
                         }
 
-                        guard let beamObject = inputResult.data?.beamObjectsUpdated?.beamObject else {
+                        guard let beamObjects = inputResult.data?.beamObjectsUpdated?.beamObjects else {
                             return
                         }
 
-                        do {
-                            try beamObject.decrypt()
-                            try beamObject.setTimestamps()
-                            completionHandler(.success(beamObject))
-                        } catch {
-                            completionHandler(.failure(error))
+                        for beamObject in beamObjects {
+                            if let dataUrl = beamObject.dataUrl {
+                                let request = BeamObjectRequest()
+                                do {
+                                    try request.fetchDataFromUrl(urlString: dataUrl) { result in
+                                        switch result {
+                                        case .failure(let error):
+                                            completionHandler(.failure(error))
+                                        case .success(let data):
+                                            beamObject.data = data
+
+                                            do {
+                                                try beamObject.decrypt()
+                                                try beamObject.setTimestamps()
+                                                completionHandler(.success(beamObject))
+                                            } catch {
+                                                completionHandler(.failure(error))
+                                            }
+                                        }
+                                    }
+                                } catch {
+                                    completionHandler(.failure(error))
+                                }
+                            } else {
+                                do {
+                                    try beamObject.decrypt()
+                                    try beamObject.setTimestamps()
+                                    completionHandler(.success(beamObject))
+                                } catch {
+                                    completionHandler(.failure(error))
+                                }
+                            }
                         }
                     }
                 }
@@ -492,6 +523,7 @@ extension APIWebSocketRequest {
         // swiftlint:disable:next nesting
         struct WebSocketDataBeamObject: Decodable {
             let beamObject: BeamObject?
+            let beamObjects: [BeamObject]?
         }
 
         // We should add all subscription here
