@@ -87,7 +87,7 @@ struct AdsSection: View {
 
     var body: some View {
         Toggle(isOn: $isAdsFilterEnabled) {
-            Text("Remove most advertisments while browsing")
+            Text("Remove most advertisements while browsing")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
