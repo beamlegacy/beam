@@ -21,7 +21,7 @@ extension BeamWindow {
         state.data.versionChecker.areAnyUpdatesAvailable { isThereAnUpdate in
             if onStartUp && !isThereAnUpdate { return }
             let updateAlertMessage = isThereAnUpdate ? "A new version of beam is available!" : "You’re up-to-date!"
-            let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the lastest version of beam."
+            let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the latest version of beam."
             let updateAlertButtonTitle = isThereAnUpdate ? "Update Now" : "OK"
             let updateAlertSecondaryButtonTitle = isThereAnUpdate ? onStartUp ? "Update Later" : "Cancel" : ""
 
