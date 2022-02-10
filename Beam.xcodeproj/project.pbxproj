@@ -99,6 +99,7 @@
 		3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997326CBDDC900F52C23 /* SearchInContentView.swift */; };
 		3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997526CBE0AE00F52C23 /* SearchViewModel.swift */; };
 		3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */ = {isa = PBXBuildFile; fileRef = 3355999526CBF11E00F52C23 /* SearchWebPage.js */; };
+		336E82EF27B4094C00A196BC /* apple-activity-indicator-extended.json in Resources */ = {isa = PBXBuildFile; fileRef = 336E82E927B4094C00A196BC /* apple-activity-indicator-extended.json */; };
 		33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
@@ -1397,6 +1398,7 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		3355999526CBF11E00F52C23 /* SearchWebPage.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SearchWebPage.js; sourceTree = "<group>"; };
+		336E82E927B4094C00A196BC /* apple-activity-indicator-extended.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "apple-activity-indicator-extended.json"; sourceTree = "<group>"; };
 		338981C02795B9BD00477941 /* Bundle+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Beam.swift"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
@@ -5234,6 +5236,7 @@
 		A5F47EC626F8D70F004B7CDE /* Lotties */ = {
 			isa = PBXGroup;
 			children = (
+				336E82E927B4094C00A196BC /* apple-activity-indicator-extended.json */,
 				A5C661A527A1A57200727ACB /* editor-delete.json */,
 				33BBA506274423E700FE92DB /* editor-embed_expand.json */,
 				33BBA504274423E200FE92DB /* editor-embed_collapse.json */,
@@ -6103,6 +6106,7 @@
 				8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
 				8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */,
+				336E82EF27B4094C00A196BC /* apple-activity-indicator-extended.json in Resources */,
 				8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
