@@ -29,6 +29,7 @@
         "DeleteNotesTests",
         "DownloadsTest",
         "EditorShortcutsTests",
+        "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "JavascriptNativeInteractionsTests",
         "JournalTest",
