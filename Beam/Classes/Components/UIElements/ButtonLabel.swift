@@ -40,6 +40,7 @@ struct ButtonLabelStyle {
 struct ButtonLabel: View {
     var text: String?
     var iconName: String?
+    var lottieName: String?
     let defaultState: ButtonLabelState
     let variant: ButtonLabelVariant
     // TODO replace style by a custom modifier like .buttonLabelStyle()
@@ -56,6 +57,16 @@ struct ButtonLabel: View {
          customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
         self.text = text
         self.iconName = icon
+        self.defaultState = state
+        self.variant = variant
+        self.style = customStyle
+        self.action = action
+    }
+
+    init(_ text: String? = nil, lottie: String, state: ButtonLabelState = .normal, variant: ButtonLabelVariant = .secondary,
+         customStyle: ButtonLabelStyle = ButtonLabelStyle(), action: (() -> Void)? = nil) {
+        self.text = text
+        self.lottieName = lottie
         self.defaultState = state
         self.variant = variant
         self.style = customStyle
@@ -81,6 +92,10 @@ struct ButtonLabel: View {
         return style.foregroundColor
     }
 
+    private var foregroundNSColor: NSColor {
+        NSColor(foregroundColor)
+    }
+
     private var backgroundColor: Color? {
         if isTouching || defaultState == .clicked {
             return style.activeBackgroundColor
@@ -97,6 +112,9 @@ struct ButtonLabel: View {
             } else {
                 if let icon = iconName {
                     Icon(name: icon, width: style.iconSize, color: foregroundColor)
+                }
+                if let lottie = lottieName {
+                    LottieView(name: lottie, playing: true, color: foregroundNSColor, animationSize: CGSize(width: style.iconSize, height: style.iconSize))
                 }
                 if let text = text {
                     Text(text)
