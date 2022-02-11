@@ -36,6 +36,9 @@ struct KeychainStorable<T> {
                 value = store[key] as? T
             } else if T.self == Data.self {
                 value = store[data: key] as? T
+            } else if T.self == [String: String].self {
+                guard let storedValue = store[key] else { return nil }
+                value = unserialize(str: storedValue) as? T
             }
             if useCache {
                 cache.lastValue = value
@@ -66,6 +69,9 @@ struct KeychainStorable<T> {
                     try storeWithLabelAndComment.set(value, key: key)
                 } else if let value = newValue as? Data {
                     try storeWithLabelAndComment.set(value, key: key)
+                } else if let dictValue = newValue as? [String: String],
+                            let value = serialize(dict: dictValue) {
+                    try storeWithLabelAndComment.set(value, key: key)
                 } else {
                     Logger.shared.logError("Can't store \(key) -> \(newValue.debugDescription)", category: .keychain)
                 }
@@ -74,5 +80,16 @@ struct KeychainStorable<T> {
                                        category: .keychain)
             }
         }
+    }
+
+    private func unserialize(str: String) -> [String: String]? {
+        guard let data = str.data(using: .utf8),
+              let jsonArray = try? JSONSerialization.jsonObject(with: data, options: .allowFragments) as? [String: String] else { return nil }
+        return jsonArray
+    }
+
+    private func serialize(dict: [String: String]) -> String? {
+        guard let data = try? JSONSerialization.data(withJSONObject: dict, options: [.prettyPrinted]) else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 }

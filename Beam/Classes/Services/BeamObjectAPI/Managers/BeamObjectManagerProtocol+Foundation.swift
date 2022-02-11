@@ -286,14 +286,14 @@ extension BeamObjectManagerDelegate {
     }
 
     @discardableResult
-    func fetchAllFromBeamObjectAPI(_ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest {
+    func fetchAllFromBeamObjectAPI(raisePrivateKeyError: Bool = false, _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
 
         let objectManager = BeamObjectManager()
 
-        return try objectManager.fetchAllObjects(completion)
+        return try objectManager.fetchAllObjects(raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
     @discardableResult

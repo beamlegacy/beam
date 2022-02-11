@@ -12,6 +12,7 @@ enum BeamObjectManagerError: Error {
     case fetchError
     case saveError
     case nestedTooDeep
+    case sendingObjectsDisabled
 }
 
 extension BeamObjectManagerError: LocalizedError {
@@ -39,6 +40,8 @@ extension BeamObjectManagerError: LocalizedError {
             return "Save error"
         case .nestedTooDeep:
             return "Nested too deep"
+        case .sendingObjectsDisabled:
+            return "Sending objects is disabled until first sync is complete"
         }
     }
 }

@@ -88,7 +88,7 @@ struct OnboardingSaveEncryptionView: View {
             }
         }))
         .onAppear {
-            key = EncryptionManager.shared.privateKey().asString()
+            key = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
             updateActions()
         }
     }

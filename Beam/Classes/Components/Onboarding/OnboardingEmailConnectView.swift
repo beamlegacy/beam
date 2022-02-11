@@ -184,7 +184,7 @@ struct OnboardingEmailConnectView: View {
         loadingState = .signinin
         var loadingStartTime = BeamDate.now
         updateButtonState()
-        accountManager.signIn(email: emailField, password: passwordField) { result in
+        accountManager.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
@@ -207,11 +207,18 @@ struct OnboardingEmailConnectView: View {
                     loadingState = .gettingInfos
                     loadingStartTime = BeamDate.now
                     updateButtonState()
+
+                    onboardingManager.checkForPrivateKey { nextStep in
+                        guard nextStep != nil else {
+                            handleSyncCompletion(startTime: loadingStartTime)
+                            return
+                        }
+                        finish(nextStep)
+                    }
                 }
             }
-        } syncCompletion: { _ in
-            handleSyncCompletion(startTime: loadingStartTime)
-        }
+
+        } syncCompletion: { _ in }
     }
 
     private func showEmailConfirmationStep() {
