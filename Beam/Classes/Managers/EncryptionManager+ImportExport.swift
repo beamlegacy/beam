@@ -15,7 +15,7 @@ extension EncryptionManager {
 
     /// Copies privat ekey to general pasteboard
     func copyKeyToPasteboard() {
-        let key = privateKey().asString()
+        let key = privateKey(for: Persistence.emailOrRaiseError()).asString()
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
         pasteboard.setString(key, forType: .string)
@@ -28,7 +28,7 @@ extension EncryptionManager {
     ///   - completion: called with boolean `true` if the file has been succesfully saved
     func saveKeyToFile(atPath: String? = nil, completion: ((Bool) -> Void)?) {
 
-        let key = privateKey()
+        let key = privateKey(for: Persistence.emailOrRaiseError())
         if let atPath = atPath, let atURL = URL(string: atPath) {
             do {
                 try saveToFile(key: key, atURL: atURL)
@@ -65,7 +65,7 @@ extension EncryptionManager {
         if path.pathExtension.isEmpty != false {
             path = path.appendingPathComponent(Self.defaultFilename)
         }
-        let data = try encodeBeamKeyFile(privateKey())
+        let data = try encodeBeamKeyFile(privateKey(for: Persistence.emailOrRaiseError()))
         try data.write(to: path)
     }
 
@@ -90,6 +90,7 @@ extension EncryptionManager {
 
         if let atPath = atPath, let atURL = URL(string: atPath) {
             workBlock(atURL)
+            return
         }
 
         let openPanel = NSOpenPanel()

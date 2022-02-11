@@ -25,6 +25,7 @@ class DeleteDocument: DocumentCommand {
         fatalError("init(from:) has not been implemented")
     }
 
+    // swiftlint:disable function_body_length
     override func run(context: DocumentManager?, completion: ((Bool) -> Void)?) {
         let signpost = SignPost("DeleteDocumentCommand")
         signpost.begin("run")

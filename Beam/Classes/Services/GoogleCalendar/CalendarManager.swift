@@ -53,8 +53,7 @@ class CalendarManager: ObservableObject {
         guard !didLazyInitConnectedSources else { return }
         didLazyInitConnectedSources = true
 
-        if let googleTokensStr = Persistence.Authentication.googleCalendarTokens,
-           let googleTokens = GoogleTokenUtility.objectifyOauth(str: googleTokensStr) {
+        if let googleTokens = Persistence.Authentication.googleCalendarTokens {
             for (googleAccessToken, googleRefreshToken) in googleTokens {
                 let googleCalendar = GoogleCalendarService(accessToken: googleAccessToken, refreshToken: googleRefreshToken)
                 self.connectedSources.append(googleCalendar)
@@ -110,12 +109,11 @@ class CalendarManager: ObservableObject {
         case .googleCalendar:
             guard let googleCalendarService = self.connectedSources.first(where: { $0.id == sourceId }) as? GoogleCalendarService,
                   let accessToken = googleCalendarService.accessToken,
-                  let googleCalendarTokensStr = Persistence.Authentication.googleCalendarTokens,
-                  var googleCalendarTokens = GoogleTokenUtility.objectifyOauth(str: googleCalendarTokensStr) else { return }
+                  var googleCalendarTokens = Persistence.Authentication.googleCalendarTokens else { return }
 
             if let idx = connectedSources.firstIndex(where: { $0.id == sourceId }) {
                 googleCalendarTokens.removeValue(forKey: accessToken)
-                Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleCalendarTokens)
+                Persistence.Authentication.googleCalendarTokens = googleCalendarTokens
                 connectedSources.remove(at: idx)
                 updated = true
             }

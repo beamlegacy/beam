@@ -249,6 +249,29 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 }
                 BeamNote.purgeDeletedNode(id)
             }.store(in: &scope)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(defaultDatabaseDidChange(notification:)),
+                                               name: .defaultDatabaseUpdate,
+                                               object: nil)
+
+    }
+
+    @objc private func defaultDatabaseDidChange(notification: Notification) {
+        BeamNote.unloadAllNotes()
+        reloadJournal()
+
+        let dbID = DatabaseManager.defaultDatabase.id
+        for window in AppDelegate.main.windows {
+            switch window.state.mode {
+            case .note:
+                if window.state.currentNote?.databaseId != dbID {
+                    window.state.navigateToJournal(note: nil, clearNavigation: true)
+                }
+            default:
+                break
+            }
+        }
     }
 
     static let noteUpdated = PassthroughSubject<DocumentStruct, Never>()
@@ -342,6 +365,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func reloadJournal() {
+        _todaysNote = nil
         journal.removeAll()
         calendarManager.meetingsForNote.removeAll()
         setupJournal()

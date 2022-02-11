@@ -19,7 +19,8 @@ class FrecencyNoteStorageTest: XCTestCase {
         super.setUp()
 
         BeamTestsHelper.logout()
-        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+//        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
     }
 
     func testSaveFetch() throws {

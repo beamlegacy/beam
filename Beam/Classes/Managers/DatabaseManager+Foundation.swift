@@ -138,7 +138,7 @@ extension DatabaseManager {
                 // Trigger updates for Advanced Settings, will force update for the Picker listing all DBs
                 // Important: Don't use `DatabaseManager.defaultDatabase` here as object, as it recreates a default DB.
                 DispatchQueue.main.async {
-                    NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                    NotificationCenter.default.post(name: .databaseListUpdate,
                                                     object: nil)
                 }
 
