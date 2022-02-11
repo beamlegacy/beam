@@ -345,7 +345,9 @@ class ImageNode: ResizableNode {
     }
 
     override func mouseDown(mouseInfo: MouseInfo) -> Bool {
-        if mouseInfo.position.x < resizableElementContentSize.width / 2 {
+        let contentWidth = layers["focus"]?.frame.width ?? visibleSize.width
+
+        if mouseInfo.position.x < contentWidth / 2 {
             focus(position: 0)
         } else {
             focus(position: 1)
