@@ -4,6 +4,7 @@
 //
 //  Created by Sebastien Metrot on 06/05/2021.
 //
+// swiftlint:disable file_length
 
 import Foundation
 import BeamCore
@@ -324,6 +325,23 @@ class BeamFileDBManager: BeamFileStorage {
         }
     }
 
+    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try self.clear()
+            if AuthenticationManager.shared.isAuthenticated && includedRemote {
+                try self.deleteAllFromBeamObjectAPI { result in
+                    networkCompletion?(result)
+                }
+            } else {
+                networkCompletion?(.success(false))
+            }
+            return
+        } catch {
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .fileDB)
+        }
+        networkCompletion?(.success(false))
+    }
+
     func allRecords(_ updatedSince: Date? = nil) throws -> [BeamFileRecord] {
         try dbPool.read { db in
             if let updatedSince = updatedSince {
@@ -351,7 +369,7 @@ class BeamFileDBManager: BeamFileStorage {
             defer {
                 do {
                     if try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == to).fetchCount(db) == 0 {
-                        if var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == to).fetchOne(db) {
+                        if var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == to).filter(BeamFileRecord.Columns.deletedAt == nil).fetchOne(db) {
                             file.deletedAt = BeamDate.now
                             try file.save(db)
                             if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
@@ -398,7 +416,7 @@ class BeamFileDBManager: BeamFileStorage {
                 let fileId: UUID = row[BeamFileRecord.Columns.uid]
                 if try BeamFileRefRecord.filter(BeamFileRefRecord.Columns.fileId == fileId).fetchCount(db) == 0 {
                     do {
-                        guard var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == fileId).fetchOne(db) else { continue }
+                        guard var file = try BeamFileRecord.filter(BeamFileRecord.Columns.uid == fileId).filter(BeamFileRecord.Columns.deletedAt == nil).fetchOne(db) else { continue }
                         file.deletedAt = BeamDate.now
                         try file.save(db)
                         if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {

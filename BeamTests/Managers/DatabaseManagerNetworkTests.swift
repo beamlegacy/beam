@@ -38,11 +38,13 @@ class DatabaseManagerNetworkTests: QuickSpec {
             helper = DocumentManagerTestsHelper(documentManager: DocumentManager(),
                                                 coreDataManager: CoreDataManager.shared)
 
+            BeamObjectManager.disableSendingObjects = false
             BeamTestsHelper.login()
             helper.deleteAllDatabases()
             helper.deleteAllDocuments()
-
-            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+            
+            try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+//            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {

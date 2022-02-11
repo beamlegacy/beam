@@ -28,6 +28,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             beamHelper.beginNetworkRecording()
 
+            BeamObjectManager.disableSendingObjects = false
             BeamTestsHelper.login()
 
             BeamObjectManager.unregisterAll()
@@ -35,8 +36,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
             MyRemoteObjectManager.store.removeAll()
             try? BeamObjectChecksum.deleteAll()
-
-            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+            try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+//            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {

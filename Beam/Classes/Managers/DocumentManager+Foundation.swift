@@ -599,25 +599,102 @@ extension DocumentManager {
 
     // MARK: -
     // MARK: Database related
-    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
+    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, displayAlert: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         let documentManager = DocumentManager()
         do {
             let databaseIds = DatabaseManager().all().map { $0.id }
-            let filters: [DocumentFilter] = onlyOrphans ? [.notDatabaseIds(databaseIds), .includeDeleted] : [.allDatabases, .includeDeleted]
+            let filters: [DocumentFilter] = onlyOrphans ? [.notDatabaseIds(databaseIds), .includeDeleted] : [.notDatabaseIds([databaseId]), .includeDeleted]
             var count = 0
             for document in try documentManager.fetchAll(filters: filters) {
                 let noteId = document.id
-                guard let note = BeamNote.fetch(id: noteId, includeDeleted: true) else { continue }
-                note.databaseId = databaseId
-                _ = note.syncedSave()
+                guard let note = BeamNote.fetch(id: noteId, includeDeleted: true, keepInMemory: false, verifyDatabase: false),
+                      note.databaseId != databaseId
+                else { continue }
+
+                // make sure we don't have duplicate notes:
+                if note.type.isJournal {
+                    if let date = note.type.journalDate {
+                        if let existingNote = BeamNote.fetch(journalDate: date, keepInMemory: false), note.id != existingNote.id, !note.isEntireNoteEmpty() {
+                            // This is a journal note, if we have a collision we must take this contents and move it to the end the existing note of the same day
+
+                            if existingNote.isEntireNoteEmpty() {
+                                // we just replace the children with the one from the local note
+                                existingNote.children = []
+                            }
+
+                            for child in note.children {
+                                guard let content = child.deepCopy(withNewId: false, selectedElements: nil, includeFoldedChildren: true) else { continue }
+                                existingNote.children.append(content)
+                            }
+                            existingNote.resetCommandManager()
+                            _ = existingNote.syncedSave()
+
+                            // Delete source note:
+                            documentManager.softDelete(id: note.id) { result in
+                                switch result {
+                                case let .failure(error):
+                                    Logger.shared.logError("Failed to softDelete \(note.titleAndId): \(error)", category: .document)
+                                case let .success(res):
+                                    if !res {
+                                        Logger.shared.logError("Failed to softDelete \(note.titleAndId)", category: .document)
+                                    }
+                                }
+                            }
+                        } else {
+                            note.databaseId = databaseId
+                            _ = note.syncedSave()
+                        }
+
+                    }
+                } else {
+                    // This is a regular note, if we have a collision we need to add an index to the end of the name until we find a non colliding name:
+                    // First make sure it doesn't already exist in the destination DB:
+                    var note = note
+                    if documentManager.fetchAllNames(filters: [.id(note.id)]).count != 0 {
+                        // ID Conflict!
+                        // This note was already synced in a past life, let's rename it and change its id in the new DB
+                        guard let noteCopy = note.deepCopy(withNewId: true, selectedElements: nil, includeFoldedChildren: true) else {
+                            Logger.shared.logError("Unable to duplicate note \(note.titleAndId)", category: .document)
+                            continue
+                        }
+                        documentManager.softDelete(id: note.id) { result in
+                            switch result {
+                            case let .failure(error):
+                                Logger.shared.logError("Error during soft delete of note \(note.titleAndId): \(error)", category: .document)
+                            case let .success(res):
+                                if !res {
+                                    Logger.shared.logError("Unable to soft delete note \(note.titleAndId)", category: .document)
+                                }
+                            }
+                        }
+                        note = noteCopy
+                    }
+
+                    // Check for titles duplicates:
+                    let allTitles = Set(documentManager.fetchAllNames(filters: [.databaseId(databaseId)]))
+                    var index = 0
+                    var title = note.title
+                    let maxCount = allTitles.count + 1
+                    while allTitles.contains(title) && index < maxCount {
+                        // we have a conflict, let's try to find a non clonflicting note:
+                        index += 1
+                        title = note.title + " (\(index))"
+                    }
+
+                    note.title = title
+                    _ = note.syncedSave()
+                }
                 count += 1
             }
 
-            if count != 0 {
-                UserAlert.showMessage(message: "\(count) documents impacted, must exit.", buttonTitle: "Exit now")
-                NSApplication.shared.terminate(nil)
-            } else {
-                UserAlert.showMessage(message: "no document impacted")
+            if displayAlert {
+                if count != 0 {
+                    UserAlert.showMessage(message: "\(count) documents impacted, must exit.", buttonTitle: "Exit now")
+                    NSApplication.shared.terminate(nil)
+                } else {
+                    UserAlert.showMessage(message: "no document impacted")
+                }
             }
             completion(.success(true))
         } catch {

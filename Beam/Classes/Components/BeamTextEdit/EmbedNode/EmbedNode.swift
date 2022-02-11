@@ -50,6 +50,7 @@ class EmbedNode: ResizableNode {
         setupEmbed(availableWidth: availableWidth)
     }
 
+    // swiftlint:disable function_body_length
     func setupEmbed(availableWidth: CGFloat) {
         guard case .embed = element.kind else {
             Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .embed)
