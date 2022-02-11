@@ -52,7 +52,7 @@ class BeamObjectRequest: APIRequest {
         try beamObject.encrypt()
 
         #if DEBUG
-        return UpdateBeamObject(beamObject: beamObject, privateKey: EncryptionManager.shared.privateKey().asString())
+        return UpdateBeamObject(beamObject: beamObject, privateKey: EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString())
         #else
         return UpdateBeamObject(beamObject: beamObject, privateKey: nil)
         #endif
@@ -65,7 +65,7 @@ class BeamObjectRequest: APIRequest {
         }
 
         #if DEBUG
-        return UpdateBeamObjects(beamObjects: result, privateKey: EncryptionManager.shared.privateKey().asString())
+        return UpdateBeamObjects(beamObjects: result, privateKey: EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString())
         #else
         return UpdateBeamObjects(beamObjects: result, privateKey: nil)
         #endif

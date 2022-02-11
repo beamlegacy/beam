@@ -11,11 +11,11 @@ import XCTest
 class BrowsingTreeTest: XCTestCase {
     override func setUpWithError() throws {
         super.setUp()
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
     override func tearDownWithError() throws {
         super.tearDown()
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
 
     func testDeserialization() {

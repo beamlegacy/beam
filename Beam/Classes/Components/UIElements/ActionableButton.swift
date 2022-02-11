@@ -18,6 +18,7 @@ enum ActionableButtonVariant {
     case primaryBlue
     case primaryPurple
     case secondary
+    case destructive
     case custom(ActionableButtonStyle)
 
     var style: ActionableButtonStyle {
@@ -37,6 +38,11 @@ enum ActionableButtonVariant {
                                          foregroundColor: .secondaryForeground,
                                          backgroundColor: .secondaryBackground,
                                          icon: .init(name: "shortcut-bttn_esc", size: 16, palette: .secondaryIcon))
+        case .destructive:
+            return ActionableButtonStyle(font: BeamFont.medium(size: 13).swiftUI,
+                                         foregroundColor: .destructiveForeground,
+                                         backgroundColor: .destructiveBackground,
+                                         icon: .init(name: "shortcut-bttn_esc", size: 16, palette: .destructiveBackground))
         case .custom(let customStyle):
             return customStyle
         }
@@ -260,6 +266,15 @@ extension ActionableButtonState {
                                                                  hovered: .ActionableButtonSecondary.iconHovered,
                                                                  clicked: .ActionableButtonSecondary.iconActive,
                                                                  disabled: .ActionableButtonSecondary.iconDisabled)
+
+        static let destructiveForeground = ActionableButtonState.Palette(normal: BeamColor.Shiraz,
+                                                                         hovered: BeamColor.Shiraz,
+                                                                         clicked: BeamColor.Shiraz,
+                                                                         disabled: BeamColor.Shiraz)
+        static let destructiveBackground = ActionableButtonState.Palette(normal: BeamColor.Shiraz.alpha(0.1),
+                                                                         hovered: BeamColor.Shiraz.alpha(0.1),
+                                                                         clicked: BeamColor.Shiraz.alpha(0.3),
+                                                                         disabled: BeamColor.Shiraz.alpha(0))
     }
 }
 
