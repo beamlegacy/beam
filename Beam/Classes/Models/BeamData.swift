@@ -46,6 +46,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
+    var checkForUpdateCancellable: AnyCancellable?
     let sessionId = UUID()
     var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
@@ -430,6 +431,62 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
         self.versionChecker.logMessage = { logMessage in
             Logger.shared.logInfo(logMessage, category: .autoUpdate)
+        }
+
+        autoUpdateStartupCheck()
+    }
+
+    private func autoUpdateStartupCheck() {
+        // Only trigger the startup alert for the beta builds
+        guard Configuration.branchType == .beta else { return }
+
+        if versionChecker.autocheckEnabled {
+            checkForUpdateCancellable = versionChecker.$state.sink { [weak self] state in
+                guard let self = self else { return }
+                switch state {
+                case .downloaded:
+                    //We need to DispatchAsync here because, if not, the AlertPanel will pause the thread before the state will actually be changed to .downloaded
+                    DispatchQueue.main.async {
+                        self.showUpdateAlert(onStartUp: true, isThereAnUpdate: true)
+                        self.checkForUpdateCancellable = nil
+                    }
+                case .noUpdate where self.versionChecker.lastCheck != nil:
+                    self.checkForUpdateCancellable = nil
+                case .error(let errorMessage):
+                    UserAlert.showMessage(message: "Error checking for updates",
+                                          informativeText: errorMessage,
+                                          buttonTitle: "OK")
+                default:
+                    break
+                }
+            }
+            versionChecker.checkForUpdates()
+        }
+    }
+
+    func checkForUpdate() {
+        versionChecker.areAnyUpdatesAvailable { isThereAnUpdate in
+            self.showUpdateAlert(onStartUp: false, isThereAnUpdate: isThereAnUpdate)
+        }
+    }
+
+    private func showUpdateAlert(onStartUp: Bool, isThereAnUpdate: Bool) {
+        if onStartUp && !isThereAnUpdate { return }
+
+        let appName = Information.appName ?? "beam"
+
+        let updateAlertMessage = isThereAnUpdate ? "A new version of \(appName) is available!" : "You’re up-to-date!"
+        let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the latest version of \(appName)."
+        let updateAlertButtonTitle = isThereAnUpdate ? "Update Now" : "OK"
+        let updateAlertSecondaryButtonTitle = isThereAnUpdate ? onStartUp ? "Update Later" : "Cancel" : ""
+
+        UserAlert.showMessage(message: updateAlertMessage,
+                              informativeText: updateAlertInformativeText,
+                              buttonTitle: updateAlertButtonTitle,
+                              secondaryButtonTitle: updateAlertSecondaryButtonTitle) {
+            if isThereAnUpdate {
+                self.versionChecker.checkForUpdates(forceInstall: true)
+            }
         }
     }
 }
