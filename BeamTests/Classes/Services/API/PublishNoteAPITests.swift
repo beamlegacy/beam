@@ -40,7 +40,7 @@ class PublishNoteAPITests: XCTestCase {
 
         helper.createDefaultDatabase()
 
-        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
         BeamTestsHelper.login()
         testNote = BeamNote(title: "Test")

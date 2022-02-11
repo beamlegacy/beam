@@ -6,6 +6,58 @@ class AccountManager {
 
     let userSessionRequest = UserSessionRequest()
     let userInfoRequest = UserInfoRequest()
+
+    static public private(set) var state = ConnectionState.signedOff
+
+    enum ConnectionState {
+        case signedOff
+        case authenticated
+        case privateKeyCheck
+        case signedIn
+    }
+}
+
+extension AccountManager {
+    static func updateInitialState() {
+        switch state {
+        case .signedOff:
+            if AuthenticationManager.shared.isAuthenticated {
+                state = .authenticated
+            }
+        case .signedIn, .privateKeyCheck, .authenticated:
+            if !AuthenticationManager.shared.isAuthenticated {
+                state = .signedOff
+            }
+        }
+    }
+
+    static func moveToSignedOff() {
+        state = .signedOff
+    }
+
+    static func moveToAuthenticated() {
+        assert(AuthenticationManager.shared.isAuthenticated)
+        assert(state == .signedOff || state == .authenticated)
+        state = .authenticated
+    }
+
+    static func moveToPrivateKeyCheck() {
+        assert(AuthenticationManager.shared.isAuthenticated)
+        assert(state == .authenticated || state == .privateKeyCheck)
+        state = .privateKeyCheck
+    }
+
+    static func moveToSignedIn() {
+        assert(AuthenticationManager.shared.isAuthenticated)
+        assert(state == .privateKeyCheck)
+        state = .signedIn
+    }
+
+    static func logoutIfNeeded() {
+        if AccountManager.state == .authenticated || AccountManager.state == .privateKeyCheck {
+            AccountManager.logout()
+        }
+    }
 }
 
 // Safari Keychain
