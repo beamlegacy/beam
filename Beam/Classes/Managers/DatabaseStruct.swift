@@ -6,6 +6,7 @@ struct DatabaseStruct: BeamObjectProtocol {
 
     var id: UUID = .null
     var title: String
+    var titleBeforeAutoRenaming: String?
     var createdAt: Date
     var updatedAt: Date
     var deletedAt: Date?
@@ -30,6 +31,7 @@ struct DatabaseStruct: BeamObjectProtocol {
     func copy() -> DatabaseStruct {
         DatabaseStruct(id: id,
                        title: title,
+                       titleBeforeAutoRenaming: titleBeforeAutoRenaming,
                        createdAt: createdAt,
                        updatedAt: updatedAt,
                        deletedAt: deletedAt

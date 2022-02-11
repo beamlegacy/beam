@@ -14,8 +14,10 @@ class ZZZTests: QuickSpec {
             BeamTestsHelper.logout()
             beamHelper.beginNetworkRecording()
             BeamTestsHelper.login()
+            
+            try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
-            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+//            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {

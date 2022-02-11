@@ -21,7 +21,8 @@ struct AdvancedPreferencesView: View {
     @State private var sentryEnabled = Configuration.sentryEnabled
     @State private var loggedIn: Bool = AuthenticationManager.shared.isAuthenticated
     @State private var networkEnabled: Bool = Configuration.networkEnabled
-    @State private var privateKey = EncryptionManager.shared.privateKey().asString()
+    @State private var localPrivateKey = ""
+    @State private var privateKeys = [String: String]()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loading: Bool = false
 
@@ -52,12 +53,6 @@ struct AdvancedPreferencesView: View {
             let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
             self.apiHostname = cleanValue
             Configuration.apiHostname = cleanValue
-        })
-
-        let privateKeyBinding = Binding<String>(get: {
-            privateKey
-        }, set: {
-            try? EncryptionManager.shared.replacePrivateKey($0)
         })
 
         ScrollView(.vertical, showsIndicators: false) {
@@ -193,8 +188,8 @@ struct AdvancedPreferencesView: View {
                                                 DatabaseManager.defaultDatabase = DatabaseStruct(database: database)
                                                 selectedDatabase = database
                                                 try? CoreDataManager.shared.save()
-                                                DatabaseManager.showRestartAlert(beforeDb,
-                                                                                 DatabaseManager.defaultDatabase)
+                                                DatabaseManager.dispatchDatabaseChangedNotification(beforeDb,
+                                                                                                    DatabaseManager.defaultDatabase, andRestart: true)
                                             }
                                         }
                                         showNewDatabase = false
@@ -305,12 +300,81 @@ struct AdvancedPreferencesView: View {
                         Text("Legacy browsing trees").frame(minWidth: 100)
                     }).disabled(loading)
                 }
-                Preferences.Section(title: "Encryption key", bottomDivider: true) {
-                    TextField("Private Key", text: privateKeyBinding)
-                        .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
-                    Text((try? privateKeyBinding.wrappedValue.SHA256()) ?? "-")
-                    ResetPrivateKey
-                    VerifyPrivateKey
+
+                Preferences.Section(title: "Encryption keys", bottomDivider: true) {
+                    VStack(alignment: .leading) {
+                        if AuthenticationManager.shared.isAuthenticated {
+                            if privateKeys.isEmpty {
+                                Button("Migrate old private key to current account") {
+                                    migrateOldPrivateKeyToCurrentAccount()
+                                }
+                            } else {
+                                ForEach(privateKeys.sorted(by: >), id: \.key) { key, value in
+                                    VStack(alignment: .leading) {
+                                        HStack(alignment: .firstTextBaseline) {
+                                            Text(key)
+                                            Spacer()
+
+                                            Button("Verify") {
+                                                verifyPrivateKey(forAccount: key)
+                                            }
+                                            Button("Delete") {
+                                                deletePrivateKey(forAccount: key)
+                                            }.foregroundColor(Color.red)
+                                            Button("Reset") {
+                                                resetPrivateKey(forAccount: key)
+                                            }.foregroundColor(Color.red)
+                                        }
+                                        TextField("\(key):", text: Binding<String>(get: {
+                                            EncryptionManager.shared.privateKey(for: key).asString()
+                                        }, set: { value, _ in
+                                            _ = try? EncryptionManager.shared.replacePrivateKey(for: key, with: value)
+                                            updateKeys()
+                                        }))
+                                        Separator(horizontal: true, hairline: true)
+                                    }.frame(width: 450)
+                                }
+
+                                Button("Delete all private keys") {
+                                    deleteAllPrivateKeys()
+                                }.foregroundColor(Color.red)
+                            }
+                        } else {
+                            Text("You are not Authenticated")
+                        }
+                    }
+                }
+
+                Preferences.Section(title: "Local Encryption Key", bottomDivider: true) {
+                    VStack(alignment: .leading) {
+                        HStack(alignment: .firstTextBaseline) {
+                            Text("Local private key (only used to store local contents)")
+                            Spacer()
+
+                                Button("Verify") {
+                                    verifyLocalPrivateKey()
+                                }
+                                Button("Reset") {
+                                    resetLocalPrivateKey()
+                                }.foregroundColor(Color.red)
+                        }.frame(width: 450)
+                        TextField("local private key:", text: Binding<String>(get: {
+                            localPrivateKey
+                        }, set: { value, _ in
+                            Persistence.Encryption.localPrivateKey = value
+                            updateKeys()
+                        })).frame(width: 450)
+                        Spacer()
+
+                        VStack(alignment: .leading) {
+                            Text("The historical private key:")
+                            TextField("privateKey", text: Binding<String>(get: {
+                                Persistence.Encryption.privateKey ?? ""
+                            }, set: { value, _ in
+                                Persistence.Encryption.privateKey = value
+                            }))
+                        }.frame(width: 450)
+                    }
                 }
 
                 Preferences.Section(bottomDivider: true) {
@@ -390,10 +454,22 @@ struct AdvancedPreferencesView: View {
                 }
             }.onAppear {
                 startObservers()
+                if AuthenticationManager.shared.isAuthenticated {
+                    updateKeys()
+                }
             }.onDisappear {
                 stopObservers()
             }
         }.frame(maxHeight: 500)
+    }
+
+    private func updateKeys() {
+        var pkeys = [String: String]()
+        for email in EncryptionManager.shared.accounts {
+            pkeys[email] = EncryptionManager.shared.privateKey(for: email).asString()
+        }
+        privateKeys = pkeys
+        localPrivateKey = EncryptionManager.shared.localPrivateKey().asString()
     }
 
     @State private var showNewDatabase = false
@@ -539,45 +615,6 @@ struct AdvancedPreferencesView: View {
         })
     }
 
-    private var ResetPrivateKey: some View {
-        Button(action: {
-            EncryptionManager.shared.resetPrivateKey()
-            privateKey = EncryptionManager.shared.privateKey().asString()
-        }, label: {
-            // TODO: loc
-            Text("Reset Private Key").frame(minWidth: 100)
-        })
-    }
-
-    private var VerifyPrivateKey: some View {
-        Button(action: {
-            do {
-                let string = "This is the clear text with accent é 🤤"
-                let encryptedString = try EncryptionManager.shared.encryptString(string)
-                var decryptedString: String?
-
-                if let encryptedString = encryptedString {
-                    decryptedString = try EncryptionManager.shared.decryptString(encryptedString)
-
-                    if decryptedString == string, encryptedString != string {
-                        UserAlert.showMessage(message: "Encryption",
-                                              informativeText: "Encryption worked ✅ Clear text is \(string) and encrypted data is \(encryptedString)")
-
-                        return
-                    }
-                }
-
-                UserAlert.showError(message: "Encryption",
-                                    informativeText: "This encryption didn't work, key is corrupted!")
-            } catch {
-                UserAlert.showError(message: "Encryption", error: error)
-            }
-        }, label: {
-            // TODO: loc
-            Text("Verify Private Key").frame(minWidth: 100)
-        })
-    }
-
     private var StateRestorationEnabledButton: some View {
         Button(action: {
             Configuration.stateRestorationEnabled = !Configuration.stateRestorationEnabled
@@ -606,6 +643,12 @@ struct AdvancedPreferencesView: View {
     private func startObservers() {
         NotificationCenter.default
             .publisher(for: .defaultDatabaseUpdate, object: nil)
+            .sink { _ in
+                selectedDatabase = Database.defaultDatabase()
+            }
+            .store(in: &cancellables)
+        NotificationCenter.default
+            .publisher(for: .databaseListUpdate, object: nil)
             .sink { _ in
                 selectedDatabase = Database.defaultDatabase()
             }
@@ -750,6 +793,95 @@ struct AdvancedPreferencesView: View {
         }
     }
 
+    func deletePrivateKey(forAccount key: String) {
+        UserAlert.showAlert(message: "Are you sure you want to erase the private key for '\(key)'?", buttonTitle: "Cancel", secondaryButtonTitle: "Erase Private Key", secondaryButtonAction: {
+            EncryptionManager.shared.clearPrivateKey(for: key)
+            updateKeys()
+        }, style: .critical)
+    }
+
+    func resetPrivateKey(forAccount key: String) {
+        UserAlert.showAlert(message: "Are you sure you want to reset the private key for '\(key)'?", buttonTitle: "Cancel", secondaryButtonTitle: "Reset Private Key", secondaryButtonAction: {
+            EncryptionManager.shared.clearPrivateKey(for: key)
+            let pkey = EncryptionManager.shared.generateKey()
+            do {
+                try EncryptionManager.shared.replacePrivateKey(for: key, with: pkey.asString())
+            } catch {
+                Logger.shared.logError("Error while replacing the private key for \(key) with \(pkey.asString())", category: .encryption)
+            }
+            updateKeys()
+        }, style: .critical)
+    }
+
+    func verifyPrivateKey(forAccount key: String) {
+        do {
+            let string = "This is the clear text with accent é 🤤"
+            let PKey = EncryptionManager.shared.privateKey(for: key)
+            let encryptedString = try EncryptionManager.shared.encryptString(string, PKey)
+            var decryptedString: String?
+
+            if let encryptedString = encryptedString {
+                decryptedString = try EncryptionManager.shared.decryptString(encryptedString, PKey)
+
+                if decryptedString == string, encryptedString != string {
+                    UserAlert.showMessage(message: "Encryption",
+                                          informativeText: "Encryption worked ✅ Clear text is \(string) and encrypted data is \(encryptedString)")
+
+                    return
+                }
+            }
+
+            UserAlert.showError(message: "Encryption",
+                                informativeText: "This encryption didn't work, key is corrupted!")
+        } catch {
+            UserAlert.showError(message: "Encryption", error: error)
+        }
+    }
+
+    func resetLocalPrivateKey() {
+        UserAlert.showAlert(message: "Are you sure you want to reset the local private key?", buttonTitle: "Cancel", secondaryButtonTitle: "Reset Local Private Key", secondaryButtonAction: {
+            let pkey = EncryptionManager.shared.generateKey()
+            Persistence.Encryption.localPrivateKey = pkey.asString()
+            updateKeys()
+        }, style: .critical)
+    }
+
+    func verifyLocalPrivateKey() {
+        do {
+            let string = "This is the clear text with accent é 🤤"
+            let PKey = EncryptionManager.shared.localPrivateKey()
+            let encryptedString = try EncryptionManager.shared.encryptString(string, PKey)
+            var decryptedString: String?
+
+            if let encryptedString = encryptedString {
+                decryptedString = try EncryptionManager.shared.decryptString(encryptedString, PKey)
+
+                if decryptedString == string, encryptedString != string {
+                    UserAlert.showMessage(message: "Encryption",
+                                          informativeText: "Encryption worked ✅ Clear text is \(string) and encrypted data is \(encryptedString)")
+
+                    return
+                }
+            }
+
+            UserAlert.showError(message: "Encryption",
+                                informativeText: "This encryption didn't work, key is corrupted!")
+        } catch {
+            UserAlert.showError(message: "Encryption", error: error)
+        }
+    }
+
+    func deleteAllPrivateKeys() {
+        UserAlert.showAlert(message: "Are you sure you want to delete ALL private keys?", informativeText: "Erase all private keys", buttonTitle: "Cancel", secondaryButtonTitle: "Erase Private Keys", secondaryButtonAction: {
+            EncryptionManager.shared.resetPrivateKeys(andMigrateOldSharedKey: false)
+            updateKeys()
+        }, style: .critical)
+    }
+
+    func migrateOldPrivateKeyToCurrentAccount() {
+        _ = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
+        updateKeys()
+    }
 }
 
 struct AdvancedPreferencesView_Previews: PreviewProvider {
