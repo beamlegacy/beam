@@ -98,7 +98,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         if !isRunningTests {
             createWindow(frame: nil, restoringTabs: true)
-            windows.first?.showUpdateAlert(onStartUp: true)
         }
 
         Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
