@@ -41,7 +41,11 @@ struct OnboardingView: View {
                         OnboardingEmailConfirmationView(actions: $model.actions, finish: finishCallback)
                     case .imports:
                         OnboardingImportsView(actions: $model.actions, finish: finishCallback)
-                    case .saveEncryption:
+                    case .setupPrivateKey:
+                        OnboardingSetupPrivateKey(actions: $model.actions, finish: finishCallback)
+                    case .lostPrivateKey:
+                        OnboardingLostPrivateKey(finish: finishCallback)
+                    case .savePrivateKey:
                         OnboardingSaveEncryptionView(actions: $model.actions, finish: finishCallback)
                     default:
                         OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading, finish: finishCallback)

@@ -44,6 +44,7 @@ class DocumentManagerNetworkTests: QuickSpec {
             // Try to avoid issues with BeamTextTests creating documents when parsing links
             BeamNote.clearCancellables()
 
+            BeamObjectManager.disableSendingObjects = false
             BeamTestsHelper.login()
 
             helper.deleteAllDatabases()
@@ -53,7 +54,8 @@ class DocumentManagerNetworkTests: QuickSpec {
 
             helper.createDefaultDatabase("00000000-e0df-4eca-93e6-8778984bcd18")
 
-            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+            try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+//            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {

@@ -22,8 +22,9 @@ class PasswordsDBTests: XCTestCase {
         super.setUp()
 
         BeamTestsHelper.logout()
-
-        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+        PasswordManager.shared.deleteAll(includedRemote: false)
+        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+//        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
     }
 
     func testSavingPassword() {
@@ -237,6 +238,7 @@ class PasswordsDBTests: XCTestCase {
         BeamTestsHelper.logout()
 
         beamHelper.beginNetworkRecording(test: self)
+        BeamObjectManager.disableSendingObjects = false
         BeamTestsHelper.login()
     }
 

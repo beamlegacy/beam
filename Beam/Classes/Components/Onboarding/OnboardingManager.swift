@@ -13,9 +13,11 @@ struct OnboardingStep: Equatable {
         case welcome
         case profile
         case emailConnect
+        case setupPrivateKey
+        case lostPrivateKey
         case emailConfirm
         case imports
-        case saveEncryption
+        case savePrivateKey
         case loading
     }
 
@@ -107,6 +109,9 @@ class OnboardingManager: ObservableObject {
 
     func backToPreviousStep() {
         guard let previous = stepsHistory.popLast() else { return }
+        if [.emailConnect, .welcome].contains(previous.type) {
+            AccountManager.logoutIfNeeded()
+        }
         actions = []
         currentStepIsFromHistory = true
         currentStep = previous
@@ -119,7 +124,7 @@ class OnboardingManager: ObservableObject {
         if let nextStep = nextStep ?? stepAfter(step: previous) {
             currentStep = nextStep
             viewIsLoading = false
-            if AuthenticationManager.shared.isAuthenticated {
+            if AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn {
                 stepsHistory.removeAll()
             } else {
                 stepsHistory.append(previous)
@@ -139,9 +144,11 @@ class OnboardingManager: ObservableObject {
             return stepAfterProfile()
         case .profile:
             return stepAfterProfile()
-        case .saveEncryption:
+        case .savePrivateKey:
             return importStepIfNeeded(onlyConnect: onlyConnect)
-        case .imports, .loading:
+        case .setupPrivateKey:
+            return stepAfterProfile()
+        case .imports, .loading, .lostPrivateKey:
             return nil
         }
     }
@@ -152,7 +159,7 @@ class OnboardingManager: ObservableObject {
 
     private func encryptionKeyStepIfNeeded() -> OnboardingStep? {
         if userDidSignUp {
-            return OnboardingStep(type: .saveEncryption)
+            return OnboardingStep(type: .savePrivateKey)
         }
         return nil
     }
@@ -187,6 +194,19 @@ class OnboardingManager: ObservableObject {
         PasswordManager.shared.count() > 0
     }
 
+    func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        switch AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
+        case .signedIn:
+            completionHandler(nil)
+            AccountManager().runFirstSync(useBuiltinPrivateKeyUI: false) { result in
+                syncCompletion?(result)
+            }
+        case .privateKeyCheck:
+            completionHandler(OnboardingStep(type: .setupPrivateKey))
+        default:
+            assert(false)
+        }
+    }
 }
 
 // MARK: - Window management

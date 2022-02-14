@@ -131,6 +131,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
     }
+
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try db.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
@@ -144,6 +145,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         }
         return nil
     }
+
     private func createOrUpdate(record: FrecencyNoteRecord?, score: FrecencyScore, paramKey: FrecencyParamKey) -> FrecencyNoteRecord {
         if var updatedRecord = record {
             updatedRecord.lastAccessAt = score.lastTimestamp
@@ -161,6 +163,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
             return createdRecord
         }
     }
+
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
         let existingRecord = try? db.fetchOneFrecencyNote(noteId: score.id, paramKey: paramKey)
         let recordToSave = createOrUpdate(record: existingRecord, score: score, paramKey: paramKey)
@@ -185,6 +188,23 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
         try saveAllOnNetwork(recordsToSave)
+    }
+
+    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try self.db.clearNoteFrecencies()
+            if AuthenticationManager.shared.isAuthenticated && includedRemote {
+                try self.deleteAllFromBeamObjectAPI { result in
+                    networkCompletion?(result)
+                }
+            } else {
+                networkCompletion?(.success(false))
+            }
+            return
+        } catch {
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .fileDB)
+        }
+        networkCompletion?(.success(false))
     }
 }
 
