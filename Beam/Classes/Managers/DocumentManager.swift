@@ -77,7 +77,7 @@ public class DocumentManager: NSObject {
     static var networkTasks: [UUID: (DispatchWorkItem, Bool, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
     var thread: Thread
-    @discardableResult func checkThread() -> Bool {
+    @discardableResult internal func checkThread() -> Bool {
         let res = self.thread == Thread.current
 
         if !res {
@@ -96,40 +96,6 @@ public class DocumentManager: NSObject {
         context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
 
         super.init()
-    }
-
-    // MARK: Coredata Updates
-    @objc func managedObjectContextObjectsDidChange(_ notification: Notification) {
-        printObjects(notification)
-    }
-
-    private func printObjectsFromNotification(_ notification: Notification, _ keyPath: String) {
-        checkThread()
-        if let objects = notification.userInfo?[keyPath] as? Set<NSManagedObject>, !objects.isEmpty {
-            let titles = objects.compactMap { object -> String? in
-                guard let document = object as? Document else { return nil }
-
-                return "\(document.title) {\(document.id)} version \(document.version)"
-            }
-
-            if !titles.isEmpty {
-                Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(titles.count) Documents: \(titles)",
-                                       category: .coredataDebug)
-            }
-        }
-    }
-
-    func printObjects(_ notification: Notification) {
-        checkThread()
-        printObjectsFromNotification(notification, NSInsertedObjectsKey)
-        printObjectsFromNotification(notification, NSUpdatedObjectsKey)
-        printObjectsFromNotification(notification, NSDeletedObjectsKey)
-        printObjectsFromNotification(notification, NSRefreshedObjectsKey)
-        printObjectsFromNotification(notification, NSInvalidatedObjectsKey)
-
-        if let areInvalidatedAllObjects = notification.userInfo?[NSInvalidatedAllObjectsKey] as? Bool {
-            Logger.shared.logDebug("All objects are invalidated: \(areInvalidatedAllObjects)", category: .coredataDebug)
-        }
     }
 
     // MARK: CoreData Load
