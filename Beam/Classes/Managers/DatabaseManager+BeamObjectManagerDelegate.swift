@@ -62,6 +62,7 @@ extension DatabaseManager: BeamObjectManagerDelegate {
                         changed = true
                         // I don't need to flag this object `deleted` like I do for DocumentStruct because
                         // Database `checkValidations` only has title checks. In such case, changing the title.
+                        database.titleBeforeAutoRenaming = originalTitle
                         database.title = "\(originalTitle) (\(index))"
                         Logger.shared.logWarning("Validation issue, new title is \(database.title)",
                                                  category: .databaseNetwork)

@@ -384,7 +384,7 @@ final class WebAutocompleteContext {
     private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
         switch host {
         case "app.beamapp.co":
-            return WebAutocompleteRules(ignoreUntaggedPasswordFieldAlone: true)
+            return WebAutocompleteRules(ignorePasswordAutocompleteOff: .never, ignoreUntaggedPasswordFieldAlone: true)
         case "pinterest.com", "netflix.com", "maderasbarber.com":
             return WebAutocompleteRules(discardAutocompleteAttribute: .whenPasswordField)
         default:

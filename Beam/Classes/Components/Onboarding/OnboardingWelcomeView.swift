@@ -12,6 +12,7 @@ struct OnboardingWelcomeView: View {
     var welcoming: Bool
     @Binding var viewIsLoading: Bool
     var finish: OnboardingView.StepFinishCallback
+    @EnvironmentObject private var onboardingManager: OnboardingManager
     @State private var isLoadingDataStartTime: Date?
 
     private enum SigninError: Error {
@@ -46,7 +47,7 @@ struct OnboardingWelcomeView: View {
                     OnboardingView.TitleText(title: welcoming ? "Welcome to Beam" : "Connect to Beam")
                 }
                 VStack(spacing: BeamSpacing._120) {
-                    GoogleButton(buttonType: .signin, onClick: nil, onConnect: onSigninDone, onDataSync: onDataSyncDone, onFailure: onGoogleSigninError, label: { _ in
+                    GoogleButton(buttonType: .signin, onClick: nil, onConnect: onSigninDone, onDataSync: nil, onFailure: onGoogleSigninError, label: { _ in
                         ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280, height: 34)
                     })
                     .buttonStyle(.borderless)
@@ -75,13 +76,21 @@ struct OnboardingWelcomeView: View {
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
             error = nil
         }
+        AccountManager.logoutIfNeeded()
     }
 
     private func onSigninDone() {
         DispatchQueue.main.async {
             guard AuthenticationManager.shared.isAuthenticated else { return }
-            self.viewIsLoading = true
-            self.isLoadingDataStartTime = BeamDate.now
+            self.onboardingManager.checkForPrivateKey { nextStep in
+                guard nextStep != nil else {
+                    self.viewIsLoading = true
+                    self.isLoadingDataStartTime = BeamDate.now
+                    onDataSyncDone()
+                    return
+                }
+                finish(nextStep)
+            }
         }
     }
 

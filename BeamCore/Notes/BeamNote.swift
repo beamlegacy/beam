@@ -130,7 +130,11 @@ public class BeamNote: BeamElement {
         self.title = Self.validTitle(fromTitle: title)
         super.init()
         changePropagationEnabled = false
-        defer { changePropagationEnabled = true }
+        warmingUp = true
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
 
         self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
@@ -142,7 +146,11 @@ public class BeamNote: BeamElement {
         self.type = BeamNoteType.journalForDate(journalDate)
         super.init()
         changePropagationEnabled = false
-        defer { changePropagationEnabled = true }
+        warmingUp = true
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
 
         self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
@@ -174,7 +182,11 @@ public class BeamNote: BeamElement {
 
         try super.init(from: decoder)
         changePropagationEnabled = false
-        defer { changePropagationEnabled = true }
+        warmingUp = true
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
 
         self.sign = Self.signPost.createId(object: self)
         if container.contains(.sources) {
@@ -334,6 +346,16 @@ public class BeamNote: BeamElement {
         if var note = note as? BeamNoteDocument {
             note.lastChangedElement = child
         }
+    }
+
+    public static func unloadAllNotes() {
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
+
+        fetchedNotesCancellables.removeAll()
+        fetchedNotes.removeAll()
+        fetchedNotesTitles.removeAll()
+        clearCancellables()
     }
 
     public static func unload(note: BeamNote) {

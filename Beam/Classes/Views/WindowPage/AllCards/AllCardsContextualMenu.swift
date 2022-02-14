@@ -52,14 +52,6 @@ class AllCardsContextualMenu {
                     keyEquivalent: ""
                 ))
             }
-
-            if count == 1 {
-                menu.addItem(NSMenuItem(
-                    title: "Invite...",
-                    action: #selector(invite),
-                    keyEquivalent: ""
-                ))
-            }
             menu.addItem(NSMenuItem.separator())
         }
 
@@ -166,10 +158,6 @@ class AllCardsContextualMenu {
         } else {
             AppDelegate.main.exportAllNotesToJSON(self)
         }
-    }
-
-    @objc private func invite() {
-//        no-op for now
     }
 
     @objc private func makePublic() {

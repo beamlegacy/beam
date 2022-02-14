@@ -12,7 +12,7 @@ enum Persistence {
         @KeychainStorable("authentication.email") static var email: String?
         @KeychainStorable("authentication.password") static var password: String?
 
-        @KeychainStorable("authentication.google.tokens", synchronizable: false) static var googleCalendarTokens: String?
+        @KeychainStorable("authentication.google.tokens", synchronizable: false) static var googleCalendarTokens: [String: String]?
 
         @StandardStorable("authentication.username") static var username: String?
         @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
@@ -28,7 +28,15 @@ enum Persistence {
     }
 
     enum Encryption {
+        @KeychainStorable("encryption.localPrivateKey", synchronizable: false) static var localPrivateKey: String?
+        @KeychainStorable("encryption.privateKeys") static var privateKeys: [String: String]?
+
+        // This is deprecated but we keep it as for now
         @KeychainStorable("encryption.privateKey") static var privateKey: String?
+        // This is not saved in the keychain
+        @KeychainStorable("encryption.privateKeyCreationDate") static var creationDate: Date?
+        @KeychainStorable("encryption.privateKeyUpdateDate") static var updateDate: Date?
+
     }
 
     enum BrowsingTree {
@@ -71,5 +79,17 @@ enum Persistence {
         Persistence.Authentication.password = nil
         Persistence.Authentication.googleCalendarTokens = nil
         Sync.cleanUp()
+    }
+
+    static func emailOrRaiseError() -> String {
+        guard let email = Persistence.Authentication.email else {
+            fatalError("Email is nil and it should not")
+        }
+
+        guard !email.isEmpty else {
+            fatalError("Email is empty and it should not")
+        }
+
+        return email
     }
 }

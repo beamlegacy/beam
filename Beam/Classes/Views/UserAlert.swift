@@ -21,7 +21,7 @@ class UserAlert {
         showAlert(message: message ?? "Error", informativeText: error.localizedDescription, style: .critical)
     }
 
-    static private func showAlert(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil, buttonAction: (() -> Void)? = nil, style: NSAlert.Style = .informational) {
+    static func showAlert(message: String, informativeText: String? = nil, buttonTitle: String? = nil, secondaryButtonTitle: String? = nil, buttonAction: (() -> Void)? = nil, secondaryButtonAction: (() -> Void)? = nil, style: NSAlert.Style = .informational) {
         let call = {
             let alert = NSAlert()
             alert.alertStyle = style
@@ -41,7 +41,10 @@ class UserAlert {
             let modalResult = alert.runModal()
             if modalResult.rawValue == 1000 {
                 buttonAction?()
+            } else {
+                secondaryButtonAction?()
             }
+
         }
 
         if Thread.isMainThread {

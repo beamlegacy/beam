@@ -4,43 +4,27 @@ import BeamCore
 
 extension AppDelegate {
     @IBAction func deleteLocalContent(_ sender: Any) {
-        deleteAllLocalContent()
+        deleteAllData()
     }
 
-    func deleteAllLocalContent() {
+    func deleteAllData(includedRemote: Bool = false) {
         // Clustering Orphaned file
         do {
             try data.clusteringOrphanedUrlManager.clear()
         } catch {
             Logger.shared.logError("Could not delete Clustering Orphaned file", category: .general)
         }
-
-        // Link Store
-        do {
-            try LinkStore.shared.deleteAll()
-        } catch {
-            Logger.shared.logError("Could not delete LinkStore", category: .general)
-        }
-
         // GRDB
         do {
             try GRDBDatabase.shared.clear()
         } catch {
             Logger.shared.logError("Could not delete GRDB Databases", category: .general)
         }
-
         // TopDomain
         do {
             try TopDomainDatabase.shared.clear()
         } catch {
             Logger.shared.logError("Could not delete TopDomains", category: .general)
-        }
-
-        // BeamFile
-        do {
-            try BeamFileDBManager.shared.clear()
-        } catch {
-            Logger.shared.logError("Could not delete BeamFiles", category: .general)
         }
 
         // CoreData Logger
@@ -55,25 +39,37 @@ extension AppDelegate {
 
         // Cookies && Cache
         data.clearCookiesAndCache()
+
+        // BeamFile
+        BeamFileDBManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        // Link Store
+        LinkStore.shared.deleteAll(includedRemote: includedRemote) { _ in }
         //Contacts
-        ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
+        ContactsManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
         // Passwords
-        PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
+        PasswordManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        // Note Frecency
+        GRDBNoteFrecencyStorage().deleteAll(includedRemote: includedRemote) { _ in }
+        // BrowsingTree Remote
+        if includedRemote {
+            BrowsingTreeStoreManager.shared.remoteDeleteAll { _ in }
+        }
         // BeamObject Coredata Checksum
         do {
             try BeamObjectChecksum.deleteAll()
         } catch {
             Logger.shared.logError("Could not delete BeamObjectChecksum", category: .general)
         }
+
         // Notes and Databases
-        self.deleteDocumentsAndDatabases(includedRemote: false)
+        self.deleteDocumentsAndDatabases(includedRemote: includedRemote)
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
         deleteDocumentsAndDatabases(includedRemote: true)
     }
 
-    private func deleteDocumentsAndDatabases(includedRemote: Bool) {
+    func deleteDocumentsAndDatabases(includedRemote: Bool) {
         // Documents and Databases
         documentManager.deleteAll(includedRemote: includedRemote) { result in
             switch result {
