@@ -10,7 +10,7 @@ let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.bu
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
-    @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
+    @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
     @Published var accountsCalendar: [AccountCalendar] = []
 
     private var scope = Set<AnyCancellable>()
@@ -32,7 +32,7 @@ class AccountsViewModel: ObservableObject {
         }.store(in: &scope)
 
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            self?.isloggedIn = isAuthenticated
+            self?.isloggedIn = isAuthenticated && AccountManager.state == .signedIn
         }.store(in: &scope)
     }
 
@@ -251,24 +251,24 @@ struct AccountsView: View {
                 .frame(width: 286, alignment: .leading)
                 .padding(.bottom, 20)
 
-            Button(action: {
-                promptDeleteAccountActionAlert()
-            }, label: {
-                // TODO: loc
-                Text("Delete Account...")
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 132)
-                    .padding(.top, -4)
-
-            })
-            VStack {
-                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.leading)
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.frame(width: 286, height: 26, alignment: .leading)
+//            Button(action: {
+//                promptDeleteAccountActionAlert()
+//            }, label: {
+//                // TODO: loc
+//                Text("Delete Account...")
+//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+//                    .frame(width: 132)
+//                    .padding(.top, -4)
+//
+//            })
+//            VStack {
+//                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
+//                    .lineLimit(2)
+//                    .fixedSize(horizontal: false, vertical: true)
+//                    .multilineTextAlignment(.leading)
+//                    .font(BeamFont.regular(size: 11).swiftUI)
+//                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+//            }.frame(width: 286, height: 26, alignment: .leading)
         }
     }
 
@@ -296,7 +296,7 @@ struct AccountsView: View {
                 }
             }, label: {
                 HStack {
-                    Text(EncryptionManager.shared.privateKey().asString())
+                    Text(EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString())
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                     Image("preferences-account-copy")
@@ -348,9 +348,9 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             AccountManager.logout()
             if self.checkboxHelper.isOn {
-                AppDelegate.main.deleteAllLocalContent()
+                AppDelegate.main.deleteAllData()
             }
-            viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated
+            viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
         }
     }
 
@@ -360,7 +360,7 @@ struct AccountsView: View {
                               informativeText: "All your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
-            // TODO: Implement when endpoint is ready
+            AppDelegate.main.deleteDocumentsAndDatabases(includedRemote: true)
         }
     }
 

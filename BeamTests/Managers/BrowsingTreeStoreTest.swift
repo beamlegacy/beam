@@ -13,13 +13,13 @@ import Nimble
 class BrowsingTreeStoreTest: XCTestCase {
 
     override func setUpWithError() throws {
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try GRDBDatabase.shared.clearUrlFrecencies()
         try GRDBDatabase.shared.clearBrowsingTrees()
     }
 
     override func tearDownWithError() throws {
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in}
         try GRDBDatabase.shared.clearUrlFrecencies()
         try GRDBDatabase.shared.clearBrowsingTrees()
     }

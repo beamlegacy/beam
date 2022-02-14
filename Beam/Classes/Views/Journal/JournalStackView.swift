@@ -129,7 +129,20 @@ class JournalSimpleStackView: NSView {
         return NSSize(width: width, height: height)
     }
 
+    private var databaseId = UUID.null
+    private func inspectDatabaseChange() {
+        guard databaseId != DatabaseManager.defaultDatabase.id else { return }
+        self.notes.removeAll()
+        for view in views.values {
+            view.removeFromSuperview()
+        }
+        views.removeAll()
+        databaseId = DatabaseManager.defaultDatabase.id
+    }
+
     public func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
+        inspectDatabaseChange()
+
         let sortedNotes = notes.sorted(by: { lhs, rhs in
             guard let j1 = lhs.type.journalDate,
                   let j2 = rhs.type.journalDate else { return false }

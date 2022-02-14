@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import BeamCore
+import CryptoKit
 
 enum PasswordManagerError: Error, Equatable {
     case localPasswordNotFound
@@ -204,7 +205,11 @@ extension PasswordManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ passwords: [PasswordRecord]) throws {
-        try self.passwordsDB.save(passwords: passwords)
+        var encryptedsPasswords: [PasswordRecord] = []
+        for password in passwords {
+            encryptedsPasswords.append(reEncrypt(password, encryptKey: EncryptionManager.shared.localPrivateKey()))
+        }
+        try self.passwordsDB.save(passwords: encryptedsPasswords)
         changeSubject.send()
     }
 
@@ -214,7 +219,12 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
-        try self.passwordsDB.save(passwords: passwords)
+        var encryptedsPasswords: [PasswordRecord] = []
+        for password in passwords {
+            encryptedsPasswords.append(reEncrypt(password, encryptKey: EncryptionManager.shared.localPrivateKey()))
+        }
+
+        try self.passwordsDB.save(passwords: encryptedsPasswords)
         changeSubject.send()
     }
 
@@ -223,9 +233,13 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        var encryptedsPasswords: [PasswordRecord] = []
+        for password in passwords {
+            encryptedsPasswords.append(reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey()))
+        }
         Self.backgroundQueue.async { [weak self] in
             do {
-                try self?.saveOnBeamObjectsAPI(passwords) { result in
+                try self?.saveOnBeamObjectsAPI(encryptedsPasswords) { result in
                     switch result {
                     case .success:
                         Logger.shared.logDebug("Saved passwords on the BeamObject API",
@@ -244,9 +258,10 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        let encryptedPassword = reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
         Self.backgroundQueue.async { [weak self] in
             do {
-                try self?.saveOnBeamObjectAPI(password) { result in
+                try self?.saveOnBeamObjectAPI(encryptedPassword) { result in
                     switch result {
                     case .success:
                         Logger.shared.logDebug("Saved password on the BeamObject API",
@@ -262,5 +277,14 @@ extension PasswordManager: BeamObjectManagerDelegate {
                 Logger.shared.logError(error.localizedDescription, category: .passwordNetwork)
             }
         }
+    }
+
+    private func reEncrypt(_ password: PasswordRecord, decryptKey: SymmetricKey? = nil, encryptKey: SymmetricKey? = nil) -> PasswordRecord {
+        var passwordRecord = password
+        if let decryptedPassword = try? EncryptionManager.shared.decryptString(passwordRecord.password, decryptKey),
+           let newlyEncryptedPassword = try? EncryptionManager.shared.encryptString(decryptedPassword, encryptKey) {
+               passwordRecord.password = newlyEncryptedPassword
+        }
+        return passwordRecord
     }
 }

@@ -7,7 +7,7 @@ import XCTest
 class BeamLinkDBTests: XCTestCase {
     override func tearDown() {
         super.tearDown()
-        try? BeamLinkDB.shared.deleteAll()
+        BeamLinkDB.shared.deleteAll(includedRemote: false)
     }
 
     func testDomain() throws {
