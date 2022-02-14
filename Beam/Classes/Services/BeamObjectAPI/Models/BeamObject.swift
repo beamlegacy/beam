@@ -39,6 +39,10 @@ extension BeamObjectProtocol {
         BeamObjectChecksum.previousChecksum(object: self)
     }
 
+    var hasBeenSyncedOnce: Bool {
+        previousChecksum != nil
+    }
+
     func checksum() throws -> String {
         guard let result = try BeamObject(self).dataChecksum else {
             assert(false)
@@ -78,6 +82,7 @@ class BeamObject: Codable {
     enum BeamObjectError: Error {
         case noData
         case differentEncryptionKey
+        case noEmail
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -278,7 +283,10 @@ extension BeamObject {
     func decrypt() throws {
         guard let dataBang = data else { return }
 
-        let currentPrivateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+        guard let email = Persistence.Authentication.email else {
+            throw BeamObjectError.noEmail
+        }
+        let currentPrivateKeySignature = try EncryptionManager.shared.privateKey(for: email).asString().SHA256()
         guard privateKeySignature == currentPrivateKeySignature else {
             throw BeamObjectError.differentEncryptionKey
         }
@@ -308,7 +316,7 @@ extension BeamObject {
         guard let clearData = data else { return }
 
         if Configuration.env == .test,
-           EncryptionManager.shared.privateKey().asString() != Configuration.testPrivateKey {
+           EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString() != Configuration.testPrivateKey {
             fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)` in your tests")
         }
 
@@ -318,6 +326,10 @@ extension BeamObject {
 
         encrypted = true
         data = encryptedClearData
-        privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+
+        guard let email = Persistence.Authentication.email else {
+            throw BeamObjectError.noEmail
+        }
+        privateKeySignature = try EncryptionManager.shared.privateKey(for: email).asString().SHA256()
     }
 }

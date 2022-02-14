@@ -347,11 +347,13 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         Logger.shared.logDebug("Submit: \(elementId)", category: .passwordManagerInternal)
         disabledForSubmit = true // disable focus handler temporarily, to prevent the password manager menu from reappearing if the JS code triggers a selection in a text field
         dismissPasswordManagerMenu()
-        requestValuesFromTextFields(frameInfo: frameInfo) { dict in
+        requestValuesFromTextFields(frameInfo: frameInfo) { [weak self] dict in
+            guard let self = self else { return }
             if let values = dict ?? self.valuesOnFocusOut {
                 self.updateStoredValues(with: values, userInput: true)
                 self.saveCredentialsIfChanged(allowEmptyUsername: true)
             }
+            self.autocompleteContext.clear()
         }
     }
 
