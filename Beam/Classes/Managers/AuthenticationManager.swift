@@ -31,6 +31,12 @@ class AuthenticationManager {
         set {
             Persistence.Authentication.accessToken = newValue
             persistenceDidUpdate()
+            if isAuthenticated && AccountManager.state == .signedOff {
+                AccountManager.moveToAuthenticated()
+            } else if !isAuthenticated && AccountManager.state != .signedOff {
+                AccountManager.moveToSignedOff()
+            }
+
         }
     }
     var refreshToken: String? {

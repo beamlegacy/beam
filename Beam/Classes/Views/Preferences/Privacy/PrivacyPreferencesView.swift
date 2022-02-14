@@ -9,14 +9,11 @@ import SwiftUI
 import Preferences
 
 let PrivacyPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .privacy, title: "Privacy", imageName: "preferences-privacy") {
-    PrivacyPreferencesView(selectedUpdate: ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval)
+    PrivacyPreferencesView()
 }
 
 struct PrivacyPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
-
-    @State var allowListIsPresented: Bool = false
-    @State var selectedUpdate: SynchronizeInterval
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
@@ -52,7 +49,7 @@ struct PrivacyPreferencesView: View {
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .frame(width: 250, alignment: .trailing)
             } content: {
-                UpdateRulesSection(selectedUpdate: $selectedUpdate)
+                UpdateRulesSection()
             }
 
             Preferences.Section(verticalAlignment: .top) {
@@ -61,7 +58,7 @@ struct PrivacyPreferencesView: View {
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                 .frame(width: 250, alignment: .trailing)
             } content: {
-                AllowListSection(allowListIsPresented: $allowListIsPresented)
+                AllowListSection()
             }
 
 //            Preferences.Section {
@@ -78,7 +75,7 @@ struct PrivacyPreferencesView: View {
 
 struct PrivacyPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PrivacyPreferencesView(selectedUpdate: .daily)
+        PrivacyPreferencesView()
     }
 }
 
@@ -87,12 +84,12 @@ struct AdsSection: View {
 
     var body: some View {
         Toggle(isOn: $isAdsFilterEnabled) {
-            Text("Remove most advertisments while browsing")
+            Text("Remove most advertisements while browsing")
         }.toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
-            .onReceive([isAdsFilterEnabled].publisher.first()) {
-                PreferencesManager.isAdsFilterEnabled = $0
+            .onChange(of: isAdsFilterEnabled) { newValue in
+                PreferencesManager.isAdsFilterEnabled = newValue
             }
     }
 }
@@ -108,8 +105,8 @@ struct TrackersSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([isPrivacyFilterEnabled].publisher.first()) {
-                    PreferencesManager.isPrivacyFilterEnabled = $0
+                .onChange(of: isPrivacyFilterEnabled) { newValue in
+                    PreferencesManager.isPrivacyFilterEnabled = newValue
                 }
 
             Toggle(isOn: $isSocialMediaFilterEnabled) {
@@ -117,9 +114,10 @@ struct TrackersSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([isSocialMediaFilterEnabled].publisher.first()) {
-                    PreferencesManager.isSocialMediaFilterEnabled = $0
+                .onChange(of: isSocialMediaFilterEnabled) { newValue in
+                    PreferencesManager.isSocialMediaFilterEnabled = newValue
                 }
+
             VStack {
                 Text("Websites which embed social media buttons implicitly track your browser history, even if you don’t have an account.")
                     .font(BeamFont.regular(size: 11).swiftUI)
@@ -143,17 +141,19 @@ struct AnnoyancesSection: View {
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([isAnnoyancesFilterEnabled].publisher.first()) {
-                    PreferencesManager.isAnnoyancesFilterEnabled = $0
+                .onChange(of: isAnnoyancesFilterEnabled) { newValue in
+                    PreferencesManager.isAnnoyancesFilterEnabled = newValue
                 }
+
             Toggle(isOn: $isCookiesFilterEnabled) {
                 Text("Hide cookie banners")
             }.toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-                .onReceive([isCookiesFilterEnabled].publisher.first()) {
-                    PreferencesManager.isCookiesFilterEnabled = $0
+                .onChange(of: isCookiesFilterEnabled) { newValue in
+                    PreferencesManager.isCookiesFilterEnabled = newValue
                 }
+
             VStack {
                 Text("Some websites display banners which impair the site’s functionality in order to force your content to be tracked.")
                     .font(BeamFont.regular(size: 11).swiftUI)
@@ -167,7 +167,7 @@ struct AnnoyancesSection: View {
 }
 
 struct UpdateRulesSection: View {
-    @Binding var selectedUpdate: SynchronizeInterval
+    @State private var selectedUpdate: SynchronizeInterval = ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval
 
     var body: some View {
         VStack(alignment: .leading) {
@@ -178,9 +178,10 @@ struct UpdateRulesSection: View {
                     }
                 }.labelsHidden()
                 .frame(width: 140)
-                .onReceive([self.selectedUpdate].publisher.first()) { (value) in
-                    ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval = value
+                .onChange(of: selectedUpdate) { newValue in
+                    ContentBlockingManager.shared.radBlockPreferences.synchronizeInterval = newValue
                 }
+
                 Button("Update Now") {
                     ContentBlockingManager.shared.synchronize()
                 }
@@ -193,7 +194,7 @@ struct UpdateRulesSection: View {
 }
 
 struct AllowListSection: View {
-    @Binding var allowListIsPresented: Bool
+    @State private var allowListIsPresented: Bool = false
 
     var body: some View {
         VStack(alignment: .leading) {

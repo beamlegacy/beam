@@ -230,8 +230,7 @@ class GoogleCalendarService {
             switch result {
             case .success(let response):
 
-                guard let googleTokensStr = Persistence.Authentication.googleCalendarTokens,
-                      var googleTokens = GoogleTokenUtility.objectifyOauth(str: googleTokensStr),
+                guard var googleTokens = Persistence.Authentication.googleCalendarTokens,
                         let accessToken = self.accessToken else {
                           completionHandler(.failure(CalendarError.unknownError(message: "Can't save renewed google access token")))
                           return
@@ -240,7 +239,7 @@ class GoogleCalendarService {
                 googleTokens.updateValue(refreshToken, forKey: response.credential.oauthToken)
 
                 self.accessToken = response.credential.oauthToken
-                Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: googleTokens)
+                Persistence.Authentication.googleCalendarTokens = googleTokens
                 completionHandler(.success(true))
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .eventCalendar)
@@ -268,12 +267,11 @@ class GoogleCalendarService {
             case .success(let (credential, _, _)):
                 self.accessToken = credential.oauthToken
                 self.refreshToken = credential.oauthRefreshToken
-                if let googleCalendarTokens = Persistence.Authentication.googleCalendarTokens,
-                    var object = GoogleTokenUtility.objectifyOauth(str: googleCalendarTokens) {
-                    object.updateValue(credential.oauthRefreshToken, forKey: credential.oauthToken)
-                    Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: object)
+                if var googleCalendarTokens = Persistence.Authentication.googleCalendarTokens {
+                    googleCalendarTokens.updateValue(credential.oauthRefreshToken, forKey: credential.oauthToken)
+                    Persistence.Authentication.googleCalendarTokens = googleCalendarTokens
                 } else {
-                    Persistence.Authentication.googleCalendarTokens = GoogleTokenUtility.stringifyOauth(dict: [credential.oauthToken: credential.oauthRefreshToken])
+                    Persistence.Authentication.googleCalendarTokens = [credential.oauthToken: credential.oauthRefreshToken]
                 }
                 self.inNeedOfPermission = false
                 completionHandler(.success(()))

@@ -61,7 +61,7 @@ struct OauthButton<Content: View>: View {
                         onConnect?()
                     }
                 case .signin:
-                    AccountManager().signInWithProvider(provider: type, accessToken: credential.oauthToken) { _ in
+                    AccountManager().signInWithProvider(provider: type, accessToken: credential.oauthToken, runFirstSync: false) { _ in
                         onConnect?()
                     } syncCompletion: { _ in
                         onDataSync?()

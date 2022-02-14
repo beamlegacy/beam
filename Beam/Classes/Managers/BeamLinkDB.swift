@@ -172,8 +172,21 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         return link
     }
 
-    public func deleteAll() throws {
-        try db.deleteAll()
+    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try db.deleteAll()
+            if AuthenticationManager.shared.isAuthenticated && includedRemote {
+                try self.deleteAllFromBeamObjectAPI { result in
+                    networkCompletion?(result)
+                }
+            } else {
+                networkCompletion?(.success(false))
+            }
+            return
+        } catch {
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .linkNetwork)
+        }
+        networkCompletion?(.success(false))
     }
 
     public var allLinks: [Link] {
@@ -223,7 +236,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
                     }
                 }
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
             }
         }
     }

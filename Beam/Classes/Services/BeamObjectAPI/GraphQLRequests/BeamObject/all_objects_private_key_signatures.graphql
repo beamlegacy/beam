@@ -1,0 +1,9 @@
+query {
+    me {
+        beamObjects {
+            id
+            type
+            privateKeySignature
+        }
+    }
+}
