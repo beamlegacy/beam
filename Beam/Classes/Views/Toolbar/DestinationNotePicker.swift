@@ -212,7 +212,7 @@ struct DestinationNotePicker: View {
                 return
             }
             let finalCardName = autocompleteModel.realNameForCardName(result.text)
-            if result.source == .createCard {
+            if result.source == .createNote {
                 note = createNote(named: result.text)
             } else if result.source == .note && result.text != finalCardName,
                       let date = autocompleteModel.getDateForCardReplacementJournalNote(result.text) {
