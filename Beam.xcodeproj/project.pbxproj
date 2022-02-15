@@ -6131,7 +6131,6 @@
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
-				027CB665263163AC001311A0 /* PasswordManager.js in Resources */,
 				52F78D2F27884699007A9F53 /* prepare_beam_object.graphql in Resources */,
 				022843362617C4C3001C062E /* Readability.js in Resources */,
 				A07B03EE279AF1D200D14C45 /* Inter-LightItalic.otf in Resources */,
