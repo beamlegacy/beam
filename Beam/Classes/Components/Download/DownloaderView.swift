@@ -22,6 +22,8 @@ struct DownloaderView<List: DownloadListProtocol>: View {
     @State private var selectedDownloads: Set<List.Element> = []
     @State private var lastManuallyInsertedDownload: List.Element?
 
+    @Environment(\.colorScheme) var colorScheme
+
     let preferredWidth: CGFloat = 368.0
 
     private var onClose: () -> Void
@@ -57,15 +59,18 @@ struct DownloaderView<List: DownloadListProtocol>: View {
                             self.isHovering = h
                         }
                     }
-                }.onHover { h in
+                }
+                .padding(.horizontal, 12)
+                .onHover { h in
                     withAnimation {
                         self.isHoveringHeader = h
                     }
                 }
                 Separator(horizontal: true)
+                    .blendModeLightMultiplyDarkScreen()
                     .padding(.top, 6)
+                    .opacity(colorScheme == .dark ? 0.3 : 1.0)
             }
-            .padding(.horizontal, 12)
             .padding(.top, 12)
             .animation(.easeInOut(duration: 1), value: isHoveringHeader)
             .animation(.easeInOut(duration: 1), value: isHovering)
@@ -108,7 +113,7 @@ struct DownloaderView<List: DownloadListProtocol>: View {
             .padding(.top, 2)
         }
         .frame(width: preferredWidth)
-        .background(BeamColor.Generic.background.swiftUI)
+        .background(BeamColor.Generic.secondaryBackground.swiftUI)
         .cornerRadius(10)
         .alert(item: $downloadList.showAlertFileNotFoundForDownload, content: { download in
             Alert(title: Text("Beam can’t show the file “\(download.filename ?? "?")” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
@@ -181,6 +186,6 @@ struct DownloaderView_Previews: PreviewProvider {
 
         return Group {
             DownloaderView(downloadList: downloadList, onCloseButtonTap: {})
-        }
+        }.preferredColorScheme(.dark)
     }
 }
