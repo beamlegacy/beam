@@ -20,7 +20,6 @@ class FrecencyNoteStorageTest: XCTestCase {
 
         BeamTestsHelper.logout()
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-//        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
     }
 
     func testSaveFetch() throws {
@@ -110,6 +109,7 @@ class FrecencyNoteStorageTest: XCTestCase {
         BeamTestsHelper.logout()
         beamHelper.beginNetworkRecording(test: self)
         BeamTestsHelper.login()
+        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
 
     private func stopNetworkTests() {
