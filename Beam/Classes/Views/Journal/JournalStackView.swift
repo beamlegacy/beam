@@ -17,7 +17,11 @@ class JournalSimpleStackView: NSView {
     var onStartEditing: (() -> Void)?
 
     var notes: [BeamNote] = []
-    var views: [BeamNote: BeamTextEdit] = [:]
+    var views: [BeamNote: BeamTextEdit] = [:] {
+        didSet {
+            countChanged = !initialLayout
+        }
+    }
     var scope: [AnyCancellable] = []
 
     override var wantsUpdateLayer: Bool { true }
@@ -80,7 +84,6 @@ class JournalSimpleStackView: NSView {
         guard enclosingScrollView != nil else { return }
         defer {
             countChanged = false
-            initialLayout = false
         }
 
         let textEditViews = self.notes.compactMap { views[$0] }
@@ -116,7 +119,7 @@ class JournalSimpleStackView: NSView {
               let textEdit = views[firstNote]
         else { return .zero }
 
-        let width = textEdit.intrinsicContentSize.width
+        let width = frame.width
 
         var height = topOffset
         for note in self.notes {
@@ -169,12 +172,10 @@ class JournalSimpleStackView: NSView {
             // Remove the notes that are not there any more:
             if note.shouldAppearInJournal {
                 addNote(note)
-                countChanged = true
             } else {
                 guard let view = views[note] else { continue }
                 view.removeFromSuperview()
                 views.removeValue(forKey: note)
-                countChanged = true
             }
         }
 
@@ -186,20 +187,29 @@ class JournalSimpleStackView: NSView {
                 let view = tuple.value
                 view.removeFromSuperview()
                 views.removeValue(forKey: note)
-                countChanged = true
             }
         }
 
         if countChanged {
-            invalidateLayout()
+            layout()
         }
     }
 
+    private let typicalEditorHeightWhenWeDontKnow = CGFloat(800)
     public func addNote(_ note: BeamNote) {
         guard views[note] == nil else { return }
-        let view = getTextEditView(for: note, enableDelayedInit: views.count > 3)
+        let maxHeight: CGFloat
+        if frame.height > 0 {
+            maxHeight = frame.height
+        } else if let windowHeight = window?.frame.height {
+            maxHeight = windowHeight
+        } else if let screen = window?.screen ?? NSScreen.main {
+            maxHeight = screen.frame.height
+        } else {
+            maxHeight = typicalEditorHeightWhenWeDontKnow
+        }
+        let view = getTextEditView(for: note, enableDelayedInit: views.count > 1 + Int(maxHeight / BeamTextEdit.minimumEmptyEditorHeight))
         views[note] = view
-        countChanged = true
         addSubview(view)
     }
 
@@ -209,7 +219,7 @@ class JournalSimpleStackView: NSView {
     }
 
     private func getTextEditView(for note: BeamNote, enableDelayedInit: Bool) -> BeamTextEdit {
-        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit)
+        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit, frame: NSRect(origin: .zero, size: CGSize(width: frame.width, height: BeamTextEdit.minimumEmptyEditorHeight)))
         textEditView.state = state
         textEditView.onStartEditing = onStartEditing
         textEditView.openURL = { [weak state] url, element in
@@ -251,4 +261,7 @@ class JournalSimpleStackView: NSView {
         super.mouseDown(with: event)
     }
 
+    override func viewDidMoveToWindow() {
+        initialLayout = false
+    }
 }
