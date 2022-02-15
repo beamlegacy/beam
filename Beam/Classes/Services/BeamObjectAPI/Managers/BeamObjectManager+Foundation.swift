@@ -1,6 +1,5 @@
 import Foundation
 import BeamCore
-import simd
 
 // swiftlint:disable file_length
 
