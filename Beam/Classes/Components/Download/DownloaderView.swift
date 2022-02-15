@@ -105,6 +105,7 @@ struct DownloaderView<List: DownloadListProtocol>: View {
                             downloadList.openFile(download)
                         })
                         .padding(.trailing, (download.state == .completed && download.errorMessage == nil) ? 20 : 40)
+                        .frame(height: 53) //Force the height to fix a bug on Monterey were the ClickCatchingView is not getting the good height
                     }
                 }
             }
