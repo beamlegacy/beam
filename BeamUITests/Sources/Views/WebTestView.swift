@@ -52,8 +52,8 @@ class WebTestView: BaseView {
         let predicate = NSCompoundPredicate(
             type: .or,
             subpredicates: [
-                NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createCard'"),
-                NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-" + searchText + "-createCard'")
+                NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-" + searchText + "-createNote'"),
+                NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-" + searchText + "-createNote'")
             ]
         )
         let cardCreationElement = app.otherElements.matching(predicate).firstMatch
