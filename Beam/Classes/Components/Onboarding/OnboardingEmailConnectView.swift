@@ -208,12 +208,24 @@ struct OnboardingEmailConnectView: View {
                     loadingStartTime = BeamDate.now
                     updateButtonState()
 
+                    if let pkStatus = try? PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
+                        // We do this to show the saveEncyptionView, user probably reset his account
+                        onboardingManager.userDidSignUp = true
+                    }
+
                     onboardingManager.checkForPrivateKey { nextStep in
                         guard nextStep != nil else {
-                            handleSyncCompletion(startTime: loadingStartTime)
                             return
                         }
                         finish(nextStep)
+                    } syncCompletion: { result in
+                        switch result {
+                        case .success:
+                            handleSyncCompletion(startTime: loadingStartTime)
+                        default:
+                            Logger.shared.logError("Run first Sync failed when trying to connect with Email", category: .network)
+                            break
+                        }
                     }
                 }
             }

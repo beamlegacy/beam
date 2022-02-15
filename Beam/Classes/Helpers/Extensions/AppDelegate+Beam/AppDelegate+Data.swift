@@ -4,10 +4,10 @@ import BeamCore
 
 extension AppDelegate {
     @IBAction func deleteLocalContent(_ sender: Any) {
-        deleteAllData()
+        deleteAllLocalData()
     }
 
-    func deleteAllData(includedRemote: Bool = false) {
+    func deleteAllLocalData() {
         // Clustering Orphaned file
         do {
             try data.clusteringOrphanedUrlManager.clear()
@@ -41,19 +41,15 @@ extension AppDelegate {
         data.clearCookiesAndCache()
 
         // BeamFile
-        BeamFileDBManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        BeamFileDBManager.shared.deleteAll(includedRemote: false) { _ in }
         // Link Store
-        LinkStore.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         //Contacts
-        ContactsManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
         // Passwords
-        PasswordManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
         // Note Frecency
-        GRDBNoteFrecencyStorage().deleteAll(includedRemote: includedRemote) { _ in }
-        // BrowsingTree Remote
-        if includedRemote {
-            BrowsingTreeStoreManager.shared.remoteDeleteAll { _ in }
-        }
+        GRDBNoteFrecencyStorage().deleteAll(includedRemote: false) { _ in }
         // BeamObject Coredata Checksum
         do {
             try BeamObjectChecksum.deleteAll()
@@ -62,7 +58,7 @@ extension AppDelegate {
         }
 
         // Notes and Databases
-        self.deleteDocumentsAndDatabases(includedRemote: includedRemote)
+        self.deleteDocumentsAndDatabases(includedRemote: false)
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
