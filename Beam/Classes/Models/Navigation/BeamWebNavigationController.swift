@@ -302,7 +302,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
             if challenge.previousFailureCount == 0 {
                 PasswordManager.shared.credentials(for: challenge.protectionSpace.host) { credentials in
                     if let firstCredential = credentials.first,
-                       let decrypted = try? EncryptionManager.shared.decryptString(firstCredential.password),
+                       let decrypted = try? EncryptionManager.shared.decryptString(firstCredential.password, EncryptionManager.shared.localPrivateKey()),
                        !decrypted.isEmpty || !firstCredential.username.isEmpty {
                         completionHandler(.useCredential, URLCredential(user: firstCredential.username, password: decrypted, persistence: .forSession))
                     } else {
