@@ -24,8 +24,10 @@ class JournalTestView: BaseView {
     
     @discardableResult
     func openRecentCardByName(_ cardName: String) -> CardTestView {
-        _ = staticText(cardName).waitForExistence(timeout: implicitWaitTimeout)
-        staticText(cardName).click()
+        let button = app.buttons.matching(identifier: ToolbarLocators.Buttons.cardSwitcher.accessibilityIdentifier)
+            .matching(NSPredicate(format: "value = '\(cardName)'")).firstMatch
+        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, button)
+        button.click()
         return CardTestView()
     }
     
@@ -37,7 +39,9 @@ class JournalTestView: BaseView {
     
     @discardableResult
     func createCardViaOmniboxSearch(_ cardNameToBeCreated: String) -> CardTestView {
-        return self.searchInOmniBox(cardNameToBeCreated, false).selectCreateCard(cardNameToBeCreated)
+        searchInOmniBox(cardNameToBeCreated, false)
+        app.typeKey(.enter, modifierFlags: .option)
+        return CardTestView()
     }
     
     @discardableResult

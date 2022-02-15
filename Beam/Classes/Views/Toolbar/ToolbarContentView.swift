@@ -96,7 +96,7 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
                     })
             }
             ToolbarButton(icon: "nav-omnibox", action: {
-                state.setFocusOmnibox(fromTab: false)
+                state.startFocusOmnibox(fromTab: false)
             }).accessibilityIdentifier("nav-omnibox")
             if showPivotButton {
                 ToolbarModeSwitcher(modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)
@@ -174,8 +174,8 @@ struct ToolbarContentView_Previews: PreviewProvider {
             )
         ]
 
-        state.focusOmniBox = false
-        focusedState.focusOmniBox = true
+        state.stopFocusOmnibox()
+        focusedState.startFocusOmnibox()
         focusedState.mode = .web
         let origin = BrowsingTreeOrigin.searchBar(query: "query", referringRootId: nil)
         focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Note title"))

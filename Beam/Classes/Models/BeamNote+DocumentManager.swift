@@ -648,6 +648,23 @@ extension BeamNote: BeamNoteDocument {
         return create(journalDate: date)
     }
 
+    public static func availableTitle(withPrefix prefix: String) -> String {
+        let documentManager = DocumentManager()
+        let titles = documentManager.fetchAllNames(filters: [.titleMatch(prefix)])
+        var availableTitle: String?
+        var candidate = prefix
+        var index = 1
+        while availableTitle == nil {
+            index += 1
+            if titles.contains(candidate) {
+                candidate = prefix + " \(index)"
+            } else {
+                availableTitle = candidate
+            }
+        }
+        return availableTitle ?? prefix
+    }
+
     public var lastChangedElement: BeamElement? {
         get {
             AppDelegate.main.data?.lastChangedElement

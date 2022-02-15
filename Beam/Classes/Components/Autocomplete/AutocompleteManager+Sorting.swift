@@ -8,6 +8,7 @@
 import Foundation
 
 extension AutocompleteManager {
+    private static let resultsLimit = 8
 
     func mergeAndSortPublishersResults(publishersResults: [AutocompletePublisherSourceResults],
                                        for searchText: String) -> (results: [AutocompleteResult], canCreateNote: Bool) {
@@ -38,9 +39,10 @@ extension AutocompleteManager {
                                        topDomainResults: autocompleteResults[.topDomain] ?? [],
                                        mnemonicResults: autocompleteResults[.mnemonic] ?? [],
                                        searchEngineResults: autocompleteResults[.searchEngine] ?? [],
-                                       createCardResults: autocompleteResults[.createCard] ?? [])
+                                       actionsResults: autocompleteResults[.action] ?? [],
+                                       createCardResults: autocompleteResults[.createNote] ?? [])
 
-        let canCreateNote = autocompleteResults[.createCard]?.isEmpty == false
+        let canCreateNote = autocompleteResults[.createNote]?.isEmpty == false
         return (results: finalResults, canCreateNote: canCreateNote)
     }
 
@@ -51,6 +53,7 @@ extension AutocompleteManager {
                              topDomainResults: [AutocompleteResult],
                              mnemonicResults: [AutocompleteResult],
                              searchEngineResults: [AutocompleteResult],
+                             actionsResults: [AutocompleteResult],
                              createCardResults: [AutocompleteResult]) -> [AutocompleteResult] {
         let start = DispatchTime.now()
         let historyResultsTruncated = Array(historyResults.prefix(6))
@@ -74,11 +77,11 @@ extension AutocompleteManager {
         var filteredSearchEngineResults = filterOutSearchEngineURLResults(from: searchEngineResults, forURLAlreadyIn: uniqueURLs)
         filteredSearchEngineResults = autocompleteResultsUniqueSearchEngine(sequence: filteredSearchEngineResults)
 
-        let resultLimit = 8
         let results = merge(sortableResults: sortableResults,
                             searchEngineResults: filteredSearchEngineResults,
+                            actionsResults: actionsResults,
                             createCardResults: createCardResults,
-                            limit: resultLimit)
+                            limit: Self.resultsLimit)
         return results
     }
 
@@ -97,30 +100,39 @@ extension AutocompleteManager {
 
     private func merge(sortableResults: [AutocompleteResult],
                        searchEngineResults: [AutocompleteResult],
+                       actionsResults: [AutocompleteResult],
                        createCardResults: [AutocompleteResult],
                        limit: Int) -> [AutocompleteResult] {
         // leave space for at least 2 search engine result and 1 create card
         let hasCreateCard = !createCardResults.isEmpty
-        let truncateLength = limit - min(2, searchEngineResults.count) - (hasCreateCard ? 1 : 0)
+        let searchEngineSpace = searchEngineResults.count > 0 ? min(2, searchEngineResults.count) : 2
+        let truncateLength = limit - searchEngineSpace - (hasCreateCard ? 1 : 0)
         var results = Array(sortableResults.prefix(truncateLength))
         let searchEngineMax = limit - results.count - (hasCreateCard ? 1 : 0)
         results.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: sortableResults.isEmpty ? 0 : 1)
+        results.append(contentsOf: actionsResults)
         results.append(contentsOf: createCardResults)
         return results
     }
 
-    func insertSearchEngineResults(_ searchEngineResults: [AutocompleteResult], in results: [AutocompleteResult]) -> [AutocompleteResult] {
+    func insertSearchEngineResults(_ searchEngineResults: [AutocompleteResult],
+                                   in results: [AutocompleteResult]) -> [AutocompleteResult] {
+        let limit = Self.resultsLimit
         var finalResults = results
-        let canCreate = finalResults.firstIndex { $0.source == .createCard } != nil
         let existingAutocompleteResult = finalResults.filter { $0.source == .searchEngine }
 
-        let maxGuesses = finalResults.count > 2 ? 4 : 6
-        let toInsert = searchEngineResults.filter { result in
+        let maxGuesses = max(2, limit - finalResults.count)
+        let filteredSearchResults = searchEngineResults.filter { result in
             !existingAutocompleteResult.contains { $0.text == result.text }
         }.prefix(maxGuesses)
-        let atIndex = max(0, finalResults.count - (canCreate ? 1 : 0))
-        if atIndex <= finalResults.count {
-            finalResults.insert(contentsOf: toInsert, at: atIndex)
+        let insertionIndex: Int
+        if let lastPriority = finalResults.lastIndex(where: { $0.source.priority < AutocompleteResult.Source.searchEngine.priority }) {
+            insertionIndex = lastPriority + 1
+        } else {
+            insertionIndex = 0
+        }
+        if insertionIndex <= finalResults.count {
+            finalResults.insert(contentsOf: filteredSearchResults, at: insertionIndex)
         }
         return finalResults
     }
