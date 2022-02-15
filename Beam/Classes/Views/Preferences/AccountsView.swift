@@ -348,7 +348,7 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             AccountManager.logout()
             if self.checkboxHelper.isOn {
-                AppDelegate.main.deleteAllData()
+                AppDelegate.main.deleteAllLocalData()
             }
             viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
         }
