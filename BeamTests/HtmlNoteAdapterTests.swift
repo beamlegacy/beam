@@ -528,4 +528,23 @@ class HtmlNoteAdapterTests: XCTestCase {
         })
         wait(for: [expectation], timeout: 10.0)
     }
+
+    func testPDFlink() {
+        let html = "<a href=\"https://joe.cat/images/papers/tabs.pdf\">https://joe.cat/images/papers/tabs.pdf</a>"
+
+        let htmlNoteAdapter = self.setupTestMocks("https://joe.cat/images/papers/tabs.pdf")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage {
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+            } else {
+                XCTFail("expected atleast one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
 }
