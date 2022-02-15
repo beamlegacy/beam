@@ -319,7 +319,7 @@ class PnSAddToCardTests: BaseTest {
         testRailPrint("TBD")
         // PointAndShootPopup is now also visible
         XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
-        XCTAssertTrue(pnsView.textField(PnSViewLocators.TextFields.addNote.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(pnsView.textField(PnSViewLocators.TextFields.addComment.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
 
         // Add to today's note
         let noteTitle = "Ultralight Beam"
