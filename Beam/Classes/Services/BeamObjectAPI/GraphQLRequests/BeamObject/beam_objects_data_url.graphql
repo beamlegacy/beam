@@ -1,4 +1,4 @@
-query ($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String, $skipDeleted: Boolean) {
+query BeamObjectsDataUrl($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamObjectType: String, $skipDeleted: Boolean) {
   me {
     beamObjects(receivedAtAfter: $receivedAtAfter, ids: $ids, type: $beamObjectType, filterDeleted: $skipDeleted) {
       id

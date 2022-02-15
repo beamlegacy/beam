@@ -1,4 +1,4 @@
-subscription ($id: ID!) {
+subscription BeamObjectUpdatedDataUrl($id: ID!) {
   beamObjectUpdated(id: $id) {
     beamObject {
       id

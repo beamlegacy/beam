@@ -1,4 +1,4 @@
-query beamObject($id: ID!) {
+query BeamObject($id: ID!) {
   beamObject(id: $id) {
     id
     data
