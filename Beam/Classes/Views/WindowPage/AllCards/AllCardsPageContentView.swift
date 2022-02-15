@@ -364,7 +364,7 @@ struct AllCardsPageContentView: View {
             return
         }
         if row >= notesList.count {
-            let newNote = state.createNoteForQuery(title)
+            let newNote = state.fetchOrCreateNoteForQuery(title)
             let isPublic = listType == .publicNotes
 
             //If we create a public note, publish it right after creation, else just save it

@@ -33,13 +33,9 @@ struct Omnibox: View {
             setIsEditing($0)
         })
     }
-    private var isEditingCurrentTabURL: Bool {
-        autocompleteManager.searchQuery == browserTabsManager.currentTab?.url?.absoluteString
-    }
 
     private var shouldShowAutocompleteResults: Bool {
-        !autocompleteManager.autocompleteResults.isEmpty &&
-        !isEditingCurrentTabURL
+        !autocompleteManager.autocompleteResults.isEmpty
     }
 
     private var boxIsLow: Bool {
@@ -81,11 +77,14 @@ struct Omnibox: View {
         }
         .fixedSize(horizontal: false, vertical: true)
         .animation(BeamAnimation.easeInOut(duration: 0.3), value: autocompleteManager.autocompleteResults)
-        .animation(BeamAnimation.easeInOut(duration: 0.3), value: autocompleteManager.searchQuery.isEmpty)
     }
 
     private func setIsEditing(_ editing: Bool) {
-        state.focusOmniBox = editing
+        if editing {
+            state.startFocusOmnibox(fromTab: state.focusOmniBoxFromTab, updateResults: false)
+        } else {
+            state.stopFocusOmnibox()
+        }
     }
 }
 
@@ -171,10 +170,10 @@ struct OmniboxContainer: View {
 
 struct Omnibox_Previews: PreviewProvider {
     static let state = BeamState()
-    static let autocompleteManager = AutocompleteManager(with: BeamData(), searchEngine: GoogleSearch())
+    static let autocompleteManager = AutocompleteManager(searchEngine: GoogleSearch(), beamState: nil)
 
     static var autocompleteManagerWithResults: AutocompleteManager {
-        let mngr = AutocompleteManager(with: BeamData(), searchEngine: MockSearchEngine())
+        let mngr = AutocompleteManager(searchEngine: MockSearchEngine(), beamState: nil)
         mngr.setQuery("Res", updateAutocompleteResults: false)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(100)) {
             mngr.autocompleteResults = [
