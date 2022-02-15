@@ -54,7 +54,7 @@ struct ModeView: View {
             if state.focusOmniBox &&
                 scrollPoint.y + cardScrollViewTopInset > 10 &&
                 state.autocompleteManager.searchQuery.isEmpty {
-                state.focusOmniBox = false
+                state.stopFocusOmnibox()
             }
         }
                           .frame(maxWidth: .infinity, maxHeight: .infinity)
