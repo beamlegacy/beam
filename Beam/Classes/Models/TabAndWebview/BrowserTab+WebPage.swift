@@ -129,6 +129,22 @@ extension BrowserTab: WebPage {
         sendTree()
     }
 
+    func getMouseLocation() -> NSPoint {
+        let webviewCenter = CGPoint(
+            x: webView.frame.midX - (PointAndShootView.defaultPickerSize.width / 2),
+            y: webView.frame.midY - (PointAndShootView.defaultPickerSize.height / 2)
+        )
+
+        guard let pns = pointAndShoot else { return webviewCenter }
+
+        if webView.frame.contains(pns.mouseLocation) && pns.mouseLocation != .zero {
+            return pns.mouseLocation
+        } else {
+            return webviewCenter
+        }
+    }
+
+    /// Handles collecting a full tab with CMD+S
     func collectTab() {
 
         guard let layer = webView.layer,
@@ -138,18 +154,31 @@ extension BrowserTab: WebPage {
 
         let animator = FullPageCollectAnimator(webView: webView)
         guard let (hoverLayer, hoverGroup, webViewGroup) = animator.buildFullPageCollectAnimation() else { return }
-        let webviewFrame = webView.frame
 
-        let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { _ in
+        let mouseLocation = self.getMouseLocation()
+        let pageTitle = self.title.isEmpty ? url.absoluteString : self.title
+
+        let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { [weak self] _ in
             DispatchQueue.main.async {
-                var webviewCenter = CGPoint(x: webviewFrame.midX, y: webviewFrame.midY)
-                webviewCenter.x -= PointAndShootView.defaultPickerSize.width / 2
-                webviewCenter.y -= PointAndShootView.defaultPickerSize.height / 2
-                let mouseLocation = webviewFrame.contains(pns.mouseLocation) ? pns.mouseLocation : webviewCenter
-                let target = PointAndShoot.Target.init(id: UUID().uuidString, rect: self.webView.frame, mouseLocation: mouseLocation, html: "<a href=\"\(url)\">\(self.title)</a>", animated: true)
-                let shootGroup = PointAndShoot.ShootGroup.init(id: UUID().uuidString, targets: [target], text: "", href: "", shapeCache: nil, showRect: false, directShoot: true)
+                let target = PointAndShoot.Target.init(
+                    id: UUID().uuidString,
+                    rect: self?.webView.frame ?? .zero,
+                    mouseLocation: mouseLocation,
+                    html: "<a href=\"\(url)\">\(pageTitle)</a>",
+                    animated: true
+                )
 
-                if let note = self.noteController.note {
+                let shootGroup = PointAndShoot.ShootGroup.init(
+                    id: UUID().uuidString,
+                    targets: [target],
+                    text: "",
+                    href: "",
+                    shapeCache: nil,
+                    showRect: false,
+                    directShoot: true
+                )
+
+                if let note = self?.noteController.note {
                     pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, withSourceBullet: false, completion: {})
                 } else {
                     pns.activeShootGroup = shootGroup
