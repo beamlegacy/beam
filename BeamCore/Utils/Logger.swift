@@ -177,10 +177,6 @@ public final class Logger {
             timeDiff = BeamDate.now.timeIntervalSince(localTimer)
         }
 
-        if message == "-" {
-            dump(message)
-        }
-
         var tid: UInt64 = 0
         pthread_threadid_np(nil, &tid)
         let threadName = Thread.isMainThread ? "main" : "\(tid)"
