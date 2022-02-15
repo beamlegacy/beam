@@ -208,7 +208,7 @@ extension BrowserTab: WebPage {
     }
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
-        if case .searchFromNode(_) = browsingTreeOrigin {
+        if case .searchFromNode = browsingTreeOrigin {
             logInNote(url: url, title: title, reason: reason)
         }
         updateScore()

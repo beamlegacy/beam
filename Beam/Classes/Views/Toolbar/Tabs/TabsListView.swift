@@ -337,7 +337,7 @@ struct TabsListView: View {
 
     private func onTabTapped(at index: Int) {
         guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
-        state.setFocusOmnibox(fromTab: true)
+        state.startFocusOmnibox(fromTab: true)
     }
 
     private func onTabClose(at index: Int, fromContextMenu: Bool = false) {
@@ -525,7 +525,7 @@ extension TabsListView {
             // it was just a quick tap
             self.dragModel.cleanAfterDrag()
             if !viewModel.currentDragDidChangeCurrentTab {
-                state.setFocusOmnibox(fromTab: true)
+                state.startFocusOmnibox(fromTab: true)
             }
         } else {
             let shouldBePinned = self.dragModel.draggingOverPins
