@@ -1,4 +1,4 @@
-subscription {
+subscription BeamObjectsUpdatedDataUrl {
   beamObjectsUpdated {
     beamObjects {
       id
