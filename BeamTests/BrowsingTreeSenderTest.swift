@@ -46,11 +46,11 @@ class BrowsingTreeSenderTest: XCTestCase {
         )
         appSessionId = UUID()
         subject = BrowsingTreeSender(session: session, config: testConfig, appSessionId: appSessionId)
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
     override func tearDownWithError() throws {
         PreferencesManager.isPrivacyFilterEnabled = PreferencesManager.privacyFilterDefault
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
 
     func testSentData() throws {
@@ -62,16 +62,19 @@ class BrowsingTreeSenderTest: XCTestCase {
 
         let decoder = JSONDecoder()
         let tree = BrowsingTree(nil)
-        let expectedMapping = [tree.root!.link: "<???>"]
         subject.send(browsingTree: tree)
         let unwrappedData = try sentData(session: session)
 
         XCTAssertEqual(unwrappedData.rootCreatedAt, tree.root.events.first!.date.timeIntervalSince1970)
         XCTAssertEqual(unwrappedData.rootId, tree.root.id)
         XCTAssertEqual(unwrappedData.data.root.id, tree.root.id)
+        if case .searchBar(query: let query, referringRootId: _) = unwrappedData.data.origin {
+            XCTAssertNil(query)
+        } else {
+            XCTFail("Sent data tree origin anonymization issue")
+        }
         XCTAssertEqual(unwrappedData.data.current.id, tree.current.id)
         XCTAssertEqual(unwrappedData.appSessionId, appSessionId)
-        XCTAssertEqual(unwrappedData.idUrlMapping, expectedMapping)
 
         let anotherTree = BrowsingTree(nil)
         subject.send(browsingTree: anotherTree)
@@ -81,7 +84,11 @@ class BrowsingTreeSenderTest: XCTestCase {
         XCTAssertEqual(otherUnwrappedData.rootId, anotherTree.root.id)
         XCTAssertEqual(otherUnwrappedData.data.root.id, anotherTree.root.id)
         XCTAssertEqual(otherUnwrappedData.data.current.id, anotherTree.current.id)
-        XCTAssertEqual(otherUnwrappedData.idUrlMapping, expectedMapping)
+        if case .searchBar(query: let query, referringRootId: _) = otherUnwrappedData.data.origin {
+            XCTAssertNil(query)
+        } else {
+            XCTFail("Sent data tree origin anonymization issue")
+        }
         XCTAssertEqual(unwrappedData.userId, otherUnwrappedData.userId)
         XCTAssertEqual(unwrappedData.appSessionId, otherUnwrappedData.appSessionId)
 

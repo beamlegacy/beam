@@ -30,6 +30,7 @@ public struct EnvironmentVariables {
     public struct BrowsingTree {
         static public private(set) var accessToken = "$(BROWSING_TREE_ACCESS_TOKEN)"
         static public private(set) var url = "$(BROWSING_TREE_URL)"
+        static public private(set) var apiSyncEnabled = NSString("$(BROWSING_TREE_API_SYNC_ENABLED)").boolValue
     }
 
     public struct PublicAPI {
@@ -39,6 +40,17 @@ public struct EnvironmentVariables {
 
     public struct Sentry {
         static public private(set) var key = "$(SENTRY_KEY)"
+    }
+
+    public struct Firebase {
+        static public private(set) var apiKey = "$(FIREBASE_API_KEY)"
+        static public private(set) var clientID = "$(FIREBASE_CLIENT_ID)"
+        static public private(set) var googleAppID = "$(FIREBASE_GOOGLE_APP_ID)"
+        static public private(set) var projectID = "$(FIREBASE_PROJECT_ID)"
+        static public private(set) var apiKeyDev = "$(FIREBASE_DEV_API_KEY)"
+        static public private(set) var clientIDDev = "$(FIREBASE_DEV_CLIENT_ID)"
+        static public private(set) var googleAppIDDev = "$(FIREBASE_DEV_GOOGLE_APP_ID)"
+        static public private(set) var projectIDDev = "$(FIREBASE_DEV_PROJECT_ID)"
     }
 
     public struct Account {

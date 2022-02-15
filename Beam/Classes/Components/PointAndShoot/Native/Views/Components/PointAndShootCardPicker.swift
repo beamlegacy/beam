@@ -185,7 +185,7 @@ struct PointAndShootCardPicker: View {
                     BeamTextField(
                         text: $addNoteField,
                         isEditing: $isEditingNote,
-                        placeholder: "Add note",
+                        placeholder: loc("Add comment"),
                         font: font,
                         textColor: secondLabelTextColor,
                         placeholderColor: placeholderColor

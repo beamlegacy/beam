@@ -318,7 +318,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     @Published open var childrenFormat: ElementChildrenFormat = .bullet { didSet { change(.meta) } }
     @Published open private(set) var textStats: ElementTextStats = ElementTextStats(wordsCount: 0)
     @Published open var query: String?
-    private var warmingUp = true
+    internal var warmingUp = true
 
     open var note: BeamNote? {
         return parent?.note
@@ -647,7 +647,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             updateDate = BeamDate.now
             lastChangeType = type
         }
-        
+
         if changePropagationEnabled {
             changed.send((self, type))
         }

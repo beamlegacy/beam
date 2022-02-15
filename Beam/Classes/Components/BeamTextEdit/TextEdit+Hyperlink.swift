@@ -29,7 +29,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         let (_, linkFrame) = node.linkRangeAt(point: point)
         let link = node.linkAt(index: node.cursorPosition)
 
-        showOrHideInlineFormatter(isPresent: false) { [weak self] in
+        hideInlineFormatter { [weak self] in
             guard let self = self else { return }
             let linkTitle = self.selectedText
             let targetRange = self.selectedTextRange
@@ -99,17 +99,17 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         var allItems = [
             ContextMenuItem(title: "Open Link", action: {
                 node.openExternalLink(link: link, element: node.element)
-                self.showOrHideInlineFormatter(isPresent: false)
+                self.hideInlineFormatter()
             }),
             ContextMenuItem.separator(),
             ContextMenuItem(title: "Copy Link", action: {
                 NSPasteboard.general.clearContents()
                 NSPasteboard.general.setString(link.absoluteString, forType: .string)
-                self.showOrHideInlineFormatter(isPresent: false)
+                self.hideInlineFormatter()
             }),
 
             ContextMenuItem(title: "Edit Link...", action: {
-                self.showOrHideInlineFormatter(isPresent: false) {
+                self.hideInlineFormatter {
                     self.showLinkFormatterForSelection(mousePosition: .zero, showMenu: false)
                     DispatchQueue.main.asyncAfter(deadline: .now()) {
                         if let linkEditor = self.inlineFormatter as? HyperlinkFormatterView {
@@ -120,7 +120,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             }),
             ContextMenuItem(title: "Remove Link", action: {
                 self.updateLink(in: node, at: self.selectedTextRange, newTitle: nil, newUrl: "", originalUrl: link.absoluteString)
-                self.showOrHideInlineFormatter(isPresent: false)
+                self.hideInlineFormatter()
             })
         ]
         if linkCanBeEmbed(link) {
@@ -136,11 +136,11 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     private func getPasteMenuItemsForLink(for node: TextNode, range: Range<Int>) -> [ContextMenuItem] {
         return [
             ContextMenuItem(title: "Show as Link", action: {
-                self.showOrHideInlineFormatter(isPresent: false)
+                self.hideInlineFormatter()
             }),
             ContextMenuItem(title: "Show as Embed", action: {
                 self.updateLinkToEmbed(in: node, at: range)
-                self.showOrHideInlineFormatter(isPresent: false)
+                self.hideInlineFormatter()
             })
         ]
     }
@@ -168,7 +168,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
         DispatchQueue.main.async {
-            self.showOrHideInlineFormatter(isPresent: true)
+            self.showInlineFormatter()
         }
     }
 
@@ -212,7 +212,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         if debounce {
             debounceShowHideInlineFormatter(true)
         } else {
-            showOrHideInlineFormatter(isPresent: true)
+            showInlineFormatter()
         }
     }
 
@@ -287,7 +287,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     internal func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, didFinishEditing newUrl: String?, newTitle: String?, originalUrl: String?) {
 
         guard let node = formatterTargetNode ?? (focusedWidget as? TextNode) else {
-            self.showOrHideInlineFormatter(isPresent: false)
+            self.hideInlineFormatter()
             return
         }
 
@@ -295,6 +295,6 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         if let editingRange = editingRange, !editingRange.isEmpty {
             updateLink(in: node, at: editingRange, newTitle: newTitle, newUrl: newUrl, originalUrl: originalUrl)
         }
-        self.showOrHideInlineFormatter(isPresent: false)
+        self.hideInlineFormatter()
     }
 }

@@ -33,6 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // swiftlint:disable:next force_cast
     class var main: AppDelegate { NSApplication.shared.delegate as! AppDelegate }
 
+    var skipTerminateMethods = false
     var window: BeamWindow? {
         (NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow) as? BeamWindow
     }
@@ -70,8 +71,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ aNotification: Notification) {
         let isSwiftUIPreview = NSString(string: ProcessInfo.processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] ?? "0").boolValue
-        if Configuration.env.rawValue == "$(ENV)" || Configuration.sentryKey == "$(SENTRY_KEY)", !isSwiftUIPreview {
-            fatalError("Please restart your build, your ENV wasn't detected properly, and this should only happens for SwiftUI Previews")
+        if Configuration.env.rawValue == "$(ENV)" || Configuration.Sentry.key == "$(SENTRY_KEY)", !isSwiftUIPreview {
+            fatalError("The ENV wasn't detected properly, please run `direnv allow` and restart your build. (Should only happen in SwiftUI Previews)")
         }
 
         if !isSwiftUIPreview {
@@ -79,7 +80,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             DistributedNotificationCenter.default.addObserver(self, selector: #selector(interfaceModeChanged(sender:)), name: NSNotification.Name(rawValue: "AppleInterfaceThemeChangedNotification"), object: nil)
         }
 
-        LibrariesManager.shared.configure()
+        ThirdPartyLibrariesManager.shared.configure()
         // We set our own ExceptionHandler but first we get the already set one in that case Sentry
         // We do what we want when there is an exception, in this case saving the tabs then we pass it back to Sentry
         NSSetUncaughtExceptionHandler { _ in
@@ -89,15 +90,20 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
 
         ContentBlockingManager.shared.setup()
+        // Setup localPrivateKey
+        EncryptionManager.shared.localPrivateKey()
         //TODO: - Remove when everyone has its local links data moved from old db to grdb
         BeamObjectManager.setup()
 
         data = BeamData()
+        if deleteAllLocalDataAtStartup {
+            self.deleteAllData(includedRemote: false)
+        }
+
         startDisplayingBrowserImportErrors()
 
         if !isRunningTests {
             createWindow(frame: nil, restoringTabs: true)
-            windows.first?.showUpdateAlert(onStartUp: true)
         }
 
         Logger.shared.logInfo("This version of Beam was built from a \(EnvironmentVariables.branchType) branch", category: .general)
@@ -116,13 +122,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccountManager.logout()
         }
         #endif
+
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
-        beamObjectManager.liveSync { _ in
-            self.syncDataWithBeamObject()
-            self.data.updateNoteCount()
+        AccountManager.updateInitialState()
+
+        if AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
+            beamObjectManager.liveSync { _ in
+                self.syncDataWithBeamObject()
+                self.data.updateNoteCount()
+            }
+        } else {
+            AccountManager.logoutIfNeeded()
         }
+
         fetchTopDomains()
         getUserInfos()
+        LoggerRecorder.shared.deleteEntries(olderThan: DateComponents(hour: -2))
     }
 
     // Work around to fix odd animation in Preferences Panes
@@ -164,31 +179,142 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         let localTimer = BeamDate.now
 
+        let initialDBs = Set(databaseManager.all())
+
         do {
             Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
-            try beamObjectManager.syncAllFromAPI(force: force) { result in
-                Logger.shared.logInfo("syncAllFromAPI called",
-                                      category: .beamObjectNetwork,
-                                      localTimer: localTimer)
+            try beamObjectManager.syncAllFromAPI(
+                force: force,
+                prepareBeforeSaveAll: {
+                    self.prepareBeforeSaveAll(initialDBs: initialDBs)
+                }, { result in
+                    Logger.shared.logInfo("syncAllFromAPI called",
+                                          category: .beamObjectNetwork,
+                                          localTimer: localTimer)
 
-                self.deleteEmptyDatabases(showAlert: showAlert) { _ in
-                    switch result {
-                    case .success:
-                        DatabaseManager.changeDefaultDatabaseIfNeeded()
-                        completionHandler?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logInfo("syncAllFromAPI failed",
-                                              category: .beamObjectNetwork,
-                                              localTimer: localTimer)
-                        completionHandler?(.failure(error))
+                    self.deleteEmptyDatabases(showAlert: showAlert) { _ in
+                        switch result {
+                        case .success:
+                            DatabaseManager.changeDefaultDatabaseIfNeeded()
+                            completionHandler?(.success(true))
+                        case .failure(let error):
+                            Logger.shared.logInfo("syncAllFromAPI failed",
+                                                  category: .beamObjectNetwork,
+                                                  localTimer: localTimer)
+                            completionHandler?(.failure(error))
+                        }
                     }
-                }
-            }
+                })
         } catch {
             Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
                                    category: .document,
                                    localTimer: localTimer)
             completionHandler?(.failure(error))
+        }
+    }
+
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
+    private func prepareBeforeSaveAll(initialDBs: Set<DatabaseStruct>) {
+        // We have just synced all the databases
+        // We now need to check if a new database was added from the sync and move all the notes to it
+        let initialIds = Set(initialDBs.map({ $0.id }))
+        let allDBs = databaseManager.all()
+        let dbMap = [UUID: DatabaseStruct](uniqueKeysWithValues: allDBs.map({ ($0.id, $0) }))
+        let allIds = Set(dbMap.keys)
+        let syncedIds = allIds.subtracting(initialIds)
+        let strictlyLocalIds = initialIds.subtracting(syncedIds)
+
+        // Basically strictlyLocalDBs are the DBs that are not from the sync and syncedDBs are the one that comes from the sync
+        // In the end we must have ONLY ONE DB. We will take the one that has the most notes from the sync and make it current. If syncedDBs is empty them we take the local DB that has the most notes and make it current.
+        // We then move all the notes to the current DB and DESTROY all the other DBs.
+        // If the other DB comes from the Sync they are soft deleted, if the other DB is strictly local, it is hard deleted
+
+        var newDefaultDB: UUID?
+        if !syncedIds.isEmpty && !syncedIds.contains(DatabaseManager.defaultDatabase.id) {
+            // The default database is not synced. So we need to change it to the one that has the most notes:
+            Logger.shared.logInfo("The default database is not synced. So we need to change it to the one that has the most notes", category: .database)
+            var noteCount = 0
+            for db in syncedIds {
+                let count = self.databaseManager.documentsCountForDatabase(db)
+                Logger.shared.logInfo("Database \(db) contains \(count) documents", category: .database)
+                if count > noteCount {
+                    noteCount = count
+                    newDefaultDB = db
+                }
+            }
+        }
+
+        if newDefaultDB == nil {
+            // We haven't found a suitable default DB, let's use a local one:
+            Logger.shared.logInfo("We haven't found a suitable default synced DB, let's use a local one", category: .database)
+            var noteCount = 0
+            for db in strictlyLocalIds {
+                let count = self.databaseManager.documentsCountForDatabase(db)
+                Logger.shared.logInfo("Database \(db) contains \(count) documents", category: .database)
+                if count > noteCount {
+                    noteCount = count
+                    newDefaultDB = db
+                }
+            }
+        }
+
+        if let newDefaultDB = newDefaultDB {
+            // We have a new current DB so let's move all the notes to the current DB:
+            let moveSemaphore = DispatchSemaphore(value: 0)
+            DispatchQueue.main.sync {
+                self.documentManager.moveAllOrphanNotes(databaseId: newDefaultDB, onlyOrphans: false, displayAlert: false) { result in
+                    switch result {
+                    case let .failure(error):
+                        Logger.shared.logError("Error while moving all notes to database \(newDefaultDB): \(error)", category: .database)
+                    case let .success(res):
+                        if !res {
+                            Logger.shared.logError("Unable to move all notes to database \(newDefaultDB)", category: .database)
+                        }
+                    }
+                    moveSemaphore.signal()
+                }
+            }
+            moveSemaphore.wait()
+
+            // We are done moving, let's change the current dB:
+            if DatabaseManager.defaultDatabase.id != newDefaultDB, let defaultDBStruct = dbMap[newDefaultDB] {
+                DatabaseManager.defaultDatabase = defaultDBStruct
+            }
+        }
+
+        Logger.shared.logInfo("The default database now is \(DatabaseManager.defaultDatabase)", category: .database)
+        let deleteSemaphore = DispatchSemaphore(value: 0)
+        deleteEmptyDatabases(showAlert: false) { result in
+            switch result {
+            case .success:
+                Logger.shared.logInfo("Deleted all empty databases", category: .database)
+            case .failure(let error):
+                Logger.shared.logInfo("Error while Deleting all empty databases: \(error)", category: .database)
+            }
+            deleteSemaphore.signal()
+        }
+        deleteSemaphore.wait()
+
+        // rename the default DB if possible:
+        if let title = DatabaseManager.defaultDatabase.titleBeforeAutoRenaming, !databaseManager.allTitles().contains(title) {
+            DatabaseManager.defaultDatabase.title = title
+            let renameSemaphore = DispatchSemaphore(value: 0)
+            // Let's save this DB only locally, we'll let the full sync do the job to syncing everything later
+            databaseManager.save(DatabaseManager.defaultDatabase, false, nil) { result in
+                switch result {
+                case let .failure(error):
+                    Logger.shared.logError("Error while saving renamed default database: \(error)", category: .database)
+                case let .success(res):
+                    if !res {
+                        Logger.shared.logError("Error while saving renamed default database", category: .database)
+                    } else {
+                        Logger.shared.logInfo("Renamed default database to \(title)", category: .database)
+
+                    }
+                }
+                renameSemaphore.signal()
+            }
+            renameSemaphore.wait()
         }
     }
 
@@ -232,7 +358,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                             Logger.shared.logWarning("Default database changed, showing alert",
                                                     category: .database, localTimer: localTimer)
 
-                            DatabaseManager.showRestartAlert(previousDefaultDatabase, DatabaseManager.defaultDatabase)
+                            DatabaseManager.dispatchDatabaseChangedNotification(previousDefaultDatabase, DatabaseManager.defaultDatabase, andRestart: true)
                         }
                     }
                     completionHandler?(.success(success))
@@ -308,7 +434,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: - Tabs
     func applicationWillTerminate(_ aNotification: Notification) {
+        guard !skipTerminateMethods else { return }
         // Insert code here to tear down your application
+        do {
+            try BeamFileDBManager.shared.purgeUndo()
+            try BeamFileDBManager.shared.purgeUnlinkedFiles()
+        } catch {
+            Logger.shared.logError("Unable to purge unused files: \(error)", category: .fileDB)
+        }
         if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
             data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
@@ -350,13 +483,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
-        if !flag {
+        if !flag && data != nil {
             createWindow(frame: nil, restoringTabs: true)
         }
 
         return true
     }
 
+    var deleteAllLocalDataAtStartup = false
     func applicationWillFinishLaunching(_ notification: Notification) {
         CoreDataManager.shared.setup()
 
@@ -372,6 +506,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 forEventClass: AEEventClass(kInternetEventClass),
                 andEventID: AEEventID(kAEGetURL)
             )
+
+        let flags = NSEvent.modifierFlags
+        if flags.contains(.shift), flags.contains(.command), flags.contains(.option), flags.contains(.control) {
+            if Persistence.Authentication.email != nil {
+                UserAlert.showAlert(message: "Logout from account \(Persistence.emailOrRaiseError())", informativeText: "Do you want to logout?", buttonTitle: "Cancel", secondaryButtonTitle: "Logout", secondaryButtonAction: {
+                    AccountManager.logout()
+
+                    UserAlert.showAlert(message: "Reset all private keys", informativeText: "Do you want to reset all accounts? (make sure your private keys are backuped first!). The following accounts will be removed:\n\(EncryptionManager.shared.accounts.joined(separator: "\n"))", buttonTitle: "Cancel", secondaryButtonTitle: "Reset all accounts", secondaryButtonAction: {
+                        EncryptionManager.shared.resetPrivateKeys(andMigrateOldSharedKey: false)
+                    }, style: .critical)
+                }, style: .critical)
+            }
+
+            UserAlert.showAlert(message: "Erase all local contents", informativeText: "Do you want to eraase all local contents?", buttonTitle: "Cancel", secondaryButtonTitle: "Erase local contents", secondaryButtonAction: {
+                self.deleteAllLocalDataAtStartup = true
+            }, style: .critical)
+        }
     }
 
     func application(_ application: NSApplication,
@@ -396,6 +547,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard !skipTerminateMethods else { return .terminateNow }
+        AccountManager.logoutIfNeeded()
         data.saveData()
         saveCloseTabsCmd(onExit: true)
         _ = self.data.browsingTreeSender?.groupWait()
@@ -420,12 +573,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
 
-        if data.downloadManager.ongoingDownload {
-            let downloads = data.downloadManager.downloads.filter { d in
-                d.state == .running
-            }
-
-            let alert = buildAlertForDownloadInProgress(downloads)
+        let runningDownloads = data.downloadManager.downloadList.runningDownloads
+        if !runningDownloads.isEmpty {
+            let alert = buildAlertForDownloadInProgress(runningDownloads)
             let answer = alert.runModal()
             if answer == .alertSecondButtonReturn {
                 return .terminateCancel
@@ -564,13 +714,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {
         let url = URL(fileURLWithPath: filename)
-        if url.pathExtension == BeamDownloadDocument.downloadDocumentFileExtension {
+        if url.pathExtension == BeamDownloadDocument.fileExtension {
             let documentURL = URL(fileURLWithPath: filename)
             if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
                 do {
-                    let doc = BeamDownloadDocument()
+                    let doc = try BeamDownloadDocument(fileWrapper: wrapper)
                     doc.fileURL = documentURL
-                    try doc.read(from: wrapper, ofType: "co.beamapp.download")
                     try self.data.downloadManager.downloadFile(from: doc)
                 } catch {
                     Logger.shared.logError("Can't open Download Document from disk", category: .downloader)
@@ -617,14 +766,14 @@ extension AppDelegate {
 // MARK: - Downloads
 extension AppDelegate {
 
-    fileprivate func buildAlertForDownloadInProgress(_ downloads: [Download]) -> NSAlert {
+    fileprivate func buildAlertForDownloadInProgress(_ downloads: [DownloadItem]) -> NSAlert {
         let message: String
         let question: String
 
         if let uniqueDownload = downloads.first, downloads.count == 1 {
             question = NSLocalizedString("A download is in progress", comment: "Quit during download")
             message = """
-                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.suggestedFileName)".
+                        Are you sure you want to quit? Beam is currently downloading "\(uniqueDownload.filename ?? "")".
                         If you quit now, Beam won’t finish downloading this file.
                         """
         } else {

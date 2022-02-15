@@ -13,8 +13,11 @@ struct OnboardingStep: Equatable {
         case welcome
         case profile
         case emailConnect
+        case setupPrivateKey
+        case lostPrivateKey
         case emailConfirm
         case imports
+        case savePrivateKey
         case loading
     }
 
@@ -46,22 +49,25 @@ class OnboardingManager: ObservableObject {
     @Published var actions = [StepAction]()
     @Published var viewIsLoading = false
     @Published private(set) var stepsHistory = [OnboardingStep]()
+
     var currentStepIsFromHistory = false
     var onlyConnect: Bool = false
     var onlyImport: Bool = false
     weak var delegate: OnboardingManagerDelegate?
+    /// Did the user just signed up through the onboarding
+    var userDidSignUp: Bool = false
     var temporaryCredentials: (email: String, password: String)?
 
     private weak var window: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 
     init(onlyImport: Bool = false) {
-        var needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
+        let needsToDisplayOnboard = Configuration.env != .test && Persistence.Authentication.hasSeenOnboarding != true
         var step: OnboardingStep?
         if needsToDisplayOnboard {
             if AuthenticationManager.shared.isAuthenticated {
                 if AuthenticationManager.shared.username != nil {
-                    needsToDisplayOnboard = false
+                    step = OnboardingStep(type: .imports)
                 } else {
                     step = OnboardingStep(type: .profile)
                 }
@@ -84,6 +90,7 @@ class OnboardingManager: ObservableObject {
         currentStepIsFromHistory = false
         viewIsLoading = false
         temporaryCredentials = nil
+        userDidSignUp = false
         onlyConnect = false
         onlyImport = false
     }
@@ -102,6 +109,9 @@ class OnboardingManager: ObservableObject {
 
     func backToPreviousStep() {
         guard let previous = stepsHistory.popLast() else { return }
+        if [.emailConnect, .welcome].contains(previous.type) {
+            AccountManager.logoutIfNeeded()
+        }
         actions = []
         currentStepIsFromHistory = true
         currentStep = previous
@@ -114,7 +124,7 @@ class OnboardingManager: ObservableObject {
         if let nextStep = nextStep ?? stepAfter(step: previous) {
             currentStep = nextStep
             viewIsLoading = false
-            if AuthenticationManager.shared.isAuthenticated {
+            if AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn {
                 stepsHistory.removeAll()
             } else {
                 stepsHistory.append(previous)
@@ -128,17 +138,37 @@ class OnboardingManager: ObservableObject {
     private func stepAfter(step: OnboardingStep) -> OnboardingStep? {
         switch step.type {
         case .welcome, .emailConnect, .emailConfirm:
-            if AuthenticationManager.shared.isAuthenticated && AuthenticationManager.shared.username == nil {
+            if AuthenticationManager.shared.isAuthenticated && !userHasUsername() {
                 return OnboardingStep(type: .profile)
-            } else {
-                return onlyConnect ? nil : OnboardingStep(type: .imports)
             }
+            return stepAfterProfile()
         case .profile:
-            return onlyConnect ? nil : OnboardingStep(type: .imports)
-        case .imports:
+            return stepAfterProfile()
+        case .savePrivateKey:
+            return importStepIfNeeded(onlyConnect: onlyConnect)
+        case .setupPrivateKey:
+            return stepAfterProfile()
+        case .imports, .loading, .lostPrivateKey:
             return nil
-        default:
+        }
+    }
+
+    private func stepAfterProfile() -> OnboardingStep? {
+        encryptionKeyStepIfNeeded() ?? importStepIfNeeded(onlyConnect: onlyConnect)
+    }
+
+    private func encryptionKeyStepIfNeeded() -> OnboardingStep? {
+        if userDidSignUp {
+            return OnboardingStep(type: .savePrivateKey)
+        }
+        return nil
+    }
+
+    private func importStepIfNeeded(onlyConnect: Bool) -> OnboardingStep? {
+        if onlyConnect || userHasPasswordsData() {
             return nil
+        } else {
+            return OnboardingStep(type: .imports)
         }
     }
 
@@ -156,6 +186,27 @@ class OnboardingManager: ObservableObject {
         delegate?.onboardingManagerDidFinish()
     }
 
+    func userHasUsername() -> Bool {
+        AuthenticationManager.shared.username != nil
+    }
+
+    private func userHasPasswordsData() -> Bool {
+        PasswordManager.shared.count() > 0
+    }
+
+    func checkForPrivateKey(completionHandler: @escaping (OnboardingStep?) -> Void, syncCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        switch AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: false) {
+        case .signedIn:
+            completionHandler(nil)
+            AccountManager().runFirstSync(useBuiltinPrivateKeyUI: false) { result in
+                syncCompletion?(result)
+            }
+        case .privateKeyCheck:
+            completionHandler(OnboardingStep(type: .setupPrivateKey))
+        default:
+            assert(false)
+        }
+    }
 }
 
 // MARK: - Window management

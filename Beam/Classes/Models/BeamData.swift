@@ -46,6 +46,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
+    var checkForUpdateCancellable: AnyCancellable?
     let sessionId = UUID()
     var browsingTreeSender: BrowsingTreeSender?
     var noteFrecencyScorer: FrecencyScorer = ExponentialFrecencyScorer(storage: GRDBNoteFrecencyStorage())
@@ -183,7 +184,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
 //                if tabToIndex.shouldBeIndexed {
 //                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
 //                                                             url: tabToIndex.url.string,
-//                                                             aliasDomain: tabToIndex.requestedUrl?.absoluteString,
+//                                                             aliasDomain: tabToIndex.requestedURL?.absoluteString,
 //                                                             title: tabToIndex.document.title,
 //                                                             content: nil)
 //                }
@@ -199,7 +200,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }
         }.store(in: &scope)
 
-        downloadManager.$downloads.sink { [weak self] _ in
+        downloadManager.downloadList.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
 
@@ -248,6 +249,29 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                 }
                 BeamNote.purgeDeletedNode(id)
             }.store(in: &scope)
+
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(defaultDatabaseDidChange(notification:)),
+                                               name: .defaultDatabaseUpdate,
+                                               object: nil)
+
+    }
+
+    @objc private func defaultDatabaseDidChange(notification: Notification) {
+        BeamNote.unloadAllNotes()
+        reloadJournal()
+
+        let dbID = DatabaseManager.defaultDatabase.id
+        for window in AppDelegate.main.windows {
+            switch window.state.mode {
+            case .note:
+                if window.state.currentNote?.databaseId != dbID {
+                    window.state.navigateToJournal(note: nil, clearNavigation: true)
+                }
+            default:
+                break
+            }
+        }
     }
 
     static let noteUpdated = PassthroughSubject<DocumentStruct, Never>()
@@ -341,6 +365,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func reloadJournal() {
+        _todaysNote = nil
         journal.removeAll()
         calendarManager.meetingsForNote.removeAll()
         setupJournal()
@@ -431,6 +456,62 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         self.versionChecker.logMessage = { logMessage in
             Logger.shared.logInfo(logMessage, category: .autoUpdate)
         }
+
+        autoUpdateStartupCheck()
+    }
+
+    private func autoUpdateStartupCheck() {
+        // Only trigger the startup alert for the beta builds
+        guard Configuration.branchType == .beta else { return }
+
+        if versionChecker.autocheckEnabled {
+            checkForUpdateCancellable = versionChecker.$state.sink { [weak self] state in
+                guard let self = self else { return }
+                switch state {
+                case .downloaded:
+                    //We need to DispatchAsync here because, if not, the AlertPanel will pause the thread before the state will actually be changed to .downloaded
+                    DispatchQueue.main.async {
+                        self.showUpdateAlert(onStartUp: true, isThereAnUpdate: true)
+                        self.checkForUpdateCancellable = nil
+                    }
+                case .noUpdate where self.versionChecker.lastCheck != nil:
+                    self.checkForUpdateCancellable = nil
+                case .error(let errorMessage):
+                    UserAlert.showMessage(message: "Error checking for updates",
+                                          informativeText: errorMessage,
+                                          buttonTitle: "OK")
+                default:
+                    break
+                }
+            }
+            versionChecker.checkForUpdates()
+        }
+    }
+
+    func checkForUpdate() {
+        versionChecker.areAnyUpdatesAvailable { isThereAnUpdate in
+            self.showUpdateAlert(onStartUp: false, isThereAnUpdate: isThereAnUpdate)
+        }
+    }
+
+    private func showUpdateAlert(onStartUp: Bool, isThereAnUpdate: Bool) {
+        if onStartUp && !isThereAnUpdate { return }
+
+        let appName = Information.appName ?? "beam"
+
+        let updateAlertMessage = isThereAnUpdate ? "A new version of \(appName) is available!" : "You’re up-to-date!"
+        let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the latest version of \(appName)."
+        let updateAlertButtonTitle = isThereAnUpdate ? "Update Now" : "OK"
+        let updateAlertSecondaryButtonTitle = isThereAnUpdate ? onStartUp ? "Update Later" : "Cancel" : ""
+
+        UserAlert.showMessage(message: updateAlertMessage,
+                              informativeText: updateAlertInformativeText,
+                              buttonTitle: updateAlertButtonTitle,
+                              secondaryButtonTitle: updateAlertSecondaryButtonTitle) {
+            if isThereAnUpdate {
+                self.versionChecker.checkForUpdates(forceInstall: true)
+            }
+        }
     }
 }
 
@@ -499,4 +580,27 @@ extension BeamData {
     func resetPinnedTabs() {
         pinnedTabs = pinnedTabsManager.getPinnedTabs()
     }
+}
+
+extension BeamData {
+    func reindexFileReferences() throws {
+        do {
+            try BeamFileDBManager.shared.clearFileReferences()
+            for noteId in DocumentManager().allDocumentsIds(includeDeletedNotes: false) {
+                guard let note = BeamNote.fetch(id: noteId, includeDeleted: false) else { continue }
+
+                note.visitAllElements { element in
+                    guard case let .image(fileId, origin: _, displayInfos: _) = element.kind else { return }
+                    do {
+                        try BeamFileDBManager.shared.addReference(fromNote: noteId, element: element.id, to: fileId)
+                    } catch {
+                        Logger.shared.logError("Unable to add reindexed reference to file \(fileId) from element \(element.id) of note \(element.note?.id ?? UUID.null)", category: .fileDB)
+                    }
+                }
+            }
+        } catch {
+            Logger.shared.logError("Couldn't reindex all files from notes: \(error)", category: .fileDB)
+        }
+    }
+
 }

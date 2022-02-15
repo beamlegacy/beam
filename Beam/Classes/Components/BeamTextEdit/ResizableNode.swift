@@ -23,17 +23,17 @@ class ResizableNode: ElementNode {
         }
     }
 
+    var canResizeHeight = false
+
     ///The main element's real size (image or video)
     var resizableElementContentSize = CGSize.zero {
         didSet {
             let widthRatio = (desiredWidthRatio ?? 1.0)
-            let initWidith = availableWidth * widthRatio
-            setVisibleWidth(initWidith)
+            let initWidth = availableWidth * widthRatio
+            setVisibleWidth(initWidth)
 
             if !keepAspectRatio {
-                let initScaleFactor = (1.0 / availableWidth) * initWidith
-                let initHeight = resizableElementContentSize.height * initScaleFactor
-                visibleSize.height = initHeight.clamp(minHeight, maxHeight)
+                visibleSize.height = resizableElementContentSize.height.clamp(minHeight, maxHeight)
             }
         }
     }
@@ -55,7 +55,7 @@ class ResizableNode: ElementNode {
     var minWidth: CGFloat = 48
     var minHeight: CGFloat = 48
     var maxWidth: CGFloat?
-    var maxHeight: CGFloat = 1200
+    var maxHeight: CGFloat = 2200
     var keepAspectRatio: Bool = true
     var responsiveStrategy: ResponsiveType? {
         didSet {
@@ -93,7 +93,6 @@ class ResizableNode: ElementNode {
 
     func setVisibleHeight(_ height: CGFloat? = nil) {
         guard let height = height else { return }
-        visibleSize.height = height.clamp(minHeight, maxHeight)
 
         if keepAspectRatio {
             let originalAspectRatio = resizableElementContentSize.width / resizableElementContentSize.height
@@ -102,6 +101,12 @@ class ResizableNode: ElementNode {
             //at the fallBackWidth which ever is smallest
             let maxWidthClamp = min(maxWidth ?? fallBackWidth, fallBackWidth)
             visibleSize.width = computedWidth.clamp(minWidth, maxWidthClamp)
+
+            let computedMaxHeight = visibleSize.width / originalAspectRatio
+            let maxHeightClamp = min(maxHeight, computedMaxHeight)
+            visibleSize.height = height.clamp(minHeight, maxHeightClamp)
+        } else {
+            visibleSize.height = height.clamp(minHeight, maxHeight)
         }
     }
 
@@ -300,6 +305,8 @@ class ResizableNode: ElementNode {
         handleLayer.zPosition = 2
         handleLayer.opacity = 0.0
 
+        self.canResizeHeight = true
+
         let handle = Layer(name: "handle_vertical", layer: handleLayer) { [weak self] info in
             if info.event.clickCount == 2 {
                 self?.invalidateLayout(animated: true)
@@ -357,12 +364,18 @@ class ResizableNode: ElementNode {
                 )
             )
         case .embed(let url, let sourceMetadata, _):
+            /// DisplayInfo explainer for embeds:
+            /// - The width is always expressed as a ratio to the available editor width stored in displayInfo.displayRatio (at least on the client)
+            /// - The height is expressed as an absolute number of pixels stored in displayinfo.height. Height is only set when it's possible to resize the height
+            /// - displayinfo.width is not used for embeds
+            ///
+            /// Should the embed have the preserveAspectRatio flag, the displayInfo.height will be ignored
+            /// to instead respect the aspect ratio, based on the width of the embed
             element.kind = .embed(
                 url,
                 origin: sourceMetadata,
                 displayInfos: MediaDisplayInfos(
-                    height: Int(resizableElementContentSize.height),
-                    width: Int(resizableElementContentSize.width),
+                    height: canResizeHeight ? Int(self.visibleSize.height) : nil,
                     displayRatio: desiredWidthRatio
                 )
             )

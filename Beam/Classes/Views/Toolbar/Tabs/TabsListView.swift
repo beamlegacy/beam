@@ -11,6 +11,7 @@ import BeamCore
 
 struct TabsListView: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
@@ -27,7 +28,7 @@ struct TabsListView: View {
     @State private var scrollContentSize: CGFloat = 0
     @State private var draggableTabsAreas: [CGRect] = [] {
         didSet {
-            state.undraggableWindowRects = draggableTabsAreas
+            windowInfo.undraggableWindowRects = draggableTabsAreas
         }
     }
 
@@ -36,6 +37,7 @@ struct TabsListView: View {
         var currentDragDidChangeCurrentTab = false
         var lastTouchWasOnUnselectedTab: Bool = false
         var singleTabCenteringAdjustment: CGFloat = 0
+        var singleTabCurrentFrame: CGRect?
     }
 
     private var isDraggingATab: Bool {
@@ -81,6 +83,10 @@ struct TabsListView: View {
     private func isSelected(_ tab: BrowserTab) -> Bool {
         guard let ctab = currentTab else { return false }
         return tab.id == ctab.id
+    }
+
+    private func isSingleTab(atIndex: Int, in tabsSections: TabsSections) -> Bool {
+        tabsSections.otherTabs.count == 1 && atIndex == tabsSections.pinnedTabs.count
     }
 
     // MARK: - Rendering
@@ -137,12 +143,12 @@ struct TabsListView: View {
                     onClose: { onTabClose(at: index) },
                     onCopy: { onTabCopy(at: index)},
                     onToggleMute: { onTabToggleMute(at: index) })
-                .frame(width: isTheDraggedTab ? 0 : widthProvider.widthForTab(selected: selected, pinned: tab.isPinned) - centeringAdjustment)
+                .frame(width: isTheDraggedTab ? 0 : max(0, widthProvider.widthForTab(selected: selected, pinned: tab.isPinned) - centeringAdjustment))
                 .opacity(isTheDraggedTab ? 0 : 1)
                 .onHover { h in
                     if h { hoveredIndex = index }
                 }
-                .background(!selected || isSingle ? nil : GeometryReader { prxy in
+                .background(!selected ? nil : GeometryReader { prxy in
                     Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: index, frame: prxy.safeTopLeftGlobalFrame(in: nil).rounded()))
                 })
                 .contextMenu { tabContextMenuItems(forTabAtIndex: index) }
@@ -269,10 +275,13 @@ struct TabsListView: View {
                 guard !isDraggingATab && newValue != nil else { return }
                 guard newValue?.index == selectedIndex else { return }
                 state?.browserTabsManager.currentTabUIFrame = newValue?.frame
-                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
+                guard !isSingleTab(atIndex: selectedIndex, in: tabsSections) else { return }
+                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: viewModel.singleTabCurrentFrame)
             }
             .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
-                guard !isDraggingATab, let newValue = newValue else { return }
+                guard !isDraggingATab else { return }
+                viewModel.singleTabCurrentFrame = newValue
+                guard let newValue = newValue else { return }
                 updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: newValue)
             }
         }

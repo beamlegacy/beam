@@ -142,14 +142,16 @@ extension BeamTextEdit {
         }
 
         do {
-            if let noteData = noteData {
+            if let noteData = noteData, !noteData.isEmpty {
                 let elementHolder = BeamNoteDataHolder(noteData: noteData)
                 let elementHolderData = try PropertyListEncoder().encode(elementHolder)
+                pasteboard.addTypes([.noteDataHolder], owner: nil)
                 pasteboard.setData(elementHolderData, forType: .noteDataHolder)
             }
-            if let bText = beamText {
+            if let bText = beamText, !bText.isEmpty {
                 let bTextHolder = BeamTextHolder(bText: bText)
                 let beamTextData = try PropertyListEncoder().encode(bTextHolder)
+                pasteboard.addTypes([.bTextHolder], owner: nil)
                 pasteboard.setData(beamTextData, forType: .bTextHolder)
             }
             // Added this to clean lineSpacing, while lineSpacing in TextNode is not working

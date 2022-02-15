@@ -61,7 +61,7 @@ struct Passwords: View {
             VStack(alignment: .center) {
                 HStack {
                     Toggle(isOn: $autofillUsernamePasswords) {
-                        Text("Autofill username and passwords")
+                        Text("Autofill usernames and passwords")
                     }.toggleStyle(CheckboxToggleStyle())
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)

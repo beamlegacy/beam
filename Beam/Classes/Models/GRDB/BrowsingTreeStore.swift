@@ -166,7 +166,9 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     func save(browsingTree: BrowsingTree, appSessionId: UUID? = nil) throws {
         guard let record = browsingTree.toRecord(appSessionId: appSessionId) else { return }
         try db.save(browsingTreeRecord: record)
-        if AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled {
+        if AuthenticationManager.shared.isAuthenticated,
+            Configuration.networkEnabled,
+            Configuration.browsingTreeApiSyncEnabled {
             try self.saveOnNetwork(record)
         }
     }

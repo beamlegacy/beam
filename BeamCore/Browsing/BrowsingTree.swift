@@ -11,9 +11,9 @@ import Foundation
 import Combine
 
 public indirect enum BrowsingTreeOrigin: Codable, Equatable {
-    case searchBar(query: String, referringRootId: UUID?)
-    case searchFromNode(nodeText: String)
-    case linkFromNote(noteName: String)
+    case searchBar(query: String?, referringRootId: UUID?)
+    case searchFromNode(nodeText: String?)
+    case linkFromNote(noteName: String?)
     case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?, rootId: UUID?) //following a cmd + click on link
     case historyImport(sourceBrowser: BrowserType)
 
@@ -21,6 +21,16 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         switch self {
         case let .browsingNode(_, _, origin, _): return origin
         default: return self
+        }
+    }
+    public var anonymized: BrowsingTreeOrigin {
+        switch self {
+        case .searchBar(query: _, referringRootId: let id): return .searchBar(query: nil, referringRootId: id)
+        case .searchFromNode: return .searchFromNode(nodeText: nil)
+        case .linkFromNote: return .linkFromNote(noteName: nil)
+        case .browsingNode(id: let id, pageLoadId: let pageLoadId, rootOrigin: let rootOrigin, rootId: let rootId):
+            return .browsingNode(id: id, pageLoadId: pageLoadId, rootOrigin: rootOrigin?.anonymized, rootId: rootId)
+        case .historyImport: return self
         }
     }
 
@@ -66,12 +76,12 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         let type = try container.decode(String.self, forKey: .type)
         switch type {
         case "searchBar":
-            self = .searchBar(query: try container.decode(String.self, forKey: .value),
+            self = .searchBar(query: try? container.decode(String.self, forKey: .value),
                               referringRootId: try? container.decodeIfPresent(UUID.self, forKey: .referringRootId))
         case "searchFromNode":
-            self = .searchFromNode(nodeText: try container.decode(String.self, forKey: .value))
+            self = .searchFromNode(nodeText: try? container.decode(String.self, forKey: .value))
         case "linkFromNote":
-            self = .linkFromNote(noteName: try container.decode(String.self, forKey: .value))
+            self = .linkFromNote(noteName: try? container.decode(String.self, forKey: .value))
         case "browsingNode":
             self = .browsingNode(
                 id: try container.decode(UUID.self, forKey: .value),
@@ -415,6 +425,15 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         self.longTermScoreStore = longTermScoreStore
         self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
+    }
+    init(root: BrowsingNode, current: BrowsingNode, scores: [UUID: Score], origin: BrowsingTreeOrigin) {
+        self.root = root
+        self.current = current
+        self.scores = scores
+        self.origin = origin
+    }
+    public var anonymized: BrowsingTree {
+        BrowsingTree(root: root, current: current, scores: scores, origin: origin.anonymized)
     }
 
     public init(origin: BrowsingTreeOrigin, root: BrowsingNode, current: BrowsingNode, scores: [UUID: Score]) {

@@ -12,12 +12,12 @@ class AutocompleteResultTest: XCTestCase {
 
     func testComparison() throws {
         let results = [
-            AutocompleteResult(text: "Pierre", source: .autocomplete, score: 1.0),
-            AutocompleteResult(text: "Paul", source: .autocomplete, score: 2.0),
-            AutocompleteResult(text: "Nicolas", source: .autocomplete, completingText: "Nicol", score: nil),
-            AutocompleteResult(text: "Henri", source: .autocomplete, completingText: "Hen", score: nil),
-            AutocompleteResult(text: "Louis 16", source: .autocomplete, completingText: "Louis", score: nil),
-            AutocompleteResult(text: "Louis 17", source: .autocomplete, completingText: "Louis", score: nil)
+            AutocompleteResult(text: "Pierre", source: .searchEngine, score: 1.0),
+            AutocompleteResult(text: "Paul", source: .searchEngine, score: 2.0),
+            AutocompleteResult(text: "Nicolas", source: .searchEngine, completingText: "Nicol", score: nil),
+            AutocompleteResult(text: "Henri", source: .searchEngine, completingText: "Hen", score: nil),
+            AutocompleteResult(text: "Louis 16", source: .searchEngine, completingText: "Louis", score: nil),
+            AutocompleteResult(text: "Louis 17", source: .searchEngine, completingText: "Louis", score: nil)
 
         ]
         XCTAssertLessThan(results[0], results[1]) //score value comparison

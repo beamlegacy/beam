@@ -9,7 +9,6 @@ import Foundation
 
 enum BeamPlaceholder {
     static let allPlaceholders: [String] = [
-        "You can write here and press ⌘⏎ to search the web",
         "Here you are",
         "Here you are. What now?",
         "Let's go",
@@ -31,7 +30,6 @@ enum BeamPlaceholder {
         "You are here",
         "It's a big world",
         "It's time to build",
-        "Enter spacebar",
         "Where to, friend?",
         "Once upon a time …",
         "One step at a time",
@@ -42,6 +40,11 @@ enum BeamPlaceholder {
         "Baby steps",
         "A new beginning",
         "Here is where we begin",
-        "This is the beginning"
+        "This is the beginning",
+        "⌘T to start a new search",
+        "⌘D to switch between the web and your notes",
+        "Hold ⌥ to capture content on the web",
+        "⌥S to capture a web page",
+        "@ or [[ to create a note"
     ]
 }

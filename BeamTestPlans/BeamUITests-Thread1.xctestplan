@@ -15,10 +15,6 @@
     {
       "skippedTests" : [
         "BaseTest",
-        "DownloadsTest",
-        "EditorShortcutsTests",
-        "HelpAndFeedbackTests",
-        "JavascriptNativeInteractionsTests",
         "JournalTest",
         "LinksTests",
         "LoginPasswordAutocompleteTests",
@@ -28,10 +24,12 @@
         "OmniboxDestinationTests",
         "OmniboxViewTests",
         "OnboardingTests",
+        "PasswordPreferencesTests",
         "PnSAddToCardTests",
         "ReferencesTests",
         "SearchOnCardTests",
         "SearchOnWebTests",
+        "SignInAutocompleteTests",
         "SignInSucessfullyTests",
         "SignInTests",
         "SignUpAutocompleteTests",

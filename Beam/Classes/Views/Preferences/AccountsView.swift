@@ -10,7 +10,7 @@ let AccountsPreferenceViewController: PreferencePane = PreferencesPaneBuilder.bu
 
 class AccountsViewModel: ObservableObject {
     @ObservedObject var calendarManager: CalendarManager
-    @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated
+    @Published var isloggedIn: Bool = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
     @Published var accountsCalendar: [AccountCalendar] = []
 
     private var scope = Set<AnyCancellable>()
@@ -32,7 +32,7 @@ class AccountsViewModel: ObservableObject {
         }.store(in: &scope)
 
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            self?.isloggedIn = isAuthenticated
+            self?.isloggedIn = isAuthenticated && AccountManager.state == .signedIn
         }.store(in: &scope)
     }
 
@@ -251,24 +251,24 @@ struct AccountsView: View {
                 .frame(width: 286, alignment: .leading)
                 .padding(.bottom, 20)
 
-            Button(action: {
-                promptDeleteAccountActionAlert()
-            }, label: {
-                // TODO: loc
-                Text("Delete Account...")
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 132)
-                    .padding(.top, -4)
-
-            })
-            VStack {
-                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .multilineTextAlignment(.leading)
-                    .font(BeamFont.regular(size: 11).swiftUI)
-                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-            }.frame(width: 286, height: 26, alignment: .leading)
+//            Button(action: {
+//                promptDeleteAccountActionAlert()
+//            }, label: {
+//                // TODO: loc
+//                Text("Delete Account...")
+//                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+//                    .frame(width: 132)
+//                    .padding(.top, -4)
+//
+//            })
+//            VStack {
+//                Text("Your account, your database and all your notes will be deleted and cannot be recovered.")
+//                    .lineLimit(2)
+//                    .fixedSize(horizontal: false, vertical: true)
+//                    .multilineTextAlignment(.leading)
+//                    .font(BeamFont.regular(size: 11).swiftUI)
+//                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+//            }.frame(width: 286, height: 26, alignment: .leading)
         }
     }
 
@@ -289,16 +289,14 @@ struct AccountsView: View {
             Button(action: {
                 encryptionKeyIsCopied.toggle()
 
-                let pasteboard = NSPasteboard.general
-                pasteboard.clearContents()
-                pasteboard.setString(EncryptionManager.shared.privateKey().asString(), forType: .string)
+                EncryptionManager.shared.copyKeyToPasteboard()
 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
                     encryptionKeyIsCopied.toggle()
                 }
             }, label: {
                 HStack {
-                    Text(EncryptionManager.shared.privateKey().asString())
+                    Text(EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString())
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                     Image("preferences-account-copy")
@@ -335,6 +333,8 @@ struct AccountsView: View {
         alert.messageText = "Are you sure you want to sign out ?"
         let customView = NSView(frame: NSRect(x: 0, y: 0, width: 252, height: 16))
         let checkBox = NSButton(checkboxWithTitle: "Delete all data on this device", target: self.checkboxHelper, action: #selector(self.checkboxHelper.checkboxClicked))
+        checkBox.state = .on
+        self.checkboxHelper.isOn = checkBox.state == .on
         checkBox.frame.origin = CGPoint(x: 0, y: 0)
         checkBox.font = BeamFont.regular(size: 12).nsFont
         customView.addSubview(checkBox)
@@ -348,9 +348,9 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             AccountManager.logout()
             if self.checkboxHelper.isOn {
-                AppDelegate.main.deleteAllLocalContent()
+                AppDelegate.main.deleteAllData()
             }
-            viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated
+            viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
         }
     }
 
@@ -360,7 +360,7 @@ struct AccountsView: View {
                               informativeText: "All your notes will be deleted and cannot be recovered.",
                               buttonTitle: "Delete",
                               secondaryButtonTitle: "Cancel") {
-            // TODO: Implement when endpoint is ready
+            AppDelegate.main.deleteDocumentsAndDatabases(includedRemote: true)
         }
     }
 

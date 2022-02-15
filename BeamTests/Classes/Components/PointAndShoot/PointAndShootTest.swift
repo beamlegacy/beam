@@ -15,7 +15,7 @@ class TestWebPage: WebPage {
     private(set) var title: String = "PNS MockPage"
     static let urlStr = "https://webpage.com"
     var url: URL? = URL(string: urlStr)
-    var requestedUrl: URL?
+    var requestedURL: URL?
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
     var webPositions: WebPositions?
@@ -31,7 +31,7 @@ class TestWebPage: WebPage {
     var hasError: Bool = false
     var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
-    var appendToIndexer: ((URL, Readability) -> Void)?
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var webView: BeamWebView!
     var activeNote: BeamNote {
         if let note = testNotes.values.first {
@@ -182,6 +182,16 @@ class FileStorageMock: BeamFileStorage {
     func remove(uid: UUID) throws {}
 
     func clear() throws {}
+
+    func addReference(fromNote: UUID, element: UUID, to: UUID) throws {}
+    func removeReference(fromNote: UUID, element: UUID?, to: UUID?) throws {}
+    func referenceCount(fileId: UUID) throws -> Int { 0 }
+
+    func referencesFor(fileId: UUID) throws -> [BeamNoteReference] { [] }
+
+    func purgeUnlinkedFiles() throws {}
+    func purgeUndo() throws {}
+    func clearFileReferences() throws {}
 }
 
 class DownloadManagerMock: DownloadManager {
@@ -189,7 +199,9 @@ class DownloadManagerMock: DownloadManager {
 
     var fractionCompleted: Double = 0.0
     var overallProgress: Progress = Progress()
-    var downloads: [Download] = []
+    var downloadList = DownloadList<DownloadItem>()
+
+    func download(_ download: WKDownload) {}
 
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void) {}
 
@@ -198,11 +210,10 @@ class DownloadManagerMock: DownloadManager {
         completion(DownloadManagerResult.binary(data: Data([0x01, 0x02, 0x03]), mimeType: "image/png", actualURL: URL(string: "https://webpage.com/image.png")!))
     }
 
-    func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?) {}
     func downloadFile(from document: BeamDownloadDocument) throws {}
 
     func clearAllFileDownloads() {}
-    func clearFileDownload(_ download: Download) -> Download? { return nil }
+    func clearFileDownload(_ download: DownloadItem) -> DownloadItem? { return nil }
 
     func downloadImage(_ src: URL, pageUrl: URL, completion: @escaping ((Data, String)?) -> Void) {
         let headers = ["Referer": pageUrl.absoluteString]
@@ -280,7 +291,7 @@ class PointAndShootTest: XCTestCase {
             targets.append(target)
         }
 
-        return PointAndShoot.ShootGroup(UUID().uuidString, targets, "placeholder text", faker.internet.url(), shapeCache: .init())
+        return PointAndShoot.ShootGroup(id: UUID().uuidString, targets: targets, text: "placeholder text", href: faker.internet.url(), shapeCache: .init())
     }
 
     // Note: this class is only used to setup the Point and Shoot Mocks and testbed

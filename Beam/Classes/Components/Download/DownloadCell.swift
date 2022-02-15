@@ -8,7 +8,7 @@
 import SwiftUI
 import Combine
 
-struct DownloadCell: View {
+struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem == List.Element {
 
     private enum OnHoverState {
         case pause
@@ -18,36 +18,43 @@ struct DownloadCell: View {
 
     @Environment(\.colorScheme) var colorScheme
 
-    @ObservedObject var download: Download
+    @ObservedObject private var download: ListItem
     @State private var hoverState: OnHoverState?
     var isSelected: Bool
-    private weak var downloadManager: BeamDownloadManager?
+    private weak var downloadList: List?
     private var onDeleteKeyDownAction: (() -> Void)?
 
-    init(download: Download, from downloadManager: BeamDownloadManager? = nil, isSelected: Bool = false, onDeleteKeyDownAction: (() -> Void)? = nil) {
+    init(download: ListItem, from downloadList: List? = nil, isSelected: Bool = false, onDeleteKeyDownAction: (() -> Void)? = nil) {
         self.download = download
         self.isSelected = isSelected
-        self.downloadManager = downloadManager
+        self.downloadList = downloadList
         self.onDeleteKeyDownAction = onDeleteKeyDownAction
     }
 
     var body: some View {
         HStack(spacing: 8) {
-            Image(nsImage: icon(for: download.fileSystemURL.pathExtension))
-                .allowsHitTesting(false)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(download.fileSystemURL.lastPathComponent)
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Niobium.swiftUI)
-                if let task = download.downloadTask,
-                   task.state == .running {
-                    LinearProgressView(progress: download.progress, height: 3.0)
-                }
-                Text(detailString)
-                    .animation(.none)
-                    .font(BeamFont.regular(size: 10).swiftUI)
-                    .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-            }.allowsHitTesting(false)
+
+            if let filename = download.filename,
+               let fileExtension = download.fileExtension {
+
+                Image(nsImage: icon(for: fileExtension))
+                    .allowsHitTesting(false)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(filename)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Niobium.swiftUI)
+                    if download.state == .running {
+                        LinearProgressView(progress: download.progressFractionCompleted, height: 3.0)
+                    }
+                    Text(detailString)
+                        .animation(.none)
+                        .font(BeamFont.regular(size: 10).swiftUI)
+                        .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                }.allowsHitTesting(false)
+
+            }
+
             Spacer()
             switch download.state {
             case .running:
@@ -62,9 +69,7 @@ struct DownloadCell: View {
                 CircledButton(image: "download-resume", action: resumeDownload, onHover: { hover in
                     hoverState = hover ? .resume : nil
                 }).blendModeLightMultiplyDarkScreen()
-            case .completed, .canceling:
-                EmptyView()
-            @unknown default:
+            case .completed:
                 EmptyView()
             }
             CircledButton(image: "download-view", action: showInFinder, onHover: { hover in
@@ -98,15 +103,11 @@ struct DownloadCell: View {
             }
             switch download.state {
             case .running:
-                return download.localizedProgressString ?? ""
+                return download.progressDescription ?? ""
             case .suspended:
-                return "\(download.localizedProgressString ?? "") · Stopped"
-            case .canceling:
-                return "\(download.localizedProgressString ?? "") · Canceling"
+                return "\(download.progressDescription ?? "") · Stopped"
             case .completed:
-                return download.totalByteCount ?? ""
-            @unknown default:
-                return ""
+                return download.progressDescription ?? ""
             }
         }
     }
@@ -116,19 +117,19 @@ struct DownloadCell: View {
     }
 
     private func pauseDownload() {
-        downloadManager?.cancel(download)
+        downloadList?.cancel(download)
     }
 
     private func resumeDownload() {
-        downloadManager?.resume(download)
+        downloadList?.resume(download)
     }
 
     private func openFile() {
-        downloadManager?.openFile(download)
+        downloadList?.openFile(download)
     }
 
     private func showInFinder() {
-        downloadManager?.showInFinder(download)
+        downloadList?.showInFinder(download)
     }
 
     private func onKeyDown(event: NSEvent) {
@@ -160,33 +161,54 @@ struct DownloadCell: View {
 
 struct DownloadCell_Previews: PreviewProvider {
     static var previews: some View {
-        let d1 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), suggestedFileName: "", downloadTask: nil)
-        d1.fakeState = .completed
+        let list = DownloadListFake()
 
-        let d2 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), suggestedFileName: "", downloadTask: nil)
-        d2.fakeState = .suspended
+        Group {
+            DownloadCell(
+                download: DownloadListItemFake(
+                    filename: "Uno.txt",
+                    fileExtension: "txt",
+                    state: .completed,
+                    progressFractionCompleted: 1,
+                    localizedDescription: "100 MB"
+                ),
+                from: list
+            )
 
-        let d3 = Download(downloadURL: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1.dmg")!, fileSystemURL: URL(fileURLWithPath: "/"), suggestedFileName: "", downloadTask: nil)
-        d3.fakeState = .running
+            DownloadCell(
+                download: DownloadListItemFake(
+                    filename: "Dos.mp4",
+                    fileExtension: "mp4",
+                    state: .running,
+                    progressFractionCompleted: 0.75,
+                    localizedDescription: "75 MB / 100 MB"
+                ),
+                from: list
+            )
 
-        return Group {
-            Group {
-                DownloadCell(download: d1)
-                    .frame(width: 368.0)
-                DownloadCell(download: d2)
-                    .frame(width: 368.0)
-                DownloadCell(download: d3)
-                    .frame(width: 368.0)
-            }
-            Group {
-                DownloadCell(download: d1)
-                    .frame(width: 368.0)
-                DownloadCell(download: d2)
-                    .frame(width: 368.0)
-                DownloadCell(download: d3)
-                    .frame(width: 368.0)
-            }.preferredColorScheme(.dark)
+            DownloadCell(
+                download: DownloadListItemFake(
+                    filename: "Tres.jpg",
+                    fileExtension: "jpg",
+                    state: .suspended,
+                    progressFractionCompleted: 0.5,
+                    localizedDescription: "50 MB / 100 MB"
+                ),
+                from: list
+            )
+
+            DownloadCell(
+                download: DownloadListItemFake(
+                    filename: "Ricky.jpg",
+                    fileExtension: "jpg",
+                    state: .suspended,
+                    progressFractionCompleted: 0.5,
+                    localizedDescription: "50 MB / 100 MB",
+                    errorMessage: "Ouch error"
+                ),
+                from: list
+            )
         }
-
+        .frame(width: 368.0)
     }
 }
