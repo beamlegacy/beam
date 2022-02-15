@@ -125,7 +125,7 @@ struct OnboardingEmailConnectView: View {
     var body: some View {
         VStack(spacing: 0) {
             if loadingState == .gettingInfos {
-                OnboardingView.LoadingView(randomDetails: ["account", "username"])
+                OnboardingView.LoadingView()
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 VStack(spacing: 0) {
@@ -138,6 +138,7 @@ struct OnboardingEmailConnectView: View {
         }
         .onAppear {
             updateButtonState()
+            onboardingManager.userDidSignUp = false
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(500)) {
                 // wait a little for the animation to finish before focusing the text field
                 isEmailEditing = true
@@ -183,7 +184,7 @@ struct OnboardingEmailConnectView: View {
         loadingState = .signinin
         var loadingStartTime = BeamDate.now
         updateButtonState()
-        accountManager.signIn(email: emailField, password: passwordField) { result in
+        accountManager.signIn(email: emailField, password: passwordField, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 switch result {
                 case .failure(let error):
@@ -206,11 +207,18 @@ struct OnboardingEmailConnectView: View {
                     loadingState = .gettingInfos
                     loadingStartTime = BeamDate.now
                     updateButtonState()
+
+                    onboardingManager.checkForPrivateKey { nextStep in
+                        guard nextStep != nil else {
+                            handleSyncCompletion(startTime: loadingStartTime)
+                            return
+                        }
+                        finish(nextStep)
+                    }
                 }
             }
-        } syncCompletion: { _ in
-            handleSyncCompletion(startTime: loadingStartTime)
-        }
+
+        } syncCompletion: { _ in }
     }
 
     private func showEmailConfirmationStep() {
@@ -232,6 +240,7 @@ struct OnboardingEmailConnectView: View {
                         errorState = .genericError(description: error.localizedDescription)
                     }
                 case .success:
+                    onboardingManager.userDidSignUp = true
                     showEmailConfirmationStep()
                 }
             }

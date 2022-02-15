@@ -77,7 +77,7 @@ extension DatabaseManager {
 
                     // Trigger updates for Advanced Settings
                     DispatchQueue.main.async {
-                        NotificationCenter.default.post(name: .defaultDatabaseUpdate,
+                        NotificationCenter.default.post(name: .databaseListUpdate,
                                                         object: nil)
                     }
 

@@ -109,7 +109,7 @@ class BeamUITestsMenuGenerator {
         DocumentManager().deleteAll { _ in }
         DatabaseManager().deleteAll { _ in }
         let data = AppDelegate.main.window?.state.data
-        try? LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try? GRDBDatabase.shared.clear()
         data?.saveData()
     }
@@ -240,7 +240,7 @@ class BeamUITestsMenuGenerator {
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
 
-        accountManager.signIn(email: email, password: password, completionHandler: { result in
+        accountManager.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
             }
@@ -261,6 +261,7 @@ class BeamUITestsMenuGenerator {
 
     private func showOnboarding() {
         logout()
+        clearPasswordsDatabase()
         AuthenticationManager.shared.username = nil
         let onboarding = AppDelegate.main.window?.state.data.onboardingManager
         onboarding?.forceDisplayOnboarding()

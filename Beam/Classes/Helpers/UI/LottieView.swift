@@ -29,6 +29,8 @@ struct LottieView: NSViewRepresentable {
     var loopMode: LottieLoopMode = .loop
     var speed: CGFloat = 1
 
+    var animationSize: CGSize?
+
     public func makeCoordinator() -> Coordinator {
         return Coordinator()
     }
@@ -42,6 +44,7 @@ struct LottieView: NSViewRepresentable {
         animationView.contentMode = .scaleAspectFit
         animationView.loopMode = loopMode
         animationView.animationSpeed = speed
+
         if playing {
             animationView.play()
         }
@@ -55,6 +58,13 @@ struct LottieView: NSViewRepresentable {
             animationView.heightAnchor.constraint(equalTo: view.heightAnchor),
             animationView.widthAnchor.constraint(equalTo: view.widthAnchor)
         ])
+
+        if let animationSize = animationSize {
+            NSLayoutConstraint.activate([
+                view.heightAnchor.constraint(equalToConstant: animationSize.height),
+                view.widthAnchor.constraint(equalToConstant: animationSize.width)
+            ])
+        }
         return view
     }
 

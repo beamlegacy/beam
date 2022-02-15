@@ -25,19 +25,25 @@ html, body, .twitter-tweet, .twitter-tweet-rendered, iframe {
   margin: 0 !important;
 }
 
-/* only if aspect ratio is fixed */
-.iframe.video {
-  padding-top: calc(var(--height) / var(--width) * 100%);
-  position: relative;
-  width: 100%;
+iframe {
+  border: none;
+  border-radius: 3px;
 }
 
-.iframe.resizable iframe {
+.resize-horizontal iframe {
   background: transparent;
+  position: static;
+  visibility: visible;
   display: block;
-  height: 100%;
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 100%;
+  flex-grow: 1;
+}
+
+.aspectRatio iframe {
+  height: 100vh !important;
+  width: 100vw !important;
+}
+
+.noAspectRatio.resize-both iframe {
+  height: 100vh !important;
+  width: 100vw !important;
 }

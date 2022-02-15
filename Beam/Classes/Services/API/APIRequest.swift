@@ -69,7 +69,7 @@ class APIRequest: NSObject {
 
             guard AuthenticationManager.shared.isAuthenticated,
                   let accessToken = AuthenticationManager.shared.accessToken else {
-                LibrariesManager.nonFatalError(error: APIRequestError.notAuthenticated,
+                      ThirdPartyLibrariesManager.shared.nonFatalError(error: APIRequestError.notAuthenticated,
                                                addedInfo: AuthenticationManager.shared.hashTokensInfos())
 
                 NotificationCenter.default.post(name: .networkUnauthorized, object: self)
@@ -178,7 +178,7 @@ class APIRequest: NSObject {
     // If request contains a filename but no query, load the query from fileName
     func loadQuery<T: GraphqlParametersProtocol>(_ bodyParamsRequest: T) -> T {
         if bodyParamsRequest.fileName == nil && bodyParamsRequest.query == nil {
-            LibrariesManager.nonFatalError("Missing fileName or query in GraphqlParameters")
+            ThirdPartyLibrariesManager.shared.nonFatalError("Missing fileName or query in GraphqlParameters")
         }
 
         var updatedRequest = bodyParamsRequest
@@ -214,7 +214,7 @@ class APIRequest: NSObject {
         default:
             let nsError = error as NSError
             Logger.shared.logError("\(nsError) - \(nsError.userInfo)", category: .network)
-            LibrariesManager.nonFatalError(error: error)
+            ThirdPartyLibrariesManager.shared.nonFatalError(error: error)
         }
     }
 

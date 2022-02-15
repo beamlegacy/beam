@@ -130,7 +130,11 @@ public class BeamNote: BeamElement {
         self.title = Self.validTitle(fromTitle: title)
         super.init()
         changePropagationEnabled = false
-        defer { changePropagationEnabled = true }
+        warmingUp = true
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
 
         self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
@@ -142,7 +146,11 @@ public class BeamNote: BeamElement {
         self.type = BeamNoteType.journalForDate(journalDate)
         super.init()
         changePropagationEnabled = false
-        defer { changePropagationEnabled = true }
+        warmingUp = true
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
 
         self.sign = Self.signPost.createId(object: self)
         setupSourceObserver()
@@ -174,7 +182,11 @@ public class BeamNote: BeamElement {
 
         try super.init(from: decoder)
         changePropagationEnabled = false
-        defer { changePropagationEnabled = true }
+        warmingUp = true
+        defer {
+            changePropagationEnabled = true
+            warmingUp = false
+        }
 
         self.sign = Self.signPost.createId(object: self)
         if container.contains(.sources) {
@@ -311,7 +323,6 @@ public class BeamNote: BeamElement {
 
         fetchedNotesCancellables[cancellableKey] =
             note.changed
-            .dropFirst(1)
             .receive(on: DispatchQueue.main)
             .sink { [weak note] _ in
                 guard let note = note as? BeamNoteDocument else { return }
@@ -337,6 +348,16 @@ public class BeamNote: BeamElement {
         }
     }
 
+    public static func unloadAllNotes() {
+        fetchedLock.writeLock()
+        defer { fetchedLock.writeUnlock() }
+
+        fetchedNotesCancellables.removeAll()
+        fetchedNotes.removeAll()
+        fetchedNotesTitles.removeAll()
+        clearCancellables()
+    }
+
     public static func unload(note: BeamNote) {
         fetchedLock.writeLock()
         defer { fetchedLock.writeUnlock() }
@@ -358,7 +379,7 @@ public class BeamNote: BeamElement {
     public func isEntireNoteEmpty() -> Bool {
         if children.count > 1 { return false }
 
-        if let child = children.first, !child.text.isEmpty || children.count > 1 {
+        if let child = children.first, !child.text.isEmpty || child.children.count > 0 {
             return false
         }
 

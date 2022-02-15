@@ -13,10 +13,12 @@ protocol WebPage: AnyObject, Scorable {
 
     var frame: NSRect { get }
 
-    var originalQuery: String? { get }
-    var requestedUrl: URL? { get set }
     var title: String { get }
     var url: URL? { get set }
+    /// The URL before any website implicit redirection. (ex: gmail.com redirects to mail.google.com)
+    var requestedURL: URL? { get set }
+    /// The user typed text that ended up opening this page.
+    var originalQuery: String? { get }
     var hasError: Bool { get set }
     var responseStatusCode: Int { get set }
 
@@ -59,7 +61,7 @@ protocol WebPage: AnyObject, Scorable {
     // MARK: Navigation handling
     /// Leave the page, either by back or forward.
     func leave()
-    var appendToIndexer: ((URL, Readability) -> Void)? { get }
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)? { get }
     func shouldNavigateInANewTab(url: URL) -> Bool
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
@@ -144,6 +146,10 @@ extension WebPage {
 
     func addTextToClusteringManager(_ text: String, url: URL) { }
     func allowsMouseMoved(with event: NSEvent) -> Bool { true }
+
+    func handleFormSubmit(frameInfo: WKFrameInfo) {
+        passwordOverlayController?.handleWebFormSubmit(with: "", frameInfo: frameInfo)
+    }
 }
 
 extension WebPage {

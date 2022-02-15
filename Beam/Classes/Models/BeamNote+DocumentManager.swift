@@ -306,6 +306,13 @@ extension BeamNote: BeamNoteDocument {
                                 }
 
                                 self.saving.store(false, ordering: .relaxed)
+                                // remove all file references:
+                                do {
+                                    try BeamFileDBManager.shared.removeReference(fromNote: self.id, element: nil)
+                                } catch {
+                                    Logger.shared.logError("Error while updating file references for note \(self.titleAndId)", category: .document)
+                                }
+
                                 completion?(result)
                             }
 
@@ -354,6 +361,16 @@ extension BeamNote: BeamNoteDocument {
                 }
             }
 
+            // remove all file references:
+            do {
+                try BeamFileDBManager.shared.removeReference(fromNote: self.id, element: nil)
+                // and recreate them:
+                for fileElement in self.allFileElements {
+                    try BeamFileDBManager.shared.addReference(fromNote: self.id, element: fileElement.1.id, to: fileElement.0)
+                }
+            } catch {
+                Logger.shared.logError("Error while updating file references for note \(self.titleAndId)", category: .document)
+            }
             self.saving.store(false, ordering: .relaxed)
             completion?(result)
             Self.signPost.end(Signs.save, id: self.sign)
@@ -365,7 +382,7 @@ extension BeamNote: BeamNoteDocument {
                                 decodeChildren: Bool = true,
                                 verifyDatabase: Bool = true) throws -> BeamNote {
 
-        if verifyDatabase && documentStruct.databaseId != Database.defaultDatabase().id {
+        if verifyDatabase && documentStruct.databaseId != DatabaseManager.defaultDatabase.id {
             Logger.shared.logError("We just tried loading a note from a database that is NOT the default database!", category: .database)
         }
 
@@ -469,7 +486,7 @@ extension BeamNote: BeamNoteDocument {
     public static func fetch(id: UUID,
                              includeDeleted: Bool,
                              keepInMemory: Bool = true, fetchFromMemory: Bool = true,
-                             decodeChildren: Bool = true) -> BeamNote? {
+                             decodeChildren: Bool = true, verifyDatabase: Bool = true) -> BeamNote? {
         let sign = Self.signPost.createId()
         sign.begin(Signs.fetchId, id.uuidString)
         defer {
@@ -490,7 +507,7 @@ extension BeamNote: BeamNoteDocument {
         }
 
         do {
-            return try instanciateNote(doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren)
+            return try instanciateNote(doc, keepInMemory: keepInMemory, decodeChildren: decodeChildren, verifyDatabase: verifyDatabase)
         } catch {
             Logger.shared.logError("Unable to decode note \(doc.title) (\(doc.id))", category: .document)
         }

@@ -41,7 +41,7 @@ extension BeamTextEdit {
 
     // MARK: - UI
 
-    func initInlineTextFormatter() {
+    private func initInlineTextFormatter() {
         guard inlineFormatter == nil else { return }
         let formatterView = TextFormatterView(key: "TextFormatter", viewType: .inline)
         formatterView.items = BeamTextEdit.textFormatterType
@@ -85,7 +85,38 @@ extension BeamTextEdit {
         CustomPopoverPresenter.shared.presentFormatterView(view, atPoint: atPoint, from: self, animated: false)
     }
 
-    internal func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false, completionHandler: (() -> Void)? = nil) {
+    private func showInlineTextFormatterIfNeeded() -> Bool {
+        let hasTextSelected = rootNode?.textIsSelected == true
+        let hasTextNodeSelection = rootNode?.state.nodeSelection?.hasTextNode == true
+        guard hasTextSelected || hasTextNodeSelection else { return false }
+
+        initInlineTextFormatter()
+        return true
+    }
+
+    func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
+        guard showInlineTextFormatterIfNeeded() else { return }
+        updateInlineFormatterView(isKeyEvent: isKeyEvent)
+
+        if isInlineFormatterHidden {
+            showOrHideInlineFormatter(isPresent: true)
+        }
+    }
+
+    func updateInlineFormatterOnDrag(isDragged: Bool = false) {
+        guard showInlineTextFormatterIfNeeded() else { return }
+        updateInlineFormatterView(isDragged: isDragged)
+    }
+
+    func showInlineFormatter(completionHandler: (() -> Void)? = nil) {
+        showOrHideInlineFormatter(isPresent: true, completionHandler: completionHandler)
+    }
+
+    func hideInlineFormatter(completionHandler: (() -> Void)? = nil) {
+        showOrHideInlineFormatter(isPresent: false, completionHandler: completionHandler)
+    }
+
+    private func showOrHideInlineFormatter(isPresent: Bool, isDragged: Bool = false, completionHandler: (() -> Void)? = nil) {
         guard let formatterView = inlineFormatter else {
             completionHandler?()
             return

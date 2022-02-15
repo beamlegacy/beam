@@ -50,7 +50,9 @@ struct SmallUpdateIndicatorView: View {
             case .checking:
                 EmptyView()
             case .error(errorDesc: let errorDesc):
-                ButtonLabel("Update error : \(errorDesc)", customStyle: buttonLabelStyle)
+                ButtonLabel("\(errorDesc)",
+                            icon: "status-update_failed",
+                            customStyle: buttonLabelStyle)
                     .onReceive(opacityTimer, perform: { _ in
                         withAnimation {
                             opacity = 0
@@ -68,9 +70,11 @@ struct SmallUpdateIndicatorView: View {
                     }
                 }.frame(maxWidth: 250)
             case .installing:
-                ButtonLabel("Installing update…")
+                ButtonLabel("Installing update…", lottie: "apple-activity-indicator-extended", customStyle: buttonLabelLottieStyle)
             case .updateInstalled:
-                ButtonLabel(updateInstalledMessage(timerExpired: timerExpired), customStyle: buttonLabelStyle) {
+                ButtonLabel(updateInstalledMessage(timerExpired: timerExpired),
+                            lottie: "apple-activity-indicator-extended",
+                            customStyle: buttonLabelLottieStyle) {
                     updateInstalledTimerCancellable?.cancel()
                     NSApp.terminate(nil)
                 }
@@ -93,11 +97,22 @@ struct SmallUpdateIndicatorView: View {
     }
 
     func updateInstalledMessage(timerExpired: Bool) -> String {
-        timerExpired ? "Update installed. Restarting…" : "Update installed."
+        timerExpired ? "Updated. Restarting…" : "Updated."
     }
 
     private var buttonLabelStyle: ButtonLabelStyle {
         return ButtonLabelStyle(spacing: 1,
+                                foregroundColor: BeamColor.LightStoneGray.swiftUI,
+                                activeForegroundColor: BeamColor.Niobium.swiftUI,
+                                backgroundColor: BeamColor.Generic.background.swiftUI,
+                                hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
+                                activeBackgroundColor: BeamColor.Mercury.swiftUI,
+                                leadingPaddingAdjustment: 4)
+    }
+
+    private var buttonLabelLottieStyle: ButtonLabelStyle {
+        return ButtonLabelStyle(iconSize: 12,
+                                spacing: 3,
                                 foregroundColor: BeamColor.LightStoneGray.swiftUI,
                                 activeForegroundColor: BeamColor.Niobium.swiftUI,
                                 backgroundColor: BeamColor.Generic.background.swiftUI,
@@ -112,7 +127,11 @@ struct SmallUpdateIndicatorView: View {
                                                          buttonFont: BeamFont.medium(size: 12).swiftUI, buttonColor: BeamColor.LightStoneGray.swiftUI,
                                                          buttonHoverColor: BeamColor.Niobium.swiftUI, closeButtonColor: BeamColor.LightStoneGray.swiftUI,
                                                          closeButtonHoverColor: BeamColor.Niobium.swiftUI, dateFont: BeamFont.medium(size: 12).swiftUI,
-                                                         dateColor: BeamColor.AlphaGray.swiftUI, versionNameFont: BeamFont.medium(size: 13).swiftUI, versionNameColor: BeamColor.Niobium.swiftUI, backgroundColor: BeamColor.Generic.secondaryBackground.swiftUI, cellHoverColor: BeamColor.Nero.swiftUI, separatorColor: BeamColor.Mercury.swiftUI, parmaRenderer: BeamRender())
+                                                         dateColor: BeamColor.AlphaGray.swiftUI, versionNameFont: BeamFont.medium(size: 13).swiftUI,
+                                                         versionNameColor: BeamColor.Niobium.swiftUI,
+                                                         backgroundColor: BeamColor.Generic.secondaryBackground.swiftUI, cellHoverColor: BeamColor.Nero.swiftUI,
+                                                         separatorView: AnyView(PopupSeparator()),
+                                                         parmaRenderer: BeamRender())
 
         return style
     }

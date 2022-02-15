@@ -1,0 +1,70 @@
+{
+  "name": "beam-passwordmanager",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Beam JS PasswordManager handler",
+  "scripts": {
+    "clean": "rm -Rf node_modules",
+    "prebuild": "yarn install",
+    "build": "webpack",
+    "watch": "webpack --watch",
+    "start": "webpack serve",
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --reporters=default --silent",
+    "test-ci": "node --experimental-vm-modules node_modules/.bin/jest --ci --silent --reporters=default --reporters=jest-junit --coverage",
+    "lint": "eslint **/*.ts --format gitlab ..",
+    "lint-fix": "eslint **/*.ts --format gitlab .. --fix"
+  },
+  "author": "frontend@beam.co",
+  "devDependencies": {
+    "@babel/core": "^7.16.0",
+    "@babel/plugin-proposal-class-properties": "^7.16.0",
+    "@babel/plugin-transform-runtime": "^7.16.0",
+    "@babel/preset-env": "^7.16.0",
+    "@babel/preset-typescript": "^7.16.0",
+    "@babel/runtime-corejs3": "^7.16.3",
+    "@types/jest": "^27.0.2",
+    "@types/node": "^16.11.7",
+    "@types/uuid": "^8.3.0",
+    "@typescript-eslint/eslint-plugin": "^5.3.1",
+    "@typescript-eslint/parser": "^5.3.1",
+    "babel-jest": "^27.3.1",
+    "css-loader": "^6.5.1",
+    "eslint": "^8.2.0",
+    "eslint-formatter-gitlab": "^3.0.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "27.3.1",
+    "jest-junit": "^13.0.0",
+    "jest-measure": "^0.0.14",
+    "posthtml-expressions": "^1.7.1",
+    "sass": "1.43.4",
+    "sass-loader": "^12.3.0",
+    "source-map-loader": "^3.0.0",
+    "style-loader": "^3.3.1",
+    "terser-webpack-plugin": "^5.3.0",
+    "ts-jest": "^27.0.7",
+    "ts-loader": "^9.1.0",
+    "typescript": "^4.3.5",
+    "uuid": "^8.3.2",
+    "webpack": "^5.64.0",
+    "webpack-cli": "4.9.1",
+    "webpack-dev-server": "^4.4.0"
+  },
+  "browserslist": [
+    "safari 13"
+  ],
+  "babel": {
+    "presets": [
+      "@babel/preset-env"
+    ],
+    "plugins": [
+      "@babel/plugin-proposal-class-properties"
+    ]
+  },
+  "jest": {
+    "transform": {},
+    "moduleNameMapper": {
+      "^.+\\.(css|scss)$": "identity-obj-proxy",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/fileMocks.js"
+    }
+  }
+}

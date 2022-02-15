@@ -61,15 +61,13 @@ import Sentry
     @Published var focusOmniBox: Bool = true
     @Published var focusOmniBoxFromTab: Bool = false
 
+    @Published var showHelpAndFeedback: Bool = false
+
     @Published var destinationCardIsFocused: Bool = false
     @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: Range<Int>?
     var keepDestinationNote: Bool = false
 
-    @Published var windowIsResizing = false
-    var undraggableWindowRects: [CGRect] = []
-    @Published var windowIsMain = true
-    @Published var windowFrame = CGRect.zero
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
     }
@@ -417,7 +415,7 @@ import Sentry
     private func selectAutocompleteResult(_ result: AutocompleteResult) {
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
-        case .autocomplete:
+        case .searchEngine:
             guard let url = searchEngine.searchURL(forQuery: result.text) else {
                 Logger.shared.logError("Couldn't retrieve search URL from search engine description", category: .search)
                 break
@@ -497,7 +495,7 @@ import Sentry
         super.init()
         setup(data: data)
 
-        data.downloadManager.$downloads.sink { [weak self] _ in
+        data.downloadManager.downloadList.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
     }

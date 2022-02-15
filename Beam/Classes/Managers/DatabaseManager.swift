@@ -92,14 +92,15 @@ class DatabaseManager {
                 }
             }
 
-            Self.showRestartAlert(oldValue, newValue)
+            Self.dispatchDatabaseChangedNotification(oldValue, newValue, andRestart: false)
         }
     }
 
-    static func showRestartAlert(_ oldValue: DatabaseStruct, _ newValue: DatabaseStruct) {
+    static func dispatchDatabaseChangedNotification(_ oldValue: DatabaseStruct, _ newValue: DatabaseStruct, andRestart restart: Bool) {
         DispatchQueue.main.async {
             NotificationCenter.default.post(name: .defaultDatabaseUpdate, object: newValue)
 
+            guard restart else { return }
             // TODO: remove this once the app knows how to switch database live
             UserAlert.showError(message: "Database changed",
                                 informativeText: "DB Changed from \(oldValue.title) {\(oldValue.id)} to \(newValue.title) {\(newValue.id)}. Beam must exit now.",
@@ -337,7 +338,7 @@ class DatabaseManager {
     // TODO: we should add a `automaticCreated` in `Database` to know when we created one automatically at start, so a
     // user creating one manually with `Default` as title won't match this
     private static func isDefaultDatabaseAutomaticallyCreated() -> Bool {
-        DatabaseManager.defaultDatabase.title.prefix(7) == "Default"
+        DatabaseManager.defaultDatabase.title.hasPrefix("Default")
     }
 
     /// Is database completly empty, without any documents
@@ -375,7 +376,7 @@ class DatabaseManager {
 
                 // Only automatically created DB should be deleted.
                 // TODO: we should add a `automaticCreated` in `Database` instead of checking for title
-                if onlyAutomaticCreated, database.title.prefix(7) != "Default" {
+                if onlyAutomaticCreated, !database.title.hasPrefix("Default") {
                     Logger.shared.logDebug("Not automatic DB, skip", category: .databaseDebug)
                     continue
                 }
@@ -388,9 +389,18 @@ class DatabaseManager {
                 Logger.shared.logDebug("Deleting", category: .databaseDebug)
 
                 group.enter()
-                self.delete(DatabaseStruct(database: database)) { result in
-                    do { _ = try result.get() } catch { errors.append(error) }
-                    group.leave()
+                let databaseStruct = DatabaseStruct(database: database)
+                if databaseStruct.hasBeenSyncedOnce {
+                    self.softDelete(databaseStruct) { result in
+                        do { _ = try result.get() } catch { errors.append(error) }
+                        group.leave()
+                    }
+                } else {
+                    delete(databaseStruct) { result in
+                        do { _ = try result.get() } catch { errors.append(error) }
+                        group.leave()
+                    }
+
                 }
             }
 
@@ -437,21 +447,38 @@ class DatabaseManager {
                 return
             }
 
-            guard defaultDatabase.title.prefix(7) == "Default" else { return }
+            guard defaultDatabase.title.hasPrefix("Default") else { return }
 
             deleted = true
-            Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, deleting now",
+            Logger.shared.logWarning("Default Database: \(Self.defaultDatabase.titleAndId) is empty, soft deleting now",
                                      category: .database)
+
+            /*
+             When we just created a database (at boot time for example), the network save propagated this database to
+             other devices, we can't just delete it. We have to soft delete it to propagate this delete to other
+             devices.
+             */
 
             let semaphore = DispatchSemaphore(value: 0)
             var error: Error?
 
-            delete(defaultDatabase) { result in
-                switch result {
-                case .failure(let deleteError): error = deleteError
-                case .success: break
+            // If the database has already been synced once that we need to soft delete it, otherwise we can safely erase completely is localy
+            if defaultDatabase.hasBeenSyncedOnce {
+                softDelete(defaultDatabase) { result in
+                    switch result {
+                    case .failure(let deleteError): error = deleteError
+                    case .success: break
+                    }
+                    semaphore.signal()
                 }
-                semaphore.signal()
+            } else {
+                delete(defaultDatabase, includedRemote: false) { result in
+                    switch result {
+                    case .failure(let deleteError): error = deleteError
+                    case .success: break
+                    }
+                    semaphore.signal()
+                }
             }
 
             let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))

@@ -77,7 +77,7 @@ public class DocumentManager: NSObject {
     static var networkTasks: [UUID: (DispatchWorkItem, Bool, ((Swift.Result<Bool, Error>) -> Void)?)] = [:]
     static var networkTasksSemaphore = DispatchSemaphore(value: 1)
     var thread: Thread
-    @discardableResult func checkThread() -> Bool {
+    @discardableResult internal func checkThread() -> Bool {
         let res = self.thread == Thread.current
 
         if !res {
@@ -96,40 +96,6 @@ public class DocumentManager: NSObject {
         context = Thread.isMainThread ? self.coreDataManager.mainContext : self.coreDataManager.persistentContainer.newBackgroundContext()
 
         super.init()
-    }
-
-    // MARK: Coredata Updates
-    @objc func managedObjectContextObjectsDidChange(_ notification: Notification) {
-        printObjects(notification)
-    }
-
-    private func printObjectsFromNotification(_ notification: Notification, _ keyPath: String) {
-        checkThread()
-        if let objects = notification.userInfo?[keyPath] as? Set<NSManagedObject>, !objects.isEmpty {
-            let titles = objects.compactMap { object -> String? in
-                guard let document = object as? Document else { return nil }
-
-                return "\(document.title) {\(document.id)} version \(document.version)"
-            }
-
-            if !titles.isEmpty {
-                Logger.shared.logDebug("\(Unmanaged.passUnretained(self).toOpaque()) \(keyPath) \(titles.count) Documents: \(titles)",
-                                       category: .coredataDebug)
-            }
-        }
-    }
-
-    func printObjects(_ notification: Notification) {
-        checkThread()
-        printObjectsFromNotification(notification, NSInsertedObjectsKey)
-        printObjectsFromNotification(notification, NSUpdatedObjectsKey)
-        printObjectsFromNotification(notification, NSDeletedObjectsKey)
-        printObjectsFromNotification(notification, NSRefreshedObjectsKey)
-        printObjectsFromNotification(notification, NSInvalidatedObjectsKey)
-
-        if let areInvalidatedAllObjects = notification.userInfo?[NSInvalidatedAllObjectsKey] as? Bool {
-            Logger.shared.logDebug("All objects are invalidated: \(areInvalidatedAllObjects)", category: .coredataDebug)
-        }
     }
 
     // MARK: CoreData Load
@@ -360,6 +326,8 @@ public class DocumentManager: NSObject {
             return false
         }
 
+        Logger.shared.logDebug("Document has local change", category: .documentMerge)
+
         guard mergeWithLocalChanges(document, remoteDocumentStruct.data) else {
             // Local version could not be merged with remote version
             Logger.shared.logWarning("Document has local change but could not merge", category: .documentMerge)
@@ -489,7 +457,7 @@ public class DocumentManager: NSObject {
         guard error.domain == NSCocoaErrorDomain, let conflicts = error.userInfo["conflictList"] as? [NSMergeConflict] else { return }
 
         for conflict in conflicts {
-            let title = (conflict.sourceObject as? Document)?.title ?? ":( Document Not found"
+            let title = (conflict.sourceObject as? Document)?.title ?? ":( sourceObject Document Not found"
             Logger.shared.logError("Old version: \(conflict.oldVersionNumber), new version: \(conflict.newVersionNumber), title: \(title)", category: .coredata)
         }
     }
@@ -892,6 +860,52 @@ extension DocumentManager {
             }
         } catch {
             Logger.shared.logError("DocumentManager.deleteAll failed: \(error)", category: .document)
+            throw error
+        }
+    }
+
+    func softDeleteAll(databaseId: UUID?) throws {
+        checkThread()
+
+        do {
+            let filters: [DocumentFilter] = {
+                if let databaseId = databaseId {
+                    return [.databaseId(databaseId)]
+                } else {
+                    return [.allDatabases]
+                }
+            }()
+
+            let documentManager = DocumentManager()
+
+            let allDocuments: [DocumentStruct] = (try documentManager.fetchAll(filters: filters)).compactMap { document in
+                var documentStruct = DocumentStruct(document: document)
+                documentStruct.version += 1
+                documentStruct.deletedAt = documentStruct.deletedAt ?? BeamDate.now
+
+                let semaphore = DispatchSemaphore(value: 0)
+
+                // TODO: should be optimized but this isn't called often. We should save all documentstruct at once instead
+                documentManager.save(documentStruct, false, nil) { _ in
+                    semaphore.signal()
+                }
+
+                semaphore.wait()
+
+                return documentStruct
+            }
+
+            if !allDocuments.isEmpty {
+                let semaphore = DispatchSemaphore(value: 0)
+
+                try documentManager.saveOnBeamObjectsAPI(allDocuments) { _ in
+                    semaphore.signal()
+                }
+
+                semaphore.wait()
+            }
+        } catch {
+            Logger.shared.logError("DocumentManager.softDeleteAll failed: \(error)", category: .document)
             throw error
         }
     }

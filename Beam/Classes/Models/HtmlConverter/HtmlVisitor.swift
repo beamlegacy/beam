@@ -29,7 +29,7 @@ class HtmlVisitor {
     // Optional fileStorage
     var fileStorage: BeamFileStorage?
     // Checks preferences to allow embedding of content
-    var allowConvertToEmbed: Bool {
+    static var allowConvertToEmbed: Bool {
         PreferencesManager.embedContentPreference == PreferencesEmbedOptions.always.id ||
             PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id
     }
@@ -73,7 +73,7 @@ class HtmlVisitor {
                     }
                     let url: String = getUrl(href)
                     child.text.addAttributes([.link(url)], to: child.text.wholeRange)
-                    if allowConvertToEmbed {
+                    if HtmlVisitor.allowConvertToEmbed {
                         convertElementToEmbed(child) // if possible converts url to embed
                     }
                     return child
@@ -173,7 +173,7 @@ class HtmlVisitor {
                       let mdUrl = url.absoluteString.markdownizedURL else { break }
                 let iframeElement = BeamElement(mdUrl)
                 iframeElement.text.addAttributes([.link(mdUrl)], to: iframeElement.text.wholeRange)
-                if allowConvertToEmbed {
+                if HtmlVisitor.allowConvertToEmbed {
                     convertElementToEmbed(iframeElement) // if possible converts url to embed
                 }
                 text.append(iframeElement)
@@ -184,7 +184,7 @@ class HtmlVisitor {
                       let mdUrl = url.absoluteString.markdownizedURL else { break }
                 let embedElement = BeamElement(mdUrl)
                 embedElement.text.addAttributes([.link(mdUrl)], to: embedElement.text.wholeRange)
-                if allowConvertToEmbed {
+                if HtmlVisitor.allowConvertToEmbed {
                     convertElementToEmbed(embedElement) // if possible converts url to embed
                 }
                 text.append(embedElement)

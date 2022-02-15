@@ -98,9 +98,20 @@ class JavascriptNativeInteractionsTests: BaseTest {
 
         let goButton = alert.buttons["Go"]
         let input = sheet.comboBoxes.firstMatch
-        input.typeText("/Applications")
-        goButton.tap()
-        WaitHelper().waitForDoesntExist(goButton)
+        
+        let textField = journalView.app.dialogs.sheets.textFields.matching(identifier: "PathTextField").element //workaround for Monterrey diff from Big Sur
+        if textField.exists {
+            ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+            textField.typeText("/Applications")
+            journalView.typeKeyboardKey(.enter)
+        } else {
+            input.typeText("/Applications")
+        }
+        
+        if goButton.exists {
+            goButton.tap()
+            WaitHelper().waitForDoesntExist(goButton)
+        }
         journalView.typeKeyboardKey(.downArrow)
         open.clickOnEnabled()
         XCTAssertTrue(WaitHelper().waitForDoesntExist(webView.staticTexts[fileExistanceLabel]))

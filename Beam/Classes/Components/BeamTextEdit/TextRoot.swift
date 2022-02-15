@@ -45,8 +45,8 @@ public class TextRoot: ElementNode {
             state.selectedTextRange
         }
         set {
-            textIsSelected = !newValue.isEmpty
             state.selectedTextRange = newValue
+            textIsSelected = !selectedText.isEmpty
         }
     }
     var markedTextRange: Range<Int>? {

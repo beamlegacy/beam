@@ -140,7 +140,7 @@ class CardReferenceFormatterView: FormatterView {
         guard let selectedResult = listModel.selectedResult else { return false }
         if case let .note(noteId, elementId) = selectedResult.source, let noteIdUnwrapped = noteId {
             onSelectNote?(noteIdUnwrapped, elementId)
-        } else if selectedResult.source == .autocomplete && listModel.realNameForCardName(selectedResult.text) != selectedResult.text {
+        } else if selectedResult.source == .note && listModel.realNameForCardName(selectedResult.text) != selectedResult.text {
             onSelectCreate?(listModel.realNameForCardName(selectedResult.text))
         } else if selectedResult.source == .createCard {
             onSelectCreate?(selectedResult.text)

@@ -44,6 +44,10 @@ enum SandboxEscape {
         }
     }
 
+    /// Allow access to file referenced by URL through Powerbox
+    /// - Parameter url: file URL
+    /// - Returns: the URL to be used to access the file contents, or nil if the user cancelled the operation
+    /// - Throws: any filesystem error, typically NSFileNoSuchFileError
     static func endorsedURL(for url: URL) throws -> URL? {
         if try canOpen(url: url) {
             return url
@@ -56,7 +60,7 @@ enum SandboxEscape {
         panel.allowsMultipleSelection = false
         panel.directoryURL = url.deletingLastPathComponent()
         panel.delegate = delegate
-        panel.message = "Please open \(url.lastPathComponent)"
+        panel.message = "Please open \"\(url.lastPathComponent)\""
 
         let response = panel.runModal()
         if response == .OK, let url = panel.url {

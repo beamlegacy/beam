@@ -147,7 +147,7 @@ extension BrowserTab: WebPage {
                 webviewCenter.y -= PointAndShootView.defaultPickerSize.height / 2
                 let mouseLocation = webviewFrame.contains(pns.mouseLocation) ? pns.mouseLocation : webviewCenter
                 let target = PointAndShoot.Target.init(id: UUID().uuidString, rect: self.webView.frame, mouseLocation: mouseLocation, html: "<a href=\"\(url)\">\(self.title)</a>", animated: true)
-                let shootGroup = PointAndShoot.ShootGroup.init(UUID().uuidString, [target], "", "", shapeCache: nil, showRect: false, directShoot: true)
+                let shootGroup = PointAndShoot.ShootGroup.init(id: UUID().uuidString, targets: [target], text: "", href: "", shapeCache: nil, showRect: false, directShoot: true)
 
                 if let note = self.noteController.note {
                     pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, withSourceBullet: false, completion: {})
@@ -179,9 +179,14 @@ extension BrowserTab: WebPage {
     }
 
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
-        logInNote(url: url, title: title, reason: reason)
+        if case .searchFromNode(_) = browsingTreeOrigin {
+            logInNote(url: url, title: title, reason: reason)
+        }
         updateScore()
         updateFavIcon(fromWebView: true)
+        if reason == .navigation {
+            pointAndShoot?.leavePage()
+        }
     }
 
     /// When using Point and Shoot to capture text in a webpage, notify the

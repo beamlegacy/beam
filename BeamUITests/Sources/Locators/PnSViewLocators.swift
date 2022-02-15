@@ -11,7 +11,7 @@ enum PnSViewLocators {
     
     enum TextFields: String, CaseIterable, UIElement  {
         case destinationCardToday = "Today"
-        case addNote = "Add note"
+        case addComment = "Add comment"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement  {

@@ -22,47 +22,47 @@ struct OnboardingView: View {
     @State private var stepOffset: [OnboardingStep.StepType: CGFloat] = [:]
     @State private var stepOpacity: [OnboardingStep.StepType: CGFloat] = [:]
     private let estimatedSafeAreaInsets = NSEdgeInsets(top: 38, left: 0, bottom: 0, right: 0) // invisible toolbar
+    private let contentWidth: Double = 512
 
     var body: some View {
         VStack(spacing: 0) {
             VStack(spacing: 0) {
                 Spacer(minLength: 100)
                 Group {
+                    let finishCallback: StepFinishCallback = { nextStep in
+                        model.advanceToNextStep(nextStep)
+                    }
                     switch currentStep.type {
                     case .profile:
-                        OnboardingProfileCreationView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingProfileCreationView(actions: $model.actions, finish: finishCallback)
                     case .emailConnect:
-                        OnboardingEmailConnectView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingEmailConnectView(actions: $model.actions, finish: finishCallback)
                     case .emailConfirm:
-                        OnboardingEmailConfirmationView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingEmailConfirmationView(actions: $model.actions, finish: finishCallback)
                     case .imports:
-                        OnboardingImportsView(actions: $model.actions) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingImportsView(actions: $model.actions, finish: finishCallback)
+                    case .setupPrivateKey:
+                        OnboardingSetupPrivateKey(actions: $model.actions, finish: finishCallback)
+                    case .lostPrivateKey:
+                        OnboardingLostPrivateKey(finish: finishCallback)
+                    case .savePrivateKey:
+                        OnboardingSaveEncryptionView(actions: $model.actions, finish: finishCallback)
                     default:
-                        OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading) { nextStep in
-                            model.advanceToNextStep(nextStep)
-                        }
+                        OnboardingWelcomeView(welcoming: !model.onlyConnect, viewIsLoading: $model.viewIsLoading, finish: finishCallback)
                     }
                 }
                 .offset(x: 0, y: stepOffset[currentStep.type] ?? 0)
                 .opacity(stepOpacity[currentStep.type] ?? 1)
                 Spacer(minLength: 0)
             }
-            .frame(minWidth: 280)
+            .frame(minWidth: 280, maxWidth: contentWidth)
             .padding(.top, BeamSpacing._100)
             .fixedSize(horizontal: true, vertical: false)
             .environmentObject(model)
             bottomBar
         }
         .background(BeamColor.Generic.background.swiftUI.edgesIgnoringSafeArea(.all))
-        .frame(width: 512, height: 600 - estimatedSafeAreaInsets.top)
+        .frame(width: contentWidth, height: 600 - estimatedSafeAreaInsets.top)
         .onAppear {
             displayedStep = model.currentStep
         }
@@ -194,9 +194,14 @@ struct OnboardingView: View {
         private var subtitle: String {
             "Syncing \(detailToDisplay)"
         }
-        var randomDetails = [
-            "notes", "passwords", "images", "embeds"
+        private let defaultDetails = [
+            "account", "notes", "images", "embeds"
         ]
+        var syncingDetails: [String]?
+        private var randomDetails: [String] {
+            syncingDetails ?? defaultDetails
+        }
+
         @State private var detailToDisplay = ""
         @State private var detailLoopCancellable: Cancellable?
 

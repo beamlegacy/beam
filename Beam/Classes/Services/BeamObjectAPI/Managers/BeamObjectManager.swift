@@ -21,6 +21,7 @@ enum BeamObjectObjectType: String {
     case myRemoteObject = "my_remote_object"
     case contact
     case noteFrecency = "note_frecency"
+    case privateKeySignature
 
     static func fromString(value: String) -> Self? {
         BeamObjectObjectType(rawValue: value)
@@ -31,12 +32,14 @@ class BeamObjectManager {
     static var managerOrder: [BeamObjectObjectType] = []
     static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
     static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
+    internal static var disableSendingObjects = true
 
     #if DEBUG
     static var networkRequests: [APIRequest] = []
     #endif
 
-    var webSocketRequest = APIWebSocketRequest()
+    var webSocketRequest: APIWebSocketRequest?
+    internal var websocketRetryDelay = 0
 
     let backgroundQueue = DispatchQueue(label: "BeamObjectManager backgroundQueue", qos: .userInitiated)
 
@@ -65,7 +68,7 @@ class BeamObjectManager {
                 }
             }()
 
-            Logger.shared.logDebug("Received \(objects.count) \(object.beamObjectType), filtered to \(toSaveObjects.count). Already had \(previousChecksums.count) checksums",
+            Logger.shared.logDebug("Received \(objects.count) \(object.beamObjectType), filtered to \(toSaveObjects.count) after checksum verification. \(previousChecksums.count) existing checksums",
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
 
@@ -123,6 +126,8 @@ class BeamObjectManager {
                 throw error
             }
 
+            _ = try BeamObjectChecksum.savePreviousObjects(beamObjects: toSaveObjects)
+
             Logger.shared.logDebug("Received \(encapsulatedObjects.count) \(object.beamObjectType) (\(totalSize.byteSize)). Manager done",
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
@@ -135,15 +140,19 @@ class BeamObjectManager {
     }
 
     static func setup() {
+        let treeSyncEnabled = Configuration.browsingTreeApiSyncEnabled
         // Add any manager using BeamObjects here
         DocumentManager().registerOnBeamObjectManager()
         DatabaseManager().registerOnBeamObjectManager()
         PasswordManager.shared.registerOnBeamObjectManager()
         BeamFileDBManager.shared.registerOnBeamObjectManager()
-        BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
+        if treeSyncEnabled {
+            BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
+        }
         BeamLinkDB.shared.registerOnBeamObjectManager()
         ContactsManager.shared.registerOnBeamObjectManager()
         GRDBNoteFrecencyStorage().registerOnBeamObjectManager()
+        PrivateKeySignatureManager.shared.registerOnBeamObjectManager()
 
         /*
          Not yet used: In what order should we proceed when receiving new objects? We might have objects with
@@ -151,8 +160,10 @@ class BeamObjectManager {
 
          We should use that order when sending objects to the API, and when receiving new objects.
          */
-        managerOrder = [.database, .contact, .file, .document, .password, .link, .browsingTree, .noteFrecency]
-
+        managerOrder = [.privateKeySignature, .database, .contact, .file, .document, .password, .link, .noteFrecency]
+        if treeSyncEnabled {
+            managerOrder.append(.browsingTree)
+        }
         assert(managerOrder.count == managerInstances.count)
     }
 
@@ -219,7 +230,7 @@ class BeamObjectManager {
             group.enter()
             DispatchQueue.global(qos: .userInteractive).async {
                 do {
-                    try translator(managerInstance, objects)
+                    try translator(managerInstance, objects.filter({ $0.deletedAt == nil }))
                 } catch {
                     Logger.shared.logError("Error parsing remote \(key) beamobjects: \(error.localizedDescription). Retrying one by one.",
                                            category: .beamObjectNetwork)
@@ -239,7 +250,8 @@ class BeamObjectManager {
                     var message: String
                     if objectsInError.count == objects.count {
                         Logger.shared.logError("All \(key) objects in error", category: .beamObjectNetwork)
-                        message = "All BeamObjects types: \(key) are in error"
+                        message = "All \(objectsInError.count) BeamObjects types: \(key) are in error"
+                        dump(objectsInError)
                     } else {
                         Logger.shared.logError("Error parsing following \(key) beamobjects: \(objectsInError.map { $0.id.uuidString }.joined(separator: ", "))",
                                                category: .beamObjectNetwork)

@@ -492,48 +492,61 @@
                                                         </connections>
                                                     </menuItem>
                                                     <menuItem isSeparatorItem="YES" id="tjb-m3-N6g"/>
-                                                    <menuItem title="Import Safari History" id="3xJ-aB-Hsi">
+                                                    <menuItem title="Import History" id="cgO-8L-fvv">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importSafariHistory:" target="Voe-Tx-rLC" id="yBq-S3-5zY"/>
-                                                        </connections>
+                                                        <menu key="submenu" title="Import History" id="gAp-RQ-KWx">
+                                                            <items>
+                                                                <menuItem title="Import Safari History" id="3xJ-aB-Hsi">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importSafariHistory:" target="Voe-Tx-rLC" id="yBq-S3-5zY"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="Import Firefox History" id="ORD-oT-gZt">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importFirefoxHistory:" target="Voe-Tx-rLC" id="ctj-vu-7Yk"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="Import Chrome History" id="1up-Ef-3Fj">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importChromeHistory:" target="Voe-Tx-rLC" id="BAG-iw-5da"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="Import Brave History" id="IJF-Y1-BdP" userLabel="Import Brave History">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importBraveHistory:" target="Voe-Tx-rLC" id="dPX-aH-3OB"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
                                                     </menuItem>
-                                                    <menuItem title="Import Firefox History" id="ORD-oT-gZt">
+                                                    <menuItem title="Import Passwords" id="o1h-Xz-REj">
                                                         <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importFirefoxHistory:" target="Voe-Tx-rLC" id="ctj-vu-7Yk"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Import Chrome History" id="1up-Ef-3Fj">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importChromeHistory:" target="Voe-Tx-rLC" id="BAG-iw-5da"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Import Brave History" id="IJF-Y1-BdP" userLabel="Import Brave History">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importBraveHistory:" target="Voe-Tx-rLC" id="dPX-aH-3OB"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem isSeparatorItem="YES" id="t7s-Ob-8BJ"/>
-                                                    <menuItem title="Import Chrome Passwords" id="9Le-VN-E3u">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importChromePasswords:" target="Voe-Tx-rLC" id="cJD-vG-pFV"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Import Brave Passwords" id="rVv-Tv-cBI">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importBravePasswords:" target="Voe-Tx-rLC" id="9Q5-s3-QYa"/>
-                                                        </connections>
-                                                    </menuItem>
-                                                    <menuItem title="Import Passwords from CSV File…" id="V1a-7E-Uh2">
-                                                        <modifierMask key="keyEquivalentModifierMask"/>
-                                                        <connections>
-                                                            <action selector="importCSVPasswords:" target="Voe-Tx-rLC" id="mlZ-AN-bEQ"/>
-                                                        </connections>
+                                                        <menu key="submenu" title="Import Passwords" id="Dfw-BA-NRF">
+                                                            <items>
+                                                                <menuItem title="Import Chrome Passwords" id="9Le-VN-E3u">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importChromePasswords:" target="Voe-Tx-rLC" id="cJD-vG-pFV"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="Import Brave Passwords" id="rVv-Tv-cBI">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importBravePasswords:" target="Voe-Tx-rLC" id="9Q5-s3-QYa"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                                <menuItem title="Import Passwords from CSV File…" id="V1a-7E-Uh2">
+                                                                    <modifierMask key="keyEquivalentModifierMask"/>
+                                                                    <connections>
+                                                                        <action selector="importCSVPasswords:" target="Voe-Tx-rLC" id="mlZ-AN-bEQ"/>
+                                                                    </connections>
+                                                                </menuItem>
+                                                            </items>
+                                                        </menu>
                                                     </menuItem>
                                                 </items>
                                             </menu>
@@ -1266,6 +1279,12 @@
                                                 <action selector="showHelp:" target="Ady-hI-5gd" id="y7X-2Q-9no"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="Download Logs" id="TI6-U6-Nl2">
+                                            <modifierMask key="keyEquivalentModifierMask"/>
+                                            <connections>
+                                                <action selector="obtainLogs:" target="Ady-hI-5gd" id="ukb-wv-cuk"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem isSeparatorItem="YES" id="Ldo-Gm-MtW"/>
                                         <menuItem title="Show All Notes" id="KUY-Ll-jZL">
                                             <modifierMask key="keyEquivalentModifierMask"/>
@@ -1292,25 +1311,25 @@
                                             </connections>
                                         </menuItem>
                                         <menuItem isSeparatorItem="YES" id="8CZ-9R-gka"/>
-                                        <menuItem title="Show Omnibox Content Debugger" tag="-1111" id="pqi-wg-6Kg" userLabel="Show Omnibox Content Debugger">
+                                        <menuItem title="Show Omnibox Content Debugger" tag="-1111" enabled="NO" id="pqi-wg-6Kg" userLabel="Show Omnibox Content Debugger">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showOmnibarContentDebugger:" target="Voe-Tx-rLC" id="1yn-LY-88I"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Toggle score card" tag="-1111" id="AED-TZ-YmC" userLabel="Toggle score card">
+                                        <menuItem title="Toggle score card" tag="-1111" enabled="NO" id="AED-TZ-YmC" userLabel="Toggle score card">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="toggleScoreCard:" target="Ady-hI-5gd" id="RTT-Uf-Jy7"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Dump browsing tree" tag="-1111" id="Fu6-WY-AjE">
+                                        <menuItem title="Dump browsing tree" tag="-1111" enabled="NO" id="Fu6-WY-AjE">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="dumpBrowsingTree:" target="Ady-hI-5gd" id="syH-w2-mx5"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Show TabGrouping" tag="-1111" id="uXo-6f-A9j" userLabel="Show TabGrouping">
+                                        <menuItem title="Show TabGrouping" tag="-1111" enabled="NO" id="uXo-6f-A9j" userLabel="Show TabGrouping">
                                             <modifierMask key="keyEquivalentModifierMask"/>
                                             <connections>
                                                 <action selector="showTabGroupingWindow:" target="Ady-hI-5gd" id="7JO-gB-gJr"/>
@@ -1348,13 +1367,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="708"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="701"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="706"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="699"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="706"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="699"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1516,7 +1535,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="691" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="684" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">

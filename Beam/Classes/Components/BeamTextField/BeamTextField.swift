@@ -105,9 +105,7 @@ struct BeamTextField: NSViewRepresentable {
 
         if selectedRange != coordinator.lastSelectedRange {
             if let range = selectedRange {
-                let pos = Int(range.startIndex)
-                let len = Int(range.endIndex - range.startIndex)
-                updateSelectedRange(view, range: NSRange(location: pos, length: len))
+                updateSelectedRange(view, range: range, in: text)
             }
             coordinator.lastSelectedRange = selectedRange
         }
@@ -148,9 +146,18 @@ struct BeamTextField: NSViewRepresentable {
         coordinator.lastUpdateWasEditing = isEditing
     }
 
-    private func updateSelectedRange(_ view: Self.NSViewType, range: NSRange) {
+    private func nsRangeForSelection(from range: Range<Int>, in text: String) -> NSRange {
+        let defaultRange = NSRange(location: range.lowerBound, length: range.count)
+        guard text.utf16.count != text.count, let utf16Range = text.utf16Range(from: text.range(from: range)) else {
+            return defaultRange
+        }
+        return NSRange(location: utf16Range.startIndex, length: utf16Range.count)
+    }
+
+    private func updateSelectedRange(_ view: Self.NSViewType, range: Range<Int>, in text: String) {
         let fieldeditor = view.currentEditor()
-        fieldeditor?.selectedRange = range
+        // NSText's selectedRange value is based on UTF-16 characters. We need to convert the range here.
+        fieldeditor?.selectedRange = nsRangeForSelection(from: range, in: text)
         if let selectedRangeColor = selectedRangeColor, let textField = view as? BeamNSTextFieldProtocol {
             textField.updateTextSelectionColor(selectedRangeColor)
         }
@@ -234,7 +241,7 @@ struct BeamTextField: NSViewRepresentable {
                 textView.disableAutomaticScrollOnType = true
                 // Changing the replacement text here instantaneously, faster than waiting for SwiftUI update
                 (textField as? BeamNSTextFieldProtocol)?.setText(newText, font: parent.font, icon: nil, skipGuards: true)
-                parent.updateSelectedRange(textField, range: NSRange(location: newRange.lowerBound, length: newRange.count))
+                parent.updateSelectedRange(textField, range: newRange, in: newText)
                 finalText = newText
 
                 let block = DispatchWorkItem { [weak textView] in

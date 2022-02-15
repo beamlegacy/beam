@@ -5,7 +5,7 @@ import simd
 // swiftlint:disable file_length
 
 extension BeamObjectManager {
-    func syncAllFromAPI(force: Bool = false, delete: Bool = true, _ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    func syncAllFromAPI(force: Bool = false, delete: Bool = true, prepareBeforeSaveAll: (() -> Void)? = nil, _ completion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -25,6 +25,12 @@ extension BeamObjectManager {
                                        localTimer: localTimer)
 
                 do {
+                    if let prepareBeforeSaveAll = prepareBeforeSaveAll {
+                        Logger.shared.logDebug("syncAllFromAPI: calling prepareBeforeSaveAll",
+                                               category: .beamObjectNetwork)
+                        prepareBeforeSaveAll()
+                    }
+
                     localTimer = BeamDate.now
                     Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
                                            category: .beamObjectNetwork)
@@ -37,6 +43,9 @@ extension BeamObjectManager {
                 } catch {
                     completion?(.failure(error))
                 }
+
+                // Reactivate sending object
+                Self.disableSendingObjects = false
             }
         }
     }
@@ -409,6 +418,7 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSave)
+                    try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSave)
                     completion(.success(objects))
                 } catch {
                     completion(.failure(error))
@@ -694,8 +704,8 @@ extension BeamObjectManager {
 
     /// Fetch all remote objects
     @discardableResult
-    func fetchAllObjects<T: BeamObjectProtocol>(_ completion: @escaping (Result<[T], Error>) -> Void) throws -> APIRequest {
-        try fetchBeamObjects(T.beamObjectType.rawValue) { fetchResult in
+    func fetchAllObjects<T: BeamObjectProtocol>(raisePrivateKeyError: Bool = false, _ completion: @escaping (Result<[T], Error>) -> Void) throws -> APIRequest {
+        try fetchBeamObjects(T.beamObjectType.rawValue, raisePrivateKeyError: raisePrivateKeyError) { fetchResult in
             switch fetchResult {
             case .failure(let error): completion(.failure(error))
             case .success(let remoteBeamObjects):
@@ -805,6 +815,10 @@ extension BeamObjectManager {
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
                                           force: Bool = false,
                                           _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
+        guard !Self.disableSendingObjects || force else {
+            throw BeamObjectManagerError.sendingObjectsDisabled
+        }
+
         if Configuration.beamObjectDataUploadOnSeparateCall {
             return try saveToAPIWithDirectUpload(object, force: force, completion)
         } else {
@@ -843,6 +857,8 @@ extension BeamObjectManager {
 
                 do {
                     try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+                    try BeamObjectChecksum.savePreviousObject(beamObject: beamObject)
+
                     Logger.shared.logDebug("Saved object",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
@@ -1090,6 +1106,7 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
+                    try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjects)
                     completion(.success(beamObjects))
                 } catch {
                     completion(.failure(error))
@@ -1226,6 +1243,9 @@ extension BeamObjectManager {
     func saveToAPI(_ beamObject: BeamObject,
                    deep: Int = 0,
                    _ completion: @escaping ((Result<BeamObject, Error>) -> Void)) throws -> APIRequest {
+        guard !Self.disableSendingObjects else {
+            throw BeamObjectManagerError.sendingObjectsDisabled
+        }
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -1243,6 +1263,7 @@ extension BeamObjectManager {
             case .success:
                 do {
                     try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+                    try BeamObjectChecksum.savePreviousObject(beamObject: beamObject)
                     completion(.success(beamObject))
                 } catch {
                     completion(.failure(error))
@@ -1422,12 +1443,13 @@ extension BeamObjectManager {
 
     @discardableResult
     internal func fetchBeamObjects(_ beamObjectType: String,
+                                   raisePrivateKeyError: Bool = false,
                                    _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> APIRequest {
         let request = BeamObjectRequest()
         if Configuration.beamObjectDataOnSeparateCall {
-            try request.fetchAllWithDataUrl(beamObjectType: beamObjectType, completion)
+            try request.fetchAllWithDataUrl(beamObjectType: beamObjectType, raisePrivateKeyError: raisePrivateKeyError, completion)
         } else {
-            try request.fetchAll(beamObjectType: beamObjectType, completion)
+            try request.fetchAll(beamObjectType: beamObjectType, raisePrivateKeyError: raisePrivateKeyError, completion)
         }
         return request
     }

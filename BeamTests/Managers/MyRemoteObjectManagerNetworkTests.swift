@@ -636,6 +636,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             beamHelper.beginNetworkRecording()
             BeamURLSession.shouldNotBeVinyled = true
 
+            BeamObjectManager.disableSendingObjects = false
             BeamTestsHelper.login()
 
             BeamObjectManager.unregisterAll()
@@ -644,7 +645,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             try? MyRemoteObjectManager.deleteAll()
             try? BeamObjectChecksum.deleteAll()
 
-            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+            try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
 
             Configuration.beamObjectDirectCall = false
         }

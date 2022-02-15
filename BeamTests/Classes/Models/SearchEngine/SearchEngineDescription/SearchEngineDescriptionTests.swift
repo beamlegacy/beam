@@ -29,6 +29,13 @@ class SearchEngineDescriptionTests: XCTestCase {
         XCTAssertEqual(searchEngine.suggestionsURL(forQuery: "wdyt about c++ ?; expensive:=$")?.absoluteString, expected)
     }
 
+    func testQueryFromURL() {
+        guard let url = URL(string: "https://suggest.gigou.tutu/turlututu/?q=wdyt%20about%20c%2B%2B%20%3F%3B%20expensive%3A%3D%24&glagla=turlututu") else {
+            fatalError("Couldn't build test URL")
+        }
+        XCTAssertEqual(searchEngine.queryFromURL(url), "wdyt about c++ ?; expensive:=$")
+    }
+
 }
 
 // MARK: -

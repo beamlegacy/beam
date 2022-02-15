@@ -31,7 +31,7 @@ class WebPageBaseImpl: WebPage {
 
     var title: String = ""
     var url: URL?
-    var requestedUrl: URL?
+    var requestedURL: URL?
     var hasError: Bool = false
     var responseStatusCode: Int = 200
 
@@ -42,7 +42,7 @@ class WebPageBaseImpl: WebPage {
     var browsingScorer: BrowsingScorer?
     var passwordOverlayController: PasswordOverlayController?
     var mediaPlayerController: MediaPlayerController?
-    var appendToIndexer: ((URL, Readability) -> Void)?
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var score: Float = 0
 
     var authenticationViewModel: AuthenticationViewModel?

@@ -31,7 +31,7 @@ struct OmniboxSearchField: View {
         if let autocompleteResult = selectedAutocompleteResult {
             return autocompleteResult.source.iconName
         }
-        return AutocompleteResult.Source.autocomplete.iconName
+        return AutocompleteResult.Source.searchEngine.iconName
     }
 
     private var selectedAutocompleteResult: AutocompleteResult? {
@@ -44,6 +44,11 @@ struct OmniboxSearchField: View {
            [.history, .url, .topDomain, .mnemonic].contains(autocompleteResult.source) {
             FaviconProvider.shared.favicon(fromURL: url, cacheOnly: true) { favicon in
                 icon = favicon?.image
+                if favicon == nil, let aliasDestinationURL = autocompleteResult.aliasForDestinationURL {
+                    FaviconProvider.shared.favicon(fromURL: aliasDestinationURL, cacheOnly: true) { favicon in
+                        icon = favicon?.image
+                    }
+                }
             }
         } else if state.focusOmniBoxFromTab,
                   let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
@@ -58,7 +63,7 @@ struct OmniboxSearchField: View {
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
         if let info = autocompleteResult.displayInformation {
             return info
-        } else if autocompleteResult.source == .autocomplete {
+        } else if autocompleteResult.source == .searchEngine {
             return autocompleteManager.searchEngine.description
         }
         return nil

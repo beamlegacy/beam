@@ -118,10 +118,11 @@ class GutterContainerView: NSView {
     override var intrinsicContentSize: NSSize {
         switch leadingGutterViewType {
         case .calendarGutterView(let viewModel):
+            let calendarCellHeight = Int(CalendarView.bottomPadding + CalendarIemView.itemSize.height)
             if viewModel.meetings.count > 0 {
-                return NSSize(width: 0, height: 20 * viewModel.meetings.count)
+                return NSSize(width: 0, height: (Int(CalendarView.itemSpacing) + calendarCellHeight) * (viewModel.meetings.count - 1) + calendarCellHeight)
             }
-            return NSSize(width: 0, height: 20)
+            return NSSize(width: 0, height: calendarCellHeight)
         case .none:
             return .zero
         }

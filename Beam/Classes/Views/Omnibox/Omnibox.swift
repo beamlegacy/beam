@@ -15,12 +15,13 @@ struct Omnibox: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     var isInsideNote = false
     @State private var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     private var enableAnimations: Bool {
-        !state.windowIsResizing
+        !windowInfo.windowIsResizing
     }
     private var isEditing: Bool {
         state.focusOmniBox
@@ -74,7 +75,7 @@ struct Omnibox: View {
                          alignment: .bottom)
                 .frame(height: Self.defaultHeight, alignment: .top)
                 if shouldShowAutocompleteResults {
-                    AutocompleteList(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
+                    AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
                 }
             }
         }
@@ -136,7 +137,7 @@ struct OmniboxContainer: View {
                                 $0.frame(maxWidth: offset.width != 0 ? offset.width : .infinity)
                             }
                         Omnibox(isInsideNote: boxIsInsideNote)
-                            .frame(width: boxWidth)
+                            .frame(idealWidth: boxWidth, maxWidth: boxWidth)
                         Spacer(minLength: boxMaxX)
                     }
                     Spacer(minLength: boxMinY)
@@ -177,10 +178,10 @@ struct Omnibox_Previews: PreviewProvider {
         mngr.setQuery("Res", updateAutocompleteResults: false)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(100)) {
             mngr.autocompleteResults = [
-                .init(text: "Result A", source: .autocomplete),
-                .init(text: "Result B", source: .autocomplete),
-                .init(text: "Result C", source: .autocomplete),
-                .init(text: "Result D", source: .autocomplete)
+                .init(text: "Result A", source: .searchEngine),
+                .init(text: "Result B", source: .searchEngine),
+                .init(text: "Result C", source: .searchEngine),
+                .init(text: "Result D", source: .searchEngine)
             ]
         }
         return mngr

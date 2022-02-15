@@ -108,19 +108,24 @@ extension BeamText {
 
     static func font(fontSize: CGFloat, strong: Bool, emphasis: Bool, elementKind: ElementKind) -> NSFont {
         var font: BeamFont
+        var heading: Bool = false
         switch elementKind {
         case .heading:
-            font = BeamFont.medium(size: fontSize)
+            heading = true
         case .bullet, .code, .quote, .check, .divider, .image, .embed, .blockReference:
             break
         }
 
         if strong && emphasis {
-            font = BeamFont.mediumItalic(size: fontSize)
+            font = BeamFont.semiboldItalic(size: fontSize)
         } else if strong {
             font = BeamFont.semibold(size: fontSize)
         } else if emphasis {
             font = BeamFont.regularItalic(size: fontSize) //NSFontManager.shared.convert(NSFont.systemFont(ofSize: fontSize), toHaveTrait: .italicFontMask)
+        } else if heading {
+            font = BeamFont.medium(size: fontSize)
+        } else if heading && emphasis {
+            font = BeamFont.mediumItalic(size: fontSize)
         } else {
             font = BeamFont.regular(size: fontSize)
         }

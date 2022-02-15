@@ -10,13 +10,14 @@ import BeamCore
 
 struct WindowBottomToolBar: View {
     @EnvironmentObject var state: BeamState
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     private var isJournal: Bool {
         state.mode == .today
     }
 
     private var animationEnabled: Bool {
-        !state.windowIsResizing
+        !windowInfo.windowIsResizing
     }
 
     private var currentNote: BeamNote? {
@@ -74,20 +75,13 @@ private struct BottomToolBarTrailingIconView: View {
             } else {
                 GeometryReader { proxy in
                     ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2)) {
-                        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
-                        let view = HelpAndFeedbackMenuView(window: window)
-                            .environmentObject(state)
-                        let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)
-                        let y = buttonFrame.minY - 7
-                        let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
-                        var origin = CGPoint(x: x, y: y)
-                        if let parentWindow = window?.parent {
-                            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+                        showHelpAndFeedbackMenuView(proxy: proxy)
+                    }.onReceive(self.state.$showHelpAndFeedback, perform: { showHelp in
+                        if showHelp {
+                            showHelpAndFeedbackMenuView(proxy: proxy)
+                            self.state.showHelpAndFeedback = false
                         }
-                        window?.setView(with: view, at: origin)
-                        window?.isMovable = false
-                        window?.makeKey()
-                    }
+                    })
                     .accessibility(identifier: "HelpButton")
                     .background(
                         Circle()
@@ -105,6 +99,22 @@ private struct BottomToolBarTrailingIconView: View {
                 }.frame(width: 18, height: 18)
             }
         }
+    }
+
+    func showHelpAndFeedbackMenuView(proxy: GeometryProxy) {
+        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
+        let view = HelpAndFeedbackMenuView(window: window)
+            .environmentObject(state)
+        let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)
+        let y = buttonFrame.minY - 7
+        let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
+        var origin = CGPoint(x: x, y: y)
+        if let parentWindow = window?.parent {
+            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+        }
+        window?.setView(with: view, at: origin)
+        window?.isMovable = false
+        window?.makeKey()
     }
 }
 

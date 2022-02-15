@@ -125,7 +125,7 @@ class BeamTestsHelper {
         let password = Configuration.testAccountPassword
 
         waitUntil(timeout: .seconds(10)) { done in
-            accountManager.signIn(email: email, password: password, completionHandler: { result in
+            accountManager.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
                 if case .failure(let error) = result {
                     fail(error.localizedDescription)
                 }

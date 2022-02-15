@@ -26,10 +26,9 @@ extension BeamObjectProtocol {
         "<BeamObjectProtocol: \(beamObjectId) [\(Self.beamObjectType.rawValue)]>"
     }
 
+    /// Do we have local changes not yet synced to the API
     var hasLocalChanges: Bool {
-        let previousChecksum = BeamObjectChecksum.previousChecksum(object: self)
-
-        return (try? BeamObject(self))?.dataChecksum != previousChecksum
+        previousSavedObject != self
     }
 
     var previousSavedObject: Self? {
@@ -38,6 +37,10 @@ extension BeamObjectProtocol {
 
     var previousChecksum: String? {
         BeamObjectChecksum.previousChecksum(object: self)
+    }
+
+    var hasBeenSyncedOnce: Bool {
+        previousChecksum != nil
     }
 
     func checksum() throws -> String {
@@ -80,6 +83,7 @@ class BeamObject: Codable {
     enum BeamObjectError: Error {
         case noData
         case differentEncryptionKey
+        case noEmail
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -283,7 +287,10 @@ extension BeamObject {
     func decrypt() throws {
         guard let dataBang = data else { return }
 
-        let currentPrivateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+        guard let email = Persistence.Authentication.email else {
+            throw BeamObjectError.noEmail
+        }
+        let currentPrivateKeySignature = try EncryptionManager.shared.privateKey(for: email).asString().SHA256()
         guard privateKeySignature == currentPrivateKeySignature else {
             throw BeamObjectError.differentEncryptionKey
         }
@@ -313,8 +320,8 @@ extension BeamObject {
         assert(!encrypted)
 
         if Configuration.env == .test,
-           EncryptionManager.shared.privateKey().asString() != Configuration.testPrivateKey {
-            fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)` in your tests")
+           EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString() != Configuration.testPrivateKey {
+            fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)` in your tests")
         }
 
         guard let encryptedClearData = try EncryptionManager.shared.encryptData(clearData) else {
@@ -323,6 +330,10 @@ extension BeamObject {
 
         encrypted = true
         data = encryptedClearData
-        privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+
+        guard let email = Persistence.Authentication.email else {
+            throw BeamObjectError.noEmail
+        }
+        privateKeySignature = try EncryptionManager.shared.privateKey(for: email).asString().SHA256()
     }
 }

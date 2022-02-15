@@ -14,10 +14,13 @@ xctests:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - pwd
     - time bundle exec fastlane tests
@@ -57,9 +60,11 @@ swift lint:
       when: never
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
-    - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   tags:
     - macos
@@ -81,10 +86,13 @@ UITestThread1:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - time bundle exec fastlane uitestsThread1
   after_script:
@@ -119,10 +127,13 @@ UITestThread2:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - time bundle exec fastlane uitestsThread2
   after_script:
@@ -157,10 +168,13 @@ UITestThread3:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - time bundle exec fastlane uitestsThread3
   after_script:
@@ -195,10 +209,13 @@ UITestThread4:
       cobertura: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
-  only:
-    - merge_requests
-    - master
-    - develop
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - time bundle exec fastlane uitestsThread4
   after_script:
@@ -228,10 +245,13 @@ js_test:
     paths:
     - ./Beam/Classes/Components/PointAndShoot/Web/node_modules/
     - .yarn
-  only:
-    - master
-    - develop
-    - merge_requests
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web install
     - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
@@ -259,9 +279,11 @@ coverage_check:
       when: never
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
-    - if: '$CI_COMMIT_TAG'
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
     - scripts/code_coverage.sh

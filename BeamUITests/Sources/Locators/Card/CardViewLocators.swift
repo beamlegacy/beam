@@ -36,7 +36,7 @@ enum CardViewLocators {
     }
     
     enum TextFields: String, CaseIterable, UIElement {
-        case cardTitle = "Note's title"
+        case noteTitle = "Note's title"
         case textNode = "TextNode"
         case imageNode = "ImageNode"
         case embedNode = "EmbedNode"
@@ -48,7 +48,6 @@ enum CardViewLocators {
         case publishLabel = "ContextMenuItem-publish"
         case unpublishLabel = "ContextMenuItem-unpublish"
         case copyLinkLabel = "ContextMenuItem-copy link"
-        case inviteLabel = "ContextMenuItem-invite..."
         case blockRefLock = "ContextMenuItem-lock"
         case blockRefUnlock = "ContextMenuItem-unlock"
         case blockRefRemove = "ContextMenuItem-remove"

@@ -137,6 +137,7 @@ public class TextNode: ElementNode {
         let textFrame = emptyTextFrame ?? textFrame
         return textFrame?.lines.first?.bounds.height ?? CGFloat(fontSize * interlineFactor)
     }
+
     override var firstLineBaseline: CGFloat {
         let textFrame = emptyTextFrame ?? self.textFrame
         if let firstLine = textFrame?.lines.first {
@@ -694,8 +695,7 @@ public class TextNode: ElementNode {
         editor.detectTextFormatterType()
 
         if mouseIsDragged {
-            editor.detectTextFormatterType()
-            editor.showOrHideInlineFormatter(isPresent: true)
+            editor.showInlineFormatterOnKeyEventsAndClick(isKeyEvent: false)
             mouseIsDragged = false
         }
         return false

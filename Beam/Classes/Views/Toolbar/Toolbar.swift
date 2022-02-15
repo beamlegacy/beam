@@ -54,7 +54,7 @@ struct Toolbar: View {
     }
     var body: some View {
         let mode = state.mode
-        ToolbarContentView()
+        ToolbarContentView(downloadList: state.data.downloadManager.downloadList)
             .environmentObject(state.autocompleteManager)
             .zIndex(11)
             .background(ClickCatchingView(onTap: { _ in }, onDoubleTap: { _ in

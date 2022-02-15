@@ -81,7 +81,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
 
         var title: String = ""
         var url: URL?
-        var requestedUrl: URL?
+        var requestedURL: URL?
 
         var webPositions: WebPositions?
         var pointAndShoot: PointAndShoot?
@@ -89,7 +89,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var browsingScorer: BrowsingScorer?
         var passwordOverlayController: PasswordOverlayController?
         var mediaPlayerController: MediaPlayerController?
-        var appendToIndexer: ((URL, Readability) -> Void)?
+        var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
         var score: Float = 0
         var authenticationViewModel: AuthenticationViewModel?
         var searchViewModel: SearchViewModel?
@@ -159,7 +159,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
             html: "<p>Pointed text</p>",
             animated: false
         )
-        pns.activeShootGroup = PointAndShoot.ShootGroup("abc", [target], "placeholder", "abc", shapeCache: .init())
+        pns.activeShootGroup = PointAndShoot.ShootGroup(id: "abc", targets: [target], text: "placeholder", href: "abc", shapeCache: .init())
 
         //When point and shooting to a note, frecency score of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)
