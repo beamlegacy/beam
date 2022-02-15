@@ -1,4 +1,4 @@
-query {
+query AllObjectsPrivateKeySignature {
     me {
         beamObjects {
             id
