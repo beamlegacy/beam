@@ -86,7 +86,10 @@ extension BeamObjectChecksum {
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
         return try context.performAndWait {
-            guard let objects = try? context.fetch(request), let previousData = objects.first?.data_sent else { return nil }
+            guard let objects = try? context.fetch(request), let object = objects.first else { return nil}
+            context.refresh(object, mergeChanges: false)
+
+            guard let previousData = object.data_sent else { return nil }
 
             let beamObject = try Self.decoder.decode(BeamObject.self, from: previousData)
             return try beamObject.decodeBeamObject()
@@ -212,12 +215,6 @@ extension BeamObjectChecksum {
             for beamObject in beamObjects {
                 let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
 
-                // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
-                // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
-                if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
-                    checksum.data_sent = try encoder.encode(beamObject)
-                }
-
                 checksum.id = checksum.id ?? beamObject.id
                 checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
                 checksum.previous_checksum = beamObject.dataChecksum
@@ -233,12 +230,88 @@ extension BeamObjectChecksum {
         }
     }
 
+    static func savePreviousObjects(beamObjects: [BeamObject]) throws {
+        guard !beamObjects.isEmpty else {
+            Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
+            return
+        }
+
+        // We don't save previous objects for anything else than document for now
+        guard beamObjects.compactMap({ $0.beamObjectType == BeamObjectObjectType.document.rawValue }).contains(true) else { return }
+
+        var localTimer = BeamDate.now
+
+        let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
+        localTimer = BeamDate.now
+
+        try context.performAndWait {
+            for beamObject in beamObjects {
+                guard beamObject.beamObjectType == BeamObjectObjectType.document.rawValue else {
+                    continue
+                }
+
+                let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
+
+                // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
+                // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
+                if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
+                    checksum.data_sent = try encoder.encode(beamObject)
+                }
+
+                checksum.id = checksum.id ?? beamObject.id
+                checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
+                checksum.previous_checksum = beamObject.dataChecksum
+                checksum.updated_at = BeamDate.now
+            }
+
+            try CoreDataManager.save(context)
+
+            let objectTypes = Array(Set(beamObjects.map { $0.beamObjectType }))
+            Logger.shared.logDebug("Saved previous data for \(beamObjects.count) \(objectTypes) beamObjects",
+                                   category: .beamObjectChecksum,
+                                   localTimer: localTimer)
+        }
+    }
+
     /// This will be much slower than using `savePreviousChecksums(beamObjects)`
     static func savePreviousChecksums<T: BeamObjectProtocol>(objects: [T]) throws {
         guard !objects.isEmpty else {
             Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
             return
         }
+
+        let localTimer = BeamDate.now
+
+        let (checksums, context) = findChecksumsForObjects(objects: objects)
+
+        try context.performAndWait {
+            for object in objects {
+                let checksum = checksums[object] ?? BeamObjectChecksum(context: context)
+
+                let beamObject = try BeamObject(object: object)
+
+                checksum.id = checksum.id ?? beamObject.id
+                checksum.object_type = checksum.object_type ?? type(of: object).beamObjectType.rawValue
+                checksum.previous_checksum = beamObject.dataChecksum
+                checksum.updated_at = BeamDate.now
+            }
+
+            try CoreDataManager.save(context)
+
+            Logger.shared.logDebug("Saved previous checksums for \(objects.count) \(T.beamObjectType) objects",
+                                   category: .beamObjectChecksum,
+                                   localTimer: localTimer)
+        }
+    }
+
+    /// This will be much slower than using `savePreviousChecksums(beamObjects)`
+    static func savePreviousObject<T: BeamObjectProtocol>(objects: [T]) throws {
+        guard !objects.isEmpty else {
+            Logger.shared.logWarning("No objects to save...", category: .beamObjectChecksum)
+            return
+        }
+
+        guard T.beamObjectType == BeamObjectObjectType.document else { return }
 
         let localTimer = BeamDate.now
 
@@ -264,7 +337,7 @@ extension BeamObjectChecksum {
 
             try CoreDataManager.save(context)
 
-            Logger.shared.logDebug("Saved previous checksums for \(objects.count) \(T.beamObjectType) objects",
+            Logger.shared.logDebug("Saved previous object for \(objects.count) \(T.beamObjectType) objects",
                                    category: .beamObjectChecksum,
                                    localTimer: localTimer)
         }
@@ -277,11 +350,31 @@ extension BeamObjectChecksum {
             guard !objectChecksum.isEqual(to: beamObject) else { return }
 
             objectChecksum.previous_checksum = beamObject.dataChecksum
-            objectChecksum.data_sent = try encoder.encode(beamObject)
             objectChecksum.updated_at = BeamDate.now
 
             if !noLog {
                 Logger.shared.logDebug("Saving previous checksum for \(beamObject.description): \(objectChecksum.previous_checksum ?? "-")",
+                                       category: .beamObjectChecksum)
+            }
+
+            try CoreDataManager.save(context)
+        }
+    }
+
+    static func savePreviousObject(beamObject: BeamObject, noLog: Bool = false) throws {
+        let (objectChecksum, context) = objectWithObject(object: beamObject)
+
+        guard beamObject.beamObjectType == BeamObjectObjectType.document.rawValue else { return }
+
+        try context.performAndWait {
+            guard !objectChecksum.isEqual(to: beamObject) else { return }
+
+            objectChecksum.previous_checksum = beamObject.dataChecksum
+            objectChecksum.data_sent = try encoder.encode(beamObject)
+            objectChecksum.updated_at = BeamDate.now
+
+            if !noLog {
+                Logger.shared.logDebug("Saving previous object for \(beamObject.description): \(objectChecksum.previous_checksum ?? "-")",
                                        category: .beamObjectChecksum)
             }
 
@@ -298,7 +391,6 @@ extension BeamObjectChecksum {
             guard !objectChecksum.isEqual(to: object) else { return }
 
             objectChecksum.previous_checksum = beamObject.dataChecksum
-            objectChecksum.data_sent = try encoder.encode(beamObject)
             objectChecksum.updated_at = BeamDate.now
 
             if !noLog {
@@ -310,7 +402,32 @@ extension BeamObjectChecksum {
         }
     }
 
-    static func savePreviousChecksum<T: BeamObjectProtocol>(object: T, previousChecksum: String?) throws {
+    static func savePreviousObject<T: BeamObjectProtocol>(object: T, noLog: Bool = false) throws {
+        guard T.beamObjectType == BeamObjectObjectType.document else { return }
+
+        let (objectChecksum, context) = objectWithObject(object: object)
+
+        try context.performAndWait {
+            let beamObject = try BeamObject(object: object)
+
+            guard !objectChecksum.isEqual(to: object) else { return }
+
+            objectChecksum.previous_checksum = beamObject.dataChecksum
+            objectChecksum.data_sent = try encoder.encode(beamObject)
+            objectChecksum.updated_at = BeamDate.now
+
+            if !noLog {
+                Logger.shared.logDebug("Saving previous object for \(object.description): \(objectChecksum.previous_checksum ?? "-")",
+                                       category: .beamObjectChecksum)
+            }
+
+            try CoreDataManager.save(context)
+        }
+    }
+
+    static func savePreviousObject<T: BeamObjectProtocol>(object: T, previousChecksum: String?) throws {
+        guard T.beamObjectType == BeamObjectObjectType.document else { return }
+
         let (objectChecksum, context) = objectWithObject(object: object)
 
         let beamObject = try BeamObject(object: object)
@@ -318,6 +435,20 @@ extension BeamObjectChecksum {
         try context.performAndWait {
             objectChecksum.previous_checksum = previousChecksum
             objectChecksum.data_sent = try encoder.encode(beamObject)
+            objectChecksum.updated_at = BeamDate.now
+
+            Logger.shared.logDebug("Saving previous object for \(object.description): \(objectChecksum.previous_checksum ?? "-")",
+                                   category: .beamObjectChecksum)
+
+            try CoreDataManager.save(context)
+        }
+    }
+
+    static func savePreviousChecksum<T: BeamObjectProtocol>(object: T, previousChecksum: String?) throws {
+        let (objectChecksum, context) = objectWithObject(object: object)
+
+        try context.performAndWait {
+            objectChecksum.previous_checksum = previousChecksum
             objectChecksum.updated_at = BeamDate.now
 
             Logger.shared.logDebug("Saving previous checksum for \(object.description): \(objectChecksum.previous_checksum ?? "-")",

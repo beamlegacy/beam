@@ -11,7 +11,6 @@
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShootUI_web.ts
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShootHelper.ts
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShoot.ts
-./Beam/Classes/Components/PointAndShoot/Web/Util.ts
 ./Beam/Classes/Components/PointAndShoot/Web/PointAndShootUI_debug.ts
 ./Beam/Classes/Helpers/Utils/Web/BeamMouseEvent.ts
 ./Beam/Classes/Helpers/Utils/Web/Test/Mock/BeamTextMock.ts

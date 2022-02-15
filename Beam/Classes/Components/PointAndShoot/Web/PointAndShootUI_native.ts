@@ -67,6 +67,13 @@ export class PointAndShootUI_native implements PointAndShootUI {
         html: this.getHtml(boundsElement),
         text: (<BeamHTMLElement>boundsElement).innerText ?? ""
       }
+    }).filter(target => {
+      if (Boolean(target.rect) == false) {
+        // remove group from swift when no rect can be calculated
+        this.native.sendMessage("dismissShootGroup", { id: target.id })
+      }
+      
+      return Boolean(target.rect)
     })
 
     const payload = {

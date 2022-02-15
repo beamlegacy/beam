@@ -39,7 +39,7 @@ class TextEditorContextViewTests: BaseTest {
         allCardsView.openCardByName(cardTitle: cardName)
         
         testRailPrint("Then new note is created")
-        cardView.waitForCardViewToLoad()
+        _ = cardView.waitForCardToOpen(cardTitle: cardName)
         XCTAssertEqual(cardName, cardView.getCardTitle())
         XCTAssertEqual(1, cardView.getLinksContentNumber())
         XCTAssertEqual(textToType + " ", cardView.getLinkContentByIndex(0))

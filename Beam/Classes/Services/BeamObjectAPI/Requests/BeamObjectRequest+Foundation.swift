@@ -28,7 +28,7 @@ extension BeamObjectRequest {
         let parameters = UpdateBeamObject(beamObject: saveObject, privateKey: nil)
 
         if EnvironmentVariables.beamObjectSendPrivateKey {
-            parameters.privateKey = EncryptionManager.shared.privateKey().asString()
+            parameters.privateKey = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
         }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_object",
@@ -137,7 +137,7 @@ extension BeamObjectRequest {
         var parameters = UpdateBeamObjects(beamObjects: saveBeamObjects, privateKey: nil)
 
         if EnvironmentVariables.beamObjectSendPrivateKey {
-            parameters.privateKey = EncryptionManager.shared.privateKey().asString()
+            parameters.privateKey = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
         }
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_beam_objects",
@@ -299,13 +299,14 @@ extension BeamObjectRequest {
                   ids: [UUID]? = nil,
                   beamObjectType: String? = nil,
                   skipDeleted: Bool? = false,
+                  raisePrivateKeyError: Bool = false,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
                                                skipDeleted: skipDeleted)
 
-        return try fetchAllWithFile("beam_objects", parameters, completion)
+        return try fetchAllWithFile("beam_objects", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
     @discardableResult
@@ -313,13 +314,14 @@ extension BeamObjectRequest {
                              ids: [UUID]? = nil,
                              beamObjectType: String? = nil,
                              skipDeleted: Bool? = false,
+                             raisePrivateKeyError: Bool = false,
                              _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
                                                skipDeleted: skipDeleted)
 
-        return try fetchAllWithFile("beam_objects_data_url", parameters, completion)
+        return try fetchAllWithFile("beam_objects_data_url", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
     @discardableResult
@@ -327,19 +329,21 @@ extension BeamObjectRequest {
                            ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
                            skipDeleted: Bool? = false,
+                           raisePrivateKeyError: Bool = false,
                            _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
                                                skipDeleted: skipDeleted)
 
-        return try fetchAllWithFile("beam_object_checksums", parameters, completion)
+        return try fetchAllWithFile("beam_object_checksums", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
     @discardableResult
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func fetchAllWithFile<T: Encodable>(_ filename: String,
                                                 _ parameters: T,
+                                                raisePrivateKeyError: Bool,
                                                 _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
 
@@ -365,6 +369,7 @@ extension BeamObjectRequest {
                      code wouldn't know what to do with it anyway.
                      */
                     do {
+                        var invalidObjects = [BeamObject]()
                         let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
                             do {
                                 try $0.decrypt()
@@ -373,19 +378,21 @@ extension BeamObjectRequest {
                             } catch EncryptionManagerError.authenticationFailure {
                                 Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
                             } catch BeamObject.BeamObjectError.differentEncryptionKey {
-                                let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+                                let privateKeySignature = try EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
+                                invalidObjects.append($0)
                                 Logger.shared.logError("Can't decrypt beam object, private key \($0.privateKeySignature ?? "-") unavailable. Current private key: \(privateKeySignature).", category: .beamObjectNetwork)
                             }
 
                             return nil
                         }
 
-                        if decryptedObjects.count < beamObjects.count {
-                            UserAlert.showError(message: "Encryption error",
-                                                informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
+                        if decryptedObjects.count < beamObjects.count && raisePrivateKeyError {
+//                            UserAlert.showError(message: "Encryption error",
+//                                                informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
+                            completion(.failure(BeamObjectRequestError.privateKeyError(validObjects: decryptedObjects, invalidObjects: invalidObjects)))
+                        } else {
+                            completion(.success(decryptedObjects))
                         }
-
-                        completion(.success(decryptedObjects))
                     } catch {
                         // Will catch anything but encryption errors
                         completion(.failure(error))
@@ -547,6 +554,7 @@ extension BeamObjectRequest {
         case malformattedURL
         case not200
         case noData
+        case privateKeyError(validObjects: [BeamObject], invalidObjects: [BeamObject])
     }
 
     @discardableResult
@@ -655,5 +663,18 @@ extension BeamObjectRequest {
 
         task.resume()
         return task
+    }
+
+    func fetchAllObjectPrivateKeySignatures(_ completionHandler: @escaping (Swift.Result<[String], Error>) -> Void) throws {
+        try fetchAllWithFile("all_objects_private_key_signatures", EmptyVariable(), raisePrivateKeyError: false) { result in
+            switch result {
+            case let .failure(error):
+                Logger.shared.logError(error.localizedDescription, category: .network)
+                completionHandler(.failure(error))
+            case let .success(objects):
+                let sigs = objects.compactMap { $0.privateKeySignature }
+                completionHandler(.success(sigs))
+            }
+        }
     }
 }

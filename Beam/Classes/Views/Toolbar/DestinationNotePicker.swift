@@ -12,6 +12,7 @@ import BeamCore
 
 struct DestinationNotePicker: View {
     @Environment(\.isMainWindow) private var isMainWindow
+    @EnvironmentObject var windowInfo: BeamWindowInfo
 
     let tab: BrowserTab
     @EnvironmentObject var state: BeamState
@@ -20,7 +21,7 @@ struct DestinationNotePicker: View {
 
     @State private var _internalDisableAnimation = false
     private var enableAnimations: Bool {
-        !_internalDisableAnimation && !state.windowIsResizing
+        !_internalDisableAnimation && !windowInfo.windowIsResizing
     }
     private let boxHeight: CGFloat = 32
     private let maxBoxWidth: CGFloat = 230
@@ -213,7 +214,7 @@ struct DestinationNotePicker: View {
             let finalCardName = autocompleteModel.realNameForCardName(result.text)
             if result.source == .createCard {
                 note = createNote(named: result.text)
-            } else if result.source == .autocomplete && result.text != finalCardName,
+            } else if result.source == .note && result.text != finalCardName,
                       let date = autocompleteModel.getDateForCardReplacementJournalNote(result.text) {
                 note = createJournalNote(date: date)
             }

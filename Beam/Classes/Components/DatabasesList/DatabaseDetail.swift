@@ -15,6 +15,7 @@ struct DatabaseDetail: View {
                 SoftUnDeleteButton
                 DeleteButton
                 MoveOrphanButton
+                MoveAllButton
                 Spacer()
             }.padding()
 
@@ -78,6 +79,10 @@ struct DatabaseDetail: View {
             }
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .document)
+            DispatchQueue.main.async {
+                timer.invalidate()
+                refreshing = false
+            }
         }
     }
 
@@ -137,12 +142,27 @@ struct DatabaseDetail: View {
                 refreshing = true
             }
 
-            DocumentManager().moveAllOrphanNotes(databaseId: database.id) { _ in
+            DocumentManager().moveAllOrphanNotes(databaseId: database.id, onlyOrphans: true, displayAlert: true) { _ in
                 timer.invalidate()
                 refreshing = false
             }
         }, label: {
             Text("Move Orphan Notes").frame(minWidth: 100)
+        }).disabled(refreshing)
+    }
+
+    private var MoveAllButton: some View {
+        Button(action: {
+            let timer = Timer.scheduledTimer(withTimeInterval: 0.2, repeats: false) { _ in
+                refreshing = true
+            }
+
+            DocumentManager().moveAllOrphanNotes(databaseId: database.id, onlyOrphans: false, displayAlert: true) { _ in
+                timer.invalidate()
+                refreshing = false
+            }
+        }, label: {
+            Text("Move All Notes").frame(minWidth: 100)
         }).disabled(refreshing)
     }
 

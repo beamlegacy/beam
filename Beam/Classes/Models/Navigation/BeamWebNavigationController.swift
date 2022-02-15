@@ -11,7 +11,6 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
     public var isNavigatingFromNote: Bool = false
     private var isNavigatingFromSearchBar: Bool = false
     private weak var webView: WKWebView?
-    var requestedUrl: URL?
 
     init(browsingTree: BrowsingTree, noteController: WebNoteController, webView: WKWebView) {
         self.browsingTree = browsingTree
@@ -41,22 +40,22 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
         currentBackForwardItem = webView.backForwardList.currentItem
     }
 
-    // swiftlint:disable_next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity
     func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
         guard let page = self.page else {
             return
         }
-        //If the webview is loading, we should not index the content.
-        //We will be called by the webView delegate at the end of the loading
+        // If the webview is loading, we should not index the content.
+        // We will be called by the webView delegate at the end of the loading
         guard !webView.isLoading else {
             return
         }
 
-        //Only register navigation if the page was successfully loaded
+        // Only register navigation if the page was successfully loaded
         guard page.responseStatusCode == 200 else { return }
 
         // handle the case where a redirection happened and we never get a title for the original url:
-        if let requestedUrl = requestedUrl, requestedUrl != url {
+        if let requestedUrl = page.requestedURL, requestedUrl != url {
             Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedUrl) - \(String(describing: webView.title))")
             let link = GRDBDatabase.shared.visit(url: requestedUrl.absoluteString, title: webView.title, content: nil, destination: url.absoluteString)
             ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()).update(id: link.id, value: 0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
@@ -104,20 +103,24 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
     private func indexVisit(url: URL, isLinkActivation: Bool, read: Readability? = nil) {
         guard let page = self.page else { return }
         //Alway index the visit, event if we were not able to read the content
-        self.browsingTree.navigateTo(url: url.absoluteString, title: read?.title ?? webView?.title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
+        let title = read?.title ?? webView?.title
+        self.browsingTree.navigateTo(url: url.absoluteString, title: title, startReading: page.isActiveTab(), isLinkActivation: isLinkActivation, readCount: read?.content.count ?? 0)
 
         guard let read = read else { return }
         try? TextSaver.shared?.save(nodeId: self.browsingTree.current.id, text: read)
-        page.appendToIndexer?(url, read)
+        page.appendToIndexer?(url, title ?? "", read)
     }
 
     private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {
 
         guard let response = navigationResponse.response as? HTTPURLResponse else { return false }
 
+        let contentType = BeamDownloadManager.contentType(from: response.allHeaderFields)
         let contentDisposition = BeamDownloadManager.contentDisposition(from: response.allHeaderFields)
 
-        if let disposition = contentDisposition {
+        if contentType == .forceDownload {
+            return true
+        } else if let disposition = contentDisposition {
             return disposition == .attachment
         } else if !navigationResponse.canShowMIMEType {
             return true
@@ -134,10 +137,20 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         case .other:
             // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
             break
+        case .formSubmitted, .formResubmitted:
+            // We found at that `action.sourceFrame` can be null for `.formResubmitted` even if it's not an optional
+            // Assigning it to an optional to check if we have a value
+            // see https://linear.app/beamapp/issue/BE-3180/exc-breakpoint-exception-6-code-3431810664-subcode-8
+            let sourceFrame: WKFrameInfo? = action.sourceFrame
+            if let sourceFrame = sourceFrame {
+                Logger.shared.logDebug("Form submitted for \(sourceFrame.request.url?.absoluteString ?? "(no source frame URL)")", category: .web)
+                page?.handleFormSubmit(frameInfo: sourceFrame)
+            }
+            fallthrough
         default:
             // update the requested url as it is not from a redirection but from a user action:
             if let url = action.request.url {
-                requestedUrl = url
+                self.page?.requestedURL = url
             }
         }
     }
@@ -151,6 +164,11 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
                  preferences: WKWebpagePreferences,
                  decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+        if navigationAction.shouldPerformDownload {
+            decisionHandler(.download, preferences)
+            return
+        }
+
         handleNavigationAction(navigationAction)
         switch navigationAction.navigationType {
         case .backForward:
@@ -162,7 +180,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
         if let targetURL = navigationAction.request.url {
             let navigationUrlHandler = ExternalDeeplinkHandler(request: navigationAction.request)
-            let withCommandKey = navigationAction.modifierFlags.contains(.command)
+            let withCommandKey = navigationAction.modifierFlags.contains(.command) || NSEvent.modifierFlags.contains(.command)
             if navigationUrlHandler.isDeeplink() {
                 decisionHandler(.cancel, preferences)
                 if navigationUrlHandler.shouldOpenDeeplink() {
@@ -188,22 +206,16 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-
-        if let response = navigationResponse.response as? HTTPURLResponse,
-           let url = response.url,
-           shouldDownloadFile(for: navigationResponse) {
-            decisionHandler(.cancel)
-            var headers: [String: String] = [:]
-            if let sourceURL = webView.url {
-                headers["Referer"] = sourceURL.absoluteString
-            }
-            page?.downloadManager?.downloadFile(at: url, headers: headers, suggestedFileName: response.suggestedFilename, destinationFoldedURL: DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder)?.sandboxAccessibleUrl)
-        } else {
-            if let response = navigationResponse.response as? HTTPURLResponse, webView.url == response.url {
-                page?.responseStatusCode = response.statusCode
-            }
-            decisionHandler(.allow)
+        if shouldDownloadFile(for: navigationResponse) {
+            decisionHandler(.download)
+            return
         }
+
+        if let response = navigationResponse.response as? HTTPURLResponse, webView.url == response.url {
+            page?.responseStatusCode = response.statusCode
+        }
+
+        decisionHandler(.allow)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) { }
@@ -240,7 +252,6 @@ extension BeamWebNavigationController: WKNavigationDelegate {
         guard let webviewUrl = webView.url else {
             return // webview probably failed to load
         }
-        self.page?.requestedUrl = webviewUrl
 
         if BeamURL(webviewUrl).isErrorPage {
             let beamSchemeUrl = BeamURL(webviewUrl)
@@ -310,5 +321,13 @@ extension BeamWebNavigationController: WKNavigationDelegate {
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) { }
+
+    func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
+        page?.downloadManager?.download(download)
+    }
+
+    func webView(_ webView: WKWebView, navigationResponse: WKNavigationResponse, didBecome download: WKDownload) {
+        page?.downloadManager?.download(download)
+    }
 
 }

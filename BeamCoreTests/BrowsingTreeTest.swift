@@ -11,11 +11,11 @@ import XCTest
 class BrowsingTreeTest: XCTestCase {
     override func setUpWithError() throws {
         super.setUp()
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
     override func tearDownWithError() throws {
         super.tearDown()
-        try LinkStore.shared.deleteAll()
+        LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
 
     func testDeserialization() {
@@ -247,6 +247,7 @@ class BrowsingTreeTest: XCTestCase {
         BeamDate.reset()
     }
 
+    //swiftlint:disable:next function_body_length
     func testFlattenUnflatten() throws {
 
         func isEqual(_ leftNode: BrowsingNode, _ rightNode: BrowsingNode) {
@@ -313,6 +314,57 @@ class BrowsingTreeTest: XCTestCase {
         //checks that decoded wasn't mutated when given as input of BrowsingTree(flattenedTree:)
         for node in decoded.nodes {
             isSerializable(node: node)
+        }
+    }
+
+    func testTreeOriginAnonymization() {
+        //search bar case
+        let referringId = UUID()
+        let searchBarOrigin: BrowsingTreeOrigin = .searchBar(query: "query", referringRootId: referringId)
+        if case .searchBar(query: let query, referringRootId: let anonymizedId) = searchBarOrigin.anonymized {
+            XCTAssertNil(query)
+            XCTAssertEqual(referringId, anonymizedId)
+        } else {
+            XCTFail("Tree origin anonymization issue")
+        }
+
+        //search from node case
+        let searchFromNoteOrigin: BrowsingTreeOrigin = .searchFromNode(nodeText: "node")
+        if case .searchFromNode(nodeText: let text) = searchFromNoteOrigin.anonymized {
+            XCTAssertNil(text)
+        } else {
+            XCTFail("Tree origin anonymization issue")
+        }
+
+        //link from note case
+        let linkFromNoteOrigin: BrowsingTreeOrigin = .linkFromNote(noteName: "note")
+        if case .linkFromNote(noteName: let noteName) = linkFromNoteOrigin.anonymized {
+            XCTAssertNil(noteName)
+        } else {
+            XCTFail("Tree origin anonymization issue")
+        }
+
+        //cmd + click case
+        let nodeOrigin: BrowsingTreeOrigin = .browsingNode(id: UUID(), pageLoadId: UUID(), rootOrigin: searchBarOrigin, rootId: UUID())
+        if case let .browsingNode(id: _, pageLoadId: _, rootOrigin: .searchBar(query: query, referringRootId: _), rootId: _) = nodeOrigin.anonymized {
+            XCTAssertNil(query)
+        } else {
+            XCTFail("Tree origin anonymization issue")
+        }
+    }
+
+    func testTreeAnonymization() {
+        let referringId = UUID()
+        let tree = BrowsingTree(.searchBar(query: "query", referringRootId: referringId))
+        let anonymizedTree = tree.anonymized
+        XCTAssert(tree.root === anonymizedTree.root)
+        XCTAssert(tree.current === anonymizedTree.current)
+        XCTAssertEqual(tree.scores, anonymizedTree.scores)
+        if case .searchBar(query: let query, referringRootId: let anonymizedId) = anonymizedTree.origin {
+            XCTAssertNil(query)
+            XCTAssertEqual(referringId, anonymizedId)
+        } else {
+            XCTFail("Tree origin anonymization issue")
         }
     }
 }

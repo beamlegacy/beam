@@ -14,26 +14,7 @@ import Foundation
 /// Sometimes it can be a desired effect, sometimes not.
 extension BeamWindow {
     @IBAction func checkForUpdate(_ sender: Any?) {
-        showUpdateAlert()
-    }
-
-    func showUpdateAlert(onStartUp: Bool = false) {
-        state.data.versionChecker.areAnyUpdatesAvailable { isThereAnUpdate in
-            if onStartUp && !isThereAnUpdate { return }
-            let updateAlertMessage = isThereAnUpdate ? "A new version of beam is available!" : "You’re up-to-date!"
-            let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the lastest version of beam."
-            let updateAlertButtonTitle = isThereAnUpdate ? "Update Now" : "OK"
-            let updateAlertSecondaryButtonTitle = isThereAnUpdate ? onStartUp ? "Update Later" : "Cancel" : ""
-
-            UserAlert.showMessage(message: updateAlertMessage,
-                                  informativeText: updateAlertInformativeText,
-                                  buttonTitle: updateAlertButtonTitle,
-                                  secondaryButtonTitle: updateAlertSecondaryButtonTitle) {
-                if isThereAnUpdate {
-                    self.state.data.versionChecker.checkForUpdates()
-                }
-            }
-        }
+        state.data.checkForUpdate()
     }
 
     @IBAction func showPreviousTab(_ sender: Any?) {
@@ -155,7 +136,10 @@ extension BeamWindow {
     }
 
     @IBAction func showHelp(_ sender: Any?) {
-        state.navigateToPage(.shortcutsWindowPage)
+        if state.mode == .web {
+            state.mode = .today
+        }
+        self.state.showHelpAndFeedback = true
     }
 
     @IBAction func toggleStatusBar(_ sender: Any?) {

@@ -181,8 +181,8 @@ class PasswordsDB: PasswordStore {
             if let storedPasswords = rows {
                 for password in storedPasswords {
                     var encryptedPassword: String = ""
-                    if let decryptedPassword = try EncryptionManager.shared.decryptString(password["password"]),
-                       let newlyEncryptedPassword = try EncryptionManager.shared.encryptString(decryptedPassword) {
+                    if let decryptedPassword = try EncryptionManager.shared.decryptString(password["password"], EncryptionManager.shared.localPrivateKey()),
+                       let newlyEncryptedPassword = try EncryptionManager.shared.encryptString(decryptedPassword, EncryptionManager.shared.localPrivateKey()) {
                         encryptedPassword = newlyEncryptedPassword
                     }
 
@@ -195,7 +195,7 @@ class PasswordsDB: PasswordStore {
                         createdAt: password["createdAt"],
                         updatedAt: password["updatedAt"],
                         deletedAt: password["deletedAt"],
-                        privateKeySignature: encryptedPassword.isEmpty ? nil : try EncryptionManager.shared.privateKey().asString().SHA256())
+                        privateKeySignature: encryptedPassword.isEmpty ? nil : try EncryptionManager.shared.localPrivateKey().asString().SHA256())
                     try passwordRecord.insert(db)
                 }
             }
@@ -324,7 +324,7 @@ class PasswordsDB: PasswordStore {
             return nil
         }
         do {
-            let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password)
+            let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password, EncryptionManager.shared.localPrivateKey())
             return decryptedPassword
         } catch let error {
             throw PasswordDBError.cantDecryptPassword(errorMsg: error.localizedDescription)
@@ -338,10 +338,10 @@ class PasswordsDB: PasswordStore {
     func save(hostname: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
-                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
+                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password, EncryptionManager.shared.localPrivateKey()) else {
                     throw PasswordDBError.cantEncryptPassword
                 }
-                let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+                let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
                 var passwordRecord = PasswordRecord(
                     uuid: uuid ?? UUID(),
                     entryId: id(for: hostname, and: username),
@@ -372,10 +372,10 @@ class PasswordsDB: PasswordStore {
     func update(record: PasswordRecord, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
-                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password) else {
+                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password, EncryptionManager.shared.localPrivateKey()) else {
                     throw PasswordDBError.cantEncryptPassword
                 }
-                let privateKeySignature = try EncryptionManager.shared.privateKey().asString().SHA256()
+                let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
                 var updatedRecord = record
                 if let uuid = uuid {
                     updatedRecord.uuid = uuid

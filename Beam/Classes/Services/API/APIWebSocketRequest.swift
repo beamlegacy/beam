@@ -37,8 +37,6 @@ extension APIWebSocketRequestError: LocalizedError {
  */
 
 class APIWebSocketRequest: APIRequest {
-    static let shared = APIWebSocketRequest()
-
     // Change API route from https?://api.beamapp.co/ to wss?://api.beamapp.co/cable
     static private var cableRoute: String {
         let hosts = Configuration.apiHostname.split(separator: ":",
@@ -51,11 +49,17 @@ class APIWebSocketRequest: APIRequest {
     private var webSocketTask: URLSessionWebSocketTask?
     private var connected: Bool = false
     private var channelIds: [UUID] = []
+
     private var connectHandler: (() -> Void)?
+    var disconnectHandler: (() -> Void)?
+
     private var subscribeHandlers: [UUID: ((Swift.Result<UUID, Error>) -> Void)] = [:]
     private var queryCommandHandlers: [UUID: ((Swift.Result<String, Error>) -> Void)] = [:]
     private static var webSocketUploadedBytes: Int64 = 0
     private static var webSocketDownloadedBytes: Int64 = 0
+
+    private var lastReceivedPing: Date?
+    private var checkTimer: Timer?
 
     deinit {
         disconnect()
@@ -64,7 +68,8 @@ class APIWebSocketRequest: APIRequest {
     /// Connect to the Beam API web sockets
     /// - Parameter completionHandler: called once connected
     /// - Throws:
-    func connect(completionHandler: @escaping () -> Void) throws {
+    func connect(onConnect: @escaping () -> Void,
+                 onDisconnect: @escaping () -> Void) throws {
         reset()
 
         let request = try Self.makeUrlWebSocketRequest()
@@ -75,16 +80,93 @@ class APIWebSocketRequest: APIRequest {
         webSocketTask = urlSession.webSocketTask(with: request)
 
         receive_messages()
-        logDebug("Connecting to \(Self.cableRoute)")
 
-        // TODO: add a timer, if the welcome message doesn't come back after X second,
-        // call the handler with a fail?
-        connectHandler = completionHandler
+        let authorization = (try? request.value(forHTTPHeaderField: "Authorization")?.SHA256()) ?? "-"
+        let device = request.value(forHTTPHeaderField: "Device") ?? "-"
+        logDebug("Connecting to \(Self.cableRoute). origin: \(Configuration.apiHostname), auth: \(authorization), device: \(device)")
+
+        connectHandler = onConnect
+        disconnectHandler = onDisconnect
+
         webSocketTask?.resume()
+    }
+
+    private func addCheckTimer() {
+        // We need `connect` to be called from the main thread or it breaks the timer
+        assert(Thread.isMainThread)
+
+        checkTimer?.invalidate()
+        checkTimer = Timer.scheduledTimer(withTimeInterval: 10, repeats: true) { _ in
+            self.sendPing()
+
+            guard let lastReceivedPing = self.lastReceivedPing else {
+                Logger.shared.logDebug("no last received ping", category: .webSocket)
+                return
+            }
+
+            let timeDiff = BeamDate.now.timeIntervalSince(lastReceivedPing)
+
+            guard timeDiff < 10 else {
+                Logger.shared.logDebug("last received ping longer than 10sec, disconnecting",
+                                       category: .webSocket)
+                self.enforceDisconnect(callDisconnectHandler: true)
+                return
+            }
+
+            #if DEBUG_API_1
+            let timeDiffString = String(format: "%.1f", BeamDate.now.timeIntervalSince(lastReceivedPing))
+
+            Logger.shared.logDebug("Checked last received ping: \(timeDiffString)sec",
+                                   category: .webSocket)
+            #endif
+        }
+    }
+
+    private func sendPing() {
+        guard let webSocketTask = webSocketTask else {
+            Logger.shared.logError("websocket variable is nil", category: .webSocket)
+            return
+        }
+
+        #if DEBUG_API_1
+        Logger.shared.logDebug("Sending ping", category: .webSocket)
+        #endif
+        webSocketTask.sendPing { error in
+            if let error = error {
+                Logger.shared.logError("Error sending ping: \(error.localizedDescription)",
+                                       category: .webSocket)
+                self.enforceDisconnect()
+                return
+            }
+
+            #if DEBUG_API_1
+            Logger.shared.logDebug("Received pong", category: .webSocket)
+            #endif
+        }
+    }
+
+    private func enforceDisconnect(callDisconnectHandler: Bool = false) {
+        self.connected = false
+
+        checkTimer?.invalidate()
+        checkTimer = nil
+
+        if callDisconnectHandler {
+            self.disconnectHandler?()
+            self.disconnectHandler = nil
+        }
+
+        reset()
     }
 
     func disconnect() {
         webSocketTask?.cancel(with: .normalClosure, reason: nil)
+        enforceDisconnect()
+    }
+
+    func disconnectAndReconnect() {
+        webSocketTask?.cancel(with: .normalClosure, reason: nil)
+        enforceDisconnect(callDisconnectHandler: true)
     }
 
     private func reset() {
@@ -92,6 +174,7 @@ class APIWebSocketRequest: APIRequest {
         subscribeHandlers = [:]
         connectHandler = nil
         channelIds = []
+        lastReceivedPing = nil
     }
 
     /// Ask API for any beam objects changes, completionHandler will be call once per update received until this channel has been unsubscribed.
@@ -138,14 +221,20 @@ class APIWebSocketRequest: APIRequest {
                         guard let inputMessage = try? self?.defaultDecoder().decode(WebSocketInputReceivedMessage.self,
                                                                                     from: message.asData),
                               let inputResult = inputMessage.message?.result else {
-                            self?.logDebug("[\(channelId)] connectDocuments: \(message)")
+                                  Logger.shared.logError("Can't parse message: \(message)",
+                                                         category: .webSocket)
                             return
                         }
 
                         guard let beamObjects = inputResult.data?.beamObjectsUpdated?.beamObjects else {
+                            Logger.shared.logDebug("No beam objects!", category: .webSocket)
                             return
                         }
 
+                        Logger.shared.logDebug("Received \(beamObjects.count) beam objects",
+                                               category: .webSocket)
+
+                        // TODO: change the completion handler to [BeamObject] and make a single call
                         for beamObject in beamObjects {
                             if let dataUrl = beamObject.dataUrl {
                                 let request = BeamObjectRequest()
@@ -194,6 +283,8 @@ class APIWebSocketRequest: APIRequest {
             case .failure(let error):
                 // we don't call `receive_messages()` since this is probably a final error
                 Logger.shared.logError("Failed to receive message: \(error)", category: .webSocket)
+
+                self.enforceDisconnect(callDisconnectHandler: true)
             case .success(let message):
                 // `receive` method is called only once. If you want to receive following messages,
                 // you must call `receive` again.
@@ -272,6 +363,10 @@ class APIWebSocketRequest: APIRequest {
             return
         }
 
+        guard let webSocketTask = webSocketTask else {
+            return
+        }
+
         switch message.type {
         case nil:
             #if DEBUG_API_1
@@ -285,17 +380,23 @@ class APIWebSocketRequest: APIRequest {
             connected = true
             connectHandler?()
             connectHandler = nil
+            DispatchQueue.main.async {
+                self.addCheckTimer()
+            }
         case .ping:
+            lastReceivedPing = BeamDate.now
+            #if DEBUG_API_1
+            logDebug(messageText)
+            #endif
             // When receiving ping types from the API, we just send another ping back
-            webSocketTask?.sendPing { error in
+            webSocketTask.sendPing { error in
                 if let error = error {
                     Logger.shared.logError("Ping failed: \(error)", category: .webSocket)
-                    // TODO: disconnect / reconnect?
+                    self.enforceDisconnect()
                 }
             }
         case .disconnect:
-            // TODO: reconnect with trottle?
-            reset()
+            enforceDisconnect(callDisconnectHandler: true)
         case .confirm_subscription:
             // confirm_subscription types are received after subscribing a new channel
             manage_socket_message_subscription(message)
@@ -444,6 +545,18 @@ class APIWebSocketRequest: APIRequest {
 
     static private func makeUrlWebSocketRequest() throws -> URLRequest {
         guard let url = URL(string: Self.cableRoute) else { fatalError("Can't get URL: \(Self.cableRoute)") }
+
+        AuthenticationManager.shared.updateAccessTokenIfNeeded()
+
+        guard AuthenticationManager.shared.isAuthenticated,
+              let accessToken = AuthenticationManager.shared.accessToken else {
+                  ThirdPartyLibrariesManager.shared.nonFatalError(error: APIRequestError.notAuthenticated,
+                                           addedInfo: AuthenticationManager.shared.hashTokensInfos())
+
+            NotificationCenter.default.post(name: .networkUnauthorized, object: self)
+            throw APIRequestError.notAuthenticated
+        }
+
         var request = URLRequest(url: url)
         let headers: [String: String] = [
             "Device": Self.deviceId.uuidString.lowercased(),
@@ -451,24 +564,12 @@ class APIWebSocketRequest: APIRequest {
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
             "Content-Type": "application/json",
-            "Accept-Language": Locale.current.languageCode ?? "en"
+            "Accept-Language": Locale.current.languageCode ?? "en",
+            "Authorization": "Bearer " + accessToken
         ]
 
         request.httpMethod = "GET"
         request.allHTTPHeaderFields = headers
-
-        AuthenticationManager.shared.updateAccessTokenIfNeeded()
-
-        guard AuthenticationManager.shared.isAuthenticated,
-              let accessToken = AuthenticationManager.shared.accessToken else {
-            LibrariesManager.nonFatalError(error: APIRequestError.notAuthenticated,
-                                           addedInfo: AuthenticationManager.shared.hashTokensInfos())
-
-            NotificationCenter.default.post(name: .networkUnauthorized, object: self)
-            throw APIRequestError.notAuthenticated
-        }
-
-        request.setValue("Bearer " + accessToken, forHTTPHeaderField: "Authorization")
 
         return request
     }

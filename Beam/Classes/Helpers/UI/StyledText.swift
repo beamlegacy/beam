@@ -28,6 +28,10 @@ public extension TextStyle {
     static func font(_ font: Font) -> TextStyle {
         TextStyle(key: .init("TextStyleFont"), apply: { $0.font(font) })
     }
+
+    static func underline() -> TextStyle {
+        TextStyle(key: .init("TextStyleUnderline"), apply: { $0.underline() })
+    }
 }
 
 public struct StyledText {

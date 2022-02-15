@@ -4,6 +4,7 @@
 //
 //  Created by Remi Santos on 12/11/2021.
 //
+// swiftlint:disable file_length
 
 import SwiftUI
 import BeamCore
@@ -121,14 +122,14 @@ struct OnboardingImportsView: View {
     private var loadingDetails: [String] {
         var result = [String]()
         if checkHistory { result.append("history") }
-        if checkPassword { result.append("password") }
+        if checkPassword { result.append("passwords") }
         return result
     }
 
     var body: some View {
         VStack(spacing: 0) {
             if isLoading {
-                OnboardingView.LoadingView(randomDetails: loadingDetails)
+                OnboardingView.LoadingView(syncingDetails: loadingDetails)
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 OnboardingView.TitleText(title: "Import your data")
@@ -180,11 +181,14 @@ struct OnboardingImportsView: View {
 
     private func updateAvailableSources() {
         availableSources = ImportSource.allCases.filter { $0.isAvailable }
+        if !availableSources.contains(selectedSource), let newSource = availableSources.first {
+            selectedSource = newSource
+        }
     }
     private let skipActionId = "skip_action"
     private let importActionId = "import_action"
 
-    private var shoudlEnableImportButton: Bool {
+    private var shouldEnableImportButton: Bool {
         if checkPassword {
             return passwordImportURL != nil || selectedSource.supportsAutomaticPasswordImport
         } else {
@@ -199,7 +203,7 @@ struct OnboardingImportsView: View {
         }
         actions = [
             .init(id: skipActionId, title: "Skip", enabled: true, secondary: true),
-            .init(id: importActionId, title: "Import", enabled: shoudlEnableImportButton) {
+            .init(id: importActionId, title: "Import", enabled: shouldEnableImportButton) {
                 startImports()
                 return false
             }
@@ -225,9 +229,14 @@ extension OnboardingImportsView {
     }
 
     private func startImports() {
-        guard !isLoading && shoudlEnableImportButton else { return }
-        isLoading = true
-        updateActions()
+        guard !isLoading && shouldEnableImportButton else { return }
+        guard selectedSource.readyToImport(passwords: checkPassword, history: checkHistory) else {
+            if let applicationName = selectedSource.applicationName {
+                UserAlert.showError(message: "\(applicationName) should be closed during import.", informativeText: "Please quit \(applicationName) and try again.")
+            }
+            return
+        }
+
         let importsManager = AppDelegate.main.data.importsManager
         if checkPassword {
             if selectedSource.supportsAutomaticPasswordImport, let passwordImporter = selectedSource.passwordImporter {
@@ -239,6 +248,10 @@ extension OnboardingImportsView {
         if checkHistory, let importer = selectedSource.historyImporter {
             importsManager.startBrowserHistoryImport(from: importer)
         }
+
+        isLoading = true
+        updateActions()
+
         waitForImporterToFinish(importsManager)
     }
 
@@ -311,6 +324,21 @@ extension OnboardingImportsView {
             }
         }
 
+        var applicationName: String? {
+            switch self {
+            case .safari, .safariOld:
+                return "Safari"
+            case .chrome:
+                return "Google Chrome"
+            case .firefox:
+                return "Firefox"
+            case .brave:
+                return "Brave Browser"
+            case .passwordsCSV:
+                return nil
+            }
+        }
+
         private var bundleIdentifier: String? {
             switch self {
             case .safari, .safariOld:
@@ -325,6 +353,7 @@ extension OnboardingImportsView {
                 return nil
             }
         }
+
         var appURL: URL? {
             guard let bundleIdentifier = bundleIdentifier else { return nil }
             return NSWorkspace.shared.urlForApplication(withBundleIdentifier: bundleIdentifier)
@@ -393,6 +422,39 @@ extension OnboardingImportsView {
             case .passwordsCSV:
                 return nil
             }
+        }
+
+        func readyToImport(passwords: Bool, history: Bool) -> Bool {
+            guard needsExclusiveAccess(passwords: passwords, history: history) else {
+                return true
+            }
+            guard let bundleIdentifier = bundleIdentifier else {
+                return true
+            }
+            let applicationIsRunning = NSWorkspace.shared.runningApplications.contains {
+                $0.bundleIdentifier == bundleIdentifier
+            }
+            return !applicationIsRunning
+        }
+
+        private func needsExclusiveAccess(passwords: Bool, history: Bool) -> Bool {
+            if passwords {
+                switch self {
+                case .chrome, .brave, .firefox:
+                    return true
+                case .safari, .safariOld, .passwordsCSV:
+                    return false
+                }
+            }
+            if history {
+                switch self {
+                case .safari, .safariOld, .chrome, .brave, .firefox:
+                    return true
+                case .passwordsCSV:
+                    return false
+                }
+            }
+            return false
         }
     }
 }

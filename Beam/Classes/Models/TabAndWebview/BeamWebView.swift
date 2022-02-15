@@ -127,7 +127,9 @@ class BeamWebView: WKWebView {
 
     public override func flagsChanged(with event: NSEvent) {
         super.keyUp(with: event)
-        optionKeyToggle(event.modifierFlags)
+        if let window = event.window, window.isKeyWindow {
+            optionKeyToggle(event.modifierFlags)
+        }
     }
 
     //swiftlint:disable:next weak_delegate
@@ -198,6 +200,21 @@ class BeamWebView: WKWebView {
         super.mouseDragged(with: theEvent)
         mouseMoveTriggeredChange(mouseLocation(from: theEvent), theEvent.modifierFlags)
     }
+
+    override func willOpenMenu(_ menu: NSMenu, with event: NSEvent) {
+        let menuItemIdentifiersToDisable: [NSUserInterfaceItemIdentifier] = [
+            .webKitCopyImage,
+            .webKitDownloadImage
+        ]
+
+        let filteredItems = menu.items.filter { menuItem in
+            guard let identifier = menuItem.identifier else { return true }
+            return !menuItemIdentifiersToDisable.contains(identifier)
+        }
+
+        menu.items = filteredItems
+    }
+
 }
 
 extension WKWebView {

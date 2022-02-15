@@ -400,6 +400,8 @@ struct GRDBDatabase {
         migrator.eraseDatabaseOnSchemaChange = false
         #endif
 
+        try checkCurrentMigrationStatus(dbReader: dbReader)
+
         if migrate {
             try self.migrate()
         }
@@ -425,6 +427,18 @@ struct GRDBDatabase {
             try migrator.migrate(dbWriter)
         }
     }
+    private func checkCurrentMigrationStatus(dbReader: DatabaseReader) throws {
+        try dbReader.read { db in
+            if try migrator.hasBeenSuperseded(db) {
+                Logger.shared.logError("GRDB migration status is ahead of registred migrations.", category: .database)
+                UserAlert.showError(message: "Application version is too old, please reinstall latest version.",
+                                    informativeText: "Database version is ahead of application version.",
+                                    buttonTitle: "Exit now")
+                AppDelegate.main.skipTerminateMethods = true
+                NSApplication.shared.terminate(nil)
+            }
+        }
+    }
 }
 
 // MARK: - Database Access: Writes
@@ -436,7 +450,7 @@ extension GRDBDatabase {
         let pivotDate = lastIndexingFor(note: note)
         guard note.updateDate > pivotDate else { return }
 
-        let databaseId =  note.databaseId?.uuidString ?? Database.defaultDatabase().id.uuidString
+        let databaseId = note.databaseId?.uuidString ?? DatabaseManager.defaultDatabase.id.uuidString
         let noteTitle = note.title
         let noteIdStr = note.id.uuidString
         let records = note.allTextElements.map { BeamElementRecord(title: noteTitle, text: $0.text.text, uid: $0.id.uuidString, noteId: noteIdStr, databaseId: databaseId) }
@@ -1261,7 +1275,7 @@ extension GRDBDatabase {
         return matchingLinks
     }
 
-    func getTopScoredLinks(matchingUrl url: String, frecencyParam: FrecencyParamKey, limit: Int = 10) -> [LinkWithFrecency] {
+    func getTopScoredLinks(matchingUrl url: String, frecencyParam: FrecencyParamKey, limit: Int = 10) -> [LinkSearchResult] {
         let association = Link.frecency
             .filter(FrecencyUrlRecord.Columns.frecencyKey == frecencyParam)
             .order(FrecencyUrlRecord.Columns.frecencySortScore.desc)
@@ -1272,7 +1286,10 @@ extension GRDBDatabase {
             .including(optional: association)
             .limit(limit)
         return (try? dbReader.read { db in
-            try LinkWithFrecency.fetchAll(db, query)
+            let links = try LinkWithFrecency.fetchAll(db, query)
+            return links.map { linkWithFrecency in
+                linkWithFrecencyToLinkSearchResult(linkWithFrecency, enabledFrecencyParam: frecencyParam, in: db)
+            }
         }) ?? []
     }
 
@@ -1306,7 +1323,8 @@ extension GRDBDatabase {
     func visit(url: String, title: String? = nil, content: String?, destination: String?) -> Link {
         guard var link = linkFor(url: url) else {
             // The link doesn't exist, create it and return the id
-            var link = Link(url: url, title: title, content: content, destination: destination)
+            var link = Link(url: url, title: title, content: content)
+            link.setDestination(destination)
             _ = try? dbWriter.write { db in
                 try link.insert(db)
             }
@@ -1358,9 +1376,10 @@ extension GRDBDatabase {
 
     // Search History and Aliases:
     public struct LinkSearchResult {
-        let title: String
+        let title: String?
         let url: String
         let frecency: FrecencyUrlRecord?
+        var destinationURL: String?
     }
 
     public struct LinkWithFrecency: FetchableRecord {
@@ -1408,9 +1427,8 @@ extension GRDBDatabase {
                     .asRequest(of: LinkWithFrecency.self)
                     .fetchAll(db)
                     .map { record -> LinkSearchResult in
-                        LinkSearchResult(title: record.link.title ?? "",
-                                     url: record.link.url,
-                                     frecency: record.frecency)
+                        Logger.shared.logDebug("Found \(record.link.url) - with frecency: \(record.frecency.debugDescription)", category: .search)
+                        return linkWithFrecencyToLinkSearchResult(record, enabledFrecencyParam: enabledFrecencyParam, in: db)
                     }
                 completion(.success(results))
             } catch {
@@ -1420,45 +1438,25 @@ extension GRDBDatabase {
         }
     }
 
-    func searchAlias(query: String,
-                     enabledFrecencyParam: FrecencyParamKey? = nil,
-                     completion: @escaping (Result<LinkSearchResult?, Error>) -> Void) {
-        dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
-            do {
-                let db = try dbResult.get()
-                var request = Link
-                    .filter(Link.Columns.destination != nil)
-                    .filter(Link.Columns.url.like("%\(query)%"))
-                    .including(optional: Link.frecency)
-                if let frecencyParam = enabledFrecencyParam {
-                    request = request
-                        .filter(literal: "frecencyUrlRecord.frecencyKey = \(frecencyParam)")
-                        .order(literal: "frecencyUrlRecord.frecencySortScore DESC")
-                }
-                let result = try request
-                    .asRequest(of: LinkWithFrecency.self)
-                    .fetchOne(db)
-                    .map { record -> LinkSearchResult in
-                        if let destination = record.link.destination,
-                           let searchResult = getLinkFrecency(db, id: destination, enabledFrecencyParam: enabledFrecencyParam) {
-                            // If we found a destination, try to use the destinations frecency as it will probably be more accurate (and visited more times)
-                            Logger.shared.logDebug("Found \(record.link) has a destination: \(record.link.destination) and frecency \(searchResult.frecency) - use frecency from destination instead: \(record.frecency)", category: .search)
-                            return LinkSearchResult(title: record.link.title ?? record.link.url,
-                                                       url: record.link.url,
-                                                       frecency: searchResult.frecency ?? record.frecency)
-                        }
-
-                        Logger.shared.logDebug("Found \(record.link) - with frecency: \(record.frecency)", category: .search)
-                        return LinkSearchResult(title: record.link.title ?? record.link.url,
-                                            url: record.link.url,
-                                            frecency: record.frecency)
-                    }
-                completion(.success(result))
-            } catch {
-                Logger.shared.logError("link search failure: \(error)", category: .search)
-                completion(.failure(error))
-            }
+    private func linkWithFrecencyToLinkSearchResult(_ record: LinkWithFrecency,
+                                                    enabledFrecencyParam: FrecencyParamKey? = nil,
+                                                    in db: GRDB.Database) -> LinkSearchResult {
+        var destinationRecord: LinkSearchResult?
+        if let destination = record.link.destination,
+           let destinationFound = getLinkFrecency(db, id: destination, enabledFrecencyParam: enabledFrecencyParam) {
+            // If we found a destination, try to use the destinations frecency as it will probably be more accurate (and visited more times)
+            Logger.shared.logDebug("Found \(record.link.url) destination: \(destinationFound.url); using its frecency: \(destinationFound.frecency.debugDescription)", category: .search)
+            destinationRecord = destinationFound
         }
+        var frecency = record.frecency
+        if let destinationFrecency = destinationRecord?.frecency,
+           destinationFrecency.frecencySortScore > (frecency?.frecencySortScore ?? -Float.greatestFiniteMagnitude) {
+            frecency = destinationFrecency
+        }
+        return LinkSearchResult(title: record.link.title,
+                                url: record.link.url,
+                                frecency: destinationRecord?.frecency ?? record.frecency,
+                                destinationURL: destinationRecord?.url)
     }
 
     private func getLinkFrecency(_ db: GRDB.Database, id: UUID, enabledFrecencyParam: FrecencyParamKey? = nil) -> LinkSearchResult? {
@@ -1476,7 +1474,7 @@ extension GRDBDatabase {
                 .asRequest(of: LinkWithFrecency.self)
                 .fetchOne(db)
                 .map { record -> LinkSearchResult in
-                    LinkSearchResult(title: record.link.title ?? "",
+                    LinkSearchResult(title: record.link.title,
                                  url: record.link.url,
                                  frecency: record.frecency)
                 }

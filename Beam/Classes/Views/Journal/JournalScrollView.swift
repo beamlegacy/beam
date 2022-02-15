@@ -43,8 +43,13 @@ struct JournalScrollView: NSViewRepresentable {
             scrollView.contentInsets = NSEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
         }
         // Initial document view
-        let journalStackView = StackView(state: state, safeTop: Toolbar.height, onStartEditing: { self.isEditing = true }, verticalSpace: 10,
-                                                topOffset: Self.firstNoteTopOffset(forProxy: proxy))
+        let journalStackView = StackView(
+            state: state,
+            safeTop: Toolbar.height,
+            onStartEditing: { self.isEditing = true },
+            verticalSpace: 0,
+            topOffset: 63 + Self.firstNoteTopOffset(forProxy: proxy)
+        )
         journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
         scrollView.documentView = journalStackView
 
@@ -117,10 +122,6 @@ class ScrollViewContentWatcher: NSObject {
                                                selector: #selector(contentOffsetDidChange(notification:)),
                                                name: NSView.boundsDidChangeNotification,
                                                object: contentView)
-        NotificationCenter.default.addObserver(self,
-                                               selector: #selector(defaultDatabaseDidChange(notification:)),
-                                               name: .defaultDatabaseUpdate,
-                                               object: nil)
     }
 
     let spaceBeforeLoadingMoreData = CGFloat(1.0)
@@ -142,17 +143,6 @@ class ScrollViewContentWatcher: NSObject {
             }
         }
         onScroll?(clipView.bounds.origin)
-    }
-
-    @objc private func defaultDatabaseDidChange(notification: Notification) {
-        guard let clipView = contentView,
-              let scrollView = clipView.superview as? NSScrollView,
-              let documentView = scrollView.documentView as? JournalScrollView.StackView else { return }
-
-        BeamNote.clearCancellables()
-        documentView.invalidateLayout()
-        data.reloadJournal()
-        documentView.layout()
     }
 
     private func loadMore() {

@@ -22,8 +22,9 @@ class PasswordsDBTests: XCTestCase {
         super.setUp()
 
         BeamTestsHelper.logout()
-
-        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+        PasswordManager.shared.deleteAll(includedRemote: false)
+        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+//        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
     }
 
     func testSavingPassword() {
@@ -36,6 +37,7 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+        cleanupPasswordsAfterTest()
     }
 
     func testSavingPasswordOnBeamObjects() {
@@ -88,6 +90,7 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(subdomainEntries.count, 1)
         XCTAssertEqual(subdomainEntries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(subdomainEntries.last?.username, Self.username)
+        cleanupPasswordsAfterTest()
     }
 
     func testDecodeOldObjectVersion() throws {
@@ -108,7 +111,6 @@ class PasswordsDBTests: XCTestCase {
         let passwordRecord: PasswordRecord = try beamObject.decodeBeamObject()
         XCTAssertEqual(passwordRecord.username, "foo@gmail.com")
         XCTAssertEqual(passwordRecord.hostname, "facebook.com")
-
     }
 
     func testDecodeNewObjectVersion() throws {
@@ -138,6 +140,7 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+        cleanupPasswordsAfterTest()
     }
 
     func testFindEntriesForHostWithParents() {
@@ -150,6 +153,7 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.first?.username, Self.username)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+        cleanupPasswordsAfterTest()
     }
 
     func testFindEntriesForHostWithSubdomains() {
@@ -162,6 +166,7 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.last?.username, Self.username)
         XCTAssertEqual(entries.first?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
+        cleanupPasswordsAfterTest()
     }
 
     func testSearchEntries() {
@@ -172,6 +177,7 @@ class PasswordsDBTests: XCTestCase {
         let found = entries.filter { $0.minimizedHost == Self.host.minimizedHost }
         XCTAssertEqual(found.count, 1)
         XCTAssertEqual(found.last?.username, Self.username)
+        cleanupPasswordsAfterTest()
     }
 
     func testFetchAllEntries() {
@@ -179,6 +185,16 @@ class PasswordsDBTests: XCTestCase {
 
         let entries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(entries.count > 0, "FetchAll has no passwords, it should be > 0")
+        cleanupPasswordsAfterTest()
+    }
+
+    func testCount() {
+        let beforeCount = PasswordManager.shared.count()
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+        PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
+        let count = PasswordManager.shared.count()
+        XCTAssertEqual(count - beforeCount, 2)
+        cleanupPasswordsAfterTest()
     }
 
     func testGetPassword() {
@@ -186,6 +202,7 @@ class PasswordsDBTests: XCTestCase {
 
         let password = PasswordManager.shared.password(hostname: Self.host.minimizedHost!, username: Self.username)
         XCTAssertEqual(password, Self.password)
+        cleanupPasswordsAfterTest()
     }
 
     func testDelete() {
@@ -221,6 +238,7 @@ class PasswordsDBTests: XCTestCase {
         BeamTestsHelper.logout()
 
         beamHelper.beginNetworkRecording(test: self)
+        BeamObjectManager.disableSendingObjects = false
         BeamTestsHelper.login()
     }
 
@@ -233,5 +251,9 @@ class PasswordsDBTests: XCTestCase {
         }
         semaphore.wait()
         beamHelper.endNetworkRecording()
+    }
+
+    private func cleanupPasswordsAfterTest() {
+        PasswordManager.shared.deleteAll(includedRemote: false)
     }
 }

@@ -92,11 +92,46 @@ extension FrecencyNoteRecord: TableRecord {
     }
 }
 
+class NoteFrecencyApiSaveLimiter {
+    private let saveOnApiLimit: Int // Save on Api every x local saves
+    private var saveCount: Int = 0
+    private var records = [UUID: FrecencyNoteRecord]()
+
+    init(saveOnApiLimit: Int = 10) {
+        self.saveOnApiLimit = saveOnApiLimit
+    }
+
+    func add(record: FrecencyNoteRecord) {
+        if let previousRecord = records[record.id],
+           record.lastAccessAt >= previousRecord.lastAccessAt {
+            records[record.id] = record
+        }
+        if records[record.id] == nil {
+            records[record.id] = record
+        }
+        saveCount += 1
+    }
+    private func reset() {
+        saveCount = 0
+        records = [UUID: FrecencyNoteRecord]()
+    }
+    var recordsToSave: [FrecencyNoteRecord]? {
+        guard saveCount >= saveOnApiLimit else { return nil }
+        defer { reset() }
+        return Array(records.values)
+    }
+}
+
 public class GRDBNoteFrecencyStorage: FrecencyStorage {
     let db: GRDBDatabase
+    private static let apiSaveLimiter = NoteFrecencyApiSaveLimiter()
+
+    private(set) var batchSaveOnApiCompleted = false
+
     init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
     }
+
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try db.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
@@ -110,6 +145,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         }
         return nil
     }
+
     private func createOrUpdate(record: FrecencyNoteRecord?, score: FrecencyScore, paramKey: FrecencyParamKey) -> FrecencyNoteRecord {
         if var updatedRecord = record {
             updatedRecord.lastAccessAt = score.lastTimestamp
@@ -132,10 +168,17 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         let existingRecord = try? db.fetchOneFrecencyNote(noteId: score.id, paramKey: paramKey)
         let recordToSave = createOrUpdate(record: existingRecord, score: score, paramKey: paramKey)
         try db.saveFrecencyNote(recordToSave)
+        Self.apiSaveLimiter.add(record: recordToSave)
 
-        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
-        try saveOnNetwork(recordToSave)
+        if AuthenticationManager.shared.isAuthenticated,
+           Configuration.networkEnabled,
+           let recordsToSaveOnNetwork = Self.apiSaveLimiter.recordsToSave {
+            batchSaveOnApiCompleted = false
+            try saveAllOnNetwork(recordsToSaveOnNetwork) { _ in
+                self.batchSaveOnApiCompleted = true
+            }
         }
+    }
 
     public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
         let noteIds = scores.map { $0.id }
@@ -145,6 +188,23 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
 
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
         try saveAllOnNetwork(recordsToSave)
+    }
+
+    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+        do {
+            try self.db.clearNoteFrecencies()
+            if AuthenticationManager.shared.isAuthenticated && includedRemote {
+                try self.deleteAllFromBeamObjectAPI { result in
+                    networkCompletion?(result)
+                }
+            } else {
+                networkCompletion?(.success(false))
+            }
+            return
+        } catch {
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .fileDB)
+        }
+        networkCompletion?(.success(false))
     }
 }
 

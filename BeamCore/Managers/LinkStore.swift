@@ -24,14 +24,12 @@ public struct Link: Codable {
     public var updatedAt: Date
     public var deletedAt: Date?
 
-    public init(url: String, title: String?, content: String?, destination: String? = nil, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
+    public init(url: String, title: String?, content: String?, destination: UUID? = nil, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
         self.id = UUID.v5(name: url, namespace: .url)
         self.url = url
         self.title = title
         self.content = content
-        if let destination = destination {
-            self.destination = UUID.v5(name: destination, namespace: .url)
-        }
+        self.destination = destination
 
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -54,7 +52,7 @@ public protocol LinkManager {
     func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID
     func linkFor(id: UUID) -> Link?
     func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link
-    func deleteAll() throws
+    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?)
     func isDomain(id: UUID) -> Bool
     func getDomainId(id: UUID) -> UUID?
     var allLinks: [Link] { get }
@@ -64,8 +62,8 @@ public class FakeLinkManager: LinkManager {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
     public func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID { UUID.null }
     public func linkFor(id: UUID) -> Link? { nil }
-    public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link { Link(url: url, title: title, content: content, destination: destination) }
-    public func deleteAll() throws { }
+    public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link { Link(url: url, title: title, content: content, destination: nil) }
+    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?) { }
     public func isDomain(id: UUID) -> Bool { false }
     public func getDomainId(id: UUID) -> UUID? { UUID.null }
     public var allLinks: [Link] { [] }
@@ -85,8 +83,11 @@ public class LinkStore: LinkManager {
     public func visit(_ url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> Link { linkManager.visit(url, title: title, content: content, destination: destination) }
     public func isDomain(id: UUID) -> Bool { linkManager.isDomain(id: id) }
     public func getDomainId(id: UUID) -> UUID? { linkManager.getDomainId(id: id) }
-    public func deleteAll() throws { try linkManager.deleteAll() }
-
+    public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?) {
+        linkManager.deleteAll(includedRemote: includedRemote) { networkResult in
+            networkCompletion?(networkResult)
+        }
+    }
     public static func linkFor(_ id: UUID) -> Link? {
         return shared.linkFor(id: id)
     }

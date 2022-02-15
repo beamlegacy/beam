@@ -8,9 +8,9 @@
 import SwiftUI
 import Combine
 
-struct DownloaderView: View {
+struct DownloaderView<List: DownloadListProtocol>: View {
 
-    @ObservedObject var downloader: BeamDownloadManager
+    @ObservedObject private var downloadList: List
 
     private let disabledContentColor = BeamColor.Button.text.swiftUI.opacity(0.13)
     private let contentColor = BeamColor.Button.text.swiftUI
@@ -19,15 +19,15 @@ struct DownloaderView: View {
     @State private var isHovering: Bool = false
     @State private var isHoveringHeader: Bool = false
 
-    @State private var selectedDownloads: Set<Download> = []
-    @State private var lastManuallyInsertedDownload: Download?
+    @State private var selectedDownloads: Set<List.Element> = []
+    @State private var lastManuallyInsertedDownload: List.Element?
 
-    static var width: CGFloat = 368.0
+    let preferredWidth: CGFloat = 368.0
 
     private var onClose: () -> Void
 
-    init(downloader: BeamDownloadManager, onCloseButtonTap: @escaping () -> Void) {
-        self.downloader = downloader
+    init(downloadList: List, onCloseButtonTap: @escaping () -> Void) {
+        self.downloadList = downloadList
         self.onClose = onCloseButtonTap
     }
 
@@ -39,7 +39,7 @@ struct DownloaderView: View {
                         .font(BeamFont.medium(size: 13).swiftUI)
                     Spacer()
                     ButtonLabel("Clear") {
-                        downloader.clearAllFileDownloads()
+                        downloadList.removeAllCompletedOrSuspendedDownloads()
                     }
                     .opacity(shouldDisplayClearButton ? 1 : 0)
                     .animation(.easeInOut(duration: 0.3), value: shouldDisplayClearButton)
@@ -71,35 +71,35 @@ struct DownloaderView: View {
             .animation(.easeInOut(duration: 1), value: isHovering)
             .transition(.opacity)
             VStack(spacing: 2) {
-                ForEach(downloader.downloads) { d in
+                ForEach(downloadList.downloads) { download in
                     ZStack {
-                        DownloadCell(download: d, from: downloader, isSelected: selectedDownloads.contains(d), onDeleteKeyDownAction: backspaceTappedInCell)
+                        DownloadCell(download: download, from: downloadList, isSelected: selectedDownloads.contains(download), onDeleteKeyDownAction: backspaceTappedInCell)
                         ClickCatchingView(onTap: { event in
                             if event.modifierFlags.contains(.command) {
-                                if selectedDownloads.contains(d) {
-                                    selectedDownloads.remove(d)
+                                if selectedDownloads.contains(download) {
+                                    selectedDownloads.remove(download)
                                     lastManuallyInsertedDownload = nil
                                 } else {
-                                    selectedDownloads.insert(d)
-                                    lastManuallyInsertedDownload = d
+                                    selectedDownloads.insert(download)
+                                    lastManuallyInsertedDownload = download
                                 }
                             } else if event.modifierFlags.contains(.shift) {
-                                guard let tappedIndex = downloader.downloads.firstIndex(of: d) else { return }
-                                if let last = lastManuallyInsertedDownload, let initialIndex = downloader.downloads.firstIndex(of: last) {
+                                guard let tappedIndex = downloadList.downloads.firstIndex(of: download) else { return }
+                                if let last = lastManuallyInsertedDownload, let initialIndex = downloadList.downloads.firstIndex(of: last) {
                                     let minIndex = min(initialIndex, tappedIndex)
                                     let maxIndex = max(initialIndex, tappedIndex)
-                                    selectedDownloads = Set(downloader.downloads[minIndex...maxIndex])
+                                    selectedDownloads = Set(downloadList.downloads[minIndex...maxIndex])
                                 } else {
-                                    selectedDownloads = Set(downloader.downloads[0...tappedIndex])
+                                    selectedDownloads = Set(downloadList.downloads[0...tappedIndex])
                                 }
                             } else {
-                                selectedDownloads = [d]
-                                lastManuallyInsertedDownload = d
+                                selectedDownloads = [download]
+                                lastManuallyInsertedDownload = download
                             }
                         }, onDoubleTap: { _ in
-                            downloader.openFile(d)
+                            downloadList.openFile(download)
                         })
-                        .padding(.trailing, (d.state == URLSessionDownloadTask.State.completed && d.errorMessage == nil) ? 20 : 40)
+                        .padding(.trailing, (download.state == .completed && download.errorMessage == nil) ? 20 : 40)
                     }
                 }
             }
@@ -107,15 +107,14 @@ struct DownloaderView: View {
             .padding(.bottom, 6)
             .padding(.top, 2)
         }
-        .frame(width: Self.width)
+        .frame(width: preferredWidth)
         .background(BeamColor.Generic.background.swiftUI)
         .cornerRadius(10)
-        .alert(item: $downloader.showAlertFileNotFoundForDownload, content: { download in
-            Alert(title: Text("Beam can’t show the file “\(download.fileSystemURL.lastPathComponent)” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
-                downloader.clearFileDownload(download)
-                downloader.downloadFile(at: download.downloadURL, headers: [:], suggestedFileName: download.suggestedFileName)
+        .alert(item: $downloadList.showAlertFileNotFoundForDownload, content: { download in
+            Alert(title: Text("Beam can’t show the file “\(download.filename ?? "?")” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
+                downloadList.restart(download)
             }), secondaryButton: .destructive(Text("Remove"), action: {
-                downloader.clearFileDownload(download)
+                downloadList.remove(download)
             }))
         })
     }
@@ -123,7 +122,7 @@ struct DownloaderView: View {
     private var shouldDisplayClearButton: Bool {
         if isHoveringHeader {
             return true
-        } else if !downloader.ongoingDownload && !downloader.downloads.isEmpty {
+        } else if downloadList.containsOnlyCompletedOrSuspendedDownloads {
             return true
         } else {
             return false
@@ -136,8 +135,7 @@ struct DownloaderView: View {
 
     private func backspaceTappedInCell() {
         for download in selectedDownloads {
-            guard download.state != .running else { continue }
-            downloader.clearFileDownload(download)
+            downloadList.removeDownloadIfCompletedOrSuspended(download)
         }
         selectedDownloads = []
         lastManuallyInsertedDownload = nil
@@ -147,12 +145,42 @@ struct DownloaderView: View {
 struct DownloaderView_Previews: PreviewProvider {
 
     static var previews: some View {
+        let downloadList = DownloadListFake(isDownloading: false)
 
-        let downloader = BeamDownloadManager()
-        downloader.downloadFile(at: URL(string: "https://devimages-cdn.apple.com/design/resources/download/SF-Symbols-2.1")!, headers: [:], suggestedFileName: nil)
+        downloadList.downloads = [
+            DownloadListItemFake(
+                filename: "Uno.txt",
+                fileExtension: "txt",
+                state: .completed,
+                progressFractionCompleted: 1,
+                localizedDescription: "100 MB"
+            ),
+            DownloadListItemFake(
+                filename: "Dos.mp4",
+                fileExtension: "mp4",
+                state: .running,
+                progressFractionCompleted: 0.75,
+                localizedDescription: "75 MB / 100 MB"
+            ),
+            DownloadListItemFake(
+                filename: "Tres.jpg",
+                fileExtension: "jpg",
+                state: .suspended,
+                progressFractionCompleted: 0.5,
+                localizedDescription: "50 MB / 100 MB"
+            ),
+            DownloadListItemFake(
+                filename: "Ricky.jpg",
+                fileExtension: "jpg",
+                state: .suspended,
+                progressFractionCompleted: 0.5,
+                localizedDescription: "50 MB / 100 MB",
+                errorMessage: "Ouch error"
+            )
+        ]
 
         return Group {
-            DownloaderView(downloader: downloader, onCloseButtonTap: {})
+            DownloaderView(downloadList: downloadList, onCloseButtonTap: {})
         }
     }
 }

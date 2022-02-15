@@ -5,12 +5,6 @@ import WebKit
 import BeamCore
 import Promises
 
-enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
-    case docs = "docs.google.com"
-    case sheets_new = "sheets.new"
-    case sheets = "sheets.google.com"
-}
-
 // swiftlint:disable file_length
 // swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, Scorable {
@@ -75,10 +69,10 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     }
     var webviewWindow: NSWindow? { webView.window }
     var frame: NSRect { webView.frame }
-    @Published var title: String = "New Tab"
+    @Published var title: String = ""
     @Published var originalQuery: String?
     @Published var url: URL?
-    @Published var requestedUrl: URL?
+    @Published var requestedURL: URL?
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
     @Published var mouseHoveringLocation: MouseHoveringLocation = .none
@@ -142,7 +136,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         webPositions.delegate = self
         return webPositions
     }()
-    var appendToIndexer: ((URL, Readability) -> Void)?
+    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var navigationCount: Int = 0
     // End WebPage Properties
 
@@ -203,9 +197,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         noteController = WebNoteController(note: nil, rootElement: nil)
 
         super.init()
-        DispatchQueue.main.async {
-            self.updateFavIcon(fromWebView: false)
-        }
+        updateFavIcon(fromWebView: false)
     }
 
     private static func newBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
@@ -307,10 +299,6 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
     }
 
     private func receivedWebviewTitle(_ title: String? = nil) {
-        guard let url = url else {
-            return
-        }
-        logInNote(url: url, title: title, reason: .receivedPageTitle)
         self.title = title ?? ""
     }
 
@@ -319,8 +307,8 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         guard let url = url else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
         let dispatchItem = DispatchWorkItem { [weak self] in
-            guard let webView = self?.webView else { return }
-            FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
+            guard !fromWebView || cacheOnly || self?.webView != nil else { return }
+            FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
                 guard let self = self else { return }
                 guard let image = favicon?.image else {
                     if fromWebView {
@@ -383,7 +371,7 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
         state?.$focusOmniBox.sink { [weak self] value in
             guard value else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
-                self?.pointAndShoot?.dismissShoot()
+                self?.pointAndShoot?.dismissActiveShootGroup()
             }
         }.store(in: &scope)
     }
@@ -408,26 +396,12 @@ enum GoogleURLHostsThatBreakOnUserAgentString: String, CaseIterable {
             navigationController?.setLoading()
         }
         self.url = url
-        requestedUrl = url
+        requestedURL = url
 
         navigationCount = 0
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
-            // Google Sheets and friends show an error message when using the Safari User Agent
-            // The alternative of setting the applicationNameForUserAgent in BeamWebViewConfiguration
-            // creates unexpected behaviour on google search results pages.
-            // Source: https://github.com/sindresorhus/Plash/blob/main/Plash/WebViewController.swift#L69-L72
-            let shouldClearUserAgent = GoogleURLHostsThatBreakOnUserAgentString
-                .allCases
-                .contains(where: { $0.rawValue == url.host })
-
-            if shouldClearUserAgent {
-                webView.customUserAgent = ""
-            } else {
-                webView.customUserAgent = Constants.SafariUserAgent
-            }
-
             webView.load(URLRequest(url: url))
         }
         Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .passwordManagerInternal)
@@ -611,6 +585,7 @@ extension BrowserTab: WebPositionsDelegate {
     /// Callback will be called very often. Take care of your own debouncing or throttling
     /// - Parameter frame: WebPage frame coordinates and positions
     func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo) {
+        passwordOverlayController?.updateScrollPosition(for: frame)
         guard let scorer = browsingScorer else { return }
         scorer.debouncedUpdateScrollingScore.send(frame)
     }

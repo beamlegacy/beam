@@ -29,7 +29,7 @@ protocol Collapsable: AnyObject {
     func cleanCollapsedLayer()
 
     func buildCollapsedTitle(mouseInteractionType: MouseInteractionType?) -> NSAttributedString
-    func layoutCollapseExpand(contentLayer: CALayer)
+    func layoutCollapseExpand(contentLayer: CALayer, verticalOffset: CGFloat)
 }
 
 extension Collapsable where Self: ElementNode {
@@ -92,7 +92,7 @@ extension Collapsable where Self: ElementNode {
             addLayer(thumbnailLayer, origin: CGPoint(x: thumbnailLayer.layer.frame.width, y: 0))
         }
         addLayer(text, origin: CGPoint(x: thumbnailLayer.layer.position.x + thumbnailWidth + 6, y: 0))
-}
+    }
 
     func setupCollapseExpandLayer(hidden: Bool) {
 
@@ -131,7 +131,7 @@ extension Collapsable where Self: ElementNode {
         let mouseInteraction = MouseInteraction(type: mouseInteractionType ?? .unknown, range: NSRange(location: 0, length: text.count))
         let config = BeamTextAttributedStringBuilder.Config(elementKind: .bullet, ranges: text.ranges, fontSize: PreferencesManager.editorFontSize, fontColor: BeamColor.Generic.text.staticColor, markedRange: nil, searchedRanges: [], mouseInteraction: mouseInteraction)
 
-        let builtString = builder.build(config: config).addAttributes([.foregroundColor: textColor.cgColor]).addAttributes([.font: BeamFont.medium(size: 14).nsFont])
+        let builtString = builder.build(config: config).addAttributes([.foregroundColor: textColor.cgColor]).addAttributes([.font: BeamFont.regular(size: 14).nsFont])
         return builtString
     }
 
@@ -211,13 +211,13 @@ extension Collapsable where Self: ElementNode {
         layer.hovered = mouseHover
     }
 
-    func layoutCollapseExpand(contentLayer: CALayer) {
+    func layoutCollapseExpand(contentLayer: CALayer, verticalOffset: CGFloat) {
         if let textLayer = layers["collapsed-text"]?.layer as? CATextLayer {
 
             let text = buildCollapsedTitle(mouseInteractionType: nil)
             let boundingRect = text.boundingRect(with: NSSize(width: contentsWidth, height: 0), options: .usesLineFragmentOrigin)
             textLayer.string = text
-            let origin = CGPoint(x: contentLayer.position.x + contentLayer.frame.width + 6, y: contentLayer.frame.minY)
+            let origin = CGPoint(x: contentLayer.position.x + contentLayer.frame.width + 6, y: contentLayer.frame.minY - verticalOffset)
             textLayer.frame.origin = origin
             let frame = TextFrame.create(string: text, atPosition: origin, textWidth: contentsWidth, singleLineHeightFactor: nil, maxHeight: nil)
 
@@ -237,7 +237,7 @@ extension Collapsable where Self: ElementNode {
         if let expandButtonLayer = layers["global-expand"]?.layer,
            let textLayer = expandButtonLayer.sublayers?.first(where: {$0 is CATextLayer}) as? CATextLayer {
             let margin: CGFloat = 11.0
-            expandButtonLayer.frame.origin = CGPoint(x: availableWidth + childInset + margin, y: contentsTop)
+            expandButtonLayer.frame.origin = CGPoint(x: availableWidth + childInset + margin, y: contentsTop + 2)
 
             let title = isCollapsed ? "to Image" : collapsedTitle
             textLayer.string = title

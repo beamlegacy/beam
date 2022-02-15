@@ -8,9 +8,9 @@
 import SwiftUI
 import Combine
 
-struct ToolbarDownloadButton: View {
+struct ToolbarDownloadButton<List: DownloadListProtocol>: View {
 
-    @ObservedObject var downloadManager: BeamDownloadManager
+    @ObservedObject private var downloadList: List
     var action: () -> Void
 
     @State private var isHovering: Bool = false
@@ -19,22 +19,16 @@ struct ToolbarDownloadButton: View {
     private let contentColor = BeamColor.Button.text.swiftUI
     private let activeContentColor = BeamColor.Button.activeText.swiftUI
 
-    init(downloadManager: BeamDownloadManager, action: @escaping () -> Void) {
-        self.downloadManager = downloadManager
+    init(downloadList: List, action: @escaping () -> Void) {
+        self.downloadList = downloadList
         self.action = action
     }
 
-    private var previewFractionCompleted: CGFloat?
-    fileprivate init(downloadManager: BeamDownloadManager, previewFraction: CGFloat, action: @escaping () -> Void) {
-        self.init(downloadManager: downloadManager, action: action)
-        self.previewFractionCompleted = previewFraction
-    }
-
     var body: some View {
-        ToolbarButton(icon: hasOngoingDownload ? "nav-downloads" : "nav-downloads_done",
+        ToolbarButton(icon: downloadList.isDownloading ? "nav-downloads" : "nav-downloads_done",
                       action: action)
-            .overlay(!hasOngoingDownload ?  nil :
-                        LinearProgressView(progress: previewFractionCompleted ?? downloadManager.fractionCompleted, height: 2.0)
+            .overlay(!downloadList.isDownloading ? nil :
+                        LinearProgressView(progress: downloadList.progressFractionCompleted, height: 2.0)
                         .frame(width: 16)
                         .padding(.bottom, 5),
                      alignment: .bottom
@@ -42,22 +36,19 @@ struct ToolbarDownloadButton: View {
             .accessibility(identifier: "downloads")
     }
 
-    var foregroundColor: Color {
-        return isHovering ? activeContentColor : contentColor
-    }
-
-    var hasOngoingDownload: Bool {
-        downloadManager.ongoingDownload || previewFractionCompleted != nil
-    }
 }
 
 struct ToolbarDownloadButton_Previews: PreviewProvider {
     static var previews: some View {
-        let noDownloadsManager = BeamDownloadManager()
-        let downloadsManager = BeamDownloadManager()
-        return Group {
-            ToolbarDownloadButton(downloadManager: noDownloadsManager, action: {})
-            ToolbarDownloadButton(downloadManager: downloadsManager, previewFraction: 0.7, action: {})
+        Group {
+            ToolbarDownloadButton(
+                downloadList: DownloadListFake(isDownloading: false),
+                action: {}
+            )
+            ToolbarDownloadButton(
+                downloadList: DownloadListFake(isDownloading: true, progressFractionCompleted: 0.7),
+                action: {}
+            )
         }
     }
 }

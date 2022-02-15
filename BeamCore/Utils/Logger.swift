@@ -63,6 +63,7 @@ public enum LogCategory: String, CaseIterable {
     case browserImport
     case autoUpdate
     case accountManager
+    case privateKeySignature
 }
 
 public final class Logger {

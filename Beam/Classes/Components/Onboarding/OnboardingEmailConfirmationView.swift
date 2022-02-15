@@ -62,7 +62,7 @@ struct OnboardingEmailConfirmationView: View {
     var body: some View {
         VStack(spacing: 0) {
             if loadingState == .gettingInfos {
-                OnboardingView.LoadingView(randomDetails: ["account", "username"])
+                OnboardingView.LoadingView()
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 VStack(spacing: 0) {
@@ -123,7 +123,7 @@ struct OnboardingEmailConfirmationView: View {
         loadingState = .signinin
         updateActions()
         var loadingStartTime = BeamDate.now
-        accountManager.signIn(email: email, password: password) { result in
+        accountManager.signIn(email: email, password: password, runFirstSync: false) { result in
             DispatchQueue.main.async {
                 updateActions()
                 switch result {
@@ -139,11 +139,21 @@ struct OnboardingEmailConfirmationView: View {
                     Logger.shared.logInfo("Sign in after email confirmation succeeded", category: .network)
                     loadingState = .gettingInfos
                     loadingStartTime = BeamDate.now
+
+                    onboardingManager.checkForPrivateKey { nextStep in
+                        guard nextStep != nil else {
+                            handleSyncCompletion(startTime: loadingStartTime)
+                            return
+                        }
+                        // This is a failsafe but we should never end-up in such a case
+                        UserAlert.showMessage(message: "Private Key Error", informativeText: "The private key was unable to be created.", buttonTitle: "Restart Beam") {
+                            NSApp.relaunch()
+                        }
+
+                    }
                 }
             }
-        } syncCompletion: { _ in
-            handleSyncCompletion(startTime: loadingStartTime)
-        }
+        } syncCompletion: { _ in }
     }
 
     private func handleSyncCompletion(startTime: Date) {

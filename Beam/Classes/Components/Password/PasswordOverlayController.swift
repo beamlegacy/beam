@@ -10,6 +10,7 @@ import Foundation
 import BeamCore
 import SwiftUI
 import Promises
+import Combine
 
 struct WebFieldAutofill: Codable {
     var id: String
@@ -20,16 +21,20 @@ struct WebFieldAutofill: Codable {
 enum PasswordSaveAction {
     case save
     case update
+    case saveSilently
 }
 
 class PasswordOverlayController: NSObject, WebPageRelated {
+    private var scope = Set<AnyCancellable>()
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
-    private var passwordMenuWindow: PopoverWindow?
+    private let scrollUpdater = PassthroughSubject<WebPositions.FrameInfo, Never>()
+    private var passwordMenuPopover: WebAutofillPopoverContainer?
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
     private var autocompleteContext: WebAutocompleteContext
     private var fieldWithIcon: String?
+    private var buttonPopover: WebAutofillPopoverContainer?
     private var currentlyFocusedElementId: String?
     private var previouslyFocusedElementId: String?
     private var lastFocusOutTimestamp: Date = .distantPast
@@ -38,7 +43,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private var currentPasswordManagerViewModel: PasswordManagerMenuViewModel?
     private var currentInputFrame: WKFrameInfo?
     private var currentFrameIdentifier = 0
-    private let JSObjectName = "PMng"
+    private let JSObjectName = "PasswordManager"
     weak var page: WebPage?
 
     init(userInfoStore: UserInformationsStore) {
@@ -47,6 +52,12 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         encoder = JSONEncoder()
         decoder = JSONDecoder()
         autocompleteContext = WebAutocompleteContext()
+        super.init()
+        PreferencesManager.$autofillUsernamePasswords.sink { [weak self] autofill in
+            if !autofill {
+                self?.dismiss()
+            }
+        }.store(in: &scope)
     }
 
     func prepareForLoading() {
@@ -66,7 +77,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     func requestInputFields(frameInfo: WKFrameInfo?) {
-        self.page?.executeJS("beam_sendTextFields('\(nextFrameIdentifier())')", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal)
+        self.page?.executeJS("sendTextFields('\(nextFrameIdentifier())')", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal)
     }
 
     func updateInputFields(with jsResult: String, frameInfo: WKFrameInfo?) {
@@ -86,15 +97,38 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             Logger.shared.logDebug("Detected fields: \(elements.map { $0.debugDescription })", category: .passwordManagerInternal)
         } catch {
             Logger.shared.logError(String(describing: error), category: .passwordManager)
+            dismissPasswordManagerMenu()
+            currentlyFocusedElementId = nil
             return
         }
 
+        guard PreferencesManager.autofillUsernamePasswords else {
+            return
+        }
+
+        if let elementId = currentlyFocusedElementId ?? previouslyFocusedElementId, !elements.map(\.beamId).contains(elementId) {
+            Logger.shared.logDebug("Focused field just disappeared", category: .passwordManagerInternal)
+            dismissPasswordManagerMenu()
+            self.currentlyFocusedElementId = nil
+            saveCredentialsIfChanged(allowEmptyUsername: false)
+        }
+
         let addedIds = autocompleteContext.update(with: elements, on: getPageHost())
+        let values = [String: String](uniqueKeysWithValues: elements.compactMap { element in
+            if let value = element.value {
+                return (element.beamId, value)
+            } else {
+                return nil
+            }
+        })
+        if !values.isEmpty {
+            self.updateStoredValues(with: values, userInput: false)
+        }
         if !addedIds.isEmpty {
-            self.page?.executeJS("beam_installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { _ in
+            self.page?.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { _ in
                 self.installFocusHandlers(addedIds: addedIds, frameInfo: frameInfo)
             }
-            self.page?.executeJS("beam_getFocusedField()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { result in
+            self.page?.executeJS("passwordHelper.getFocusedField()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { result in
                 if let focusedId = result as? String {
                     DispatchQueue.main.async {
                         self.inputFieldDidGainFocus(focusedId, frameInfo: frameInfo, contents: nil)
@@ -107,12 +141,15 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     private func installFocusHandlers(addedIds: [String], frameInfo: WKFrameInfo?) {
         let formattedList = addedIds.map { "\"\($0)\"" }.joined(separator: ",")
-        let focusScript = "beam_installFocusHandlers('[\(formattedList)]')"
+        let focusScript = "installFocusHandlers('[\(formattedList)]')"
         self.page?.executeJS(focusScript, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal)
     }
 
     func inputFieldDidGainFocus(_ elementId: String, frameInfo: WKFrameInfo?, contents: String?) {
         Logger.shared.logDebug("Text field \(elementId) gained focus.", category: .passwordManagerInternal)
+        guard PreferencesManager.autofillUsernamePasswords else {
+            return
+        }
         guard elementId != currentlyFocusedElementId else {
             return
         }
@@ -129,23 +166,35 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             disabledForSubmit = false
             return
         }
-        if let contents = contents, contents.isEmpty, !autocompleteGroup.isAmbiguous {
-            showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: true, inGroup: autocompleteGroup)
+        currentlyFocusedElementId = elementId
+        if let contents = contents, contents.isEmpty, autocompleteGroup.action.isPasswordRelated, !autocompleteGroup.isAmbiguous {
+            checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
+                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
+            }
         } else {
             dismissPasswordManagerMenu()
         }
-        showIcon(onField: elementId, frameInfo: frameInfo)
+        if autocompleteGroup.action.isPasswordRelated {
+            showIcon(onField: elementId, frameInfo: frameInfo)
+        }
     }
 
     func inputFieldDidLoseFocus(_ elementId: String, frameInfo: WKFrameInfo?) {
         Logger.shared.logDebug("Text field \(elementId) lost focus.", category: .passwordManagerInternal)
         requestValuesFromTextFields(frameInfo: frameInfo) { dict in
-            self.valuesOnFocusOut = dict
+            if let dict = dict {
+                self.valuesOnFocusOut = dict
+                self.updateStoredValues(with: dict, userInput: true)
+            }
         }
         dismissPasswordManagerMenu()
         lastFocusOutTimestamp = BeamDate.now
         previouslyFocusedElementId = elementId
         currentlyFocusedElementId = nil
+    }
+
+    func updateScrollPosition(for frame: WebPositions.FrameInfo) {
+        scrollUpdater.send(frame)
     }
 
     private func showIcon(onField elementId: String, frameInfo: WKFrameInfo?) {
@@ -157,22 +206,22 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             if let rect = rect {
                 DispatchQueue.main.async {
                     let location = CGRect(x: rect.origin.x + rect.width - 24 - 16, y: rect.origin.y - rect.height / 2 - 24 - 12, width: 24, height: 24)
-                    guard let webView = (self.page as? BrowserTab)?.webView,
+                    guard let page = self.page,
+                          let webView = (page as? BrowserTab)?.webView,
                           let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true)
                     else { return }
                     buttonWindow.isMovableByWindowBackground = false
-                    if let passwordMenuWindow = self.passwordMenuWindow, let parentWindow = passwordMenuWindow.parent {
-                        parentWindow.removeChildWindow(passwordMenuWindow)
-                        parentWindow.addChildWindow(passwordMenuWindow, ordered: .above)
-                    }
+                    let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, frameURL: frameInfo?.request.url?.absoluteString, scrollUpdater: self.scrollUpdater)
+                    self.passwordMenuPopover?.orderFront()
                     let buttonView = WebFieldAutofillButton { [weak self] in
-                        if let self = self, self.passwordMenuWindow == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
-                            self.requestWebFieldValue(elementId: elementId, frameInfo: frameInfo) { value in
-                                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: value?.isEmpty ?? true, inGroup: autocompleteGroup)
+                        if let self = self, self.passwordMenuPopover == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
+                            self.checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
+                                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
                             }
                         }
                     }
                     buttonWindow.setView(with: buttonView, at: self.convertRect(location, relativeTo: webView).origin, fromTopLeft: true)
+                    self.buttonPopover = buttonPopover
                     self.fieldWithIcon = elementId
                 }
             }
@@ -186,7 +235,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func showPasswordManagerMenu(for elementId: String, frameInfo: WKFrameInfo?, emptyField: Bool, inGroup autocompleteGroup: WebAutocompleteGroup) {
-        currentlyFocusedElementId = elementId
         if autocompleteGroup.isAmbiguous, let fieldWithFocus = autocompleteGroup.field(id: elementId) {
             self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, options: fieldWithFocus.role.isPassword ? .ambiguousPassword : .login)
         } else {
@@ -218,20 +266,21 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     private func showPasswordManagerMenu(at location: CGRect, frameInfo: WKFrameInfo?, options: PasswordManagerMenuOptions) {
         guard let host = self.page?.url else { return }
-        if passwordMenuWindow != nil {
+        if passwordMenuPopover != nil {
             dismissPasswordManagerMenu()
         }
         currentInputFrame = frameInfo
         let viewModel = passwordManagerViewModel(for: host, options: options)
         let passwordManagerMenu = PasswordManagerMenu(viewModel: viewModel)
-        guard let webView = (page as? BrowserTab)?.webView,
+        guard let page = page,
+              let webView = (page as? BrowserTab)?.webView,
               let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, storedInPresenter: true)
         else { return }
         var updatedRect = convertRect(location, relativeTo: webView)
         updatedRect.origin.y += location.height
         passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromTopLeft: true)
         passwordWindow.delegate = viewModel.passwordGeneratorViewModel
-        passwordMenuWindow = passwordWindow
+        passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, frameURL: frameInfo?.request.url?.absoluteString, scrollUpdater: scrollUpdater, topEdgeHeight: 24)
     }
 
     private func passwordManagerViewModel(for host: URL, options: PasswordManagerMenuOptions) -> PasswordManagerMenuViewModel {
@@ -251,7 +300,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     private func dismissPasswordManagerMenu() {
         CustomPopoverPresenter.shared.dismissPopovers()
-        passwordMenuWindow = nil
+        passwordMenuPopover = nil
         currentPasswordManagerViewModel = nil
         currentInputFrame = nil
         clearIcon() // required: the child window containing the icon is not visible anymore, but fieldWithIcon has not been reset
@@ -263,24 +312,12 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         return rect
     }
 
-    func updateScrollPosition(x: CGFloat, y: CGFloat, width: CGFloat, height: CGFloat) {
-        guard currentlyFocusedElementId != nil || fieldWithIcon != nil else {
-            return
-        }
-        DispatchQueue.main.async {
-            if self.passwordMenuWindow != nil {
-                self.dismissPasswordManagerMenu()
-            }
-            self.clearIcon()
-        }
-    }
-
     func updateViewSize(width: CGFloat, height: CGFloat) {
-        guard currentlyFocusedElementId != nil || fieldWithIcon != nil else {
+        guard passwordMenuPopover != nil || buttonPopover != nil else {
             return
         }
         DispatchQueue.main.async {
-            if self.passwordMenuWindow != nil {
+            if self.passwordMenuPopover != nil {
                 self.dismissPasswordManagerMenu()
             }
             self.clearIcon()
@@ -288,18 +325,20 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func requestWebFieldFrame(elementId: String, frameInfo: WKFrameInfo?, completion: @escaping (CGRect?) -> Void) {
-        let script = "beam_getElementRects('[\"\(elementId)\"]')"
+        let script = "passwordHelper.getElementRects('[\"\(elementId)\"]')"
         self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo).then { [weak self] jsResult in
             guard let self = self, let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect else {
                 return completion(nil)
             }
             let offset: CGPoint
             if let href = frameInfo?.request.url?.absoluteString, let webPositions = self.page?.webPositions {
-                offset = webPositions.viewportPosition(href: href)
+                offset = webPositions.viewportOffset(href: href)
             } else {
                 offset = .zero
             }
-            let frame = CGRect(x: rect.minX + offset.x, y: rect.minY + offset.y + rect.height, width: rect.width, height: rect.height)
+            let scale = self.page?.webView?.zoomLevel() ?? 1
+            Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .passwordManagerInternal)
+            let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y + rect.height) * scale, width: rect.width * scale, height: rect.height * scale)
             completion(frame)
         }
     }
@@ -307,10 +346,14 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     func handleWebFormSubmit(with elementId: String, frameInfo: WKFrameInfo?) {
         Logger.shared.logDebug("Submit: \(elementId)", category: .passwordManagerInternal)
         disabledForSubmit = true // disable focus handler temporarily, to prevent the password manager menu from reappearing if the JS code triggers a selection in a text field
-        requestValuesFromTextFields(frameInfo: frameInfo) { dict in
+        dismissPasswordManagerMenu()
+        requestValuesFromTextFields(frameInfo: frameInfo) { [weak self] dict in
+            guard let self = self else { return }
             if let values = dict ?? self.valuesOnFocusOut {
-                self.updateStoredValues(with: values)
+                self.updateStoredValues(with: values, userInput: true)
+                self.saveCredentialsIfChanged(allowEmptyUsername: true)
             }
+            self.autocompleteContext.clear()
         }
     }
 
@@ -327,9 +370,18 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         return host
     }
 
-    private func requestWebFieldValue(elementId: String, frameInfo: WKFrameInfo?, completion: @escaping (String?) -> Void) {
-        requestValuesFromTextFields(ids: [elementId], frameInfo: frameInfo) { values in
-            completion(values?.first)
+    private func checkSimilarFieldsEmpty(elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?, completion: @escaping (Bool) -> Void) {
+        let similarFieldIds: [String]
+        if autocompleteGroup.field(id: elementId)?.role.isPassword ?? false {
+            similarFieldIds = autocompleteGroup.relatedFields
+                .filter { $0.role.isPassword }
+                .map(\.id)
+        } else {
+            similarFieldIds = [elementId]
+        }
+        requestValuesFromTextFields(ids: similarFieldIds, frameInfo: frameInfo) { values in
+            let allEmpty = (values?.first { !$0.isEmpty }) == nil
+            completion(allEmpty)
         }
     }
 
@@ -347,7 +399,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     private func requestValuesFromTextFields(ids: [String], frameInfo: WKFrameInfo?, completion: @escaping (([String]?) -> Void)) {
         let formattedList = ids.map { "\"\($0)\"" }.joined(separator: ",")
-        let script = "beam_getTextFieldValues('[\(formattedList)]')"
+        let script = "passwordHelper.getTextFieldValues('[\(formattedList)]')"
         self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { jsResult in
             if let jsonString = jsResult as? String,
                let jsonData = jsonString.data(using: .utf8),
@@ -360,38 +412,38 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    private func updateStoredValues(with values: [String: String]) {
-        guard let hostname = getPageHost() else { return }
-        guard let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage() else {
-            Logger.shared.logDebug("Login/password fields not found", category: .passwordManagerInternal)
-            return
-        }
+    private func updateStoredValues(with values: [String: String], userInput: Bool) {
+        let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage()
         let firstNonEmptyLogin = values.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
         let firstNonEmptyPassword = values.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
-        guard let login = credentialsBuilder.updatedUsername(firstNonEmptyLogin), let password = firstNonEmptyPassword else {
-            Logger.shared.logDebug("No field match for submitted values in \(values)", category: .passwordManagerInternal)
-            return
-        }
-        Logger.shared.logDebug("FOUND login: \(login), password: (redacted)", category: .passwordManagerInternal)
-        if password.count > 2 && login.count > 2 {
-            var saveAction: PasswordSaveAction?
-            if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: login) {
-                if password != storedPassword {
-                    saveAction = .update
-                }
-            } else {
-                saveAction = .save
+        credentialsBuilder.updateValues(username: firstNonEmptyLogin, password: firstNonEmptyPassword, userInput: userInput)
+    }
+
+    private func saveCredentialsIfChanged(allowEmptyUsername: Bool) {
+        guard let hostname = getPageHost(),
+              let credentials = credentialsBuilder.unsavedCredentials(allowEmptyUsername: allowEmptyUsername),
+              let saveAction = saveCredentialsAction(hostname: hostname, credentials: credentials)
+        else { return }
+        // This code may be called multiple times for a given submit action.
+        // Here we must mark credentials as saved regardless of the user's choice (if the user decides not to save, we don't want to present the dialog again, until the credentials have been changed again.)
+        credentialsBuilder.markSaved()
+        // TODO: make special case for credentials.username == nil
+        Logger.shared.logDebug("Saving password for \(credentials.username ?? "<empty username>")", category: .passwordManagerInternal)
+        confirmSavePassword(username: credentials.username ?? "", action: saveAction) { save in
+            guard save else { return }
+            if saveAction != .saveSilently, let browserTab = (self.page as? BrowserTab) {
+                browserTab.passwordManagerToast(saved: saveAction == .save)
             }
-            if let action = saveAction {
-                confirmSavePassword(username: login, action: action) { save in
-                    guard save else { return }
-                    if let browserTab = (self.page as? BrowserTab) {
-                        browserTab.passwordManagerToast(saved: action == .save)
-                    }
-                    PasswordManager.shared.save(hostname: hostname, username: login, password: password)
-                }
-            }
+            PasswordManager.shared.save(hostname: hostname, username: credentials.username ?? "", password: credentials.password)
         }
+    }
+
+    private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
+        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: credentials.username ?? "") {
+            guard credentials.password != storedPassword else { return nil }
+            return .update
+        }
+        return credentials.askSaveConfirmation ? .save : .saveSilently
     }
 
     private func confirmSavePassword(username: String, action: PasswordSaveAction, onDismiss: @escaping (Bool) -> Void) {
@@ -400,7 +452,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         let alertMessage: String
         let saveButtonTitle: String
-        let alert = NSAlert()
         switch action {
         case .save:
             alertMessage = "Would you like to save this password?"
@@ -408,7 +459,10 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         case .update:
             alertMessage = "Would you like to update the saved password for \(username)?"
             saveButtonTitle = "Update Password"
+        case .saveSilently:
+            return onDismiss(true)
         }
+        let alert = NSAlert()
         alert.messageText = alertMessage
         alert.informativeText = "You can view and remove saved passwords in Beam Passwords preferences."
         let saveButton = alert.addButton(withTitle: saveButtonTitle)
@@ -420,16 +474,11 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    private func passwordFieldIdsForStorage() -> (usernameIds: [String], passwordIds: [String])? {
+    private func passwordFieldIdsForStorage() -> (usernameIds: [String], passwordIds: [String]) {
         let inputFields = autocompleteContext.allInputFields
         let newPasswordIds = inputFields.filter { $0.role == .newPassword }.map(\.id)
         let currentPasswordIds = inputFields.filter { $0.role == .currentPassword }.map(\.id)
         let passwordIds = newPasswordIds + currentPasswordIds
-        guard !passwordIds.isEmpty else {
-            Logger.shared.logWarning("Storage: password fields not found", category: .passwordManager)
-            dumpInputFields(inputFields)
-            return nil
-        }
         var usernameIds: [String]
         if !newPasswordIds.isEmpty {
             Logger.shared.logDebug("Storage: new password field(s) found", category: .passwordManagerInternal)
@@ -440,11 +489,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         usernameIds += inputFields.filter { $0.role == .currentUsername }.map(\.id)
         usernameIds += inputFields.filter { $0.role == .email }.map(\.id)
-        guard !usernameIds.isEmpty else {
-            Logger.shared.logWarning("Storage: login fields not found", category: .passwordManager)
-            dumpInputFields(inputFields)
-            return nil
-        }
         return (usernameIds: usernameIds, passwordIds: passwordIds)
     }
 
@@ -473,7 +517,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             return
         }
         currentPasswordManagerViewModel?.revertToFirstItem()
-        credentialsBuilder.selectCredentials(entry)
+        credentialsBuilder.autofill(host: entry.minimizedHost, username: entry.username, password: password)
         Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManagerInternal)
         let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
@@ -502,6 +546,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManagerMenu()
             return
         }
+        credentialsBuilder.storeGeneratedPassword(password)
         let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
         let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
             switch field.role {
@@ -554,7 +599,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         do {
             let data = try encoder.encode(params)
             guard let jsonString = String(data: data, encoding: .utf8) else { return }
-            let script = "beam_setTextFieldValues('\(jsonString)')"
+            let script = "passwordHelper.setTextFieldValues('\(jsonString)')"
             self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentInputFrame, successLogCategory: .passwordManagerInternal).then { _ in
                 Logger.shared.logDebug("passwordOverlay text fields set.", category: .passwordManagerInternal)
             }
@@ -570,7 +615,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         do {
             let data = try encoder.encode(passwordParams)
             guard let jsonString = String(data: data, encoding: .utf8) else { return }
-            let script = "beam_togglePasswordFieldVisibility('\(jsonString)', '\(visibility.description)')"
+            let script = "passwordHelper.togglePasswordFieldVisibility('\(jsonString)', '\(visibility.description)')"
             self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentInputFrame, successLogCategory: .passwordManagerInternal)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)

@@ -440,7 +440,7 @@ public extension CALayer {
         updateLayout(nodesRect)
     }
 
-    private var nodesRect: NSRect {
+    internal var nodesRect: NSRect {
         let r = bounds
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         var rect = NSRect()
@@ -472,7 +472,8 @@ public extension CALayer {
             self.rootNode?.setLayout(rect)
             self.updateTrailingGutterLayout(textRect: rect)
             if let cardNote = self.note as? BeamNote, cardNote.type.isJournal {
-                _ = self.setupLeadingGutter(textRect: rect)
+                self.setupLeadingGutter(textRect: rect)
+                self.updateLeadingGutterLayout(textRect: rect)
             }
 
             self.doRunAfterNextLayout()
@@ -548,7 +549,7 @@ public extension CALayer {
     }
 
     private var cardHeaderPosY: CGFloat {
-        return journalMode ? 63 : 127
+        return journalMode ? 0 : 127
     }
 
     private var cardTimePosY: CGFloat {
@@ -956,6 +957,7 @@ public extension CALayer {
         blockRefNode?.readOnly = true
     }
 
+    /// also known as instantSearch
     /// - Returns: true if action is possible
     private func triggerCmdReturn(from node: TextNode) -> Bool {
         guard node.text.count > 0, !(node is BlockReferenceNode), !(node is ProxyNode)
@@ -1102,7 +1104,7 @@ public extension CALayer {
     internal var inputDetectorLastInput: String = ""
 
     // MARK: Paste properties
-    internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.noteDataHolder, .bTextHolder, .rtf, .string]
+    internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.rtf, .string]
     internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSAttributedString.self, NSString.self]
 
     func initBlinking() {
@@ -1369,25 +1371,6 @@ public extension CALayer {
     @IBAction func save(_ sender: Any?) {
         Logger.shared.logInfo("Save document!", category: .noteEditor)
         rootNode?.note?.save()
-    }
-
-    func showInlineFormatterOnKeyEventsAndClick(isKeyEvent: Bool = false) {
-        initInlineTextFormatter()
-        updateInlineFormatterView(isKeyEvent: isKeyEvent)
-
-        if isInlineFormatterHidden {
-            showOrHideInlineFormatter(isPresent: true)
-        }
-    }
-
-    func updateInlineFormatterOnDrag(isDragged: Bool = false) {
-        initInlineTextFormatter()
-        updateInlineFormatterView(isDragged: isDragged)
-    }
-
-    func hideInlineFormatter() {
-        guard inlineFormatter != nil else { return }
-        showOrHideInlineFormatter(isPresent: false)
     }
 
     @IBAction func selectAllHierarchically(_ sender: Any?) {
@@ -1858,12 +1841,13 @@ public extension CALayer {
                 return false
             }
 
-            let fileManager = BeamFileDBManager()
+            let fileManager = BeamFileDBManager.shared
             do {
                 let uid = try fileManager.insert(name: url.lastPathComponent, data: data)
                 let newElement = BeamElement()
                 newElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
                 rootNode.cmdManager.insertElement(newElement, inNode: newParent, afterNode: afterNode)
+                try fileManager.addReference(fromNote: rootNode.elementId, element: newElement.id, to: uid)
                 Logger.shared.logInfo("Added Image to note \(String(describing: rootNode.element.note)) with uid \(uid) from dropped file (\(image))", category: .noteEditor)
             } catch {
                 Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)

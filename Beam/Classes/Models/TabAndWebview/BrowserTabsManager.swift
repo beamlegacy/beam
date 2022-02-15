@@ -108,7 +108,7 @@ class BrowserTabsManager: ObservableObject {
             self.autoSave()
         }
     }
-    var currentTabUIFrame: CGRect?
+    @Published var currentTabUIFrame: CGRect?
 
     init(with data: BeamData, state: BeamState) {
         self.data = data
@@ -156,7 +156,7 @@ class BrowserTabsManager: ObservableObject {
         for tab in tabs {
             guard tab.appendToIndexer == nil else { continue }
 
-            tab.appendToIndexer = { [unowned self, weak tab] url, read in
+            tab.appendToIndexer = { [unowned self, weak tab] url, title, read in
                 guard let tab = tab else { return }
                 var textForClustering = [""]
                 let tabTree = tab.browsingTree.deepCopy()
@@ -168,18 +168,19 @@ class BrowserTabsManager: ObservableObject {
 
                     DispatchQueue.main.async { [weak self] in
                         guard let self = self else { return }
-                        let indexDocument = IndexDocument(source: url.absoluteString, title: tab.title, contents: read.textContent)
-                        var shouldIndexUserTypedUrl = tab.requestedUrl != nil && tab.requestedUrl != tab.url
 
-                        // this check is case last url redirected just contains a /
-                        if let url = tab.url, let userTypedUrl = tab.requestedUrl {
+                        let indexDocument = IndexDocument(source: url.absoluteString, title: title, contents: read.textContent)
+                        var shouldIndexUserTypedUrl = tab.requestedURL != nil && tab.requestedURL != tab.url
+
+                        // this check in case last url redirected just contains a /
+                        if let url = tab.url, let userTypedUrl = tab.requestedURL {
                             if url.absoluteString.prefix(url.absoluteString.count - 1) == userTypedUrl.absoluteString {
                                 shouldIndexUserTypedUrl = false
                             }
                         }
 
                         let tabInformation: TabInformation? = TabInformation(url: url,
-                                                                             requestedUrl: shouldIndexUserTypedUrl ? tab.requestedUrl : nil,
+                                                                             requestedURL: shouldIndexUserTypedUrl ? tab.requestedURL : nil,
                                                                              shouldBeIndexed: tab.responseStatusCode == 200,
                                                                              tabTree: tabTree,
                                                                              currentTabTree: currentTabTree,
@@ -190,7 +191,7 @@ class BrowserTabsManager: ObservableObject {
                                                                              cleanedTextContentForClustering: textForClustering,
                                                                              isPinnedTab: tab.isPinned)
                         self.data.tabToIndex = tabInformation
-                        self.currentTab?.requestedUrl = nil
+                        tab.requestedURL = nil
                         self.latestCurrentTab = nil
                     }
                 }
@@ -342,7 +343,7 @@ extension BrowserTabsManager {
 
 struct TabInformation {
     var url: URL
-    var requestedUrl: URL?
+    var requestedURL: URL?
     var shouldBeIndexed: Bool = true
     weak var tabTree: BrowsingTree?
     weak var currentTabTree: BrowsingTree?

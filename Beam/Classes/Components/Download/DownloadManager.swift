@@ -17,29 +17,17 @@ public enum DownloadManagerError: Error {
 
 protocol DownloadManager: AnyObject {
 
-    var fractionCompleted: Double { get }
-    var overallProgress: Progress { get }
-    var downloads: [Download] { get }
+    var downloadList: DownloadList<DownloadItem> { get }
+
+    func download(_ download: WKDownload)
 
     func downloadURLs(_ urls: [URL], headers: [String: String], completion: @escaping ([DownloadManagerResult]) -> Void)
-    func downloadURL(_ url: URL, headers: [String: String], completion: @escaping (DownloadManagerResult) -> Void)
-
-    /// Download a file from the provided URL. You can specify headers if they are required for the download, and a potential destination folder URL.
-    /// - Parameters:
-    ///   - url: The URL of the file to download
-    ///   - headers: Headers that will be added to the URLRequest
-    ///   - destinationFoldedURL: Desired destination folder. If not provided, the download will end up in the download folder
-    func downloadFile(at url: URL, headers: [String: String], suggestedFileName: String?, destinationFoldedURL: URL?)
 
     /// Start a download with informations found in the download document.
     /// Download can be started with some resume data if available, or from scratch using included infos
     /// - Parameter document: A BeamDownloadDocument with at least download infos
     func downloadFile(from document: BeamDownloadDocument) throws
 
-    func clearAllFileDownloads()
-
-    @discardableResult
-    func clearFileDownload(_ download: Download) -> Download?
     /// Download an image file from the provided URL. Resulting image will be inserted into BeamFileStorage
     /// - Parameters:
     ///   - src: The URL of the image to download
