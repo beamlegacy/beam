@@ -22,8 +22,8 @@ extension AutocompleteManager {
 
     func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
         [
-            // Default suggestions will be improved in a upcoming ticket
-            futureToPublisher(defaultSuggestionsNotesResults(), source: .note)
+            futureToPublisher(defaultSuggestionsNotesResults(), source: .note),
+            futureToPublisher(defaultActionsResults(), source: .action)
         ]
     }
 
@@ -38,12 +38,11 @@ extension AutocompleteManager {
             self.autocompleteCanCreateNoteResult(for: searchText)
                 .replaceError(with: false)
                 .map { canCreate in
-                    let createResult = AutocompleteResult(text: searchText,
-                                                          source: .createCard,
-                                                          information: "New note",
-                                                          completingText: searchText)
-                    let results = canCreate ? [createResult] : []
-                    return AutocompletePublisherSourceResults(source: AutocompleteResult.Source.createCard, results: results)
+                    var results = [AutocompleteResult]()
+                    if canCreate {
+                        results.append(Self.DefaultActions.createNoteResult(for: searchText))
+                    }
+                    return AutocompletePublisherSourceResults(source: .createNote, results: results)
                 }.eraseToAnyPublisher()
         ]
     }
@@ -274,18 +273,62 @@ extension AutocompleteManager {
     // MARK: - Empty Query Suggestions
     private func defaultSuggestionsNotesResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
+            guard let beamState = self?.beamState, !beamState.focusOmniBoxFromTab else {
+                promise(.success([]))
+                return
+            }
             let start = DispatchTime.now()
-            let documentManager = DocumentManager()
             let limit = 3
-            let documentStructs = documentManager.loadAllWithLimit(limit, sortingKey: .updatedAt(false))
-            let ids = documentStructs.map { $0.id }
+            let recentsNotes = beamState.recentsManager.recentNotes
+            let ids = recentsNotes.map { $0.id }
             let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
-            let autocompleteResults = documentStructs.map {
+            let autocompleteResults = recentsNotes.map {
                 AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }.sorted(by: >).prefix(limit)
             let autocompleteResultsArray = Array(autocompleteResults)
             self?.logIntermediate(step: "NoteRecents", stepShortName: "NR", results: autocompleteResultsArray, startedAt: start)
             promise(.success(autocompleteResultsArray))
+        }
+    }
+
+    private func defaultActionsResults() -> Future<[AutocompleteResult], Error> {
+        Future { [weak self] promise in
+            guard let self = self, let state = self.beamState else {
+                promise(.success([]))
+                return
+            }
+            var actions = [AutocompleteResult]()
+            let mode = state.mode
+            let isFocusingTab = state.focusOmniBoxFromTab
+
+            if isFocusingTab {
+                actions.append(contentsOf: [
+                    Self.DefaultActions.copyTabAddressAction,
+                    Self.DefaultActions.captureTabAction
+                ])
+            } else {
+                if mode == .web {
+                    actions.append(contentsOf: [
+                        Self.DefaultActions.journalAction,
+                        Self.DefaultActions.allNotesAction,
+                        Self.DefaultActions.switchToNotesAction
+                    ])
+                } else {
+                    if mode != .today {
+                        actions.append(Self.DefaultActions.journalAction)
+                    }
+                    if state.mode != .page || state.currentPage?.id != .allCards {
+                        actions.append(Self.DefaultActions.allNotesAction)
+                    }
+                    if state.hasBrowserTabs {
+                        actions.append(Self.DefaultActions.switchToWebAction)
+                    }
+                }
+            }
+            if !isFocusingTab {
+                actions.append(Self.DefaultActions.createNoteResult(for: ""))
+            }
+            promise(.success(actions))
         }
     }
 

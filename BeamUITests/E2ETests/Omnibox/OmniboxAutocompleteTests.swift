@@ -45,7 +45,8 @@ class OmniboxAutocompleteTests: BaseTest {
         omniboxView.typeKeyboardKey(.escape)
 
         testRailPrint("Then results back to default, search field is empty focused")
-        XCTAssertLessThanOrEqual(results.count, 1) // default shows 1 today note
+        let noteResults = results.matching(helper.autocompleteNotePredicate)
+        XCTAssertLessThanOrEqual(noteResults.count, 1) // default shows 1 today note
         XCTAssertEqual(omniboxSearchField.value as? String, "")
         XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
 

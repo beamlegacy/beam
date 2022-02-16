@@ -501,7 +501,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             Logger.shared.logDebug("Could not find page title while checking text links", category: .pointAndShoot)
             return true
         }
-        for link in first.text.links where (link == pageUrl) && (first.text.text == pageTitle) {
+        for link in first.text.links where (link == pageUrl) || (first.text.text == pageTitle) {
             return false
         }
 

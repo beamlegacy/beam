@@ -78,4 +78,72 @@ class OmniboxViewTests: BaseTest {
         XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertFalse(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists)
     }
+
+    func testOmniboxDefaultActions() {
+        let omniboxView = OmniBoxTestView()
+        let journalView = launchApp()
+        let helper = BeamUITestsHelper(journalView.app)
+        let omniboxHelper = OmniBoxUITestsHelper(OmniBoxTestView().app)
+
+        testRailPrint("Given I have at least 4 notes")
+        let noteATitle = "Note A"
+        journalView.createCardViaOmniboxSearch(noteATitle)
+        journalView.createCardViaOmniboxSearch("Note B")
+        journalView.createCardViaOmniboxSearch("Note C")
+
+        let results = omniboxView.getAutocompleteResults()
+        let noteResults = results.matching(omniboxHelper.autocompleteNotePredicate)
+        // In all note
+        testRailPrint("When I open omnibox in all notes")
+        journalView.openAllCardsMenu()
+        omniboxView.focusOmniBoxSearchField()
+        testRailPrint("Then suggestions contains the correct actions")
+        XCTAssertEqual(results.count, 5)
+        XCTAssertEqual(results.element(boundBy: 2).label, noteATitle)
+        XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
+        XCTAssertEqual(noteResults.count, 3)
+
+        // In a note
+        testRailPrint("When I open omnibox in a note view")
+        journalView.openRecentCardByName(noteATitle)
+        omniboxView.focusOmniBoxSearchField()
+        testRailPrint("Then suggestions contains the correct actions")
+        XCTAssertEqual(results.count, 6)
+        XCTAssertEqual(results.element(boundBy: 0).label, noteATitle) // Note A moved up in the list of recents
+        XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+        XCTAssertEqual(noteResults.count, 3)
+
+        // In Web
+        testRailPrint("When I open omnibox in web mode")
+        helper.openTestPage(page: .page1)
+        omniboxView.focusOmniBoxSearchField()
+        testRailPrint("Then suggestions contains the correct actions")
+        XCTAssertEqual(results.count, 7)
+        XCTAssertEqual(results.element(boundBy: 0).label, noteATitle)
+        XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 5).label, OmniboxLocators.Labels.switchToNotes.accessibilityIdentifier)
+        XCTAssertEqual(noteResults.count, 3)
+
+        // In Web tab focus
+        testRailPrint("When I open omnibox for a web tab")
+        omniboxView.focusOmniBoxSearchField(forCurrenTab: true)
+        testRailPrint("Then suggestions contains the correct actions")
+        XCTAssertEqual(results.count, 2)
+        XCTAssertEqual(results.element(boundBy: 0).label, OmniboxLocators.Labels.copyTab.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 1).label, OmniboxLocators.Labels.collectTab.accessibilityIdentifier)
+        XCTAssertEqual(noteResults.count, 0)
+
+        // In journal
+        testRailPrint("When I open omnibox for the journal")
+        helper.showJournal()
+        omniboxView.focusOmniBoxSearchField()
+        testRailPrint("Then suggestions contains the correct actions")
+        XCTAssertEqual(results.count, 6)
+        XCTAssertEqual(results.element(boundBy: 0).label, noteATitle)
+        XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.switchToWeb.accessibilityIdentifier)
+        XCTAssertEqual(noteResults.count, 3)
+    }
 }

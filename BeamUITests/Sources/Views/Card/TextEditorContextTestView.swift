@@ -22,7 +22,7 @@ class TextEditorContextTestView: BaseView {
 
     @discardableResult
     func confirmBidiLinkCreation(cardName: String) -> CardTestView {
-        app.otherElements["autocompleteResult-selected-\(cardName)-createCard"].clickOnExistence()
+        app.otherElements["autocompleteResult-selected-\(cardName)-createNote"].clickOnExistence()
         return CardTestView()
     }
 
