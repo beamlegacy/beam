@@ -224,7 +224,6 @@ struct OnboardingEmailConnectView: View {
                             handleSyncCompletion(startTime: loadingStartTime)
                         default:
                             Logger.shared.logError("Run first Sync failed when trying to connect with Email", category: .network)
-                            break
                         }
                     }
                 }

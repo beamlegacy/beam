@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 struct OnboardingSetupPrivateKey: View {
     @Binding var actions: [OnboardingManager.StepAction]
@@ -148,7 +149,7 @@ struct OnboardingSetupPrivateKey: View {
             case .success:
                 finish(nil)
             default:
-                break
+                Logger.shared.logError("Run first Sync failed after Private Key setup", category: .network)
             }
         }
     }
