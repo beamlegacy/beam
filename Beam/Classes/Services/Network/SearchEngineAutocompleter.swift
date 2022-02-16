@@ -28,7 +28,7 @@ class SearchEngineAutocompleter: ObservableObject {
             }
 
             self.lastDataTask?.cancel()
-            let description = self.searchEngine.description
+            let engineDescription = self.searchEngine.description
             self.lastDataTask = BeamURLSession.shared.dataTask(with: url) { [weak self] data, _, error in
                 guard let self = self else { return }
                 if let error = error as? URLError, error.code == .cancelled {
@@ -37,7 +37,7 @@ class SearchEngineAutocompleter: ObservableObject {
 
                 var res = [AutocompleteResult]()
                 if query.containsCharacters {
-                    res.append(AutocompleteResult(text: query, source: .searchEngine, url: nil, information: description))
+                    res.append(AutocompleteResult(text: query, source: .searchEngine, url: nil, information: engineDescription))
                 }
                 guard let data = data else {
                     promise(.success(res))
@@ -49,7 +49,7 @@ class SearchEngineAutocompleter: ObservableObject {
                     let source: AutocompleteResult.Source = isURL ? .url : .searchEngine
                     let url = isURL ? URL(string: str) : nil
                     var text = str
-                    let info = description//(index == 0 && url == nil) ? description : nil
+                    let info = isURL ? nil : engineDescription
                     if let url = url {
                         text = url.urlStringWithoutScheme
                     }

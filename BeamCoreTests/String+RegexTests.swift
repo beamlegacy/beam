@@ -9,12 +9,12 @@ import XCTest
 
 class StringRegexTests: XCTestCase {
 
-    let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr", "http://the-super--swift.fr", "https://atlas.engineer", "https://swift.org/רפאל_נדאל"]
+    let validWebURLs = ["swift.fr", "http://swift.fr", "http://SwIft.Fr", "http://the-super--swift.fr", "https://atlas.engineer", "swift101.com", "https://swift.org/רפאל_נדאל", "http://172.28.43.22/swift", "http://localhost"]
     let validFileURLs = ["file:///swift.beamappfile", "file:///path/to/swift.html", "file:///some-dir/some-swift--file.html"]
     let validEmails = ["swift@beamapp.co", "s@b.co", "john-swift--the3rd@beamapp.co"]
     let validUsernames = ["tyler", "tyler_joseph", "josh-dun-09", "ty", "username20characters"]
 
-    let invalidWebURLs = ["thhs://swift", "swift", "file://swift.html"]
+    let invalidWebURLs = ["thhs://swift", "swift", "file://swift.html", "https://swift is cool.com"]
     let invalidFileURLs = ["file://swift.html", "file://path/swift.html", "file"]
     let invalidEmails = ["swift", "https://swift", "@swift.co", "mailto:swift@beamapp.co", "swift@beamapp.co:wrong"]
     let invalidUsernames = ["tyler joseph", "tyler.joseph", "t", "usernameislongerthan30characters", ""]
