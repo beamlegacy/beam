@@ -33,7 +33,7 @@ extension FrecencyUrlRecord: FetchableRecord {
         urlId = row[Columns.urlId]
         lastAccessAt = row[Columns.lastAccessAt]
         frecencyScore = row[Columns.frecencyScore]
-        frecencySortScore = row[Columns.frecencySortScore]
+        frecencySortScore = row[Columns.frecencySortScore] ??  -Float.greatestFiniteMagnitude
         frecencyKey = row[Columns.frecencyKey]
     }
 }
