@@ -311,6 +311,7 @@ extension AutocompleteManager {
 
         // if new entered character is the next character in selection, user is following the autocompletion
         guard currentText.lowercased().starts(with: unselectedProposedText.lowercased()),
+              unselectedProposedText.count == selectedRange.lowerBound + 1,
               unselectedProposedText.last?.lowercased() == selectedText.first?.lowercased()
         else {
             if proposedText.isEmpty {
