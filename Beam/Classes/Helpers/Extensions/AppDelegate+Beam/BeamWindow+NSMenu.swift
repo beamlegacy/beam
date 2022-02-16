@@ -127,6 +127,11 @@ extension BeamWindow {
         }
     }
 
+    @IBAction func copyCurrentTabURL(_ sender: Any?) {
+        guard let currentTab = state.browserTabsManager.currentTab else { return }
+        currentTab.copyURLToPasteboard()
+    }
+
     @IBAction func muteOtherTabs(_ sender: Any?) {
         for tab in state.browserTabsManager.tabs where tab != state.browserTabsManager.currentTab {
             if let tabIsPlaying = tab.mediaPlayerController?.isPlaying, tabIsPlaying {
