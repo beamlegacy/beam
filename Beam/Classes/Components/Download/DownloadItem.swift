@@ -7,8 +7,8 @@ final class DownloadItem: NSObject, ObservableObject, DownloadListItem {
 
     let id: UUID
 
-    var filename: String? { artifact?.filename }
-    var fileExtension: String? { artifact?.fileExtension }
+    var filename: String? { artifact?.filename ?? downloadProxy.tentativeFilename }
+    var fileExtension: String? { artifact?.fileExtension ?? downloadProxy.tentativeFileExtension }
 
     /// The URL of the download document or, if completed, the completed download file.
     var artifactURL: URL? { artifact?.artifactURL }
