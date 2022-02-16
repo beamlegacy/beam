@@ -28,10 +28,9 @@ struct AutocompleteListView: View {
         VStack(spacing: 0) {
             ForEach(Array(elements.enumerated()), id: \.1.id) { (index, item) in
                 let isSelected = isSelectedItem(item)
-                let isCreateCard = item.source == .createCard
                 let displaySubtitle = shouldItemDisplaySubtitle(item, atIndex: index)
-                let allowsShortcut = isCreateCard || (isSelected && !isItemSelectedByHovering(item))
-                if item.source == .createCard && elements.count > 1 {
+                let allowsShortcut = item.shortcut != nil || (isSelected && !isItemSelectedByHovering(item))
+                if item.source == .createNote && elements.count > 1 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
@@ -39,7 +38,7 @@ struct AutocompleteListView: View {
                 AutocompleteItemView(item: item, selected: isSelected,
                                  displaySubtitle: displaySubtitle,
                                  allowsShortcut: allowsShortcut,
-                                 colorPalette: item.source == .createCard ?
+                                 colorPalette: item.source == .createNote ?
                                  AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
                                     AutocompleteItemView.defaultColorPalette)
                     .padding(.horizontal, BeamSpacing._60)
@@ -66,7 +65,7 @@ struct AutocompleteListView: View {
 
     func isSelectedItem(_ item: AutocompleteResult) -> Bool {
         if modifierFlagsPressed?.contains(.option) == true {
-            return item.source == .createCard
+            return item.source == .createNote
         } else if let i = selectedIndex, i < elements.count, elements[i] == item {
             return true
         } else if let i = hoveredItemIndex, i < elements.count, elements[i] == item {
@@ -90,7 +89,7 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "Search Result 2", source: .searchEngine),
         AutocompleteResult(text: "Site Visited", source: .history, url: URL(string: "https://apple.com")),
         AutocompleteResult(text: "result.com", source: .url, urlFields: .text),
-        AutocompleteResult(text: "My Own Note", source: .createCard)]
+        AutocompleteResult(text: "My Own Note", source: .createNote)]
     static var previews: some View {
         AutocompleteListView(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
     }

@@ -51,6 +51,7 @@ struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem =
                         .animation(.none)
                         .font(BeamFont.regular(size: 10).swiftUI)
                         .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                        .blendModeLightMultiplyDarkScreen()
                 }.allowsHitTesting(false)
 
             }
@@ -76,7 +77,8 @@ struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem =
                 hoverState = hover ? .view : nil
             }).blendModeLightMultiplyDarkScreen()
         }
-        .padding(.horizontal, 8)
+        .padding(.trailing, 8)
+        .padding(.leading, 7)
         .animation(.easeInOut(duration: 0.3), value: hoverState)
         .frame(height: 53)
         .background(KeyEventHandlingView(handledKeyCodes: [.space, .enter, .backspace, .delete], onKeyDown: onKeyDown(event:)))
@@ -84,7 +86,7 @@ struct DownloadCell<ListItem, List: DownloadListProtocol>: View where ListItem =
     }
 
     private var backgroundColor: Color {
-        self.isSelected ? BeamColor.Autocomplete.clickedBackground.swiftUI : BeamColor.Generic.background.swiftUI
+        self.isSelected ? BeamColor.Autocomplete.clickedBackground.swiftUI : BeamColor.Generic.secondaryBackground.swiftUI
     }
 
     private var detailString: String {

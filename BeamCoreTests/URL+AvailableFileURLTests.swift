@@ -37,6 +37,14 @@ class URLAvailableFileURLTests: XCTestCase {
         XCTAssertEqual(url.availableFileURL(), expected, "File was not renamed to `gigou-3.txt`")
     }
 
+    func testExistingFileWithMultipleExtensions() {
+        fileManager.createFile(atPath: testDirectory.path.appending("/gigou.wesh.txt"), contents: nil)
+
+        let url = testDirectory.url.appendingPathComponent("/gigou.wesh.txt")
+        let expected = testDirectory.url.appendingPathComponent("/gigou-2.wesh.txt")
+        XCTAssertEqual(url.availableFileURL(), expected, "File was not renamed to `gigou-2.wesh.txt`")
+    }
+
     func testNonFileURL() {
         let url = URL(string: "https://beamapp.co/some/path")!
 

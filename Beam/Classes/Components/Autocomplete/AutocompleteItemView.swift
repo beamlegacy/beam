@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 struct AutocompleteItemView: View {
 
@@ -28,23 +29,10 @@ struct AutocompleteItemView: View {
     @State private var favicon: NSImage?
     var backgroundColor: Color {
         switch item.source {
-        case .createCard, .note:
+        case .createNote, .note:
             return isTouchDown ? colorPalette.touchdownCardBackgroundColor.swiftUI : colorPalette.selectedCardBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
         default:
             return isTouchDown ? colorPalette.touchdownBackgroundColor.swiftUI : colorPalette.selectedBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
-        }
-    }
-
-    func iconNameSource(_ source: AutocompleteResult.Source) -> String {
-        switch item.source {
-        case .history:
-            return "field-history"
-        case .searchEngine, .url, .topDomain, .mnemonic:
-            return "field-search"
-        case .createCard:
-            return "field-card_new"
-        case .note:
-            return "field-card"
         }
     }
 
@@ -64,7 +52,7 @@ struct AutocompleteItemView: View {
             return subtitleLinkColor
         case .url where !isUrlWithTitle:
             return subtitleLinkColor
-        case .note, .createCard:
+        case .note, .createNote:
             return cardColor
         default:
             return defaultTextColor
@@ -74,7 +62,7 @@ struct AutocompleteItemView: View {
         switch item.source {
         case .history, .url:
             return subtitleLinkColor
-        case .createCard:
+        case .createNote:
             return defaultTextColor
         default:
             return colorPalette.informationTextColor.swiftUI
@@ -82,7 +70,7 @@ struct AutocompleteItemView: View {
     }
     private var shortcutColor: Color {
         switch item.source {
-        case .note, .createCard:
+        case .note, .createNote:
             return cardColor
         default:
             return subtitleLinkColor
@@ -92,7 +80,7 @@ struct AutocompleteItemView: View {
     private func highlightedTextRanges(secondaryText: Bool = false) -> ((String) -> [Range<String.Index>]) {
         { text in
             guard let completingText = item.completingText,
-                  item.source != .createCard,
+                  item.source != .createNote,
                   (item.source != .searchEngine || !secondaryText)
             else {
                 return []
@@ -109,8 +97,8 @@ struct AutocompleteItemView: View {
 
     var mainText: String {
         switch item.source {
-        case .createCard:
-            return "New Note:"
+        case .createNote:
+            return secondaryText?.isEmpty == false ? loc("New Note:") : loc("New Note")
         default:
             return item.displayText
         }
@@ -119,14 +107,31 @@ struct AutocompleteItemView: View {
     var secondaryText: String? {
         guard displaySubtitle else { return nil }
         switch item.source {
-        case .createCard:
-            return " " + item.text
+        case .createNote:
+            let displayText = item.displayText
+            return displayText.isEmpty ? nil : " " + displayText
         default:
             if let info = item.displayInformation {
                 return " - " + info
             }
             return nil
         }
+    }
+
+    private var shortcut: Shortcut? {
+        guard allowsShortcut else { return nil }
+        if let shortcut = item.shortcut {
+            return shortcut
+        } else {
+            return Shortcut(modifiers: [], keys: [.enter])
+        }
+    }
+
+    private var shortcutShouldBeVisible: Bool {
+        if item.shortcut != nil {
+            return true
+        }
+        return selected
     }
 
     var body: some View {
@@ -138,7 +143,7 @@ struct AutocompleteItemView: View {
                         .scaledToFit()
                         .frame(maxWidth: 16, maxHeight: 16)
                 } else {
-                    Icon(name: item.source.iconName, color: secondaryTextColor)
+                    Icon(name: item.icon, color: secondaryTextColor)
                         .blendModeLightMultiplyDarkScreen()
                 }
             }
@@ -170,17 +175,11 @@ struct AutocompleteItemView: View {
             }
             .blendModeLightMultiplyDarkScreen()
             Spacer(minLength: 0)
-            if allowsShortcut {
-                if item.source == .createCard {
-                    ShortcutView(shortcut: .init(modifiers: [.option], keys: [.enter]), spacing: 1, withBackground: !selected)
-                        .frame(height: 18)
-                        .blendModeLightMultiplyDarkScreen()
-                } else {
-                    ShortcutView(shortcut: .init(modifiers: [], keys: [.enter]), spacing: 1, withBackground: !selected)
-                        .frame(height: 18)
-                        .opacity(selected ? 1 : 0)
-                        .blendModeLightMultiplyDarkScreen()
-                }
+            if let shortcut = shortcut {
+                ShortcutView(shortcut: shortcut, spacing: 1, withBackground: !selected)
+                    .frame(height: 18)
+                    .opacity(shortcutShouldBeVisible ? 1 : 0)
+                    .blendModeLightMultiplyDarkScreen()
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -206,6 +205,7 @@ struct AutocompleteItemView: View {
             }
         }
         .accessibilityElement()
+        .accessibilityLabel(item.displayText)
         .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.displayText)-\(item.source)")
     }
 
@@ -233,7 +233,7 @@ extension AutocompleteItemView {
 
 struct AutocompleteItem_Previews: PreviewProvider {
     static let items = [
-        AutocompleteResult(text: "James Dean", source: .createCard, information: "New Note"),
+        AutocompleteResult(text: "James Dean", source: .createNote, information: "New Note"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .searchEngine, information: "Google Search"),
         AutocompleteResult(text: "jamesdean.com", source: .url, urlFields: .text),
