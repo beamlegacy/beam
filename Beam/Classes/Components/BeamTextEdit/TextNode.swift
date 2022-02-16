@@ -747,7 +747,7 @@ public class TextNode: ElementNode {
     }
 
     override func mouseDragged(mouseInfo: MouseInfo) -> Bool {
-        guard let editor = self.editor else { return false }
+        guard let editor = self.editor, isFocused else { return false }
         let p = positionAt(point: mouseInfo.position)
         root?.cursorPosition = p
 
