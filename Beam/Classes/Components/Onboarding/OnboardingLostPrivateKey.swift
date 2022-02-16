@@ -38,7 +38,9 @@ struct OnboardingLostPrivateKey: View {
                     UserAlert.showMessage(message: "Are you sure you want to erase all your beam data?", informativeText: "This operation cannot be undone.", buttonTitle: "Yes, Erase All Data", secondaryButtonTitle: "Cancel") {
                         // Delete All Local Content && Remote data
                         _ = try? BeamObjectManager().deleteAll(nil) { _ in
-                            AppDelegate.main.deleteAllLocalData()
+                            DispatchQueue.main.async {
+                                AppDelegate.main.deleteAllLocalData()
+                            }
                         }
                     }
                 }
