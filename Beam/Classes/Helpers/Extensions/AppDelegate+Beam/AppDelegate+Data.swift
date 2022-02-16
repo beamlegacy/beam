@@ -84,19 +84,12 @@ extension AppDelegate {
                         UserAlert.showError(message: "Could not delete databases",
                                             error: error)
                     case .success:
-                        if includedRemote {
-                            UserAlert.showMessage(message: "All the Notes data has been deleted. Beam must restart now.",
-                                                  buttonTitle: "Restart Beam now") {
-                                guard Configuration.env != .test else { return }
-                                NSApplication.shared.relaunch()
-                            }
-                        } else {
-                            UserAlert.showMessage(message: "All the local data has been deleted. Beam must restart now.",
-                                                  buttonTitle: "Restart Beam now") {
-                                guard Configuration.env != .test else { return }
-                                NSApplication.shared.relaunch()
-                            }
+                        for window in self.windows {
+                            window.close()
                         }
+                        AppDelegate.main.closePreferencesWindow()
+                        self.data.onboardingManager.forceDisplayOnboarding()
+                        self.data.onboardingManager.presentOnboardingWindow()
                     }
                 }
             }
