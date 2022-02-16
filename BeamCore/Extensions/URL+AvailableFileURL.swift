@@ -15,8 +15,10 @@ extension URL {
         var url = self
 
         let directory = url.deletingLastPathComponent()
-        let fileName = url.deletingPathExtension().lastPathComponent
-        let pathExtension = url.pathExtension
+        let splits = url.lastPathComponent.split(separator: ".")
+        let fileName = splits[0]
+        let pathExtension = splits[1...].joined(separator: ".")
+
         var count = 2
 
         while fileManager.fileExists(atPath: url.path) {

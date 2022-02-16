@@ -5,6 +5,9 @@ import Combine
 // https://chromium.googlesource.com/chromium/src/+/master/components/omnibox/browser/search_suggestion_parser.cc
 
 struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConvertible {
+    static func == (lhs: AutocompleteResult, rhs: AutocompleteResult) -> Bool {
+        lhs.id == rhs.id
+    }
 
     struct URLFields: OptionSet {
         let rawValue: Int
@@ -26,13 +29,15 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     }
 
     enum Source: Equatable, Hashable {
+
         case history
         case note(noteId: UUID? = nil, elementId: UUID? = nil)
         case searchEngine
         case url
-        case createCard
+        case createNote
         case topDomain
         case mnemonic
+        case action
 
         var iconName: String {
             switch self {
@@ -40,10 +45,12 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return "field-history"
             case .searchEngine:
                 return "field-search"
-            case .createCard:
+            case .createNote:
                 return "field-card_new"
             case .note:
                 return "field-card"
+            case .action:
+                return "tool-go"
             case .topDomain, .url, .mnemonic:
                 return "field-web"
             }
@@ -58,11 +65,11 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return 0
             case .url:
                 return 1
-            case .searchEngine:
-                return 2
             case .note:
+                return 2
+            case .searchEngine:
                 return 3
-            case .createCard:
+            case .action, .createNote:
                 return 4
             case .topDomain, .mnemonic:
                 return 5
@@ -73,43 +80,49 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     var id: String {
         "\(uuid)\(completingText ?? "")"
     }
-    var text: String
-    var source: Source
-    var disabled: Bool = false
-    var url: URL?
-    var aliasForDestinationURL: URL?
-    var information: String?
-    var completingText: String?
-    var uuid: UUID
-    var score: Float?
+    private(set) var text: String
+    private(set) var source: Source
+    private(set) var disabled: Bool = false
+    private(set) var url: URL?
+    private(set) var aliasForDestinationURL: URL?
+    private(set) var information: String?
+    private var customIcon: String?
+    private(set) var shortcut: Shortcut?
+    private(set) var completingText: String?
+    private(set) var uuid: UUID
+    private(set) var score: Float?
+    private(set) var handler: ((BeamState) -> Void)?
 
     /// [0..1] depending on the comparison of the query vs the content of the text field. Can be compared to rawInfoPrefixScore
-    var rawTextPrefixScore: Float
+    private(set) var rawTextPrefixScore: Float
     /// [0..1] depending on the comparison of the query vs the content of the info field. Can be compared to rawTextPrefixScore
-    var rawInfoPrefixScore: Float
+    private(set) var rawInfoPrefixScore: Float
 
     /// rawTextPrefixScore boosted by the type of the field (source kind + is it an url?)
-    var textPrefixScore: Float
+    private(set) var textPrefixScore: Float
     /// rawInfoPrefixScore boosted by the type of the field (source kind + is it an url?)
-    var infoPrefixScore: Float
+    private(set) var infoPrefixScore: Float
     /// textPrefixScore and infoPrefixScore Combined
-    var prefixScore: Float
+    private(set) var prefixScore: Float
     /// This option set tell us which of the String fields of this struct contains an URL. Right now only the "text" and "information" field can be a textual url. We use this to match the query with the start of the url (ignoring the scheme).
-    var urlFields: URLFields
-    var takeOverCandidate = false
+    private(set) var urlFields: URLFields
+    private(set) var takeOverCandidate = false
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
-         information: String? = nil, completingText: String? = nil,
-         uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = []) {
+         information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil,
+         uuid: UUID = UUID(), score: Float? = nil, handler: ((BeamState) -> Void)? = nil, urlFields: URLFields = []) {
         self.text = text
         self.source = source
         self.disabled = disabled
         self.url = url
         self.aliasForDestinationURL = aliasForDestinationURL
         self.information = information
+        self.customIcon = customIcon
+        self.shortcut = shortcut
         self.completingText = completingText
         self.uuid = uuid
         self.score = score
+        self.handler = handler
         self.urlFields = urlFields
 
         let textResult = Self.boosterScore(prefix: completingText, base: text, isURL: urlFields.contains(.text), source: source)
@@ -152,7 +165,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         var canMatchInside = !isURL
         var canReplaceBase = true
         switch source {
-        case .note, .createCard:
+        case .note, .createNote:
             canMatchInside = false
         case .searchEngine:
             canReplaceBase = false
@@ -201,7 +214,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
     /// This is the main text to display.
     var displayText: String {
-        [.note, .createCard].contains(source) ? text :
+        [.note, .createNote].contains(source) ? text :
         (rawInfoPrefixScore > rawTextPrefixScore ? information ?? text : text)
     }
 
@@ -231,5 +244,9 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             urlToPrint = "<???>"
         }
         return "id: \(id) text: \(text) - source: \(source) - url: \(urlToPrint) - score: \(score ?? Float.nan)"
+    }
+
+    var icon: String {
+        customIcon ?? source.iconName
     }
 }

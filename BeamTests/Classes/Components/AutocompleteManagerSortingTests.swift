@@ -11,7 +11,7 @@ import XCTest
 
 class AutocompleteManagerSortingTests: XCTestCase {
 
-    private let manager = AutocompleteManager(with: .init(), searchEngine: MockSearchEngine())
+    private let manager = AutocompleteManager(searchEngine: MockSearchEngine(), beamState: nil)
     func testAutocompleteResultsUniqueNotes() {
 
         let noteAId = UUID()
@@ -141,7 +141,7 @@ class AutocompleteManagerSortingTests: XCTestCase {
             .init(text: "URL1", source: .url),
             .init(text: "B3", source: .searchEngine),
             .init(text: "History1", source: .history),
-            .init(text: "New Card", source: .createCard),
+            .init(text: "New Card", source: .createNote),
         ]
 
         let result = manager.insertSearchEngineResults(searchEngineResults, in: base)
