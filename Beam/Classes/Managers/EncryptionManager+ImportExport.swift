@@ -60,6 +60,7 @@ extension EncryptionManager {
             }
         }
     }
+
     private func saveToFile(key: SymmetricKey, atURL url: URL) throws {
         var path = url
         if path.pathExtension.isEmpty != false {
@@ -119,6 +120,11 @@ extension EncryptionManager {
         return try decodeBeamKeyFile(data)
     }
 
+    // import BeamKey str
+
+    public func decodeBeamKey(_ str: String) -> SymmetricKey? {
+        SymmetricKey(base64EncodedString: str)
+    }
 }
 
 // MARK: - File encoding
