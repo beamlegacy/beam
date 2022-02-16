@@ -46,7 +46,7 @@ extension AutocompleteManager {
         static var copyTabAddressAction: AutocompleteResult {
             AutocompleteResult(text: loc("Copy Address"), source: .action,
                                customIcon: "editor-url_copy_16",
-                               shortcut: Shortcut(modifiers: [.command], keys: [.string("C")]),
+                               shortcut: Shortcut(modifiers: [.shift, .command], keys: [.string("C")]),
                                handler: { beamState in
                 guard let urlString = beamState.browserTabsManager.currentTab?.url?.absoluteString else { return }
                 let pasteboard = NSPasteboard.general
