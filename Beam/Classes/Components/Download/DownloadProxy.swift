@@ -12,3 +12,15 @@ protocol DownloadProxy: AnyObject {
     func cancel(_ completionHandler: ((Data?) -> Void)?)
 
 }
+
+extension DownloadProxy {
+
+    /// Attempts to derive the name of the downloaded file from the request that initiated it.
+    /// The actual name may differ once the web view starts the download.
+    var tentativeFilename: String? { originalRequest?.url?.lastPathComponent }
+
+    /// Attempts to derive the extension of the downloaded file from the request that initiated it.
+    /// The actual name may differ once the web view starts the download.
+    var tentativeFileExtension: String? { originalRequest?.url?.pathExtension }
+
+}
