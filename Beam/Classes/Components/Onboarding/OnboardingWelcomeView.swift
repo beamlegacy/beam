@@ -100,7 +100,6 @@ struct OnboardingWelcomeView: View {
                     onDataSyncDone()
                 default:
                     Logger.shared.logError("Run first Sync failed when trying to connect with Google", category: .network)
-                    break
                 }
             }
         }
