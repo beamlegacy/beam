@@ -24,7 +24,6 @@ class ClusteringManager: ObservableObject {
 
     public struct PageOpenInTab {
         let pageId: UUID
-        let domain: String?
     }
 
     enum InitialiseNotes {
