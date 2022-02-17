@@ -265,6 +265,8 @@
 		41A969FF2581394300E6594B /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41A969FE2581394300E6594B /* Configuration.swift */; };
 		41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 41B4277A25E52DCA00A8243F /* Localizable.stringsdict */; };
 		41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */; };
+		4E0556E127B4004E00B4A42F /* TabColoringUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E0556E027B4004E00B4A42F /* TabColoringUpdater.swift */; };
+		4E15C19227B583A100E3DD0D /* TabColoringUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E15C19127B583A100E3DD0D /* TabColoringUpdaterTests.swift */; };
 		4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */; };
 		4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E6097A326CE8A6F00F90260 /* ActiveSources.swift */; };
 		4E9F4C8326F8C75D00420DED /* ClusteringManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */; };
@@ -1584,6 +1586,8 @@
 		41A969FE2581394300E6594B /* Configuration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Configuration.swift; sourceTree = "<group>"; };
 		41B4277A25E52DCA00A8243F /* Localizable.stringsdict */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; path = Localizable.stringsdict; sourceTree = "<group>"; };
 		41FAD34E25E5742800D78B36 /* CALayer+Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Animation.swift"; sourceTree = "<group>"; };
+		4E0556E027B4004E00B4A42F /* TabColoringUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabColoringUpdater.swift; sourceTree = "<group>"; };
+		4E15C19127B583A100E3DD0D /* TabColoringUpdaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabColoringUpdaterTests.swift; sourceTree = "<group>"; };
 		4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedSourcesUpdaterTests.swift; sourceTree = "<group>"; };
 		4E6097A326CE8A6F00F90260 /* ActiveSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveSources.swift; sourceTree = "<group>"; };
 		4E9F4C8226F8C75D00420DED /* ClusteringManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringManagerTests.swift; sourceTree = "<group>"; };
@@ -3166,6 +3170,7 @@
 				BAA67971FD6352F46D77E3BE /* WebNoteController.swift */,
 				DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */,
 				DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */,
+				4E0556E027B4004E00B4A42F /* TabColoringUpdater.swift */,
 				DA52E97F276CE026008D4990 /* BrowsingTreeProcessor.swift */,
 				375D83B0278D63260064C246 /* MouseHoveringLocation.swift */,
 			);
@@ -4691,6 +4696,7 @@
 				DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */,
 				DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */,
 				4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */,
+				4E15C19127B583A100E3DD0D /* TabColoringUpdaterTests.swift */,
 				0DC6E2DA26A02B0E00BD2E2A /* Assets */,
 				DAB8DB04269C502C00453867 /* UrlScoresCollectionTest.swift */,
 				DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */,
@@ -6959,6 +6965,7 @@
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */,
+				4E0556E127B4004E00B4A42F /* TabColoringUpdater.swift in Sources */,
 				3392E56D269D82FE000FA401 /* ClickCatchingView.swift in Sources */,
 				960A57E8264C88920061E8D2 /* ProxyEmbedNode.swift in Sources */,
 				33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */,
@@ -7372,6 +7379,7 @@
 				52FC003D25E426FE00ABECB0 /* BeamUITestsMenuGeneratorTests.swift in Sources */,
 				DA905D52277CB20A00307146 /* FrecencyNoteStorageTest.swift in Sources */,
 				032562F126051D65006513E4 /* NSString+IDNATests.m in Sources */,
+				4E15C19227B583A100E3DD0D /* TabColoringUpdaterTests.swift in Sources */,
 				5298649125D151D300D27A80 /* SearchEngineAutocompleterTests.swift in Sources */,
 				DA547BA527107DA00085EEC1 /* BrowsingTreeRecordTests.swift in Sources */,
 				8A7F949826A8694600270A74 /* PointAndShootSelectTest.swift in Sources */,

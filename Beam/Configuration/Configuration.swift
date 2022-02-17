@@ -24,6 +24,7 @@ struct Configuration {
     static private(set) var uiTestModeLaunchArgument = "XCUITest"
     static private(set) var unitTestModeLaunchArgument = "test"
     static private(set) var browsingTreeApiSyncEnabled = EnvironmentVariables.BrowsingTree.apiSyncEnabled
+    static private(set) var tabColoringEnabled = EnvironmentVariables.Clustering.tabColoring
 
     static var buildSchemeName: String? {
         Bundle.main.infoDictionary?["SchemeName"] as? String
