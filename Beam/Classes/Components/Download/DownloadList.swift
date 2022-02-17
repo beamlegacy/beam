@@ -21,7 +21,7 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
     func addDownload(_ download: T) {
         guard !downloads.contains(where: { $0.id == download.id }) else { return }
 
-        downloads.append(download)
+        downloads.insert(download, at: 0)
         isDownloading = downloads.contains(where: \.isRunning)
         download.delegate = self
         observePublishers(of: download)
