@@ -18,7 +18,7 @@ class TabColoringUpdaterTests: XCTestCase {
             pageIDs.append(UUID())
         }
         urlGroups = [[pageIDs[0]], [pageIDs[1]], [pageIDs[2]], [pageIDs[3], pageIDs[4], pageIDs[5], pageIDs[6]]]
-        openPages = [ClusteringManager.PageOpenInTab(pageId: pageIDs[0], domain: "www.theguardian.com"), ClusteringManager.PageOpenInTab(pageId: pageIDs[1], domain: "www.theguardian.com"), ClusteringManager.PageOpenInTab(pageId: pageIDs[2], domain: "www.theguardian.com"), ClusteringManager.PageOpenInTab(pageId: pageIDs[4], domain: "en.wikipedia.org"), ClusteringManager.PageOpenInTab(pageId: pageIDs[5], domain: "www.rogerfederer.com")]
+        openPages = [ClusteringManager.PageOpenInTab(pageId: pageIDs[0]), ClusteringManager.PageOpenInTab(pageId: pageIDs[1]), ClusteringManager.PageOpenInTab(pageId: pageIDs[2]), ClusteringManager.PageOpenInTab(pageId: pageIDs[4]), ClusteringManager.PageOpenInTab(pageId: pageIDs[5])]
     }
 
     func testRemoveClosedPages() throws {
@@ -26,23 +26,14 @@ class TabColoringUpdaterTests: XCTestCase {
         expect(newUrlGroups) == [[pageIDs[0]], [pageIDs[1]], [pageIDs[2]], [pageIDs[4], pageIDs[5]]]
     }
 
-    func testMergeSinglesOfSameDomain() throws {
-        var newUrlGroups = updater.removeClosedPages(urlGroups: self.urlGroups, openPages: self.openPages)
-        newUrlGroups = updater.mergeSinglesOfSameDomain(urlGroups: newUrlGroups, allOpenPages: self.openPages)
-        expect(Set(newUrlGroups)) == Set([[pageIDs[0], pageIDs[1], pageIDs[2]], [pageIDs[4], pageIDs[5]]])
-    }
-
-    func testMergeSingleWithGroupOfSameDomain() throws {
-        urlGroups = [[pageIDs[0], pageIDs[1]], [pageIDs[2]], [pageIDs[3], pageIDs[4], pageIDs[5], pageIDs[6]]]
-        var newUrlGroups = updater.removeClosedPages(urlGroups: self.urlGroups, openPages: self.openPages)
-        newUrlGroups = updater.mergeSinglesOfSameDomain(urlGroups: newUrlGroups, allOpenPages: self.openPages)
-        newUrlGroups = updater.mergeSingleWithGroupOfSameDomain(urlGroups: newUrlGroups, allOpenPages: self.openPages)
-        expect(Set(newUrlGroups)) == Set([[pageIDs[0], pageIDs[1], pageIDs[2]], [pageIDs[4], pageIDs[5]]])
+    func testRemoveSingles() throws {
+        let newUrlGroups = updater.removeSingles(urlGroups: self.urlGroups)
+        expect(Set(newUrlGroups)) == Set([[pageIDs[3], pageIDs[4], pageIDs[5], pageIDs[6]]])
     }
 
     func testAll() throws {
         updater.update(urlGroups: urlGroups, openPages: openPages)
-        expect(Set(self.updater.groupsToColor ?? [])).toEventually(equal(Set([[pageIDs[0], pageIDs[1], pageIDs[2]], [pageIDs[4], pageIDs[5]]])))
+        expect(Set(self.updater.groupsToColor ?? [])).toEventually(equal(Set([[pageIDs[4], pageIDs[5]]])))
     }
 
     func testAllWithoutOpenPages() throws {
