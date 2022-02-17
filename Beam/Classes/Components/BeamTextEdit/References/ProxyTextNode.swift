@@ -19,9 +19,10 @@ class ProxyTextNode: TextNode, ProxyNode {
         var result: [Range<Int>] = []
         for range in text.ranges {
             if let noteTitle = editor?.note.note?.title {
-                let cleanRanges = range.string.lowercased().ranges(of: noteTitle.lowercased())
+                let string = range.string.lowercased()
+                let cleanRanges = string.ranges(of: noteTitle.lowercased())
                 for cleanRange in cleanRanges {
-                    result.append(range.string.range(from: cleanRange))
+                    result.append(string.range(from: cleanRange))
                 }
             }
         }
