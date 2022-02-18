@@ -50,9 +50,14 @@ extension FrecencyUrlRecord: PersistableRecord {
 }
 
 public class GRDBUrlFrecencyStorage: FrecencyStorage {
+    let db: GRDBDatabase
+    init(db: GRDBDatabase = GRDBDatabase.shared) {
+        self.db = db
+    }
+
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
-            if let record = try GRDBDatabase.shared.fetchOneFrecency(fromUrl: id)[paramKey] {
+            if let record = try db.fetchOneFrecency(fromUrl: id)[paramKey] {
                 return FrecencyScore(id: record.urlId,
                                      lastTimestamp: record.lastAccessAt,
                                      lastScore: record.frecencyScore,
@@ -71,7 +76,7 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
                                        frecencyScore: score.lastScore,
                                        frecencySortScore: score.sortValue,
                                        frecencyKey: paramKey)
-        try GRDBDatabase.shared.saveFrecencyUrl(record)
+        try db.saveFrecencyUrl(record)
     }
     public func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
         let records = scores.map { score in
@@ -83,6 +88,32 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
                 frecencyKey: paramKey
             )
         }
-        try GRDBDatabase.shared.save(urlFrecencies: records)
+        try db.save(urlFrecencies: records)
+    }
+}
+
+class LinkStoreFrecencyUrlStorage: FrecencyStorage {
+    let linkDB: BeamLinkDB
+
+    init(db: GRDBDatabase = GRDBDatabase.shared) {
+        linkDB = BeamLinkDB(db: db)
+    }
+    func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
+        guard paramKey == .webVisit30d0,
+              let link = linkDB.linkFor(id: id),
+              let lastAccessAt = link.frecencyVisitLastAccessAt,
+              let score = link.frecencyVisitScore,
+              let sortScore = link.frecencyVisitSortScore else { return nil }
+        return FrecencyScore(id: id, lastTimestamp: lastAccessAt, lastScore: score, sortValue: sortScore)
+    }
+
+    func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
+        guard paramKey == .webVisit30d0 else { return }
+        linkDB.updateFrecency(id: score.id, lastAccessAt: score.lastTimestamp, score: score.lastScore, sortScore: score.sortValue)
+    }
+
+    func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws {
+        guard paramKey == .webVisit30d0 else { return }
+        linkDB.updateFrecencies(scores: scores)
     }
 }

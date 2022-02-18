@@ -133,7 +133,7 @@ extension AutocompleteManager {
                         let result = AutocompleteResult(text: information, source: .history, url: url,
                                                         aliasForDestinationURL: aliasForDestinationURL,
                                                         information: result.title,
-                                                        completingText: query, score: result.frecency?.frecencySortScore, urlFields: [.text])
+                                                        completingText: query, score: result.frecencySortScore, urlFields: [.text])
                         if let searchEngineResult = self.convertResultToSearchEngineResultIfNeeded(result) {
                             return searchEngineResult
                         }
@@ -162,7 +162,7 @@ extension AutocompleteManager {
                 let result = AutocompleteResult(text: text, source: .url, url: url,
                                                 aliasForDestinationURL: aliasForDestinationURL,
                                                 information: info, completingText: query,
-                                                score: scoredLink.frecency?.frecencySortScore, urlFields: .text)
+                                                score: scoredLink.frecencySortScore, urlFields: .text)
                 if let searchEngineResult = self.convertResultToSearchEngineResultIfNeeded(result) {
                     return searchEngineResult
                 }

@@ -84,9 +84,16 @@ class BrowserImportManagerTest: XCTestCase {
         let node1 = try XCTUnwrap(root?.children[1])
         XCTAssertEqual(node0.events.first?.date, Date(timeIntervalSinceReferenceDate: Double(0)))
         XCTAssertEqual(node1.events.first?.date, Date(timeIntervalSinceReferenceDate: Double(1)))
-        let links = [node0.link, node1.link]
-        //expects 2 frecencies to be saved
-        let frecencies = GRDBDatabase.shared.getFrecencyScoreValues(urlIds: links, paramKey: .webVisit30d0)
-        XCTAssertEqual(frecencies.count, 2)
+        let urlIds = [node0.link, node1.link]
+        //expects 2 frecencies to be saved in linkstore and not in frecencyRecord table anymore
+        let frecencies = GRDBDatabase.shared.getFrecencyScoreValues(urlIds: urlIds, paramKey: .webVisit30d0)
+        XCTAssertEqual(frecencies.count, 0)
+        let links: [UUID: Link] = try GRDBDatabase.shared.getLinks(ids: urlIds)
+        XCTAssertNotNil(links[node0.link]?.frecencyVisitScore)
+        XCTAssertNotNil(links[node0.link]?.frecencyVisitSortScore)
+        XCTAssertNotNil(links[node0.link]?.frecencyVisitLastAccessAt)
+        XCTAssertNotNil(links[node1.link]?.frecencyVisitScore)
+        XCTAssertNotNil(links[node1.link]?.frecencyVisitSortScore)
+        XCTAssertNotNil(links[node1.link]?.frecencyVisitLastAccessAt)
     }
 }
