@@ -174,7 +174,7 @@ class OnboardingManager: ObservableObject {
 
     private func onboardingDidStart() {
         AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            if isAuthenticated {
+            if isAuthenticated && AccountManager.state == .signedIn {
                 self?.stepsHistory.removeAll()
             }
         }.store(in: &cancellables)
