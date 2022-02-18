@@ -86,7 +86,7 @@ func export_all_note_sources(to url: URL?) {
                     )
             }
             } else {
-                return [NoteAndSourcesRow(noteTitle: note.title, noteCreatedAt: note.creationDate, noteId: note.id)]
+                return nil
             }
     }.joined()
 
