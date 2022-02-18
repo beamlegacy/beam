@@ -44,7 +44,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
         // Set the message as the NSAlert text
         let alert = NSAlert()
         alert.informativeText = message
-        alert.addButton(withTitle: "Ok")
+        alert.addButton(withTitle: "OK")
 
         // Display the NSAlert
         alert.runModal()
