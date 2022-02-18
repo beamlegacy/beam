@@ -443,7 +443,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logError("Unable to purge unused files: \(error)", category: .fileDB)
         }
         if Configuration.branchType != .beta && Configuration.branchType != .publicRelease {
-            data.clusteringManager.saveOrphanedUrls(orphanedUrlManager: data.clusteringOrphanedUrlManager)
+            data.clusteringManager.saveOrphanedUrlsAtSessionClose(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
         data.clusteringManager.exportSummaryForNextSession()
     }

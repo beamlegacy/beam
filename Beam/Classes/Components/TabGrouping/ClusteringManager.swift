@@ -447,7 +447,18 @@ class ClusteringManager: ObservableObject {
             .map { urlGroup, _ in return urlGroup }
     }
 
-    public func saveOrphanedUrls(orphanedUrlManager: ClusteringOrphanedUrlManager) {
+    public func addOrphanedUrlsFromCurrentSession(orphanedUrlManager: ClusteringOrphanedUrlManager) {
+        let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
+        let savedAt = BeamDate.now
+        for (id, group) in orphanedUrlGroups.enumerated() {
+            for urlId in group {
+                let url = LinkStore.linkFor(urlId)?.url
+                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt))
+            }
+        }
+    }
+
+    public func saveOrphanedUrlsAtSessionClose(orphanedUrlManager: ClusteringOrphanedUrlManager) {
         let orphanedUrlGroups = getOrphanedUrlGroups(urlGroups: clusteredPagesId, noteGroups: clusteredNotesId, activeSources: activeSources)
         let savedAt = BeamDate.now
         for (id, group) in orphanedUrlGroups.enumerated() {
