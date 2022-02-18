@@ -590,6 +590,7 @@ import Promises
             return
         }
         hasCopiedURL = true
+        SoundEffectPlayer.shared.playSound(.beginRecord)
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [weak self] in
             self?.hasCopiedURL = false
         }

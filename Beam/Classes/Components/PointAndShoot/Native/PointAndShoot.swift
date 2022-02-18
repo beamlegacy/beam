@@ -2,7 +2,6 @@ import Foundation
 import BeamCore
 import SwiftSoup
 import Promises
-import AVFoundation
 
 struct PointAndShootError: LocalizedError {
     var errorDescription: String?
@@ -26,27 +25,14 @@ public struct NoteInfo: Encodable {
 // swiftlint:disable file_length
 class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
-    var shootSound: SystemSoundID = 0
-    var collectSound: SystemSoundID = 1
-
-    override init() {
-        if let soundURL = Bundle.main.url(forResource: "collect", withExtension: "aif") {
-            AudioServicesCreateSystemSoundID(soundURL as CFURL, &shootSound)
-        }
-
-        if let soundURL = Bundle.main.url(forResource: "confirm", withExtension: "aiff") {
-            AudioServicesCreateSystemSoundID(soundURL as CFURL, &collectSound)
-        }
-    }
-
     fileprivate func playShootSound() {
         guard PreferencesManager.isCollectSoundsEnabled else { return }
-        AudioServicesPlaySystemSound(shootSound)
+        SoundEffectPlayer.shared.playSound(.pointAndShootCollect)
     }
 
     fileprivate func playCollectSound() {
         guard PreferencesManager.isCollectSoundsEnabled else { return }
-        AudioServicesPlaySystemSound(collectSound)
+        SoundEffectPlayer.shared.playSound(.pointAndShootConfirm)
     }
 
     var data: BeamData = AppDelegate.main.data
