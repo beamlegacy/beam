@@ -51,15 +51,22 @@ struct OrphanedUrl: CsvRow {
 }
 class ClusteringOrphanedUrlManager {
     var urls: [OrphanedUrl] = [OrphanedUrl]()
+    var tempUrls: [OrphanedUrl] = [OrphanedUrl]()
     var savePath: URL
+    var savePathTemp: URL?
     let fileManager = FileManager.default
 
     init(savePath: URL) {
         self.savePath = savePath
+        self.savePathTemp =  URL(string: savePath.deletingLastPathComponent().string + "temp.csv")
     }
 
     func add(orphanedUrl: OrphanedUrl) {
         urls.append(orphanedUrl)
+    }
+
+    func addTemporarily(orphanedUrl: OrphanedUrl) {
+        tempUrls.append(orphanedUrl)
     }
 
     func save() {
@@ -73,7 +80,23 @@ class ClusteringOrphanedUrlManager {
 
     func export(to: URL) {
         let destination = to.appendingPathComponent("beam_clustering_orphaned_urls-\(BeamDate.now).csv")
-        _ = fileManager.secureCopyItem(at: savePath, to: destination)
+        if let savePathTemp = savePathTemp {
+            do {
+                try FileManager.default.removeItem(at: savePathTemp)
+            } catch {
+                Logger.shared.logWarning("Did not remove previous temp csv file of orphans from current session", category: .web)
+            }
+            do {
+                try FileManager.default.copyItem(at: savePath, to: savePathTemp)
+                let writer = CsvRowsWriter(header: OrphanedUrl.header, rows: tempUrls)
+                try writer.append(to: savePathTemp)
+                _ = fileManager.secureCopyItem(at: savePathTemp, to: destination)
+            } catch {
+                Logger.shared.logError("Couldn't add orphans from current session", category: .web)
+                _ = fileManager.secureCopyItem(at: savePath, to: destination)
+            }
+        }
+        tempUrls = [OrphanedUrl]()
     }
 
     func clear() throws {
