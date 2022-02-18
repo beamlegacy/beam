@@ -11,7 +11,7 @@ import UUIDKit
 public struct Link: Codable {
     public static let missing = Link(url: "<???>", title: nil, content: nil, createdAt: Date.distantPast, updatedAt: Date.distantPast)
     enum CodingKeys: String, CodingKey {
-        case url, title, createdAt, updatedAt, deletedAt
+        case url, title, createdAt, frecencyVisitLastAccessAt, frecencyVisitScore, frecencyVisitSortScore, updatedAt, deletedAt
     }
 
     public var id: UUID = .null
@@ -19,17 +19,26 @@ public struct Link: Codable {
     public var title: String?
     public var content: String?
     public var destination: UUID?
+    public var frecencyVisitLastAccessAt: Date?
+    public var frecencyVisitScore: Float?
+    public var frecencyVisitSortScore: Float?
 
     public var createdAt: Date
     public var updatedAt: Date
     public var deletedAt: Date?
 
-    public init(url: String, title: String?, content: String?, destination: UUID? = nil, createdAt: Date = BeamDate.now, updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
+    public init(url: String, title: String?, content: String?, destination: UUID? = nil,
+                frecencyVisitLastAccessAt: Date? = nil, frecencyVisitScore: Float? = nil,
+                frecencyVisitSortScore: Float? = nil, createdAt: Date = BeamDate.now,
+                updatedAt: Date = BeamDate.now, deletedAt: Date? = nil) {
         self.id = UUID.v5(name: url, namespace: .url)
         self.url = url
         self.title = title
         self.content = content
         self.destination = destination
+        self.frecencyVisitLastAccessAt = frecencyVisitLastAccessAt
+        self.frecencyVisitScore = frecencyVisitScore
+        self.frecencyVisitSortScore = frecencyVisitSortScore
 
         self.createdAt = createdAt
         self.updatedAt = updatedAt
