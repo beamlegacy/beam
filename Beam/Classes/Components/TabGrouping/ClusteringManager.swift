@@ -275,7 +275,13 @@ class ClusteringManager: ObservableObject {
                 switch result {
                 case .failure(let error):
                     self.isClustering = false
-                    Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
+                    if error as? Cluster.AdditionError == .skippingToNextAddition {
+                        Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
+                    } else if error as? Cluster.AdditionError == .abortingAdditionDuringClustering {
+                        Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
+                    } else {
+                        Logger.shared.logError("Error while adding page to cluster for \(pageToAdd): \(error)", category: .clustering)
+                    }
                 case .success(let result):
                     self.similarities = result.similarities
                     self.clusteredPagesId = result.pageGroups
@@ -341,6 +347,10 @@ class ClusteringManager: ObservableObject {
             case .failure(let error):
                 if error as? Cluster.AdditionError == .notEnoughTextInNote {
                     Logger.shared.logInfo("Note ignored by the clustering process due to insufficient content. Suggestions can still be made for the note.")
+                } else if error as? Cluster.AdditionError == .skippingToNextAddition {
+                    Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
+                } else if error as? Cluster.AdditionError == .abortingAdditionDuringClustering {
+                    Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
                 } else {
                     Logger.shared.logError("Error while adding note to cluster for \(clusteringNote): \(error)", category: .clustering)
                 }
