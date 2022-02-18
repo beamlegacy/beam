@@ -111,9 +111,9 @@ extension BeamWindow {
 
     @IBAction func openLocation(_ sender: Any?) {
         if state.focusOmniBox && (state.mode != .web || state.focusOmniBoxFromTab) {
-            state.focusOmniBox = false
+            state.stopFocusOmnibox()
         } else {
-            state.setFocusOmnibox(fromTab: true)
+            state.startFocusOmnibox(fromTab: true)
         }
     }
 
@@ -125,6 +125,11 @@ extension BeamWindow {
         if let currentTabIsPlaying = state.browserTabsManager.currentTab?.mediaPlayerController?.isPlaying, currentTabIsPlaying {
             state.browserTabsManager.currentTab?.mediaPlayerController?.isMuted = true
         }
+    }
+
+    @IBAction func copyCurrentTabURL(_ sender: Any?) {
+        guard let currentTab = state.browserTabsManager.currentTab else { return }
+        currentTab.copyURLToPasteboard()
     }
 
     @IBAction func muteOtherTabs(_ sender: Any?) {

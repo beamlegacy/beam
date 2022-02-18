@@ -24,6 +24,7 @@ import Promises
     @Published var privateMode = false
     @Published var isPinned = false
     @Published var screenshotCapture: NSImage?
+    @Published var hasCopiedURL: Bool = false
 
     weak var state: BeamState? {
         didSet {
@@ -575,6 +576,23 @@ import Promises
             BrowsingTreeStoreManager.shared.groupSave(browsingTree: self.browsingTree, appSessionId: appSessionId)
         } else {
             BrowsingTreeStoreManager.shared.save(browsingTree: self.browsingTree, appSessionId: appSessionId) {}
+        }
+    }
+
+    func copyURLToPasteboard() {
+        guard let url = url ?? preloadUrl else { return }
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(url.absoluteString, forType: .string)
+        guard !hasCopiedURL else {
+            // if it was already copied, let's dismiss right away.
+            hasCopiedURL = false
+            return
+        }
+        hasCopiedURL = true
+        SoundEffectPlayer.shared.playSound(.beginRecord)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) { [weak self] in
+            self?.hasCopiedURL = false
         }
     }
 }

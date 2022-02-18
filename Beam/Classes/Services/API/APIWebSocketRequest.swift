@@ -181,14 +181,19 @@ class APIWebSocketRequest: APIRequest {
     /// - Parameter completionHandler: the document update
     /// - Returns: The channelId used for calling `unsubscribe()`
     @discardableResult
-    func connectBeamObjects(_ completionHandler: @escaping (Swift.Result<[BeamObject], Error>) -> Void) -> UUID? {
+    func connectBeamObjects(_ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) -> UUID? {
         guard connected else {
             Logger.shared.logError("Socket isn't connected", category: .webSocket)
             completionHandler(.failure(APIWebSocketRequestError.socket_not_connected))
             return nil
         }
 
-        guard let query = loadFile(fileName: "subscription_beam_objects_updated") else {
+        var filename = "subscription_beam_objects_updated"
+        if Configuration.beamObjectDataOnSeparateCall {
+            filename = "subscription_beam_objects_updated_data_url"
+        }
+
+        guard let query = loadFile(fileName: filename) else {
             fatalError("File not found")
         }
 
@@ -226,17 +231,42 @@ class APIWebSocketRequest: APIRequest {
                             return
                         }
 
-                        do {
-                            Logger.shared.logDebug("Received \(beamObjects.count) beam objects",
-                                                   category: .webSocket)
+                        Logger.shared.logDebug("Received \(beamObjects.count) beam objects",
+                                               category: .webSocket)
 
-                            for beamObject in beamObjects {
-                                try beamObject.decrypt()
-                                try beamObject.setTimestamps()
+                        // TODO: change the completion handler to [BeamObject] and make a single call
+                        for beamObject in beamObjects {
+                            if let dataUrl = beamObject.dataUrl {
+                                let request = BeamObjectRequest()
+                                do {
+                                    try request.fetchDataFromUrl(urlString: dataUrl) { result in
+                                        switch result {
+                                        case .failure(let error):
+                                            completionHandler(.failure(error))
+                                        case .success(let data):
+                                            beamObject.data = data
+
+                                            do {
+                                                try beamObject.decrypt()
+                                                try beamObject.setTimestamps()
+                                                completionHandler(.success(beamObject))
+                                            } catch {
+                                                completionHandler(.failure(error))
+                                            }
+                                        }
+                                    }
+                                } catch {
+                                    completionHandler(.failure(error))
+                                }
+                            } else {
+                                do {
+                                    try beamObject.decrypt()
+                                    try beamObject.setTimestamps()
+                                    completionHandler(.success(beamObject))
+                                } catch {
+                                    completionHandler(.failure(error))
+                                }
                             }
-                            completionHandler(.success(beamObjects))
-                        } catch {
-                            completionHandler(.failure(error))
                         }
                     }
                 }

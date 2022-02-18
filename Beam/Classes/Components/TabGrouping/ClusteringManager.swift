@@ -4,7 +4,7 @@
 //
 //  Created by Jean-Louis Darmon on 31/05/2021.
 //
-// swiftlint:disable:next file_length, type_body_length
+// swiftlint:disable:next file_length type_body_length
 
 import Foundation
 import BeamCore
@@ -20,6 +20,10 @@ class ClusteringManager: ObservableObject {
         var pageId: UUID?
         var pageDate: Date = Date.distantPast
         var pageScore: Float = 0
+    }
+
+    public struct PageOpenInTab {
+        let pageId: UUID
     }
 
     enum InitialiseNotes {
@@ -38,6 +42,9 @@ class ClusteringManager: ObservableObject {
             transformToClusteredNotes()
             if clusteredNotesId.count > 1 {
                 updateNoteSources()
+                if Configuration.tabColoringEnabled {
+                    updateTabColors()
+                }
             }
         }
     }
@@ -57,6 +64,7 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
+    var tabColoringUpdater: TabColoringUpdater
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
     var similarities = [UUID: [UUID: Double]]()
@@ -64,6 +72,7 @@ class ClusteringManager: ObservableObject {
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
     let frecencyFetcher = GRDBUrlFrecencyStorage()
     var summary: SummaryForNewDay
+    var allOpenPages: [PageOpenInTab]?
     public var continueToNotes = [UUID]()
     public var continueToPage: UUID?
 
@@ -75,6 +84,7 @@ class ClusteringManager: ObservableObject {
         self.weightEntities = entities
         self.activeSources = activeSources
         self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId)
+        self.tabColoringUpdater = TabColoringUpdater()
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
         self.sessionId = sessionId
@@ -238,7 +248,7 @@ class ClusteringManager: ObservableObject {
         return (id, parentId)
     }
 
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func addPage(id: UUID, parentId: UUID?, value: TabInformation? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
         if let value = value {
@@ -410,6 +420,10 @@ class ClusteringManager: ObservableObject {
                 return BeamNote.titleForNoteId(noteUuid, false)
             }
         })
+    }
+
+    private func updateTabColors() {
+        self.tabColoringUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
     }
 
     private func updateNoteSources() {

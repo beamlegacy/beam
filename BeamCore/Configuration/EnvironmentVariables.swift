@@ -33,6 +33,10 @@ public struct EnvironmentVariables {
         static public private(set) var apiSyncEnabled = NSString("$(BROWSING_TREE_API_SYNC_ENABLED)").boolValue
     }
 
+    public struct Clustering {
+        static public private(set) var tabColoring = NSString("$(TAB_COLORING)").boolValue
+    }
+
     public struct PublicAPI {
         static public private(set) var embed = "$(PUBLIC_API_EMBED_URL)"
         static public private(set) var publishServer = "$(PUBLIC_API_PUBLISH_URL)"

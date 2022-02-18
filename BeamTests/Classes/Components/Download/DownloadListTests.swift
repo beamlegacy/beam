@@ -23,6 +23,19 @@ class DownloadListTests: XCTestCase {
         XCTAssertTrue(downloadList.downloads.contains(d2))
     }
 
+    func testReverseChronologicalOrder() {
+        let d1 = DownloadListItemMock(id: 1, state: .running)
+        let d2 = DownloadListItemMock(id: 2, state: .running)
+        let d3 = DownloadListItemMock(id: 3, state: .running)
+        downloadList.addDownload(d1)
+        downloadList.addDownload(d2)
+        downloadList.addDownload(d3)
+
+        XCTAssertEqual(downloadList.downloads[0].id, 3)
+        XCTAssertEqual(downloadList.downloads[1].id, 2)
+        XCTAssertEqual(downloadList.downloads[2].id, 1)
+    }
+
     func testAddDuplicate() {
         downloadList.addDownload(DownloadListItemMock(id: 1, state: .running))
         downloadList.addDownload(DownloadListItemMock(id: 1, state: .suspended))

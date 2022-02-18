@@ -65,6 +65,7 @@ class BeamObject: Codable {
     var dataChecksum: String?
     var previousChecksum: String?
     var privateKeySignature: String?
+    var largeDataBlobId: String?
 
     var id: UUID
 
@@ -97,6 +98,7 @@ class BeamObject: Codable {
         case dataChecksum = "checksum"
         case previousChecksum
         case privateKeySignature
+        case largeDataBlobId
     }
 
     init(id: UUID, beamObjectType: String) {
@@ -171,6 +173,8 @@ class BeamObject: Codable {
         result.previousChecksum = previousChecksum
         result.dataChecksum = dataChecksum
         result.encrypted = encrypted
+        result.largeDataBlobId = largeDataBlobId
+
         return result
     }
 
@@ -311,13 +315,13 @@ extension BeamObject {
     }
 
     func encrypt() throws {
-        assert(!encrypted)
-
         guard let clearData = data else { return }
+
+        assert(!encrypted)
 
         if Configuration.env == .test,
            EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString() != Configuration.testPrivateKey {
-            fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)` in your tests")
+            fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)` in your tests")
         }
 
         guard let encryptedClearData = try EncryptionManager.shared.encryptData(clearData) else {

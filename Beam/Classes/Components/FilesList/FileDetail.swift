@@ -214,7 +214,7 @@ struct FileDetail: View {
                 do {
                     saving = true
 
-                    try fileManager.saveOnBeamObjectAPI(file) { result in
+                    try fileManager.saveOnBeamObjectAPI(file, force: true) { result in
                         saving = false
 
                         switch result {

@@ -16,6 +16,7 @@ class AutocompleteManager: ObservableObject {
     static let urlFrecencyParamKey: FrecencyParamKey = .webVisit30d0
 
     @Published var searchQuery: String = ""
+    weak private(set) var beamState: BeamState?
 
     private var textChangeIsFromSelection = false
     private var replacedProposedText: String?
@@ -33,7 +34,6 @@ class AutocompleteManager: ObservableObject {
     }
 
     @Published var animateInputingCharacter = false
-    let beamData: BeamData
 
     private let searchEngineCompleter: SearchEngineAutocompleter
     var searchEngine: SearchEngineDescription {
@@ -42,10 +42,9 @@ class AutocompleteManager: ObservableObject {
     private var scope = Set<AnyCancellable>()
     var searchRequestsCancellables = Set<AnyCancellable>()
 
-    init(with data: BeamData, searchEngine: SearchEngineDescription) {
-        beamData = data
+    init(searchEngine: SearchEngineDescription, beamState: BeamState?) {
         searchEngineCompleter = SearchEngineAutocompleter(searchEngine: searchEngine)
-
+        self.beamState = beamState
         $searchQuery
             .dropFirst()
             .sink { [weak self] query in
@@ -70,7 +69,16 @@ class AutocompleteManager: ObservableObject {
 
     typealias AutocompleteSourceResult = [AutocompleteResult.Source: [AutocompleteResult]]
 
-    private func buildAutocompleteResults(for receivedQueryString: String) {
+    /// Called right before showing the omnibox;
+    /// to make sure we have the expected results before any animation
+    func prepareResultsForAppearance(for receivedQueryString: String, completion: (() -> Void)? = nil) {
+        guard shouldDisplayDefaultSuggestions(for: receivedQueryString) else { return }
+        buildAutocompleteResults(for: receivedQueryString) {
+            completion?()
+        }
+    }
+
+    private func buildAutocompleteResults(for receivedQueryString: String, completion: (() -> Void)? = nil) {
         guard !textChangeIsFromSelection else {
             textChangeIsFromSelection = false
             return
@@ -94,7 +102,7 @@ class AutocompleteManager: ObservableObject {
 
         stopCurrentCompletionWork()
         var publishers: [AnyPublisher<AutocompleteManager.AutocompletePublisherSourceResults, Never>]
-        if searchText.isEmpty {
+        if shouldDisplayDefaultSuggestions(for: searchText) {
             publishers = getDefaultSuggestionsPublishers()
         } else {
             publishers = getAutocompletePublishers(for: searchText) +
@@ -110,6 +118,9 @@ class AutocompleteManager: ObservableObject {
         Publishers.MergeMany(publishers).collect()
             .receive(on: DispatchQueue.main)
             .sink { [weak self] publishersResults in
+                defer {
+                    completion?()
+                }
                 guard let self = self else { return }
                 self.rawAutocompleteResults = publishersResults.compactMap({ $0.results.isEmpty ? nil : $0 })
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
@@ -121,6 +132,11 @@ class AutocompleteManager: ObservableObject {
                     self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: selectionWasReset)
                 }
             }.store(in: &searchRequestsCancellables)
+    }
+
+    private func shouldDisplayDefaultSuggestions(for searchText: String) -> Bool {
+        searchText.isEmpty ||
+        (beamState?.focusOmniBoxFromTab == true && searchText == beamState?.browserTabsManager.currentTab?.url?.absoluteString)
     }
 
     private func logAutocompleteResultFinished(for searchText: String, finalResults: [AutocompleteResult], startedAt: DispatchTime) {

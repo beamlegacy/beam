@@ -11,8 +11,8 @@ import XCTest
 class OmniBoxTestView: BaseView {
 
 
-    func focusOmniBoxSearchField() {
-        shortcutsHelper.shortcutActionInvoke(action: .openLocation)
+    func focusOmniBoxSearchField(forCurrenTab: Bool = false) {
+        shortcutsHelper.shortcutActionInvoke(action: forCurrenTab ? .openLocation : .newTab)
     }
 
     func getOmniBoxSearchField() -> XCUIElement {

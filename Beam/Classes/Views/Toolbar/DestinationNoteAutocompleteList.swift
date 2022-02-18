@@ -71,7 +71,7 @@ struct DestinationNoteAutocompleteList: View {
             ForEach(model.results, id: \.id) { i in
                 return AutocompleteItemView(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
                                         alwaysHighlightCompletingText: alwaysHighlightCompletingText,
-                                        allowsShortcut: i.source != .createCard || model.allowNewCardShortcut, colorPalette: colorPalette,
+                                        allowsShortcut: i.source != .createNote || model.allowNewCardShortcut, colorPalette: colorPalette,
                                         additionalLeadingPadding: additionLeadingPadding, cornerRadius: 0)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
@@ -169,7 +169,7 @@ extension DestinationNoteAutocompleteList {
             guard !result.disabled else { return false }
             if let i = selectedIndex {
                 return results[i].id == result.id
-            } else if result.source == .createCard && modifierFlagsPressed?.contains(.command) == true {
+            } else if result.source == .createNote && modifierFlagsPressed?.contains(.command) == true {
                 return true
             }
             return false
@@ -358,7 +358,7 @@ extension DestinationNoteAutocompleteList {
             allowCreateCard = allowCreateCard
                 && !items.contains(where: { $0.title.lowercased() == text.lowercased() })
             if allowCreateCard && !text.isEmpty {
-                let createItem = AutocompleteResult(text: text, source: .createCard, information: "New Note")
+                let createItem = AutocompleteResult(text: text, source: .createNote, information: "New Note")
                 if autocompleteItems.count >= itemLimit {
                     autocompleteItems[autocompleteItems.count - 1] = createItem
                 } else {

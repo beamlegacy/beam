@@ -63,6 +63,10 @@ struct TabView: View {
         tab.mediaPlayerController?.isPlaying == true
     }
 
+    private var copyMessage: String? {
+        tab.hasCopiedURL ? loc("Link Copied") : nil
+    }
+
     private var audioView: some View {
         TabAudioView(tab: tab, action: onToggleMute)
     }
@@ -134,6 +138,17 @@ struct TabView: View {
         }
     }
 
+    private func copyMessageView(message: String) -> some View {
+        HStack(spacing: BeamSpacing._40) {
+            Icon(name: "editor-url_copy", width: 12, color: BeamColor.LightStoneGray.swiftUI)
+            Text(message)
+                .font(BeamFont.medium(size: 11).swiftUI)
+                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                .allowsHitTesting(false)
+                .accessibility(identifier: "browserTabInfoMessage")
+        }
+    }
+
     // swiftlint:disable:next function_body_length
     private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
         ZStack {
@@ -141,7 +156,7 @@ struct TabView: View {
             let showForegroundHoverStyle = isHovering && isSelected
             let shouldShowClose = isHovering
             let iconNextToTitle = Group { if shouldShowSecurity { securityIcon } else { faviconView } }
-            let iconSpacing: CGFloat = shouldShowSecurity ? 1 : 4
+            let iconSpacing: CGFloat = shouldShowSecurity ? 1 : BeamSpacing._40
             if isSingleTab {
                 // Using hidden texts to make sure the intrinsic size used is the largest of these two layout
                 HStack {
@@ -152,7 +167,10 @@ struct TabView: View {
                     }
                 }.opacity(0).accessibility(hidden: true)
             }
-            if showForegroundHoverStyle {
+            if let copyMessage = copyMessage {
+                copyMessageView(message: copyMessage)
+                    .transition(centerViewTransition(foregroundHoverStyle: true))
+            } else if showForegroundHoverStyle {
                 HStack(spacing: iconSpacing) {
                     iconNextToTitle
                     Text(tab.url?.urlStringWithoutScheme ?? tab.title)
@@ -372,6 +390,12 @@ struct TabView_Previews: PreviewProvider {
         t.mediaPlayerController?.isPlaying = true
         return t
     }()
+    static var tabCopied: BrowserTab = {
+        let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: nil)
+        t.title = "Tab Copied"
+        t.hasCopiedURL = true
+        return t
+    }()
 
     static var previews: some View {
         Group {
@@ -384,6 +408,7 @@ struct TabView_Previews: PreviewProvider {
                     TabView(tab: tab, isHovering: true, isSelected: false)
                     TabView(tab: tab, isSelected: false)
                     TabView(tab: tabPlaying, isHovering: true, isSelected: false)
+                    TabView(tab: tabCopied, isHovering: false, isSelected: false)
                 }
                 Rectangle().fill(Color.red)
                     .frame(width: 1, height: 280)

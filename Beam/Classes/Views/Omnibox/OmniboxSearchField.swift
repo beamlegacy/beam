@@ -29,7 +29,7 @@ struct OmniboxSearchField: View {
             return AutocompleteResult.Source.url.iconName
         }
         if let autocompleteResult = selectedAutocompleteResult {
-            return autocompleteResult.source.iconName
+            return autocompleteResult.icon
         }
         return AutocompleteResult.Source.searchEngine.iconName
     }
@@ -75,7 +75,7 @@ struct OmniboxSearchField: View {
     }
 
     private var subtitleColor: BeamColor {
-        if let result = selectedAutocompleteResult, result.source == .createCard {
+        if let result = selectedAutocompleteResult, result.source == .createNote {
             return BeamColor.Autocomplete.newCardSubtitle
         }
         return BeamColor.Autocomplete.link
@@ -159,7 +159,7 @@ struct OmniboxSearchField: View {
         let isCreateCardShortcut = modifierFlags?.contains(.option) == true
         if isCreateCardShortcut {
             if let createCardIndex = autocompleteManager.autocompleteResults.firstIndex(where: { (result) -> Bool in
-                return result.source == .createCard
+                return result.source == .createNote
             }) {
                 autocompleteManager.autocompleteSelectedIndex = createCardIndex
             }

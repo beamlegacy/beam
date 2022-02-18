@@ -142,7 +142,7 @@ class CardReferenceFormatterView: FormatterView {
             onSelectNote?(noteIdUnwrapped, elementId)
         } else if selectedResult.source == .note && listModel.realNameForCardName(selectedResult.text) != selectedResult.text {
             onSelectCreate?(listModel.realNameForCardName(selectedResult.text))
-        } else if selectedResult.source == .createCard {
+        } else if selectedResult.source == .createNote {
             onSelectCreate?(selectedResult.text)
         }
         return true

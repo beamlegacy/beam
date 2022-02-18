@@ -75,7 +75,7 @@ class AutocompleteResultTest: XCTestCase {
     }
 
     func testCreateNoteMatchInTheMiddle() {
-        let result = AutocompleteResult(text: "Hello world", source: .createCard, disabled: false, url: nil, information: nil, completingText: "wor", uuid: UUID(), score: 1.0, urlFields: [])
+        let result = AutocompleteResult(text: "Hello world", source: .createNote, disabled: false, url: nil, information: nil, completingText: "wor", uuid: UUID(), score: 1.0, urlFields: [])
         // Check that the matcher doesn't cut the test to "world"
         XCTAssertEqual(result.displayText, "Hello world")
         XCTAssertNil(result.displayInformation)

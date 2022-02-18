@@ -10,7 +10,7 @@ import BeamCore
 import AutoUpdate
 import ZIPFoundation
 
-// swiftlint:disable file_length
+// swiftlint:disable file_length type_body_length
 public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var _todaysNote: BeamNote?
     var todaysNote: BeamNote {
