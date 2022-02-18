@@ -91,26 +91,6 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             expect(matches.count) == 1
             expect(matches[0].url) == "https://unicode-separator.com"
         }
-
-        // Check frecency record is retrieved
-        do {
-            let frecency = FrecencyUrlRecord(urlId: LinkStore.getOrCreateIdFor("https://macg.co"),
-                                             lastAccessAt: Date(timeIntervalSince1970: 0),
-                                             frecencyScore: 0.42,
-                                             frecencySortScore: 0,
-                                             frecencyKey: .webVisit30d0)
-            try db.saveFrecencyUrl(frecency)
-            // Match urlId = 0, and check frecency record
-            searchLink(db, query: "Monterey", prefixLast: false) { matches in
-                expect(matches.count) == 1
-                guard let f = matches[0].frecency else {
-                    fail("expect a frecency record")
-                    return
-                }
-                expect(f.frecencyScore) == 0.42
-                expect(f.frecencySortScore) == 0.0
-            }
-        }
     }
 
     func testSearchHistoryFrecencySort() throws {
@@ -119,54 +99,36 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             LinkStore.getOrCreateIdFor("https://foobar.co"),
             LinkStore.getOrCreateIdFor("https://foobar1.co"),
             LinkStore.getOrCreateIdFor("https://foobar2.co"),
+            LinkStore.getOrCreateIdFor("https://destination.co"),
+        ]
+        let historyItems = [
+            (urlId: urlIds[0], url: "https://foobar.co", title: "foo bar", content: "", sortScore: Float(0.42), destination: nil),
+            (urlId: urlIds[1], url: "https://foobar1.co", title: "foo baz", content: nil, sortScore: Float(-0.05), destination: nil),
+            (urlId: urlIds[2], url: "https://foobar2.co", title: "foo·bar baz", content: nil, sortScore: Float(-10), destination: "https://destination.co"),
+            (urlId: urlIds[3], url: "https://destination.co", title: "destination", content: nil, sortScore: Float(2.5), destination: nil)
         ]
 
-        for history in [
-            (urlId: urlIds[0], url: "https://foobar.co", title: "foo bar", content: ""),
-            (urlId: urlIds[1], url: "https://foobar1.co", title: "foo baz", content: nil),
-            (urlId: urlIds[2], url: "https://foobar2.co", title: "foo·bar baz", content: nil)
-        ] {
-            db.visit(url: history.url, title: history.title, content: history.content, destination: nil)
-        }
-
-        for f in [
-            (urlId: urlIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 0.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
-            (urlId: urlIds[1], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -0.05,           frecencyKey: FrecencyParamKey.webVisit30d0),
-            (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: 1.42,            frecencyKey: FrecencyParamKey.webVisit30d0),
-            (urlId: urlIds[2], lastAccessAt: BeamDate.now, frecencyScore: 0.0, frecencySortScore: -Float.infinity, frecencyKey: FrecencyParamKey.webReadingTime30d0),
-        ] {
-            let frecency = FrecencyUrlRecord(urlId: f.urlId,
-                                             lastAccessAt: f.lastAccessAt,
-                                             frecencyScore: Float(f.frecencyScore),
-                                             frecencySortScore: Float(f.frecencySortScore),
-                                             frecencyKey: f.frecencyKey)
-            try db.saveFrecencyUrl(frecency)
+        for history in historyItems {
+            db.visit(url: history.url, title: history.title, content: history.content, destination: history.destination)
+            db.updateLinkFrecency(id: history.urlId, lastAccessAt: BeamDate.now, score: 1, sortScore: history.sortScore)
         }
 
         // Retrieve search results with frecency sort on .visit30d0
         searchLink(db, query: "foo", enabledFrecencyParam: .webVisit30d0) { matches in
             expect(matches.count) == 3
 
-            for (expectedUrlId, match) in zip([urlIds[2], urlIds[0], urlIds[1]], matches) {
-                guard let f = match.frecency else {
-                    fail("expect a frecency record")
-                    continue
-                }
-                expect(f.urlId) == expectedUrlId
-            }
-        }
+            //When a match has a destination, destination frecency is fetched instead of its own
+            expect(matches[0].url) == historyItems[2].url
+            expect(matches[0].frecencySortScore) == historyItems[3].sortScore
+            expect(matches[0].destinationURL) == historyItems[3].url
 
-        // Retrieve search results with frecency sort on .readingTime30d0
-        searchLink(db, query: "foo", enabledFrecencyParam: .webReadingTime30d0) { matches in
-            expect(matches.count) == 1
+            expect(matches[1].url) == historyItems[0].url
+            expect(matches[1].frecencySortScore) == historyItems[0].sortScore
+            expect(matches[1].destinationURL).to(beNil())
 
-            for (expectedUrlId, match) in zip([ urlIds[2] ], matches) {
-                guard let f = match.frecency else {
-                    fail("expect a frecency record")
-                    continue
-                }
-                expect(f.urlId) == expectedUrlId
-            }
+            expect(matches[2].url) == historyItems[1].url
+            expect(matches[2].frecencySortScore) == historyItems[1].sortScore
+            expect(matches[2].destinationURL).to(beNil())
         }
     }
 

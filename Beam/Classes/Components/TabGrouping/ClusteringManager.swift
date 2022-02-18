@@ -70,7 +70,7 @@ class ClusteringManager: ObservableObject {
     var similarities = [UUID: [UUID: Double]]()
     var notesChangedByUserInSession = [UUID]()
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
-    let frecencyFetcher = GRDBUrlFrecencyStorage()
+    let frecencyFetcher = LinkStoreFrecencyUrlStorage()
     var summary: SummaryForNewDay
     var allOpenPages: [PageOpenInTab]?
     public var continueToNotes = [UUID]()

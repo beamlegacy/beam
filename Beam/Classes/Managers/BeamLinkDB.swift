@@ -14,23 +14,27 @@ import BeamCore
 extension Link: TableRecord {
     /// The table columns
     enum Columns: String, ColumnExpression {
-        case id, url, title, content, destination, createdAt, updatedAt, deletedAt
+        case id, url, title, content, destination, createdAt, updatedAt, deletedAt, frecencyVisitLastAccessAt, frecencyVisitScore, frecencyVisitSortScore
     }
 
     static let frecencyForeign = "frecency"
     static let frecency = hasOne(FrecencyUrlRecord.self,
                                  key: frecencyForeign,
                                  using: ForeignKey([FrecencyUrlRecord.Columns.urlId], to: [Columns.id]))
+    static let destinationLink = belongsTo(Link.self, key: "destinationLink", using: ForeignKey(["destination"], to: ["id"]))
 }
 
 // Fetching methods
-extension Link: FetchableRecord {
+extension Link: Identifiable, FetchableRecord {
     /// Creates a record from a database row
     public init(row: Row) {
         self.init(url: row[Columns.url],
                   title: row[Columns.title],
                   content: row[Columns.content],
                   destination: row[Columns.destination],
+                  frecencyVisitLastAccessAt: row[Columns.frecencyVisitLastAccessAt],
+                  frecencyVisitScore: row[Columns.frecencyVisitScore],
+                  frecencyVisitSortScore: row[Columns.frecencyVisitSortScore],
                   createdAt: row[Columns.createdAt],
                   updatedAt: row[Columns.updatedAt],
                   deletedAt: row[Columns.deletedAt]
@@ -60,6 +64,9 @@ extension Link: MutablePersistableRecord {
         container[Columns.title] = title
         container[Columns.content] = content
         container[Columns.destination] = destination
+        container[Columns.frecencyVisitLastAccessAt] = frecencyVisitLastAccessAt
+        container[Columns.frecencyVisitScore] = frecencyVisitScore
+        container[Columns.frecencyVisitSortScore] = frecencyVisitSortScore
         container[Columns.createdAt] = createdAt
         container[Columns.updatedAt] = updatedAt
         container[Columns.deletedAt] = deletedAt
@@ -79,7 +86,9 @@ extension Link: BeamObjectProtocol {
     }
 
     public func copy() throws -> Link {
-        Link(url: url, title: title, content: "", createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
+        Link(url: url, title: title, content: "", frecencyVisitLastAccessAt: frecencyVisitLastAccessAt,
+             frecencyVisitScore: frecencyVisitScore, frecencyVisitSortScore: frecencyVisitSortScore,
+             createdAt: createdAt, updatedAt: updatedAt, deletedAt: deletedAt)
     }
 }
 
@@ -189,6 +198,14 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         networkCompletion?(.success(false))
     }
 
+    public func updateFrecency(id: UUID, lastAccessAt: Date, score: Float, sortScore: Float) {
+        db.updateLinkFrecency(id: id, lastAccessAt: lastAccessAt, score: score, sortScore: sortScore)
+    }
+
+    public func updateFrecencies(scores: [FrecencyScore]) {
+        db.updateLinkFrecencies(scores: scores)
+    }
+
     public var allLinks: [Link] {
         return (try? db.allLinks(updatedSince: nil)) ?? []
     }
@@ -206,7 +223,17 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func receivedObjects(_ links: [Link]) throws {
-        try store(links: links, shouldSaveOnNetwork: false)
+        let ids = links.map { $0.id }
+        let existingLinks: [UUID: Link] = (try? db.getLinks(ids: ids)) ?? [UUID: Link]()
+        let linksToStore = links.map { (link) -> Link in
+            var newLink = link
+            //if received frecency fields are nil and local links exist, dont overwrite existing fields.
+            newLink.frecencyVisitScore = link.frecencyVisitScore ?? existingLinks[link.id]?.frecencyVisitScore
+            newLink.frecencyVisitSortScore = link.frecencyVisitSortScore ?? existingLinks[link.id]?.frecencyVisitSortScore
+            newLink.frecencyVisitLastAccessAt = link.frecencyVisitLastAccessAt ?? existingLinks[link.id]?.frecencyVisitLastAccessAt
+            return newLink
+        }
+        try store(links: linksToStore, shouldSaveOnNetwork: false)
     }
 
     func allObjects(updatedSince: Date?) throws -> [Link] {
