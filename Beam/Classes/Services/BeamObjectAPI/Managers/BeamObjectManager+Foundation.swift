@@ -247,7 +247,9 @@ extension BeamObjectManager {
                                 completion(.success(true))
                                 return
                             } catch {
-                                AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                                if Configuration.env == .debug {
+                                    AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                                }
                                 completion(.failure(error))
                             }
                         }
@@ -316,7 +318,9 @@ extension BeamObjectManager {
                     completion(.success(true))
                     return
                 } catch {
-                    AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                    if Configuration.env == .debug {
+                        AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                    }
                     completion(.failure(error))
                 }
             }
