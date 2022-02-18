@@ -45,7 +45,7 @@ extension DocumentManager {
         saveDocumentPromiseCancels[documentStruct.id] = cancel
 
         let result = promise
-            .then(on: self.backgroundQueue) { context -> Promise<Bool> in
+            .then(on: self.saveDocumentQueue) { context -> Promise<Bool> in
                 let documentManager = DocumentManager()
                 return try documentManager.context.performAndWait {
                     Logger.shared.logDebug("Saving \(documentStruct.titleAndId)", category: .document)
