@@ -968,6 +968,8 @@
 		A5B37AD927046A1500989479 /* CheckboxView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B37AD827046A1500989479 /* CheckboxView.swift */; };
 		A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B532422703525D007FC8B8 /* MeetingModalView.swift */; };
 		A5B71852274B92E70010FE8E /* Omnibox.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5B71851274B92E70010FE8E /* Omnibox.swift */; };
+		A5BAD84E27BF520F00B9AFF3 /* SoundEffectPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BAD84D27BF520F00B9AFF3 /* SoundEffectPlayer.swift */; };
+		A5BAD85527BF533900B9AFF3 /* begin_record.caf in Resources */ = {isa = PBXBuildFile; fileRef = A5BAD85427BF533900B9AFF3 /* begin_record.caf */; };
 		A5BF04D32681A4F800CC80EB /* ElementNode+Layers.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */; };
 		A5C2023B2761FDA2008BB2FB /* TabFaviconView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C2023A2761FDA2008BB2FB /* TabFaviconView.swift */; };
 		A5C202422762071C008BB2FB /* TabAudioView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5C202412762071C008BB2FB /* TabAudioView.swift */; };
@@ -2293,6 +2295,8 @@
 		A5B37AD827046A1500989479 /* CheckboxView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxView.swift; sourceTree = "<group>"; };
 		A5B532422703525D007FC8B8 /* MeetingModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeetingModalView.swift; sourceTree = "<group>"; };
 		A5B71851274B92E70010FE8E /* Omnibox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Omnibox.swift; sourceTree = "<group>"; };
+		A5BAD84D27BF520F00B9AFF3 /* SoundEffectPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SoundEffectPlayer.swift; sourceTree = "<group>"; };
+		A5BAD85427BF533900B9AFF3 /* begin_record.caf */ = {isa = PBXFileReference; lastKnownFileType = file; path = begin_record.caf; sourceTree = "<group>"; };
 		A5BF04D22681A4F800CC80EB /* ElementNode+Layers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ElementNode+Layers.swift"; sourceTree = "<group>"; };
 		A5C2023A2761FDA2008BB2FB /* TabFaviconView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabFaviconView.swift; sourceTree = "<group>"; };
 		A5C202412762071C008BB2FB /* TabAudioView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabAudioView.swift; sourceTree = "<group>"; };
@@ -3232,6 +3236,7 @@
 				418171932581107C00317ED8 /* Persistence */,
 				418172FC25811DB200317ED8 /* Web */,
 				4181718B2581107C00317ED8 /* Readability.swift */,
+				A5BAD84D27BF520F00B9AFF3 /* SoundEffectPlayer.swift */,
 				8A2A398626F24F9E0084A073 /* Debounce.swift */,
 				8AD2631426F3A8730074D673 /* Throttle.swift */,
 				4181718F2581107C00317ED8 /* NSContainerView.swift */,
@@ -4332,6 +4337,7 @@
 		8ABFD6A22791D833001E35DE /* Sounds */ = {
 			isa = PBXGroup;
 			children = (
+				A5BAD85427BF533900B9AFF3 /* begin_record.caf */,
 				8ABFD6A32791D843001E35DE /* PointAndShoot */,
 			);
 			path = Sounds;
@@ -6203,6 +6209,7 @@
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				8ADD06012729657D004C3EC9 /* WebPositions.js in Resources */,
 				A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */,
+				A5BAD85527BF533900B9AFF3 /* begin_record.caf in Resources */,
 				8A9309FF27A04E2C00064133 /* jest.config.js in Resources */,
 				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
@@ -7253,6 +7260,7 @@
 				A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */,
 				333A0A20268C4EED004B7905 /* KeyEventHandlingView.swift in Sources */,
 				A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */,
+				A5BAD84E27BF520F00B9AFF3 /* SoundEffectPlayer.swift in Sources */,
 				A570D32E27591C27003B239D /* ReadSizeViewModifier.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
 				A570D2F227583BD4003B239D /* TabsListView.swift in Sources */,
