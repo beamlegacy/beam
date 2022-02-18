@@ -81,7 +81,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                                                     withIntermediateDirectories: true,
                                                     attributes: nil)
 
-            if FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
+            if !fileName.isEmpty, FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
                 do {
                     try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + destinationName)
                 } catch {
