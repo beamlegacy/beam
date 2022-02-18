@@ -96,7 +96,11 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
                     })
             }
             ToolbarButton(icon: "nav-omnibox", action: {
-                state.startFocusOmnibox(fromTab: false)
+                if state.focusOmniBox {
+                    state.stopFocusOmnibox()
+                } else {
+                    state.startFocusOmnibox(fromTab: false)
+                }
             }).accessibilityIdentifier("nav-omnibox")
             if showPivotButton {
                 ToolbarModeSwitcher(modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)

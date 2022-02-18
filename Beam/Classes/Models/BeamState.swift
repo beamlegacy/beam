@@ -164,7 +164,11 @@ import Sentry
                 navigateToJournal(note: nil)
             }
         case .today, .note, .page:
-            if hasBrowserTabs { mode = .web }
+            if hasBrowserTabs {
+                mode = .web
+            } else {
+                startNewSearch()
+            }
         }
     }
 
