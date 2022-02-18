@@ -70,10 +70,10 @@ struct SmallUpdateIndicatorView: View {
                     }
                 }.frame(maxWidth: 250)
             case .installing:
-                ButtonLabel("Installing update…", lottie: "apple-activity-indicator-extended", customStyle: buttonLabelLottieStyle)
+                ButtonLabel("Installing update…", lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
             case .updateInstalled:
                 ButtonLabel(updateInstalledMessage(timerExpired: timerExpired),
-                            lottie: "apple-activity-indicator-extended",
+                            lottie: "status-update_restart",
                             customStyle: buttonLabelLottieStyle) {
                     updateInstalledTimerCancellable?.cancel()
                     NSApp.terminate(nil)
