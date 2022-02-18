@@ -58,7 +58,7 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
         if let requestedUrl = page.requestedURL, requestedUrl != url {
             Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedUrl) - \(String(describing: webView.title))")
             let link = GRDBDatabase.shared.visit(url: requestedUrl.absoluteString, title: webView.title, content: nil, destination: url.absoluteString)
-            ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()).update(id: link.id, value: 0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
+            ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()).update(id: link.id, value: 0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
         }
 
         let isLinkActivation = !isNavigatingFromSearchBar && !replace
