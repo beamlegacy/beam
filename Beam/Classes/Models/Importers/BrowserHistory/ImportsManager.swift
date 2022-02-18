@@ -54,7 +54,7 @@ public class ImportsManager: NSObject, ObservableObject {
         let id = UUID()
         let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser))
         do {
-            let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: GRDBUrlFrecencyStorage())
+            let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage())
             let cancellable = importer.publisher.sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:

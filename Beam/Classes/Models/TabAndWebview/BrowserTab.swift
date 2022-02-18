@@ -204,7 +204,7 @@ import Promises
     private static func newBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
         BrowsingTree(
             origin,
-            frecencyScorer: ExponentialFrecencyScorer(storage: GRDBUrlFrecencyStorage()),
+            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
             longTermScoreStore: LongTermUrlScoreStore()
         )
     }
