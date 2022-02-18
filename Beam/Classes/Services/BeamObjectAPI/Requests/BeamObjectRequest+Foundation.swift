@@ -176,6 +176,56 @@ extension BeamObjectRequest {
             }
         }
     }
+
+    @discardableResult
+    func prepare(_ beamObject: BeamObject,
+                 _ completion: @escaping (Swift.Result<BeamObjectUpload, Error>) -> Void) throws -> URLSessionDataTask? {
+
+        let parameters = try prepareBeamObjectParameters(beamObject)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_object", variables: parameters)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<PrepareBeamObjectUpload, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let prepareBeamObjects):
+                guard let beamObjectUpload = prepareBeamObjects.beamObjectUpload else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                completion(.success(beamObjectUpload))
+            }
+        }
+    }
+
+    @discardableResult
+    func prepare(_ beamObjects: [BeamObject],
+                 _ completion: @escaping (Swift.Result<[BeamObjectUpload], Error>) -> Void) throws -> URLSessionDataTask? {
+        let saveObjects: [BeamObject] = beamObjects.map {
+            $0.copy()
+        }
+
+        let parameters = try prepareBeamObjectsParameters(saveObjects)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "prepare_beam_objects", variables: parameters)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<PrepareBeamObjectsUpload, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let prepareBeamObjects):
+                guard let beamObjects = prepareBeamObjects.beamObjectsUpload else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                completion(.success(beamObjects))
+            }
+        }
+    }
+
     @discardableResult
     func delete<T: BeamObjectProtocol>(object: T,
                                        _ completion: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws  -> URLSessionDataTask {
@@ -503,12 +553,13 @@ extension BeamObjectRequest {
     enum BeamObjectRequestError: Error {
         case malformattedURL
         case not200
+        case noData
         case privateKeyError(validObjects: [BeamObject], invalidObjects: [BeamObject])
     }
 
     @discardableResult
-    private func fetchDataFromUrl(urlString: String,
-                                  _ completionHandler: @escaping (Swift.Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
+    public func fetchDataFromUrl(urlString: String,
+                                  _ completionHandler: @escaping (Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
 
         guard let url = URL(string: urlString) else {
              throw BeamObjectRequestError.malformattedURL
@@ -524,7 +575,17 @@ extension BeamObjectRequest {
         let session = BeamURLSession.shared
         let localTimer = BeamDate.now
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
-            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) \(urlString)",
+            #if DEBUG
+            // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
+            APIRequest.networkCallFilesSemaphore.wait()
+            APIRequest.networkCallFiles.append("direct_download")
+            APIRequest.networkCallFilesSemaphore.signal()
+            #endif
+
+            APIRequest.callsCount += 1
+
+            // I only enable those log manually, they're very verbose!
+            Logger.shared.logDebug("[\(data?.count.byteSize ?? "-")] \((response as? HTTPURLResponse)?.statusCode ?? 0) download \(urlString)",
                                    category: .network,
                                    localTimer: localTimer)
 
@@ -543,6 +604,67 @@ extension BeamObjectRequest {
         return task
     }
 
+    @discardableResult
+    func sendDataToUrl(urlString: String,
+                       putHeaders: [String: String],
+                       data: Data,
+                       _ completionHandler: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
+        guard let url = URL(string: urlString) else {
+             throw BeamObjectRequestError.malformattedURL
+        }
+        var request = URLRequest(url: url)
+
+        var headers = putHeaders
+        headers["User-Agent"] = "Beam client, \(Information.appVersionAndBuild)"
+        headers["Content-Length"] = String(data.count)
+        request.httpMethod = "PUT"
+        request.httpBody = data
+        request.allHTTPHeaderFields = headers
+
+        let session = BeamURLSession.shared
+        let localTimer = BeamDate.now
+
+        let task = session.dataTask(with: request) { (_, response, error) -> Void in
+            #if DEBUG
+            // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
+            APIRequest.networkCallFilesSemaphore.wait()
+            APIRequest.networkCallFiles.append("direct_upload")
+            APIRequest.networkCallFilesSemaphore.signal()
+            #endif
+
+            APIRequest.callsCount += 1
+
+            // I only enable those log manually, they're very verbose!
+            Logger.shared.logDebug("[\(data.count.byteSize)] \((response as? HTTPURLResponse)?.statusCode ?? 0) upload \(urlString)",
+                                   category: .network,
+                                   localTimer: localTimer)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                completionHandler(.failure(error ?? BeamObjectRequestError.not200))
+                return
+            }
+
+            /*
+             S3 direct upload returns 0 byte for `data` (now named `_`), Vinyl will not store it at all. Don't match on it as:
+
+             `data != nil == true` on the first call, but false when going through Vinyl
+             */
+
+            guard [200, 204].contains(httpResponse.statusCode) else {
+                Logger.shared.logError("Error while uploading data: \(httpResponse.statusCode)", category: .network)
+                Logger.shared.logDebug("Sent headers: \(headers)", category: .network)
+                completionHandler(.failure(error ?? BeamObjectRequestError.not200))
+
+                return
+            }
+
+            completionHandler(.success(true))
+        }
+
+        task.resume()
+        return task
+    }
+
     func fetchAllObjectPrivateKeySignatures(_ completionHandler: @escaping (Swift.Result<[String], Error>) -> Void) throws {
         try fetchAllWithFile("all_objects_private_key_signatures", EmptyVariable(), raisePrivateKeyError: false) { result in
             switch result {
@@ -554,6 +676,5 @@ extension BeamObjectRequest {
                 completionHandler(.success(sigs))
             }
         }
-
     }
 }

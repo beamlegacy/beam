@@ -153,7 +153,8 @@ extension APIRequest {
 
         #if DEBUG_API_0
         guard let httpResponse = response as? HTTPURLResponse else {
-            Logger.shared.logDebug("- \(filename)", category: .network)
+            Logger.shared.logError("Wrong HTTP Response for \(filename): \(String(describing: response))",
+                                   category: .network)
             return
         }
         let diffTime = BeamDate.now.timeIntervalSince(localTimer)

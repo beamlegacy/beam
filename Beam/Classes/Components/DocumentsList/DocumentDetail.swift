@@ -14,6 +14,7 @@ struct DocumentDetail: View {
             ScrollView {
                 HStack(alignment: VerticalAlignment.center, spacing: 10.0) {
                     RefreshButton
+                    SaveButton
                     SoftDeleteButton
                     SoftUnDeleteButton
                     LocalDeleteButton
@@ -188,6 +189,15 @@ struct DocumentDetail: View {
         })
     }
 
+    private func save() {
+        var documentStruct = DocumentStruct(document: document)
+        documentStruct.updatedAt = BeamDate.now
+        documentStruct.version += 1
+
+        documentManager.saveThenSaveOnAPI(documentStruct, completion: { _ in
+        })
+    }
+
     private func togglePublic() {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.version += 1
@@ -234,6 +244,14 @@ struct DocumentDetail: View {
             softDelete()
         }, label: {
             Text("Soft Delete").frame(minWidth: 100)
+        })
+    }
+
+    private var SaveButton: some View {
+        Button(action: {
+            save()
+        }, label: {
+            Text("Save").frame(minWidth: 100)
         })
     }
 

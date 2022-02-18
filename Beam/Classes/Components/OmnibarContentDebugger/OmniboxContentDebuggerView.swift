@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct OmniboxContentDebuggerView: View {
-    @ObservedObject private var autocompleteManager = AutocompleteManager(with: AppDelegate.main.data, searchEngine: PreferredSearchEngine())
+    @ObservedObject private var autocompleteManager = AutocompleteManager(searchEngine: PreferredSearchEngine(), beamState: nil)
     private var textFieldText: Binding<String> {
         $autocompleteManager.searchQuery
     }
@@ -105,7 +105,7 @@ struct OmniboxContentDebuggerView: View {
 //        let isCreateCardShortcut = modifierFlags?.contains(.option) == true
 //        if isCreateCardShortcut {
 //            if let createCardIndex = autocompleteManager.autocompleteResults.firstIndex(where: { (result) -> Bool in
-//                return result.source == .createCard
+//                return result.source == .createNote
 //            }) {
 //                autocompleteManager.autocompleteSelectedIndex = createCardIndex
 //            }

@@ -33,6 +33,7 @@ class BrowserTabsManager: ObservableObject {
     private weak var state: BeamState?
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
+            self.tabsToPages()
             self.updateTabsHandlers()
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
             self.autoSave()
@@ -151,6 +152,10 @@ class BrowserTabsManager: ObservableObject {
     }
 
     private var indexingQueue = DispatchQueue(label: "indexing")
+
+    private func tabsToPages() {
+        self.data.clusteringManager.allOpenPages = tabs.map { ClusteringManager.PageOpenInTab(pageId: $0.browsingTree.current.link) }
+    }
 
     private func updateTabsHandlers() {
         for tab in tabs {

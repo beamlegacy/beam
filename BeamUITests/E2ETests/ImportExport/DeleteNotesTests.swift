@@ -49,10 +49,7 @@ class DeleteNotesTests: BaseTest {
         
         testRailPrint("When click clear notes option")
         isLocalContentsTest ? fileMenu.deleteAllLocalContents() : fileMenu.deleteAllNotes()
-        let staticText = isLocalContentsTest ? "All the local data has been deleted. Beam must restart now." : "All the Notes data has been deleted. Beam must restart now."
-        XCTAssertTrue(alert.getAlertDialog().staticTexts[staticText].waitForExistence(timeout: implicitWaitTimeout))
-        alert.restartNowClick()
-        
+
         testRailPrint("Then notes are cleared")
         launchApp()
         XCTAssertEqual(CardTestView().getNumberOfVisibleNotes(), 1, "Local data hasn't been cleared")

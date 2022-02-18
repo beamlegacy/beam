@@ -35,7 +35,7 @@ class PnSTestView: BaseView {
         triggerAddToCardPopup(elementToAdd)
         
         if noteText != "" {
-            textField(PnSViewLocators.TextFields.addNote.accessibilityIdentifier).clickAndType(noteText)
+            textField(PnSViewLocators.TextFields.addComment.accessibilityIdentifier).clickAndType(noteText)
         }
         
         let destinationCard = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch

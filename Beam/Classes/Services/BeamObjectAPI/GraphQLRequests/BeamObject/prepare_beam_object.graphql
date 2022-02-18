@@ -1,0 +1,11 @@
+            mutation PrepareBeamObjectUpload($beamObjectMetadata: BeamObjectMetadata!) {
+              prepareBeamObjectUpload(input: {beamObjectMetadata: $beamObjectMetadata}) {
+                beamObjectUpload {
+                  id
+                  uploadUrl
+                  uploadHeaders
+                  blobSignedId
+                }
+                errors { objectid path message }
+              }
+            }

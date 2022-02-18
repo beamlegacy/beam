@@ -1,4 +1,4 @@
-query BeamObject($id: ID!) {
+query BeamObjectUpdatedAt($id: ID!) {
   beamObject(id: $id) {
     id
     type

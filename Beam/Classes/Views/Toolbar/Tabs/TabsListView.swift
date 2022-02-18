@@ -337,7 +337,7 @@ struct TabsListView: View {
 
     private func onTabTapped(at index: Int) {
         guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
-        state.setFocusOmnibox(fromTab: true)
+        state.startFocusOmnibox(fromTab: true)
     }
 
     private func onTabClose(at index: Int, fromContextMenu: Bool = false) {
@@ -347,13 +347,7 @@ struct TabsListView: View {
     private func onTabCopy(at index: Int) {
         guard index < tabs.count else { return }
         let tab = tabs[index]
-        copyTabAddress(tab)
-    }
-
-    private func copyTabAddress(_ tab: BrowserTab) {
-        guard let url = tab.url else { return }
-        NSPasteboard.general.clearContents()
-        NSPasteboard.general.setString(url.absoluteString, forType: .string)
+        tab.copyURLToPasteboard()
     }
 
     private func pasteAndGo(on tab: BrowserTab) {
@@ -441,7 +435,7 @@ extension TabsListView {
         }
         let secondGroup = Group {
             Button("Copy Address") {
-                copyTabAddress(tab)
+                tab.copyURLToPasteboard()
             }.disabled(tab.url == nil)
             Button("Paste and Go") {
                 pasteAndGo(on: tab)
@@ -525,7 +519,7 @@ extension TabsListView {
             // it was just a quick tap
             self.dragModel.cleanAfterDrag()
             if !viewModel.currentDragDidChangeCurrentTab {
-                state.setFocusOmnibox(fromTab: true)
+                state.startFocusOmnibox(fromTab: true)
             }
         } else {
             let shouldBePinned = self.dragModel.draggingOverPins
