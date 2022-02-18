@@ -1,4 +1,5 @@
 sentry:
+  timeout: 8 minutes
   dependencies:
     - build:dmg
     - build:zip

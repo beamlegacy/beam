@@ -340,10 +340,20 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable function_body_length
     func saveToAPI<T: BeamObjectProtocol>(_ objects: [T],
                                           force: Bool = false,
                                           _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
+        if Configuration.beamObjectDataUploadOnSeparateCall {
+            return try saveToAPIWithDirectUpload(objects, force: force, completion)
+        } else {
+            return try saveToAPIClassic(objects, force: force, completion)
+        }
+    }
+
+    // swiftlint:disable function_body_length
+    func saveToAPIClassic<T: BeamObjectProtocol>(_ objects: [T],
+                                                 force: Bool = false,
+                                                 _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -406,9 +416,174 @@ extension BeamObjectManager {
                 self.saveToAPIFailure(objects, error, completion)
             case .success:
                 do {
-                    try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjects)
-                    try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjects)
+                    try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSave)
+                    try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSave)
                     completion(.success(objects))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        }
+
+        return request
+    }
+
+    // swiftlint:disable:next cyclomatic_complexity
+    func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ objects: [T],
+                                                          force: Bool = false,
+                                                          _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
+
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
+        guard !objects.isEmpty else {
+            completion(.success([]))
+            return nil
+        }
+
+        var localTimer = BeamDate.now
+
+        let beamObjects: [BeamObject] = try objects.map {
+            try BeamObject(object: $0)
+        }
+
+        Logger.shared.logDebug("Converted \(objects.count) \(T.beamObjectType) to beam objects",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
+        localTimer = BeamDate.now
+
+        let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
+
+        guard !objectsToSave.isEmpty else {
+            Logger.shared.logDebug("Skip \(beamObjects.count) objects, based on previousChecksum they were already saved",
+                                   category: .beamObjectNetwork,
+                                   localTimer: localTimer)
+            completion(.success([]))
+            return nil
+        }
+
+        Logger.shared.logDebug("Filtered \(beamObjects.count) beam objects to \(objectsToSave.count)",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
+
+        localTimer = BeamDate.now
+
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objectsToSave)
+        for objectToSave in objectsToSave {
+            objectToSave.previousChecksum = checksums[objectToSave]
+            try objectToSave.encrypt()
+        }
+
+        if checksums.count != objectsToSave.count {
+            Logger.shared.logWarning("\(checksums.count) checksums doesn't match \(objectsToSave.count) objects! It's ok if new.",
+                                     category: .beamObjectChecksum)
+        }
+
+        Logger.shared.logDebug("Set \(checksums.count) checksums for \(objectsToSave.count) objects",
+                               category: .beamObjectChecksum,
+                               localTimer: localTimer)
+
+        Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
+                               category: .beamObjectNetwork)
+
+        localTimer = BeamDate.now
+
+        let request = BeamObjectRequest()
+
+        try request.prepare(objectsToSave) { requestResult in
+            switch requestResult {
+            case .failure(let error):
+                Logger.shared.logError("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API: \(error.localizedDescription)",
+                                       category: .beamObjectNetwork,
+                                       localTimer: localTimer)
+                completion(.failure(error))
+            case .success(let beamObjectsUpload):
+                do {
+                    assert(beamObjectsUpload.count == objectsToSave.count)
+                    if beamObjectsUpload.count != objectsToSave.count {
+                        Logger.shared.logError("We don't get the same object counts", category: .beamObjectNetwork)
+                    }
+
+                    let decoder = JSONDecoder()
+                    var errors: [Error] = []
+                    let lock = DispatchSemaphore(value: 1)
+
+                    Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: starting",
+                                           category: .beamObjectNetwork)
+
+                    localTimer = BeamDate.now
+                    var totalSize = 0
+
+                    // TODO: limit parallelization?
+                    for beamObjectsUploadChunk in beamObjectsUpload.chunked(into: 10) {
+                        let group = DispatchGroup()
+                        for beamObjectUpload in beamObjectsUploadChunk {
+                            let headers: [String: String] = try decoder.decode([String: String].self,
+                                                                               from: beamObjectUpload.uploadHeaders.asData)
+
+                            guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
+                                assert(false)
+                                Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
+                                continue
+                            }
+
+                            totalSize += data.count
+                            group.enter()
+                            try request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
+                                                      putHeaders: headers,
+                                                      data: data) { result in
+                                switch result {
+                                case .failure(let error):
+                                    lock.wait()
+                                    errors.append(error)
+                                    lock.signal()
+                                case .success: break
+                                }
+
+                                group.leave()
+                            }
+                        }
+
+                        group.wait()
+                    }
+
+                    Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: finished uploading \(totalSize.byteSize)",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
+
+                    guard errors.isEmpty else {
+                        Logger.shared.logError(BeamObjectManagerError.multipleErrors(errors).localizedDescription,
+                                               category: .beamObjectNetwork)
+                        completion(.failure(BeamObjectManagerError.multipleErrors(errors)))
+                        return
+                    }
+
+                    // To not reupload data
+                    for objectToSave in objectsToSave {
+                        objectToSave.largeDataBlobId = beamObjectsUpload.first(where: { $0.id == objectToSave.id })?.blobSignedId
+                        objectToSave.data = nil
+                    }
+
+                    let request = BeamObjectRequest()
+                    localTimer = BeamDate.now
+
+                    try request.save(objectsToSave) { result in
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError("Error while saving \(objectsToSave.count) \(T.beamObjectType)",
+                                                   category: .beamObjectNetwork,
+                                                   localTimer: localTimer)
+                            self.saveToAPIFailure(objects, error, completion)
+                        case .success:
+                            do {
+                                try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSave)
+                                completion(.success(objects))
+                            } catch {
+                                completion(.failure(error))
+                            }
+                        }
+                    }
                 } catch {
                     completion(.failure(error))
                 }
@@ -636,16 +811,29 @@ extension BeamObjectManager {
         }
     }
 
-    /// Completion will not be called if returned `APIRequest` is `nil`
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
                                           force: Bool = false,
                                           _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
         guard !Self.disableSendingObjects || force else {
             throw BeamObjectManagerError.sendingObjectsDisabled
         }
+
+        if Configuration.beamObjectDataUploadOnSeparateCall {
+            return try saveToAPIWithDirectUpload(object, force: force, completion)
+        } else {
+            return try saveToAPIClassic(object, force: force, completion)
+        }
+    }
+
+    /// Completion will not be called if returned `APIRequest` is `nil`
+    func saveToAPIClassic<T: BeamObjectProtocol>(_ object: T,
+                                                 force: Bool = false,
+                                                 _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
+
+        let localTimer = BeamDate.now
 
         let beamObject = try BeamObject(object: object)
         beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)
@@ -669,6 +857,10 @@ extension BeamObjectManager {
                 do {
                     try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
                     try BeamObjectChecksum.savePreviousObject(beamObject: beamObject)
+
+                    Logger.shared.logDebug("Saved object",
+                                           category: .beamObjectNetwork,
+                                           localTimer: localTimer)
                     completion(.success(object))
                 } catch {
                     completion(.failure(error))
@@ -683,6 +875,100 @@ extension BeamObjectManager {
             Self.networkRequests.append(request)
         }
         #endif
+
+        return request
+    }
+
+    // swiftlint:disable:next function_body_length
+    // swiftlint:disable:next cyclomatic_complexity
+    func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ object: T,
+                                                          force: Bool = false,
+                                                          _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
+        let localTimer = BeamDate.now
+
+        let beamObject = try BeamObject(object: object)
+        beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)
+
+        guard beamObject.previousChecksum != beamObject.dataChecksum || beamObject.previousChecksum == nil || force else {
+            Logger.shared.logDebug("Skip object, based on previousChecksum it was already saved",
+                                   category: .beamObjectNetwork)
+            completion(.success(object))
+            return nil
+        }
+
+        let request = BeamObjectRequest()
+
+        try beamObject.encrypt()
+
+        guard let data = beamObject.data else { throw BeamObjectManagerError.noData }
+
+        /*
+         1st: we "prepare" our upload asking for a blobId and upload URL to our API
+         */
+        try request.prepare(beamObject, { requestResult in
+            switch requestResult {
+            case .failure(let error):
+                Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                completion(.failure(error))
+            case .success(let beamObjectUpload):
+                do {
+                    let decoder = JSONDecoder()
+                    let headers: [String: String] = try decoder.decode([String: String].self,
+                                                                       from: beamObjectUpload.uploadHeaders.asData)
+
+                    /*
+                     2nd: we direct upload the beam object data to the direct upload URL, including mandatory headers
+                     */
+                    try request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
+                                              putHeaders: headers,
+                                              data: data) { result in
+
+                        switch result {
+                        case .failure(let error):
+                            Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                            completion(.failure(error))
+                        case .success:
+                            do {
+                                let request = BeamObjectRequest()
+
+                                beamObject.largeDataBlobId = beamObjectUpload.blobSignedId
+
+                                // Making sure we don't send data again to our API.
+                                beamObject.data = nil
+
+                                /*
+                                 3rd: we let our API know we uploaded the data
+                                 */
+                                try request.save(beamObject) { result in
+                                    switch result {
+                                    case .failure(let error):
+                                        self.saveToAPIFailure(object, beamObject, error, completion)
+                                    case .success:
+                                        do {
+                                            try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+                                            Logger.shared.logDebug("Saved object",
+                                                                   category: .beamObjectNetwork,
+                                                                   localTimer: localTimer)
+                                            completion(.success(object))
+                                        } catch {
+                                            completion(.failure(error))
+                                        }
+                                    }
+                                }
+                            } catch {
+                                completion(.failure(error))
+                            }
+                        }
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        })
 
         return request
     }

@@ -42,7 +42,7 @@ import Sentry
         RecentsManager(with: DocumentManager())
     }()
     private(set) lazy var autocompleteManager: AutocompleteManager = {
-        AutocompleteManager(with: data, searchEngine: searchEngine)
+        AutocompleteManager(searchEngine: searchEngine, beamState: self)
     }()
     private(set) lazy var browserTabsManager: BrowserTabsManager = {
         let manager = BrowserTabsManager(with: data, state: self)
@@ -58,7 +58,7 @@ import Sentry
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
-    @Published var focusOmniBox: Bool = true
+    @Published private(set) var focusOmniBox: Bool = true
     @Published var focusOmniBoxFromTab: Bool = false
 
     @Published var showHelpAndFeedback: Bool = false
@@ -164,7 +164,11 @@ import Sentry
                 navigateToJournal(note: nil)
             }
         case .today, .note, .page:
-            if hasBrowserTabs { mode = .web }
+            if hasBrowserTabs {
+                mode = .web
+            } else {
+                startNewSearch()
+            }
         }
     }
 
@@ -372,8 +376,13 @@ import Sentry
         return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self, needsToBeSaved: tab.url != nil)
     }
 
-    func createNoteForQuery(_ query: String) -> BeamNote {
-        EventsTracker.logBreadcrumb(message: "createNoteForQuery \(query)", category: "BeamState")
+    func createNewUntitledNote() -> BeamNote {
+        let title = BeamNote.availableTitle(withPrefix: loc("New Note"))
+        return BeamNote.create(title: title)
+    }
+
+    func fetchOrCreateNoteForQuery(_ query: String) -> BeamNote {
+        EventsTracker.logBreadcrumb(message: "fetchOrCreateNoteForQuery \(query)", category: "BeamState")
         if let n = BeamNote.fetch(title: query) {
             return n
         }
@@ -412,6 +421,7 @@ import Sentry
         self.mode = .web
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func selectAutocompleteResult(_ result: AutocompleteResult) {
         EventsTracker.logBreadcrumb(message: "\(#function) - \(result)", category: "BeamState")
         switch result.source {
@@ -452,8 +462,14 @@ import Sentry
         case .note(let noteId, _):
             navigateToNote(id: noteId ?? result.uuid)
 
-        case .createCard:
-            navigateToNote(createNoteForQuery(result.text))
+        case .action:
+            result.handler?(self)
+        case .createNote:
+            if result.text.isEmpty {
+                navigateToNote(createNewUntitledNote())
+            } else {
+                navigateToNote(fetchOrCreateNoteForQuery(result.text))
+            }
         }
         autocompleteManager.clearAutocompleteResults()
     }
@@ -565,22 +581,28 @@ import Sentry
         }
     }
 
-    func setFocusOmnibox(fromTab: Bool = false) {
+    func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        focusOmniBoxFromTab = fromTab && mode == .web
+        guard updateResults else {
+            focusOmniBox = true
+            return
+        }
         if mode == .web {
-            focusOmniBoxFromTab = fromTab
             if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
                 autocompleteManager.searchQuerySelectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
-                autocompleteManager.clearAutocompleteResults()
-            } else if !autocompleteManager.searchQuery.isEmpty || autocompleteManager.autocompleteResults.isEmpty {
+            } else if !autocompleteManager.searchQuery.isEmpty {
                 autocompleteManager.resetQuery()
-                autocompleteManager.getEmptyQuerySuggestions()
             }
-        } else if autocompleteManager.searchQuery.isEmpty && autocompleteManager.autocompleteResults.isEmpty {
-            autocompleteManager.getEmptyQuerySuggestions()
         }
-        focusOmniBox = true
+        autocompleteManager.prepareResultsForAppearance(for: autocompleteManager.searchQuery) { [unowned self] in
+            self.focusOmniBox = true
+        }
+    }
+
+    func stopFocusOmnibox() {
+        focusOmniBox = false
     }
 
     func startNewSearch() {
@@ -588,7 +610,7 @@ import Sentry
         if focusOmniBox {
             autocompleteManager.shakeOmniBox()
         }
-        setFocusOmnibox(fromTab: false)
+        startFocusOmnibox(fromTab: false)
     }
 
     func resetDestinationCard() {

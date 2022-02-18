@@ -373,7 +373,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func openOauthWindow(title: String?) -> OauthWindow {
         if let oauthWindow = oauthWindow { return oauthWindow }
 
-        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 500))
+        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 700))
         guard let oauthWindow = oauthWindow else { fatalError("Can't create oauthwindow") }
 
         if let title = title {

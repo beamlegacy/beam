@@ -32,9 +32,9 @@ extension BeamObjectManager {
                     case .failure(let error):
                         Logger.shared.logError("Received error in connectBeamObjects: \(error.localizedDescription)",
                                                category: .webSocket)
-                    case .success(let beamObjects):
+                    case .success(let beamObject):
                         do {
-                            try self.parseFilteredObjects(self.filteredObjects(beamObjects))
+                            try self.parseFilteredObjects(self.filteredObjects([beamObject]))
                         } catch {
                             Logger.shared.logError(error.localizedDescription, category: .beamObject)
                         }

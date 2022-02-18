@@ -60,7 +60,10 @@ class CoreDataManager {
 
         let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(10))
         if case .timedOut = semaphoreResult {
-            Logger.shared.logError("Semaphore for CoreData setup timedout", category: .coredata)
+            Logger.shared.logError("Semaphore for CoreData setup timedout, are you running another Beam instance using the same DB?",
+                                   category: .coredata)
+
+            // Another Beam process is probably running using the same DB
             assert(false)
         }
 

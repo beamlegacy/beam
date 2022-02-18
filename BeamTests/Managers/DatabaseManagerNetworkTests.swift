@@ -42,9 +42,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
             BeamTestsHelper.login()
             helper.deleteAllDatabases()
             helper.deleteAllDocuments()
-            
+
+            Configuration.beamObjectDirectCall = false
+
             try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-//            try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
         }
 
         afterEach {

@@ -45,7 +45,7 @@ extension AppDelegate {
         // Link Store
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         //Contacts
-        ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
+        ContactsManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
         // Passwords
         PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
         // Note Frecency
@@ -58,7 +58,7 @@ extension AppDelegate {
         }
 
         // Notes and Databases
-        self.deleteDocumentsAndDatabases(includedRemote: false)
+        self.deleteDocumentsAndDatabases(includedRemote: includedRemote)
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
@@ -80,19 +80,12 @@ extension AppDelegate {
                         UserAlert.showError(message: "Could not delete databases",
                                             error: error)
                     case .success:
-                        if includedRemote {
-                            UserAlert.showMessage(message: "All the Notes data has been deleted. Beam must restart now.",
-                                                  buttonTitle: "Restart Beam now") {
-                                guard Configuration.env != .test else { return }
-                                NSApplication.shared.relaunch()
-                            }
-                        } else {
-                            UserAlert.showMessage(message: "All the local data has been deleted. Beam must restart now.",
-                                                  buttonTitle: "Restart Beam now") {
-                                guard Configuration.env != .test else { return }
-                                NSApplication.shared.relaunch()
-                            }
+                        for window in self.windows {
+                            window.close()
                         }
+                        AppDelegate.main.closePreferencesWindow()
+                        self.data.onboardingManager.forceDisplayOnboarding()
+                        self.data.onboardingManager.presentOnboardingWindow()
                     }
                 }
             }
