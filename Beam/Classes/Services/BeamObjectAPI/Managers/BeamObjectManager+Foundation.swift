@@ -247,8 +247,10 @@ extension BeamObjectManager {
                                 completion(.success(true))
                                 return
                             } catch {
+                                let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
+                                Logger.shared.logError(message, category: .beamObject)
                                 if Configuration.env == .debug {
-                                    AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                                    AppDelegate.showMessage(message)
                                 }
                                 completion(.failure(error))
                             }
@@ -261,7 +263,11 @@ extension BeamObjectManager {
                     }
                     #endif
                 } catch {
-                    AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                    let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
+                    Logger.shared.logError(message, category: .beamObject)
+                    if Configuration.env == .debug {
+                        AppDelegate.showMessage(message)
+                    }
                     completion(.failure(error))
                 }
             }
@@ -318,8 +324,10 @@ extension BeamObjectManager {
                     completion(.success(true))
                     return
                 } catch {
+                    let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
+                    Logger.shared.logError(message, category: .beamObject)
                     if Configuration.env == .debug {
-                        AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                        AppDelegate.showMessage(message)
                     }
                     completion(.failure(error))
                 }
