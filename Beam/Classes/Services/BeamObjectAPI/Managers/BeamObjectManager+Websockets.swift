@@ -60,9 +60,9 @@ extension BeamObjectManager {
 
                 Logger.shared.logWarning("Websocket disconnected, sleeping \(self.websocketRetryDelay)sec then retrying",
                                          category: .beamObjectNetwork)
-                sleep(UInt32(self.websocketRetryDelay))
-
-                self.liveSync(handler)
+                DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .seconds(self.websocketRetryDelay))) { [weak self] in
+                    self?.liveSync(handler)
+                }
             })
         } catch {
             handler(false)
