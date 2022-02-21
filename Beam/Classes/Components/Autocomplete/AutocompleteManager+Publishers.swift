@@ -325,9 +325,11 @@ extension AutocompleteManager {
                     }
                 }
             }
-            if !isFocusingTab {
-                actions.append(Self.DefaultActions.createNoteResult(for: ""))
-            }
+//            Disabling New Note default action for now
+//            See https://linear.app/beamapp/issue/BE-2402/omnibox-default-states
+//            if !isFocusingTab {
+//                actions.append(Self.DefaultActions.createNoteResult(for: ""))
+//            }
             promise(.success(actions))
         }
     }
