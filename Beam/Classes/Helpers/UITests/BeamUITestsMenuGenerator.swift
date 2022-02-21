@@ -29,12 +29,15 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPageAlerts: loadUITestsPage(identifier: "Alerts")
         case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
         case .insertTextInCurrentNote: insertTextInCurrentNote()
-        case .create100Notes: Self.create100Notes()
-        case .create100NormalNotes: Self.create100NormalNotes()
-        case .create100JournalNotes: Self.create100JournalNotes()
-        case .create10Notes: Self.create10Notes()
-        case .create10NormalNotes: Self.create10NormalNotes()
-        case .create10JournalNotes: Self.create10JournalNotes()
+        case .create100Notes: Self.createNotes(count: 100, journalRatio: 0.2, futureRatio: 0.1)
+        case .create100NormalNotes: Self.createNotes(count: 100, journalRatio: 0.0, futureRatio: 0.0)
+        case .create100JournalNotes: Self.createNotes(count: 100, journalRatio: 1.0, futureRatio: 0.05)
+        case .create10Notes: Self.createNotes(count: 10, journalRatio: 0.2, futureRatio: 0.05)
+        case .create10NormalNotes: Self.createNotes(count: 10, journalRatio: 0.0, futureRatio: 0.0)
+        case .create10JournalNotes: Self.createNotes(count: 10, journalRatio: 1.0, futureRatio: 0.05)
+        case .create1000Links: Self.createLinks(count: 1000)
+        case .create10000Links: Self.createLinks(count: 10000)
+        case .create50000Links: Self.createLinks(count: 50000)
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omniboxFillHistory: fillHistory()
@@ -148,48 +151,16 @@ class BeamUITestsMenuGenerator {
         return fmt.string(from: date)
     }
 
-    static public func create100Notes() {
-        let generator = FakeNoteGenerator(count: 100, journalRatio: 0.2, futureRatio: 0.1)
-        generator.generateNotes()
-        for note in generator.notes {
-            note.save()
+    static public func createLinks(count: Int = 50000) {
+        for index in 1...count {
+            _ = LinkStore.shared.getOrCreateIdFor(url: "http://beamapp.co/test/\(index)", title: "Title \(index)")
         }
+
+        Logger.shared.logDebug("Created \(count) links", category: .linkDB)
     }
 
-    static public func create100NormalNotes() {
-        let generator = FakeNoteGenerator(count: 100, journalRatio: 0.0, futureRatio: 0.0)
-        generator.generateNotes()
-        for note in generator.notes {
-            note.save()
-        }
-    }
-
-    static public func create100JournalNotes() {
-        let generator = FakeNoteGenerator(count: 100, journalRatio: 1.0, futureRatio: 0.05)
-        generator.generateNotes()
-        for note in generator.notes {
-            note.save()
-        }
-    }
-
-    static public func create10Notes() {
-        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.2, futureRatio: 0.05)
-        generator.generateNotes()
-        for note in generator.notes {
-            note.save()
-        }
-    }
-
-    static public func create10NormalNotes() {
-        let generator = FakeNoteGenerator(count: 10, journalRatio: 0.0, futureRatio: 0.0)
-        generator.generateNotes()
-        for note in generator.notes {
-            note.save()
-        }
-    }
-
-    static public func create10JournalNotes() {
-        let generator = FakeNoteGenerator(count: 10, journalRatio: 1.0, futureRatio: 0.05)
+    static public func createNotes(count: Int, journalRatio: Float, futureRatio: Float) {
+        let generator = FakeNoteGenerator(count: count, journalRatio: journalRatio, futureRatio: futureRatio)
         generator.generateNotes()
         for note in generator.notes {
             note.save()

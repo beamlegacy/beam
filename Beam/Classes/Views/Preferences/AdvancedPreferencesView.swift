@@ -754,7 +754,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create100RandomNotes: some View {
         Button(action: {
-            BeamUITestsMenuGenerator.create100Notes()
+            BeamUITestsMenuGenerator.createNotes(count: 100, journalRatio: 0.2, futureRatio: 0.1)
         }, label: {
             Text("Create 100 Random notes")
         })
@@ -762,7 +762,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create100NormalNotes: some View {
         Button(action: {
-            BeamUITestsMenuGenerator.create100NormalNotes()
+            BeamUITestsMenuGenerator.createNotes(count: 100, journalRatio: 0.0, futureRatio: 0.0)
         }, label: {
             Text("Create 100 Random notes")
         })
@@ -770,7 +770,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create100JournalNotes: some View {
         Button(action: {
-            BeamUITestsMenuGenerator.create100JournalNotes()
+            BeamUITestsMenuGenerator.createNotes(count: 100, journalRatio: 1.0, futureRatio: 0.05)
         }, label: {
             Text("Create 100 Random notes")
         })
@@ -778,7 +778,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create10RandomNotes: some View {
         Button(action: {
-            BeamUITestsMenuGenerator.create10Notes()
+            BeamUITestsMenuGenerator.createNotes(count: 10, journalRatio: 0.2, futureRatio: 0.05)
         }, label: {
             Text("Create 10 Random notes")
         })
@@ -786,7 +786,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create10NormalNotes: some View {
         Button(action: {
-            BeamUITestsMenuGenerator.create10NormalNotes()
+            BeamUITestsMenuGenerator.createNotes(count: 10, journalRatio: 0.0, futureRatio: 0.0)
         }, label: {
             Text("Create 10 Random notes")
         })
@@ -794,7 +794,7 @@ struct AdvancedPreferencesView: View {
 
     private var Create10JournalNotes: some View {
         Button(action: {
-            BeamUITestsMenuGenerator.create10JournalNotes()
+            BeamUITestsMenuGenerator.createNotes(count: 10, journalRatio: 1.0, futureRatio: 0.05)
         }, label: {
             Text("Create 10 Random notes")
         })
