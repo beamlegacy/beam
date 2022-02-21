@@ -149,7 +149,6 @@ struct OnboardingEmailConfirmationView: View {
                         UserAlert.showMessage(message: "Private Key Error", informativeText: "The private key was unable to be created.", buttonTitle: "Restart Beam") {
                             NSApp.relaunch()
                         }
-
                     }
                 }
             }

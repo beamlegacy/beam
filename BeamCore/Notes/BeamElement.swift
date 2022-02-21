@@ -812,6 +812,24 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return nil
     }
 
+    open func imageElements() -> [BeamElement] {
+        var result: [BeamElement] = []
+
+        switch self.kind {
+        case .image:
+            result.append(self)
+        default: break
+        }
+    
+        for c in children {
+            let imageElements = c.imageElements()
+            if !imageElements.isEmpty {
+                result.append(contentsOf: imageElements)
+            }
+        }
+        return result
+    }
+
     open func nextElement() -> BeamElement? {
         if children.count > 0 {
             return children.first
