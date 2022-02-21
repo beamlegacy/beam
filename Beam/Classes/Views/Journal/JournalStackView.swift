@@ -115,11 +115,7 @@ class JournalSimpleStackView: NSView {
     }
 
     override public var intrinsicContentSize: NSSize {
-        guard let firstNote = notes.first,
-              let textEdit = views[firstNote]
-        else { return .zero }
-
-        let width = frame.width
+        let width = BeamTextEdit.minimumEmptyEditorWidth
 
         var height = topOffset
         for note in self.notes {
