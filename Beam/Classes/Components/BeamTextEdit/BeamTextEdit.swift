@@ -88,7 +88,7 @@ public extension CALayer {
     }
 
     public var enableDelayedInit: Bool
-    var delayedInit = true
+    private var delayedInit: Bool
     func updateRoot(with note: BeamElement) {
         sign.begin(Signs.updateRoot)
 
@@ -190,8 +190,9 @@ public extension CALayer {
     public override var wantsUpdateLayer: Bool { true }
     internal var scope = Set<AnyCancellable>()
 
-    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool) {
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil) {
         self.enableDelayedInit = enableDelayedInit
+        self.delayedInit = enableDelayedInit
         self.journalMode = journalMode
 
         note = root
@@ -229,6 +230,14 @@ public extension CALayer {
         setupCardHeader()
         registerForDraggedTypes([.fileURL])
         refreshAndHandleDeletionsAsync()
+
+        if let frame = frame {
+            self.frame = frame
+            if !enableDelayedInit {
+                prepareRoot()
+            }
+        }
+
     }
 
     var unpreparedRoot: BeamElement?
@@ -568,19 +577,19 @@ public extension CALayer {
         }
     }
 
+    static let minimumEmptyEditorHeight = CGFloat(184)
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
-            let minHeight = 184
             if let root = unpreparedRoot, journalMode {
                 let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                return NSSize(width: 670, height: max(minHeight, size))
+                return NSSize(width: 670, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
             }
-            return NSSize(width: 670, height: minHeight)
+            return NSSize(width: 670, height: Self.minimumEmptyEditorHeight)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
@@ -606,7 +615,7 @@ public extension CALayer {
         _ = scrollToVisible(centeredSpot)
     }
 
-    var layoutInvalidated = false
+    var layoutInvalidated = true
     public func invalidateLayout() {
         guard !inRelayout, !layoutInvalidated else { return }
         layoutInvalidated = true

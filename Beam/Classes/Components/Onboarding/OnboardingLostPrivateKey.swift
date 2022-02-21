@@ -36,14 +36,12 @@ struct OnboardingLostPrivateKey: View {
                 // Two alerts and delete
                 UserAlert.showMessage(message: "Erase all data", informativeText: "This operation cannot be undone.", buttonTitle: "Erase all data", secondaryButtonTitle: "Cancel") {
                     UserAlert.showMessage(message: "Are you sure you want to erase all your beam data?", informativeText: "This operation cannot be undone.", buttonTitle: "Yes, Erase All Data", secondaryButtonTitle: "Cancel") {
-                        let semaphore = DispatchSemaphore(value: 0)
                         // Delete All Local Content && Remote data
-                        AppDelegate.main.deleteAllData(includedRemote: false)
                         _ = try? BeamObjectManager().deleteAll(nil) { _ in
-                            semaphore.signal()
+                            DispatchQueue.main.async {
+                                AppDelegate.main.deleteAllLocalData()
+                            }
                         }
-                        semaphore.wait()
-                        finish(nil)
                     }
                 }
             }
