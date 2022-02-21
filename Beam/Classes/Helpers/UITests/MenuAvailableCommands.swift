@@ -41,6 +41,11 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case create10NormalNotes = "Create 10 Normal Notes"
     case create10JournalNotes = "Create 10 Journal Notes"
 
+    // Links
+    case create1000Links = "Create 1,000 Links"
+    case create10000Links = "Create 10,000 Links"
+    case create50000Links = "Create 50,000 Links"
+
     // Passwords
     case populatePasswordsDB = "Populate Passwords Database"
     case clearPasswordsDB = "Clear Passwords Database"
@@ -66,6 +71,8 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
         case .populateDBWithJournal, .insertTextInCurrentNote,
                 .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes:
             return .notes
+        case .create1000Links, .create10000Links, .create50000Links:
+            return .links
         case .enableBrowsingSessionCollection, .disableBrowsingSessionCollection:
             return .browsingSession
         case .resizeSquare1000, .resizeWindowPortrait, .resizeWindowLandscape:
@@ -93,6 +100,7 @@ public enum UITestMenuGroup: String, CaseIterable {
     case browsingSession = "Browsing Session"
     case loadHTMLPage = "Load UITest HTML Page"
     case notes = "Notes"
+    case links = "Links"
     case omniboxSetup = "Omnibox Setup"
     case passwords = "Passwords"
     case mockHttpServer = "Mock HTTP Server"
