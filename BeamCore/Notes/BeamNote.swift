@@ -124,6 +124,9 @@ public class BeamNote: BeamElement {
 
     public override func checkHasNote() {
         hasNote = true
+        for child in children {
+            child.checkHasNote()
+        }
     }
 
     public init(title: String) {
