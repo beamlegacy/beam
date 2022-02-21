@@ -8213,6 +8213,20 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"UITests-1.html",
+					"UITests-Playground.html",
+					"UITests-Media.html",
+					"UITests-Password.html",
+					"UITests-4.html",
+					"UITests-3.html",
+					"UITests-2.html",
+					"UITests-Alerts.html",
+					audio.mp3,
+					"beam-logo-test.png",
+					Beam.css,
+					video.mov,
+				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -8682,6 +8696,20 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"UITests-1.html",
+					"UITests-Playground.html",
+					"UITests-Media.html",
+					"UITests-Password.html",
+					"UITests-4.html",
+					"UITests-3.html",
+					"UITests-2.html",
+					"UITests-Alerts.html",
+					audio.mp3,
+					"beam-logo-test.png",
+					Beam.css,
+					video.mov,
+				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
@@ -9124,6 +9152,20 @@
 				DEVELOPMENT_TEAM = X87W5M786F;
 				ENABLE_HARDENED_RUNTIME = YES;
 				ENABLE_PREVIEWS = YES;
+				EXCLUDED_SOURCE_FILE_NAMES = (
+					"UITests-1.html",
+					"UITests-Playground.html",
+					"UITests-Media.html",
+					"UITests-Password.html",
+					"UITests-4.html",
+					"UITests-3.html",
+					"UITests-2.html",
+					"UITests-Alerts.html",
+					audio.mp3,
+					"beam-logo-test.png",
+					Beam.css,
+					video.mov,
+				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
