@@ -71,7 +71,7 @@ public struct FrecencyScore {
     public var sortValue: Float!
 
     private func scoreSortValue(halfLife: Float) -> Float {
-        guard lastScore != 0.0 else { return -Float.greatestFiniteMagnitude }
+        guard lastScore > 0.0 else { return -Float.greatestFiniteMagnitude }
         return log(lastScore) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife
     }
 
