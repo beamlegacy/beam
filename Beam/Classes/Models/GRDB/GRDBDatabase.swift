@@ -431,7 +431,7 @@ struct GRDBDatabase {
         try dbReader.read { db in
             if try migrator.hasBeenSuperseded(db) {
                 Logger.shared.logError("GRDB migration status is ahead of registred migrations.", category: .database)
-                UserAlert.showError(message: "Application version is too old, please reinstall latest version.",
+                UserAlert.showError(message: "You need to update to beam's latest version.",
                                     informativeText: "Database version is ahead of application version.",
                                     buttonTitle: "Exit now")
                 AppDelegate.main.skipTerminateMethods = true
