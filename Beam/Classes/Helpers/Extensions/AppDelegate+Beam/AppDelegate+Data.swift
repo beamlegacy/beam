@@ -45,7 +45,7 @@ extension AppDelegate {
         // Link Store
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         //Contacts
-        ContactsManager.shared.deleteAll(includedRemote: includedRemote) { _ in }
+        ContactsManager.shared.deleteAll(includedRemote: false) { _ in }
         // Passwords
         PasswordManager.shared.deleteAll(includedRemote: false) { _ in }
         // Note Frecency
@@ -58,7 +58,7 @@ extension AppDelegate {
         }
 
         // Notes and Databases
-        self.deleteDocumentsAndDatabases(includedRemote: includedRemote)
+        self.deleteDocumentsAndDatabases(includedRemote: false)
     }
 
     @IBAction func resetDatabase(_ sender: Any) {
