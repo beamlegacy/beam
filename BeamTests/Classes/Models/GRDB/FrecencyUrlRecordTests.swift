@@ -33,6 +33,16 @@ class FrecencyUrlRecordTests: XCTestCase {
             try expect(FrecencyUrlRecord.fetchCount(db)) == 3
         }
     }
+    func testFetchNanSortScore() throws {
+        let db = GRDBDatabase.empty()
+        let id = UUID()
+        let record = FrecencyUrlRecord(urlId: id, lastAccessAt: Date(timeIntervalSince1970: 1), frecencyScore: -1, frecencySortScore: Float.nan, frecencyKey: .webVisit30d0)
+        try db.saveFrecencyUrl(record)
+        let frecencies = try db.fetchOneFrecency(fromUrl: id)
+        let frecency = try XCTUnwrap(frecencies[record.frecencyKey])
+        XCTAssertEqual(frecency.frecencySortScore, -Float.greatestFiniteMagnitude)
+    }
+
     func testGetMany() throws {
         let db = GRDBDatabase.empty()
         let urlIds = (0...2).map { _ in UUID() }

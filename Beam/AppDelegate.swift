@@ -97,7 +97,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         data = BeamData()
         if deleteAllLocalDataAtStartup {
-            self.deleteAllData(includedRemote: false)
+            self.deleteAllLocalData()
         }
 
         startDisplayingBrowserImportErrors()

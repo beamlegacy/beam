@@ -15,7 +15,7 @@ enum NoteViewLocators {
     
     enum SlashContextMenuItems: String, CaseIterable, UIElement {
         // slash menu options
-        case cardReferenceItem = "ContextMenuItem-note reference"
+        case noteItem = "ContextMenuItem-note"
         case todoItem = "ContextMenuItem-todo"
         case datePickerItem = "ContextMenuItem-date picker"
         case boldItem = "ContextMenuItem-bold"
