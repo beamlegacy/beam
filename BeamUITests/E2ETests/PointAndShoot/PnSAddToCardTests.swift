@@ -21,7 +21,7 @@ class PnSAddToCardTests: BaseTest {
             "Point And Shoot Test Fixture Cursor"
         ]
     
-    func testAddTextToTodaysCard() throws {
+    func SKIPtestAddTextToTodaysCard() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
         let journalView = launchApp()
         UITestsMenuBar().destroyDB()
@@ -334,7 +334,7 @@ class PnSAddToCardTests: BaseTest {
         }
     }
     
-    func testDismissShootCardPicker() throws {
+    func SKIPtestDismissShootCardPicker() throws {
         try XCTSkipIf(true, "Skipped due to PointFrame cannot be detected BE-2591")
        //Shoot "dismiss shootCardPicker by clicking on page and pressing escape"
        let journalView = launchApp()

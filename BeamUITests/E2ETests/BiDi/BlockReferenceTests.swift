@@ -13,7 +13,7 @@ class BlockReferenceTests: BaseTest {
     let cardName1 = "Block 1"
     let cardName2 = "Block 2"
     
-    func testCreateBlockReference() throws {
+    func SKIPtestCreateBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
         let journalView = launchApp()
         
@@ -26,7 +26,7 @@ class BlockReferenceTests: BaseTest {
         XCTAssertEqual(cardView.getBlockRefByIndex(0).value as? String, noteForReference)
     }
     
-    func testLockUnlockBlockReference() throws {
+    func SKIPtestLockUnlockBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
         let journalView = launchApp()
         let textToAdd = " additional text"
@@ -51,7 +51,7 @@ class BlockReferenceTests: BaseTest {
         XCTAssertEqual(blockRef.value as? String, noteForReference)
     }
     
-    func testViewBlockReferenceOrigin() throws {
+    func SKIPtestViewBlockReferenceOrigin() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
         let journalView = launchApp()
         
@@ -64,7 +64,7 @@ class BlockReferenceTests: BaseTest {
         XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName1, cardView.cardTitle), "Actual note name is \(cardView.cardTitle)")
     }
     
-    func testRemoveBlockReference() throws {
+    func SKIPtestRemoveBlockReference() throws {
         try XCTSkipIf(true, "Feature is temporary deprecated")
         let journalView = launchApp()
         

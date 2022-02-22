@@ -11,7 +11,7 @@ import XCTest
 class AllCardsViewTests: BaseTest {
     
     
-    func testAllCardsView() throws {
+    func SKIPtestAllCardsView() throws {
         try XCTSkipIf(true, "WIP, TBD in next MR")
         // Assert all notes exist
 
