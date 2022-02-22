@@ -545,9 +545,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
 
+    ///Should only be used to say that the full sync on quit is done
+    ///Set to true to directly return .terminateNow in shouldTerminate
+    var fullSyncOnQuitStatus: FullSyncOnQuitStatus = .notStarted
+
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard !skipTerminateMethods else { return .terminateNow }
+        guard !skipTerminateMethods, fullSyncOnQuitStatus != .done else { return .terminateNow }
+        guard fullSyncOnQuitStatus != .ongoing else {
+            Logger.shared.logDebug("Tried to quit while full syncing")
+            return .terminateCancel }
+
         AccountManager.logoutIfNeeded()
         data.saveData()
         saveCloseTabsCmd(onExit: true)
@@ -586,16 +594,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
+        //We need to trigger full sync before quitting the app
+        //To make it feel more instant, we first close all the windows
+        windows.forEach {
+            $0.close()
+        }
+
+        //Then start the full sync.
+        //As this code is async, but uses at some point the main thread, we could not ."terminateLater"
+        //because it will set its RunLoop in the modalPanel mode and that will make dispatch to main queue fail
+        //More explanations here: https://www.thecave.com/2015/08/10/dispatch-async-to-main-queue-doesnt-work-with-modal-window-on-mac-os-x
+        fullSyncOnQuitStatus = .ongoing
         syncDataWithBeamObject(force: false, showAlert: false) { _ in
-            Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
-            RunLoop.main.perform(inModes: [.modalPanel]) {
-                Logger.shared.logDebug("Sending toApplicationShouldTerminate true (main thread)")
-                NSApplication.shared.reply(toApplicationShouldTerminate: true)
+            Logger.shared.logDebug("Full sync finished. Asking again to quit, without full sync")
+            DispatchQueue.main.async {
+                self.fullSyncOnQuitStatus = .done
+                NSApp.terminate(nil)
             }
         }
 
-        Logger.shared.logDebug("applicationShouldTerminate: terminateLater")
-        return .terminateLater
+        //We cancel the quit for now. Will ask again after full sync is over
+        return .terminateCancel
     }
 
     private func cancelQuitAlertForImports() -> Bool {
@@ -734,6 +753,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+}
+
+// MARK: - Full sync on quit
+extension AppDelegate {
+    enum FullSyncOnQuitStatus {
+        case notStarted
+        case ongoing
+        case done
+    }
 }
 
 // MARK: - NSAppearance

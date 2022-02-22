@@ -578,6 +578,7 @@ public extension CALayer {
     }
 
     static let minimumEmptyEditorHeight = CGFloat(184)
+    static let minimumEmptyEditorWidth = CGFloat(670)
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
@@ -587,9 +588,9 @@ public extension CALayer {
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                return NSSize(width: 670, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
+                return NSSize(width: Self.minimumEmptyEditorWidth, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
             }
-            return NSSize(width: 670, height: Self.minimumEmptyEditorHeight)
+            return NSSize(width: Self.minimumEmptyEditorWidth, height: Self.minimumEmptyEditorHeight)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth

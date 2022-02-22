@@ -167,6 +167,7 @@ struct CalendarView: View {
             var position = prefix.count
             text.insert(prefix, at: 0, withAttributes: [])
             meeting.attendees.enumerated().forEach { index, attendee in
+                guard !attendee.name.isEmpty else { return }
                 let name = attendee.name
                 let attendeeNote = BeamNote.fetchOrCreate(title: name)
                 saveContacts(for: attendee, and: attendeeNote)
