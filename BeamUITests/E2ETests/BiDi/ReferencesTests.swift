@@ -142,7 +142,7 @@ class ReferencesTests: BaseTest {
         XCTAssertFalse(cardView.doesReferenceSectionExist())
     }
     
-    func testLinkReferecnes() throws {
+    func SKIPtestLinkReferecnes() throws {
         try XCTSkipIf(true, "Link and Link All buttons are not accessible")
         let secondReference = "\(cardName1) second REF"
         let thirdReference = "\(cardName1) THIRD_reference"
@@ -218,7 +218,7 @@ class ReferencesTests: BaseTest {
         XCTAssertFalse(cardView.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
     }
     
-    func testReferencesIndentationLevels() throws {
+    func SKIPtestReferencesIndentationLevels() throws {
         try XCTSkipIf(true, "WIP")
     }
 }

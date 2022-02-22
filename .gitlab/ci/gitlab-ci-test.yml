@@ -70,7 +70,7 @@ swift lint:
     - macos
 
 UITestThread1:
-  timeout: 20 minutes
+  timeout: 25 minutes
   dependencies: []
   stage: test
   artifacts:
@@ -111,7 +111,7 @@ UITestThread1:
   interruptible: true
 
 UITestThread2:
-  timeout: 20 minutes
+  timeout: 25 minutes
   dependencies: []
   stage: test
   artifacts:
@@ -152,7 +152,7 @@ UITestThread2:
   interruptible: true
 
 UITestThread3:
-  timeout: 20 minutes
+  timeout: 25 minutes
   dependencies: []
   stage: test
   artifacts:
@@ -193,7 +193,7 @@ UITestThread3:
   interruptible: true
 
 UITestThread4:
-  timeout: 20 minutes
+  timeout: 25 minutes
   dependencies: []
   stage: test
   artifacts:
