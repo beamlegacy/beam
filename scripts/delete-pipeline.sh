@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -euo pipefail
+set -eo pipefail
 
 # Get GitLab API URL from project URL
 GITLAB_API_URL="https://gitlab.com/api/v4"
