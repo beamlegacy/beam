@@ -16,9 +16,9 @@ class EmbedNode: ResizableNode {
 
     override var bulletLayerPositionY: CGFloat {
         if isCollapsed, let collapsedContentFirstBaseline = collapsedContent?.firstBaseline {
-            return padding.top + collapsedContentFirstBaseline - 15
+            return padding.top + collapsedContentFirstBaseline - 14
         } else {
-            return expandedContentOrigin.y + 4
+            return expandedContentOrigin.y
         }
     }
 
