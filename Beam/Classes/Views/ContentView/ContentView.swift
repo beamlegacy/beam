@@ -44,6 +44,7 @@ struct ContentView: View {
                 .zIndex(1)
         }
         .environment(\.isMainWindow, windowInfo.windowIsMain)
+        .environment(\.windowFrame, windowInfo.windowFrame)
     }
 
     private var shouldDisplayBottomBar: Bool {
@@ -73,5 +74,16 @@ extension EnvironmentValues {
     var isMainWindow: Bool {
         get { self[IsMainWindowEnvironmentKey.self] }
         set { self[IsMainWindowEnvironmentKey.self] = newValue }
+    }
+}
+
+// MARK: - Window Frame environment value
+private struct WindowFrameEnvironmentKey: EnvironmentKey {
+    static let defaultValue = CGRect.zero
+}
+extension EnvironmentValues {
+    var windowFrame: CGRect {
+        get { self[WindowFrameEnvironmentKey.self] }
+        set { self[WindowFrameEnvironmentKey.self] = newValue }
     }
 }
