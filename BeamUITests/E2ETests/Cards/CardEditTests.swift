@@ -105,7 +105,7 @@ class CardEditTests: BaseTest {
         XCTAssertTrue(webPageUrl.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageUrl)")
     }
     
-    func testIntendUnintendNote() throws {
+    func SKIPtestIntendUnintendNote() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2234/perform-uitest-locally-trigger-the-vinyl-fatalerror")
         launchApp()
         
