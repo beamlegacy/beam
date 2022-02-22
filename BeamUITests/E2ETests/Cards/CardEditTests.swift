@@ -60,7 +60,7 @@ class CardEditTests: BaseTest {
     }
     
     func testCardDeleteSuccessfully() {
-        let cardNameToBeCreated = "Delete"
+        let cardNameToBeCreated = "Delete me"
         let journalView = launchApp()
         
         testRailPrint("Given I create \(cardNameToBeCreated) note")
