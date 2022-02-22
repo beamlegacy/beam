@@ -10,6 +10,7 @@ default:
     - direnv allow
     - eval "$(direnv export bash)"
     - eval "$(rbenv init -)"
+    - scripts/delete-pipeline.sh
     - scripts/install_xcode.sh
     - bundle install
     # This is actually to be done once per CI or ~/.gitconfig gets messed up
