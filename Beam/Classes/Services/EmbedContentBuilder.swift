@@ -89,4 +89,17 @@ struct EmbedContentBuilder {
             }
         }
     }
+
+    func embeddableContentFromAnyStrategy(for url: URL) -> Future<EmbedContent, EmbedContentError> {
+        let embedContentBuilder = EmbedContentBuilder()
+
+        if let embedContent = embedContentBuilder.embeddableContent(for: url) {
+            return Future<EmbedContent, EmbedContentError> { promise in
+                promise(.success(embedContent))
+            }
+        }
+
+        return embedContentBuilder.embeddableContentAsync(for: url)
+    }
+
 }
