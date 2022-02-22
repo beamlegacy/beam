@@ -76,7 +76,7 @@ extension BrowserTab: WebPage {
     }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
-        // TODO: Open a new window compliant with windowFeatures instead.
+        // TODO: Open a new window compliant with windowFeatures instead, including slight offset similar to the default new window behaviour
         let defaultValue = true
         let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
         let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue

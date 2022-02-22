@@ -32,7 +32,7 @@ class TestWebPage: WebPage {
     var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
-    var webView: BeamWebView!
+    var webView: BeamWebView
     var activeNote: BeamNote {
         if let note = testNotes.values.first {
             return note
@@ -78,6 +78,7 @@ class TestWebPage: WebPage {
         events.append("createNewWindow \(targetURL) \(setCurrent))")
         let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
                                   fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+
         return webPage.webView
     }
 

@@ -12,10 +12,11 @@ enum WebViewFocusMessages: String, CaseIterable {
     case focusChanged
 }
 
-class WebViewFocusMessageHandler: BeamMessageHandler<WebViewFocusMessages> {
+class WebViewFocusMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: WebViewFocusMessages.self, jsFileName: "WebViewFocusHandling")
+    init() {
+        let messages = WebViewFocusMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "WebViewFocusHandling")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {

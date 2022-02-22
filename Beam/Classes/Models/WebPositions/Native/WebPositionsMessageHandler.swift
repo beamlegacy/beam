@@ -27,10 +27,11 @@ struct WebPositionsError: LocalizedError {
     }
 }
 
-class WebPositionsMessageHandler: BeamMessageHandler<WebPositionsMessages> {
+class WebPositionsMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: WebPositionsMessages.self, jsFileName: "WebPositions_prod")
+    init() {
+        let messages = WebPositionsMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "WebPositions_prod")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
