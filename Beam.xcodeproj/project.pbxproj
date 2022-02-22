@@ -745,6 +745,13 @@
 		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
 		A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */; };
 		A039B14D26960F21008A2E0B /* UserInformationsModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */; };
+		A03B908B27BE99AC001FBE64 /* HowToBeam.json in Resources */ = {isa = PBXBuildFile; fileRef = A03B908827BE99AC001FBE64 /* HowToBeam.json */; };
+		A03B908C27BE99AC001FBE64 /* Yesterday.json in Resources */ = {isa = PBXBuildFile; fileRef = A03B908927BE99AC001FBE64 /* Yesterday.json */; };
+		A03B908D27BE99AC001FBE64 /* Capture.json in Resources */ = {isa = PBXBuildFile; fileRef = A03B908A27BE99AC001FBE64 /* Capture.json */; };
+		A03B909227BE9A4E001FBE64 /* htb-0.gif in Resources */ = {isa = PBXBuildFile; fileRef = A03B908F27BE9A4E001FBE64 /* htb-0.gif */; };
+		A03B909327BE9A4E001FBE64 /* htb-1.gif in Resources */ = {isa = PBXBuildFile; fileRef = A03B909027BE9A4E001FBE64 /* htb-1.gif */; };
+		A03B909527BEA5B7001FBE64 /* cpt-0.jpg in Resources */ = {isa = PBXBuildFile; fileRef = A03B909427BEA5B6001FBE64 /* cpt-0.jpg */; };
+		A03B909827BEA5EA001FBE64 /* htb-2.png in Resources */ = {isa = PBXBuildFile; fileRef = A03B909727BEA5EA001FBE64 /* htb-2.png */; };
 		A03CE0EC25F954CB00D767B0 /* BeamNoteDataHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */; };
 		A0404F0C25E7ECDD00E347F3 /* CommandNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */; };
 		A043B7E7265937DA00E267E5 /* AppDelegate+TabGrouping.swift in Sources */ = {isa = PBXBuildFile; fileRef = A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */; };
@@ -840,6 +847,7 @@
 		A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */; };
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
+		A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
 		A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */; };
@@ -2093,6 +2101,13 @@
 		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
 		A0379C42266E6C5B00D75D6B /* AllowListTableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListTableView.swift; sourceTree = "<group>"; };
 		A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsModalView.swift; sourceTree = "<group>"; };
+		A03B908827BE99AC001FBE64 /* HowToBeam.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = HowToBeam.json; sourceTree = "<group>"; };
+		A03B908927BE99AC001FBE64 /* Yesterday.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Yesterday.json; sourceTree = "<group>"; };
+		A03B908A27BE99AC001FBE64 /* Capture.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = Capture.json; sourceTree = "<group>"; };
+		A03B908F27BE9A4E001FBE64 /* htb-0.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "htb-0.gif"; sourceTree = "<group>"; };
+		A03B909027BE9A4E001FBE64 /* htb-1.gif */ = {isa = PBXFileReference; lastKnownFileType = image.gif; path = "htb-1.gif"; sourceTree = "<group>"; };
+		A03B909427BEA5B6001FBE64 /* cpt-0.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "cpt-0.jpg"; sourceTree = "<group>"; };
+		A03B909727BEA5EA001FBE64 /* htb-2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "htb-2.png"; sourceTree = "<group>"; };
 		A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteDataHolder.swift; sourceTree = "<group>"; };
 		A0404F0B25E7ECDD00E347F3 /* CommandNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandNodeTests.swift; sourceTree = "<group>"; };
 		A043B7E6265937DA00E267E5 /* AppDelegate+TabGrouping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+TabGrouping.swift"; sourceTree = "<group>"; };
@@ -2180,6 +2195,7 @@
 		A0F558E526BD51A70024C47E /* EditorDebugPreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorDebugPreferencesView.swift; sourceTree = "<group>"; };
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
+		A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNoteCreator.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
 		A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewTests.swift; sourceTree = "<group>"; };
@@ -3026,6 +3042,7 @@
 		41816FD02581046F00317ED8 /* Assets */ = {
 			isa = PBXGroup;
 			children = (
+				A03B908227BE9992001FBE64 /* Onboarding Notes */,
 				8ABFD6A22791D833001E35DE /* Sounds */,
 				A5F47EC626F8D70F004B7CDE /* Lotties */,
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
@@ -3497,6 +3514,7 @@
 				DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */,
 				96F53559271DADDD00B719C6 /* BeamLinkDB.swift */,
 				A062DD32275FC5EE0033DB6E /* ContactsManager.swift */,
+				A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -4829,6 +4847,28 @@
 				A0125A0526DE8AF300590CB5 /* WebCommand.swift */,
 			);
 			path = Web;
+			sourceTree = "<group>";
+		};
+		A03B908227BE9992001FBE64 /* Onboarding Notes */ = {
+			isa = PBXGroup;
+			children = (
+				A03B909627BEA5C0001FBE64 /* Media */,
+				A03B908927BE99AC001FBE64 /* Yesterday.json */,
+				A03B908A27BE99AC001FBE64 /* Capture.json */,
+				A03B908827BE99AC001FBE64 /* HowToBeam.json */,
+			);
+			path = "Onboarding Notes";
+			sourceTree = "<group>";
+		};
+		A03B909627BEA5C0001FBE64 /* Media */ = {
+			isa = PBXGroup;
+			children = (
+				A03B908F27BE9A4E001FBE64 /* htb-0.gif */,
+				A03B909027BE9A4E001FBE64 /* htb-1.gif */,
+				A03B909727BEA5EA001FBE64 /* htb-2.png */,
+				A03B909427BEA5B6001FBE64 /* cpt-0.jpg */,
+			);
+			path = Media;
 			sourceTree = "<group>";
 		};
 		A043B7FC26593A4800E267E5 /* TabGrouping */ = {
@@ -6185,6 +6225,7 @@
 				8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */,
 				8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
+				A03B908D27BE99AC001FBE64 /* Capture.json in Resources */,
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
 				5241E5F426F89C5000B08F69 /* refresh_token.graphql in Resources */,
 				52F78D2F27884699007A9F53 /* prepare_beam_object.graphql in Resources */,
@@ -6194,6 +6235,7 @@
 				965A78362514F148009980D4 /* Main.storyboard in Resources */,
 				5224CD4C2685FF8C00D4179E /* delete_beam_object.graphql in Resources */,
 				52F4E4BA264185FC0067B017 /* identities.graphql in Resources */,
+				A03B909227BE9A4E001FBE64 /* htb-0.gif in Resources */,
 				7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */,
 				56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */,
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
@@ -6252,10 +6294,13 @@
 				8AFE8354276B248B00D4B560 /* UITests-Password.html in Resources */,
 				375D83B8278D634C0064C246 /* LinkMouseOver.js in Resources */,
 				A5C661A627A1A57200727ACB /* editor-delete.json in Resources */,
+				A03B908B27BE99AC001FBE64 /* HowToBeam.json in Resources */,
 				8ABFD6A02791D82B001E35DE /* confirm.aiff in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
 				8AFE835A276B248B00D4B560 /* UITests-Media.html in Resources */,
+				A03B909827BEA5EA001FBE64 /* htb-2.png in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
+				A03B909327BE9A4E001FBE64 /* htb-1.gif in Resources */,
 				8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */,
 				52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */,
 				52EA56D5274F8FA400F092C8 /* beam_objects_data_url.graphql in Resources */,
@@ -6271,7 +6316,9 @@
 				8A930A0127A04E2C00064133 /* webpack.config.js in Resources */,
 				5224CD522685FF9B00D4179E /* update_beam_object.graphql in Resources */,
 				8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */,
+				A03B908C27BE99AC001FBE64 /* Yesterday.json in Resources */,
 				8A930A0827A04E2C00064133 /* yarn.lock in Resources */,
+				A03B909527BEA5B7001FBE64 /* cpt-0.jpg in Resources */,
 				8AFE8357276B248B00D4B560 /* UITests-Alerts.html in Resources */,
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
 				A07B03F1279AF1D200D14C45 /* Inter-SemiBoldItalic.otf in Resources */,
@@ -7308,6 +7355,7 @@
 				A570D32E27591C27003B239D /* ReadSizeViewModifier.swift in Sources */,
 				521EEDE925937FAD00BA2485 /* DocumentRow.swift in Sources */,
 				37A4A33327BE8A2900A012CB /* SmoothTextLayer.swift in Sources */,
+				A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */,
 				A570D2F227583BD4003B239D /* TabsListView.swift in Sources */,
 				8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */,
 				414B98F025A239F8002E81A3 /* FormatterView.swift in Sources */,
@@ -7827,7 +7875,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -7865,7 +7913,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -7890,7 +7938,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -7915,7 +7963,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8050,7 +8098,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -8087,7 +8135,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8112,7 +8160,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8136,7 +8184,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8295,7 +8343,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -8331,7 +8379,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8355,7 +8403,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8379,7 +8427,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8533,7 +8581,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -8570,7 +8618,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8595,7 +8643,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8619,7 +8667,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8778,7 +8826,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -8814,7 +8862,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8838,7 +8886,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8862,7 +8910,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8929,7 +8977,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8956,7 +9004,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -9168,7 +9216,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -9234,7 +9282,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -9270,7 +9318,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9301,7 +9349,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9325,7 +9373,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9348,7 +9396,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9451,7 +9499,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -9487,7 +9535,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9511,7 +9559,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9536,7 +9584,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.1.1;
+				MARKETING_VERSION = 0.1.2;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
