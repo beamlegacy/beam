@@ -10,10 +10,11 @@ enum LinkMouseOverMessage: String, CaseIterable {
 }
 
 /// A message handler receiving mouse hovering location updates when hovering over and out web links.
-final class LinkMouseOverMessageHandler: BeamMessageHandler<LinkMouseOverMessage> {
+final class LinkMouseOverMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: LinkMouseOverMessage.self, jsFileName: "LinkMouseOver")
+    init() {
+        let messages = LinkMouseOverMessage.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "LinkMouseOver")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {

@@ -73,7 +73,7 @@ struct TabView: View {
 
     private var securityIcon: some View {
         // hasOnlySecureContent is KVO observable, may be we should subscribe to it to reflect dynamic changes to it accordingly
-        let isSecure = tab.webView.hasOnlySecureContent
+        let isSecure = tab.webView.hasOnlySecureContent ?? true
         let icon = isSecure ? "tabs-security" : "tabs-security_risk"
         let color = isSecure ? BeamColor.AlphaGray : BeamColor.Shiraz
         return Icon(name: icon, color: color.swiftUI).opacity(isSecure ? 1 : 0.4)

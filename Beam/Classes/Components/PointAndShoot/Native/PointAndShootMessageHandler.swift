@@ -14,10 +14,11 @@ enum PointAndShootMessages: String, CaseIterable {
 /**
  Handles Point & shoot messages sent from web page's javascript.
  */
-class PointAndShootMessageHandler: BeamMessageHandler<PointAndShootMessages> {
+class PointAndShootMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: PointAndShootMessages.self, jsFileName: "pns_prod")
+    init() {
+        let messages = PointAndShootMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "pns_prod")
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

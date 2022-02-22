@@ -13,10 +13,11 @@ enum SearchMessage: String, CaseIterable {
     case webSearchCurrentSelection
 }
 
-class WebSearchMessageHandler: BeamMessageHandler<SearchMessage> {
+class WebSearchMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: SearchMessage.self, jsFileName: "SearchWebPage")
+    init() {
+        let messages = SearchMessage.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "SearchWebPage")
     }
 
     // swiftlint:disable:next cyclomatic_complexity

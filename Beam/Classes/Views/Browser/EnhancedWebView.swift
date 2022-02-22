@@ -24,12 +24,12 @@ struct EnhancedWebView: View {
                     Image(nsImage: captured).scaledToFit()
                         .opacity(0.5)
                 }
-                if windowInfo.windowIsMain || tabBelongsToThisWindow {
-                    WebView(webView: tab.webView, topContentInset: topContentInset)
+                if windowInfo.windowIsMain || tabBelongsToThisWindow, let webView = tab.webView {
+                    WebView(webView: webView, topContentInset: topContentInset)
                         .webViewStatusBar(isVisible: tab.showsStatusBar) {
                             WebViewStatusText(mouseHoveringLocation: tab.mouseHoveringLocation)
                         }
-                        .if(!tab.webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
+                        .if(!webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
                     ZStack {
                         if let pns = tab.pointAndShoot, PreferencesManager.showPNSView == true {
                             PointAndShootView(pns: pns)

@@ -336,7 +336,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             } else {
                 offset = .zero
             }
-            let scale = self.page?.webView?.zoomLevel() ?? 1
+            let scale = self.page?.webView.zoomLevel() ?? 1
             Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .passwordManagerInternal)
             let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y + rect.height) * scale, width: rect.width * scale, height: rect.height * scale)
             completion(frame)

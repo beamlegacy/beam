@@ -16,7 +16,7 @@ import Nimble
 // swiftlint:disable type_body_length type_name file_length
 class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     let windowHref = TestWebPage.urlStr
-    var browserTabConfiguration: BrowserTabConfiguration!
+    var browserTabConfiguration: BeamWebViewConfigurationBase!
     var webPositionsMessageHandler: WebPositionsMessageHandler!
     var windowFrameBounds: [String: Any] = [
         "bounds": [
@@ -29,8 +29,8 @@ class WebPositionsMessageHandlerFrameBoundsTest: PointAndShootTest {
     ]
     override func setUpWithError() throws {
         initTestBed()
-        self.browserTabConfiguration = BrowserTabConfiguration()
-        self.webPositionsMessageHandler = WebPositionsMessageHandler(config: browserTabConfiguration)
+        self.webPositionsMessageHandler = WebPositionsMessageHandler()
+        self.browserTabConfiguration = BeamWebViewConfigurationBase(handlers: [webPositionsMessageHandler])
     }
 
     fileprivate func helperAssertFrameInfoEqual(_ frameInfo: WebPositions.FrameInfo, _ expectedFrameInfo: WebPositions.FrameInfo) {

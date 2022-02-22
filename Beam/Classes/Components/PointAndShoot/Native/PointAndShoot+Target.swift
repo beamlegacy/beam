@@ -57,12 +57,11 @@ extension PointAndShoot {
     }
 
     func translateAndScaleTargetsIfNeeded(_ targets: [PointAndShoot.Target], _ href: String) -> [PointAndShoot.Target]? {
-        guard let page = self.page,
-              let view = page.webView else {
+        guard let page = self.page else {
                   Logger.shared.logError("Webview is required to scale target correctly", category: .pointAndShoot)
                   return nil
               }
-        let scale: CGFloat = view.zoomLevel()
+        let scale: CGFloat = page.webView.zoomLevel()
         // We can reduce calculations for the MainWindowFrame
         let isDifferentUrl = href != page.url?.absoluteString
         guard isDifferentUrl || scale != 1 else {
