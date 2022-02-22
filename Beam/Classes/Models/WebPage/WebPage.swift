@@ -8,7 +8,7 @@ import Promises
  */
 protocol WebPage: AnyObject, Scorable {
 
-    var webView: BeamWebView! { get }
+    var webView: BeamWebView { get }
     var webviewWindow: NSWindow? { get }
 
     var frame: NSRect { get }
@@ -141,7 +141,7 @@ extension WebPage {
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) { }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
-        webView
+        return webView
     }
 
     func addTextToClusteringManager(_ text: String, url: URL) { }

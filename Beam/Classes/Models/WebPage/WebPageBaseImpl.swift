@@ -14,7 +14,7 @@ import Foundation
  */
 class WebPageBaseImpl: WebPage {
 
-    weak var webView: BeamWebView!
+    var webView: BeamWebView
 
     init(webView: BeamWebView) {
         self.webView = webView

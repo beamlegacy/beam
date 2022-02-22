@@ -307,9 +307,9 @@ extension BrowserTabsManager {
         if window?.firstResponder is BeamWebView {
             window?.makeFirstResponder(nil)
         }
-        if let currentTab = currentTab, let webView = currentTab.webView {
+        if let currentTab = currentTab {
             DispatchQueue.main.async {
-                webView.window?.makeFirstResponder(currentTab.webView)
+                currentTab.webView.window?.makeFirstResponder(currentTab.webView)
             }
         }
     }
