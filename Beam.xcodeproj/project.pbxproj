@@ -904,6 +904,7 @@
 		A53C9873267B4B6400D4AE90 /* AnimatableOffsetEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */; };
 		A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */; };
 		A53F1C5627B8A8A8009AE2D0 /* OmniboxLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53F1C5527B8A8A8009AE2D0 /* OmniboxLocators.swift */; };
+		A53F8A5A27C4A74E000D168D /* AvailableShortcut.swift in Sources */ = {isa = PBXBuildFile; fileRef = A53F8A5927C4A74E000D168D /* AvailableShortcut.swift */; };
 		A545054E27AF8296006AE756 /* OnboardingSaveEncryptionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545054827AF8296006AE756 /* OnboardingSaveEncryptionView.swift */; };
 		A545055527B11F83006AE756 /* EncryptionManager+ImportExport.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */; };
 		A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */; };
@@ -2233,6 +2234,7 @@
 		A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatableOffsetEffect.swift; sourceTree = "<group>"; };
 		A53EC2F82657C175001BCCCD /* CoreDataContextObserverTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataContextObserverTests.swift; sourceTree = "<group>"; };
 		A53F1C5527B8A8A8009AE2D0 /* OmniboxLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxLocators.swift; sourceTree = "<group>"; };
+		A53F8A5927C4A74E000D168D /* AvailableShortcut.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AvailableShortcut.swift; sourceTree = "<group>"; };
 		A545054827AF8296006AE756 /* OnboardingSaveEncryptionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnboardingSaveEncryptionView.swift; sourceTree = "<group>"; };
 		A545055427B11F83006AE756 /* EncryptionManager+ImportExport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "EncryptionManager+ImportExport.swift"; sourceTree = "<group>"; };
 		A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteList.swift; sourceTree = "<group>"; };
@@ -2861,6 +2863,7 @@
 				33353ED326F3672F00063078 /* ShortcutModifier.swift */,
 				33353ED526F3675000063078 /* ShortcutKey.swift */,
 				33353EDB26F36B4300063078 /* Shortcut.swift */,
+				A53F8A5927C4A74E000D168D /* AvailableShortcut.swift */,
 				33353ED726F367FF00063078 /* ShortcutView.swift */,
 				33353ED926F369AD00063078 /* KeyboardFeatureView.swift */,
 				33353EDD26F372D700063078 /* KeyboardFeature.swift */,
@@ -6890,6 +6893,7 @@
 				A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */,
 				520088C02613295000AED835 /* DatabaseManager.swift in Sources */,
 				525F932526E2392A00A5C7BD /* DocumentManager+BeamObjectManagerDelegate.swift in Sources */,
+				A53F8A5A27C4A74E000D168D /* AvailableShortcut.swift in Sources */,
 				418172152581107C00317ED8 /* NSContainerView.swift in Sources */,
 				A0CB7E5F268E7E9200D15AFD /* PreferencesManager+Cards.swift in Sources */,
 				339D193926AED9E1006DE745 /* AuthenticationView.swift in Sources */,

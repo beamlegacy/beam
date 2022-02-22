@@ -10,4 +10,15 @@ import Foundation
 struct Shortcut: Hashable {
     let modifiers: [ShortcutModifier]
     let keys: [ShortcutKey]
+
+    var stringValue: String {
+        var text = ""
+        modifiers.forEach { m in
+            text += m.stringValue
+        }
+        keys.forEach { k in
+            text += k.stringValue
+        }
+        return text
+    }
 }
