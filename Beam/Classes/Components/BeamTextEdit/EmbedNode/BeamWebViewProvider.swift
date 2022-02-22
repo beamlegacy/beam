@@ -29,7 +29,11 @@ extension BeamWebViewProvider: BeamWebViewProviding {
             return
         }
 
-        let configuration = EmbedNodeWebViewConfiguration()
+        let configuration = BeamWebViewConfigurationBase(handlers: [
+            LoggingMessageHandler(),
+            MediaPlayerMessageHandler(),
+            EmbedNodeMessageHandler()
+        ])
         let webView = BeamWebView(frame: .zero, configuration: configuration)
         webView.setupForEmbed()
         AppDelegate.main.data.setup(webView: webView)

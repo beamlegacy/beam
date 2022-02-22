@@ -15,10 +15,11 @@ enum EmbedNodeMessages: String, CaseIterable {
 /**
  Handles logging messages sent from web page's javascript.
  */
-class EmbedNodeMessageHandler: BeamMessageHandler<EmbedNodeMessages> {
+class EmbedNodeMessageHandler:SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: EmbedNodeMessages.self, jsFileName: "EmbedNode_prod", cssFileName: "EmbedNode", jsCodePosition: .atDocumentStart, forMainFrameOnly: true)
+    init() {
+        let messages = EmbedNodeMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "EmbedNode_prod", cssFileName: "EmbedNode", jsCodePosition: .atDocumentStart, forMainFrameOnly: true)
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from: WebPage, frameInfo: WKFrameInfo?) {
