@@ -92,6 +92,39 @@ enum ShortcutKey: Hashable {
         }
     }
 
+    var stringValue: String {
+        switch self {
+        case .string(let char):
+            return char
+        case .up:
+            return "↑"
+        case .down:
+            return "↓"
+        case .left:
+            return "←"
+        case .right:
+            return "→"
+        case .tab:
+            return "⇥"
+        case .enter:
+            return "⮐"
+        case .arobase:
+            return "@"
+        case .bracket:
+            return "["
+        case .bracketReversed:
+            return "]"
+        case .doubleBracket:
+            return "[["
+        case .slash:
+            return "/"
+        case .plus:
+            return "+"
+        case .minus:
+            return "-"
+        }
+    }
+
     func hash(into hasher: inout Hasher) {
         hasher.combine(buildHashValue)
     }
