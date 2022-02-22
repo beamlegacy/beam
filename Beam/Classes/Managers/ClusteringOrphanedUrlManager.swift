@@ -39,13 +39,14 @@ struct OrphanedUrl: CsvRow {
     let groupId: Int
     let navigationGroupId: Int?
     let savedAt: Date
+    let cleanedContent: String
 
     static var columnNames: [String] {
-        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt"]
+        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt", "cleanedContent"]
     }
 
     var columns: [String] {
-        [sessionId.uuidString, optionalToString(url), String(groupId), String(navigationGroupId ?? -1), savedAt.toString]
+        [sessionId.uuidString, optionalToString(url), String(groupId), String(navigationGroupId ?? -1), savedAt.toString, cleanedContent]
     }
 
 }

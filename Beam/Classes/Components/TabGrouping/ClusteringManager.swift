@@ -463,7 +463,8 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt))
+                let cleanedContent = self.cluster.getCleanedContentFromPageId(pageID: urlId)
+                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, cleanedContent: cleanedContent))
             }
         }
     }
@@ -474,7 +475,8 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt))
+                let cleanedContent = self.cluster.getCleanedContentFromPageId(pageID: urlId)
+                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, cleanedContent: cleanedContent))
             }
         }
         orphanedUrlManager.save()
