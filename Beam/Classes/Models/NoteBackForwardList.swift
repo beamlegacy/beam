@@ -152,9 +152,27 @@ class NoteBackForwardList: Codable {
         return nil
     }
 
+    private func purgeConsecutiveDuplicates(_ list: [Element]) -> [Element] {
+        var previous: Element?
+        return list.compactMap {
+            guard $0 != previous else { return nil }
+            previous = $0
+            return $0
+        }
+    }
+
+    private func purgeConsecutiveDuplicates () {
+        backList = purgeConsecutiveDuplicates(backList)
+        if backList.last == current {
+            backList.removeLast()
+        }
+        forwardList = purgeConsecutiveDuplicates(forwardList)
+    }
+
     func purgeDeletedNote(withId id: UUID) {
         backList = backList.compactMap { $0.isNote(id) ? nil : $0 }
         forwardList = forwardList.compactMap { $0.isNote(id) ? nil : $0 }
+        purgeConsecutiveDuplicates()
     }
 
     func clear() {
