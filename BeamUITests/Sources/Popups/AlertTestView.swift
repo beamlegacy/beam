@@ -12,14 +12,14 @@ class AlertTestView: BaseView {
     
     @discardableResult
     func confirmDeletion() -> BaseView {
-        let deleteButton = button(AlertViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnExistence()
+        let deleteButton = button(AlertViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnHittable()
         WaitHelper().waitForDoesntExist(deleteButton)
         return self
     }
     
     @discardableResult
     func cancelDeletion() -> BaseView {
-        let cancelButton = button(AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier).clickOnExistence()
+        let cancelButton = button(AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier).clickOnHittable()
         WaitHelper().waitForDoesntExist(cancelButton)
         return self
     }

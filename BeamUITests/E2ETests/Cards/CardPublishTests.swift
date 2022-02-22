@@ -25,7 +25,7 @@ class CardPublishTests: BaseTest {
         XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
     }
     
-    func testPublishCard() throws {
+    func SKIPtestPublishCard() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
         let cardNameToBeCreated = "Note publish"
         let journalView = JournalTestView()
@@ -50,11 +50,11 @@ class CardPublishTests: BaseTest {
         testRailPrint("Then I can open the link in web browser")
     }
     
-    func testPublishedCardContentCorrectness() throws {
+    func SKIPtestPublishedCardContentCorrectness() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
     }
     
-    func testUnpublishPublishedCard() throws {
+    func SKIPtestUnpublishPublishedCard() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
         let cardNameToBeCreated = "Unpublish"
         let journalView = launchApp()

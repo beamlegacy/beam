@@ -10,7 +10,7 @@ import XCTest
 
 class SignInTests: BaseTest {
     
-    func testSignInSuccessfully() throws {
+    func SKIPtestSignInSuccessfully() throws {
         try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
         self.launchApp()
         UITestsMenuBar().logout()

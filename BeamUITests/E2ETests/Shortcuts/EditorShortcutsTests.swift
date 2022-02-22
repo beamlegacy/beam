@@ -102,7 +102,7 @@ class EditorShortcutsTests: BaseTest {
         XCTAssertEqual(cardView.getCardNoteValueByIndex(1), textToType)
     }
     
-    func testSwitchWebToDestinationCard () throws {
+    func SKIPtestSwitchWebToDestinationCard () throws {
         try XCTSkipIf(true, "WIP")
         let card1 = "Destination One"
         let card2 = "Destination Two"

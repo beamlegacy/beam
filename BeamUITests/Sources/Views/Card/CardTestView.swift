@@ -39,7 +39,7 @@ class CardTestView: BaseView {
     }
     
     func clickDeleteButton() -> AlertTestView {
-        image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).clickOnExistence()
+        image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).clickOnHittable()
         return AlertTestView()
     }
     
