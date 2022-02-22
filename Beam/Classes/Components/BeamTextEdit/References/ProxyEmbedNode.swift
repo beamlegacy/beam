@@ -12,6 +12,8 @@ import BeamCore
 
 class ProxyEmbedNode: EmbedNode, ProxyNode {
 
+    override var isExpandable: Bool { false }
+
     // MARK: - Initializer
 
     override init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
@@ -35,6 +37,10 @@ class ProxyEmbedNode: EmbedNode, ProxyNode {
                 self.invalidateRendering()
                 updateChildrenVisibility()
             }.store(in: &scope)
+
+        padding.top = 3
+        padding.right = 50
+        padding.bottom = children.isEmpty ? 10 : 4
     }
 
     // MARK: - Setup UI
