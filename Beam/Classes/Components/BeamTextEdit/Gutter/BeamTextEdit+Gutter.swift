@@ -70,7 +70,9 @@ extension BeamTextEdit {
         var gutterFrame = CGRect.zero
         gutterFrame.origin = CGPoint(x: 0, y: textRect.minY)
         gutterFrame.size = CGSize(width: textRect.minX, height: leadingGutterSize.height)
-        leadingGutter?.frame = gutterFrame
+        DispatchQueue.main.async { [weak self] in
+            self?.leadingGutter?.frame = gutterFrame
+        }
     }
 
     func updateCalendarLeadingGutter(for noteId: UUID) {

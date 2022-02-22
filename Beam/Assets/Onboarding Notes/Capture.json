@@ -1,0 +1,388 @@
+{
+  "id" : "48CB6F79-7136-4F2D-AFB4-5889B7DB9DDC",
+  "textStats" : {
+    "wordsCount" : 125
+  },
+  "visitedSearchResults" : [
+
+  ],
+  "type" : {
+    "type" : "note"
+  },
+  "title" : "Capture",
+  "searchQueries" : [
+
+  ],
+  "contactId" : null,
+  "children" : [
+    {
+      "creationDate" : 666624301.85729098,
+      "id" : "087C6F0F-31A7-463C-B5E9-622ADDF4755C",
+      "textStats" : {
+        "wordsCount" : 42
+      },
+      "children" : [
+        {
+          "creationDate" : 663597534.59833097,
+          "id" : "72560B9F-F1D2-4979-8EA7-36C88050D9A6",
+          "textStats" : {
+            "wordsCount" : 13
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Hold ⌥ OPTION",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " on your keyboard and click on what you want to capture "
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 666541463.76040995,
+          "id" : "1CA33D8E-2715-4514-B9FF-8B97638EE126",
+          "textStats" : {
+            "wordsCount" : 10
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Select text and press "
+              },
+              {
+                "string" : "⌥ OPTION",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " to capture the text snippet"
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 666541484.22558105,
+          "id" : "04A50D0C-328E-4F67-A186-67819DBC5EB9",
+          "textStats" : {
+            "wordsCount" : 9
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Press "
+              },
+              {
+                "string" : "⌘S or ⌥S",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " to capture a whole page"
+              }
+            ]
+          }
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Beam lets you "
+          },
+          {
+            "string" : "capture",
+            "attributes" : [
+              {
+                "type" : "strong"
+              }
+            ]
+          },
+          {
+            "string" : " anything you want on the web:"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "4216E380-AEDD-4359-989A-7023C09F8428",
+      "creationDate" : 666625450.241745
+    },
+    {
+      "creationDate" : 666625507.05930603,
+      "id" : "9B0E3A97-3233-4319-A583-A21D86082A55",
+      "textStats" : {
+        "wordsCount" : 5
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Below are a few examples:"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "D45C2484-177E-4623-86C3-AC2FEEE5F883",
+      "creationDate" : 666624501.19371295
+    },
+    {
+      "creationDate" : 666624653.12717605,
+      "id" : "6AE8FDA1-38EA-4E2D-A2EA-FA382F8569F6",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 1
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Text"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666624542.24930096,
+      "id" : "5AFBF959-5C7F-4E93-839C-A0A15357CADE",
+      "score" : 21.647552490234375,
+      "textStats" : {
+        "wordsCount" : 52
+      },
+      "children" : [
+        {
+          "creationDate" : 666624542.24758196,
+          "id" : "42A547CB-13A2-445E-8E9C-11CD36CFE017",
+          "textStats" : {
+            "wordsCount" : 49
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Our tools define our relationship with the world. Web browsers have framed our cognitive behavior to such an extent we don’t question it anymore. Can thinking be reduced to a search box with no memory or context? What is left of the thousands hours you spent on the web",
+                "attributes" : [
+                  {
+                    "type" : "source",
+                    "payload" : {
+                      "origin" : {
+                        "remote" : "https://public.beamapp.co/beam/note/c5ef3f23-5864-45ad-943e-b75b093555e1/Bright-Paper"
+                      },
+                      "title" : "Bright Paper - beam"
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Bright Paper - beam",
+            "attributes" : [
+              {
+                "type" : "link",
+                "payload" : "https://public.beamapp.co/beam/note/c5ef3f23-5864-45ad-943e-b75b093555e1/Bright-Paper"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "id" : "38455B2A-3530-4D8F-9178-C066935518F7",
+      "creationDate" : 666624665.37403703
+    },
+    {
+      "creationDate" : 666624666.14151895,
+      "id" : "7C489981-474A-4249-AE72-039D0215BE2E",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 5
+      },
+      "children" : [
+        {
+          "creationDate" : 666625410.07954299,
+          "id" : "3F8DF7DB-BD4E-44A0-B47A-7C016630716C",
+          "kind" : {
+            "source" : "803E6E14-54F9-5EDA-A000-380AFF84A849",
+            "type" : "image",
+            "sourceMetadata" : null,
+            "displayInfos" : {
+              "width" : 1500,
+              "height" : 500
+            }
+          },
+          "textStats" : {
+            "wordsCount" : 4
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "https://twitter.com/bijan/header_photo"
+              }
+            ]
+          }
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Images"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "746F554D-C511-4EAD-A47D-15ED357B43D1",
+      "creationDate" : 666625236.62816501
+    },
+    {
+      "creationDate" : 666624675.09445596,
+      "id" : "1198299B-4F43-436E-BE09-AF32DF9BEDCA",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 6
+      },
+      "children" : [
+        {
+          "creationDate" : 666624722.747931,
+          "id" : "5B8D6BB5-C85D-489E-BB49-557C0C06DAA8",
+          "kind" : {
+            "source" : "https://www.youtube.com/watch?v=3fNf4eoj8jc",
+            "type" : "embed",
+            "sourceMetadata" : null,
+            "displayInfos" : {
+              "displayRatio" : 0.97981354832268375
+            }
+          },
+          "textStats" : {
+            "wordsCount" : 5
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "https://www.youtube.com/watch?v=3fNf4eoj8jc",
+                "attributes" : [
+                  {
+                    "type" : "link",
+                    "payload" : "https://www.youtube.com/watch?v=3fNf4eoj8jc"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Videos"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "47E5BDC9-0B2E-4BCA-9CB4-B7717D5E55EA",
+      "creationDate" : 666625220.81060302
+    },
+    {
+      "creationDate" : 666625223.42687094,
+      "id" : "A3684194-A66E-44D7-A384-8738940B08F1",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 6
+      },
+      "children" : [
+        {
+          "creationDate" : 666625206.38877594,
+          "id" : "39EC5C8C-E4B2-400E-A182-897CB5493499",
+          "kind" : {
+            "source" : "https://twitter.com/elonmusk/status/1483631831748685835",
+            "type" : "embed",
+            "sourceMetadata" : null,
+            "displayInfos" : {
+
+            }
+          },
+          "textStats" : {
+            "wordsCount" : 5
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "https://twitter.com/elonmusk/status/1483631831748685835",
+                "attributes" : [
+                  {
+                    "type" : "link",
+                    "payload" : "https://twitter.com/elonmusk/status/1483631831748685835"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Tweets"
+          }
+        ]
+      }
+    },
+    {
+      "id" : "1638BD01-277B-44BB-91D5-401063227345",
+      "creationDate" : 666625431.97156405
+    },
+    {
+      "creationDate" : 666625432.15549302,
+      "id" : "D2DECC63-09BD-44C8-97C9-B2CC01B32CC2",
+      "textStats" : {
+        "wordsCount" : 8
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "And much more: Figma boards, Soundcloud, Spotify, Sketchfab..."
+          }
+        ]
+      }
+    },
+    {
+      "id" : "079AA561-53C4-4DE2-BC8D-B82FFD7B1F60",
+      "creationDate" : 666625437.12309003
+    },
+    {
+      "id" : "971F9629-EE24-452F-B11A-E0F4395931D1",
+      "creationDate" : 666625437.27288997
+    }
+  ],
+  "browsingSessionIds" : [
+
+  ],
+  "score" : 1.5144139528274536,
+  "creationDate" : 666624301.85341597
+}

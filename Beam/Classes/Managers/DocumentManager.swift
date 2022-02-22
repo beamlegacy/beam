@@ -65,11 +65,14 @@ enum DocumentFilter {
 public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     var context: NSManagedObjectContext
-    static let backgroundQueue = DispatchQueue(label: "co.beamapp.documentManager.backgroundQueue", qos: .default)
+    static let backgroundQueue = DispatchQueue(label: "co.beamapp.documentManager.backgroundQueue", qos: .userInitiated)
     var backgroundQueue: DispatchQueue { Self.backgroundQueue }
 
     static let saveDocumentQueue = DispatchQueue(label: "co.beamapp.documentManager.saveQueue", qos: .userInitiated)
     var saveDocumentQueue: DispatchQueue { Self.saveDocumentQueue }
+
+    static let saveNetworkQueue = DispatchQueue(label: "co.beamapp.documentManager.saveNetworkQueue", qos: .userInitiated)
+    var saveNetworkQueue: DispatchQueue { Self.saveNetworkQueue }
 
     var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
@@ -652,7 +655,7 @@ public class DocumentManager: NSObject {
         Self.networkTasks[document_id] = (networkTask, networkTaskStarted, networkCompletion)
         // `asyncAfter` will not execute before `deadline` but might be executed later. It is not accurate.
         // TODO: use `Timer.scheduledTimer` or `perform:with:afterDelay`
-        backgroundQueue.asyncAfter(deadline: .now() + delay, execute: networkTask)
+        saveNetworkQueue.asyncAfter(deadline: .now() + delay, execute: networkTask)
         Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): adding network task for later",
                                category: .documentNetwork)
     }
