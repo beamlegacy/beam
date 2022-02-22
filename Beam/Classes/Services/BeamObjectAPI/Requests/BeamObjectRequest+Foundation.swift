@@ -624,7 +624,7 @@ extension BeamObjectRequest {
         let session = BeamURLSession.shared
         let localTimer = BeamDate.now
 
-        let task = session.dataTask(with: request) { (_, response, error) -> Void in
+        let task = session.dataTask(with: request) { (responseData, response, error) -> Void in
             #if DEBUG
             // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
             APIRequest.networkCallFilesSemaphore.wait()
@@ -635,9 +635,9 @@ extension BeamObjectRequest {
             APIRequest.callsCount += 1
 
             // I only enable those log manually, they're very verbose!
-            Logger.shared.logDebug("[\(data.count.byteSize)] \((response as? HTTPURLResponse)?.statusCode ?? 0) upload \(urlString)",
-                                   category: .network,
-                                   localTimer: localTimer)
+//            Logger.shared.logDebug("[\(data.count.byteSize)] \((response as? HTTPURLResponse)?.statusCode ?? 0) upload \(urlString)",
+//                                   category: .network,
+//                                   localTimer: localTimer)
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 completionHandler(.failure(error ?? BeamObjectRequestError.not200))
@@ -652,6 +652,10 @@ extension BeamObjectRequest {
 
             guard [200, 204].contains(httpResponse.statusCode) else {
                 Logger.shared.logError("Error while uploading data: \(httpResponse.statusCode)", category: .network)
+                if let responseData = responseData, let responseString = responseData.asString {
+                    dump(responseString)
+                }
+
                 Logger.shared.logDebug("Sent headers: \(headers)", category: .network)
                 completionHandler(.failure(error ?? BeamObjectRequestError.not200))
 
