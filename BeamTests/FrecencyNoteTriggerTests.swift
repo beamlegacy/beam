@@ -51,16 +51,9 @@ class FrecencyNoteTriggerTests: XCTestCase {
         func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
     }
 
-    class FakeBeamWebViewConfiguration: BeamWebViewConfiguration {
-            var id = UUID()
-            func addCSS(source: String, when: WKUserScriptInjectionTime) {}
-            func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool) {}
-            func obfuscate(str: String) -> String { return "" }
-        }
-
     class FakeWebPage: WebPage {
 
-        weak var webView: BeamWebView!
+        var webView: BeamWebView
 
         init(webView: BeamWebView) {
             self.webView = webView
@@ -145,7 +138,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
     }
 
     func testPointAndShootToNote() throws {
-        let config = BrowserTabConfiguration()
+        let config = BeamWebViewConfigurationBase()
         let webView = BeamWebView(frame: CGRect(), configuration: config)
         let page = FakeWebPage(webView: webView)
         page.url = URL(string: "http://www.amazon.gr")

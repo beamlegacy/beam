@@ -13,10 +13,11 @@ enum PasswordMessages: String, CaseIterable {
 /**
  Handles password messages sent from web page's javascript.
  */
-class PasswordMessageHandler: BeamMessageHandler<PasswordMessages> {
+class PasswordMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: PasswordMessages.self, jsFileName: "PasswordManager_prod")
+    init() {
+        let messages = PasswordMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "PasswordManager_prod")
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length

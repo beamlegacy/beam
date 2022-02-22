@@ -40,7 +40,7 @@ final class WebAutofillPopoverContainer {
         guard dx != 0 || dy != 0 else {
             return
         }
-        let scale = page?.webView?.zoomLevel() ?? 1
+        let scale = page?.webView.zoomLevel() ?? 1
         let x = window.frame.origin.x - dx * scale
         let y = window.frame.origin.y + dy * scale
         window.setFrameOrigin(CGPoint(x: x, y: y))
