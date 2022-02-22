@@ -34,7 +34,7 @@ class CardCreationTests: BaseTest {
         XCTAssertEqual(numberOfCardsBeforeAdding + 1, allCardsView.getNumberOfCards())
     }
     
-    func testCreateCardUsingCardsSearchList() throws {
+    func SKIPtestCreateCardUsingCardsSearchList() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
         testRailPrint("When I create \(cardNameToBeCreated) a note from Webview cards search results")
