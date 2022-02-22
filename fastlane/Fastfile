@@ -140,8 +140,7 @@ platform :mac do
       use_system_scm: true,
       #code_coverage: true,
       result_bundle: true,
-      fail_build: true,
-      number_of_retries: 2
+      fail_build: true
     )
     # For Gitlab artifacts
     #slather(
