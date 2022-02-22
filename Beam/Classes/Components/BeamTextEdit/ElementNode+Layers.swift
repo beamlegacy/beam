@@ -96,7 +96,7 @@ extension ElementNode {
             bulletLayer.frame.origin = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         }
         bulletLayer.layer.opacity = Float((showDisclosureButton || !PreferencesManager.alwaysShowBullets) ? 0 : 1)
-        bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty
+        bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty && element.kind.isText
     }
 
     private func updateDisclosureLayer() {
