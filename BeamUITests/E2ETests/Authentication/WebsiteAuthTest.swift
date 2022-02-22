@@ -52,7 +52,7 @@ class WebsiteAuthTest: BaseTest {
         XCTAssertTrue(appWebsiteView.staticText("Beam Objects").waitForExistence(timeout: implicitWaitTimeout) || appWebsiteView.staticText("Beam is where ideas take shape").waitForExistence(timeout: implicitWaitTimeout))
     }
     
-    func testAuthenticationFailure() throws {
+    func SKIPtestAuthenticationFailure() throws {
         try XCTSkipIf(true, "Skipped due to unknown false failure on server side. To be fixed soon")
         let journalView = launchApp()
         OmniBoxUITestsHelper(journalView.app).tapCommand(.omniboxFillHistory)

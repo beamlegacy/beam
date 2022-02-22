@@ -172,7 +172,7 @@ class LinksTests: BaseTest {
         XCTAssertFalse(cardView.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
     }
     
-    func testLinksIndentationLevels() throws {
+    func SKIPtestLinksIndentationLevels() throws {
         try XCTSkipIf(true, "WIP")
     }
     

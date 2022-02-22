@@ -88,7 +88,7 @@ class SearchOnWebTests: BaseTest {
         XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
     }
     
-    func testSearchFieldPasteAndTypeText() throws {
+    func SKIPtestSearchFieldPasteAndTypeText() throws {
         try XCTSkipIf(true, "WIP. Test is blocked by https://linear.app/beamapp/issue/BE-1849/no-search-results-displayed-for-the-string-longer-than-visible-part-of")
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
@@ -108,11 +108,11 @@ class SearchOnWebTests: BaseTest {
             .typeKeyboardKey(.delete)
     }
     
-    func testScrollDownUpToSearchedWord() throws {
+    func SKIPtestScrollDownUpToSearchedWord() throws {
         try XCTSkipIf(true, "WIP")
     }
     
-    func testTriggerSearchFieldFromSelectedText() throws {
+    func SKIPtestTriggerSearchFieldFromSelectedText() throws {
         try XCTSkipIf(true, "WIP once https://linear.app/beamapp/issue/BE-1848/cmd-f-on-selected-text-launches-search-with-pre-filled-query")
     }
     
