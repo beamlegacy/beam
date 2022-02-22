@@ -1,436 +1,539 @@
-//
-//  EmbedNode.swift
-//  Beam
-//
-//  Created by Sebastien Metrot on 08/05/2021.
-//
-
-import Foundation
-import BeamCore
 import AppKit
-import WebKit
+import Foundation
 import Combine
+import BeamCore
 
 // swiftlint:disable file_length
 class EmbedNode: ResizableNode {
 
-    private static var webViewConfiguration = EmbedNodeWebViewConfiguration()
-    var webView: BeamWebView?
-    private var embedContent: EmbedContent?
-    private var embedView = NSView()
-    private var webPage: EmbedNodeWebPage?
-    private var embedCancellables = Set<AnyCancellable>()
-    private let defaultSizeRatio = 240.0/320.0
-    private let cornerRadius = CGFloat(3)
-    private var loadingView: NSView?
-    private var isLoadingEmbed = false {
+    var isExpandable: Bool { true }
+
+    override var hover: Bool {
         didSet {
-            loadingView?.isHidden = !isLoadingEmbed
+            toggleButtonBeamLayer?.layer.opacity = hover ? 1 : 0
         }
     }
 
+    override var bulletLayerPositionY: CGFloat {
+        if isCollapsed, let collapsedContentFirstBaseline = collapsedContent?.firstBaseline {
+            return padding.top + collapsedContentFirstBaseline - 15
+        } else {
+            return expandedContentOrigin.y + 4
+        }
+    }
+
+    override var indentLayerPositionY: CGFloat { 28 }
+    override var resizableContentBounds: CGRect { expandedContentFrame }
+
+    private var expandedContent: EmbedContentView?
+    private var collapsedContent: CollapsedContentLayer?
+    private var toggleButtonBeamLayer: CollapseButtonLayer!
+    private var focusBeamLayer: Layer!
+
+    private let initialExpandedContentSize = CGSize(width: 170, height: 128)
+    private let focusLayerBorderRadius: CGFloat = 3
+    private let expandedContentSizeUpdateDebounceDelay = 0.5
+    private let expandedContentAnimationKey = "expandedContent"
+    private let collapseContentAnimationKey = "collapsedContent"
+
+    private var cancellables = Set<AnyCancellable>()
+
+    /// A subject that broadcasts the size updates received from the embed content's script message handler.
+    private lazy var expandedContentSizeSubject: PassthroughSubject<CGSize, Never> = {
+        PassthroughSubject<CGSize, Never>()
+    }()
+
+    private var isCollapsed: Bool { isUserCollapsed || !isExpandable }
+
+    private var isUserCollapsed = false {
+        didSet {
+            guard isUserCollapsed != oldValue else { return }
+            applyCollapsedState(animated: true)
+        }
+    }
+
+    private var visibleContentFrame: CGRect {
+        isCollapsed ? collapsedContentFrame : expandedContentFrame
+    }
+
+    private var expandedContentFrame: CGRect {
+        CGRect(origin: expandedContentOrigin, size: expandedContentSize)
+    }
+
+    private var expandedContentOrigin: CGPoint {
+        CGPoint(x: contentsLead + 4, y: 0)
+    }
+
+    private var expandedContentFrameInEditorCoordinates: CGRect {
+        layer.convert(expandedContentFrame, to: editor?.layer)
+    }
+
+    private var expandedContentSize: CGSize {
+        if visibleSize != .zero {
+            return visibleSize
+
+        } else if let widthRatio = displayInfos?.displayRatio, let height = displayInfos?.height {
+            // Restore size previously set by user and stored in element
+            let width = Int(contentsWidth * widthRatio)
+            return CGSize(width: width, height: height)
+
+        } else {
+            // Embed is displayed for the first time
+            return initialExpandedContentSize
+        }
+    }
+
+    private var collapsedContentOrigin: CGPoint {
+        CGPoint(x: contentsLead + 4, y: contentsTop)
+    }
+
+    private var collapsedContentFrame: CGRect {
+        CGRect(
+            origin: collapsedContentOrigin,
+            size: collapsedContent?.layer.frame.size ?? .zero
+        )
+    }
+
+    private var toggleButtonOrigin: CGPoint {
+        CGPoint(
+            x: availableWidth + childInset + 11,
+            y: contentsTop + 2
+        )
+    }
+
+    private var focusFrame: CGRect {
+        visibleContentFrame.insetBy(dx: -4, dy: -4)
+    }
+
+    private var focusColor: CGColor {
+        isCollapsed ? BeamColor.Editor.linkActiveBackground.cgColor : selectionColor.cgColor
+    }
+
     private var sourceURL: URL? {
-        guard case .embed(let url, _, _) = element.kind else { return nil }
+        guard case let .embed(url, _, _) = element.kind else { return nil }
         return url
     }
 
-    override func setBottomPaddings(withDefault: CGFloat) {
-        super.setBottomPaddings(withDefault: 14)
+    private var displayInfos: MediaDisplayInfos? {
+        guard case let .embed(_, _, displayInfos) = element.kind else { return nil }
+        return displayInfos
+    }
+
+    private var userSizedEmbedContent: Bool {
+        displayInfos?.displayRatio != nil
     }
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
 
-        setupEmbed(availableWidth: availableWidth)
-    }
+        isUserCollapsed = element.collapsed
 
-    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
-        super.init(editor: editor, element: element, availableWidth: availableWidth)
+        addFocusLayer()
 
-        setupEmbed(availableWidth: availableWidth)
-    }
-
-    // swiftlint:disable function_body_length
-    func setupEmbed(availableWidth: CGFloat) {
-        guard case .embed = element.kind else {
-            Logger.shared.logError("EmbedNode can only handle url elements, not \(element.kind)", category: .embed)
-            return
+        if isExpandable {
+            addToggleButton()
         }
 
-        setupResizeHandleLayer()
-        self.canBeResized = true
-        guard let sourceURL = sourceURL else { return }
-
-        let webviewConfiguration = EmbedNode.webViewConfiguration
-        var webView: BeamWebView?
-        var isReusedWebview = false
-        if let note = editor?.note as? BeamNote {
-            webView = mediaPlayerManager?.playingWebViewForNote(note: note, elementId: elementId, url: sourceURL)
-            webPage = webView?.page as? EmbedNodeWebPage
-            isReusedWebview = webView != nil
-        }
-
-        if webView == nil {
-            let wv = BeamWebView(frame: .zero, configuration: webviewConfiguration)
-            wv.setupForEmbed()
-            let p = EmbedNodeWebPage(webView: wv)
-            webPage = p
-            wv.page = p
-            AppDelegate.main.data.setup(webView: wv)
-            webView = wv
-        }
-
-        webPage?.delegate = self
-        if let webView = webView {
-            webView.navigationDelegate = self
-            webView.wantsLayer = true
-            webView.allowsMagnification = true
-            let webFrame = CGRect(x: 0, y: 0, width: 150, height: 150)
-            embedView.frame = webFrame
-            webView.frame = CGRect(origin: .zero, size: webFrame.size)
-            webView.autoresizingMask = [.width, .height]
-            webView.layer?.cornerRadius = cornerRadius
-            webView.layer?.masksToBounds = true
-            embedView.alphaValue = 0
-            embedView.addSubview(webView)
-            editor?.addSubview(embedView)
-        }
-        self.webView = webView
+        observeExpandedContentSizeUpdates()
 
         setAccessibilityLabel("EmbedNode")
         setAccessibilityRole(.textArea)
 
-        contentsPadding = NSEdgeInsets(top: 4, left: contentsPadding.left + 4, bottom: 14, right: 4)
-        updateResizableElementContentSize()
-        updateEmbedContent(updateWebview: !isReusedWebview)
-    }
-
-    deinit {
-        let nodeStillOwnsTheWebView = webPage?.delegate as? EmbedNode == self
-        if nodeStillOwnsTheWebView || webPage?.delegate == nil {
-            webView?.removeFromSuperview()
-            embedView.removeFromSuperview()
-        }
-    }
-
-    override func willBeRemovedFromNote() {
-        super.willBeRemovedFromNote()
-        clearWebViewAndStopPlaying()
-    }
-
-    private func setupLoader() {
-        let text = NSTextField(labelWithAttributedString: NSAttributedString(string: "Loading...", attributes: [
-            .font: BeamFont.regular(size: 13).nsFont,
-            .foregroundColor: BeamColor.AlphaGray.nsColor
-        ]))
-        let container = NSView()
-        container.isHidden = true
-        container.wantsLayer = true
-        container.layer?.backgroundColor = BeamColor.Nero.cgColor
-        container.addSubview(text)
-        container.frame = webView?.bounds ?? .zero
-        container.autoresizingMask = [.width, .height]
-        text.translatesAutoresizingMaskIntoConstraints = false
-        container.addConstraints([
-            text.centerXAnchor.constraint(equalTo: container.centerXAnchor),
-            text.centerYAnchor.constraint(equalTo: container.centerYAnchor)
-        ])
-        webView?.addSubview(container)
-        self.loadingView = container
-    }
-
-    /// Display EmbedContent in WebView
-    fileprivate func loadEmbedContentInWebView() {
-        guard let embedContent = embedContent else {
-            return
-        }
-
-        updateResizableElementContentSize()
-        self.updateLayout()
-        switch embedContent.type {
-        case .page, .audio, .rich, .video, .photo, .image:
-            guard let content = embedContent.html else {
-                fallthrough
-            }
-            let theme = self.webView?.isDarkMode ?? false ? "dark" : "light"
-            let headContent = self.getHeadContent(theme: theme)
-            let resizableClass = embedContent.responsive != nil ? "resize-" + embedContent.responsive!.rawValue : "non-resizable"
-            let aspectRatioClass = embedContent.keepAspectRatio ? "aspectRatio" : "noAspectRatio"
-            let html = headContent + "<div class=\"iframe \(embedContent.type.rawValue) \(aspectRatioClass) \(resizableClass)\">" + content + "</div>"
-            self.webView?.loadHTMLString(html, baseURL: URL(string: "https://example.com"))
-        default:
-            if let url = embedContent.embedURL {
-                self.webView?.load(URLRequest(url: url, cachePolicy: .returnCacheDataElseLoad))
-            }
-        }
-    }
-
-    private func updateEmbedContent(updateWebview: Bool) {
-        guard let sourceURL = sourceURL else { return }
-
-        embedCancellables.removeAll()
-        let builder = EmbedContentBuilder()
-        if let embedContent = builder.embeddableContent(for: sourceURL) {
-            self.embedContent = embedContent
-            if updateWebview {
-                setupLoader()
-                self.loadEmbedContentInWebView()
-            } else {
-                updateResizableElementContentSize()
-            }
-        } else {
-            setupLoader()
-            isLoadingEmbed = true
-            builder.embeddableContentAsync(for: sourceURL)
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] completion in
-                    switch completion {
-                    case .failure:
-                        Logger.shared.logError("Embed Node couldn't load content for \(sourceURL.absoluteString)", category: .embed)
-                    case .finished:
-                        break
-                    }
-                    self?.isLoadingEmbed = false
-                    self?.embedCancellables.removeAll()
-                } receiveValue: { [weak self] embedContent in
-                    self?.embedContent = embedContent
-                    if updateWebview {
-                        self?.loadEmbedContentInWebView()
-                    }
-                }.store(in: &embedCancellables)
-        }
-    }
-
-    /// Returns html a `<head>` tag to correctly style the twitter embed and the webview background
-    /// in both Light and Dark color schemes.Css and Scripts are added via EmbedNode.ts
-    /// - Parameter theme: The inital "dark" or "light" theme
-    /// - Returns: html `<head>`tag as String
-    private func getHeadContent(theme: String) -> String {
-        return """
-            <head>
-                <meta name="twitter:dnt" content="on" />
-                <meta name="twitter:widgets:theme" content="\(theme)" />
-                <meta name="twitter:widgets:chrome" content="transparent" />
-            </head>
-        """
-    }
-
-    private func clearWebViewAndStopPlaying() {
-        guard let note = editor?.note as? BeamNote,
-              let url = self.sourceURL else { return }
-        mediaPlayerManager?.stopNotePlaying(note: note, elementId: elementId, url: url)
-        webView?.page = nil
-        webPage = nil
+        applyCollapsedState(animated: false)
     }
 
     override func updateRendering() -> CGFloat {
         updateFocus()
-        return visibleSize.height
-    }
 
-    override func updateLayersVisibility() {
-        super.updateLayersVisibility()
-        webView?.isHidden = layer.isHidden
+        return visibleContentFrame.height
     }
 
     override func updateLayout() {
         super.updateLayout()
-        let r = layer.frame
-        let embedFrame = CGRect(x: r.minX, y: r.minY, width: visibleSize.width, height: visibleSize.height)
-        DispatchQueue.main.async { [weak self] in
-            self?.embedView.frame = embedFrame
-            self?.embedView.alphaValue = r == .zero ? 0 : 1
+
+        NSAppearance.withAppAppearance {
+            layoutExpandedContent()
+            layoutCollapsedContent()
+            layoutFocusLayer()
+            layoutToggleButton()
         }
     }
 
-    /// Updates the resizableElementContentSize with the EmbedContent width and height
-    /// - Parameter content: EmbedContent of this EmbedNode
-    func updateResizableElementContentSize() {
-        if let content = self.embedContent {
-            if let minWidth = content.minWidth {
-                self.minWidth = minWidth
-            }
+    override func setBottomPaddings(withDefault: CGFloat) {
+        super.setBottomPaddings(withDefault: isCollapsed ? 6 : 14)
+    }
 
-            if let minHeight = content.minHeight {
-                self.minHeight = minHeight
-            }
+    override func updateElementCursor() {
+        let referenceFrame = focusBeamLayer.layer.frame
+        let cursorX: CGFloat
+        let cursorWidth: CGFloat = 2
 
-            if let maxWidth = content.maxWidth {
-                self.maxWidth = maxWidth
-            }
-
-            if let maxHeight = content.maxHeight {
-                self.maxHeight = maxHeight
-            }
-
-            self.keepAspectRatio = content.keepAspectRatio
-
-            if let responsiveStrategy = content.responsive {
-                self.responsiveStrategy = responsiveStrategy
-            }
-
-            if let width = content.width {
-                resizableElementContentSize.width = width
-            }
-
-            if let height = content.height {
-                resizableElementContentSize.height = height
-            }
+        if caretIndex == 0 {
+            // Caret is placed before the embed
+            cursorX = 0
         } else {
-            let height = availableWidth  * CGFloat(defaultSizeRatio)
-            resizableElementContentSize = CGSize(width: availableWidth, height: height)
+            // Caret is placed after the embed
+            cursorX = referenceFrame.width - cursorWidth
         }
-    }
 
-    var focusMargin = CGFloat(3)
-    public override func updateElementCursor() {
-        let bounds = webView?.bounds ?? .zero
-        let cursorRect = NSRect(x: caretIndex == 0 ? -4 : (bounds.width + 2), y: -focusMargin, width: 2, height: bounds.height + focusMargin * 2)
+        let cursorRect = CGRect(
+            x: cursorX,
+            y: referenceFrame.minY - padding.top,
+            width: cursorWidth,
+            height: referenceFrame.height
+        )
+
         layoutCursor(cursorRect)
     }
 
-    var focusLayer: CALayer?
     override func updateFocus() {
-        focusLayer?.removeFromSuperlayer()
-
-        guard isFocused else {
-            return
+        NSAppearance.withAppAppearance {
+            layoutCollapsedContent()
+            layoutFocusLayer()
         }
+    }
 
-        let bounds = (webView?.bounds ?? .zero).insetBy(dx: -focusMargin, dy: -focusMargin)
-        let position = CGPoint(x: 0, y: 0)
-        let path = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
-
-        let mask = CAShapeLayer()
-        mask.path = path.cgPath
-        mask.position = position
-
-        let borderPath = NSBezierPath(roundedRect: bounds, xRadius: 2, yRadius: 2)
-        let borderLayer = CAShapeLayer()
-        borderLayer.path = borderPath.cgPath
-        borderLayer.lineWidth = 5
-        borderLayer.strokeColor = selectionColor.cgColor
-        borderLayer.fillColor = NSColor.clear.cgColor
-        borderLayer.bounds = bounds
-        borderLayer.position = CGPoint(x: contentsLead - 3 + bounds.width / 2, y: 1 + bounds.height / 2)
-        borderLayer.mask = mask
-        layer.addSublayer(borderLayer)
-        focusLayer = borderLayer
+    override func onFocus() {
+        updateFocus()
     }
 
     override func onUnfocus() {
         updateFocus()
     }
 
-    override func onFocus() {
-        updateFocus()
+    override func updateLayersVisibility() {
+        super.updateLayersVisibility()
+
+        expandedContent?.isHidden = layer.isHidden
     }
+
+    override func willBeRemovedFromNote() {
+        super.willBeRemovedFromNote()
+
+        stopNotePlaying()
+    }
+
+    deinit {
+        expandedContent?.removeFromSuperview()
+    }
+
 }
 
-extension EmbedNode: EmbedNodeWebPageDelegate {
-    var mediaPlayerManager: NoteMediaPlayerManager? {
-        self.editor?.state?.noteMediaPlayerManager
+extension EmbedNode {
+
+    private func applyCollapsedState(animated: Bool) {
+        if isCollapsed {
+            collapse(animated: animated)
+        } else {
+            expand(animated: animated)
+        }
+
+        invalidateLayout()
     }
 
-    func embedNodeDidUpdateMediaController(_ controller: MediaPlayerController?) {
-        guard let note = root?.editor?.note as? BeamNote,
-              let webView = webView,
-              let mediaManager = mediaPlayerManager,
-              let url = self.sourceURL else { return }
-        if controller?.isPlaying == true {
-            mediaManager.addNotePlaying(note: note, elementId: elementId, webView: webView, url: url)
+    private func expand(animated: Bool) {
+        element.collapsed = false
+        canBeResized = true
+
+        if expandedContent == nil {
+            expandedContent = makeExpandedContent()
+            layoutExpandedContent()
+            // We need this embed node to be a child of the editor's layer tree before we can add the expanded content.
+            // Therefore we don't add it until the next layout pass.
+        }
+
+        if animated {
+            let presentationAnimation = EmbedAnimator.makeExpandedContentPresentationAnimation()
+            presentationAnimation.delegate = AnimationHandler(
+                layer: expandedContent?.layer,
+                removeAllAnimationsWhenFinished: true
+            )
+
+            let dismissalAnimation = EmbedAnimator.makeCollapsedContentDismissalAnimation()
+            dismissalAnimation.delegate = AnimationHandler(animationDidFinishHandler: { [weak self] in
+                self?.removeCollapsedContentFromView()
+            })
+
+            expandedContent?.layer?.add(presentationAnimation, forKey: expandedContentAnimationKey)
+            collapsedContent?.layer.add(dismissalAnimation, forKey: collapseContentAnimationKey)
+
         } else {
-            mediaManager.stopNotePlaying(note: note, elementId: elementId, url: url)
+            removeCollapsedContentFromView()
         }
     }
 
-    /// Gets called from the EmbedNodeMessageHandler with updated sizes when resizing the webview
-    /// - Parameter size: Computed width and height from JS
-    func embedNodeDelegateCallback(size: CGSize) {
-        if embedContent?.height == nil {
+    private func collapse(animated: Bool) {
+        element.collapsed = true
+        canBeResized = false
+
+        if collapsedContent == nil {
+            collapsedContent = makeCollapsedContent()
+            layoutCollapsedContent()
+            addLayer(collapsedContent!)
+        }
+
+        if animated {
+            let presentationAnimation = EmbedAnimator.makeCollapsedContentPresentationAnimation()
+            presentationAnimation.delegate = AnimationHandler(
+                layer: collapsedContent?.layer,
+                removeAllAnimationsWhenFinished: true
+            )
+
+            let dismissalAnimation = EmbedAnimator.makeExpandedContentDismissalAnimation()
+            dismissalAnimation.delegate = AnimationHandler(animationDidFinishHandler: { [weak self] in
+                self?.removeExpandedContentFromView()
+            })
+
+            collapsedContent?.layer.add(presentationAnimation, forKey: collapseContentAnimationKey)
+            expandedContent?.layer?.add(dismissalAnimation, forKey: expandedContentAnimationKey)
+
+        } else {
+            removeExpandedContentFromView()
+        }
+    }
+
+    private func makeExpandedContent() -> EmbedContentView? {
+        guard
+            let note = editor?.note as? BeamNote,
+            let url = sourceURL,
+            let noteMediaPlayerManager = editor?.state?.noteMediaPlayerManager
+        else {
+            return nil
+        }
+
+        let webViewProvider = BeamWebViewProvider(
+            note: note,
+            elementId: elementId,
+            url: url,
+            noteMediaPlayerManager: noteMediaPlayerManager
+        )
+
+        let view = EmbedContentView(frame: .zero, url: url, webViewProvider: webViewProvider)
+        view.layer?.anchorPoint = .zero
+        view.delegate = self
+
+        view.startLoadingContent()
+
+        return view
+    }
+
+    private func makeCollapsedContent() -> CollapsedContentLayer? {
+        guard let url = sourceURL else { return nil }
+
+        let text: String
+        if !element.text.isEmpty {
+            text = element.text.text
+        } else {
+            // Fallback for cases when no title was captured, for example when pasting an embed link in a note
+            text = url.absoluteString
+        }
+
+        let layer = CollapsedContentLayer(name: "collapsed", text: text) { [weak editor, weak element] in
+            editor?.state?.handleOpenUrl(url, note: element?.note, element: element)
+        }
+
+        FaviconProvider.shared.favicon(fromURL: url) { [weak layer] favicon in
+            guard let image = favicon?.image else { return }
+            layer?.setImage(image)
+        }
+
+        return layer
+    }
+
+    private func addFocusLayer() {
+        let focusLayer = CAShapeLayer()
+        focusLayer.zPosition = 0
+        focusLayer.cornerRadius = focusLayerBorderRadius
+
+        focusBeamLayer = Layer(name: "focus", layer: focusLayer)
+
+        addLayer(focusBeamLayer!, origin: .zero)
+    }
+
+    private func addToggleButton() {
+        toggleButtonBeamLayer = CollapseButtonLayer(name: "toggle", isCollapsed: isCollapsed) { [weak self] isCollapsed in
+            self?.isUserCollapsed = isCollapsed
+        }
+
+        toggleButtonBeamLayer?.layer.opacity = 0
+        toggleButtonBeamLayer?.collapseText = NSLocalizedString("to Link", comment: "Embed collapse button label")
+        toggleButtonBeamLayer?.expandText = NSLocalizedString("to Embed", comment: "Embed expand button label")
+
+        addLayer(toggleButtonBeamLayer!)
+    }
+
+    private func layoutExpandedContent() {
+        guard !isCollapsed else { return }
+
+        let frame = expandedContentFrameInEditorCoordinates
+
+        if !isResizing {
+            // Prevent UI jerkiness by disabling layer animations while the node is being resized
+            expandedContent?.layer?.frame = frame
+        }
+
+        // `BeamTextEdit` delayed initialization runs layout from a `.userInteractive` background queue.
+        DispatchQueue.main.async { [weak expandedContent, weak self] in
+            // Wait until the first layout passed, after which we know for sure the node has been added to the editor's
+            // layer tree, until we make the expanded content visible.
+            // We need to wait until the node is added to the editor's layer tree, to get its origin in this coordinate
+            // space, and then place the expanded content at the same position.
+            self?.addExpandedContentToViewIfNeeded()
+
+            expandedContent?.frame = frame
+        }
+    }
+
+    private func layoutCollapsedContent() {
+        guard isCollapsed else { return }
+
+        CATransaction.disableAnimations {
+            collapsedContent?.isFocused = isFocused
+            collapsedContent?.maxWidth = contentsWidth
+            collapsedContent?.sizeToFit()
+            collapsedContent?.layer.frame.origin = collapsedContentOrigin
+        }
+    }
+
+    private func layoutFocusLayer() {
+        CATransaction.disableAnimations {
+            focusBeamLayer?.layer.frame = focusFrame
+            focusBeamLayer?.layer.backgroundColor = focusColor
+            focusBeamLayer?.layer.opacity = isFocused ? 1 : 0
+        }
+    }
+
+    private func layoutToggleButton() {
+        CATransaction.disableAnimations {
+            toggleButtonBeamLayer?.layer.frame.origin = toggleButtonOrigin
+        }
+    }
+
+    private func addExpandedContentToViewIfNeeded() {
+        guard let expandedContent = expandedContent, expandedContent.superview == nil else { return }
+        expandedContent.layer?.zPosition = 1
+        editor?.addSubview(expandedContent)
+    }
+
+    private func removeExpandedContentFromView() {
+        expandedContent?.removeFromSuperview()
+        expandedContent = nil
+    }
+
+    private func removeCollapsedContentFromView() {
+        if let layer = collapsedContent {
+            removeLayer(layer)
+        }
+        collapsedContent = nil
+    }
+
+    private func stopNotePlaying() {
+        guard
+            let note = editor?.note as? BeamNote,
+            let url = sourceURL
+        else {
+            return
+        }
+        editor?.state?.noteMediaPlayerManager.stopNotePlaying(note: note, elementId: elementId, url: url)
+    }
+
+    /// Observes the size updates from the embed content's script message handler.
+    ///
+    /// Size updates are debounced for the following reasons:
+    /// - While an embed is loading, multiple temporary size updates can be received in a short amount of time,
+    /// resulting in unnecessary resizes and UI stuttering.
+    /// - When an embed is first displayed, we want to give it its previously known size first, and protect it from the
+    /// temporary size updates happening during loading.
+    private func observeExpandedContentSizeUpdates() {
+        expandedContentSizeSubject
+            .debounce(for: .seconds(expandedContentSizeUpdateDebounceDelay), scheduler: RunLoop.main)
+            .sink { [weak self] size in
+                self?.updateExpandedContentSize(size)
+            }
+            .store(in: &cancellables)
+    }
+
+    private func updateExpandedContentSize(_ size: CGSize) {
+        if expandedContent?.embedContent?.height == nil {
             setVisibleHeight(size.height)
         }
 
-        if embedContent?.width == nil {
+        if expandedContent?.embedContent?.width == nil {
             setVisibleWidth(size.width)
         }
 
-        self.invalidateLayout()
+        invalidateLayout()
     }
+
 }
 
-extension EmbedNode: WKNavigationDelegate {
+// MARK: - EmbedContentViewDelegate
 
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction))", category: .embed)
-        decisionHandler(.allow)
+extension EmbedNode: EmbedContentViewDelegate {
+
+    func embedContentView(_ embedContentView: EmbedContentView, didReceiveEmbedContent embedContent: EmbedContent) {
+        minWidth = embedContent.minWidth ?? minWidth
+        minHeight = embedContent.minHeight ?? minHeight
+        maxWidth = embedContent.maxWidth ?? maxWidth
+        maxHeight = embedContent.maxHeight ?? maxHeight
+        keepAspectRatio = embedContent.keepAspectRatio
+        responsiveStrategy = embedContent.responsive ?? responsiveStrategy
+
+        let width = embedContent.width ?? resizableElementContentSize.width
+
+        let height: CGFloat
+        if embedContent.height == nil {
+            // If the embed doesn't have a default height, we compute it by applying the same initial aspect ratio
+            // from the loading state onto the width
+            height = width * initialExpandedContentSize.aspectRatio
+        } else {
+            height = embedContent.height!
+        }
+
+        resizableElementContentSize = CGSize(width: width, height: height)
     }
 
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, preferences: WKWebpagePreferences, decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
-        // When clicking on a link inside the EmbedNode
-        guard let targetURL = navigationAction.request.url,
-              navigationAction.navigationType == .linkActivated,
-              let destinationNote = root?.editor?.note as? BeamNote,
-              let rootElement = root?.element,
-              let state = self.editor?.state else {
-            Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction)), allow navigation", category: .embed)
-            decisionHandler(.allow, preferences)
+    func embedContentView(_ embedContentView: EmbedContentView, contentSizeDidChange size: CGSize) {
+        if isResizing {
+            // Apply the new size immediately if the node is being resized, or if we don't have any preferred height yet
+            updateExpandedContentSize(size)
+        } else {
+            // Wait until the embed content size stabilizes itself
+            expandedContentSizeSubject.send(size)
+        }
+    }
+
+    func embedContentView(_ embedContentView: EmbedContentView, didRequestNewTab url: URL) {
+        guard
+            let destinationNote = root?.editor?.note as? BeamNote,
+            let rootElement = root?.element,
+            let state = self.editor?.state
+        else {
             return
         }
 
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction)), cancel navigation, creating new tab", category: .embed)
         // Create a new tab with the targetURL, the current note as destinationNote and the embedNode as rootElement
-        _ = state.createTab(withURL: targetURL, note: destinationNote, rootElement: rootElement)
-
-        // Don't navigate the EmbedNode
-        decisionHandler(.cancel, preferences)
+        _ = state.createTab(withURL: url, note: destinationNote, rootElement: rootElement)
     }
 
-    public func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse, decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationResponse))", category: .embed)
-        decisionHandler(.allow)
+    func embedContentView(
+        _ embedContentView: EmbedContentView,
+        didUpdateMediaPlayerController mediaPlayerController: MediaPlayerController?
+    ) {
+        guard
+            let note = root?.editor?.note as? BeamNote,
+            let webView = embedContentView.webView,
+            let noteMediaPlayerManager = editor?.state?.noteMediaPlayerManager,
+            let url = sourceURL
+        else {
+            return
+        }
+
+        if mediaPlayerController?.isPlaying == true {
+            noteMediaPlayerManager.addNotePlaying(note: note, elementId: elementId, webView: webView, url: url)
+        } else {
+            noteMediaPlayerManager.stopNotePlaying(note: note, elementId: elementId, url: url)
+        }
     }
 
-    public func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didStartProvisionalNavigation: \(String(describing: navigation))", category: .embed)
-    }
-
-    public func webView(_ webView: WKWebView, didReceiveServerRedirectForProvisionalNavigation navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didReceiveServerRedirectForProvisionalNavigation: \(String(describing: navigation))", category: .embed)
-    }
-
-    public func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        Logger.shared.logDebug("Embed didFailProvisionalNavigation: \(String(describing: navigation))", category: .embed)
-    }
-
-    public func webView(_ webView: WKWebView, didCommit navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didCommit: \(String(describing: navigation))", category: .embed)
-    }
-
-    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-        Logger.shared.logDebug("Embed didFinish: \(String(describing: navigation))", category: .embed)
-    }
-
-    public func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        Logger.shared.logError("Embed Error: \(error)", category: .embed)
-    }
-
-    public func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
-        completionHandler(.performDefaultHandling, nil)
-    }
-
-    public func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
-
-    }
-
-    public func webView(_ webView: WKWebView, authenticationChallenge challenge: URLAuthenticationChallenge, shouldAllowDeprecatedTLS decisionHandler: @escaping (Bool) -> Void) {
-        decisionHandler(true)
-    }
-
-}
-
-// MARK: - EmbedNode + Layer
-extension EmbedNode {
-    override var bulletLayerPositionY: CGFloat { 9 }
-    override var indentLayerPositionY: CGFloat { 28 }
 }
