@@ -34,20 +34,20 @@ class AllCardsContextualMenu {
         let menu = NSMenu()
         menu.font = BeamFont.regular(size: 13).nsFont
 
-        var countSuffix = "All"
+        var countSuffix = " All"
         if selectedNotes.count > 0 {
             let count = selectedNotes.count
-            countSuffix = count == 1 ? "" : "\(count) Notes"
+            countSuffix = count == 1 ? "" : " \(count) Notes"
 
             if let first = selectedNotes.first, first.publicationStatus.isPublic {
                 menu.addItem(NSMenuItem(
-                    title: "Unpublish \(countSuffix)",
+                    title: "Unpublish\(countSuffix)",
                     action: #selector(makePrivate),
                     keyEquivalent: ""
                 ))
             } else {
                 menu.addItem(NSMenuItem(
-                    title: "Publish \(countSuffix)",
+                    title: "Publish\(countSuffix)",
                     action: #selector(makePublic),
                     keyEquivalent: ""
                 ))
@@ -63,7 +63,7 @@ class AllCardsContextualMenu {
 
         menu.addItem(NSMenuItem.separator())
         menu.addItem(NSMenuItem(
-            title: "Delete \(countSuffix)",
+            title: "Delete\(countSuffix)...",
             action: #selector(deleteNotes),
             keyEquivalent: ""
         ))
@@ -114,7 +114,7 @@ class AllCardsContextualMenu {
             ))
         }
         let exportItem = NSMenuItem(
-            title: "Export \(countSuffix)",
+            title: "Export\(countSuffix)",
             action: nil,
             keyEquivalent: ""
         )
@@ -196,7 +196,7 @@ class AllCardsContextualMenu {
             "all notes" :
             "these \(selectedNotes.count) notes"
         alert.messageText = "Are you sure you want to delete \(messageNotesInfo)?"
-        alert.addButton(withTitle: "Delete...")
+        alert.addButton(withTitle: "Delete")
         alert.addButton(withTitle: "Cancel")
         alert.alertStyle = .warning
         guard let window = AppDelegate.main.window else { return }
