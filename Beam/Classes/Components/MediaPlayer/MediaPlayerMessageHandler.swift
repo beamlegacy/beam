@@ -8,10 +8,11 @@ enum MediaPlayerMessages: String, CaseIterable {
     case media_playing_changed
 }
 
-class MediaPlayerMessageHandler: BeamMessageHandler<MediaPlayerMessages> {
+class MediaPlayerMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: MediaPlayerMessages.self, jsFileName: "MediaPlayer")
+    init() {
+        let messages = MediaPlayerMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "MediaPlayer")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {

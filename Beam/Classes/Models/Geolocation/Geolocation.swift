@@ -19,14 +19,15 @@ enum GeolocationMessages: String, CaseIterable {
     case geoloc_listenerRemoved
 }
 
-class GeolocationMessageHandler: BeamMessageHandler<GeolocationMessages>, CLLocationManagerDelegate {
+class GeolocationMessageHandler: SimpleBeamMessageHandler, CLLocationManagerDelegate {
 
     var locationManager = CLLocationManager()
     var listenersCount = 0
     weak var webView: WKWebView?
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: GeolocationMessages.self, jsFileName: "Geolocation")
+    init() {
+        let messages = GeolocationMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "Geolocation")
         locationManager.delegate = self
     }
 

@@ -2,6 +2,7 @@ import Foundation
 
 protocol BeamWebViewConfiguration {
     var id: UUID { get }
+    var handlers: [SimpleBeamMessageHandler] { get }
 
     /**
        Injects CSS source code into the web page.
@@ -22,6 +23,8 @@ protocol BeamWebViewConfiguration {
      */
     func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool)
 
+    func registerAllMessageHandlers()
+
     func obfuscate(str: String) -> String
 }
 
@@ -29,7 +32,9 @@ let BeamWebViewConfigurationBaseid: UUID = UUID()
 class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfiguration {
     let id: UUID = BeamWebViewConfigurationBaseid
 
-    var allowsPictureInPicture: Bool {
+    var handlers: [SimpleBeamMessageHandler] = []
+
+    static var allowsPictureInPicture: Bool {
         #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
         return true
         #else
@@ -38,6 +43,14 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
     }
 
     required init?(coder: NSCoder) { super.init(coder: coder) }
+
+    /// Doing `registerAllMessageHandlers` in the convenience init fixes a bug in webkit
+    /// where the `WKWebViewConfiguration` creates multiple references to the assigned WKMessageHandlers
+    convenience init(handlers: [SimpleBeamMessageHandler] = []) {
+        self.init()
+        self.handlers = handlers
+        registerAllMessageHandlers()
+    }
 
     override init() {
         super.init()
@@ -54,11 +67,24 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         preferences._setAllowsPicture(inPictureMediaPlayback: true)
         preferences._setFullScreenEnabled(true)
         #endif
-
-        registerAllMessageHandlers()
     }
 
-    func registerAllMessageHandlers() {}
+    func registerAllMessageHandlers() {
+        for handler in handlers {
+            for messageName in handler.messages {
+                userContentController.add(handler, name: messageName)
+            }
+
+            if let cssFileName = handler.cssFileName,
+               let cssCode = loadFile(from: cssFileName, fileType: "css") {
+                addCSS(source: cssCode, when: .atDocumentEnd)
+            }
+
+            if let jsCode = loadFile(from: handler.jsFileName, fileType: "js") {
+                addJS(source: jsCode, when: handler.jsCodePosition, forMainFrameOnly: handler.forMainFrameOnly)
+            }
+        }
+    }
 
     func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool = false) {
         let parameterized = source.replacingOccurrences(of: "__ENABLED__", with: "true")

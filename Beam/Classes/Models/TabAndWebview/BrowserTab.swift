@@ -39,7 +39,7 @@ import Promises
     let noteController: WebNoteController
     internal var isFromNoteSearch: Bool = false
     var allowsPictureInPicture: Bool {
-        Self.webViewConfiguration.allowsPictureInPicture
+        BeamWebViewConfigurationBase.allowsPictureInPicture
     }
 
     public var score: Float {
@@ -51,7 +51,18 @@ import Promises
     var lastViewDate: Date = BeamDate.now
     private var scope = Set<AnyCancellable>()
 
-    static var webViewConfiguration = BrowserTabConfiguration()
+    static var webViewConfiguration = BeamWebViewConfigurationBase(handlers: [
+        WebPositionsMessageHandler(),
+        PointAndShootMessageHandler(),
+        WebNavigationMessageHandler(),
+        LoggingMessageHandler(),
+        MediaPlayerMessageHandler(),
+        GeolocationMessageHandler(),
+        WebSearchMessageHandler(),
+        WebViewFocusMessageHandler(),
+        PasswordMessageHandler(),
+        LinkMouseOverMessageHandler()
+    ])
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
     var showsStatusBar: Bool {
@@ -63,7 +74,7 @@ import Promises
     }
 
     // MARK: - WebPage properties
-    @Published public var webView: BeamWebView! {
+    @Published public var webView: BeamWebView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration) {
         didSet {
             setupObservers()
         }
@@ -104,7 +115,6 @@ import Promises
 
     internal var beamNavigationController: BeamWebNavigationController? {
         guard _navigationController == nil else { return _navigationController }
-        guard let webView = webView else { return nil }
         let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController, webView: webView)
         navController.page = self
         _navigationController = navController
@@ -164,20 +174,20 @@ import Promises
         if let suppliedWebView = webView {
             self.webView = suppliedWebView
             backForwardList = suppliedWebView.backForwardList
-        } else {
-            let web = BeamWebView(frame: .zero, configuration: Self.webViewConfiguration)
-            web.wantsLayer = true
-            web.allowsMagnification = true
-
-            state?.setup(webView: web)
-            backForwardList = web.backForwardList
-            self.webView = web
         }
 
         browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin)
         noteController = WebNoteController(note: note, rootElement: rootElement)
 
         super.init()
+
+        if webView == nil {
+            self.webView.wantsLayer = true
+            self.webView.allowsMagnification = true
+            state?.setup(webView: self.webView)
+            backForwardList = self.webView.backForwardList
+        }
+
         self.webView.page = self
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
@@ -253,11 +263,11 @@ import Promises
         if let originalQuery = originalQuery {
             try container.encode(originalQuery, forKey: .originalQuery)
         }
-        if let currentURL = webView?.url {
+        if let currentURL = webView.url {
             try container.encode(currentURL, forKey: .url)
         }
         var backForwardUrlList = [URL]()
-        for backForwardListItem in webView?.backForwardList.backList ?? [] {
+        for backForwardListItem in webView.backForwardList.backList {
             backForwardUrlList.append(backForwardListItem.url)
         }
         try container.encode(backForwardUrlList, forKey: .backForwardUrlList)
@@ -338,7 +348,8 @@ import Promises
         if !scope.isEmpty {
             cancelObservers()
         }
-        Logger.shared.logDebug("setupObservers", category: .javascript)
+        Logger.shared.logDebug("setupObservers", category: .web)
+
         webView.publisher(for: \.title)
             .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
             .sink { [unowned self] value in
@@ -380,8 +391,8 @@ import Promises
     func cancelObservers() {
         Logger.shared.logDebug("cancelObservers", category: .javascript)
         scope.removeAll()
-        webView?.navigationDelegate = nil
-        webView?.uiDelegate = nil
+        webView.navigationDelegate = nil
+        webView.uiDelegate = nil
     }
 
     private func encodeStringTo64(fromString: String) -> String? {
@@ -390,7 +401,6 @@ import Promises
     }
 
     public func load(url: URL) {
-        guard !url.absoluteString.isEmpty else { return }
         hasError = false
         screenshotCapture = nil
         if !isFromNoteSearch {
@@ -416,24 +426,24 @@ import Promises
 
     }
 
+    /// Called when doing CMD+Shift+T to create a tab that has been closed and when
+    /// a pinned Tab is first displayed (called from tabDidAppear)
+    /// - Parameter state: BeamState
     func postLoadSetup(state: BeamState) {
+        // The webview is created in the init, but we want to set it up with a specific beamstate
+        state.setup(webView: webView)
         self.state = state
-        let web = BeamWebView(frame: NSRect(), configuration: Self.webViewConfiguration)
-        web.wantsLayer = true
-        web.allowsMagnification = true
-
-        state.setup(webView: web)
-        backForwardList = web.backForwardList
-        web.page = self
-
-        uiDelegateController.page = self
-        mediaPlayerController = MediaPlayerController(page: self)
-        webView = web
         self.webView.page = self
+        self.webView.wantsLayer = true
+        self.webView.allowsMagnification = true
+        self.backForwardList = self.webView.backForwardList
+
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
         addTreeToNote()
         setupObservers()
+
+        // Load the url
         if let backForwardListUrl = backForwardUrlList {
             for url in backForwardListUrl {
                 self.webView.load(URLRequest(url: url))
