@@ -23,16 +23,14 @@ class ResizableNode: ElementNode {
         }
     }
 
-    var canResizeHeight = false
-
     ///The main element's real size (image or video)
     var resizableElementContentSize = CGSize.zero {
         didSet {
             let widthRatio = (desiredWidthRatio ?? 1.0)
-            let initWidth = availableWidth * widthRatio
+            let initWidth = contentsWidth * widthRatio
             setVisibleWidth(initWidth)
 
-            if !keepAspectRatio {
+            if !keepAspectRatio, visibleSize.height == 0 {
                 visibleSize.height = resizableElementContentSize.height.clamp(minHeight, maxHeight)
             }
         }
@@ -63,6 +61,14 @@ class ResizableNode: ElementNode {
         }
     }
     var visibleSize: CGSize = .zero
+
+    /// The reference area to position the resizing handles around.
+    var resizableContentBounds: CGRect {
+        CGRect(
+            origin: CGPoint(x: contentsLead, y: contentsTop),
+            size: visibleSize
+        )
+    }
 
     func setVisibleSize(width: CGFloat? = nil, height: CGFloat? = nil) {
         switch responsiveStrategy {
@@ -130,13 +136,12 @@ class ResizableNode: ElementNode {
     override func updateLayout() {
         super.updateLayout()
 
-        let position = CGPoint(x: contentsLead, y: contentsTop)
-        let bounds = CGRect(origin: .zero, size: visibleSize)
+        let bounds = resizableContentBounds
 
             switch responsiveStrategy {
             case .horizontal:
                 if let handle = layers["handle_horizontal"], let handleLayer = handle.layer as? CAShapeLayer {
-                    let layerPosition = CGPoint(x: position.x + bounds.size.width + 6, y: position.y + bounds.size.height / 2)
+                    let layerPosition = CGPoint(x: bounds.minX + bounds.size.width + 6, y: bounds.minY + bounds.size.height / 2)
 
                     let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 12, height: 44))
 
@@ -151,7 +156,7 @@ class ResizableNode: ElementNode {
                 }
             case .vertical:
                 if let handle = layers["handle_vertical"], let handleLayer = handle.layer as? CAShapeLayer {
-                    let layerPosition = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height)
+                    let layerPosition = CGPoint(x: bounds.minX + bounds.size.width / 2, y: bounds.minY + bounds.size.height)
 
                     let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 44, height: 12))
 
@@ -166,7 +171,7 @@ class ResizableNode: ElementNode {
                 }
             case .both:
                 if let handle = layers["handle_horizontal"], let handleLayer = handle.layer as? CAShapeLayer {
-                    let layerPosition = CGPoint(x: position.x + bounds.size.width + 6, y: position.y + bounds.size.height / 2)
+                    let layerPosition = CGPoint(x: bounds.minX + bounds.size.width + 6, y: bounds.minY + bounds.size.height / 2)
 
                     let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 12, height: 44))
 
@@ -181,7 +186,7 @@ class ResizableNode: ElementNode {
                 }
 
                 if let handle = layers["handle_vertical"], let handleLayer = handle.layer as? CAShapeLayer {
-                    let layerPosition = CGPoint(x: position.x + bounds.size.width / 2, y: position.y + bounds.size.height + 6)
+                    let layerPosition = CGPoint(x: bounds.minX + bounds.size.width / 2, y: bounds.minY + bounds.size.height + 6)
 
                     let handleBounds = CGRect(origin: layerPosition, size: CGSize(width: 44, height: 12))
 
@@ -228,16 +233,12 @@ class ResizableNode: ElementNode {
                 self.resizableElementContentSize.height = CGFloat(height)
             }
         case .embed(_, _, let displayInfo):
-            if let ratio = displayInfo.displayRatio {
-                self.desiredWidthRatio = ratio
-            }
-
-            if let width = displayInfo.width {
-                self.resizableElementContentSize.width = CGFloat(width)
-            }
-
-            if let height = displayInfo.height {
-                self.resizableElementContentSize.height = CGFloat(height)
+            if let widthRatio = displayInfo.displayRatio, let height = displayInfo.height {
+                desiredWidthRatio = widthRatio
+                resizableElementContentSize = CGSize(
+                    width: Int(contentsWidth * widthRatio),
+                    height: height
+                )
             }
         default:
             break
@@ -305,8 +306,6 @@ class ResizableNode: ElementNode {
         handleLayer.zPosition = 2
         handleLayer.opacity = 0.0
 
-        self.canResizeHeight = true
-
         let handle = Layer(name: "handle_vertical", layer: handleLayer) { [weak self] info in
             if info.event.clickCount == 2 {
                 self?.invalidateLayout(animated: true)
@@ -366,7 +365,7 @@ class ResizableNode: ElementNode {
         case .embed(let url, let sourceMetadata, _):
             /// DisplayInfo explainer for embeds:
             /// - The width is always expressed as a ratio to the available editor width stored in displayInfo.displayRatio (at least on the client)
-            /// - The height is expressed as an absolute number of pixels stored in displayinfo.height. Height is only set when it's possible to resize the height
+            /// - The height is always expressed as an absolute number of pixels stored in displayinfo.height
             /// - displayinfo.width is not used for embeds
             ///
             /// Should the embed have the preserveAspectRatio flag, the displayInfo.height will be ignored
@@ -375,8 +374,8 @@ class ResizableNode: ElementNode {
                 url,
                 origin: sourceMetadata,
                 displayInfos: MediaDisplayInfos(
-                    height: canResizeHeight ? Int(self.visibleSize.height) : nil,
-                    displayRatio: desiredWidthRatio
+                    height: Int(visibleSize.height),
+                    displayRatio: visibleSize.width / contentsWidth
                 )
             )
         default:
