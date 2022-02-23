@@ -243,7 +243,7 @@ window.beam.__ID__SearchWebPage = {
     },
 
     asyncTextNodeWalker: function (iterator) {
-      let operation = new __ID__SWPOperation();
+      let operation = new this.Operation();
       let walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
 
       let timeout = setTimeout(() => {
@@ -357,18 +357,16 @@ window.beam.__ID__SearchWebPage = {
         var txt = document.getSelection().toString() ;
         window.webkit.messageHandlers.webSearchCurrentSelection.postMessage( {selection:txt} ) ;
     },
+
+    Operation: function () {
+      this.cancelled = false;
+      this.completed = false;
+    }
 }
 
 window.beam.__ID__SearchWebPage.setupElements();
 
-function __ID__SWPOperation() {
-  this.cancelled = false;
-  this.completed = false;
-}
-
-__ID__SWPOperation.prototype.constructor = __ID__SWPOperation;
-
-__ID__SWPOperation.prototype.cancel = function() {
+window.beam.__ID__SearchWebPage.Operation.prototype.cancel = function() {
   this.cancelled = true;
 
   if (typeof this.oncancelled === "function") {
@@ -376,7 +374,7 @@ __ID__SWPOperation.prototype.cancel = function() {
   }
 };
 
-__ID__SWPOperation.prototype.complete = function() {
+window.beam.__ID__SearchWebPage.Operation.prototype.complete = function() {
   this.completed = true;
 
   if (typeof this.oncompleted === "function") {
