@@ -1,219 +1,224 @@
 {
-    "id" : "6A0E0DAB-6644-4F67-BA30-1408E1FF15DD",
-    "textStats" : {
-        "wordsCount" : 68
-    },
-    "visitedSearchResults" : [
+  "id" : "6A0E0DAB-6644-4F67-BA30-1408E1FF15DD",
+  "textStats" : {
+    "wordsCount" : 73
+  },
+  "visitedSearchResults" : [
 
-    ],
-    "type" : {
-        "type" : "journal",
-        "date" : "2022-02-15"
-    },
-    "title" : "February 15, 2022",
-    "searchQueries" : [
+  ],
+  "type" : {
+    "type" : "journal",
+    "date" : "2022-02-15"
+  },
+  "title" : "February 15, 2022",
+  "searchQueries" : [
 
-    ],
-    "contactId" : null,
-    "children" : [
+  ],
+  "contactId" : null,
+  "children" : [
+    {
+      "creationDate" : 666618164.66159105,
+      "id" : "E80994A8-AA9D-4E0A-9343-3DE193589D79",
+      "textStats" : {
+        "wordsCount" : 4
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "This is your "
+          },
+          {
+            "string" : "Journal. ",
+            "attributes" : [
+              {
+                "type" : "strong"
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 667309022.148651,
+      "id" : "E08A9179-E9F8-4FDE-ACAB-77B7EDA47E8F",
+      "textStats" : {
+        "wordsCount" : 10
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Every day, a Daily Note will be created here automatically."
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 667239522.77254105,
+      "id" : "FCB271BF-2616-4DE3-BD3B-2498AD13658A",
+      "textStats" : {
+        "wordsCount" : 12
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "This is the place to write down your thoughts, take meetings notes..."
+          }
+        ]
+      }
+    },
+    {
+      "id" : "C5DAC0E9-4307-4299-8501-F7BCDC10290E",
+      "creationDate" : 667237304.87041497
+    },
+    {
+      "creationDate" : 666618221.33252895,
+      "id" : "5D0BD3FE-85B7-4A07-8A15-1C4074943AB4",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 38
+      },
+      "children" : [
         {
-            "creationDate" : 666618164.66159105,
-            "id" : "E80994A8-AA9D-4E0A-9343-3DE193589D79",
-            "kind" : {
-                "type" : "heading",
-                "level" : 2
-            },
-            "textStats" : {
-                "wordsCount" : 3
-            },
-            "text" : {
-                "ranges" : [
-                    {
-                        "string" : "Welcome to beam!"
-                    }
+          "creationDate" : 666618239.70190299,
+          "id" : "14A9EE14-2130-461B-8488-6B6676DD82FE",
+          "textStats" : {
+            "wordsCount" : 10
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "⌘T or ⌘K ",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
                 ]
-            }
+              },
+              {
+                "string" : "to search the web and your notes"
+              }
+            ]
+          }
         },
         {
-            "creationDate" : 666618193.49802196,
-            "id" : "4D5E657C-998E-4A14-BCB8-66B0C73D7FAB",
-            "textStats" : {
-                "wordsCount" : 17
-            },
-            "text" : {
-                "ranges" : [
-                    {
-                        "string" : "beam is an all-new way to navigate the web and gather knowledge to share with others."
-                    }
+          "creationDate" : 666618282.58982003,
+          "id" : "90461AD2-6A09-4CE1-9727-B95DDA285128",
+          "textStats" : {
+            "wordsCount" : 11
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Hold ⌥ Option & click ",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
                 ]
-            }
+              },
+              {
+                "string" : "on the web to capture text, images, videos... "
+              }
+            ]
+          }
         },
         {
-            "id" : "DA6835BE-E0F4-4AAB-A56F-4E3FB000F570",
-            "creationDate" : 666618217.268116
-        },
-        {
-            "creationDate" : 666618221.33252895,
-            "id" : "5D0BD3FE-85B7-4A07-8A15-1C4074943AB4",
-            "kind" : {
-                "type" : "heading",
-                "level" : 2
-            },
-            "textStats" : {
-                "wordsCount" : 39
-            },
-            "children" : [
-                {
-                    "creationDate" : 666618239.70190299,
-                    "id" : "14A9EE14-2130-461B-8488-6B6676DD82FE",
-                    "textStats" : {
-                        "wordsCount" : 10
-                    },
-                    "text" : {
-                        "ranges" : [
-                            {
-                                "string" : "⌘T or ⌘K ",
-                                "attributes" : [
-                                    {
-                                        "type" : "strong"
-                                    }
-                                ]
-                            },
-                            {
-                                "string" : "to search the web and your notes"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "creationDate" : 666618282.58982003,
-                    "id" : "90461AD2-6A09-4CE1-9727-B95DDA285128",
-                    "textStats" : {
-                        "wordsCount" : 11
-                    },
-                    "text" : {
-                        "ranges" : [
-                            {
-                                "string" : "Hold ⌥ Option & click ",
-                                "attributes" : [
-                                    {
-                                        "type" : "strong"
-                                    }
-                                ]
-                            },
-                            {
-                                "string" : " to "
-                            },
-                            {
-                                "string" : "Capture",
-                                "attributes" : [
-                                    {
-                                        "type" : "internalLink",
-                                        "payload" : "48CB6F79-7136-4F2D-AFB4-5889B7DB9DDC"
-                                    }
-                                ]
-                            },
-                            {
-                                "string" : " text, images, videos from the web"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "creationDate" : 666618345.70324397,
-                    "id" : "8B03E412-C3EC-4DC4-9F7A-B6D9CD7E0EC6",
-                    "textStats" : {
-                        "wordsCount" : 9
-                    },
-                    "text" : {
-                        "ranges" : [
-                            {
-                                "string" : "⌘D",
-                                "attributes" : [
-                                    {
-                                        "type" : "strong"
-                                    }
-                                ]
-                            },
-                            {
-                                "string" : " to toggle between the web and your notes"
-                            }
-                        ]
-                    }
-                },
-                {
-                    "creationDate" : 666618322.94026005,
-                    "id" : "349B1D38-F154-42C7-8CA3-533B9251BDCF",
-                    "textStats" : {
-                        "wordsCount" : 6
-                    },
-                    "text" : {
-                        "ranges" : [
-                            {
-                                "string" : "@",
-                                "attributes" : [
-                                    {
-                                        "type" : "strong"
-                                    }
-                                ]
-                            },
-                            {
-                                "string" : " or "
-                            },
-                            {
-                                "string" : "[[",
-                                "attributes" : [
-                                    {
-                                        "type" : "strong"
-                                    }
-                                ]
-                            },
-                            {
-                                "string" : " to create a new note"
-                            }
-                        ]
-                    }
-                }
-            ],
-            "text" : {
-                "ranges" : [
-                    {
-                        "string" : "Here's beam 101"
-                    }
+          "creationDate" : 667237934.49797797,
+          "id" : "591BF47E-F6C7-4719-BC6D-6A79D34E31E1",
+          "textStats" : {
+            "wordsCount" : 9
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "⌘D",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
                 ]
-            }
+              },
+              {
+                "string" : " to toggle between the web and your notes"
+              }
+            ]
+          }
         },
         {
-            "id" : "A5CBF4A2-3C71-4E58-B33F-A4D2669583BB",
-            "creationDate" : 666618364.81263494
-        },
-        {
-            "creationDate" : 666618366.48282301,
-            "id" : "EBFB69C6-E12D-4218-9687-42E9A055D029",
-            "textStats" : {
-                "wordsCount" : 9
-            },
-            "text" : {
-                "ranges" : [
-                    {
-                        "string" : "Learn more tricks and feature on "
-                    },
-                    {
-                        "string" : "How to beam",
-                        "attributes" : [
-                            {
-                                "type" : "internalLink",
-                                "payload" : "82EFF1CE-7451-40AD-A725-DD6D1D2B3C52"
-                            }
-                        ]
-                    }
+          "creationDate" : 667237936.16251695,
+          "id" : "1C1E92EF-89AA-420E-809D-2D8E171D2BA1",
+          "textStats" : {
+            "wordsCount" : 6
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "@",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
                 ]
-            }
+              },
+              {
+                "string" : " or "
+              },
+              {
+                "string" : "[[",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " to create a new note"
+              }
+            ]
+          }
+        },
+        {
+          "id" : "8B03E412-C3EC-4DC4-9F7A-B6D9CD7E0EC6",
+          "creationDate" : 666618345.70324397
         }
-    ],
-    "browsingSessionIds" : [
-
-    ],
-    "score" : 0.096074521541595459,
-    "creationDate" : 666572400.02024102
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Beam 101"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666618366.48282301,
+      "id" : "EBFB69C6-E12D-4218-9687-42E9A055D029",
+      "textStats" : {
+        "wordsCount" : 9
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Learn more tricks and feature on "
+          },
+          {
+            "string" : "How to beam",
+            "attributes" : [
+              {
+                "type" : "internalLink",
+                "payload" : "82EFF1CE-7451-40AD-A725-DD6D1D2B3C52"
+              }
+            ]
+          }
+        ]
+      }
+    }
+  ],
+  "browsingSessionIds" : [
+  ],
+  "score" : 0.19607451558113098,
+  "creationDate" : 666572400.02024102
 }
