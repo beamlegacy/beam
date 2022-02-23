@@ -9,30 +9,32 @@ import Foundation
 
 // MARK: - Keys
 extension PreferencesManager {
-    static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
-    static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
-    static let showDebugSectionKey = "showDebugSection"
-    static let showOmniboxScoreSectionKey = "showOmnibarScoreSection"
-    static let showPNSKey = "showPNSview"
-    static let PnsJSIsOnKey = "PnsJSIsOn"
-    static let SpaIndexingKey = "SpaIndexing"
-    static let collectFeedbackKey = "collectFeedback"
-    static let showsCollectFeedbackAlertKey = "showsCollectFeedbackAlert"
+    private static let browsingSessionCollectionIsOnKey = "browsingSessionCollectionIsOn"
+    private static let showTabGrougpingMenuItemKey = "showTabGrougpingMenuItem"
+    private static let showDebugSectionKey = "showDebugSection"
+    private static let showOmniboxScoreSectionKey = "showOmnibarScoreSection"
+    private static let showPNSKey = "showPNSview"
+    private static let PnsJSIsOnKey = "PnsJSIsOn"
+    private static let SpaIndexingKey = "SpaIndexing"
+    private static let collectFeedbackKey = "collectFeedback"
+    private static let showsCollectFeedbackAlertKey = "showsCollectFeedbackAlert"
+    private static let showTabsColoringKey = "showTabsColoring"
 }
 
 // MARK: - Default Values
 extension PreferencesManager {
     #if TEST
-    static let browsingSessionCollectionIsOnDefault = true
+    private static let browsingSessionCollectionIsOnDefault = true
     #endif
-    static let browsingSessionCollectionIsOnDefault = false
-    static let showTabGrougpingMenuItemDefault = false
-    static let showDebugSectionDefault = false
-    static let showOmniboxScoreSectionDefault = false
-    static let showPNSDefault = true
-    static let PnsJSIsOnDefault = true
-    static let collectFeedbackDefault = true
-    static let showsCollectFeedbackAlertDefault = true
+    private static let browsingSessionCollectionIsOnDefault = false
+    private static let showTabGrougpingMenuItemDefault = false
+    private static let showDebugSectionDefault = false
+    private static let showOmniboxScoreSectionDefault = false
+    private static let showPNSDefault = true
+    private static let PnsJSIsOnDefault = true
+    private static let collectFeedbackDefault = true
+    private static let showsCollectFeedbackAlertDefault = true
+    private static let showTabsColoringDefault = false
 }
 
 extension PreferencesManager {
@@ -60,4 +62,6 @@ extension PreferencesManager {
     @UserDefault(key: showsCollectFeedbackAlertKey, defaultValue: showsCollectFeedbackAlertDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showsCollectFeedbackAlert: Bool
 
+    @UserDefault(key: showTabsColoringKey, defaultValue: showTabsColoringDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
+    static var showTabsColoring: Bool
 }
