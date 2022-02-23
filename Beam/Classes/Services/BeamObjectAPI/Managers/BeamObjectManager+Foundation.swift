@@ -342,9 +342,13 @@ extension BeamObjectManager {
 
     func saveToAPI<T: BeamObjectProtocol>(_ objects: [T],
                                           force: Bool = false,
+                                          requestUploadType: BeamObjectRequestUploadType? = nil,
                                           _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
         if Configuration.beamObjectDataUploadOnSeparateCall {
-            return try saveToAPIWithDirectUpload(objects, force: force, completion)
+            switch requestUploadType {
+            case .multipartUpload: return try saveToAPIClassic(objects, force: force, completion)
+            case .directUpload, nil: return try saveToAPIWithDirectUpload(objects, force: force, completion)
+            }
         } else {
             return try saveToAPIClassic(objects, force: force, completion)
         }
@@ -410,6 +414,13 @@ extension BeamObjectManager {
 
         let request = BeamObjectRequest()
 
+        #if DEBUG
+        let allObjectsSize = objectsToSave.reduce(.zero) { ($1.data?.count ?? 0) + $0 }
+        if allObjectsSize > 1024 * 1024 * 1024 {
+            Logger.shared.logWarning("Total size is > \(allObjectsSize.byteSize), not efficient for multipart uploads",
+                                     category: .beamObject)
+        }
+        #endif
         try request.save(objectsToSave) { result in
             switch result {
             case .failure(let error):
@@ -490,6 +501,13 @@ extension BeamObjectManager {
         localTimer = BeamDate.now
 
         let request = BeamObjectRequest()
+
+        #if DEBUG
+        if objectsToSave.count > 200 {
+            Logger.shared.logWarning("Saving \(objectsToSave.count), which is probably too many to be efficient using direct uploads",
+                                     category: .beamObject)
+        }
+        #endif
 
         try request.prepare(objectsToSave) { requestResult in
             switch requestResult {
@@ -813,13 +831,17 @@ extension BeamObjectManager {
 
     func saveToAPI<T: BeamObjectProtocol>(_ object: T,
                                           force: Bool = false,
+                                          requestUploadType: BeamObjectRequestUploadType? = nil,
                                           _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
         guard !Self.disableSendingObjects || force else {
             throw BeamObjectManagerError.sendingObjectsDisabled
         }
 
         if Configuration.beamObjectDataUploadOnSeparateCall {
-            return try saveToAPIWithDirectUpload(object, force: force, completion)
+            switch requestUploadType {
+            case .multipartUpload: return try saveToAPIClassic(object, force: force, completion)
+            case .directUpload, nil: return try saveToAPIWithDirectUpload(object, force: force, completion)
+            }
         } else {
             return try saveToAPIClassic(object, force: force, completion)
         }

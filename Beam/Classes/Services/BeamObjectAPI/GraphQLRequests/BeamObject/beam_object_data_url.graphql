@@ -1,6 +1,7 @@
 query BeamObjectDataUrl($id: ID!) {
   beamObject(id: $id) {
     id
+    data
     dataUrl
     checksum
     type

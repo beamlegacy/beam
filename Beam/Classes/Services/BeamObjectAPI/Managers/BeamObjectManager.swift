@@ -10,6 +10,11 @@ enum BeamObjectConflictResolution {
     case fetchRemoteAndError
 }
 
+enum BeamObjectRequestUploadType {
+    case directUpload
+    case multipartUpload
+}
+
 // Add your object type when saving over the beam object API
 enum BeamObjectObjectType: String {
     case password

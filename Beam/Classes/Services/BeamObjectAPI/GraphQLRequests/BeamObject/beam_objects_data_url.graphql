@@ -6,6 +6,7 @@ query BeamObjectsDataUrl($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beamOb
       updatedAt
       deletedAt
       receivedAt
+      data
       dataUrl
       type
       checksum
