@@ -279,7 +279,8 @@ extension AutocompleteManager {
             }
             let start = DispatchTime.now()
             let limit = 3
-            let recentsNotes = beamState.recentsManager.recentNotes
+            let currentNoteID = beamState.mode == .note ? beamState.currentNote?.id : nil
+            let recentsNotes = beamState.recentsManager.recentNotes.filter { $0.id != currentNoteID }
             let ids = recentsNotes.map { $0.id }
             let scores = GRDBDatabase.shared.getFrecencyScoreValues(noteIds: ids, paramKey: AutocompleteManager.noteFrecencyParamKey)
             let autocompleteResults = recentsNotes.map {
