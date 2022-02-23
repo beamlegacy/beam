@@ -622,7 +622,7 @@ extension BeamObjectRequest {
         request.allHTTPHeaderFields = headers
 
         let session = BeamURLSession.shared
-        let localTimer = BeamDate.now
+//        let localTimer = BeamDate.now
 
         let task = session.dataTask(with: request) { (responseData, response, error) -> Void in
             #if DEBUG

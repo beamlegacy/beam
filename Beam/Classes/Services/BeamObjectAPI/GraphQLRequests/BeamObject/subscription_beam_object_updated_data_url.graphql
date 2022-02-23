@@ -2,6 +2,7 @@ subscription BeamObjectUpdatedDataUrl($id: ID!) {
   beamObjectUpdated(id: $id) {
     beamObject {
       id
+      data
       dataUrl
       checksum
       type
