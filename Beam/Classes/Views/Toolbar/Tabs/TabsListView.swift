@@ -131,13 +131,14 @@ struct TabsListView: View {
         let showTrailingDragSpacer = index == dragModel.draggingOverIndex && index > dragStartIndex
         let hideSeparator = tab.isPinned || (canScroll && isTheLastTab)
             || (!isDraggingATab && (selectedIndex == index + 1 || selectedIndex == index || hoveredIndex == index + 1 || hoveredIndex == index))
+        let hueTint = state.browserTabsManager.tabsClusteringGroups[tab.id]?.hueTint
         return HStack(spacing: 0) {
             if showLeadingDragSpacer {
                 emptyDragSpacer
                 separator.opacity(hideSeparator ? 0 : 1)
             }
             TabView(tab: tab, isSelected: selected, isPinned: tab.isPinned, isSingleTab: isSingle,
-                    isDragging: isTheDraggedTab, disableAnimations: isAnimatingDrop,
+                    isDragging: isTheDraggedTab, disableAnimations: isAnimatingDrop, hueTint: hueTint,
                     onTouchDown: { onTabTouched(at: index) },
                     onTap: { onTabTapped(at: index) },
                     onClose: { onTabClose(at: index) },

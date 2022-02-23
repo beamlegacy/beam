@@ -33,66 +33,18 @@ class BrowserTabsManager: ObservableObject {
     private weak var state: BeamState?
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
-            self.tabsToPages()
             self.updateTabsHandlers()
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
             self.autoSave()
+            self.updateClusteringOpenPages()
         }
     }
 
+    /// Dictionary of `key`: BrowserTab.id, `value`: Group to which this tab belongs
+    @Published private(set) var tabsClusteringGroups = [UUID: TabClusteringGroup]()
+
+    /// Groups of tabs by interactions, to help know where to insert new tabs. *Not related to Clustering*
     private var tabsGroup: [UUID: [UUID]] = [:]
-
-    private var currentTabGroupValue: [UUID]? {
-        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
-            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.value
-        }
-        return tabsGroup[currentTabId]
-    }
-
-    public var currentTabGroupKey: UUID? {
-        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
-            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
-        }
-        return currentTabId
-    }
-
-    public func createNewGroup(for tabId: UUID, with tabs: [UUID] = []) {
-        tabsGroup[tabId] = tabs
-    }
-
-    @discardableResult
-    // Remove the TabId from the Group and return the next TabId to show
-    public func removeFromTabGroup(tabId: UUID) -> UUID? {
-        guard let groupKey = currentTabGroupKey else { return nil }
-        if tabId == groupKey {
-            guard var group = tabsGroup.removeValue(forKey: groupKey), !group.isEmpty else { return nil }
-            let firstTabId = group.removeFirst()
-            tabsGroup[firstTabId] = group
-            return firstTabId
-        } else {
-            guard let index = tabsGroup[groupKey]?.firstIndex(of: tabId),
-                    let tabGroup = tabsGroup[groupKey] else { return nil }
-            let nextTabToGo = nextTabToGo(from: index, of: tabGroup)
-
-            tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
-            if let group = tabsGroup[groupKey], group.isEmpty {
-                tabsGroup.removeValue(forKey: groupKey)
-            }
-            return nextTabToGo ?? groupKey
-        }
-    }
-
-    private func nextTabToGo(from index: Int, of group: [UUID]) -> UUID? {
-        let afterIdx = group.index(after: index)
-        let beforeIdx = group.index(before: index)
-        if afterIdx < group.count {
-            return group[afterIdx]
-        } else if beforeIdx < group.count && beforeIdx >= 0 {
-            return group[beforeIdx]
-        } else {
-            return nil
-        }
-    }
 
     public var tabHistory: [Data] = []
     private weak var latestCurrentTab: BrowsingTree?
@@ -117,6 +69,7 @@ class BrowserTabsManager: ObservableObject {
         tabs.append(contentsOf: data.pinnedTabs)
         setupPinnedTabObserver()
         currentTab = tabs.first
+        setupTabsColoring()
     }
 
     private var isModifyingPinnedTabs = false
@@ -153,7 +106,7 @@ class BrowserTabsManager: ObservableObject {
 
     private var indexingQueue = DispatchQueue(label: "indexing")
 
-    private func tabsToPages() {
+    private func updateClusteringOpenPages() {
         self.data.clusteringManager.allOpenPages = tabs.map { ClusteringManager.PageOpenInTab(pageId: $0.browsingTree.current.link) }
     }
 
@@ -358,4 +311,77 @@ struct TabInformation {
     var textContent: String
     var cleanedTextContentForClustering: [String]
     var isPinnedTab: Bool = false
+}
+
+// MARK: - Tabs Interactions Groups
+extension BrowserTabsManager {
+
+    private var currentTabGroupValue: [UUID]? {
+        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
+            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.value
+        }
+        return tabsGroup[currentTabId]
+    }
+
+    public var currentTabGroupKey: UUID? {
+        guard let currentTabId = self.currentTab?.id, tabsGroup[currentTabId] != nil else {
+            return tabsGroup.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
+        }
+        return currentTabId
+    }
+
+    public func createNewGroup(for tabId: UUID, with tabs: [UUID] = []) {
+        tabsGroup[tabId] = tabs
+    }
+
+    @discardableResult
+    // Remove the TabId from the Group and return the next TabId to show
+    public func removeFromTabGroup(tabId: UUID) -> UUID? {
+        guard let groupKey = currentTabGroupKey else { return nil }
+        if tabId == groupKey {
+            guard var group = tabsGroup.removeValue(forKey: groupKey), !group.isEmpty else { return nil }
+            let firstTabId = group.removeFirst()
+            tabsGroup[firstTabId] = group
+            return firstTabId
+        } else {
+            guard let index = tabsGroup[groupKey]?.firstIndex(of: tabId),
+                  let tabGroup = tabsGroup[groupKey] else { return nil }
+            let nextTabToGo = nextTabToGo(from: index, of: tabGroup)
+
+            tabsGroup[groupKey]?.removeAll(where: {$0 == tabId})
+            if let group = tabsGroup[groupKey], group.isEmpty {
+                tabsGroup.removeValue(forKey: groupKey)
+            }
+            return nextTabToGo ?? groupKey
+        }
+    }
+
+    private func nextTabToGo(from index: Int, of group: [UUID]) -> UUID? {
+        let afterIdx = group.index(after: index)
+        let beforeIdx = group.index(before: index)
+        if afterIdx < group.count {
+            return group[afterIdx]
+        } else if beforeIdx < group.count && beforeIdx >= 0 {
+            return group[beforeIdx]
+        } else {
+            return nil
+        }
+    }
+
+}
+
+// MARK: - Tabs Clustering
+extension BrowserTabsManager {
+    private func setupTabsColoring() {
+        data.clusteringManager.tabGroupingUpdater.$builtPagesGroups.sink { [weak self] pagesGroups in
+            guard let self = self else { return }
+            let tabs = self.tabs
+            var tabsGroups = [UUID: TabClusteringGroup]()
+            pagesGroups.forEach { (pageID, group) in
+                guard let tab = tabs.first(where: { $0.browsingTree.current.link == pageID }) else { return }
+                tabsGroups[tab.id] = group
+            }
+            self.tabsClusteringGroups = tabsGroups
+        }.store(in: &dataScope)
+    }
 }
