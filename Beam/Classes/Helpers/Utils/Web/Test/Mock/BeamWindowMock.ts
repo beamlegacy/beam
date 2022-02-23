@@ -51,6 +51,7 @@ export abstract class BeamWindowMock<M> extends BeamEventTargetMock implements B
     this.location = location
     this.visualViewport.scale = 1
   }
+  onunload: () => void
   matchMedia(arg0: string) {
     throw new Error("Method not implemented.")
   }
