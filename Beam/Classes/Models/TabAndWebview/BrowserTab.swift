@@ -461,6 +461,7 @@ import Promises
     func reload() {
         hasError = false
         leave()
+        ContentBlockingManager.shared.configure(webView: webView)
         if let webviewUrl = webView.url, BeamURL(webviewUrl).isErrorPage, let originalUrl = BeamURL(webviewUrl).originalURLFromErrorPage {
             webView.replaceLocation(with: originalUrl)
         } else if webView.url == nil, let url = url {
