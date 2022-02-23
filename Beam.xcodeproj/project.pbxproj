@@ -515,6 +515,7 @@
 		8A2A398726F24F9E0084A073 /* Debounce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2A398626F24F9E0084A073 /* Debounce.swift */; };
 		8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */; };
 		8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */; };
+		8A4723C227C539E100E76893 /* WindowCleanup.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A4723BC27C539E100E76893 /* WindowCleanup.js */; };
 		8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */; };
 		8A4801AD26A1EBBF008F33FE /* PointAndShoot+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */; };
 		8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A50A53326E1035E0094BA97 /* BeamElementJoinTests.swift */; };
@@ -1878,6 +1879,7 @@
 		8A2A398626F24F9E0084A073 /* Debounce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debounce.swift; sourceTree = "<group>"; };
 		8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootTargetTest.swift; sourceTree = "<group>"; };
 		8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSPoint+Beam.swift"; sourceTree = "<group>"; };
+		8A4723BC27C539E100E76893 /* WindowCleanup.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WindowCleanup.js; sourceTree = "<group>"; };
 		8A4801A326A1EB66008F33FE /* PointAndShoot+DrawRules.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+DrawRules.swift"; sourceTree = "<group>"; };
 		8A4801AC26A1EBBF008F33FE /* PointAndShoot+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Helpers.swift"; sourceTree = "<group>"; };
 		8A50A53326E1035E0094BA97 /* BeamElementJoinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementJoinTests.swift; sourceTree = "<group>"; };
@@ -3628,6 +3630,7 @@
 		418172FC25811DB200317ED8 /* Web */ = {
 			isa = PBXGroup;
 			children = (
+				8A4723BC27C539E100E76893 /* WindowCleanup.js */,
 				418172FD25811DB200317ED8 /* Readability.js */,
 				418171912581107C00317ED8 /* OverrideConsole.js */,
 				A58645E526FB12DC00D7FF86 /* WebViewFocusHandling.js */,
@@ -6313,6 +6316,7 @@
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */,
 				8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */,
+				8A4723C227C539E100E76893 /* WindowCleanup.js in Resources */,
 				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
 				A52A559127592E9A002D0C99 /* Inter-Medium.otf in Resources */,
