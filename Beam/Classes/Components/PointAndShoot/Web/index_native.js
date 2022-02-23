@@ -1,7 +1,6 @@
 import {PointAndShoot} from "./PointAndShoot"
 import {PointAndShootUI_native} from "./PointAndShootUI_native"
 import {Native} from "../../../Helpers/Utils/Web/Native"
-import "./index_native.scss"
 
 const win = window
 const native = Native.getInstance(win, "pointAndShoot")

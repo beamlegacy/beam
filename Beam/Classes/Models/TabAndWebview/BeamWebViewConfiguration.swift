@@ -50,6 +50,10 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         self.init()
         self.handlers = handlers
         registerAllMessageHandlers()
+
+        if let windowCleanupSource = loadFile(from: "WindowCleanup", fileType: "js") {
+            addJS(source: windowCleanupSource, when: .atDocumentEnd)
+        }
     }
 
     override init() {

@@ -103,6 +103,11 @@ export class PointAndShoot {
       "scroll",
       debounce(this.onResize.bind(this), debounceTimeout, immediate)
     )
+
+    this.win.onunload = function() {
+      clearTimeout(this.timer)
+      this.timer = null
+    }
   }
   /**
    * Send updates to the UI.
@@ -344,7 +349,7 @@ export class PointAndShoot {
    */
   onTouchstart(ev: TouchEvent): void {
     if (!this.timer) {
-      this.timer = setTimeout(() => this.onLongtouch(ev), this.touchDuration)
+      this.timer = setTimeout(this.onLongtouch.bind(this), this.touchDuration, ev)
     }
   }
   /**
