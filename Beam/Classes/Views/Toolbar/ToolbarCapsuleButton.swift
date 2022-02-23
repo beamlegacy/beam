@@ -15,13 +15,14 @@ struct ToolbarCapsuleButton<Content: View>: View {
     var isForeground = false
     var tabStyle = false
     var lonelyStyle = false
+    var hueTint: Double?
     var label: ((_ isHovering: Bool, _ isPressed: Bool) -> Content)?
     var action: (() -> Void)?
 
     @State var isHovering: Bool = false
     @State var isPressed: Bool = false
 
-    init(isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, lonelyStyle: Bool = false,
+    init(isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, lonelyStyle: Bool = false, hueTint: Double? = nil,
          @ViewBuilder label: @escaping (_ isHovering: Bool, _ isPressed: Bool) -> Content,
          action: (() -> Void)? = nil) {
         self.text = ""
@@ -29,13 +30,16 @@ struct ToolbarCapsuleButton<Content: View>: View {
         self.isSelected = isSelected
         self.tabStyle = tabStyle
         self.lonelyStyle = lonelyStyle
+        self.hueTint = hueTint
         self.label = label
         self.action = action
     }
 
     private var backgroundColor: Color {
         guard isEnabled else { return .clear }
-        if isPressed {
+        if let hueTint = hueTint {
+            return Color(hue: hueTint, saturation: 0.4, brightness: 1, opacity: 0.2)
+        } else if isPressed {
             return BeamColor.Mercury.swiftUI
         } else if isForeground {
             return BeamColor.ToolBar.capsuleForegroundBackgrond.swiftUI
@@ -48,7 +52,9 @@ struct ToolbarCapsuleButton<Content: View>: View {
     private var strokeColor: Color {
         guard isEnabled else { return .clear }
         if tabStyle {
-            if isPressed && lonelyStyle {
+            if isForeground, let hueTint = hueTint {
+                return Color(hue: hueTint, saturation: 1, brightness: 0.8, opacity: 0.5)
+            } else if isPressed && lonelyStyle {
                 return BeamColor.ToolBar.capsuleStrokeClicked.swiftUI
             } else if isPressed {
                 return BeamColor.ToolBar.capsuleTabStrokeClicked.swiftUI

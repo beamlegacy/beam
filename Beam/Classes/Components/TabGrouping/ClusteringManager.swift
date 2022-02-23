@@ -22,8 +22,9 @@ class ClusteringManager: ObservableObject {
         var pageScore: Float = 0
     }
 
+    typealias PageID = UUID
     public struct PageOpenInTab {
-        let pageId: UUID
+        let pageId: PageID
     }
 
     enum InitialiseNotes {
@@ -32,7 +33,7 @@ class ClusteringManager: ObservableObject {
         case twoOrMorePagesAdded
     }
 
-    var clusteredPagesId: [[UUID]] = [[]] {
+    var clusteredPagesId: [[PageID]] = [[]] {
         didSet {
             transformToClusteredPages()
         }
@@ -42,7 +43,7 @@ class ClusteringManager: ObservableObject {
             transformToClusteredNotes()
             if clusteredNotesId.count > 1 {
                 updateNoteSources()
-                if Configuration.tabColoringEnabled {
+                if PreferencesManager.showTabsColoring {
                     updateTabColors()
                 }
             }
@@ -64,7 +65,7 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
-    var tabColoringUpdater: TabColoringUpdater
+    var tabGroupingUpdater: TabGroupingUpdater
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
     var similarities = [UUID: [UUID: Double]]()
@@ -74,7 +75,7 @@ class ClusteringManager: ObservableObject {
     var summary: SummaryForNewDay
     var allOpenPages: [PageOpenInTab]?
     public var continueToNotes = [UUID]()
-    public var continueToPage: UUID?
+    public var continueToPage: PageID?
 
     // swiftlint:disable:next function_body_length
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
@@ -84,7 +85,7 @@ class ClusteringManager: ObservableObject {
         self.weightEntities = entities
         self.activeSources = activeSources
         self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId)
-        self.tabColoringUpdater = TabColoringUpdater()
+        self.tabGroupingUpdater = TabGroupingUpdater()
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
         self.sessionId = sessionId
@@ -168,7 +169,7 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
-    func findPageGroupForID(pageID: UUID, pageGroups: [[UUID]]) -> Int? {
+    func findPageGroupForID(pageID: PageID, pageGroups: [[UUID]]) -> Int? {
         for pageGroup in pageGroups.enumerated() {
             if pageGroup.element.contains(pageID) {
                 return pageGroup.offset
@@ -433,7 +434,7 @@ class ClusteringManager: ObservableObject {
     }
 
     private func updateTabColors() {
-        self.tabColoringUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
+        self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
     }
 
     private func updateNoteSources() {
