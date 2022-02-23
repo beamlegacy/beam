@@ -2,6 +2,7 @@ subscription BeamObjectsUpdatedDataUrl {
   beamObjectsUpdated {
     beamObjects {
       id
+      data
       dataUrl
       checksum
       type
