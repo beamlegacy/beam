@@ -24,6 +24,7 @@ struct TabView: View {
     var isSingleTab: Bool = false
     var isDragging: Bool = false
     var disableAnimations: Bool = false
+    var hueTint: Double?
     var onTouchDown: (() -> Void)?
     var onTap: (() -> Void)?
     var onClose: (() -> Void)?
@@ -46,6 +47,9 @@ struct TabView: View {
     }
 
     private var foregroundColor: Color {
+        if let hueTint = hueTint {
+            return Color(hue: hueTint, saturation: 0.6, brightness: 0.5)
+        }
         if isSelected {
             return BeamColor.Generic.text.swiftUI
         }
@@ -315,7 +319,7 @@ struct TabView: View {
                         // Using Capsule as background instead of Capsule's label property because we have different gestures (drag/click) + paddings
                         // and they don't play well with the rendering updates of the capsule label with parameters.
                         ToolbarCapsuleButton(isSelected: false, isForeground: isSelected && (!isSingleTab || isDragging),
-                                             tabStyle: true, lonelyStyle: isSingleTab,
+                                             tabStyle: true, lonelyStyle: isSingleTab, hueTint: hueTint,
                                              label: { _, _ in Group { } }, action: nil)
                             .onTouchDown { down in
                                 if down { onTouchDown?() }
@@ -338,37 +342,6 @@ struct TabView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-    }
-}
-
-extension TabView {
-    struct TabContentIcon: View {
-        var name: String
-        var width: CGFloat = 16
-        var color = BeamColor.AlphaGray
-        var hoveredColor = BeamColor.Corduroy
-        var pressedColor = BeamColor.Niobium
-        var action: (() -> Void)?
-
-        @State private var isHovering = false
-        @State private var isPressed = false
-
-        private var foregroundColor: Color {
-            if isPressed {
-                return pressedColor.swiftUI
-            } else if isHovering {
-                return hoveredColor.swiftUI
-            }
-            return color.swiftUI
-        }
-        var body: some View {
-            Icon(name: name, width: width, color: foregroundColor)
-                .onHover { isHovering = $0 }
-                .onTouchDown { isPressed = $0 }
-                .simultaneousGesture(TapGesture().onEnded {
-                    action?()
-                })
-        }
     }
 }
 
