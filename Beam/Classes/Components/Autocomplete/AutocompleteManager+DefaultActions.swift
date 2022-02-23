@@ -13,7 +13,7 @@ extension AutocompleteManager {
     enum DefaultActions {
         static var journalAction: AutocompleteResult {
             AutocompleteResult(text: loc("Journal"), source: .action,
-                               shortcut: Shortcut(modifiers: [.command, .shift], keys: [.string("D")]),
+                               shortcut: Shortcut.AvailableShortcut.showJournal.value,
                                handler: { beamState in
                 beamState.navigateToJournal(note: nil)
             })
@@ -21,7 +21,7 @@ extension AutocompleteManager {
 
         static var allNotesAction: AutocompleteResult {
             AutocompleteResult(text: loc("All Notes"), source: .action,
-                               shortcut: Shortcut(modifiers: [.command, .shift], keys: [.string("H")]),
+                               shortcut: Shortcut.AvailableShortcut.showAllNotes.value,
                                handler: { beamState in
                 beamState.navigateToPage(.allCardsWindowPage)
             })
@@ -29,7 +29,7 @@ extension AutocompleteManager {
 
         static var switchToWebAction: AutocompleteResult {
             AutocompleteResult(text: loc("Switch to Web"), source: .action,
-                               shortcut: Shortcut(modifiers: [.command], keys: [.string("D")]),
+                               shortcut: Shortcut.AvailableShortcut.toggleNoteWeb.value,
                                handler: { beamState in
                 beamState.toggleBetweenWebAndNote()
             })
@@ -37,7 +37,7 @@ extension AutocompleteManager {
 
         static var switchToNotesAction: AutocompleteResult {
             AutocompleteResult(text: loc("Switch to Notes"), source: .action,
-                               shortcut: Shortcut(modifiers: [.command], keys: [.string("D")]),
+                               shortcut: Shortcut.AvailableShortcut.toggleNoteWeb.value,
                                handler: { beamState in
                 beamState.toggleBetweenWebAndNote()
             })

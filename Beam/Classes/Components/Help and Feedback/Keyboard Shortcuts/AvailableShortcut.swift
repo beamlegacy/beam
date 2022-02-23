@@ -61,11 +61,11 @@ extension Shortcut.AvailableShortcut {
         }
     }
 
-    private var keysString: String {
+    var keysDescription: String {
         value.stringValue
     }
 
     var description: String {
-        "\(title)・\(keysString)"
+        "\(title)・\(keysDescription)"
     }
 }
