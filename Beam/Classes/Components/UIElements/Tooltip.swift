@@ -47,60 +47,74 @@ struct Tooltip: View {
     }
 }
 
-private struct TooltipHoverWrapper: View {
+struct TooltipHoverModifier: ViewModifier {
     @Environment(\.windowFrame) private var windowFrame
 
     var title: String
     private let tooltipMargin = BeamSpacing._100
-    private let showDelay = 500
-
+    private let showDelay = 1500
+    private class ViewModel: ObservableObject {
+        var hoverDispatchWorkItem: DispatchWorkItem?
+    }
+    @State private var viewModel = ViewModel()
     @State private var showTooltip = false
     @State private var tooltipOffset: CGSize = .zero
     @State private var isHovering = false {
         didSet {
+            viewModel.hoverDispatchWorkItem?.cancel()
             if isHovering {
-                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(showDelay)) {
+                let workItem = DispatchWorkItem {
                     if self.isHovering == true {
                         showTooltip = true
                     }
                 }
+                viewModel.hoverDispatchWorkItem = workItem
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(showDelay), execute: workItem)
             } else {
                 showTooltip = isHovering
             }
         }
     }
-
-    var body: some View {
+    private var overlayProxy: some View {
         GeometryReader { proxy in
-        Rectangle()
-            .stroke(Color.clear)
-            .onHover { isHovering = $0 }
-            .overlay(
-                !showTooltip ? nil :
-                Tooltip(title: title)
-                    .fixedSize()
-                    .background(GeometryReader {
-                        Color.clear.preference(key: TooltipSizeKey.self, value: $0.size)
-                    })
-                    .onPreferenceChange(TooltipSizeKey.self) { tooltipSize in
-                        var offset = CGSize(width: 0, height: tooltipSize?.height ?? 0)
-                        let parentFrame = proxy.frame(in: .global)
-                        let tooltipMaxX = parentFrame.midX + (tooltipSize?.width ?? 0) / 2 + tooltipMargin
-                        let tooltipMinX = parentFrame.midX - (tooltipSize?.width ?? 0) / 2 - tooltipMargin
-                        if tooltipMaxX > windowFrame.width {
-                            offset.width = windowFrame.width - tooltipMaxX
-                        } else if tooltipMinX < 0 {
-                            offset.width = parentFrame.minX
+            ZStack {
+                if showTooltip {
+                    Tooltip(title: title)
+                        .fixedSize()
+                        .background(GeometryReader {
+                            Color.clear.preference(key: TooltipSizeKey.self, value: $0.size)
+                        })
+                        .onPreferenceChange(TooltipSizeKey.self) { tooltipSize in
+                            var offset = CGSize(width: 0, height: tooltipSize?.height ?? 0)
+                            let parentFrame = proxy.frame(in: .global)
+                            let tooltipMaxX = parentFrame.midX + (tooltipSize?.width ?? 0) / 2 + tooltipMargin
+                            let tooltipMinX = parentFrame.midX - (tooltipSize?.width ?? 0) / 2 - tooltipMargin
+                            if tooltipMaxX > windowFrame.width {
+                                offset.width = windowFrame.width - tooltipMaxX
+                            } else if tooltipMinX < 0 {
+                                offset.width = parentFrame.minX
+                            }
+                            tooltipOffset = offset
                         }
-                        tooltipOffset = offset
-                    }
-                    .transition(
-                        .opacity.combined(with: .animatableOffset(offset: CGSize(width: 0, height: -5)))
-                            .animation(BeamAnimation.easeInOut(duration: 0.15)))
-                    .offset(tooltipOffset),
-                alignment: .bottom
-            )
+                        .transition(
+                            .opacity.combined(with: .animatableOffset(offset: CGSize(width: 0, height: -5)))
+                                .animation(BeamAnimation.easeInOut(duration: 0.15)))
+                        .offset(tooltipOffset)
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .overlay(overlayProxy)
+            .onHover { isHovering = $0 }
+            .onTouchDown { touching in
+                guard touching else { return }
+                viewModel.hoverDispatchWorkItem?.cancel()
+                showTooltip = false
+            }
     }
 
     private struct TooltipSizeKey: PreferenceKey {
@@ -113,7 +127,7 @@ private struct TooltipHoverWrapper: View {
 
 extension View {
     func tooltipOnHover(_ title: String) -> some View {
-        overlay(TooltipHoverWrapper(title: title))
+        modifier(TooltipHoverModifier(title: title))
     }
 }
 
