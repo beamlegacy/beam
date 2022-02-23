@@ -109,6 +109,7 @@ export interface BeamCrypto {
 }
 
 export interface BeamWindow<M = MessageHandlers> extends BeamEventTarget {
+  onunload: () => void
   matchMedia(arg0: string)
   crypto: BeamCrypto
   frameElement: any
