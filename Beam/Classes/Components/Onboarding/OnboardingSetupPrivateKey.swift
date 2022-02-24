@@ -144,6 +144,7 @@ struct OnboardingSetupPrivateKey: View {
                 return
             }
             UserAlert.showMessage(message: "This private key file doesn’t match this user account", informativeText: "You need to import the private key file matching this user account.", buttonTitle: nil)
+            EncryptionManager.shared.clearPrivateKey(for: Persistence.emailOrRaiseError())
         } syncCompletion: { result in
             switch result {
             case .success:
