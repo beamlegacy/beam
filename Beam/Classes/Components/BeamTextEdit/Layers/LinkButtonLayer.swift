@@ -42,4 +42,11 @@ class LinkButtonLayer: ButtonLayer {
         self.layer.cornerRadius = self.pressed ? 3 : 0
         self.layer.backgroundColor = self.pressed ? BeamColor.LinkedSection.actionButtonBackgroundHover.cgColor : NSColor.clear.cgColor
     }
+
+    override func updateColors() {
+        super.updateColors()
+
+        handleBackgroundUi()
+    }
+
 }

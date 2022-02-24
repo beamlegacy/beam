@@ -38,6 +38,9 @@ import AVFoundation
     }
     var layout: () -> Void
 
+    /// The app appearance at the time UI elements using dynamic colors were last updated.
+    private var currentAppearance: NSAppearance?
+
     init(name: String,
          layer: CALayer,
          down: @escaping MouseBlock = { _ in false },
@@ -123,6 +126,21 @@ import AVFoundation
         return mouseMoved(mouseInfo)
     }
 
+    /// This method is called when this layer is added to a widget, and when the app appearance has changed.
+    ///
+    /// You can override this method to set all UI elements using dynamic colors.
+    ///
+    /// If you override this method, call this method on super at some point in your implementation in case a
+    /// superclass also overrides this method.
+    func updateColors() {}
+
+    final func updateColorsIfNeeded() {
+        // Stop if appearance has not changed since last pass
+        guard currentAppearance == nil || (currentAppearance != NSApp.effectiveAppearance) else { return }
+        updateColors()
+        currentAppearance = NSApp.effectiveAppearance
+    }
+
     var contentsScale: CGFloat {
         get { self.layer.contentsScale }
         set {
@@ -133,16 +151,22 @@ import AVFoundation
 }
 
 extension Layer {
-    static func icon(named: String, color: NSColor, size: CGSize? = nil) -> CALayer {
+
+    static func icon(named: String, size: CGSize? = nil) -> CALayer {
         let iconLayer = CALayer()
         let image = NSImage(named: named)
         let maskLayer = CALayer()
         maskLayer.contents = image
         iconLayer.mask = maskLayer
-        iconLayer.backgroundColor = color.cgColor
         iconLayer.frame = CGRect(origin: CGPoint(x: 0, y: 0), size: size ?? image?.size ?? CGSize(width: 20, height: 20)).rounded()
         maskLayer.frame = iconLayer.bounds
         return iconLayer
+    }
+
+    static func icon(named: String, color: NSColor, size: CGSize? = nil) -> CALayer {
+        let layer = Layer.icon(named: named, size: size)
+        layer.backgroundColor = color.cgColor
+        return layer
     }
 
     static func text(_ label: String, color: NSColor = BeamColor.Generic.text.nsColor, size: CGFloat = 12) -> CATextLayer {
