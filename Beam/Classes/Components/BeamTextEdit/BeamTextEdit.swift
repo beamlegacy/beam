@@ -1108,7 +1108,7 @@ public extension CALayer {
 
     // MARK: Paste properties
     internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.rtf, .string]
-    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSAttributedString.self, NSString.self]
+    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSImage.self, NSAttributedString.self, NSString.self]
 
     func initBlinking() {
         let defaults = UserDefaults.standard
