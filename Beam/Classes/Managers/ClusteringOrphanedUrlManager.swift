@@ -8,6 +8,7 @@
 import BeamCore
 import Foundation
 import os
+import Clustering
 
 fileprivate extension FileManager {
     func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
@@ -40,13 +41,15 @@ struct OrphanedUrl: CsvRow {
     let navigationGroupId: Int?
     let savedAt: Date
     let cleanedContent: String
+    let entities: EntitiesInText
+    let entitiesInTitle: EntitiesInText
 
     static var columnNames: [String] {
-        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt", "cleanedContent"]
+        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt", "cleanedContent", "entities", "entitiesInTitle"]
     }
 
     var columns: [String] {
-        [sessionId.uuidString, optionalToString(url), String(groupId), String(navigationGroupId ?? -1), savedAt.toString, cleanedContent]
+        [sessionId.uuidString, optionalToString(url), String(groupId), String(navigationGroupId ?? -1), savedAt.toString, cleanedContent, entities.description, entitiesInTitle.description]
     }
 
 }
