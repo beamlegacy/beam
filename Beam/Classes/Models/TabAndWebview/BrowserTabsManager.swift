@@ -29,6 +29,7 @@ class BrowserTabsManager: ObservableObject {
         self.delegate?.areTabsVisible(for: self) == true
     }
 
+    private var browserTabManagerId = UUID()
     private var data: BeamData
     private weak var state: BeamState?
     @Published public var tabs: [BrowserTab] = [] {
@@ -107,7 +108,7 @@ class BrowserTabsManager: ObservableObject {
     private var indexingQueue = DispatchQueue(label: "indexing")
 
     private func updateClusteringOpenPages() {
-        self.data.clusteringManager.allOpenBrowsingTrees = tabs.map { ClusteringManager.BrowsingTreeOpenInTab(browsingTree: $0.browsingTree) }
+        self.data.clusteringManager.allOpenBrowsingTrees = (self.data.clusteringManager.allOpenBrowsingTrees?.filter { $0.browserTabManagerId != self.browserTabManagerId } ?? []) + tabs.map { ClusteringManager.BrowsingTreeOpenInTab(browsingTree: $0.browsingTree, browserTabManagerId: self.browserTabManagerId) }
     }
 
     private func updateTabsHandlers() {
