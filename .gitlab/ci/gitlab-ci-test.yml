@@ -1,3 +1,34 @@
+build for testing:
+  timeout: 20 minutes
+  dependencies: []
+  stage: test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - time bundle exec fastlane build_for_testing
+  after_script:
+    - ls
+    - cd derived_data
+    - ls
+    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - mkdir -p logs
+    - mv ${HOME}/Library/Logs/scan/*.log logs
+    - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
+    - mv ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/*.log logs
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+  tags:
+    - macos-mono
+  interruptible: true
+
 xctests:
   timeout: 20 minutes
   dependencies: []
@@ -72,6 +103,7 @@ swift lint:
 UITestThread1:
   timeout: 25 minutes
   dependencies: []
+  needs: ["build for testing"]
   stage: test
   artifacts:
     expire_in: 4d
@@ -113,6 +145,7 @@ UITestThread1:
 UITestThread2:
   timeout: 25 minutes
   dependencies: []
+  needs: ["build for testing"]
   stage: test
   artifacts:
     expire_in: 4d
@@ -154,6 +187,7 @@ UITestThread2:
 UITestThread3:
   timeout: 25 minutes
   dependencies: []
+  needs: ["build for testing"]
   stage: test
   artifacts:
     expire_in: 4d
@@ -195,6 +229,7 @@ UITestThread3:
 UITestThread4:
   timeout: 25 minutes
   dependencies: []
+  needs: ["build for testing"]
   stage: test
   artifacts:
     expire_in: 4d
@@ -229,6 +264,24 @@ UITestThread4:
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
     - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
     - rm -r ${HOME}/Downloads/*
+  tags:
+    - macos-mono
+  interruptible: true
+  
+Teardown:
+  timeout: 10 minutes
+  dependencies: []
+  needs: [xctests, UITestThread1, UITestThread2, UITestThread3, UITestThread4]
+  stage: test
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - time bundle exec fastlane delete_s3_derived_data
   tags:
     - macos-mono
   interruptible: true

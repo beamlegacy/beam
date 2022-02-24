@@ -91,107 +91,15 @@ platform :mac do
       build_configurations: params[:build_configurations])
   end
 
-  desc "Run tests"
-  lane :tests do
-    update_app_identifier(
-      xcodeproj: "Beam.xcodeproj",
-      plist_path: "Beam/Configuration/Info.plist",
-      app_identifier: ENV["APP_IDENTIFIER"]
-    )
-    check_certs(profile_development: true,
-                cert_development: true,
-                profile_provision_name: "Beam Development",
-                profile_cert_id: "697853WUNU",
-                profile_filename: "development.co.beamapp.macos.mobileprovision",
-                code_sign_identity: "Mac Developer",
-                profile_name: "Beam Development",
-                build_configurations: ["Test"])
-    #run_tests(
-    #  scheme: "Beam",
-    #  skip_testing: "BeamUITests",
-    #  output_types: "junit",
-    #  output_files: "tests.xml",
-    #  use_system_scm: true,
-    #  number_of_retries: 2
-    #)
-    ## For Gitlab artifacts
-    #slather(
-    #  cobertura_xml: true,
-    #  workspace: "Beam.xcworkspace",
-    #  proj: "Beam.xcodeproj",
-    #  scheme: "Beam",
-    #  source_directory: "./Beam",
-    #  output_directory: "./"
-    #)
-    ## For automatic code coverage check
-    #slather(
-    #  simple_output: true,
-    #  workspace: "Beam.xcworkspace",
-    #  proj: "Beam.xcodeproj",
-    #  scheme: "Beam",
-    #  source_directory: "./Beam",
-    #  output_directory: "./"
-    #)
-    run_tests(
-      scheme: "Beam",
-      testplan: "BeamTests",
-      workspace: "Beam.xcworkspace",
-      output_files: "tests.xml",
-      use_system_scm: true,
-      #code_coverage: true,
-      result_bundle: true,
-      fail_build: true
-    )
-    # For Gitlab artifacts
-    #slather(
-    #  cobertura_xml: true,
-    #  workspace: "Beam.xcworkspace",
-    #  proj: "Beam.xcodeproj",
-    #  scheme: "Beam",
-    #  binary_basename: "Beam",
-    #  source_directory: "./Beam",
-    #  output_directory: "./"
-    #)
-    # For automatic code coverage check
-    #slather(
-    #  simple_output: true,
-    #  workspace: "Beam.xcworkspace",
-    #  proj: "Beam.xcodeproj",
-    #  scheme: "Beam",
-    #  binary_basename: "Beam",
-    #  source_directory: "./Beam",
-    #  output_directory: "./"
-    #)
-    # # For Gitlab artifacts
-    # slather(
-    #   cobertura_xml: true,
-    #   workspace: "Beam.xcworkspace",
-    #   proj: "Beam.xcodeproj",
-    #   scheme: "Beam",
-    #   source_directory: "./Beam",
-    #   output_directory: "./"
-    # )
-    # # For automatic code coverage check
-    # slather(
-    #   simple_output: true,
-    #   workspace: "Beam.xcworkspace",
-    #   proj: "Beam.xcodeproj",
-    #   scheme: "Beam",
-    #   source_directory: "./Beam",
-    #   output_directory: "./"
-    # )
-  end
+  desc "Build for UI Testing"
+  lane :build_for_testing do
 
-  4.times do |index|
-    name = "Thread#{index+1}"
-
-    desc "Run UI tests #{name}"
-    lane :"uitests#{name}" do
       update_app_identifier(
         xcodeproj: "Beam.xcodeproj",
         plist_path: "Beam/Configuration/Info.plist",
         app_identifier: ENV["APP_IDENTIFIER"]
       )
+
       check_certs(
         profile_development: true,
         cert_development: true,
@@ -202,6 +110,99 @@ platform :mac do
         profile_name: "Beam Development",
         build_configurations: ["Test"]
       )
+
+      run_tests(
+        workspace: "Beam.xcworkspace",
+        scheme: "Beam",
+        fail_build: true,
+        build_for_testing: true,
+        derived_data_path: "derived_data",
+        should_zip_build_products: true
+      )
+
+      zip(
+        path: "derived_data/SourcePackages",
+        output_path: "sourcepackages.zip",
+        verbose: false
+      )
+
+      files = [
+        "fastlane/test_output/build_products.zip",
+        "sourcepackages.zip"
+      ]
+
+      aws_s3(
+        access_key: ENV["AWS_ACCESS_KEY_ID"],
+        secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
+        bucket: s3_bucket_for_channel(publish: false),
+        region: ENV["AWS_DEFAULT_REGION"],
+        upload_metadata: true,
+        files: files,
+        path: s3_path_for_build()
+      )
+
+      lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
+        UI.success "S3: #{file}"
+      end
+  end
+
+  desc "Run Unit Tests"
+  lane :tests do
+
+    run_tests(
+      scheme: "Beam",
+      testplan: "BeamTests",
+      workspace: "Beam.xcworkspace",
+      output_files: "tests.xml",
+      use_system_scm: true,
+      result_bundle: true,
+      fail_build: true,
+      derived_data_path: "derived_data",
+      clean: false
+    )
+    
+  end
+
+
+  4.times do |index|
+    name = "Thread#{index+1}"
+
+    desc "Run UI tests #{name}"
+    lane :"uitests#{name}" do
+
+      update_app_identifier(
+        xcodeproj: "Beam.xcodeproj",
+        plist_path: "Beam/Configuration/Info.plist",
+        app_identifier: ENV["APP_IDENTIFIER"]
+      )
+
+      check_certs(
+        profile_development: true,
+        cert_development: true,
+        profile_provision_name: "Beam Development",
+        profile_cert_id: "697853WUNU",
+        profile_filename: "development.co.beamapp.macos.mobileprovision",
+        code_sign_identity: "Mac Developer",
+        profile_name: "Beam Development",
+        build_configurations: ["Test"]
+      )
+
+      Dir.chdir("..") do
+        sh "mkdir -p builds"
+      end
+
+      download_previous_file(filename: "build_products.zip", channel:s3_path_for_build(), publish: false)
+      download_previous_file(filename: "sourcepackages.zip", channel:s3_path_for_build(), publish: false)
+
+      unzip(file: "builds/build_products.zip",destination_path: "build_products")
+      unzip(file: "builds/sourcepackages.zip",destination_path: "sourcepackages")
+
+      Dir.chdir("..") do
+        sh "mkdir -p derived_data/Build/Products"
+        sh "mv build_products/* derived_data/Build/Products"
+        sh "mv sourcepackages/* derived_data"
+      end
+
       run_tests(
         scheme: "Beam",
         testplan: "BeamUITests-#{name}",
@@ -211,29 +212,27 @@ platform :mac do
         result_bundle: true,
         use_system_scm: true,
         code_coverage: true,
-        fail_build: true
+        fail_build: true,
+        test_without_building: true,
+        derived_data_path: "derived_data",
+        skip_package_dependencies_resolution: true,
+        clean: false
       )
-      # number_of_retries: 2
-      # # For Gitlab artifacts
-      # slather(
-      #   cobertura_xml: true,
-      #   workspace: "Beam.xcworkspace",
-      #   proj: "Beam.xcodeproj",
-      #   scheme: "Beam",
-      #   source_directory: "./Beam",
-      #   output_directory: "./",
-      # )
-      # # For automatic code coverage check
-      # slather(
-      #   simple_output: true,
-      #   workspace: "Beam.xcworkspace",
-      #   proj: "Beam.xcodeproj",
-      #   scheme: "Beam",
-      #   source_directory: "./Beam",
-      #   output_directory: "./"
-      # )
     end
   end
+
+    lane :delete_s3_derived_data do
+      s3 = Aws::S3::Resource.new(region: ENV["AWS_DEFAULT_REGION"],
+                                 credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"],
+                                                                   ENV["AWS_SECRET_ACCESS_KEY"]))
+
+      s3_bucket = s3_bucket_for_channel(publish: false)
+      directory = s3_path_for_build()
+      bucket = s3.bucket(s3_bucket)
+      UI.message "S3: deleting #{s3_bucket}/#{directory}"
+      bucket.objects(prefix: directory).batch_delete!
+      UI.success "S3: Removed #{s3_bucket}/#{directory}"
+    end
 
   def unique_build_number
     UI.message "Get build number for branch #{Actions.git_branch}"
