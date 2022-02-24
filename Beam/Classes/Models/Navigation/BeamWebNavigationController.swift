@@ -111,23 +111,6 @@ class BeamWebNavigationController: NSObject, WebPageRelated, WebNavigationContro
         page.appendToIndexer?(url, title ?? "", read)
     }
 
-    private func shouldDownloadFile(for navigationResponse: WKNavigationResponse) -> Bool {
-
-        guard let response = navigationResponse.response as? HTTPURLResponse else { return false }
-
-        let contentType = BeamDownloadManager.contentType(from: response.allHeaderFields)
-        let contentDisposition = BeamDownloadManager.contentDisposition(from: response.allHeaderFields)
-
-        if contentType == .forceDownload {
-            return true
-        } else if let disposition = contentDisposition {
-            return disposition == .attachment
-        } else if !navigationResponse.canShowMIMEType {
-            return true
-        } else {
-            return false
-        }
-    }
 }
 
 extension BeamWebNavigationController: WKNavigationDelegate {
@@ -206,7 +189,7 @@ extension BeamWebNavigationController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, decidePolicyFor navigationResponse: WKNavigationResponse,
                  decisionHandler: @escaping (WKNavigationResponsePolicy) -> Void) {
-        if shouldDownloadFile(for: navigationResponse) {
+        if navigationResponse.shouldPerformDownload {
             decisionHandler(.download)
             return
         }

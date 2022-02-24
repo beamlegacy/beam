@@ -188,42 +188,6 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
 
 }
 
-// MARK: - Content-Disposion parser from headers
-extension BeamDownloadManager {
-
-    enum ContentDisposition {
-        case inline
-        case attachment
-    }
-
-    enum ContentType {
-        case forceDownload
-    }
-
-    static func contentDisposition(from headers: [AnyHashable: Any]) -> ContentDisposition? {
-
-        guard let disposition = headers["Content-Disposition"] as? String else { return nil }
-        if disposition.hasPrefix("inline") {
-            return .inline
-        } else if disposition.hasPrefix("attachment") {
-            return .attachment
-        } else {
-            return nil
-        }
-
-    }
-
-    static func contentType(from headers: [AnyHashable: Any]) -> ContentType? {
-        guard let contentType = headers["Content-Type"] as? String else { return nil }
-        if contentType.hasPrefix("application/force-download") {
-            return .forceDownload
-        }
-
-        return nil
-    }
-
-}
-
 // MARK: - Animation
 extension BeamDownloadManager {
     static func flyingAnimationGroup(origin: CGPoint, destination: CGPoint) -> CAAnimationGroup {
