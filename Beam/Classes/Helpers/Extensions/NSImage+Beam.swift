@@ -32,4 +32,11 @@ extension NSImage {
 
         return image
     }
+
+    var jpegRepresentation: Data {
+        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+        let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
+        let jpegData = bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])!
+        return jpegData
+    }
 }

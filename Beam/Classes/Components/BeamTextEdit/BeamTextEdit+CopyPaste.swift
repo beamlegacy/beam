@@ -177,6 +177,8 @@ extension BeamTextEdit {
                 paste(elementHolder: elementHolder)
             } else if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
                 paste(beamTextHolder: bTextHolder)
+            } else if let image = objects?.first as? NSImage {
+                paste(image: image)
             } else if let attributedStr = objects?.first as? NSAttributedString {
                 paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
@@ -238,6 +240,40 @@ extension BeamTextEdit {
             }
         } catch {
             Logger.shared.logError("Can't encode Cloned Note", category: .general)
+        }
+    }
+
+    private func paste(image: NSImage) {
+        guard let node = focusedWidget as? ElementNode,
+              let parent = node.parent as? ElementNode else {
+            Logger.shared.logError("Can't paste on a node that is not an element node", category: .noteEditor)
+            return
+        }
+
+        let jpegImageData = image.jpegRepresentation
+
+        let fileManager = BeamFileDBManager.shared
+        do {
+            let cmdManager = node.cmdManager
+            cmdManager.beginGroup(with: "PasteImageContent")
+            defer { cmdManager.endGroup() }
+
+            if rootNode?.state.nodeSelection != nil {
+                rootNode?.eraseNodeSelection(createEmptyNodeInPlace: false, createNodeInEmptyParent: false)
+            }
+
+            let uid = try fileManager.insert(name: "image\(UUID())", data: jpegImageData)
+            let newElement = BeamElement()
+            newElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
+            cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
+            if node.element.kind.isText && node.elementText.isEmpty {
+                cmdManager.deleteElement(for: node)
+            }
+            try fileManager.addReference(fromNote: note.id, element: newElement.id, to: uid)
+            cmdManager.focus(newElement, in: parent, leading: false)
+            Logger.shared.logInfo("Added Image to note \(String(describing: note)) with uid \(uid) from pasted file (\(image))", category: .noteEditor)
+        } catch {
+            Logger.shared.logError("Unable to insert image in FileDB \(error)", category: .fileDB)
         }
     }
 
