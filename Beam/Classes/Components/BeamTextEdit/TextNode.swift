@@ -399,7 +399,7 @@ public class TextNode: ElementNode {
         super.deepInvalidateText()
     }
 
-    private func createMarkeeLayer(name: String, color: NSColor) -> ShapeLayer {
+    private func createMarkeeLayer(name: String, color: BeamColor) -> ShapeLayer {
         let layer = ShapeLayer(name: name)
         layer.layer.actions = [
             kCAOnOrderIn: NSNull(),
@@ -500,6 +500,16 @@ public class TextNode: ElementNode {
         }
 
         return size.height
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        if !inInitialLayout {
+            deepInvalidateText()
+        }
+
+        selectedTextLayer.shapeLayer.fillColor = selectionColor.cgColor
     }
 
     var useActionLayer = true

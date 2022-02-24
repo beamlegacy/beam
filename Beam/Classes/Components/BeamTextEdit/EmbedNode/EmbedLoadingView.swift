@@ -16,9 +16,12 @@ final class EmbedLoadingView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func viewDidChangeEffectiveAppearance() {
+        updateColors()
+    }
+
     private func prepare() {
         layer = CALayer()
-        layer?.backgroundColor = BeamColor.Nero.cgColor
 
         let attributedString = NSAttributedString(string: "Loading...", attributes: [
             .font: BeamFont.regular(size: 13).nsFont,
@@ -34,6 +37,12 @@ final class EmbedLoadingView: NSView {
             text.centerXAnchor.constraint(equalTo: centerXAnchor),
             text.centerYAnchor.constraint(equalTo: centerYAnchor)
         ])
+
+        updateColors()
+    }
+
+    private func updateColors() {
+        layer?.backgroundColor = BeamColor.Nero.cgColor
     }
 
 }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import AppKit
 
 class
 TextLineLayer: CALayer {
@@ -35,7 +36,9 @@ TextLineLayer: CALayer {
         ctx.textMatrix = CGAffineTransform.identity
         ctx.translateBy(x: 0, y: firstLineBaseline)
 
-        textLine.draw(ctx, translate: false)
+        NSAppearance.withAppAppearance {
+            textLine.draw(ctx, translate: false)
+        }
     }
 
     // Init Overrides:
