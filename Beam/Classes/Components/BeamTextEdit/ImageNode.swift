@@ -285,6 +285,24 @@ class ImageNode: ResizableNode {
         layoutFocus(contentLayer: imageLayer.layer)
     }
 
+    override func updateColors() {
+        super.updateColors()
+
+        if let focusLayer = layers["focus"], let borderLayer = focusLayer.layer as? CAShapeLayer {
+            borderLayer.strokeColor = selectionColor.cgColor
+        }
+
+        if let collapseExpandLayer = layers["global-expand"]?.layer,
+           let textLayer = collapseExpandLayer.sublayers?[1] as? CATextLayer {
+            let color = BeamColor.Editor.collapseExpandButton
+            textLayer.foregroundColor = color.cgColor
+        }
+
+        setLottieViewColor(color: BeamColor.Editor.collapseExpandButton.nsColor)
+
+        updateFocus()
+    }
+
     private func layoutImageLayer() {
         if let imageLayer = layers["image"] {
             let contentBounds = CGRect(origin: .zero, size: isCollapsed ? CGSize(width: 16, height: 16) : visibleSize)

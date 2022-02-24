@@ -151,12 +151,16 @@ class EmbedNode: ResizableNode {
     override func updateLayout() {
         super.updateLayout()
 
-        NSAppearance.withAppAppearance {
-            layoutExpandedContent()
-            layoutCollapsedContent()
-            layoutFocusLayer()
-            layoutToggleButton()
-        }
+        layoutExpandedContent()
+        layoutCollapsedContent()
+        layoutFocusLayer()
+        layoutToggleButton()
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        focusBeamLayer?.layer.backgroundColor = focusColor
     }
 
     override func setBottomPaddings(withDefault: CGFloat) {
@@ -187,10 +191,8 @@ class EmbedNode: ResizableNode {
     }
 
     override func updateFocus() {
-        NSAppearance.withAppAppearance {
-            layoutCollapsedContent()
-            layoutFocusLayer()
-        }
+        layoutCollapsedContent()
+        layoutFocusLayer()
     }
 
     override func onFocus() {
@@ -398,7 +400,6 @@ extension EmbedNode {
     private func layoutFocusLayer() {
         CATransaction.disableAnimations {
             focusBeamLayer?.layer.frame = focusFrame
-            focusBeamLayer?.layer.backgroundColor = focusColor
             focusBeamLayer?.layer.opacity = isFocused ? 1 : 0
         }
     }

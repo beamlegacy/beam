@@ -169,65 +169,63 @@ public class TextLine {
     }
 
     public func draw(_ context: CGContext, translate: Bool = true) {
-        NSAppearance.withAppAppearance {
-            context.saveGState()
-            context.textPosition = NSPoint()//line.frame.origin
-            if translate {
-                context.translateBy(x: frame.origin.x, y: frame.origin.y)
-            }
-            context.scaleBy(x: 1, y: -1)
+        context.saveGState()
+        context.textPosition = NSPoint()//line.frame.origin
+        if translate {
+            context.translateBy(x: frame.origin.x, y: frame.origin.y)
+        }
+        context.scaleBy(x: 1, y: -1)
 
-            CTLineDraw(ctLine, context)
+        CTLineDraw(ctLine, context)
 
-            // draw strikethrough or link icon if needed:
-            var offset = CGFloat(0)
-            for run in runs {
-                var ascent = CGFloat(0)
-                var descent = CGFloat(0)
+        // draw strikethrough or link icon if needed:
+        var offset = CGFloat(0)
+        for run in runs {
+            var ascent = CGFloat(0)
+            var descent = CGFloat(0)
 
-                let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
+            let width = CTRunGetTypographicBounds(run, CFRangeMake(0, 0), &ascent, &descent, nil)
 
-                if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
+            if let attributes = CTRunGetAttributes(run) as? [NSAttributedString.Key: Any] {
 
-                    if let color = attributes[.strikethroughColor] as? NSColor,
-                       attributes[.strikethroughStyle] as? NSNumber != nil {
-                        context.setStrokeColor(color.cgColor)
+                if let color = attributes[.strikethroughColor] as? NSColor,
+                   attributes[.strikethroughStyle] as? NSNumber != nil {
+                    context.setStrokeColor(color.cgColor)
 
-                        let  y = CGFloat(roundf(Float(ascent / 3.0)))
+                    let  y = CGFloat(roundf(Float(ascent / 3.0)))
 
-                        context.move(to: CGPoint(x: offset, y: y))
-                        context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
-                        context.strokePath()
-                    }
-                    if let delegateAttribute = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
-                        // swiftlint:disable:next force_cast
-                        let delegate: CTRunDelegate = delegateAttribute as! CTRunDelegate
-                        let imageRunRef = CTRunDelegateGetRefCon(delegate)
-                        let imageRunPtr = imageRunRef.assumingMemoryBound(to: ImageRunStruct.self)
-                        let imageRun = imageRunPtr.pointee
-                        let imageName = imageRun.image
-                        guard let image = NSImage(named: imageName) else { continue }
+                    context.move(to: CGPoint(x: offset, y: y))
+                    context.addLine(to: CGPoint(x: offset + CGFloat(width), y: y))
+                    context.strokePath()
+                }
+                if let delegateAttribute = attributes[kCTRunDelegateAttributeName as NSAttributedString.Key] {
+                    // swiftlint:disable:next force_cast
+                    let delegate: CTRunDelegate = delegateAttribute as! CTRunDelegate
+                    let imageRunRef = CTRunDelegateGetRefCon(delegate)
+                    let imageRunPtr = imageRunRef.assumingMemoryBound(to: ImageRunStruct.self)
+                    let imageRun = imageRunPtr.pointee
+                    let imageName = imageRun.image
+                    guard let image = NSImage(named: imageName) else { continue }
 
-                        var rect = CGRect(origin: CGPoint(x: offset + 1 + imageRun.offset.x, y: 4 + imageRun.offset.y), size: image.size)
-                        guard let cgImage = image.cgImage(forProposedRect: &rect,
-                                                          context: nil,
-                                                          hints: nil) else { continue }
-                        context.setBlendMode(.normal)
-                        context.draw(cgImage, in: rect)
-                        if let imageColor = imageRun.color {
-                            context.setBlendMode(.sourceIn)
-                            context.setFillColor(imageColor.cgColor)
-                            context.fill(rect)
-                        }
+                    var rect = CGRect(origin: CGPoint(x: offset + 1 + imageRun.offset.x, y: 4 + imageRun.offset.y), size: image.size)
+                    guard let cgImage = image.cgImage(forProposedRect: &rect,
+                                                      context: nil,
+                                                      hints: nil) else { continue }
+                    context.setBlendMode(.normal)
+                    context.draw(cgImage, in: rect)
+                    if let imageColor = imageRun.color {
+                        context.setBlendMode(.sourceIn)
+                        context.setFillColor(imageColor.cgColor)
+                        context.fill(rect)
                     }
                 }
-
-                offset += CGFloat(width)
             }
 
-            // Done!
-            context.restoreGState()
+            offset += CGFloat(width)
         }
+
+        // Done!
+        context.restoreGState()
     }
 
     public var interlineFactor: CGFloat = 1.0

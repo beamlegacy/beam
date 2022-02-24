@@ -88,7 +88,12 @@ extension BeamColor {
     }
 
     var cgColor: CGColor {
-        self.nsColor.cgColor
+        var color: CGColor?
+        NSAppearance.withAppAppearance {
+            // Since we're inside a non-escaping closure, we will be able to return `color` outside of it.
+            color = nsColor.cgColor
+        }
+        return color ?? nsColor.cgColor
     }
 
     var hexColor: String {
