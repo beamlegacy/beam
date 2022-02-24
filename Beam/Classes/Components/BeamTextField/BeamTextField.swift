@@ -60,7 +60,7 @@ struct BeamTextField: NSViewRepresentable {
         view.contentType = contentType
 
         if !multiline {
-            view.usesSingleLineMode = true
+            view.maximumNumberOfLines = 1
         }
         if let textColor = textColor {
             view.textColor = textColor
