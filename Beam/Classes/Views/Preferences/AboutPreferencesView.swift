@@ -27,7 +27,7 @@ struct AboutPreferencesView: View {
             } content: {
                 BeamSocialSection()
             }
-        }.frame(height: 352, alignment: .center)
+        }.frame(height: 322, alignment: .center)
     }
 }
 
@@ -103,19 +103,19 @@ struct BeamAboutSection: View {
                                 .frame(minWidth: 110)
                                 .font(BeamFont.regular(size: 13).swiftUI)
                         }.buttonStyle(BorderedButtonStyle())
-                            .padding(.bottom, 5)
-                        Button {
-                            let email = "help@beamapp.com"
-                            let subject = "I have an issue with Beam Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0"))"
-                            let mailtoStr = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")"
-                            guard let url = URL(string: mailtoStr) else { return }
-                            openURL(url)
-                        } label: {
-                            Text("Contact Support...")
-                                .frame(minWidth: 132)
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
-                            .padding(.bottom, 15)
+//                            .padding(.bottom, 5)
+//                        Button {
+//                            let email = "help@beamapp.com"
+//                            let subject = "I have an issue with Beam Version \(Information.appVersion ?? "0") (\(Information.appBuild ?? "0"))"
+//                            let mailtoStr = "mailto:\(email)?subject=\(subject.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? "")"
+//                            guard let url = URL(string: mailtoStr) else { return }
+//                            openURL(url)
+//                        } label: {
+//                            Text("Contact Support...")
+//                                .frame(minWidth: 132)
+//                                .font(BeamFont.regular(size: 13).swiftUI)
+//                        }.buttonStyle(BorderedButtonStyle())
+//                            .padding(.bottom, 15)
                     }.padding(.top, 16)
                         .padding(.leading, 2)
                 }
