@@ -107,7 +107,7 @@ class BrowserTabsManager: ObservableObject {
     private var indexingQueue = DispatchQueue(label: "indexing")
 
     private func updateClusteringOpenPages() {
-        self.data.clusteringManager.allOpenPages = tabs.map { ClusteringManager.PageOpenInTab(pageId: $0.browsingTree.current.link) }
+        self.data.clusteringManager.allOpenBrowsingTrees = tabs.map { ClusteringManager.BrowsingTreeOpenInTab(browsingTree: $0.browsingTree) }
     }
 
     private func updateTabsHandlers() {

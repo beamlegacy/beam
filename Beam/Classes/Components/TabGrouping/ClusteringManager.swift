@@ -23,8 +23,12 @@ class ClusteringManager: ObservableObject {
     }
 
     typealias PageID = UUID
+    public struct BrowsingTreeOpenInTab {
+        weak var browsingTree: BrowsingTree?
+    }
+    
     public struct PageOpenInTab {
-        let pageId: PageID
+        let pageId: PageID?
     }
 
     enum InitialiseNotes {
@@ -73,6 +77,7 @@ class ClusteringManager: ObservableObject {
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
     let frecencyFetcher = LinkStoreFrecencyUrlStorage()
     var summary: SummaryForNewDay
+    var allOpenBrowsingTrees: [BrowsingTreeOpenInTab]?
     var allOpenPages: [PageOpenInTab]?
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
@@ -434,6 +439,7 @@ class ClusteringManager: ObservableObject {
     }
 
     private func updateTabColors() {
+        self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
         self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
     }
 
