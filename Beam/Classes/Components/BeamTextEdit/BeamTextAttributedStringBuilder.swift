@@ -190,7 +190,7 @@ struct BeamTextAttributedStringBuilder {
                 stringAttributes[.foregroundColor] = BeamColor.Editor.link.staticColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
                 stringAttributes[.underlineColor] = NSColor.clear
-                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.linkDecoration.staticColor
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.linkDecoration.cgColor
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
@@ -200,7 +200,7 @@ struct BeamTextAttributedStringBuilder {
                     BeamColor.Editor.bidirectionalLinkHighlightedBackground.staticColor :
                     BeamColor.Editor.bidirectionalLinkBackground.staticColor
             } else {
-                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.staticColor
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.bidirectionalLink.cgColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
                 stringAttributes[.underlineColor] = NSColor.clear
             }

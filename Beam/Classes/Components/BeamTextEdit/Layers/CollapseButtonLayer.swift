@@ -49,7 +49,6 @@ final class CollapseButtonLayer: ButtonLayer {
         prepareLayers()
         updateLabel()
         updateSymbolLayer()
-        updateColors()
         updateLayout()
 
         let parentMouseDown = mouseDown
@@ -89,6 +88,14 @@ final class CollapseButtonLayer: ButtonLayer {
         }
     }
 
+    override func updateColors() {
+        super.updateColors()
+
+        let beamColor = state.beamColor
+        textLayer.foregroundColor = beamColor.cgColor
+        setSymbolColor(beamColor)
+    }
+
     private func prepareLayers() {
         cursor = .pointingHand
         layer.addSublayer(textLayer)
@@ -124,12 +131,6 @@ final class CollapseButtonLayer: ButtonLayer {
         textLayer.string = string
     }
 
-    private func updateColors() {
-        let beamColor = state.beamColor
-        textLayer.foregroundColor = beamColor.cgColor
-        setSymbolColor(beamColor)
-    }
-
     private func playAnimation() {
         symbolAnimationView.play()
     }
@@ -140,13 +141,15 @@ final class CollapseButtonLayer: ButtonLayer {
     }
 
     private func setSymbolColor(_ beamColor: BeamColor) {
-        guard let nsColor = beamColor.nsColor.usingColorSpace(NSScreen.main?.colorSpace ?? .sRGB) else { return }
+        NSAppearance.withAppAppearance {
+            guard let nsColor = beamColor.nsColor.usingColorSpace(NSScreen.main?.colorSpace ?? .sRGB) else { return }
 
-        let lottieColor = Color(r: nsColor.redComponent, g: nsColor.greenComponent, b: nsColor.blueComponent, a: 1)
-        let colorProvider = ColorValueProvider(lottieColor)
-        let fillKeypath = AnimationKeypath(keypath: "**.Fill 1.Color")
+            let lottieColor = Color(r: nsColor.redComponent, g: nsColor.greenComponent, b: nsColor.blueComponent, a: 1)
+            let colorProvider = ColorValueProvider(lottieColor)
+            let fillKeypath = AnimationKeypath(keypath: "**.Fill 1.Color")
 
-        symbolAnimationView.setValueProvider(colorProvider, keypath: fillKeypath)
+            symbolAnimationView.setValueProvider(colorProvider, keypath: fillKeypath)
+        }
     }
 
     private func preferredFrameSize() -> CGSize {

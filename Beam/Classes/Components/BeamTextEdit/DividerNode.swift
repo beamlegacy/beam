@@ -31,7 +31,6 @@ public class DividerNode: ElementNode {
 
     private var lineLayer: CALayer?
     private var focusLayer: CALayer?
-    private var lastApperance: NSAppearance?
 
     override func setBottomPaddings(withDefault: CGFloat) {
         super.setBottomPaddings(withDefault: 17)
@@ -72,14 +71,6 @@ public class DividerNode: ElementNode {
 
     override func updateLayout() {
         super.updateLayout()
-        if NSApp.effectiveAppearance != lastApperance {
-            lastApperance = NSApp.effectiveAppearance
-            NSAppearance.withAppAppearance {
-                lineLayer?.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
-                focusLayer?.backgroundColor = BeamColor.Generic.textSelection.cgColor
-                lineLayer?.backgroundColor = BeamColor.Mercury.cgColor
-            }
-        }
 
         let padding = contentsPadding
         var size = visibleSize
@@ -87,6 +78,14 @@ public class DividerNode: ElementNode {
         let origin = CGPoint(x: -padding.left + Self.indentLayerPositionX, y: padding.top - (size.height / 2))
         lineLayer?.frame = CGRect(origin: origin, size: size)
         focusLayer?.frame = CGRect(x: origin.x, y: selectionLayerPosY, width: size.width, height: selectionLayerHeight)
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        lineLayer?.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
+        focusLayer?.backgroundColor = BeamColor.Generic.textSelection.cgColor
+        lineLayer?.backgroundColor = BeamColor.Mercury.cgColor
     }
 
     public override func updateElementCursor() {

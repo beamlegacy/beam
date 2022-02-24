@@ -89,13 +89,11 @@ class BreadCrumb: Widget {
 
     func setupLayers(with note: BeamNote) {
         containerLayer.cornerRadius = 3
-        containerLayer.backgroundColor = BeamColor.LinkedSection.container.cgColor
         container = Layer(name: "containerLayer", layer: containerLayer, hovered: { _ in })
 
         linkLayer.string = "Link"
         linkLayer.font = BeamFont.medium(size: 0).nsFont
         linkLayer.fontSize = 12
-        linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkLayer.alignmentMode = .center
 
         let linkContentLayer = CALayer()
@@ -327,6 +325,13 @@ class BreadCrumb: Widget {
     var crumbsHeight: CGFloat { showCrumbs ? 21 : 1 }
     override func updateRendering() -> CGFloat {
         return crumbsHeight
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        containerLayer.backgroundColor = BeamColor.LinkedSection.container.cgColor
+        linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
     }
 
     var actionLinkLayerheight: CGFloat { crumbsHeight + contentsPadding.bottom - 1 }
