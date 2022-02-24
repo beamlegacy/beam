@@ -336,7 +336,7 @@ struct AdvancedPreferencesView: View {
                                             }.foregroundColor(Color.red)
                                         }
                                         TextField("\(key):", text: Binding<String>(get: {
-                                            EncryptionManager.shared.privateKey(for: key).asString()
+                                            EncryptionManager.shared.readPrivateKey(for: key)?.asString() ?? "No private key"
                                         }, set: { value, _ in
                                             _ = try? EncryptionManager.shared.replacePrivateKey(for: key, with: value)
                                             updateKeys()
@@ -476,7 +476,7 @@ struct AdvancedPreferencesView: View {
     private func updateKeys() {
         var pkeys = [String: String]()
         for email in EncryptionManager.shared.accounts {
-            pkeys[email] = EncryptionManager.shared.privateKey(for: email).asString()
+            pkeys[email] = EncryptionManager.shared.readPrivateKey(for: email)?.asString() ?? ""
         }
         privateKeys = pkeys
         localPrivateKey = EncryptionManager.shared.localPrivateKey().asString()
