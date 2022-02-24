@@ -412,8 +412,6 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
-        let request = BeamObjectRequest()
-
         #if DEBUG
         let allObjectsSize = objectsToSave.reduce(.zero) { ($1.data?.count ?? 0) + $0 }
         if allObjectsSize > 1024 * 1024 * 1024 {
@@ -421,22 +419,49 @@ extension BeamObjectManager {
                                      category: .beamObject)
         }
         #endif
-        try request.save(objectsToSave) { result in
-            switch result {
-            case .failure(let error):
-                self.saveToAPIFailure(objects, error, completion)
-            case .success:
-                do {
-                    try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSave)
-                    try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSave)
-                    completion(.success(objects))
-                } catch {
-                    completion(.failure(error))
+
+        // API can't handle too many objects at once. If it fails we return early
+        for objectsToSaveChunked in objectsToSave.chunked(into: 1000) {
+            let request = BeamObjectRequest()
+
+            try request.save(objectsToSaveChunked) { result in
+                switch result {
+                case .failure(let error):
+                    self.saveToAPIFailure(objects, error, completion)
+                    return
+                case .success:
+                    do {
+                        try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSaveChunked)
+                        try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSaveChunked)
+                    } catch {
+                        completion(.failure(error))
+                        return
+                    }
                 }
             }
         }
 
-        return request
+        completion(.success(objects))
+
+        return nil
+
+//        let request = BeamObjectRequest()
+//        try request.save(objectsToSave) { result in
+//            switch result {
+//            case .failure(let error):
+//                self.saveToAPIFailure(objects, error, completion)
+//            case .success:
+//                do {
+//                    try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSave)
+//                    try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSave)
+//                    completion(.success(objects))
+//                } catch {
+//                    completion(.failure(error))
+//                }
+//            }
+//        }
+//
+//        return request
     }
 
     // swiftlint:disable:next cyclomatic_complexity
