@@ -81,6 +81,21 @@ class EncryptionManager {
         }
     }
 
+    func readPrivateKey(for email: String) -> SymmetricKey? {
+        guard !email.isEmpty else {
+            fatalError("No Email provided to read PrivateKey, it should never happen")
+        }
+
+        return lock.read {
+            if let privateKeys = Persistence.Encryption.privateKeys,
+               let privateKeyData = privateKeys[email],
+               let result = SymmetricKey(base64EncodedString: privateKeyData) {
+                return result
+            }
+            return nil
+        }
+    }
+
     @discardableResult
     func privateKey(for email: String) -> SymmetricKey {
         guard !email.isEmpty else {
@@ -114,7 +129,7 @@ class EncryptionManager {
 
     var accounts: [String] {
         return lock.read {
-            guard let pkeys =  Persistence.Encryption.privateKeys else { return [] }
+            guard let pkeys = Persistence.Encryption.privateKeys else { return [] }
             return Array(pkeys.keys)
         }
     }
