@@ -25,8 +25,9 @@ class ClusteringManager: ObservableObject {
     typealias PageID = UUID
     public struct BrowsingTreeOpenInTab {
         weak var browsingTree: BrowsingTree?
+        let browserTabManagerId: UUID
     }
-    
+
     public struct PageOpenInTab {
         let pageId: PageID?
     }
