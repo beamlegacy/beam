@@ -67,9 +67,6 @@ final class CollapsedContentLayer: ButtonLayer {
         didSet {
             guard state != oldValue else { return }
 
-            // Invalidate to take the new visual state into account
-            cachedTextInformation = nil
-
             updateColors()
         }
     }
@@ -93,7 +90,6 @@ final class CollapsedContentLayer: ButtonLayer {
         super.init(name, CALayer(), activated: activated)
 
         prepareLayers()
-        updateColors()
 
         hovered = { [weak self] isHovered in
             guard let strongSelf = self else { return }
@@ -107,6 +103,16 @@ final class CollapsedContentLayer: ButtonLayer {
         layout = { [weak self] in
             self?.updateLayout()
         }
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        // Invalidate to take the new visual state and its associated colors into account
+        invalidateText()
+
+        updateText()
+        updateArrowSymbolColor()
     }
 
     func setImage(_ image: NSImage?) {
@@ -137,9 +143,8 @@ final class CollapsedContentLayer: ButtonLayer {
         layoutArrowSymbol()
     }
 
-    private func updateColors() {
-        updateText()
-        updateArrowSymbolColor()
+    private func invalidateText() {
+        cachedTextInformation = nil
     }
 
     private func updateText() {

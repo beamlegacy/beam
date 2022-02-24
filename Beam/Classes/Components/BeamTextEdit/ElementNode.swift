@@ -114,8 +114,8 @@ public class ElementNode: Widget {
 
     var color: NSColor { config.color }
     var disabledColor: NSColor { config.disabledColor }
-    var cursorColor: NSColor { config.cursorColor }
-    var selectionColor: NSColor { config.selectionColor }
+    var cursorColor: BeamColor { config.cursorColor }
+    var selectionColor: BeamColor { config.selectionColor }
     var alpha: Float { config.alpha }
     var blendMode: CGBlendMode { config.blendMode }
 
@@ -608,6 +608,12 @@ public class ElementNode: Widget {
     override func onUnfocus() {
         super.onUnfocus()
         updateCursor()
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        updateElementLayers()
     }
 
     let smallCursorWidth = CGFloat(2)
