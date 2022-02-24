@@ -295,20 +295,9 @@ extension EmbedNode {
     }
 
     private func makeExpandedContent() -> EmbedContentView? {
-        guard
-            let note = editor?.note as? BeamNote,
-            let url = sourceURL,
-            let noteMediaPlayerManager = editor?.state?.noteMediaPlayerManager
-        else {
-            return nil
-        }
+        guard let editor = editor, let url = sourceURL else { return nil }
 
-        let webViewProvider = BeamWebViewProvider(
-            note: note,
-            elementId: elementId,
-            url: url,
-            noteMediaPlayerManager: noteMediaPlayerManager
-        )
+        let webViewProvider = BeamWebViewProvider(editor: editor, elementId: elementId, url: url)
 
         let view = EmbedContentView(frame: .zero, url: url, webViewProvider: webViewProvider)
         view.layer?.anchorPoint = .zero
