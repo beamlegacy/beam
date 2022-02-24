@@ -37,7 +37,6 @@ extension ElementNode {
 
     private func createIndentLayer() {
         let indentLayer = CALayer()
-        indentLayer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
         indentLayer.enableAnimations = false
         addLayer(Layer(name: LayerName.indentLayer.rawValue, layer: indentLayer))
         updateIndentLayer()
@@ -56,8 +55,7 @@ extension ElementNode {
 
     private func createBulletPointLayer(at point: NSPoint) {
         guard shouldDisplayBullet else { return }
-        let bulletLayer = Layer(name: LayerName.bullet.rawValue,
-                                layer: Layer.icon(named: "editor-bullet", color: BeamColor.Editor.bullet.nsColor))
+        let bulletLayer = Layer(name: LayerName.bullet.rawValue, layer: Layer.icon(named: "editor-bullet"))
         bulletLayer.layer.actions = [
             "opacity": opacityAnimation
         ]
@@ -97,6 +95,7 @@ extension ElementNode {
         }
         bulletLayer.layer.opacity = Float((showDisclosureButton || !PreferencesManager.alwaysShowBullets) ? 0 : 1)
         bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty && element.kind.isText
+        bulletLayer.layer.backgroundColor = BeamColor.Editor.bullet.cgColor
     }
 
     private func updateDisclosureLayer() {
@@ -113,6 +112,7 @@ extension ElementNode {
         let y = firstLineHeight + indentLayerPositionY
         indentLayer.frame = NSRect(x: Self.indentLayerPositionX, y: y - 4, width: 0.5, height: frame.height - y)
         indentLayer.layer.isHidden = !(showDisclosureButton && self.open)
+        indentLayer.layer.backgroundColor = BeamColor.Editor.indentBackground.cgColor
     }
 
     private func updateCheckboxLayer() {

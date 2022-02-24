@@ -22,10 +22,11 @@ extension NSImage {
         image.isTemplate = true
         image.lockFocus()
 
-        color.set()
-
-        let imageRect = NSRect(origin: NSPoint.zero, size: image.size)
-        imageRect.fill(using: .sourceAtop)
+        NSAppearance.withAppAppearance {
+            color.set()
+            let imageRect = NSRect(origin: NSPoint.zero, size: image.size)
+            imageRect.fill(using: .sourceAtop)
+        }
 
         image.unlockFocus()
 

@@ -76,7 +76,6 @@ class LinksSection: Widget {
 
         sectionTitleLayer.font = BeamFont.semibold(size: 0).nsFont
         sectionTitleLayer.fontSize = 12
-        sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
 
         addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: { [weak self] in
             guard let self = self else { return }
@@ -85,7 +84,6 @@ class LinksSection: Widget {
             self.open.toggle()
             chevron.open = self.open
         }))
-        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
         self.layer.addSublayer(separatorLayer)
         childInset = 9
 
@@ -287,6 +285,13 @@ class LinksSection: Widget {
             setupLayerFrame()
             separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: availableWidth, height: 1)
         }
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
+        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
     }
 
     override var mainLayerName: String {
