@@ -52,7 +52,7 @@ struct TooltipHoverModifier: ViewModifier {
 
     var title: String
     private let tooltipMargin = BeamSpacing._100
-    private let showDelay = 1500
+    private let showDelay = 1300 // 1.3s just like Apple's macOS button tooltips
     private class ViewModel: ObservableObject {
         var hoverDispatchWorkItem: DispatchWorkItem?
     }
