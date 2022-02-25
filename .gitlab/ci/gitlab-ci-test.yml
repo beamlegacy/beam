@@ -12,9 +12,6 @@ build for testing:
   script:
     - time bundle exec fastlane build_for_testing
   after_script:
-    - ls
-    - cd derived_data
-    - ls
     - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - mkdir -p logs
