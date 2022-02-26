@@ -376,11 +376,12 @@ extension BrowserTabsManager {
     private func setupTabsColoring() {
         data.clusteringManager.tabGroupingUpdater.$builtPagesGroups.sink { [weak self] pagesGroups in
             guard let self = self else { return }
-            let tabs = self.tabs
+            let tabsPerPageId = Dictionary(grouping: self.tabs, by: { $0.browsingTree.current.link })
             var tabsGroups = [UUID: TabClusteringGroup]()
             pagesGroups.forEach { (pageID, group) in
-                guard let tab = tabs.first(where: { $0.browsingTree.current.link == pageID }) else { return }
-                tabsGroups[tab.id] = group
+                tabsPerPageId[pageID]?.forEach { tab in
+                    tabsGroups[tab.id] = group
+                }
             }
             self.tabsClusteringGroups = tabsGroups
         }.store(in: &dataScope)
