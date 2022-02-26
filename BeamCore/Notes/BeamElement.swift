@@ -589,9 +589,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     func checkHasParent() {
-        let newValue = parent != nil
-        guard newValue != hasParent else { return }
-        hasParent = newValue
+        hasParent = parent != nil
         checkHasNote()
     }
 
