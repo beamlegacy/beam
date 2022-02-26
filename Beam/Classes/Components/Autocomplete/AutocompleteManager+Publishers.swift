@@ -112,6 +112,11 @@ extension AutocompleteManager {
         }
     }
 
+    private func urlStringToDisplay(from url: URL) -> String {
+        let result = url.urlStringByRemovingUnnecessaryCharacters
+        return result.removingPercentEncoding ?? result
+    }
+
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
@@ -123,7 +128,7 @@ extension AutocompleteManager {
                         var information = result.url
                         let url = URL(string: result.url)
                         if let url = url {
-                            information = url.urlStringWithoutScheme.removingPercentEncoding ?? url.urlStringWithoutScheme
+                            information = self.urlStringToDisplay(from: url)
                         }
 
                         var aliasForDestinationURL: URL?
@@ -153,7 +158,10 @@ extension AutocompleteManager {
             let scoredLinks = GRDBDatabase.shared.getTopScoredLinks(matchingUrl: query, frecencyParam: AutocompleteManager.urlFrecencyParamKey, limit: 6)
             let results = scoredLinks.map { (scoredLink) -> AutocompleteResult in
                 let url = URL(string: scoredLink.url)
-                let text = url?.urlStringWithoutScheme.removingPercentEncoding ?? URL(string: scoredLink.url)?.urlStringWithoutScheme.removingPercentEncoding ?? ""
+                var text = ""
+                if let url = url {
+                    text = self.urlStringToDisplay(from: url)
+                }
                 let info = scoredLink.title?.isEmpty == false ? scoredLink.title : nil
                 var aliasForDestinationURL: URL?
                 if let destinationURLString = scoredLink.destinationURL, let destinationURL = URL(string: destinationURLString) {

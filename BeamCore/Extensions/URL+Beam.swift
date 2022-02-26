@@ -54,7 +54,7 @@ public extension URL {
     /// Exemple: `https://wikipedia.org` and `wikipedia.org/` are pointing to the same page.
     /// This method could be improved with more unnecessary strings to remove, like `index.html` , etc.
     var urlStringByRemovingUnnecessaryCharacters: String {
-        var str = self.urlStringWithoutScheme.lowercased()
+        var str = self.urlStringWithoutScheme
         let last = str.last
         if ["/", "?"].contains(last) {
             str = String(str.dropLast())
@@ -91,7 +91,7 @@ public extension URL {
         else {
             return nil
         }
-        return URL(string: "\(scheme)://\(host)/")
+        return URL(string: "\(scheme)://\(removeWWWPrefix(in: host))/")
     }
 
     /// Returns a string containing only the scheme and host.
