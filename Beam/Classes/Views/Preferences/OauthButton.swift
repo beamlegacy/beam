@@ -40,7 +40,7 @@ struct OauthButton<Content: View>: View {
     }
 
     private func connect() {
-        let window = AppDelegate.main.openOauthWindow(title: type.rawValue.capitalized)
+        let window = AppDelegate.main.openOauthWebViewWindow(title: type.rawValue.capitalized)
         let oauthController = window.oauthController
         authClient.authorizeURLHandler = oauthController
 

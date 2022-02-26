@@ -253,7 +253,7 @@ class GoogleCalendarService {
             completionHandler(.failure(CalendarError.apiScopeNil))
             return
         }
-        let window = AppDelegate.main.openOauthWindow(title: IdentityRequest.Provider.google.rawValue.capitalized)
+        let window = AppDelegate.main.openOauthWebViewWindow(title: IdentityRequest.Provider.google.rawValue.capitalized)
         let oauthController = window.oauthController
         authClient.authorizeURLHandler = oauthController
 
