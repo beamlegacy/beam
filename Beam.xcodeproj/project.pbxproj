@@ -516,6 +516,9 @@
 		8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */; };
 		8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */; };
 		8A2A398726F24F9E0084A073 /* Debounce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2A398626F24F9E0084A073 /* Debounce.swift */; };
+		8A34EADC27C7AF750063DAF6 /* TransientWebViewWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */; };
+		8A34EAE327C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */; };
+		8A34EAE527C7BDD20063DAF6 /* BaseWebNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A34EAE427C7BDD20063DAF6 /* BaseWebNavigationController.swift */; };
 		8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */; };
 		8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */; };
 		8A4723C227C539E100E76893 /* WindowCleanup.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A4723BC27C539E100E76893 /* WindowCleanup.js */; };
@@ -537,6 +540,7 @@
 		8A7F949826A8694600270A74 /* PointAndShootSelectTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F949726A8694600270A74 /* PointAndShootSelectTest.swift */; };
 		8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7F949926A8750A00270A74 /* PointAndShootCreateTargetTest.swift */; };
 		8A8CD64F274D146D00DEB52B /* WebNoteControllerTest+setContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */; };
+		8A8FB65627C7ACAD009C546A /* OauthWebViewWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8FB65527C7ACAC009C546A /* OauthWebViewWindow.swift */; };
 		8A9309FD27A04E2C00064133 /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309EF27A04E2B00064133 /* tsconfig.json */; };
 		8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */; };
 		8A9309FF27A04E2C00064133 /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F227A04E2B00064133 /* jest.config.js */; };
@@ -1883,6 +1887,9 @@
 		8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPathFrame.swift; sourceTree = "<group>"; };
 		8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Alert.swift"; sourceTree = "<group>"; };
 		8A2A398626F24F9E0084A073 /* Debounce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debounce.swift; sourceTree = "<group>"; };
+		8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransientWebViewWindow.swift; sourceTree = "<group>"; };
+		8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWindowFeatures+Beam.swift"; sourceTree = "<group>"; };
+		8A34EAE427C7BDD20063DAF6 /* BaseWebNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseWebNavigationController.swift; sourceTree = "<group>"; };
 		8A3C216C2670FF880029AC1A /* PointAndShootTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootTargetTest.swift; sourceTree = "<group>"; };
 		8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSPoint+Beam.swift"; sourceTree = "<group>"; };
 		8A4723BC27C539E100E76893 /* WindowCleanup.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = WindowCleanup.js; sourceTree = "<group>"; };
@@ -1907,6 +1914,7 @@
 		8A7F949726A8694600270A74 /* PointAndShootSelectTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootSelectTest.swift; sourceTree = "<group>"; };
 		8A7F949926A8750A00270A74 /* PointAndShootCreateTargetTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootCreateTargetTest.swift; sourceTree = "<group>"; };
 		8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebNoteControllerTest+setContents.swift"; sourceTree = "<group>"; };
+		8A8FB65527C7ACAC009C546A /* OauthWebViewWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OauthWebViewWindow.swift; sourceTree = "<group>"; };
 		8A9309EF27A04E2B00064133 /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = tsconfig.json; path = Web/tsconfig.json; sourceTree = "<group>"; };
 		8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = PasswordManagerUIMock.ts; sourceTree = "<group>"; };
 		8A9309F227A04E2B00064133 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = jest.config.js; path = Web/jest.config.js; sourceTree = "<group>"; };
@@ -3363,6 +3371,7 @@
 				8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */,
 				5268FD0F27020A9B003677B2 /* Date+iso8601millseconds.swift */,
 				378751F027AA9B5000DDDC9E /* NSUserInterfaceItemIdentifier+Beam.swift */,
+				8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3382,6 +3391,7 @@
 				A5B7184B274B929D0010FE8E /* Toolbar */,
 				A54936B0260B71FE00EF7622 /* BottomToolbar */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
+				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
 			);
 			path = Views;
@@ -3853,6 +3863,7 @@
 				52B9A399264566D60063AEEF /* OauthButton.swift */,
 				529826A52641A46E00E9448C /* GoogleButton.swift */,
 				52B9A36F264546570063AEEF /* MinimalistWebViewWindow.swift */,
+				8A8FB65527C7ACAC009C546A /* OauthWebViewWindow.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -5753,6 +5764,7 @@
 				BAA67837448460D14C798F73 /* WebNavigationController.swift */,
 				BAA67F5672D6E4512AF90CAC /* WebNavigationMessageHandler.swift */,
 				BAA670E1903659A32C562E3E /* BeamWebNavigationController.swift */,
+				8A34EAE427C7BDD20063DAF6 /* BaseWebNavigationController.swift */,
 				75A1E5B9271D98F1000824B1 /* ExternalDeeplinkHandler.swift */,
 				BAA67226F0A10301D829E071 /* WebNavigationContext.swift */,
 				75FD7B6E2707006400BEFBA7 /* BeamSchemeHandler.swift */,
@@ -6930,6 +6942,7 @@
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
 				52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */,
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
+				8A34EAE327C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift in Sources */,
 				75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */,
 				33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */,
 				A0CB7E54268E66CD00D15AFD /* View+Beam.swift in Sources */,
@@ -7217,6 +7230,7 @@
 				A545055527B11F83006AE756 /* EncryptionManager+ImportExport.swift in Sources */,
 				524CF6CA25F2735D007312F0 /* EncryptionManager.swift in Sources */,
 				873528BC27343871005E7CBC /* SafariImporter.swift in Sources */,
+				8A8FB65627C7ACAD009C546A /* OauthWebViewWindow.swift in Sources */,
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
 				37DB5A0C27BB514400534760 /* EmbedContentView.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
@@ -7310,6 +7324,7 @@
 				A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */,
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
 				75BDCDAD26F339B1004BBC7E /* ErrorPageManager.swift in Sources */,
+				8A34EAE527C7BDD20063DAF6 /* BaseWebNavigationController.swift in Sources */,
 				418172542581107C00317ED8 /* ToolbarContentView.swift in Sources */,
 				5241E5F026F89AF200B08F69 /* UserSessionRequest+PromiseKit.swift in Sources */,
 				4181721D2581107C00317ED8 /* NSImage+Beam.swift in Sources */,
@@ -7322,6 +7337,7 @@
 				8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */,
+				8A34EADC27C7AF750063DAF6 /* TransientWebViewWindow.swift in Sources */,
 				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
 				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
 				A043B800265A547100E267E5 /* TabGroupingContentView.swift in Sources */,
