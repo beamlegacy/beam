@@ -18,7 +18,8 @@ class URLBeamTest: XCTestCase {
         let expectedWikipedia = "wikipedia.org"
         XCTAssertEqual(URL(string: "wikipedia.org/")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
         XCTAssertEqual(URL(string: "https://wikipedia.org/")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
-        XCTAssertEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
+        XCTAssertEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, "wikipedia.ORG")
+        XCTAssertNotEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
         XCTAssertEqual(URL(string: "https://en.wikipedia.org/post/1?lang=en")?.urlStringByRemovingUnnecessaryCharacters, "en.wikipedia.org/post/1?lang=en")
     }
 
@@ -60,9 +61,10 @@ class URLBeamTest: XCTestCase {
         XCTAssertFalse(URL(string: "https://www.wikipedia.org/wiki")!.isDomain)
         XCTAssertFalse(URL(string: "https://wikipedia.org/page.html")!.isDomain)
     }
-    func testBaseUrl() {
-        XCTAssertEqual(URL(string: "https://www.wikipedia.org/wiki")?.domain, URL(string: "https://www.wikipedia.org/"))
-        XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://www.wikipedia.org/"))
+
+    func testDomain() {
+        XCTAssertEqual(URL(string: "https://www.wikipedia.org/wiki")?.domain, URL(string: "https://wikipedia.org/"))
+        XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://wikipedia.org/"))
         XCTAssertNil(URL(string: "www.wikipedia.org/wiki")?.domain)
     }
 
