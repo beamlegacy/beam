@@ -25,6 +25,10 @@ struct DownloaderView<List: DownloadListProtocol>: View {
     @Environment(\.colorScheme) var colorScheme
 
     let preferredWidth: CGFloat = 368.0
+    private let cellHeight: CGFloat = 53.0
+    private let cellRegularPadding: CGFloat = 6.0
+    private let cellBottomPadding: CGFloat = 2.0
+    private let listSpacing: CGFloat = 2.0
 
     private var onClose: () -> Void
 
@@ -75,43 +79,45 @@ struct DownloaderView<List: DownloadListProtocol>: View {
             .animation(.easeInOut(duration: 1), value: isHoveringHeader)
             .animation(.easeInOut(duration: 1), value: isHovering)
             .transition(.opacity)
-            VStack(spacing: 2) {
-                ForEach(downloadList.downloads) { download in
-                    ZStack {
-                        DownloadCell(download: download, from: downloadList, isSelected: selectedDownloads.contains(download), onDeleteKeyDownAction: backspaceTappedInCell)
-                        ClickCatchingView(onTap: { event in
-                            if event.modifierFlags.contains(.command) {
-                                if selectedDownloads.contains(download) {
-                                    selectedDownloads.remove(download)
-                                    lastManuallyInsertedDownload = nil
+            ScrollView {
+                VStack(spacing: listSpacing) {
+                    ForEach(downloadList.downloads) { download in
+                        ZStack {
+                            DownloadCell(download: download, from: downloadList, isSelected: selectedDownloads.contains(download), onDeleteKeyDownAction: backspaceTappedInCell)
+                            ClickCatchingView(onTap: { event in
+                                if event.modifierFlags.contains(.command) {
+                                    if selectedDownloads.contains(download) {
+                                        selectedDownloads.remove(download)
+                                        lastManuallyInsertedDownload = nil
+                                    } else {
+                                        selectedDownloads.insert(download)
+                                        lastManuallyInsertedDownload = download
+                                    }
+                                } else if event.modifierFlags.contains(.shift) {
+                                    guard let tappedIndex = downloadList.downloads.firstIndex(of: download) else { return }
+                                    if let last = lastManuallyInsertedDownload, let initialIndex = downloadList.downloads.firstIndex(of: last) {
+                                        let minIndex = min(initialIndex, tappedIndex)
+                                        let maxIndex = max(initialIndex, tappedIndex)
+                                        selectedDownloads = Set(downloadList.downloads[minIndex...maxIndex])
+                                    } else {
+                                        selectedDownloads = Set(downloadList.downloads[0...tappedIndex])
+                                    }
                                 } else {
-                                    selectedDownloads.insert(download)
+                                    selectedDownloads = [download]
                                     lastManuallyInsertedDownload = download
                                 }
-                            } else if event.modifierFlags.contains(.shift) {
-                                guard let tappedIndex = downloadList.downloads.firstIndex(of: download) else { return }
-                                if let last = lastManuallyInsertedDownload, let initialIndex = downloadList.downloads.firstIndex(of: last) {
-                                    let minIndex = min(initialIndex, tappedIndex)
-                                    let maxIndex = max(initialIndex, tappedIndex)
-                                    selectedDownloads = Set(downloadList.downloads[minIndex...maxIndex])
-                                } else {
-                                    selectedDownloads = Set(downloadList.downloads[0...tappedIndex])
-                                }
-                            } else {
-                                selectedDownloads = [download]
-                                lastManuallyInsertedDownload = download
+                            }, onDoubleTap: { _ in
+                                downloadList.openFile(download)
+                            })
+                                .padding(.trailing, (download.state == .completed && download.errorMessage == nil) ? 20 : 40)
+                                .frame(height: cellHeight) //Force the height to fix a bug on Monterey were the ClickCatchingView is not getting the good height
                             }
-                        }, onDoubleTap: { _ in
-                            downloadList.openFile(download)
-                        })
-                        .padding(.trailing, (download.state == .completed && download.errorMessage == nil) ? 20 : 40)
-                        .frame(height: 53) //Force the height to fix a bug on Monterey were the ClickCatchingView is not getting the good height
                     }
+                    .padding(.horizontal, cellRegularPadding)
+                    .padding(.bottom, cellRegularPadding)
+                    .padding(.top, cellBottomPadding)
                 }
-            }
-            .padding(.horizontal, 6)
-            .padding(.bottom, 6)
-            .padding(.top, 2)
+            }.frame(height: min((cellHeight + cellRegularPadding + cellBottomPadding + listSpacing) * CGFloat(downloadList.downloads.count), 660))
         }
         .frame(width: preferredWidth)
         .background(BeamColor.Generic.secondaryBackground.swiftUI)
