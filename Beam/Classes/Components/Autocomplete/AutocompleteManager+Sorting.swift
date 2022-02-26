@@ -126,7 +126,7 @@ extension AutocompleteManager {
             !existingAutocompleteResult.contains { $0.text == result.text }
         }.prefix(maxGuesses)
         let insertionIndex: Int
-        if let lastPriority = finalResults.lastIndex(where: { $0.source.priority < AutocompleteResult.Source.searchEngine.priority }) {
+        if let lastPriority = finalResults.lastIndex(where: { $0.source > AutocompleteResult.Source.searchEngine }) {
             insertionIndex = lastPriority + 1
         } else {
             insertionIndex = 0
@@ -149,20 +149,24 @@ extension AutocompleteManager {
     }
 
     internal func autocompleteResultsUniqueURLs(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
-        // Take all the results and deduplicate the results based on their urls and source priorities:
-        var uniqueURLs = [String: AutocompleteResult]()
+        // Take all the results and deduplicate them based on their urls, priority and score
+        var uniqueURLs = [String: Int]()
+        var finalList = [AutocompleteResult]()
         for result in sequence {
-            let id = result.url?.urlStringByRemovingUnnecessaryCharacters ?? result.text
-            if let existing = uniqueURLs[id] {
-                if result.source.priority < existing.source.priority ||
-                    (result.score != nil && (existing.score == nil || result.score ?? 0 > existing.score ?? 0)) {
-                    uniqueURLs[id] = result
+            let id = result.url?.urlStringByRemovingUnnecessaryCharacters.lowercased() ?? result.text.lowercased()
+            if let existingIndex = uniqueURLs[id] {
+                let existing = finalList[existingIndex]
+                if result.source > existing.source || (result.source == existing.source && result > existing) {
+                    uniqueURLs[id] = existingIndex
+                    finalList.remove(at: existingIndex)
+                    finalList.insert(result, at: existingIndex)
                 }
             } else {
-                uniqueURLs[id] = result
+                uniqueURLs[id] = finalList.count
+                finalList.append(result)
             }
         }
-        return Array(uniqueURLs.values).sorted(by: >)
+        return finalList.sorted(by: >)
     }
 
     internal func autocompleteResultsUniqueSearchEngine(sequence: [AutocompleteResult]) -> [AutocompleteResult] {
@@ -193,7 +197,7 @@ extension AutocompleteManager {
     internal func filterOutSearchEngineURLResults(from sequence: [AutocompleteResult], forURLAlreadyIn urlResults: [AutocompleteResult]) -> [AutocompleteResult] {
         sequence.filter { r in
             guard r.source == .url, let url = r.url else { return true }
-            return !urlResults.contains { $0.url?.urlStringByRemovingUnnecessaryCharacters == url.urlStringByRemovingUnnecessaryCharacters }
+            return !urlResults.contains { $0.url?.urlStringByRemovingUnnecessaryCharacters.lowercased() == url.urlStringByRemovingUnnecessaryCharacters.lowercased() }
         }
     }
 }

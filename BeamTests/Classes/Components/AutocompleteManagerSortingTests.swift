@@ -59,12 +59,12 @@ class AutocompleteManagerSortingTests: XCTestCase {
             .init(text: "URL B Better Score", source: .url, url: urlB, score: 10),
             .init(text: "URL A", source: .url, url: urlA, score: 9),
             .init(text: "URL B", source: .url, url: urlB, score: nil),
-            .init(text: "URL A Better Score", source: .url, url: urlA, score: 10),
+            .init(text: "URL A Better Score Longer Text", source: .url, url: urlA, score: 10),
         ]
         let result = manager.autocompleteResultsUniqueURLs(sequence: urls)
         XCTAssertEqual(result.count, 2)
         XCTAssertEqual(result[0].text, "URL B Better Score")
-        XCTAssertEqual(result[1].text, "URL A Better Score")
+        XCTAssertEqual(result[1].text, "URL A Better Score Longer Text")
     }
 
     func testAutocompleteResultsUniqueSearchEngine() {
