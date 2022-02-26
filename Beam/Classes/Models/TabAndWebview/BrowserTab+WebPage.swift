@@ -98,20 +98,12 @@ extension BrowserTab: WebPage {
             newWebView = tab.webView
         } else {
             // this is more likely a login window or something that should disappear at some point so let's create something transient:
-            newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
-            newWebView.enableAutoCloseWindow = true
-            newWebView.wantsLayer = true
-            newWebView.allowsMagnification = true
+            let transientWebViewWindow = TransientWebViewWindow(originPage: self, configuration: configuration, windowFeatures: windowFeatures)
+            transientWebViewWindow.makeKeyAndOrderFront(nil)
+            newWindow = transientWebViewWindow
+            newWebView = transientWebViewWindow.controller.webView
+            newWebView.load(URLRequest(url: targetURL))
             state?.setup(webView: newWebView)
-
-            var windowMasks: NSWindow.StyleMask = [.closable, .miniaturizable, .titled, .unifiedTitleAndToolbar]
-            if windowFeatures.allowsResizing != 0 {
-                windowMasks.insert(NSWindow.StyleMask.resizable)
-            }
-            newWindow = NSWindow(contentRect: windowFrame, styleMask: windowMasks, backing: .buffered, defer: true)
-            newWindow.isReleasedWhenClosed = false
-            newWindow.contentView = newWebView
-            newWindow.makeKeyAndOrderFront(nil)
         }
         if windowFeatures.x == nil || windowFeatures.y == nil {
             newWindow.center()

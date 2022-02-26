@@ -369,12 +369,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: -
     // MARK: Windows
-    var oauthWindow: OauthWindow?
-    func openOauthWindow(title: String?) -> OauthWindow {
-        if let oauthWindow = oauthWindow { return oauthWindow }
+    var oauthWebViewWindow: OauthWebViewWindow?
+    func openOauthWebViewWindow(title: String?) -> OauthWebViewWindow {
+        if let oauthWindow = oauthWebViewWindow { return oauthWindow }
 
-        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 700))
-        guard let oauthWindow = oauthWindow else { fatalError("Can't create oauthwindow") }
+        oauthWebViewWindow = OauthWebViewWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 700))
+        guard let oauthWindow = oauthWebViewWindow else { fatalError("Can't create oauthwindow") }
 
         if let title = title {
             oauthWindow.title = title
