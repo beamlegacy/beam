@@ -68,29 +68,29 @@ struct DestinationNoteAutocompleteList: View {
 
     var list: some View {
         VStack(spacing: 0) {
-            ForEach(model.results, id: \.id) { i in
-                return AutocompleteItemView(item: i, selected: model.isSelected(i), disabled: i.disabled, displayIcon: false,
-                                        alwaysHighlightCompletingText: alwaysHighlightCompletingText,
-                                        allowsShortcut: i.source != .createNote || model.allowNewCardShortcut, colorPalette: colorPalette,
-                                        additionalLeadingPadding: additionLeadingPadding, cornerRadius: 0)
+            ForEach(model.results, id: \.id) { item in
+                AutocompleteItemView(item: item, selected: model.isSelected(item), disabled: item.disabled, displayIcon: false,
+                                            alwaysHighlightCompletingText: alwaysHighlightCompletingText,
+                                            allowsShortcut: item.source != .createNote || model.allowNewCardShortcut, colorPalette: colorPalette,
+                                            additionalLeadingPadding: additionLeadingPadding, cornerRadius: 0)
                     .if(model.searchCardContent) {
                         $0.frame(minHeight: itemHeight).fixedSize(horizontal: false, vertical: true)
                     }
                     .if(!model.searchCardContent) {
                         $0.frame(height: itemHeight)
                     }
-                    .id(i.id)
+                    .id(item.id)
                     .transition(.identity)
                     .animation(nil)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
-                            model.select(result: i)
+                            model.select(result: item)
                             onSelectAutocompleteResult?()
                         }
                     )
                     .onHover { hovering in
                         if hovering && !model.disableHoverSelection {
-                            model.select(result: i)
+                            model.select(result: item)
                         }
                     }
             }
@@ -123,7 +123,7 @@ extension DestinationNoteAutocompleteList {
         var modifierFlagsPressed: NSEvent.ModifierFlags?
 
         var selectedResult: AutocompleteResult? {
-            guard let index = selectedIndex, index < results.count else {
+            guard let index = selectedIndex, !results.isEmpty, index < results.count else {
                 return nil
             }
             return results[index]
@@ -143,22 +143,51 @@ extension DestinationNoteAutocompleteList {
             selectedIndex = indexFor(result: result)
         }
 
+        /// Moves selectedIndex forward one step. Will loop around when going past bounds.
+        /// Will default to first result if selectedIndex is nil
+        func selectNext() {
+            guard !results.isEmpty else { return }
+            if let index = selectedIndex {
+                selectedIndex = (index + 1).clampInLoop(0, results.endIndex-1)
+            } else {
+                selectedIndex = 0
+            }
+        }
+
+        /// Moves selectedIndex back one step. Will loop around when going past bounds.
+        /// Will default to last result if selectedIndex is nil
+        func selectPrevious() {
+            guard !results.isEmpty else { return }
+            if let index = selectedIndex {
+                selectedIndex = (index - 1).clampInLoop(0, results.endIndex-1)
+            } else {
+                selectedIndex = results.endIndex - 1
+            }
+        }
+
+        /// Takes the currently selectedResult and scroll it into view.
+        func scrollToSelectResult() {
+            if let result = selectedResult {
+                disableHoverSelection = true
+                scrollViewProxy?.scrollTo(result.id)
+
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(100))) { [weak self] in
+                    self?.disableHoverSelection = false
+                }
+            }
+        }
+
         func handleCursorMovement(_ move: CursorMovement) -> Bool {
             switch move {
-            case .down, .up:
+            case .down:
                 NSCursor.setHiddenUntilMouseMoves(true)
-                var newIndex = self.selectedIndex ?? -1
-                newIndex += (move == .up ? -1 : 1)
-                newIndex = newIndex.clampInLoop(0, results.count - 1)
-                selectedIndex = newIndex
-                if let item = selectedResult {
-                    disableHoverSelection = true
-                    scrollViewProxy?.scrollTo(item.id)
-                    DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(100))) { [weak self] in
-                        guard self?.selectedIndex == newIndex else { return }
-                        self?.disableHoverSelection = false
-                    }
-                }
+                selectNext()
+                scrollToSelectResult()
+                return true
+            case .up:
+                NSCursor.setHiddenUntilMouseMoves(true)
+                selectPrevious()
+                scrollToSelectResult()
                 return true
             default:
                 return false
@@ -166,7 +195,7 @@ extension DestinationNoteAutocompleteList {
         }
 
         func isSelected(_ result: AutocompleteResult) -> Bool {
-            guard !result.disabled else { return false }
+            guard !result.disabled, !results.isEmpty else { return false }
             if let i = selectedIndex {
                 return results[i].id == result.id
             } else if result.source == .createNote && modifierFlagsPressed?.contains(.command) == true {
@@ -176,6 +205,7 @@ extension DestinationNoteAutocompleteList {
         }
 
         private func indexFor(result: AutocompleteResult) -> Int? {
+            guard !results.isEmpty else { return nil }
             for i in results.indices where results[i].id == result.id {
                 return i
             }
