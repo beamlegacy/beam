@@ -70,11 +70,11 @@ class CustomPopoverPresenter {
     }
 
     func presentPopoverChildWindow(canBecomeKey: Bool = true, canBecomeMain: Bool = true,
-                                   withShadow: Bool = true, useBeamShadow: Bool = false, movable: Bool = true, storedInPresenter: Bool = false) -> PopoverWindow? {
+                                   withShadow: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false, movable: Bool = true, storedInPresenter: Bool = false) -> PopoverWindow? {
 
         guard let mainWindow = AppDelegate.main.window else { return nil }
 
-        let window = PopoverWindow(canBecomeMain: canBecomeMain, canBecomeKey: canBecomeKey, useBeamShadow: useBeamShadow)
+        let window = PopoverWindow(canBecomeMain: canBecomeMain, canBecomeKey: canBecomeKey, useBeamShadow: useBeamShadow, lightBeamShadow: lightBeamShadow)
         window.isReleasedWhenClosed = false
         window.isMovableByWindowBackground = true
         window.backgroundColor = .clear
