@@ -11,7 +11,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
             let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
             let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
             let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
-            let isNewWindow = navigationAction.targetFrame == nil
+            let isNewWindow = !toolBars
             if isNewWindow {
                 let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }
                 Logger.shared.logInfo("""
