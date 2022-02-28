@@ -31,13 +31,21 @@ Run linting
 
 Register Device
 
+### mac build_for_testing
+
+```sh
+[bundle exec] fastlane mac build_for_testing
+```
+
+Build for UI Testing
+
 ### mac tests
 
 ```sh
 [bundle exec] fastlane mac tests
 ```
 
-Run tests
+Run Unit Tests
 
 ### mac uitestsThread1
 
@@ -70,6 +78,14 @@ Run UI tests Thread3
 ```
 
 Run UI tests Thread4
+
+### mac delete_s3_derived_data
+
+```sh
+[bundle exec] fastlane mac delete_s3_derived_data
+```
+
+
 
 ### mac build
 

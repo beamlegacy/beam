@@ -149,12 +149,36 @@ extension BeamNote: BeamNoteDocument {
         let previousTitle = self.title
         try? GRDBDatabase.shared.remove(note: self)
         self.title = newTitle
-        Self.reloadAfterRename(previousTitle: previousTitle, note: self)
+        if getFetchedNote(self.id) != nil {
+            // Only reload the note if it was already loaded
+            Self.reloadAfterRename(previousTitle: previousTitle, note: self)
+        }
         indexContents()
         Logger.shared.logInfo("Rename \(previousTitle) to \(title) [\(id)]", category: .document)
 //        AppDelegate.main.data.renamedNote = (id, previousTitle, title)
 
-        _ = syncedSave()
+        _ = syncedSave(alsoWaitForNetworkSave: DocumentManager.waitForNetworkCompletionOnSyncSave)
+
+        for link in links {
+            guard let element = link.element else { continue }
+            element.updateNoteNamesInInternalLinks(recursive: true)
+            _ = element.note?.syncedSave()
+        }
+    }
+
+    static public func updateTitleLocally(id: UUID, _ newTitle: String) {
+        beamCheckMainThread()
+        guard let previousTitle = BeamNote.titleForNoteId(id, true) else { return }
+        try? GRDBDatabase.shared.remove(noteId: id)
+        if let note = getFetchedNote(id) {
+            // Only reload the note if it was already loaded
+            Self.reloadAfterRename(previousTitle: previousTitle, note: note)
+        }
+        Logger.shared.logInfo("Rename \(previousTitle) to \(newTitle) [\(id)]", category: .document)
+
+        let links = (try? GRDBDatabase.shared.fetchLinks(toNote: id).map({ bidiLink in
+            BeamNoteReference(noteID: bidiLink.sourceNoteId, elementID: bidiLink.sourceElementId)
+        })) ?? []
 
         for link in links {
             guard let element = link.element else { continue }
@@ -170,11 +194,14 @@ extension BeamNote: BeamNoteDocument {
         sign.end(Signs.indexContents)
     }
 
-    public func syncedSave() -> Bool {
+    public func syncedSave(alsoWaitForNetworkSave: Bool = false) -> Bool {
         sign.begin(Signs.syncedSave, titleAndId)
         var saved = false
-        let semaphore = DispatchSemaphore(value: 0)
-        save { result in
+        let saveSemaphore = DispatchSemaphore(value: 0)
+        let networkSemaphore = DispatchSemaphore(value: 0)
+        save(networkSave: true, networkCompletion: { _ in
+            networkSemaphore.signal()
+        }, completion: { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError("Failed to save note \(self): \(error)", category: .document)
@@ -185,16 +212,19 @@ extension BeamNote: BeamNoteDocument {
                 }
             }
 
-            semaphore.signal()
+            saveSemaphore.signal()
+        })
+        saveSemaphore.wait()
+        if alsoWaitForNetworkSave {
+            networkSemaphore.wait()
         }
-        semaphore.wait()
 
         sign.end(Signs.syncedSave)
         return saved
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func save(completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    public func save(networkSave: Bool = true, networkCompletion: ((Swift.Result<Bool, Error>) -> Void)? = nil, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         beamCheckMainThread()
         sign.begin(Signs.save, titleAndId)
         guard !saving.load(ordering: .relaxed) && version.load(ordering: .relaxed) == savedVersion.load(ordering: .relaxed) else {
@@ -239,7 +269,7 @@ extension BeamNote: BeamNoteDocument {
 
         Logger.shared.logInfo("BeamNote wants to save: \(titleAndId)", category: .document)
         let documentManager = DocumentManager()
-        documentManager.save(documentStruct, completion: { result in
+        documentManager.save(documentStruct, networkSave, networkCompletion, completion: { result in
             switch result {
             case .success(let success):
                 guard success else { break }

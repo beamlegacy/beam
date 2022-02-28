@@ -151,9 +151,6 @@ class DocumentTests: QuickSpec {
                 expect { try sut.saveContext() }.to(throwError { (error: CocoaError) in
                     expect(error.code) == CocoaError.Code.managedObjectMerge
                 })
-                expect { try sut.saveContext() }.to(throwError { (error: CocoaError) in
-                    expect(error.code) == CocoaError.Code.managedObjectMerge
-                })
 
                 expect(document1.title).to(equal(title2))
                 mainContext.refresh(document1, mergeChanges: false)

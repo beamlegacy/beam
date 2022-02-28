@@ -50,7 +50,6 @@
       "identifier" : "965A78242514F147009980D4",
       "name" : "Beam"
     },
-    "testRepetitionMode" : "retryOnFailure",
     "uiTestingScreenshotsLifetime" : "keepAlways",
     "userAttachmentLifetime" : "keepAlways"
   },
