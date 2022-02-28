@@ -142,8 +142,13 @@ import Promises
     var pointAndShootEnabled: Bool {
         state?.focusOmniBox != true
     }
+    lazy var webFrames: WebFrames? = {
+        let webFrames = WebFrames()
+        return webFrames
+    }()
     lazy var webPositions: WebPositions? = {
-        let webPositions = WebPositions()
+        guard let webFrames = webFrames else { return nil }
+        let webPositions = WebPositions(webFrames: webFrames)
         webPositions.delegate = self
         return webPositions
     }()

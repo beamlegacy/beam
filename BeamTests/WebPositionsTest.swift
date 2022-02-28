@@ -45,9 +45,11 @@ class WebPositionsTest: XCTestCase {
         )
     ]
 
-    var webPositions = WebPositions()
+    let webFrames = WebFrames()
+    var webPositions: WebPositions!
 
     override func setUpWithError() throws {
+        self.webPositions = WebPositions(webFrames: webFrames)
         self.webPositions.framesInfo = TestFramesInfo
     }
 
