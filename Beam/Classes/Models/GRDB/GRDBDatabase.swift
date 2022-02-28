@@ -464,8 +464,8 @@ struct GRDBDatabase {
         try dbReader.read { db in
             if try migrator.hasBeenSuperseded(db) {
                 Logger.shared.logError("GRDB migration status is ahead of registred migrations.", category: .database)
-                UserAlert.showError(message: "You need to update to beam's latest version.",
-                                    informativeText: "Database version is ahead of application version.",
+                UserAlert.showError(message: "You need to update to the latest version of Beam",
+                                    informativeText: "The database was created by a more advanced version of Beam and this version cannot read it.",
                                     buttonTitle: "Exit now")
                 AppDelegate.main.skipTerminateMethods = true
                 NSApplication.shared.terminate(nil)
