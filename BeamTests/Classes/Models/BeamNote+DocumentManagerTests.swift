@@ -65,8 +65,12 @@ class BeamNote_DocumentManagerTests: QuickSpec {
                 let title3 = BeamNote.availableTitle(withPrefix: prefix)
                 let _ = helper.saveLocally(helper.createDocumentStruct(title: title3))
 
+                waitUntil(timeout: .seconds(10)) { done in
+                    helper.documentManager.softDelete(id: doc2.id) { result in
+                        done()
+                    }
+                }
 
-                helper.softDeleteDocumentStruct(doc2)
                 // title 2 is available again
                 let title2Again = BeamNote.availableTitle(withPrefix: prefix)
                 expect(title2Again) == prefix + " 2"
