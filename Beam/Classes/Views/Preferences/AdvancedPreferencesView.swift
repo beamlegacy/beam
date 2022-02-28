@@ -37,6 +37,7 @@ struct AdvancedPreferencesView: View {
     @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
     @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
     @State var isWebsocketEnabled = Configuration.websocketEnabled
+    @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -431,6 +432,14 @@ struct AdvancedPreferencesView: View {
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     PnsJSEnabledCheckbox
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Show Web on launch with tabs")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    showWebOnLaunchIfTabsView
                 }
 
                 Preferences.Section(title: "Actions", bottomDivider: true) {
@@ -925,6 +934,17 @@ struct AdvancedPreferencesView: View {
     func migrateOldPrivateKeyToCurrentAccount() {
         _ = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
         updateKeys()
+    }
+
+    private var showWebOnLaunchIfTabsView: some View {
+        return Toggle(isOn: $showWebOnLaunchIfTabs) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showWebOnLaunchIfTabs].publisher.first()) {
+                PreferencesManager.showWebOnLaunchIfTabs = $0
+            }
     }
 }
 
