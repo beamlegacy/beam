@@ -84,6 +84,7 @@ class FrecencyNoteStorageTest: XCTestCase {
 
         let db = GRDBDatabase.empty()
         let storage = GRDBNoteFrecencyStorage(db: db)
+        storage.resetApiSaveLimiter()
         let noteIds = (0..<10).map { _ in UUID() }
         var correspondingRecords = [FrecencyNoteRecord]()
 

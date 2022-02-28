@@ -1,0 +1,5 @@
+The contents of this folder is an adapted and modified version of the original code at https://github.com/soutaro/Majima
+Changes:
+- ported to swift 5.3+
+- fixed the merging algorithm to handle more cases
+- fixed the graph path following algorithm (exponential complexity -> linear complexity)

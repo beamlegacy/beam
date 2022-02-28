@@ -115,17 +115,28 @@ extension DocumentStruct {
 
 extension DocumentStruct {
     init(document: Document) {
-        self.id = document.id
-        self.createdAt = document.created_at
-        self.updatedAt = document.updated_at
-        self.deletedAt = document.deleted_at
-        self.title = document.title
-        self.documentType = DocumentType(rawValue: document.document_type) ?? .note
-        self.data = document.data ?? Data()
-        self.version = document.version
-        self.isPublic = document.is_public
-        self.databaseId = document.database_id
-        self.journalDate = documentType == .journal ? JournalDateConverter.toString(from: document.journal_day) : nil
+
+        self.databaseId = UUID.null
+        self.title = ""
+        self.createdAt = BeamDate.now
+        self.updatedAt = BeamDate.now
+        self.data = Data()
+        self.documentType = .note
+
+        document.managedObjectContext!.performAndWait({
+            document.managedObjectContext!.refresh(document, mergeChanges: true)
+            self.id = document.id
+            self.createdAt = document.created_at
+            self.updatedAt = document.updated_at
+            self.deletedAt = document.deleted_at
+            self.title = document.title
+            self.documentType = DocumentType(rawValue: document.document_type) ?? .note
+            self.data = document.data ?? Data()
+            self.version = document.version
+            self.isPublic = document.is_public
+            self.databaseId = document.database_id
+            self.journalDate = documentType == .journal ? JournalDateConverter.toString(from: document.journal_day) : nil
+        })
     }
 
     init(documentStruct: DocumentStruct) {

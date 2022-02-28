@@ -22,7 +22,7 @@ class AllowListViewModel: ObservableObject {
     func refreshAllAllowListItems() {
         RadBlockDatabase.shared.allowlistEntryEnumerator(forGroup: nil, domain: nil, sortOrder: .createDate) { entries, error in
             if let entries = entries?.allObjects as? [RBAllowlistEntry] {
-                DispatchQueue.main.sync {
+                DispatchQueue.mainSync {
                     self.allAllowListItems.removeAll()
                 }
                 for entry in entries {
