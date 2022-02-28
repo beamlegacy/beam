@@ -36,7 +36,7 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
         do {
-            guard let webPositions = webPage.webPositions else {
+            guard let webFrames = webPage.webFrames, let webPositions = webPage.webPositions else {
                 throw WebPositionsError("webPositions is required")
             }
             guard let messageKey = WebPositionsMessages(rawValue: messageName) else {
@@ -60,7 +60,7 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
                 webPositions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
 
             case WebPositionsMessages.WebPositions_frameBounds:
-                onFramesInfoMessage(dict: dict, positions: webPositions, href: href)
+                onFramesInfoMessage(dict: dict, frames: webFrames, positions: webPositions, href: href, isMain: frameInfo?.isMainFrame ?? false)
             }
 
         } catch {
@@ -69,12 +69,13 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
         }
     }
 
-    private func onFramesInfoMessage(dict: [String: AnyObject], positions: WebPositions, href: String) {
+    private func onFramesInfoMessage(dict: [String: AnyObject], frames: WebFrames, positions: WebPositions, href: String, isMain: Bool) {
         guard let jsFramesInfo = dict["frames"] as? NSArray else {
             Logger.shared.logError("Ignored beam_frameBounds: \(String(describing: dict))", category: .web)
             return
         }
 
+        var children = Set<String>()
         for jsFrameInfo in jsFramesInfo {
             let jsFrameInfo = jsFrameInfo as AnyObject
             let bounds = jsFrameInfo["bounds"] as AnyObject
@@ -91,8 +92,14 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
                 )
 
                 positions.setFrameInfo(frame: frame)
+
+                if frameHref != href {
+                    children.insert(frameHref)
+                }
             }
         }
+
+        frames.setFrame(href: href, children: children, isMain: isMain)
     }
 
     /**

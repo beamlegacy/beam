@@ -494,6 +494,9 @@
 		877888D9269C743F00D703F0 /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888D1269C743F00D703F0 /* CSVParser.swift */; };
 		877888DB269C977C00D703F0 /* PasswordImporterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888DA269C977C00D703F0 /* PasswordImporterTest.swift */; };
 		878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */ = {isa = PBXBuildFile; productRef = 878417BD276FB1FB005EB5B0 /* MockHttpServer */; };
+		8784955F27C55E0200195C62 /* WebFrames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8784955E27C55E0200195C62 /* WebFrames.swift */; };
+		8784956127C62D7500195C62 /* WebFramesTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8784956027C62D7500195C62 /* WebFramesTest.swift */; };
+		8784956927C6D31F00195C62 /* WebFieldClassifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8784956827C6D31E00195C62 /* WebFieldClassifiers.swift */; };
 		87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */; };
 		879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879157362799EECF00AE1040 /* BrowserImporter.swift */; };
 		87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */; };
@@ -1855,6 +1858,9 @@
 		877888D1269C743F00D703F0 /* CSVParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		877888DA269C977C00D703F0 /* PasswordImporterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporterTest.swift; sourceTree = "<group>"; };
 		878417BC276FB164005EB5B0 /* MockHttpServer */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MockHttpServer; path = BeamUITests/MockHttpServer; sourceTree = "<group>"; };
+		8784955E27C55E0200195C62 /* WebFrames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFrames.swift; sourceTree = "<group>"; };
+		8784956027C62D7500195C62 /* WebFramesTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFramesTest.swift; sourceTree = "<group>"; };
+		8784956827C6D31E00195C62 /* WebFieldClassifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldClassifiers.swift; sourceTree = "<group>"; };
 		8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImportErrors.swift"; sourceTree = "<group>"; };
 		879157362799EECF00AE1040 /* BrowserImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImporter.swift; sourceTree = "<group>"; };
 		87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPopoverContainer.swift; sourceTree = "<group>"; };
@@ -3229,6 +3235,7 @@
 				A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */,
 				87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */,
 				87F47CC82669415800D01960 /* WebAutocompleteContext.swift */,
+				8784956827C6D31E00195C62 /* WebFieldClassifiers.swift */,
 				8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */,
 				87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */,
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
@@ -4525,6 +4532,7 @@
 		8ADD05EA27295A9A004C3EC9 /* Native */ = {
 			isa = PBXGroup;
 			children = (
+				8784955E27C55E0200195C62 /* WebFrames.swift */,
 				BAA67DD5764226E47DFA6F9E /* WebPositions.swift */,
 				8ADD060927296E00004C3EC9 /* WebPositionsMessageHandler.swift */,
 			);
@@ -4805,6 +4813,7 @@
 				8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */,
 				8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */,
 				8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */,
+				8784956027C62D7500195C62 /* WebFramesTest.swift */,
 				8A141559267393E2005F2464 /* WebPositionsTest.swift */,
 				9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */,
 				9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */,
@@ -7067,6 +7076,7 @@
 				9623ABBF26B0061400309E5E /* Beam3ToBeam4Migration.xcmappingmodel in Sources */,
 				877888D9269C743F00D703F0 /* CSVParser.swift in Sources */,
 				96E4CF30258DFB0800D6DE22 /* BeamText+NSAttributedString.swift in Sources */,
+				8784956927C6D31F00195C62 /* WebFieldClassifiers.swift in Sources */,
 				41855A3A25D1334F00DA49DC /* BeamCollectionView.swift in Sources */,
 				A5CD234A270C9B6900240987 /* MeetingsListView.swift in Sources */,
 				8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */,
@@ -7168,6 +7178,7 @@
 				A5AD646327C53D27005FC3B1 /* TabContentIcon.swift in Sources */,
 				A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */,
 				87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */,
+				8784955F27C55E0200195C62 /* WebFrames.swift in Sources */,
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				A07C013D2705ED2700D91750 /* GoogleCalendarService.swift in Sources */,
 				A0CB5ADE268B1FF500D1EF02 /* GeneralPreferencesView.swift in Sources */,
@@ -7558,6 +7569,7 @@
 				A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */,
 				DAB8DB05269C502C00453867 /* UrlScoresCollectionTest.swift in Sources */,
 				A5297F3127ABE905006B3E1F /* AutocompleteManagerSortingTests.swift in Sources */,
+				8784956127C62D7500195C62 /* WebFramesTest.swift in Sources */,
 				8A7F948C26A858B800270A74 /* PointAndShootRefreshTest.swift in Sources */,
 				DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */,
 				562A8B5225B5E3D8004D3D8A /* String+NLTests.swift in Sources */,
