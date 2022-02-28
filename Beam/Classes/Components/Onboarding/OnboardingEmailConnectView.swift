@@ -59,6 +59,26 @@ struct OnboardingEmailConnectView: View {
         }
     }
 
+    @State private var securePasswordField = true
+
+    private func passwordField(secure: Bool) -> some View {
+        BeamTextField(text: $passwordField, isEditing: $isPasswordEditing, placeholder: "Password", font: BeamFont.regular(size: 14).nsFont,
+                      textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                      secure: secure, contentType: secure ? .password : nil,
+                      onTextChanged: { newText in
+            updateMissingRequirements(for: newText)
+            updateButtonState()
+        }, onCommit: { _ in
+            triggerConnect()
+        }, onTab: {
+            isPasswordEditing = false
+            isEmailEditing = true
+            return true
+        })
+            .frame(height: 40)
+            .accessibility(identifier: "passwordField\(isPasswordEditing ? "-editing" : "")")
+    }
+
     var emailForm: some View {
         Group {
             VStack(alignment: .leading, spacing: BeamSpacing._120) {
@@ -79,21 +99,19 @@ struct OnboardingEmailConnectView: View {
                         .accessibility(identifier: "emailField\(isEmailEditing ? "-editing" : "")")
 
                     Separator(horizontal: true, color: BeamColor.Nero)
-                    BeamTextField(text: $passwordField, isEditing: $isPasswordEditing, placeholder: "Password", font: BeamFont.regular(size: 14).nsFont,
-                                  textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                                  secure: true, contentType: .password,
-                                  onTextChanged: { newText in
-                        updateMissingRequirements(for: newText)
-                        updateButtonState()
-                    }, onCommit: { _ in
-                        triggerConnect()
-                    }, onTab: {
-                        isPasswordEditing = false
-                        isEmailEditing = true
-                        return true
-                    })
-                        .frame(height: 40)
-                        .accessibility(identifier: "passwordField\(isPasswordEditing ? "-editing" : "")")
+                    HStack {
+                        // We can't just update the view because of how NSSecureTextField cannot "become" a NSTextField
+                        if securePasswordField {
+                            passwordField(secure: true)
+                        } else {
+                            passwordField(secure: false)
+                        }
+                        if !passwordField.isEmpty {
+                            ButtonLabel(icon: securePasswordField ? "editor-password_show" : "editor-password_hide") {
+                                securePasswordField.toggle()
+                            }
+                        }
+                    }
                     Separator(horizontal: true, color: BeamColor.Nero)
                 }
                 Group {
