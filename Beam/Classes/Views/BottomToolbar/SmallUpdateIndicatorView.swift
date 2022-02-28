@@ -147,7 +147,12 @@ struct SmallUpdateIndicatorView: View {
             window?.close()
         }, beforeInstallAction: {
             window?.close()
-        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle)
+        }, afterInstallAction: { installed in
+            if installed {
+                (NSApp.delegate as? AppDelegate)?.skipTerminateMethods = true
+                NSApp.relaunch()
+            }
+        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle, autoRelaunchAfterInstall: false)
             .cornerRadius(10)
 
         let frame = geometry.safeTopLeftGlobalFrame(in: window?.parent)
