@@ -23,8 +23,7 @@ class PasswordsDBTests: XCTestCase {
 
         BeamTestsHelper.logout()
         PasswordManager.shared.deleteAll(includedRemote: false)
-        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-//        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+        Persistence.Encryption.localPrivateKey = Configuration.testPrivateKey
     }
 
     func testSavingPassword() {

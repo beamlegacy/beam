@@ -191,7 +191,7 @@ class DocumentManagerTestsHelper {
     func defaultDataForDocumentStruct(_ id: UUID, _ title: String) -> Data {
         // TODO: set creationDate and type properly
         // The bullet ID is hard coded on purpose, as it wouldn't work with Vinyl if random
-        "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"journal\", \"date\" : \"\" }, \"title\" : \"\(title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
+        "{ \"id\" : \"\(id)\", \"textStats\" : { \"wordsCount\" : 0 }, \"visitedSearchResults\" : [ ], \"sources\" : { \"sources\" : [ ] }, \"type\" : { \"type\" : \"note\" }, \"title\" : \"\(title)\", \"searchQueries\" : [ ], \"open\" : true, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] }, \"readOnly\" : false, \"children\" : [ { \"readOnly\" : false, \"score\" : 0, \"id\" : \"0324539D-5AD0-4B8D-AE19-05C1DD97B6FC\", \"creationDate\" : 650476092.56825495, \"open\" : true, \"textStats\" : { \"wordsCount\" : 1 }, \"text\" : { \"ranges\" : [ { \"string\" : \"\" } ] } } ], \"score\" : 0, \"creationDate\" : 650476092.05954194 }".asData
     }
 
     func fillDocumentStructWithStaticText(_ docStruct: DocumentStruct, _ text: String = "whatever binary data") -> DocumentStruct {
@@ -286,8 +286,8 @@ class DocumentManagerTestsHelper {
             localDocStruct.data = newLocal.asData
             localDocStruct = saveLocally(localDocStruct)
 
-            localDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
-            expect(localDocStruct.data) == newLocal.asData
+            let newLocalDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
+            expect(newLocalDocStruct.data) == newLocal.asData
         }
 
         localDocStruct = documentManager.loadById(id: ancestorDocStruct.id, includeDeleted: false)!
