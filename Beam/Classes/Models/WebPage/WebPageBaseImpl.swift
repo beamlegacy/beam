@@ -36,6 +36,7 @@ class WebPageBaseImpl: WebPage {
     var responseStatusCode: Int = 200
 
     var pointAndShoot: PointAndShoot?
+    var webFrames: WebFrames?
     var webPositions: WebPositions?
     var navigationController: WebNavigationController?
     var errorPageManager: ErrorPageManager?

@@ -79,7 +79,9 @@ class UrlScoresCollectionTest: XCTestCase {
         let scorer = BrowsingTreeScorer(browsingTree: tree)
         page.browsingScorer = scorer
         scorer.page = page
-        let positions = WebPositions()
+        let frames = WebFrames()
+        let positions = WebPositions(webFrames: frames)
+        page.webFrames = frames
         page.webPositions = positions
 
         let creationDate = try XCTUnwrap(tree.root.events.first?.date)

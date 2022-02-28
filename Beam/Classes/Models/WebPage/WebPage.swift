@@ -33,6 +33,7 @@ protocol WebPage: AnyObject, Scorable {
     var pointAndShootInstalled: Bool { get }
     var pointAndShootEnabled: Bool { get }
     var pointAndShoot: PointAndShoot? { get }
+    var webFrames: WebFrames? { get }
     var webPositions: WebPositions? { get }
 
     var authenticationViewModel: AuthenticationViewModel? { get set }
