@@ -514,6 +514,8 @@ import Sentry
         data.downloadManager.downloadList.$downloads.sink { [weak self] _ in
             self?.objectWillChange.send()
         }.store(in: &scope)
+
+        setDefaultDisplayMode()
     }
 
     enum CodingKeys: String, CodingKey {
@@ -678,6 +680,26 @@ extension BeamState: BrowserTabsManagerDelegate {
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {
         self.canGoBack = canGoBack
         self.canGoForward = canGoForward
+    }
+
+    private func setDefaultDisplayMode() {
+
+        let haveSeenWebOnboarding = Persistence.Authentication.hasSeenWebTutorial
+
+        if haveSeenWebOnboarding == nil || haveSeenWebOnboarding == false {
+            guard let onboardingURL = URL(string: EnvironmentVariables.webOnboardingURL), Configuration.env != .test else { return }
+            createTab(withURL: onboardingURL)
+            Persistence.Authentication.hasSeenWebTutorial = true
+            return
+        }
+
+        if PreferencesManager.showWebOnLaunchIfTabs {
+            let openTabs = browserTabsManager.tabs
+            if openTabs.count > 0 {
+                mode = .web
+            }
+            return
+        }
     }
 }
 
