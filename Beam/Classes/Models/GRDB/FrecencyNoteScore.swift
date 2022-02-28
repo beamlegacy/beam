@@ -111,7 +111,7 @@ class NoteFrecencyApiSaveLimiter {
         }
         saveCount += 1
     }
-    private func reset() {
+    func reset() {
         saveCount = 0
         records = [UUID: FrecencyNoteRecord]()
     }
@@ -132,6 +132,9 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         self.db = db
     }
 
+    func resetApiSaveLimiter() {
+        Self.apiSaveLimiter.reset()
+    }
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try db.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
