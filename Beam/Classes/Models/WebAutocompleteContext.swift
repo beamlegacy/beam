@@ -105,7 +105,7 @@ struct WebAutocompleteRules {
     func allowTaggedField(_ field: DOMInputElement, inPageContainingPasswordField pageContainsPasswordField: Bool) -> Bool {
         switch field.decodedAutocomplete {
         case nil:
-            return field.type == .email
+            return field.type == .email || field.type == .password
         case .off:
             switch field.type {
             case .text:
@@ -149,24 +149,32 @@ extension DOMInputElement {
     }
 
     func isUsedForLogin(bestUsernameAutocomplete: DOMInputAutocomplete?) -> Bool {
-        switch decodedAutocomplete {
-        case .currentPassword:
-            return true
-        case .username, .email, .tel, .on, .off:
-            return bestUsernameAutocomplete == decodedAutocomplete
-        default:
-            return type == .email && bestUsernameAutocomplete != .username
+        if type == .password {
+            return decodedAutocomplete != .newPassword
+        } else {
+            switch decodedAutocomplete {
+            case .currentPassword:
+                return true
+            case .username, .email, .tel, .on, .off:
+                return bestUsernameAutocomplete == decodedAutocomplete
+            default:
+                return type == .email && bestUsernameAutocomplete != .username
+            }
         }
     }
 
     func isUsedForAccountCreation(bestUsernameAutocomplete: DOMInputAutocomplete?) -> Bool {
-        switch decodedAutocomplete {
-        case .newPassword:
-            return true
-        case .username, .email, .tel, .on, .off:
-            return bestUsernameAutocomplete == decodedAutocomplete
-        default:
-            return type == .email && bestUsernameAutocomplete != .username
+        if type == .password {
+            return decodedAutocomplete != .currentPassword
+        } else {
+            switch decodedAutocomplete {
+            case .newPassword:
+                return true
+            case .username, .email, .tel, .on, .off:
+                return bestUsernameAutocomplete == decodedAutocomplete
+            default:
+                return type == .email && bestUsernameAutocomplete != .username
+            }
         }
     }
 
@@ -254,12 +262,10 @@ extension WebInputField {
 final class WebAutocompleteContext {
 
     private var autocompleteRules: WebAutocompleteRules
-    private var autocompleteFields: [WebAutocompleteAction: [WebInputField]]
-    var autocompleteGroups: [String: WebAutocompleteGroup] // key = beamId
+    private var autocompleteGroups: [String: WebAutocompleteGroup] // key = beamId
 
     init() {
         self.autocompleteRules = .default
-        self.autocompleteFields = [:]
         self.autocompleteGroups = [:]
     }
 
@@ -315,9 +321,15 @@ final class WebAutocompleteContext {
 
     /// Get and parse all login fields from `autocompleteFields[.login]`
     /// - Returns: Deduplicated dict of inputs keyed on (Beam) id
-    fileprivate func getLoginGroups() -> [String: WebAutocompleteGroup] {
+    fileprivate func getLoginGroups(_ autocompleteFields: [WebAutocompleteAction: [WebInputField]]) -> [String: WebAutocompleteGroup] {
         guard let loginFields = autocompleteFields[.login] else { return [:] }
-        let loginGroup = WebAutocompleteGroup(action: .login, relatedFields: loginFields)
+        let ambiguous: Bool
+        if let createAccountFields = autocompleteFields[.createAccount] {
+            ambiguous = !Set(createAccountFields.map(\.id)).isDisjoint(with: Set(loginFields.map(\.id)))
+        } else {
+            ambiguous = false
+        }
+        let loginGroup = WebAutocompleteGroup(action: .login, relatedFields: loginFields, isAmbiguous: ambiguous)
         let loginIds = loginFields.map(\.id)
         return loginIds.reduce(into: [:]) { dict, id in
             dict[id] = loginGroup
@@ -326,9 +338,15 @@ final class WebAutocompleteContext {
 
     /// Get and parse all create account fields from `autocompleteFields[.createAccount]`
     /// - Returns: Deduplicated dict of inputs keyed on (Beam) id
-    fileprivate func getCreateAccountGroups() -> [String: WebAutocompleteGroup] {
+    fileprivate func getCreateAccountGroups(_ autocompleteFields: [WebAutocompleteAction: [WebInputField]]) -> [String: WebAutocompleteGroup] {
         guard let createAccountFields = autocompleteFields[.createAccount] else { return [:] }
-        let createAccountGroup = WebAutocompleteGroup(action: .createAccount, relatedFields: createAccountFields)
+        let ambiguous: Bool
+        if let loginFields = autocompleteFields[.login] {
+            ambiguous = !Set(createAccountFields.map(\.id)).isDisjoint(with: Set(loginFields.map(\.id)))
+        } else {
+            ambiguous = false
+        }
+        let createAccountGroup = WebAutocompleteGroup(action: .createAccount, relatedFields: createAccountFields, isAmbiguous: ambiguous)
         let createAccountIds = createAccountFields.filter { $0.role == .newPassword }.map(\.id) // don't suggest new password when clicking on login field
         return createAccountIds.reduce(into: [:]) { dict, id in
             dict[id] = createAccountGroup
@@ -337,7 +355,7 @@ final class WebAutocompleteContext {
 
     /// Get and parse all personal info fields from `autocompleteFields[.personalInfo]`
     /// - Returns: Deduplicated dict of inputs keyed on (Beam) id
-    fileprivate func getPersonalInfoGroups() -> [String: WebAutocompleteGroup] {
+    fileprivate func getPersonalInfoGroups(_ autocompleteFields: [WebAutocompleteAction: [WebInputField]]) -> [String: WebAutocompleteGroup] {
         guard let personalInfoFields = autocompleteFields[.personalInfo] else { return [:] }
         let personalInfoGroup = WebAutocompleteGroup(action: .personalInfo, relatedFields: personalInfoFields)
         let personalInfoIds = personalInfoFields.map(\.id)
@@ -348,7 +366,7 @@ final class WebAutocompleteContext {
 
     /// Get and parse all payment fields from `autocompleteFields[.payment]`
     /// - Returns: Deduplicated dict of inputs keyed on (Beam) id
-    fileprivate func getPaymentGroups() -> [String: WebAutocompleteGroup] {
+    fileprivate func getPaymentGroups(_ autocompleteFields: [WebAutocompleteAction: [WebInputField]]) -> [String: WebAutocompleteGroup] {
         guard let paymentFields = autocompleteFields[.payment] else { return [:] }
         let paymentGroup = WebAutocompleteGroup(action: .payment, relatedFields: paymentFields)
         let paymentIds = paymentFields.map(\.id)
@@ -360,11 +378,11 @@ final class WebAutocompleteContext {
     /// Get, parse and merge a set of DOMInputElements into AutocompleteGroups
     /// - Parameter fields: Set of form input fields.
     /// - Returns: Deduplicated dict of inputs keyed on (Beam) id
-    fileprivate func getAutocompleteGroups(_ fields: [DOMInputElement]) -> [String: WebAutocompleteGroup] {
-        let loginGroups = getLoginGroups()
-        let createAccountGroups = getCreateAccountGroups()
-        let personalInfoGroups = getPersonalInfoGroups()
-        let paymentGroups = getPaymentGroups()
+    fileprivate func getAutocompleteGroups(_ autocompleteFields: [WebAutocompleteAction: [WebInputField]]) -> [String: WebAutocompleteGroup] {
+        let loginGroups = getLoginGroups(autocompleteFields)
+        let createAccountGroups = getCreateAccountGroups(autocompleteFields)
+        let personalInfoGroups = getPersonalInfoGroups(autocompleteFields)
+        let paymentGroups = getPaymentGroups(autocompleteFields)
 
         var mergedGroups = loginGroups
         mergedGroups.merge(createAccountGroups) { (current, _) in current }
@@ -375,7 +393,6 @@ final class WebAutocompleteContext {
 
     func clear() {
         Logger.shared.logDebug("Clearing autocomplete context", category: .passwordManagerInternal)
-        autocompleteFields.removeAll()
         autocompleteGroups.removeAll()
     }
 
@@ -440,7 +457,6 @@ final class WebAutocompleteContext {
         }
         let passwordFields = fields.filter { $0.type == .password }
         let autocompleteUsernamePasswordFields = usernameFields.map { WebInputField($0, role: action == .createAccount ? .newUsername : .currentUsername) } + passwordFields.map { WebInputField($0, role: action == .createAccount ? .newPassword : .currentPassword) }
-        autocompleteFields = [action: autocompleteUsernamePasswordFields]
         let autocompleteGroup = WebAutocompleteGroup(action: action, relatedFields: autocompleteUsernamePasswordFields, isAmbiguous: true)
         let autocompleteIds = autocompleteUsernamePasswordFields.map(\.id)
         let addedIds = autocompleteIds.filter { autocompleteGroups[$0] == nil }
@@ -449,13 +465,15 @@ final class WebAutocompleteContext {
             dict[id] = autocompleteGroup
         }
         autocompleteGroups.merge(newAutocompleteGroups) { (_, new) in new }
+        // Possible optimization: update allInputFields
         return addedIds
     }
 
     private func update(withTagged fields: [DOMInputElement]) -> [String] {
-        autocompleteFields = getAutocompleteFields(fields)
+        let autocompleteFields = getAutocompleteFields(fields)
         Logger.shared.logDebug("Autocomplete Fields: \(autocompleteFields)", category: .passwordManagerInternal)
-        let fieldGroups = getAutocompleteGroups(fields) // FIXME: for some strange reason getAutocompleteGroups() ignores fields, and used autocompleteFields
+        // Possible optimization: update allInputFields
+        let fieldGroups = getAutocompleteGroups(autocompleteFields)
         let addedIds = fieldGroups.keys.filter { autocompleteGroups[$0] == nil }
         autocompleteGroups.merge(fieldGroups) { (_, new) in new }
         return addedIds
@@ -466,10 +484,16 @@ final class WebAutocompleteContext {
     }
 
     var allInputFields: [WebInputField] {
-        autocompleteFields.values.flatMap { $0 }
-    }
-
-    var allInputFieldIds: [String] {
-        Array(Set(allInputFields.map(\.id)))
+        let fields = autocompleteGroups.values.flatMap(\.relatedFields)
+        // Deduplicate fields by id.
+        // This could be replaced with an ordered set if we choose to include the Collections package.
+        var fieldIds = Set<String>()
+        var deduplicatedFields = [WebInputField]()
+        for field in fields {
+            if fieldIds.insert(field.id).inserted {
+                deduplicatedFields.append(field)
+            }
+        }
+        return deduplicatedFields
     }
 }
