@@ -44,7 +44,7 @@ class TransientWebViewWindow: NSWindow, NSWindowDelegate {
 
 class TransientWebViewController: BaseWebNavigationController {
 
-    let uiDelegateController = BeamWebkitUIDelegateController()
+    let uiDelegateController = TransientWebViewUIDelegateController()
     let webView: BeamWebView
     var url: URL?
 
@@ -65,4 +65,10 @@ class TransientWebViewController: BaseWebNavigationController {
         self.webView.uiDelegate = uiDelegateController
     }
 
+}
+
+class TransientWebViewUIDelegateController: BeamWebkitUIDelegateController {
+    override func webViewDidClose(_ webView: WKWebView) {
+        webView.window?.close()
+    }
 }
