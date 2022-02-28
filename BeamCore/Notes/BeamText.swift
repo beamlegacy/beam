@@ -315,6 +315,16 @@ public struct BeamText: Codable {
         self.ranges = newText.ranges
     }
 
+    public init(_ text: String, attributes: [Attribute] = []) {
+        self.ranges = [Range(string: text, attributes: attributes, position: 0)]
+    }
+
+    public init(_ text: BeamText, attributes: [Attribute] = []) {
+        var newText = text
+        newText.addAttributes(attributes, to: newText.wholeRange)
+        self.ranges = newText.ranges
+    }
+
     // swiftlint:disable:next nesting
     enum CodingKeys: String, CodingKey {
         case ranges

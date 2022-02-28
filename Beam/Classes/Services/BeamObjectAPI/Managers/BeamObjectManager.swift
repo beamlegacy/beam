@@ -258,7 +258,9 @@ class BeamObjectManager {
                         dump(objectsInError)
                         message = "Some BeamObjects types: \(key) are in error"
                     }
-                    DispatchQueue.main.sync { errors.append(BeamObjectManagerError.parsingError(message)) }
+                    DispatchQueue.mainSync {
+                        errors.append(BeamObjectManagerError.parsingError(message))
+                    }
                 }
 
                 group.leave()

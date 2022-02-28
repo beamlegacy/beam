@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import NaturalLanguage
 
 //
 // String additions:
@@ -206,5 +207,22 @@ public extension BeamText {
             lastRange = range
         }
         return []
+    }
+}
+
+public extension BeamText {
+    var wordRanges: [Swift.Range<Int>] {
+        let t = text
+        return t.wordRanges.map { t.range(from: $0) }
+    }
+
+    var sentenceRanges: [Swift.Range<Int>] {
+        let t = text
+        return t.sentenceRanges.map { t.range(from: $0) }
+    }
+
+    func tokenize(_ tokenUnit: NLTokenUnit, options: NLTagger.Options? = nil) -> [Swift.Range<Int>] {
+        let t = text
+        return t.tokenize(tokenUnit, options: options).map { t.range(from: $0) }
     }
 }
