@@ -199,9 +199,10 @@ class BeamUITestsMenuGenerator {
     private func setAutoUpdateToMock() {
         let appDel = AppDelegate.main
         let checker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: true)
+        checker.logMessage = {
+            Logger.shared.logInfo($0, category: .autoUpdate)
+        }
         appDel.data.versionChecker = checker
-
-        checker.checkForUpdates()
     }
 
     private func cleanDownloadFolder() {
