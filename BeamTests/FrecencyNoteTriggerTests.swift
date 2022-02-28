@@ -76,6 +76,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var url: URL?
         var requestedURL: URL?
 
+        var webFrames: WebFrames?
         var webPositions: WebPositions?
         var pointAndShoot: PointAndShoot?
         var navigationController: WebNavigationController?
