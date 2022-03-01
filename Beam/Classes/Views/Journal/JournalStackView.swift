@@ -167,7 +167,14 @@ class JournalSimpleStackView: NSView {
         for note in noteSet {
             // Remove the notes that are not there any more:
             if note.shouldAppearInJournal {
-                addNote(note)
+                let forceInit: Bool = {
+                    guard let j1 = note.type.journalDate,
+                          let j2 = focussingOn?.type.journalDate else { return false }
+
+                    return j1 >= j2
+                }()
+                
+                addNote(note, forceInit: forceInit)
             } else {
                 guard let view = views[note] else { continue }
                 view.removeFromSuperview()
@@ -192,7 +199,7 @@ class JournalSimpleStackView: NSView {
     }
 
     private let typicalEditorHeightWhenWeDontKnow = CGFloat(800)
-    public func addNote(_ note: BeamNote) {
+    public func addNote(_ note: BeamNote, forceInit: Bool) {
         guard views[note] == nil else { return }
         let maxHeight: CGFloat
         if frame.height > 0 {
@@ -204,7 +211,8 @@ class JournalSimpleStackView: NSView {
         } else {
             maxHeight = typicalEditorHeightWhenWeDontKnow
         }
-        let view = getTextEditView(for: note, enableDelayedInit: views.count > 1 + Int(maxHeight / BeamTextEdit.minimumEmptyEditorHeight))
+        let delayInit = forceInit ? false : (views.count > 1 + Int(maxHeight / BeamTextEdit.minimumEmptyEditorHeight))
+        let view = getTextEditView(for: note, enableDelayedInit: delayInit)
         views[note] = view
         addSubview(view)
     }
