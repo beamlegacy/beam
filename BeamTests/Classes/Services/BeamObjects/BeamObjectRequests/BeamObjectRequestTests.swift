@@ -90,7 +90,7 @@ class BeamObjectsRequests: QuickSpec {
                         _ = beamObjectHelper.saveOnAPI(anotherObject)
                     }
 
-                    fit("sends a REST request") {
+                    it("sends a REST request") {
                         waitUntil(timeout: .seconds(10)) { done in
                             do {
                                 _ = try sut.fetchAllChecksumsWithRest(ids: [object.beamObjectId]) { result in
@@ -105,6 +105,44 @@ class BeamObjectsRequests: QuickSpec {
 
                                         expect(checksums).to(contain(checksum))
                                         expect(beamObjects).to(haveCount(1))
+                                    }
+                                    done()
+                                }
+                            } catch {
+                                fail(error.localizedDescription)
+                                done()
+                            }
+                        }
+                    }
+                }
+
+                context("with type") {
+                    beforeEach {
+                        let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd59".uuid ?? UUID()
+                        let anotherObject = MyRemoteObject(beamObjectId: uuid,
+                                                           createdAt: BeamDate.now,
+                                                           updatedAt: BeamDate.now,
+                                                           deletedAt: nil,
+                                                           title: title)
+
+                        _ = beamObjectHelper.saveOnAPI(anotherObject)
+                    }
+
+                    it("sends a REST request") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            do {
+                                _ = try sut.fetchAllChecksumsWithRest(beamObjectType: "my_remote_object") { result in
+                                    switch result {
+                                    case .failure(let error):
+                                        fail(error.localizedDescription)
+                                    case .success(let beamObjects):
+                                        let checksum = (try? object.checksum())
+                                        let checksums: [String?] = beamObjects.map { beamObject in
+                                            beamObject.dataChecksum
+                                        }
+
+                                        expect(checksums).to(contain(checksum))
+                                        expect(beamObjects).to(haveCount(2))
                                     }
                                     done()
                                 }
