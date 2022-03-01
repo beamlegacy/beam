@@ -90,6 +90,24 @@ struct Configuration {
         }
     }
 
+    static private(set) var beamObjectOnRestDefault = false
+
+    static private var beamObjectOnRestKey = "beamObjectOnRestKey"
+    static var beamObjectOnRest: Bool {
+        get {
+            if UserDefaults.standard.object(forKey: beamObjectOnRestKey) != nil {
+                return UserDefaults.standard.bool(forKey: beamObjectOnRestKey)
+            }
+
+            return beamObjectOnRestDefault
+        }
+        set {
+            if newValue != beamObjectOnRest {
+                UserDefaults.standard.set(newValue, forKey: beamObjectOnRestKey)
+            }
+        }
+    }
+
     static private var apiHostnameKey = "apiHostname"
     static var apiHostname: String {
         get {

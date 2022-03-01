@@ -327,6 +327,8 @@
 		522D48A82719D2990038DB81 /* NSTableView+ScrollToVisible.swift in Sources */ = {isa = PBXBuildFile; fileRef = 522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */; };
 		522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */; };
 		523060A827426D1400A03844 /* BeamObjectManagerCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523060A727426D1400A03844 /* BeamObjectManagerCall.swift */; };
+		5232182227CE340800B753EF /* APIRequest+REST+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5232182127CE340800B753EF /* APIRequest+REST+Foundation.swift */; };
+		5232182B27CE4E5600B753EF /* BeamObjectRequestTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5232182A27CE4E5600B753EF /* BeamObjectRequestTests.swift */; };
 		523416A22629D465001F306F /* BeamCoreDataObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523416A12629D465001F306F /* BeamCoreDataObject.swift */; };
 		523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */ = {isa = PBXBuildFile; fileRef = 523FF66025C31D8800B4BD6E /* Data+String.swift */; };
 		5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5241E5E826F89AE700B08F69 /* UserSessionRequest+Foundation.swift */; };
@@ -1651,6 +1653,8 @@
 		522D48A72719D2990038DB81 /* NSTableView+ScrollToVisible.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSTableView+ScrollToVisible.swift"; sourceTree = "<group>"; };
 		522F149227033DE000EDF2F6 /* beam_object_checksums.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = beam_object_checksums.graphql; sourceTree = "<group>"; };
 		523060A727426D1400A03844 /* BeamObjectManagerCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectManagerCall.swift; sourceTree = "<group>"; };
+		5232182127CE340800B753EF /* APIRequest+REST+Foundation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIRequest+REST+Foundation.swift"; sourceTree = "<group>"; };
+		5232182A27CE4E5600B753EF /* BeamObjectRequestTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamObjectRequestTests.swift; sourceTree = "<group>"; };
 		523416A12629D465001F306F /* BeamCoreDataObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamCoreDataObject.swift; sourceTree = "<group>"; };
 		523FF66025C31D8800B4BD6E /* Data+String.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+String.swift"; sourceTree = "<group>"; };
 		523FF67825C31D9D00B4BD6E /* String+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Data.swift"; sourceTree = "<group>"; };
@@ -3080,6 +3084,7 @@
 				4181715D2581107C00317ED8 /* GraphqlRequestsTypes */,
 				418171662581107C00317ED8 /* GraphqlRequests */,
 				418171642581107C00317ED8 /* APIRequest.swift */,
+				5232182127CE340800B753EF /* APIRequest+REST+Foundation.swift */,
 				529599F6272718CD00F3F843 /* APIRequest+Foundation.swift */,
 				529599F8272718DB00F3F843 /* APIRequest+PromiseKit.swift */,
 				529599FA272718E300F3F843 /* APIRequest+Promises.swift */,
@@ -3768,6 +3773,22 @@
 			path = GraphQLRequests;
 			sourceTree = "<group>";
 		};
+		5232182827CE4E3F00B753EF /* BeamObjects */ = {
+			isa = PBXGroup;
+			children = (
+				5232182927CE4E4600B753EF /* BeamObjectRequests */,
+			);
+			path = BeamObjects;
+			sourceTree = "<group>";
+		};
+		5232182927CE4E4600B753EF /* BeamObjectRequests */ = {
+			isa = PBXGroup;
+			children = (
+				5232182A27CE4E5600B753EF /* BeamObjectRequestTests.swift */,
+			);
+			path = BeamObjectRequests;
+			sourceTree = "<group>";
+		};
 		523A32C72677648700606768 /* Configuration */ = {
 			isa = PBXGroup;
 			children = (
@@ -3919,6 +3940,7 @@
 		5298647A25D151AD00D27A80 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				5232182827CE4E3F00B753EF /* BeamObjects */,
 				5273C65625DA834600B00EC3 /* API */,
 				5298648F25D151B600D27A80 /* Network */,
 				A51F55602733333D002C5584 /* EmbedContentBuilderTests.swift */,
@@ -6788,6 +6810,7 @@
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteListView.swift in Sources */,
 				8AF4F7CD275A67190081B6B5 /* EmbedContentLocalStrategy.swift in Sources */,
+				5232182227CE340800B753EF /* APIRequest+REST+Foundation.swift in Sources */,
 				527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */,
 				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */,
@@ -7485,6 +7508,7 @@
 				759442D726FCA86E00CBFB7A /* ErrorPageManagerTests.swift in Sources */,
 				522C30E92726F7CB00805319 /* EnvironmentVariablesTests.swift in Sources */,
 				A545D30625F7D93B00E68F94 /* MathsTests.swift in Sources */,
+				5232182B27CE4E5600B753EF /* BeamObjectRequestTests.swift in Sources */,
 				DAEEA77C26A701CC00AE72DE /* NoteSourceTests.swift in Sources */,
 				DA5C63E5274BEF31001F7CEF /* AutocompleteResultTest.swift in Sources */,
 				8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */,

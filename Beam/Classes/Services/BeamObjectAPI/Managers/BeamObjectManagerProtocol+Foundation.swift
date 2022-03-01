@@ -64,7 +64,7 @@ extension BeamObjectManagerDelegate {
         let uuids = objects.map { $0.beamObjectId }
         let semaphores = BeamObjectManagerCall.objectsSemaphores(uuids: uuids)
         semaphores.forEach {
-            let semaResult = $0.wait(timeout: DispatchTime.now() + .seconds(10))
+            let semaResult = $0.wait(timeout: DispatchTime.now() + .seconds(600))
 
             if case .timedOut = semaResult {
                 Logger.shared.logError("network semaphore expired", category: .beamObjectNetwork)
