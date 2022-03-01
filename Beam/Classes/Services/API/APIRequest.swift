@@ -218,6 +218,94 @@ class APIRequest: NSObject {
         }
     }
 
+    func parseDataTask<T: Decodable & Errorable>(data: Data?,
+                                                 response: URLResponse?,
+                                                 error: Error?,
+                                                 filename: String,
+                                                 authenticatedCall: Bool? = nil,
+                                                 completionHandler: @escaping (Swift.Result<T, Error>) -> Void) {
+
+        var localTimer = BeamDate.now
+        let callsCount = Self.callsCount
+
+        guard let dataTask = self.dataTask else {
+            self.backgroundQueue.async {
+                completionHandler(.failure(APIRequestError.parserError))
+            }
+            return
+        }
+
+        var countOfBytesReceived: Int64 = 0
+        var countOfBytesSent: Int64 = 0
+
+        if dataTask.responds(to: Selector(("countOfBytesReceived"))) {
+            countOfBytesReceived = dataTask.countOfBytesReceived
+        }
+
+        if dataTask.responds(to: Selector(("countOfBytesSent"))) {
+            countOfBytesSent = dataTask.countOfBytesSent
+        }
+
+        Self.downloadedBytes += countOfBytesReceived
+        Self.uploadedBytes += countOfBytesSent
+        Self.callsCount += 1
+
+        // Quit early in case of already cancelled requests
+        if let error = error as NSError?, error.code == NSURLErrorCancelled {
+            /*
+             In such case, we already potentially sent and received all data, and maybe should just proceed like a
+             regular request if we can parse its result meaning it's a fullfilled request.
+
+             This way we can store the sent checksum as previousChecksum
+             */
+
+            self.logCancelledRequest(filename, localTimer)
+            self.backgroundQueue.async {
+                completionHandler(.failure(error))
+            }
+            return
+        }
+
+        self.logRequest(filename,
+                        response,
+                        localTimer,
+                        callsCount,
+                        countOfBytesSent,
+                        countOfBytesReceived,
+                        authenticatedCall ?? self.authenticatedAPICall)
+
+        if let error = error {
+            self.backgroundQueue.async {
+                completionHandler(.failure(error))
+            }
+            self.handleNetworkError(error)
+            return
+        }
+
+        do {
+            localTimer = BeamDate.now
+
+            let value: T = try self.manageResponse(data, response)
+
+            let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+            if diffTime > 0.1 {
+                Logger.shared.logWarning("Parsed network response (\(data?.count.byteSize ?? "-"))",
+                                         category: .network,
+                                         localTimer: localTimer)
+            }
+
+            self.backgroundQueue.async {
+                completionHandler(.success(value))
+            }
+        } catch {
+            Logger.shared.logError("Can't parse into \(T.self): \(data?.asString ?? "-")", category: .network)
+            Logger.shared.logError(error.localizedDescription, category: .network)
+            self.backgroundQueue.async {
+                completionHandler(.failure(error))
+            }
+        }
+    }
+
     private func handleTopLevelErrors(_ errors: [ErrorData]) -> Error {
         let error: Error
         if errors[0].message == "Couldn't find Device" {

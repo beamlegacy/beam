@@ -4,7 +4,6 @@ query BeamObjectsChecksums($receivedAtAfter: ISO8601DateTime, $ids: [ID!], $beam
       id
       type
       checksum
-      receivedAt
     }
   }
 }
