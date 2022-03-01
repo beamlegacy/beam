@@ -36,6 +36,7 @@ struct AdvancedPreferencesView: View {
     @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
     @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
     @State var isWebsocketEnabled = Configuration.websocketEnabled
+    @State var restBeamObject = Configuration.beamObjectOnRest
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -104,6 +105,9 @@ struct AdvancedPreferencesView: View {
                 }
                 Preferences.Section(title: "Direct Download") {
                     DirectDownload
+                }
+                Preferences.Section(title: "REST API") {
+                    RestBeamObject
                 }
                 Preferences.Section(title: "", bottomDivider: true) {
                     Button(action: {
@@ -569,6 +573,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([isDirectUploadOn].publisher.first()) {
                 Configuration.beamObjectDataUploadOnSeparateCall = $0
+            }
+    }
+
+    private var RestBeamObject: some View {
+        return Toggle(isOn: $restBeamObject) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([restBeamObject].publisher.first()) {
+                Configuration.beamObjectOnRest = $0
             }
     }
 

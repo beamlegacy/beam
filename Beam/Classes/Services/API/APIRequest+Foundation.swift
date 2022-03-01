@@ -13,7 +13,6 @@ extension APIRequest {
         let request = try makeUrlRequest(bodyParamsRequest, authenticatedCall: authenticatedCall)
 
         let filename = bodyParamsRequest.fileName ?? "no filename"
-        let callsCount = Self.callsCount
 
         #if DEBUG
         Self.networkCallFilesSemaphore.wait()
@@ -35,85 +34,13 @@ extension APIRequest {
         // code called in the completion handler is blocking, it will prevent new following requests
         // to be parsed in the NSURLSession delegate callback thread
 
-        var localTimer = BeamDate.now
-
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
-            guard let dataTask = self.dataTask else {
-                self.backgroundQueue.async {
-                    completionHandler(.failure(APIRequestError.parserError))
-                }
-                return
-            }
-
-            var countOfBytesReceived: Int64 = 0
-            var countOfBytesSent: Int64 = 0
-
-            if dataTask.responds(to: Selector(("countOfBytesReceived"))) {
-                countOfBytesReceived = dataTask.countOfBytesReceived
-            }
-
-            if dataTask.responds(to: Selector(("countOfBytesSent"))) {
-                countOfBytesSent = dataTask.countOfBytesSent
-            }
-
-            Self.downloadedBytes += countOfBytesReceived
-            Self.uploadedBytes += countOfBytesSent
-            Self.callsCount += 1
-
-            // Quit early in case of already cancelled requests
-            if let error = error as NSError?, error.code == NSURLErrorCancelled {
-                /*
-                 In such case, we already potentially sent and received all data, and maybe should just proceed like a
-                 regular request if we can parse its result meaning it's a fullfilled request.
-
-                 This way we can store the sent checksum as previousChecksum
-                 */
-
-                self.logCancelledRequest(filename, localTimer)
-                self.backgroundQueue.async {
-                    completionHandler(.failure(error))
-                }
-                return
-            }
-
-            self.logRequest(filename,
-                            response,
-                            localTimer,
-                            callsCount,
-                            countOfBytesSent,
-                            countOfBytesReceived,
-                            authenticatedCall ?? self.authenticatedAPICall)
-
-            if let error = error {
-                self.backgroundQueue.async {
-                    completionHandler(.failure(error))
-                }
-                self.handleNetworkError(error)
-                return
-            }
-
-            do {
-                localTimer = BeamDate.now
-
-                let value: T = try self.manageResponse(data, response)
-
-                let diffTime = BeamDate.now.timeIntervalSince(localTimer)
-                if diffTime > 0.1 {
-                    Logger.shared.logWarning("Parsed network response (\(data?.count.byteSize ?? "-"))",
-                                             category: .network,
-                                             localTimer: localTimer)
-                }
-
-                self.backgroundQueue.async {
-                    completionHandler(.success(value))
-                }
-            } catch {
-                Logger.shared.logError("Can't parse into \(T.self): \(data?.asString ?? "-")", category: .network)
-                Logger.shared.logError(error.localizedDescription, category: .network)
-                self.backgroundQueue.async {
-                    completionHandler(.failure(error))
-                }
-            }
+            self.parseDataTask(data: data,
+                               response: response,
+                               error: error,
+                               filename: filename,
+                               authenticatedCall: authenticatedCall,
+                               completionHandler: completionHandler)
         }
 
         dataTask?.resume()
@@ -135,13 +62,13 @@ extension APIRequest {
     }
 
     // swiftlint:disable:next function_parameter_count
-    private func logRequest(_ filename: String,
-                            _ response: URLResponse?,
-                            _ localTimer: Date,
-                            _ callsCount: Int,
-                            _ bytesSent: Int64,
-                            _ bytesReceived: Int64,
-                            _ authenticated: Bool) {
+    func logRequest(_ filename: String,
+                    _ response: URLResponse?,
+                    _ localTimer: Date,
+                    _ callsCount: Int,
+                    _ bytesSent: Int64,
+                    _ bytesReceived: Int64,
+                    _ authenticated: Bool) {
 
         #if DEBUG
         if !Self.expectedCallFiles.isEmpty, !Self.expectedCallFiles.starts(with: Self.networkCallFiles) {
@@ -170,8 +97,8 @@ extension APIRequest {
         #endif
     }
 
-    private func logCancelledRequest(_ filename: String,
-                                     _ localTimer: Date) {
+    func logCancelledRequest(_ filename: String,
+                             _ localTimer: Date) {
         #if DEBUG_API_0
         let diffTime = BeamDate.now.timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
@@ -180,8 +107,8 @@ extension APIRequest {
     }
 
     // swiftlint:disable:next cyclomatic_complexity
-    private func manageResponse<T: Decodable & Errorable>(_ data: Data?,
-                                                          _ response: URLResponse?) throws -> T {
+    func manageResponse<T: Decodable & Errorable>(_ data: Data?,
+                                                  _ response: URLResponse?) throws -> T {
         guard let httpResponse = response as? HTTPURLResponse else {
             throw APIRequestError.parserError
         }
@@ -211,7 +138,14 @@ extension APIRequest {
                 throw APIRequestError.error
             }
 
+            let localTimer = BeamDate.now
             let jsonStruct = try self.defaultDecoder().decode(APIRequest.APIResult<T>.self, from: data)
+            let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+            if diffTime > 0.1 {
+                Logger.shared.logWarning("Parsed network response from JSON to Beam Objects",
+                                         category: .network,
+                                         localTimer: localTimer)
+            }
 
             if let errors = jsonStruct.errors, !errors.isEmpty {
                 throw APIRequestError.apiRequestErrors(errors)

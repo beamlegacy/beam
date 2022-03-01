@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import XCTest
 
 // swiftlint:disable function_length file_length
 
@@ -309,6 +310,23 @@ extension BeamObjectRequest {
         return try fetchAllWithFile("beam_objects", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
+    func fetchAllWithRest(receivedAtAfter: Date? = nil,
+                          ids: [UUID]? = nil,
+                          beamObjectType: String? = nil,
+                          skipDeleted: Bool? = false,
+                          raisePrivateKeyError: Bool = false,
+                          _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+        let parameters: [String: String] = [:]
+        let fields: String = "id,createdAt,updatedAt,deletedAt,receivedAt,data,type,checksum,privateKeySignature"
+
+//        BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
+//                                               ids: ids,
+//                                               beamObjectType: beamObjectType,
+//                                               skipDeleted: skipDeleted)
+
+        return try fetchAllWithRest(fields, parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
+    }
+
     @discardableResult
     func fetchAllWithDataUrl(receivedAtAfter: Date? = nil,
                              ids: [UUID]? = nil,
@@ -340,6 +358,64 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
+    func fetchAllChecksumsWithRest(receivedAtAfter: Date? = nil,
+                                   ids: [UUID]? = nil,
+                                   beamObjectType: String? = nil,
+                                   skipDeleted: Bool? = false,
+                                   raisePrivateKeyError: Bool = false,
+                                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+        var parameters: [String: String] = [:]
+        let fields: String = "id,checksum"
+
+        if let ids = ids {
+            ids.forEach {
+                parameters["ids[]"] = $0.uuidString.lowercased()
+            }
+        }
+
+        if let beamObjectType = beamObjectType {
+            parameters["beam_object_type"] = beamObjectType
+        }
+
+        if let skipDeleted = skipDeleted {
+            parameters["filter_deleted"] = skipDeleted ? "true" : "false"
+        }
+
+        if let receivedAtAfter = receivedAtAfter {
+            parameters["received_at_after"] = receivedAtAfter.iso8601withFractionalSeconds
+        }
+
+        return try fetchAllWithRest(fields, parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
+    }
+
+    @discardableResult
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
+    private func fetchAllWithRest(_ fields: String,
+                                  _ parameters: [String: String],
+                                  raisePrivateKeyError: Bool,
+                                  _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+
+        return try performRestRequest(path: .checksums,
+                                      queryParams: parameters,
+                                      authenticatedCall: true,
+                                      completionHandler: { (result: Swift.Result<UserMe, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success(let me):
+                guard let beamObjects = me.beamObjects else {
+                    completion(.failure(APIRequestError.parserError))
+                    return
+                }
+
+                self.parseBeamObjects(beamObjects: beamObjects,
+                                      raisePrivateKeyError: raisePrivateKeyError,
+                                      completion)
+            }
+        })
+    }
+
+    @discardableResult
     // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func fetchAllWithFile<T: Encodable>(_ filename: String,
                                                 _ parameters: T,
@@ -356,92 +432,99 @@ extension BeamObjectRequest {
                     completion(.failure(APIRequestError.parserError))
                     return
                 }
-                /*
-                 We cover all cases:
-                 - if `dataUrl` was requested, it will fetch the data in another network call, set `data` then return the object
-                 - if `dataUrl` wasn't requested, it just returns the object
-                 */
 
-                let callback = {
-                    /*
-                     When fetching all beam objects, we decrypt them if needed. We might have decryption issue
-                     like not having the key it was encrypted with. In such case we filter those out as the calling
-                     code wouldn't know what to do with it anyway.
-                     */
-                    do {
-                        var invalidObjects = [BeamObject]()
-                        let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
-                            do {
-                                try $0.decrypt()
-                                try $0.setTimestamps()
-                                return $0
-                            } catch EncryptionManagerError.authenticationFailure {
-                                Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
-                            } catch BeamObject.BeamObjectError.differentEncryptionKey {
-                                let privateKeySignature = try EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
-                                invalidObjects.append($0)
-                                Logger.shared.logError("Can't decrypt beam object, private key \($0.privateKeySignature ?? "-") unavailable. Current private key: \(privateKeySignature).", category: .beamObjectNetwork)
-                            }
-
-                            return nil
-                        }
-
-                        if decryptedObjects.count < beamObjects.count && raisePrivateKeyError {
-//                            UserAlert.showError(message: "Encryption error",
-//                                                informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
-                            completion(.failure(BeamObjectRequestError.privateKeyError(validObjects: decryptedObjects, invalidObjects: invalidObjects)))
-                        } else {
-                            completion(.success(decryptedObjects))
-                        }
-                    } catch {
-                        // Will catch anything but encryption errors
-                        completion(.failure(error))
-                        return
-                    }
-                }
-
-                guard !beamObjects.compactMap({ $0.dataUrl }).isEmpty else {
-                    callback()
-                    return
-                }
-
-                let group = DispatchGroup()
-                let lock = DispatchSemaphore(value: 1)
-
-                // TODO: are all those fetches optimized, what happens when we have 1,000 objects?
-                // Could we limit the amount of parallel calls? Can we stream multiple into the same HTTP Request?
-                for beamObject in beamObjects {
-                    guard let dataUrl = beamObject.dataUrl else { continue }
-
-                    do {
-                        group.enter()
-                        try self.fetchDataFromUrl(urlString: dataUrl) { result in
-                            switch result {
-                            case .failure(let error):
-                                Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
-                            case .success(let data):
-                                lock.wait()
-                                beamObject.data = data
-                                lock.signal()
-                            }
-                            group.leave()
-                        }
-                    } catch {
-                        Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
-                    }
-
-                    // This code is multi-threaded, with vinyl once network calls are saved, it might take one for another
-                    // because not in the same order, adding a sleep should fix that
-                    if Configuration.env == .test {
-                        usleep(100000) // 0.1s
-                    }
-                }
-
-                group.wait()
-
-                callback()
+                self.parseBeamObjects(beamObjects: beamObjects,
+                                      raisePrivateKeyError: raisePrivateKeyError,
+                                      completion)
             }
         }
+    }
+
+    private func parseBeamObjects(beamObjects: [BeamObject], raisePrivateKeyError: Bool, _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) {
+        /*
+         We cover all cases:
+         - if `dataUrl` was requested, it will fetch the data in another network call, set `data` then return the object
+         - if `dataUrl` wasn't requested, it just returns the object
+         */
+
+        let callback = {
+            /*
+             When fetching all beam objects, we decrypt them if needed. We might have decryption issue
+             like not having the key it was encrypted with. In such case we filter those out as the calling
+             code wouldn't know what to do with it anyway.
+             */
+            do {
+                var invalidObjects = [BeamObject]()
+                let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
+                    do {
+                        try $0.decrypt()
+                        try $0.setTimestamps()
+                        return $0
+                    } catch EncryptionManagerError.authenticationFailure {
+                        Logger.shared.logError("Can't decrypt \($0)", category: .beamObjectNetwork)
+                    } catch BeamObject.BeamObjectError.differentEncryptionKey {
+                        let privateKeySignature = try EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString().SHA256()
+                        invalidObjects.append($0)
+                        Logger.shared.logError("Can't decrypt beam object, private key \($0.privateKeySignature ?? "-") unavailable. Current private key: \(privateKeySignature).", category: .beamObjectNetwork)
+                    }
+
+                    return nil
+                }
+
+                if decryptedObjects.count < beamObjects.count && raisePrivateKeyError {
+//                            UserAlert.showError(message: "Encryption error",
+//                                                informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
+                    completion(.failure(BeamObjectRequestError.privateKeyError(validObjects: decryptedObjects, invalidObjects: invalidObjects)))
+                } else {
+                    completion(.success(decryptedObjects))
+                }
+            } catch {
+                // Will catch anything but encryption errors
+                completion(.failure(error))
+                return
+            }
+        }
+
+        guard !beamObjects.compactMap({ $0.dataUrl }).isEmpty else {
+            callback()
+            return
+        }
+
+        let group = DispatchGroup()
+        let lock = DispatchSemaphore(value: 1)
+
+        // TODO: are all those fetches optimized, what happens when we have 1,000 objects?
+        // Could we limit the amount of parallel calls? Can we stream multiple into the same HTTP Request?
+        for beamObject in beamObjects {
+            guard let dataUrl = beamObject.dataUrl else { continue }
+
+            do {
+                group.enter()
+                try self.fetchDataFromUrl(urlString: dataUrl) { result in
+                    switch result {
+                    case .failure(let error):
+                        Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+                    case .success(let data):
+                        lock.wait()
+                        beamObject.data = data
+                        lock.signal()
+                    }
+                    group.leave()
+                }
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
+            }
+
+            // This code is multi-threaded, with vinyl once network calls are saved, it might take one for another
+            // because not in the same order, adding a sleep should fix that
+            if Configuration.env == .test {
+                usleep(100000) // 0.1s
+            }
+        }
+
+        group.wait()
+
+        callback()
     }
 
     @discardableResult

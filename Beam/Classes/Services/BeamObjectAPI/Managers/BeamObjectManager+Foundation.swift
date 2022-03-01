@@ -158,16 +158,14 @@ extension BeamObjectManager {
             Logger.shared.logDebug("Using lastReceivedAt for BeamObjects API call: \(lastReceivedAt.iso8601withFractionalSeconds)",
                                    category: .beamObjectNetwork)
         } else {
-            Logger.shared.logDebug("No previous lastReceivedAt for BeamObjects API call",
+            Logger.shared.logDebug("No previous lastReceivedAt for BeamObjects API call, skip checksums",
                                    category: .beamObjectNetwork)
+
+            try self.fetchAllFromAPI(completion)
+            return
         }
 
         var localTimer = BeamDate.now
-
-        /*
-         TODO: when we have no local data, and never did any sync, we don't need to fetch remote checksums,
-         we should just fetch all remote objects
-         */
 
         try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
                                           skipDeleted: Persistence.Sync.BeamObjects.last_received_at == nil) { result in
@@ -214,50 +212,7 @@ extension BeamObjectManager {
                         return
                     }
 
-                    let beamRequestForIds = BeamObjectRequest()
-
-                    try beamRequestForIds.fetchAll(receivedAtAfter: nil, ids: ids) { result in
-                        switch result {
-                        case .failure(let error):
-                            Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(error.localizedDescription)",
-                                                   category: .beamObjectNetwork)
-                            completion(.failure(error))
-                        case .success(let beamObjects):
-                            // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
-                            // If not doing a delta sync, we don't as we want to update local document as `deleted`
-                            guard lastReceivedAt == nil || !beamObjects.isEmpty else {
-                                Logger.shared.logDebug("0 beam object fetched", category: .beamObjectNetwork)
-                                completion(.success(true))
-                                return
-                            }
-
-                            if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
-                                Persistence.Sync.BeamObjects.last_received_at = mostRecentReceivedAt
-                                Logger.shared.logDebug("new ReceivedAt: \(mostRecentReceivedAt.iso8601withFractionalSeconds). \(beamObjects.count) beam objects fetched",
-                                                       category: .beamObjectNetwork)
-                            }
-
-                            do {
-                                let parsedFilteredObjects = self.filteredObjects(beamObjects)
-                                try self.parseFilteredObjects(parsedFilteredObjects)
-
-                                // Note: you don't need to save checksum here, they are saved in `translators[object.beamObjectType]` callback
-                                // called by `parseFilteredObjects`
-
-                                completion(.success(true))
-                                return
-                            } catch {
-                                AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
-                                completion(.failure(error))
-                            }
-                        }
-                    }
-
-                    #if DEBUG
-                    DispatchQueue.main.async {
-                        Self.networkRequests.append(beamRequestForIds)
-                    }
-                    #endif
+                    try self.fetchAllFromAPI(ids: ids, completion)
                 } catch {
                     AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
                     completion(.failure(error))
@@ -278,8 +233,6 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        let beamRequest = BeamObjectRequest()
-
         let lastReceivedAt: Date? = Persistence.Sync.BeamObjects.last_received_at
 
         if let lastReceivedAt = lastReceivedAt {
@@ -290,7 +243,14 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        try beamRequest.fetchAll(receivedAtAfter: lastReceivedAt) { result in
+        try fetchAllFromAPI(lastReceivedAt: lastReceivedAt, completion)
+    }
+
+    private func fetchAllFromAPI(lastReceivedAt: Date? = nil,
+                                 ids: [UUID]? = nil,
+                                 _ completion: @escaping ((Result<Bool, Error>) -> Void)) throws {
+        let beamRequest = BeamObjectRequest()
+        try beamRequest.fetchAll(receivedAtAfter: lastReceivedAt, ids: ids) { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logDebug("fetchAllFromAPI: \(error.localizedDescription)",
@@ -424,7 +384,16 @@ extension BeamObjectManager {
         for objectsToSaveChunked in objectsToSave.chunked(into: 1000) {
             let request = BeamObjectRequest()
 
+            if objectsToSave.count > 1000 {
+                Logger.shared.logDebug("About to save \(objectsToSaveChunked.count) objects",
+                                       category: .beamObjectNetwork)
+            }
+
+            let semaphore = DispatchSemaphore(value: 0)
+
             try request.save(objectsToSaveChunked) { result in
+                semaphore.signal()
+
                 switch result {
                 case .failure(let error):
                     self.saveToAPIFailure(objects, error, completion)
@@ -439,6 +408,7 @@ extension BeamObjectManager {
                     }
                 }
             }
+            semaphore.wait()
         }
 
         completion(.success(objects))
