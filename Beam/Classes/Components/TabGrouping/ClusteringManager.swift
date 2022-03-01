@@ -58,7 +58,7 @@ class ClusteringManager: ObservableObject {
     var initialiseNotes = false
     var ranker: SessionLinkRanker
     var activeSources: ActiveSources
-    @Published var noteToAdd: BeamNote?
+    let noteToAdd = PassthroughSubject<BeamNote, Never>()
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
@@ -136,12 +136,10 @@ class ClusteringManager: ObservableObject {
     }
 
     private func setupObservers() {
-        $noteToAdd
+        self.noteToAdd
             .debounce(for: .milliseconds(1000), scheduler: RunLoop.main)
             .sink { value in
-                if let note = value {
-                    self.addNote(note: note)
-                }
+                self.addNote(note: value)
             }.store(in: &scope)
     }
 
