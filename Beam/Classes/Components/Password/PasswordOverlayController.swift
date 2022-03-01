@@ -118,13 +118,11 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
 
         let addedIds = fieldClassifiers?.classify(fields: elements, host: getPageHost(), frameInfo: frameInfo) ?? []
-        let values = [String: String](uniqueKeysWithValues: elements.compactMap { element in
+        let values: [String: String] = elements.reduce(into: [:]) { dict, element in
             if let value = element.value {
-                return (element.beamId, value)
-            } else {
-                return nil
+                dict[element.beamId] = value
             }
-        })
+        }
         if !values.isEmpty {
             self.updateStoredValues(with: values, userInput: false, frameInfo: frameInfo)
         }

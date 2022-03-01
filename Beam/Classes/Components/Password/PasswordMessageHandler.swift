@@ -34,7 +34,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
             passwordOverlayController.requestInputFields(frameInfo: frameInfo)
 
         case .PasswordManager_textInputFields:
-            guard let dict = messageBody as? [String: AnyObject],
+            guard let dict = messageBody as? [String: Any],
                 let jsonString = dict["textFieldsString"] as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
@@ -42,7 +42,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
             passwordOverlayController.updateInputFields(with: jsonString, frameInfo: frameInfo)
 
         case .PasswordManager_textInputFocusIn:
-            guard let dict = messageBody as? [String: AnyObject],
+            guard let dict = messageBody as? [String: Any],
                   let elementId = dict["id"] as? String
             else {
                 Logger.shared.logError("Ignoring focus event: \(String(describing: messageBody))", category: .web)
@@ -52,7 +52,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
             passwordOverlayController.inputFieldDidGainFocus(elementId, frameInfo: frameInfo, contents: text)
 
         case .PasswordManager_textInputFocusOut:
-            guard let dict = messageBody as? [String: AnyObject],
+            guard let dict = messageBody as? [String: Any],
                   let elementId = dict["id"] as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
@@ -60,7 +60,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
             passwordOverlayController.inputFieldDidLoseFocus(elementId, frameInfo: frameInfo)
 
         case .PasswordManager_formSubmit:
-            guard let dict = messageBody as? [String: AnyObject],
+            guard let dict = messageBody as? [String: Any],
                   let elementId = dict["id"] as? String else {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
@@ -68,7 +68,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
             passwordOverlayController.handleWebFormSubmit(with: elementId, frameInfo: frameInfo)
 
         case .PasswordManager_resize:
-            let passwordBody = messageBody as? [String: AnyObject]
+            let passwordBody = messageBody as? [String: Any]
             guard let dict = passwordBody,
                   let width = dict["width"] as? CGFloat,
                   let height = dict["height"] as? CGFloat
