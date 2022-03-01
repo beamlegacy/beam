@@ -17,15 +17,18 @@ class WebNoteControllerTest_setContents: XCTestCase {
     var complexTextController: WebNoteController!
     var url = URL(string: urlString)!
     static var urlString = "https://www.google.com/search?q=duck&client=safari"
+    var notes = [BeamNote]()
 
     func createController(child: BeamElement) -> WebNoteController {
         let note = BeamNote(title: "Sample note")
         note.addChild(child)
         let root = note.children[0]
+        notes.append(note)
         return WebNoteController(note: note, rootElement: root)
     }
 
     override func setUpWithError() throws {
+        notes.removeAll()
         self.simpleTextController = self.createController(child: BeamElement("lama"))
         self.textLinkController = self.createController(child: BeamElement(BeamText(text: "lama", attributes: [.link(url.absoluteString)])))
         self.textEmphasisController = self.createController(child: BeamElement(BeamText(text: "lama", attributes: [.emphasis])))
