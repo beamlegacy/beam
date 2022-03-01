@@ -163,21 +163,21 @@ extension WebPage {
 
         let viewModel = SearchViewModel(context: .web) { [weak self] search in
             self?.find(search, using: "find")
-        } onLocationIndicatorTap: { position in
-            _ = self.executeJS("window.scrollTo(0, \(position));", objectName: nil)
+        } onLocationIndicatorTap: { [weak self] position in
+            self?.executeJS("window.scrollTo(0, \(position));", objectName: nil)
         } next: { [weak self] search in
             self?.find(search, using: "findNext")
         } previous: { [weak self] search in
             self?.find(search, using: "findPrevious")
         } done: { [weak self] in
-            self?.webView.page?.executeJS("findDone()", objectName: "SearchWebPage")
+            self?.executeJS("findDone()", objectName: "SearchWebPage")
             self?.searchViewModel = nil
         }
 
         self.searchViewModel = viewModel
 
         if fromSelection {
-            self.webView.page?.executeJS("getSelection()", objectName: "SearchWebPage")
+            self.executeJS("getSelection()", objectName: "SearchWebPage")
         }
     }
 
@@ -189,6 +189,6 @@ extension WebPage {
 
     func find(_ search: String, using function: String) {
         let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
-        self.webView.page?.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
+        self.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
     }
 }
