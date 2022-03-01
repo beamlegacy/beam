@@ -38,7 +38,7 @@ class WebNavigationMessageHandler: SimpleBeamMessageHandler {
             guard let navigationController = webPage.navigationController else { return }
             let replace: Bool = type == "replaceState" ? true : false
             navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace, fromJS: true)
-            _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
+            webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
         }
     }
 }
