@@ -373,7 +373,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func openOauthWebViewWindow(title: String?) -> OauthWebViewWindow {
         if let oauthWindow = oauthWebViewWindow { return oauthWindow }
 
-        oauthWebViewWindow = OauthWebViewWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 700))
+        let windowSize = CGSize(width: 600, height: 700)
+        oauthWebViewWindow = OauthWebViewWindow(contentRect: CGRect(origin: .zero, size: windowSize))
+        oauthWebViewWindow?.setContentSize(windowSize)
+
         guard let oauthWindow = oauthWebViewWindow else { fatalError("Can't create oauthwindow") }
 
         if let title = title {
