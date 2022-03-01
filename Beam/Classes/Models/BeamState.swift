@@ -156,7 +156,7 @@ import Sentry
         switch mode {
         case .web:
             let noteController = currentTab?.noteController
-            if currentTab?.originMode == .today, let note = noteController?.note, note.type.isJournal {
+            if currentTab?.originMode != .note, let note = noteController?.note, note.type.isJournal {
                 navigateToJournal(note: note)
             } else if let note = noteController?.note ?? currentNote {
                 navigateToNote(note)
