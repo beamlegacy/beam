@@ -22,7 +22,6 @@ import Sentry
             EventsTracker.logBreadcrumb(message: "currentNote changed to \(String(describing: currentNote))", category: "BeamState")
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
-                observeNoteDeletion(note)
             }
             focusOmniBox = false
         }
@@ -516,6 +515,7 @@ import Sentry
         }.store(in: &scope)
 
         setDefaultDisplayMode()
+        setupObservers()
     }
 
     enum CodingKeys: String, CodingKey {
@@ -544,6 +544,7 @@ import Sentry
 
         setup(data: data)
         mode = try container.decode(Mode.self, forKey: .mode)
+        setupObservers()
     }
 
     func encode(to encoder: Encoder) throws {
@@ -622,18 +623,20 @@ import Sentry
         destinationCardIsFocused = false
     }
 
-    private var noteDeletionCancellable: AnyCancellable?
-    func observeNoteDeletion(_ note: BeamNote) {
-        noteDeletionCancellable = note.$deleted.sink { [weak self, weak note] deleted in
-            guard deleted else { return }
-            self?.noteDeletionCancellable = nil
-            guard let note = note, self?.mode == .note, self?.currentNote == note else { return }
-            self?.navigateToJournal(note: nil)
-
-            UserAlert.showError(message: "The note '\(note.title)' has been deleted.",
-                                informativeText: "Navigating back to the journal.")
-        }
+    var cancellables = Set<AnyCancellable>()
+    private func setupObservers() {
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+            .sink { [weak self] id in
+                guard let self = self else { return }
+                if self.currentNote?.id == id {
+                    self.currentNote = nil
+                    if self.mode == .note {
+                        self.navigateToJournal(note: nil)
+                    }
+                }
+            }.store(in: &cancellables)
     }
+
 }
 
 // MARK: - Browser Tabs
