@@ -96,15 +96,25 @@ class PasswordManager {
     }
 
     @discardableResult
-    func save(hostname: String,
+    func save(entry: PasswordManagerEntry? = nil,
+              hostname: String,
               username: String,
               password: String,
               uuid: UUID? = nil,
               _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> PasswordRecord? {
         do {
+            let previousHostname: String
+            let previousUsername: String
+            if let entry = entry {
+                previousHostname = entry.minimizedHost
+                previousUsername = entry.username
+            } else {
+                previousHostname = hostname
+                previousUsername = username
+            }
             let passwordRecord: PasswordRecord
-            if let previousRecord = try? passwordsDB.passwordRecord(hostname: hostname, username: username) {
-                passwordRecord = try passwordsDB.update(record: previousRecord, password: password, uuid: uuid)
+            if let previousRecord = try? passwordsDB.passwordRecord(hostname: previousHostname, username: previousUsername) {
+                passwordRecord = try passwordsDB.update(record: previousRecord, hostname: hostname, username: username, password: password, uuid: uuid)
             } else {
                 passwordRecord = try passwordsDB.save(hostname: hostname, username: username, password: password, uuid: uuid)
             }
