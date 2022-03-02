@@ -374,7 +374,7 @@
                 ]
               },
               {
-                "string" : " at the bottom of this card? It's all connected already!"
+                "string" : " at the bottom of this note? It's all connected already!"
               }
             ]
           }
@@ -412,7 +412,7 @@
           "text" : {
             "ranges" : [
               {
-                "string" : "Every cards you create on Beam is "
+                "string" : "Every note you create on Beam is "
               },
               {
                 "string" : "private and encrypted",
