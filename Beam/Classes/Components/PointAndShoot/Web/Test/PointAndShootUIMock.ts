@@ -1,14 +1,11 @@
 import {PointAndShootUI} from "../PointAndShootUI"
-import {BeamRangeGroup, BeamShootGroup, FrameInfo} from "../../../../Helpers/Utils/Web/BeamTypes"
+import {BeamRangeGroup, BeamShootGroup} from "../../../../Helpers/Utils/Web/BeamTypes"
 import { EventsMock } from "../../../../Helpers/Utils/Web/Test/Mock/EventsMock"
 
 export class PointAndShootUIMock extends EventsMock implements PointAndShootUI {
-  setFramesInfo(framesInfo: FrameInfo[]): void {
-    this.events.push({name: "frames", framesInfo})
-  }
   prefix: string  
   typingOnWebView(isTypingOnWebView: boolean): void {
-      this.events.push({name: "isTypingOnWebView", isTypingOnWebView})
+    this.events.push({name: "isTypingOnWebView", isTypingOnWebView})
   }
   pointBounds(pointTarget?: BeamShootGroup): void {
     this.events.push({name: "pointBounds", pointTarget})
