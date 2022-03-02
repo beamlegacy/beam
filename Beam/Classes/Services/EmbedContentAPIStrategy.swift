@@ -109,7 +109,7 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
     }
     /// *Potential* embed, doesn't mean it's 100% sure we will be able to build a embed
     func canBuildEmbeddableContent(for url: URL) -> Bool {
-        let pattern = SupportedEmbedDomains.shared.pattern
+        let pattern = SupportedEmbedDomains.shared.nativePattern
         guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
             return false
         }

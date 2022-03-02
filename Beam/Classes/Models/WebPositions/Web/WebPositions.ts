@@ -77,11 +77,11 @@ export class WebPositions<UI extends WebPositionsUI> {
     return new MutationObserver(fn) as unknown as BeamMutationObserver
   }
 
-  zoomMutationCallback(mutationRecords, self): void {
+  zoomMutationCallback(mutationRecords, _self): void {
     mutationRecords.map((mutationRecord) => {
       if (mutationRecord.attributeName == "style") {
-        const resizeInfo = self.resizeInfo()
-        self.ui.setResizeInfo(resizeInfo)
+        const resizeInfo = this.resizeInfo()
+        this.ui.setResizeInfo(resizeInfo)
       }
     })
   }
@@ -95,17 +95,17 @@ export class WebPositions<UI extends WebPositionsUI> {
     observer.observe(this.win.document, options)
   }
 
-  frameMutationCallback(mutationRecords, self): void {
+  frameMutationCallback(mutationRecords, _self): void {
     mutationRecords.map((mutationRecord) => {
       for (const node of mutationRecord.removedNodes) {
         if (node.nodeName == "IFRAME") {
-          self.sendFramesInfo(false)
+          this.sendFramesInfo(false)
         }
       }
 
       for (const node of mutationRecord.addedNodes) {
         if (node.nodeName == "IFRAME") {
-          self.sendFramesInfo(false)
+          this.sendFramesInfo(false)
         }
       }
     })
@@ -152,14 +152,17 @@ export class WebPositions<UI extends WebPositionsUI> {
       y: this.win.scrollY
     }
     this.ui.setScrollInfo(scrollInfo)
-    const immediate = true
-    debounce(this.sendFramesInfo, 200, immediate)
+    this.debouncedFrameInfoLeading()
   }
 
   onResize(_ev): void {
     const resizeInfo = this.resizeInfo()
     this.ui.setResizeInfo(resizeInfo)
+    // Because iframe postions can update when resizing we want to re-send their coordinates
+    this.debouncedFrameInfoTrailling()
   }
+  debouncedFrameInfoLeading = debounce(this.sendFramesInfo.bind(this), 200, true)
+  debouncedFrameInfoTrailling = debounce(this.sendFramesInfo.bind(this), 200, false)
 
   protected resizeInfo(): BeamResizeInfo  {
     return { width: this.win.innerWidth, height: this.win.innerHeight }
