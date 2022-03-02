@@ -189,6 +189,9 @@ class HtmlVisitor {
                 }
                 text.append(embedElement)
 
+            case "br":
+                text.append(BeamElement(" "))
+
             default:
                 let children: [BeamElement] = visitChildren(element)
                 text.append(contentsOf: children)

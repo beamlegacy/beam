@@ -12,8 +12,10 @@ class SupportedEmbedDomains {
     static var shared = SupportedEmbedDomains()
 
     private(set) var providers: [String: String] = [:]
-
-    private(set) var pattern: String = initialPattern
+    /// Pattern with the right character escaping for Swift
+    private(set) var nativePattern: String = initialPattern
+    /// Pattern with the right character escaping for JavaScript
+    private(set) var javaScriptPattern: String = initialJavaScriptPattern
 
     private var lastUpdate: Date?
 
@@ -31,7 +33,8 @@ class SupportedEmbedDomains {
                 Logger.shared.logDebug("Failed to update supported Embed API domains: \(error.localizedDescription)", category: .embed)
             case .success(let successResult):
                 self.providers = successResult.providers
-                self.pattern = successResult.pattern.replacingOccurrences(of: "\\\\", with: "\\")
+                self.javaScriptPattern = successResult.pattern
+                self.nativePattern = successResult.pattern.replacingOccurrences(of: "\\\\", with: "\\")
                 self.lastUpdate = BeamDate.now
             }
         }
@@ -46,7 +49,7 @@ class SupportedEmbedDomains {
         var providers: [String: String]
     }
 
-    private func moreThanADayAgo(date: Date?) -> Bool {
+    private func moreThanADayAgo(date: Date? = nil) -> Bool {
         guard let lastUpdate = date else { return false }
         let minute: Double = 60.0
         let hour: Double = 60.0 * minute
@@ -59,5 +62,7 @@ class SupportedEmbedDomains {
 extension SupportedEmbedDomains {
 
     /// Default pattern until we fetch the real one from the api.
-    private static let initialPattern = "(?:https?:\\/\\/(?:www\\.)?(?:instagr\\.am|instagram\\.com)\\/p\\/([\\w-]+))|(?:https?:\\/\\/(?:www\\.)?(?:flic\\.kr\\/p|flickr.com\\/photos)\\/[^\\s]+)|(?:https?:\\/\\/(?:www\\.)?deviantart\\.com\\/([a-z0-9_-]+)\\/art\\/([a-z0-9_-]+)+)|(?:https?:\\/\\/(?:www\\.)?twitch\\.tv\\/([a-z0-9_-]+)\\/video\\/([a-z0-9_-]+)+)|(?:https?:\\/\\/(?:www\\.)?soundcloud\\.com\\/([a-z0-9_-]+)\\/([a-z0-9_-]+))|(?:https?:\\/\\/(www|open|play)\\.?spotify\\.com\\/(artist|track|playlist|show)\\/([\\w\\-/]+))|(?:https?:\\/\\/(?:www\\.)?ted\\.com\\/talks\\/[\\w]+)|(?:https?:\\/\\/(?:www\\.)?vimeo\\.com\\/(?:(album)\\/(\\w+)\\/video\\/([0-9]+)|(groups)\\/(\\w+)\\/videos\\/([0-9]+)|(channels)\\/(\\w+)\\/([0-9]+)|(ondemand)\\/(\\w+)\\/([0-9]+)|(\\w+)))|(?:https?:\\/\\/(?:www\\.)?(?:youtube\\.com\\/watch\\?v=|youtu\\.be\\/)([\\w-]+)(?:&(.*=.+))*)|(?:https?:\\/\\/(?:www\\.)?slideshare\\.net\\/([\\w\\-]+)\\/([\\w\\-]+))|(?:https?:\\/\\/(?:www\\.)?twitter\\.com\\/\\w+\\/status\\/[0-9]+(?:\\?s=[0-9]+)?)|(?:https?:\\/\\/(?:[\\w.-]+\\.)?figma.com\\/(?:file|proto)\\/([0-9a-zA-Z]{22,128})\\/(.*)?$)|(?:https:\\/\\/sketchfab.com\\/models\\/(\\w+))"
+    private static let initialPattern = SupportedEmbedDomains.initialJavaScriptPattern.replacingOccurrences(of: "\\\\", with: "\\")
+
+    private static let initialJavaScriptPattern = "(?:https?:\\\\/\\\\/(?:www\\\\.)?(?:instagr\\\\.am|instagram\\\\.com)\\\\/p\\\\/([\\\\w-]+))|(?:https?:\\\\/\\\\/(?:www\\\\.)?(?:flic\\\\.kr\\\\/p|flickr.com\\\\/photos)\\\\/[^\\\\s]+)|(?:https?:\\\\/\\\\/(?:www\\\\.)?deviantart\\\\.com\\\\/([a-z0-9_-]+)\\\\/art\\\\/([a-z0-9_-]+)+)|(?:https?:\\\\/\\\\/(?:www\\\\.)?twitch\\\\.tv\\\\/([a-z0-9_-]+)\\\\/video\\\\/([a-z0-9_-]+)+)|(?:https?:\\\\/\\\\/(?:www\\\\.)?soundcloud\\\\.com\\\\/([a-z0-9_-]+)\\\\/([a-z0-9_-]+))|(?:https?:\\\\/\\\\/(www|open|play)\\\\.?spotify\\\\.com\\\\/(artist|track|playlist|show)\\\\/([\\\\w\\\\-/]+))|(?:https?:\\\\/\\\\/(?:www\\\\.)?ted\\\\.com\\\\/talks\\\\/[\\\\w]+)|(?:https?:\\\\/\\\\/(?:www\\\\.)?vimeo\\\\.com\\\\/(?:(album)\\\\/(\\\\w+)\\\\/video\\\\/([0-9]+)|(groups)\\\\/(\\\\w+)\\\\/videos\\\\/([0-9]+)|(channels)\\\\/(\\\\w+)\\\\/([0-9]+)|(ondemand)\\\\/(\\\\w+)\\\\/([0-9]+)|(\\\\w+)))|(?:https?:\\\\/\\\\/(?:www\\\\.)?(?:youtube\\\\.com\\\\/watch\\\\?v=|youtu\\\\.be\\\\/)([\\\\w-]+)(?:&(.*=.+))*)|(?:https?:\\\\/\\\\/(?:www\\\\.)?slideshare\\\\.net\\\\/([\\\\w\\\\-]+)\\\\/([\\\\w\\\\-]+))|(?:https?:\\\\/\\\\/(?:www\\\\.)?twitter\\\\.com\\\\/\\\\w+\\\\/status\\\\/[0-9]+(?:\\\\?s=[0-9]+)?)|(?:https?:\\\\/\\\\/(?:[\\\\w.-]+\\\\.)?figma.com\\\\/(?:file|proto)\\\\/([0-9a-zA-Z]{22,128})\\\\/(.*)?$)|(?:https:\\\\/\\\\/sketchfab.com\\\\/models\\\\/(\\\\w+))"
 }

@@ -178,6 +178,16 @@ export class BeamElementHelper {
    * @memberof BeamElementHelper
    */
   static parseElementBasedOnStyles(element: BeamElement, win: BeamWindow<any>): BeamHTMLElement {
+    const embedHelper = new BeamEmbedHelper(win)
+    // If we support embedding on the current location
+    if (embedHelper.isEmbeddableElement(element)) {
+      // parse the element for embedding.
+      const embedElement = embedHelper.parseElementForEmbed(element)
+      if (embedElement) {
+        return embedElement
+      }
+    }
+
     const convertedToImage = BeamElementHelper.parseBackgroundImageToImageElement(element, win)
     if (convertedToImage) {
       return convertedToImage
@@ -186,15 +196,6 @@ export class BeamElementHelper {
     const parsedForSRCSET = BeamElementHelper.parseImageForSrcset(element, win)
     if (parsedForSRCSET) {
       return parsedForSRCSET
-    }
-
-    // If we support embedding on the current location
-    if (BeamElementHelper.isEmbed(element, win)) {
-      // parse the element for embedding.
-      const embedElement = BeamEmbedHelper.parseElementForEmbed(element, win)
-      if (embedElement) {
-        return embedElement
-      }
     }
 
     const wrappedInAnchor = BeamElementHelper.wrapElementInAnchor(element, win)
@@ -253,19 +254,6 @@ export class BeamElementHelper {
   }
 
   /**
-   * Returns true if element is Embed. Shorthand for calling `BeamEmbedHelper.isEmbed`
-   *
-   * @static
-   * @param {BeamElement} element
-   * @param {BeamWindow} win
-   * @return {*}  {boolean}
-   * @memberof BeamElementHelper
-   */
-  static isEmbed(element: BeamElement, win: BeamWindow): boolean {
-    return BeamEmbedHelper.isEmbed(element, win)
-  }
-
-  /**
    * Returns whether an element is either a video or an audio element
    *
    * @param element
@@ -273,11 +261,27 @@ export class BeamElementHelper {
   static isMedia(element: BeamElement): boolean {
     return  (
       ["video", "audio"].includes(element.tagName.toLowerCase()) || 
-      Boolean(element.querySelectorAll("video").length) || 
-      Boolean(element.querySelectorAll("audio").length)
+      Boolean(element.querySelectorAll("video, audio").length)
     )
   }
 
+  /**
+   * Check whether an element is an image, or has a background-image url
+   * the background image can be a data:uri. Or has any child that is a img or svg.
+   *
+   * @param element
+   * @param win
+   * @return If the element is considered visible
+   */
+   static isImageOrContainsImageChild(element: BeamElement, win: BeamWindow): boolean {
+    const matcher = (element: BeamElement) => (
+      ["img", "svg"].includes(element.tagName.toLowerCase())
+      || Boolean(element.querySelectorAll("img, svg").length)
+    )
+    return BeamElementHelper.isImage(element, win, matcher)
+  }
+
+  static imageElementMatcher = (element: BeamElement) => ["img", "svg"].includes(element.tagName.toLowerCase())
   /**
    * Check whether an element is an image, or has a background-image url
    * the background image can be a data:uri
@@ -286,19 +290,16 @@ export class BeamElementHelper {
    * @param win
    * @return If the element is considered visible
    */
-  static isImage(element: BeamElement, win: BeamWindow): boolean {
-    // currentSrc vs src
-    if (
-      ["img", "svg"].includes(element.tagName.toLowerCase()) ||
-      Boolean(element.querySelectorAll("img").length) || 
-      Boolean(element.querySelectorAll("svg").length)
-    ) {
-      return true
-    }
-    const style = win.getComputedStyle?.(element)
-    const match = style?.backgroundImage.match(/url\(([^)]+)/)
-    return !!match
-  }
+   static isImage(element: BeamElement, win: BeamWindow, matcher = BeamElementHelper.imageElementMatcher): boolean {
+     // currentSrc vs src
+     if (matcher(element)) {
+       return true
+     }
+     const style = win.getComputedStyle?.(element)
+     const match = style?.backgroundImage.match(/url\(([^)]+)/)
+     return !!match
+   }
+ 
 
   /**
    * Returns whether an element is an image container, which means it can be an image
