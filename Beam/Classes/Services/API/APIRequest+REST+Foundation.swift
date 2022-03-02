@@ -6,13 +6,19 @@ enum BeamAPIRestPath: String {
     case checksums
 }
 
+enum APIRequestMethod {
+    case get
+    case post
+}
+
 extension APIRequest {
     @discardableResult
     //swiftlint:disable:next function_body_length
-    func performRestRequest<T: Decodable & Errorable>(path: BeamAPIRestPath,
-                                                      queryParams: [String: String]? = nil,
-                                                      authenticatedCall: Bool? = nil,
-                                                      completionHandler: @escaping (Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
+    func performRestRequest<T: Decodable & Errorable, C: Codable>(path: BeamAPIRestPath,
+                                                                  queryParams: [[String: String]]? = nil,
+                                                                  postParams: C? = nil,
+                                                                  authenticatedCall: Bool? = nil,
+                                                                  completionHandler: @escaping (Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
         let path: String = {
             switch path {
             case .checksums:
@@ -20,7 +26,11 @@ extension APIRequest {
             }
         }()
 
-        let request = try makeRestUrlRequest(path: path, queryParams: queryParams, authenticatedCall: authenticatedCall)
+        let request = try makeRestUrlRequest(path: path,
+                                             httpMethod: .post,
+                                             queryParams: queryParams,
+                                             postParams: postParams,
+                                             authenticatedCall: authenticatedCall)
         let filename = "rest call"
         #if DEBUG
         Self.networkCallFilesSemaphore.wait()
@@ -53,31 +63,48 @@ extension APIRequest {
         return dataTask!
     }
 
-    func makeRestUrlRequest(path: String,
-                            httpMethod: String = "GET",
-                            queryParams: [String: String]? = nil,
-                            authenticatedCall: Bool?) throws -> URLRequest {
+    // swiftlint:disable function_body_length
+    func makeRestUrlRequest<C: Codable>(path: String,
+                                        httpMethod: APIRequestMethod = .get,
+                                        queryParams: [[String: String]]? = nil,
+                                        postParams: C? = nil,
+                                        authenticatedCall: Bool?) throws -> URLRequest {
         let fullLink = "\(Configuration.apiHostname)\(path)"
+        var request: URLRequest
 
-        guard let urlComponents = NSURLComponents(string: fullLink) else { fatalError("Can't get URL") }
-        if let queryParams = queryParams {
-            urlComponents.queryItems = queryParams.map { (key, value) in
-                URLQueryItem(name: key, value: value)
-            }
-        }
-
-        guard let url = urlComponents.url else { fatalError("Can't get URL") }
-
-//        guard let url = URL(string: fullLink) else { fatalError("Can't get URL") }
-        var request = URLRequest(url: url)
-        let headers: [String: String] = [
+        var headers: [String: String] = [
             "Device": Self.deviceId.uuidString.lowercased(),
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
             "Accept-Language": Locale.current.languageCode ?? "en"
         ]
 
-        request.httpMethod = httpMethod
+        switch httpMethod {
+        case .get:
+            guard let urlComponents = NSURLComponents(string: fullLink) else { fatalError("Can't get URL") }
+            if let queryParams = queryParams {
+                urlComponents.queryItems = queryParams.flatMap { param in
+                    param.map { (key, value) in
+                        URLQueryItem(name: key, value: value)
+                    }
+                }
+            }
+
+            guard let url = urlComponents.url else { fatalError("Can't get URL") }
+
+            request = URLRequest(url: url)
+            request.httpMethod = "GET"
+        case .post:
+            guard let url = URL(string: fullLink) else { fatalError("Can't get URL") }
+            request = URLRequest(url: url)
+            if let postParams = postParams {
+                let jsonData = try JSONEncoder().encode(postParams)
+                request.httpBody = jsonData
+                headers["Content-Type"] = "application/json"
+            }
+            request.httpMethod = "POST"
+        }
+
         request.allHTTPHeaderFields = headers
 
         // Authentication headers
@@ -99,7 +126,7 @@ extension APIRequest {
 
         #if DEBUG_API_1
         if let queryDataString = request.httpBody?.asString {
-            Logger.shared.logDebug("-> HTTP Request: \(url)\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
+            Logger.shared.logDebug("-> HTTP Request: \(fullLink)\n\(queryDataString.replacingOccurrences(of: "\\n", with: "\n"))",
                                    category: .network)
         }
         #endif

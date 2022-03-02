@@ -82,6 +82,47 @@ class BeamObjectTestsHelper {
         return returnedBeamObject
     }
 
+    func saveOnAPI<T: BeamObjectProtocol>(_ objects: [T]) -> [BeamObject] {
+        saveOnAPIAndSaveChecksum(objects)
+    }
+
+    /// Save objects on the API, and store its checksum
+    @discardableResult
+    func saveOnAPIAndSaveChecksum<T: BeamObjectProtocol>(_ objects: [T]) -> [BeamObject] {
+        let beamObjectRequest = BeamObjectRequest()
+
+        let semaphore = DispatchSemaphore(value: 0)
+
+        var beamObjects: [BeamObject]
+
+        do {
+            beamObjects = try objects.map { object in
+                let beamObject = try BeamObject(object)
+                beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)
+                return beamObject
+            }
+
+            _ = try beamObjectRequest.save(beamObjects) { result in
+                semaphore.signal()
+            }
+
+            try beamObjects.forEach { beamObject in
+                try BeamObjectChecksum.savePreviousChecksum(beamObject: beamObject)
+            }
+        } catch {
+            fail(error.localizedDescription)
+            return []
+        }
+
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+
+        if case .timedOut = semaResult {
+            fail("Timedout")
+        }
+
+        return beamObjects
+    }
+
     func delete<T: BeamObjectProtocol>(_ object: T) {
         let semaphore = DispatchSemaphore(value: 0)
 
@@ -97,10 +138,10 @@ class BeamObjectTestsHelper {
     }
 
     /// Delete all beam objects
-    func deleteAll() {
+    func deleteAll(beamObjectType: BeamObjectObjectType? = nil) {
         let semaphore = DispatchSemaphore(value: 0)
 
-        _ = try? BeamObjectRequest().deleteAll { _ in
+        _ = try? BeamObjectRequest().deleteAll(beamObjectType: beamObjectType) { _ in
             semaphore.signal()
         }
 
