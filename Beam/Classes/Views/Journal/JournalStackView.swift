@@ -173,7 +173,7 @@ class JournalSimpleStackView: NSView {
 
                     return j1 >= j2
                 }()
-                
+
                 addNote(note, forceInit: forceInit)
             } else {
                 guard let view = views[note] else { continue }
