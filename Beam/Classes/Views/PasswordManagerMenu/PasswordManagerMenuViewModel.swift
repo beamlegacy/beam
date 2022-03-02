@@ -53,6 +53,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
     @Published var scrollingListHeight: CGFloat?
 
     let host: URL
+    let minimizedHost: String
     let options: PasswordManagerMenuOptions
     let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let userInfoStore: UserInformationsStore
@@ -64,6 +65,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
 
     init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, options: PasswordManagerMenuOptions) {
         self.host = host
+        self.minimizedHost = host.minimizedHost ?? host.urlStringWithoutScheme
         self.options = options
         self.credentialsBuilder = credentialsBuilder
         self.userInfoStore = userInfoStore
@@ -85,6 +87,10 @@ class PasswordManagerMenuViewModel: ObservableObject {
         }
         self.loadEntries()
         self.updateDisplay()
+    }
+
+    func displayedHost(for entry: PasswordManagerEntry) -> String {
+        entry.minimizedHost == minimizedHost ? "For this website" : entry.minimizedHost
     }
 
     func resetItems() {
@@ -113,7 +119,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
             if let bestEntry = credentialsBuilder.suggestedEntry() {
                 self.entriesForHost = [bestEntry]
             } else {
-                self.entriesForHost = PasswordManager.shared.entries(for: host.minimizedHost ?? host.urlStringWithoutScheme, exact: false)
+                self.entriesForHost = PasswordManager.shared.entries(for: minimizedHost, exact: false)
             }
         }
     }
@@ -135,13 +141,6 @@ class PasswordManagerMenuViewModel: ObservableObject {
             separator2: separator2,
             userInfo: display.userInfo
         )
-    }
-
-    public func getHostStr() -> String {
-        var components = URLComponents()
-        components.scheme = host.scheme
-        components.host = host.host
-        return components.url?.absoluteString ?? ""
     }
 }
 

@@ -62,7 +62,7 @@ final class PasswordManagerCredentialsBuilder {
 
     func autofill(host: String, username: String, password: String) {
         autofilledHost = host == currentHost ? nil : host
-        isDirty = autofilledHost != nil // so that the credentials will be saved with a new host -- usually after a redirect
+        isDirty = false
         Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing autofill for \(host) (current: \(currentHost ?? "nil")): dirty = \(isDirty)", category: .passwordManagerInternal)
         usernameField = .autofilled(username)
         passwordField = .autofilled(password)
@@ -114,8 +114,8 @@ final class PasswordManagerCredentialsBuilder {
         guard isDirty else { return nil }
         guard let password = passwordField.value, !password.isEmpty else { return nil }
         guard allowEmptyUsername || !(usernameField.value?.isEmpty ?? true) else { return nil }
-        let unmodified = usernameField.isAutofilled && passwordField.isAutofilled
-        return StoredCredentials(username: usernameField.value, password: password, askSaveConfirmation: !unmodified)
+        guard !(usernameField.isAutofilled && passwordField.isAutofilled) else { return nil }
+        return StoredCredentials(username: usernameField.value, password: password, askSaveConfirmation: true)
     }
 
     func markSaved() {
