@@ -63,6 +63,7 @@ struct OnboardingWelcomeView: View {
                     Separator(horizontal: true)
                         .padding(.vertical, BeamSpacing._40)
                     ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                        OnboardingNoteCreator.shared.createOnboardingNotes()
                         finish(nil)
                     }
                 }
