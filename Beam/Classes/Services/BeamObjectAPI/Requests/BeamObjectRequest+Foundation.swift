@@ -310,19 +310,26 @@ extension BeamObjectRequest {
         return try fetchAllWithFile("beam_objects", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
-    func fetchAllWithRest(receivedAtAfter: Date? = nil,
+    func fetchAllWithRest(fields: String = "id,createdAt,updatedAt,deletedAt,receivedAt,data,type,checksum,privateKeySignature",
+                          receivedAtAfter: Date? = nil,
                           ids: [UUID]? = nil,
                           beamObjectType: String? = nil,
                           skipDeleted: Bool? = false,
                           raisePrivateKeyError: Bool = false,
                           _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters: [String: String] = [:]
-        let fields: String = "id,createdAt,updatedAt,deletedAt,receivedAt,data,type,checksum,privateKeySignature"
+        struct Parameters: Codable {
+            let ids: [String]?
+            let beamObjectType: String?
+            let filterDeleted: Bool?
+            let receivedAtAfter: Date?
+        }
 
-//        BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
-//                                               ids: ids,
-//                                               beamObjectType: beamObjectType,
-//                                               skipDeleted: skipDeleted)
+        let parameters = Parameters(
+            ids: ids?.map { $0.uuidString.lowercased() },
+            beamObjectType: beamObjectType,
+            filterDeleted: skipDeleted,
+            receivedAtAfter: receivedAtAfter
+        )
 
         return try fetchAllWithRest(fields, parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
@@ -364,39 +371,24 @@ extension BeamObjectRequest {
                                    skipDeleted: Bool? = false,
                                    raisePrivateKeyError: Bool = false,
                                    _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        var parameters: [String: String] = [:]
-        let fields: String = "id,checksum"
-
-        if let ids = ids {
-            ids.forEach {
-                parameters["ids[]"] = $0.uuidString.lowercased()
-            }
-        }
-
-        if let beamObjectType = beamObjectType {
-            parameters["beam_object_type"] = beamObjectType
-        }
-
-        if let skipDeleted = skipDeleted {
-            parameters["filter_deleted"] = skipDeleted ? "true" : "false"
-        }
-
-        if let receivedAtAfter = receivedAtAfter {
-            parameters["received_at_after"] = receivedAtAfter.iso8601withFractionalSeconds
-        }
-
-        return try fetchAllWithRest(fields, parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
+         try fetchAllWithRest(fields: "id,checksum",
+                              receivedAtAfter: receivedAtAfter,
+                              ids: ids,
+                              beamObjectType: beamObjectType,
+                              skipDeleted: skipDeleted,
+                              raisePrivateKeyError: raisePrivateKeyError,
+                              completion)
     }
 
     @discardableResult
     // swiftlint:disable:next function_body_length cyclomatic_complexity
-    private func fetchAllWithRest(_ fields: String,
-                                  _ parameters: [String: String],
-                                  raisePrivateKeyError: Bool,
-                                  _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+    private func fetchAllWithRest<C: Codable>(_ fields: String,
+                                              _ parameters: C,
+                                              raisePrivateKeyError: Bool,
+                                              _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
 
         return try performRestRequest(path: .checksums,
-                                      queryParams: parameters,
+                                      postParams: parameters,
                                       authenticatedCall: true,
                                       completionHandler: { (result: Swift.Result<UserMe, Error>) in
             switch result {
