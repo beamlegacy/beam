@@ -61,7 +61,6 @@ extension MyRemoteObjectManager: BeamObjectManagerDelegate {
     func saveObjectsAfterConflict(_ objects: [MyRemoteObject]) throws {
         for object in objects {
             Self.store[object.beamObjectId] = object
-            try BeamObjectChecksum.savePreviousChecksum(object: object)
         }
     }
 

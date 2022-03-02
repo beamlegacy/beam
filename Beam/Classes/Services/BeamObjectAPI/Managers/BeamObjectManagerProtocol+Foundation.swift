@@ -452,6 +452,7 @@ extension BeamObjectManagerDelegate {
 
                     do {
                         try self.saveObjectsAfterConflict(remoteObjects)
+                        try BeamObjectChecksum.savePreviousChecksums(objects: remoteObjects)
                         completion(.success(allObjects))
                     } catch {
                         completion(.failure(error))
