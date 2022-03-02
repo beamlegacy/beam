@@ -759,7 +759,16 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return nil
     }
 
-    internal var layers: [String: Layer] = [:]
+    private var lock = RWLock()
+    private var _layers: [String: Layer] = [:]
+    internal var layers: [String: Layer] {
+        get {
+            lock.read { self._layers }
+        }
+        set {
+            lock.write { self._layers = newValue }
+        }
+    }
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         CATransaction.disableAnimations {
             layer.widget = self
