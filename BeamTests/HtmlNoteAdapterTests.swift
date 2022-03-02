@@ -547,4 +547,27 @@ class HtmlNoteAdapterTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 10.0)
     }
+
+    func testBRelement() {
+        let html = """
+                    <p class="secondary above-default-only">If you can wait and not be tired by waiting,<br>Or, being lied about, don’t deal in lies,<br>Or, being hated, don’t give way to hating,<br>And yet don’t look too good, nor talk too wise;<br></p>
+                    """
+        let htmlNoteAdapter = setupTestMocks("https://hellobeam.com")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+
+                XCTAssertEqual(firstEl.text.text, "If you can wait and not be tired by waiting, Or, being lied about, don’t deal in lies, Or, being hated, don’t give way to hating, And yet don’t look too good, nor talk too wise;")
+            } else {
+                XCTFail("expected atleast one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
 }
