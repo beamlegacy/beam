@@ -37,7 +37,7 @@ protocol PasswordStore {
     func passwordRecord(hostname: String, username: String) throws -> PasswordRecord?
     func save(hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord
     func save(passwords: [PasswordRecord]) throws
-    func update(record: PasswordRecord, password: String, uuid: UUID?) throws -> PasswordRecord
+    func update(record: PasswordRecord, hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord
     @discardableResult func markDeleted(hostname: String, username: String) throws -> PasswordRecord
     @discardableResult func markAllDeleted() throws -> [PasswordRecord]
     @discardableResult func deleteAll() throws -> [PasswordRecord]

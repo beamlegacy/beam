@@ -8,13 +8,15 @@
 import SwiftUI
 
 struct PasswordEditView: View {
-    @State var hostname: String
-    @State var username: String
-    @State var password: String
-    var editType: PasswordEditType
+    let entry: PasswordManagerEntry?
+    let password: String
+    let editType: PasswordEditType
     var onSave: (() -> Void)?
 
-    @State private var urlIsNotValid: Bool = false
+    @State private var hostname = ""
+    @State private var username = ""
+    @State private var newPassword = ""
+    @State private var urlIsNotValid = false
     @Environment(\.presentationMode) private var presentationMode
 
     enum PasswordEditType {
@@ -57,7 +59,7 @@ struct PasswordEditView: View {
                     Text("Password:")
                         .font(BeamFont.regular(size: 12).swiftUI)
                         .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
-                    TextField("", text: $password)
+                    TextField("", text: $newPassword)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 286, height: 19, alignment: .center)
                 }.padding(.bottom, 12)
@@ -71,7 +73,7 @@ struct PasswordEditView: View {
                     Button {
                         let validHostname = hostname.validUrl()
                         if validHostname.isValid {
-                            PasswordManager.shared.save(hostname: hostname, username: username, password: password)
+                            PasswordManager.shared.save(entry: editType == .update ? entry : nil, hostname: hostname, username: username, password: newPassword)
                             dismiss()
                             onSave?()
                         } else {
@@ -81,10 +83,17 @@ struct PasswordEditView: View {
                         Text(editType == PasswordEditType.create ? "Add Password" : "Done")
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                     }.buttonStyle(BorderedButtonStyle())
-                        .disabled(hostname.isEmpty || username.isEmpty || password.isEmpty || urlIsNotValid)
+                        .disabled(hostname.isEmpty || username.isEmpty || newPassword.isEmpty || urlIsNotValid)
                 }
             }.padding(20)
           }.frame(width: 400, height: 179, alignment: .center)
+            .onAppear {
+                if let entry = entry {
+                    hostname = entry.minimizedHost
+                    username = entry.username
+                }
+                newPassword = password
+            }
     }
 
     private func dismiss() {
@@ -94,6 +103,6 @@ struct PasswordEditView: View {
 
 struct PasswordEditView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordEditView(hostname: "", username: "", password: "", editType: .create)
+        PasswordEditView(entry: nil, password: "", editType: .create)
     }
 }
