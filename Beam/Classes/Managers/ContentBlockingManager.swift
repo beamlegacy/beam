@@ -86,12 +86,14 @@ class ContentBlockingManager {
     }
 
     private func register(ruleList: WKContentRuleList?, identifier: String) {
-        if let ruleList = ruleList, identifier == "regional" {
-            add(ruleList: ruleList, identifier: identifier)
-        }
         if PreferencesManager.isAdsFilterEnabled && identifier == "ads" {
             add(ruleList: ruleList, identifier: identifier)
         } else if !PreferencesManager.isAdsFilterEnabled && identifier == "ads" {
+            remove(ruleList: ruleList, identifier: identifier)
+        }
+        if PreferencesManager.isAdsFilterEnabled && identifier == "regional" {
+            add(ruleList: ruleList, identifier: identifier)
+        } else if !PreferencesManager.isAdsFilterEnabled && identifier == "regional" {
             remove(ruleList: ruleList, identifier: identifier)
         }
         if PreferencesManager.isAnnoyancesFilterEnabled && identifier == "annoyance" {
