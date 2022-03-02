@@ -10,6 +10,14 @@ import GRDB
 import BeamCore
 
 public struct FrecencyNoteRecord: Codable, BeamObjectProtocol {
+    struct UniqueKey: Hashable {
+        let frecencyKey: FrecencyParamKey
+        let noteId: UUID
+    }
+    var uniqueKey: UniqueKey {
+        UniqueKey(frecencyKey: frecencyKey, noteId: noteId)
+    }
+
     public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
     static var beamObjectType: BeamObjectObjectType = .noteFrecency
     static let BeamElementForeignKey = ForeignKey([FrecencyNoteRecord.Columns.noteId], to: [BeamElementRecord.Columns.noteId])
@@ -215,8 +223,19 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
     internal static var backgroundQueue = DispatchQueue(label: "NoteFrecency BeamObjectManager backgroundQueue", qos: .userInitiated)
 
+    private func deduplicated(records: [FrecencyNoteRecord]) -> [FrecencyNoteRecord] {
+        let keyValues = records.map { ($0.uniqueKey, $0) }
+        let deduplicatedDict = Dictionary(
+            keyValues,
+            uniquingKeysWith: { (leftRec, rightRec) in
+                leftRec.lastAccessAt > rightRec.lastAccessAt ? leftRec : rightRec
+            }
+        )
+        return Array(deduplicatedDict.values)
+    }
+
     func receivedObjects(_ objects: [FrecencyNoteRecord]) throws {
-        try self.db.save(noteFrecencies: objects)
+        try self.db.save(noteFrecencies: deduplicated(records: objects))
     }
 
     func allObjects(updatedSince: Date?) throws -> [FrecencyNoteRecord] {
