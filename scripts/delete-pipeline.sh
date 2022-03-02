@@ -13,7 +13,7 @@ then
 	# process + filter them,
 	# and finally cancel them with another API call
 	echo "CI_MERGE_REQUEST_REF_PATH = ${CI_MERGE_REQUEST_REF_PATH}"
-	curl -sS -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/pipelines?ref=${BRANCH_REF}&status=running" | \
+	curl -sS -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/pipelines?ref=${CI_MERGE_REQUEST_REF_PATH}&status=running" | \
 	jq '.[] | .id' | \
 	tail -n +2 | \
 	xargs -n 1 -I {} \
