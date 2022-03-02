@@ -107,8 +107,13 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
     }
 
     func obfuscate(str: String) -> String {
+        // hide code behind random ID
         let uuidIdentifier = id.uuidString.replacingOccurrences(of: "-", with: "_")
-        return str.replacingOccurrences(of: "__ID__", with: "beam" + uuidIdentifier)
+        let stringWithIdsReplaced = str.replacingOccurrences(of: "__ID__", with: "beam" + uuidIdentifier)
+
+        // embed the embed regex pattern
+        let pattern = SupportedEmbedDomains.shared.javaScriptPattern
+        return stringWithIdsReplaced.replacingOccurrences(of: "__EMBEDPATTERN__", with: pattern)
     }
 
 }
