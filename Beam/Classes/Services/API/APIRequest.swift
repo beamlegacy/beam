@@ -2,6 +2,8 @@ import Foundation
 import os.log
 import BeamCore
 import Vinyl
+import ZippyJSON
+import IkigaJSON
 
 // swiftlint:disable file_length
 
@@ -285,7 +287,7 @@ class APIRequest: NSObject {
         }
 
         do {
-            var localTimer = BeamDate.now
+            let localTimer = BeamDate.now
 
             let value: T = try self.manageResponse(data, response)
 
@@ -400,9 +402,27 @@ class APIRequest: NSObject {
         } as [String]
     }
 
-    func defaultDecoder() -> JSONDecoder {
+    func defaultDecoder() -> IkigaJSONDecoder {
+        ikigaJSONDecoder()
+    }
+
+    // This is surprinsigly slower :( About 3x slower than Swift
+    func ikigaJSONDecoder() -> IkigaJSONDecoder {
+        let decoder = IkigaJSONDecoder()
+        decoder.settings.dateDecodingStrategy = .formatted(ISO8601withFractionalSeconds())
+        decoder.settings.nilValueDecodingStrategy = .decodeNilForKeyNotFound
+        return decoder
+    }
+
+    func defaultJSONSwiftDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
+        return decoder
+    }
+
+    func zippyJSONDecoder() -> ZippyJSONDecoder {
+        let decoder = ZippyJSONDecoder()
+        decoder.dateDecodingStrategy = .formatted(ISO8601withFractionalSeconds())
         return decoder
     }
 
