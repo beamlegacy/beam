@@ -218,14 +218,15 @@ class APIRequest: NSObject {
         }
     }
 
+    // swiftlint:disable function_body_length
     func parseDataTask<T: Decodable & Errorable>(data: Data?,
                                                  response: URLResponse?,
                                                  error: Error?,
                                                  filename: String,
                                                  authenticatedCall: Bool? = nil,
+                                                 localTimer: Date,
                                                  completionHandler: @escaping (Swift.Result<T, Error>) -> Void) {
 
-        var localTimer = BeamDate.now
         let callsCount = Self.callsCount
 
         guard let dataTask = self.dataTask else {
@@ -283,7 +284,7 @@ class APIRequest: NSObject {
         }
 
         do {
-            localTimer = BeamDate.now
+            var localTimer = BeamDate.now
 
             let value: T = try self.manageResponse(data, response)
 

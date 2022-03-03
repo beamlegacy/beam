@@ -40,6 +40,41 @@ class BeamObjectsRequests: QuickSpec {
         }
 
         context("with Foundation") {
+            context("delete all objects") {
+                var object: MyRemoteObject!
+                let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd58".uuid ?? UUID()
+                let title = "my title"
+
+                beforeEach {
+                    object = MyRemoteObject(beamObjectId: uuid,
+                                                createdAt: BeamDate.now,
+                                                updatedAt: BeamDate.now,
+                                                deletedAt: nil,
+                                                title: title)
+
+                    _ = beamObjectHelper.saveOnAPI(object)
+                }
+
+                it("sends a REST request") {
+                    waitUntil(timeout: .seconds(10)) { done in
+                        do {
+                            _ = try sut.deleteAllWithRest { result in
+                                switch result {
+                                case .failure(let error):
+                                    fail(error.localizedDescription)
+                                case .success(let success):
+                                    expect(success).to(beTrue())
+                                }
+                                done()
+                            }
+                        } catch {
+                            fail(error.localizedDescription)
+                            done()
+                        }
+                    }
+                }
+            }
+
             context("fetch fields") {
                 let title = "my title"
 
