@@ -367,6 +367,8 @@
 		527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527C4F2F2719818A00772973 /* LoggerCategoryTableViewController.swift */; };
 		527DF48725710ECB00A0A56D /* DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527DF48625710ECB00A0A56D /* DocumentManagerTests.swift */; };
 		527F371426C6C42000BA9A25 /* BeamNote+Debug.swift in Sources */ = {isa = PBXBuildFile; fileRef = 527F370C26C6C42000BA9A25 /* BeamNote+Debug.swift */; };
+		527F535727D0CCEC00F8E717 /* ZippyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 527F535627D0CCEC00F8E717 /* ZippyJSON */; };
+		527F535F27D0DFD700F8E717 /* IkigaJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 527F535E27D0DFD700F8E717 /* IkigaJSON */; };
 		5281B01825C962EF00DF66D9 /* DocumentManagerNetworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B01725C962EF00DF66D9 /* DocumentManagerNetworkTests.swift */; };
 		5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B06325C98D2600DF66D9 /* PersistenceTests.swift */; };
 		5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5281B07425C994BE00DF66D9 /* ConfigurationTests.swift */; };
@@ -2606,8 +2608,10 @@
 				3315DC912667859A002A47CF /* Preferences in Frameworks */,
 				3315DC952667859A002A47CF /* GRDB in Frameworks */,
 				52466B22270DA966002D1716 /* Clustering in Frameworks */,
+				527F535F27D0DFD700F8E717 /* IkigaJSON in Frameworks */,
 				33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */,
 				A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
+				527F535727D0CCEC00F8E717 /* ZippyJSON in Frameworks */,
 				3315DC932667859A002A47CF /* Promises in Frameworks */,
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
 				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
@@ -5940,6 +5944,8 @@
 				8A0DFAD4275664090044515B /* FaviconFinder */,
 				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
 				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
+				527F535627D0CCEC00F8E717 /* ZippyJSON */,
+				527F535E27D0DFD700F8E717 /* IkigaJSON */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -6084,6 +6090,8 @@
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				527F535527D0CCEC00F8E717 /* XCRemoteSwiftPackageReference "ZippyJSON" */,
+				527F535D27D0DFD700F8E717 /* XCRemoteSwiftPackageReference "IkigaJSON" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -9784,6 +9792,22 @@
 				minimumVersion = 4.2.2;
 			};
 		};
+		527F535527D0CCEC00F8E717 /* XCRemoteSwiftPackageReference "ZippyJSON" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/michaeleisel/ZippyJSON";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
+			};
+		};
+		527F535D27D0DFD700F8E717 /* XCRemoteSwiftPackageReference "IkigaJSON" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Ikiga/IkigaJSON.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		527FB71325B9A93400959146 /* XCRemoteSwiftPackageReference "CocoaLumberjack" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/CocoaLumberjack/CocoaLumberjack.git";
@@ -9969,6 +9993,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */;
 			productName = KeychainAccess;
+		};
+		527F535627D0CCEC00F8E717 /* ZippyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 527F535527D0CCEC00F8E717 /* XCRemoteSwiftPackageReference "ZippyJSON" */;
+			productName = ZippyJSON;
+		};
+		527F535E27D0DFD700F8E717 /* IkigaJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 527F535D27D0DFD700F8E717 /* XCRemoteSwiftPackageReference "IkigaJSON" */;
+			productName = IkigaJSON;
 		};
 		527FB71E25B9A9B600959146 /* JWTDecode */ = {
 			isa = XCSwiftPackageProductDependency;
