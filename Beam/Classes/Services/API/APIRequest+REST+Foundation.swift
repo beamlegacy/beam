@@ -3,35 +3,40 @@ import Foundation
 import Vinyl
 
 enum BeamAPIRestPath: String {
-    case checksums
+    case fetchAll
+    case deleteAll
 }
 
 enum APIRequestMethod {
     case get
     case post
+    case delete
 }
 
 extension APIRequest {
     @discardableResult
     //swiftlint:disable:next function_body_length
     func performRestRequest<T: Decodable & Errorable, C: Codable>(path: BeamAPIRestPath,
+                                                                  httpMethod: APIRequestMethod = .post,
                                                                   queryParams: [[String: String]]? = nil,
                                                                   postParams: C? = nil,
                                                                   authenticatedCall: Bool? = nil,
                                                                   completionHandler: @escaping (Result<T, Error>) -> Void) throws -> Foundation.URLSessionDataTask {
         let path: String = {
             switch path {
-            case .checksums:
-                return "/api/v1/beam_objects/checksums"
+            case .fetchAll:
+                return "/api/v1/beam_objects/fetch_all"
+            case .deleteAll:
+                return "/api/v1/beam_objects/delete_all"
             }
         }()
 
         let request = try makeRestUrlRequest(path: path,
-                                             httpMethod: .post,
+                                             httpMethod: httpMethod,
                                              queryParams: queryParams,
                                              postParams: postParams,
                                              authenticatedCall: authenticatedCall)
-        let filename = "rest call"
+        let filename = "rest call: \(path)"
         #if DEBUG
         Self.networkCallFilesSemaphore.wait()
         Self.networkCallFiles.append(filename)
@@ -48,12 +53,15 @@ extension APIRequest {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 
+        let localTimer = BeamDate.now
+
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             self.parseDataTask(data: data,
                                response: response,
                                error: error,
                                filename: filename,
                                authenticatedCall: authenticatedCall,
+                               localTimer: localTimer,
                                completionHandler: completionHandler)
         }
 
@@ -63,7 +71,7 @@ extension APIRequest {
         return dataTask!
     }
 
-    // swiftlint:disable function_body_length
+    // swiftlint:disable function_body_length cyclomatic_complexity
     func makeRestUrlRequest<C: Codable>(path: String,
                                         httpMethod: APIRequestMethod = .get,
                                         queryParams: [[String: String]]? = nil,
@@ -76,7 +84,8 @@ extension APIRequest {
             "Device": Self.deviceId.uuidString.lowercased(),
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
-            "Accept-Language": Locale.current.languageCode ?? "en"
+            "Accept-Language": Locale.current.languageCode ?? "en",
+            "Accept-Encoding": "gzip, deflate, br"
         ]
 
         switch httpMethod {
@@ -103,6 +112,15 @@ extension APIRequest {
                 headers["Content-Type"] = "application/json"
             }
             request.httpMethod = "POST"
+        case .delete:
+            guard let url = URL(string: fullLink) else { fatalError("Can't get URL") }
+            request = URLRequest(url: url)
+            if let postParams = postParams {
+                let jsonData = try JSONEncoder().encode(postParams)
+                request.httpBody = jsonData
+                headers["Content-Type"] = "application/json"
+            }
+            request.httpMethod = "DELETE"
         }
 
         request.allHTTPHeaderFields = headers
