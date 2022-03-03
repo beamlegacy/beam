@@ -34,12 +34,15 @@ extension APIRequest {
         // code called in the completion handler is blocking, it will prevent new following requests
         // to be parsed in the NSURLSession delegate callback thread
 
+        let localTimer = BeamDate.now
+
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             self.parseDataTask(data: data,
                                response: response,
                                error: error,
                                filename: filename,
                                authenticatedCall: authenticatedCall,
+                               localTimer: localTimer,
                                completionHandler: completionHandler)
         }
 
@@ -87,7 +90,13 @@ extension APIRequest {
         let diffTime = BeamDate.now.timeIntervalSince(localTimer)
         let diff = String(format: "%.3f", diffTime)
         let request_id = httpResponse.allHeaderFields["X-Request-Id"] ?? "-"
-        let text = "[\(request_id)] [\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
+
+        var extraGzipInformation = ""
+        if let encoding = httpResponse.allHeaderFields["Content-Encoding"] as? String, encoding == "gzip" {
+            extraGzipInformation = "(gzip)"
+        }
+
+        let text = "[\(request_id)] [\(callsCount)] [\(Self.uploadedBytes.byteSize)/\(Self.downloadedBytes.byteSize)] [\(bytesSent.byteSize)/\(bytesReceived.byteSize)] \(extraGzipInformation) [\(authenticated ? "authenticated" : "anonymous")] \(diff)sec \(httpResponse.statusCode) \(filename)"
 
         if diffTime > 1.0 {
             Logger.shared.logDebug("🐢🐢🐢 \(text)", category: .network)

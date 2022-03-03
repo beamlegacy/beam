@@ -279,6 +279,16 @@ extension BeamObjectRequest {
     @discardableResult
     func deleteAll(beamObjectType: BeamObjectObjectType? = nil,
                    _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
+        if Configuration.beamObjectOnRest {
+            return try deleteAllWithRest(beamObjectType: beamObjectType, completion)
+        }
+
+        return try deleteAllWithGraphQL(beamObjectType: beamObjectType, completion)
+    }
+
+    @discardableResult
+    func deleteAllWithGraphQL(beamObjectType: BeamObjectObjectType? = nil,
+                              _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = DeleteAllBeamObjectsParameters(beamObjectType: beamObjectType?.rawValue)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_all_beam_objects", variables: parameters)
 
@@ -296,12 +306,61 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
+    func deleteAllWithRest(beamObjectType: BeamObjectObjectType? = nil,
+                           _ completion: @escaping (Swift.Result<Bool, Error>) -> Void) throws -> URLSessionDataTask {
+
+        struct Parameters: Codable {
+            let beamObjectType: String?
+        }
+
+        let parameters = Parameters(beamObjectType: beamObjectType?.rawValue)
+
+        return try performRestRequest(path: .deleteAll,
+                                      httpMethod: .delete,
+                                      postParams: parameters,
+                                      authenticatedCall: true,
+                                      completionHandler: { (result: Swift.Result<DeleteAllBeamObjects, Error>) in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success:
+                completion(.success(true))
+            }
+        })
+    }
+
+    @discardableResult
     func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
                   beamObjectType: String? = nil,
                   skipDeleted: Bool? = false,
                   raisePrivateKeyError: Bool = false,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+        if Configuration.beamObjectOnRest {
+            return try fetchAllWithRest(receivedAtAfter: receivedAtAfter,
+                                        ids: ids,
+                                        beamObjectType: beamObjectType,
+                                        skipDeleted: skipDeleted,
+                                        raisePrivateKeyError: raisePrivateKeyError,
+                                        completion)
+        }
+
+        return try fetchAllWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                       ids: ids,
+                                       beamObjectType: beamObjectType,
+                                       skipDeleted: skipDeleted,
+                                       raisePrivateKeyError: raisePrivateKeyError,
+                                       completion)
+
+    }
+
+    @discardableResult
+    func fetchAllWithGraphQL(receivedAtAfter: Date? = nil,
+                             ids: [UUID]? = nil,
+                             beamObjectType: String? = nil,
+                             skipDeleted: Bool? = false,
+                             raisePrivateKeyError: Bool = false,
+                             _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
@@ -318,17 +377,19 @@ extension BeamObjectRequest {
                           raisePrivateKeyError: Bool = false,
                           _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         struct Parameters: Codable {
+            let fields: String?
             let ids: [String]?
             let beamObjectType: String?
             let filterDeleted: Bool?
-            let receivedAtAfter: Date?
+            let receivedAtAfter: String?
         }
 
         let parameters = Parameters(
+            fields: fields,
             ids: ids?.map { $0.uuidString.lowercased() },
             beamObjectType: beamObjectType,
             filterDeleted: skipDeleted,
-            receivedAtAfter: receivedAtAfter
+            receivedAtAfter: receivedAtAfter?.iso8601withFractionalSeconds
         )
 
         return try fetchAllWithRest(fields, parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
@@ -341,6 +402,28 @@ extension BeamObjectRequest {
                              skipDeleted: Bool? = false,
                              raisePrivateKeyError: Bool = false,
                              _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+        if Configuration.beamObjectOnRest {
+            return try fetchAllWithDataUrlWithRest(receivedAtAfter: receivedAtAfter,
+                                                   ids: ids,
+                                                   beamObjectType: beamObjectType,
+                                                   skipDeleted: skipDeleted,
+                                                   raisePrivateKeyError: raisePrivateKeyError, completion)
+        }
+
+        return try fetchAllWithDataUrlWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                                  ids: ids,
+                                                  beamObjectType: beamObjectType,
+                                                  skipDeleted: skipDeleted,
+                                                  raisePrivateKeyError: raisePrivateKeyError, completion)
+    }
+
+    @discardableResult
+    func fetchAllWithDataUrlWithGraphQL(receivedAtAfter: Date? = nil,
+                                        ids: [UUID]? = nil,
+                                        beamObjectType: String? = nil,
+                                        skipDeleted: Bool? = false,
+                                        raisePrivateKeyError: Bool = false,
+                                        _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
@@ -350,12 +433,54 @@ extension BeamObjectRequest {
     }
 
     @discardableResult
+    func fetchAllWithDataUrlWithRest(receivedAtAfter: Date? = nil,
+                                     ids: [UUID]? = nil,
+                                     beamObjectType: String? = nil,
+                                     skipDeleted: Bool? = false,
+                                     raisePrivateKeyError: Bool = false,
+                                     _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+
+        try fetchAllWithRest(fields: "id,checksum,createdAt,updatedAt,deletedAt,receivedAt,data,dataUrl,type,checksum,privateKeySignature",
+                             receivedAtAfter: receivedAtAfter,
+                             ids: ids,
+                             beamObjectType: beamObjectType,
+                             skipDeleted: skipDeleted,
+                             raisePrivateKeyError: raisePrivateKeyError,
+                             completion)
+    }
+
+    @discardableResult
     func fetchAllChecksums(receivedAtAfter: Date? = nil,
                            ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
                            skipDeleted: Bool? = false,
                            raisePrivateKeyError: Bool = false,
                            _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+
+        if Configuration.beamObjectOnRest {
+            return try fetchAllChecksumsWithRest(receivedAtAfter: receivedAtAfter,
+                                                 ids: ids,
+                                                 beamObjectType: beamObjectType,
+                                                 skipDeleted: skipDeleted,
+                                                 raisePrivateKeyError: raisePrivateKeyError,
+                                                 completion)
+        }
+
+        return try fetchAllChecksumsWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                                ids: ids,
+                                                beamObjectType: beamObjectType,
+                                                skipDeleted: skipDeleted,
+                                                raisePrivateKeyError: raisePrivateKeyError,
+                                                completion)
+    }
+
+    @discardableResult
+    func fetchAllChecksumsWithGraphQL(receivedAtAfter: Date? = nil,
+                                      ids: [UUID]? = nil,
+                                      beamObjectType: String? = nil,
+                                      skipDeleted: Bool? = false,
+                                      raisePrivateKeyError: Bool = false,
+                                      _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                ids: ids,
                                                beamObjectType: beamObjectType,
@@ -371,7 +496,7 @@ extension BeamObjectRequest {
                                    skipDeleted: Bool? = false,
                                    raisePrivateKeyError: Bool = false,
                                    _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-         try fetchAllWithRest(fields: "id,checksum",
+         try fetchAllWithRest(fields: "id,type,checksum",
                               receivedAtAfter: receivedAtAfter,
                               ids: ids,
                               beamObjectType: beamObjectType,
@@ -387,7 +512,7 @@ extension BeamObjectRequest {
                                               raisePrivateKeyError: Bool,
                                               _ completion: @escaping (Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
 
-        return try performRestRequest(path: .checksums,
+        return try performRestRequest(path: .fetchAll,
                                       postParams: parameters,
                                       authenticatedCall: true,
                                       completionHandler: { (result: Swift.Result<UserMe, Error>) in
@@ -447,6 +572,8 @@ extension BeamObjectRequest {
              */
             do {
                 var invalidObjects = [BeamObject]()
+
+                let localTimer = BeamDate.now
                 let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
                     do {
                         try $0.decrypt()
@@ -462,6 +589,8 @@ extension BeamObjectRequest {
 
                     return nil
                 }
+
+                Logger.shared.logDebug("Decrypted \(decryptedObjects.count) objects", category: .beamObject, localTimer: localTimer)
 
                 if decryptedObjects.count < beamObjects.count && raisePrivateKeyError {
 //                            UserAlert.showError(message: "Encryption error",
@@ -634,7 +763,7 @@ extension BeamObjectRequest {
 
     @discardableResult
     public func fetchDataFromUrl(urlString: String,
-                                  _ completionHandler: @escaping (Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
+                                 _ completionHandler: @escaping (Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
 
         guard let url = URL(string: urlString) else {
              throw BeamObjectRequestError.malformattedURL
