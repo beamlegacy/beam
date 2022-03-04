@@ -44,6 +44,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
+    var sessionExporter: ClusteringSessionExporter
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
     var checkForUpdateCancellable: AnyCancellable?
@@ -106,6 +107,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
+        sessionExporter = ClusteringSessionExporter()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         cookies = HTTPCookieStorage()

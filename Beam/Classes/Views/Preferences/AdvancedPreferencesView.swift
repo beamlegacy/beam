@@ -265,6 +265,7 @@ struct AdvancedPreferencesView: View {
                             export_all_note_sources(to: url)
                             AppDelegate.main.data.clusteringManager.addOrphanedUrlsFromCurrentSession(orphanedUrlManager: AppDelegate.main.data.clusteringOrphanedUrlManager)
                             AppDelegate.main.data.clusteringOrphanedUrlManager.export(to: url)
+                            AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: url)
                         }
                     }, label: {
                         Text("Note Sources").frame(minWidth: 100)
