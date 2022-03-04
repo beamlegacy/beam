@@ -78,7 +78,11 @@ class ClusteringManager: ObservableObject {
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
     let frecencyFetcher = LinkStoreFrecencyUrlStorage()
     var summary: SummaryForNewDay
-    var allOpenBrowsingTrees: [BrowsingTreeOpenInTab]?
+    var allOpenBrowsingTrees: [BrowsingTreeOpenInTab]? {
+        didSet {
+            self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
+        }
+    }
     var allOpenPages: [PageOpenInTab]?
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
@@ -469,9 +473,8 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                let cleanedContent = self.cluster.getCleanedContentFromPageId(pageID: urlId)
-                let entities = self.cluster.getNamedEntitiesFromPageId(pageID: urlId)
-                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, cleanedContent: cleanedContent, entities: entities.0, entitiesInTitle: entities.1))
+                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
     }
@@ -482,12 +485,30 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                let cleanedContent = self.cluster.getCleanedContentFromPageId(pageID: urlId)
-                let entities = self.cluster.getNamedEntitiesFromPageId(pageID: urlId)
-                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, cleanedContent: cleanedContent, entities: entities.0, entitiesInTitle: entities.1))
+                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
         orphanedUrlManager.save()
+    }
+
+    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL) {
+        for group in self.clusteredPagesId.enumerated() {
+            let notesInGroup = self.clusteredNotesId[group.offset]
+            for noteId in notesInGroup {
+                let informationForId = self.cluster.getExportInformationForId(id: noteId)
+                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, userCorrectionGroup: nil))
+            }
+            for urlId in group.element {
+                let url = LinkStore.linkFor(urlId)?.url
+                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                let isOpenAtExport = self.allOpenPages?.map { $0.pageId }.contains(urlId)
+                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, userCorrectionGroup: nil))
+                //TODO: Add userCorrectionGroup when UI is ready
+            }
+        }
+        sessionExporter.export(to: to, sessionId: self.sessionId)
+        sessionExporter.urls = [AnyUrl]()
     }
 
     // swiftlint:disable:next cyclomatic_complexity
