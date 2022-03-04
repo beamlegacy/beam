@@ -40,7 +40,7 @@ export class BeamEmbedHelper {
   }
 
   isOnFullEmbeddablePage() {
-    return this.urlMatchesEmbedProvider([this.win.location.href])
+    return this.urlMatchesEmbedProvider([this.win.location.href]) && this.isInsideIframe()
   }
 
   isEmbeddableIframe(element: BeamElement): boolean {
