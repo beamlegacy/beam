@@ -685,7 +685,6 @@
 		964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */ = {isa = PBXBuildFile; fileRef = 964FE64C262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift */; };
 		9652A93426A6B24E00F0590C /* FakeNoteGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652A92926A6A96600F0590C /* FakeNoteGenerator.swift */; };
 		9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */; };
-		96540CD627CD2F3C0078F2A3 /* AutocompleteResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5C63DE274BEEE1001F7CEF /* AutocompleteResultTests.swift */; };
 		965A78292514F147009980D4 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 965A78282514F147009980D4 /* AppDelegate.swift */; };
 		965A78362514F148009980D4 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 965A78342514F148009980D4 /* Main.storyboard */; };
 		965DD95327B3EB8200648F17 /* all_objects_private_key_signatures.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 965DD94D27B3EB8200648F17 /* all_objects_private_key_signatures.graphql */; };
@@ -6818,7 +6817,6 @@
 				96F5354A27104BE400B719C6 /* EventsTracker.swift in Sources */,
 				522BC3D726A6EAEE0018B51E /* Date+IntValue.swift in Sources */,
 				9635C97427696C5700015575 /* DebugHelpers.swift in Sources */,
-				96540CCC27CD2D4A0078F2A3 /* AutocompleteResultTests.swift in Sources */,
 				96319D3D2616233E00D1CF31 /* BeamText+String.swift in Sources */,
 				96319D372616233E00D1CF31 /* String+LoremIpsum.swift in Sources */,
 				8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */,
@@ -10015,7 +10013,7 @@
 			repositoryURL = "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git";
 			requirement = {
 				kind = revision;
-				revision = f85fac6e8f8e0e7350d46307cbbfbeda6a68a9d8;
+				revision = c7f5dcdcdb6a7a72bdb9e2ad11eda258ee5dc9c3;
 			};
 		};
 		524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */ = {
