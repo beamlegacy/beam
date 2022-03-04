@@ -47,7 +47,6 @@ export class WebPositions<UI extends WebPositionsUI> {
     this.win = win
     this.logger = new BeamLogger(win, BeamLogCategory.webpositions)
     this.onScroll() // Init/refresh scroll info
-    this.sendFramesInfo()
     this.registerEventListeners()
     this.createFrameMutationObserver()
     this.createZoomMutationObserver("body", this.zoomMutationCallback.bind(this))
@@ -60,6 +59,7 @@ export class WebPositions<UI extends WebPositionsUI> {
     this.win.addEventListener("beam_historyLoad", this.onLoad.bind(this))
     this.win.addEventListener("scroll", this.onScroll.bind(this), true)
     this.win.addEventListener("resize", this.onResize.bind(this), true)
+    this.win.addEventListener("keydown", this.onKeyDown.bind(this))
   }
 
   createZoomMutationObserver(query, fn): void {
@@ -90,25 +90,37 @@ export class WebPositions<UI extends WebPositionsUI> {
     const observer = this.createMutationObserver(this.frameMutationCallback.bind(this))
     const options = {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true
     }
     observer.observe(this.win.document, options)
   }
 
   frameMutationCallback(mutationRecords, _self): void {
     mutationRecords.map((mutationRecord) => {
+      if (mutationRecord.target.nodeName == "IFRAME") {
+        this.debouncedFrameInfoTrailling()
+      }
       for (const node of mutationRecord.removedNodes) {
         if (node.nodeName == "IFRAME") {
-          this.sendFramesInfo(false)
+          this.debouncedFrameInfoTrailling()
         }
       }
 
       for (const node of mutationRecord.addedNodes) {
         if (node.nodeName == "IFRAME") {
-          this.sendFramesInfo(false)
+          this.debouncedFrameInfoTrailling()
         }
       }
     })
+  }
+
+  onKeyDown(ev) {
+    const altKey = ev.altKey || ev.key == "Alt"
+    const isOnlyAltKey = altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
+    if (isOnlyAltKey) {
+      this.debouncedFrameInfoTrailling()
+    }
   }
 
   sendFramesInfo(includeMainFrame = true): void {
@@ -170,7 +182,7 @@ export class WebPositions<UI extends WebPositionsUI> {
 
   onLoad(_ev): void {
     this.onScroll()
-    this.sendFramesInfo()
+    this.debouncedFrameInfoTrailling()
   }
 
   toString(): string {
