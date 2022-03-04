@@ -9,6 +9,7 @@ import BeamCore
 import Foundation
 import os
 import Clustering
+import NaturalLanguage
 
 fileprivate extension FileManager {
     func secureCopyItem(at srcURL: URL, to dstURL: URL) -> Bool {
@@ -40,19 +41,62 @@ struct OrphanedUrl: CsvRow {
     let groupId: Int
     let navigationGroupId: Int?
     let savedAt: Date
-    let cleanedContent: String
-    let entities: EntitiesInText
-    let entitiesInTitle: EntitiesInText
+    let title: String?
+    let cleanedContent: String?
+    let entities: EntitiesInText?
+    let entitiesInTitle: EntitiesInText?
+    let language: NLLanguage?
 
     static var columnNames: [String] {
-        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt", "cleanedContent", "entities", "entitiesInTitle"]
+        ["sessionId", "url", "groupId", "navigationGroupId", "savedAt", "title", "cleanedContent", "entities", "entitiesInTitle", "language"]
     }
 
     var columns: [String] {
-        [sessionId.uuidString, optionalToString(url), String(groupId), String(navigationGroupId ?? -1), savedAt.toString, cleanedContent, entities.description, entitiesInTitle.description]
+        [sessionId.uuidString, optionalToString(url), String(groupId), String(navigationGroupId ?? -1), savedAt.toString, optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue)]
+    }
+}
+
+struct AnyUrl: CsvRow {
+    let noteName: String?
+    let url: String?
+    let groupId: Int
+    let navigationGroupId: Int?
+    let title: String?
+    let cleanedContent: String?
+    let entities: EntitiesInText?
+    let entitiesInTitle: EntitiesInText?
+    let language: NLLanguage?
+    let isOpenAtExport: Bool?
+    let userCorrectionGroup: Int?
+
+    static var columnNames: [String] {
+        ["noteName", "url", "groupId", "navigationGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "userCorrectionGroup"]
     }
 
+    var columns: [String] {
+        [optionalToString(noteName), optionalToString(url), String(groupId), String(navigationGroupId ?? -1), optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue), optionalToString(isOpenAtExport), optionalToString(userCorrectionGroup)]
+    }
 }
+
+class ClusteringSessionExporter {
+    var urls: [AnyUrl] = [AnyUrl]()
+    let fileManager = FileManager.default
+
+    func add(anyUrl: AnyUrl) {
+        urls.append(anyUrl)
+    }
+
+    func export(to: URL, sessionId: UUID) {
+        let destination = to.appendingPathComponent("beam_clustering_session-\(sessionId)-\(BeamDate.now).csv")
+        let writer = CsvRowsWriter(header: AnyUrl.header, rows: self.urls)
+        do {
+            try writer.overWrite(to: destination)
+        } catch {
+            Logger.shared.logError("Unable to save session urls to \(destination)", category: .web)
+        }
+    }
+}
+
 class ClusteringOrphanedUrlManager {
     var urls: [OrphanedUrl] = [OrphanedUrl]()
     var tempUrls: [OrphanedUrl] = [OrphanedUrl]()
