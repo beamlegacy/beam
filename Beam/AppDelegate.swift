@@ -262,7 +262,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             // We have a new current DB so let's move all the notes to the current DB:
             let moveSemaphore = DispatchSemaphore(value: 0)
             DispatchQueue.mainSync {
-                self.documentManager.moveAllOrphanNotes(databaseId: newDefaultDB, onlyOrphans: false, displayAlert: false) { result in
+                self.documentManager.moveAllOrphanNotes(databaseId: newDefaultDB, onlyOrphans: false) { result in
                     switch result {
                     case let .failure(error):
                         Logger.shared.logError("Error while moving all notes to database \(newDefaultDB): \(error)", category: .database)
