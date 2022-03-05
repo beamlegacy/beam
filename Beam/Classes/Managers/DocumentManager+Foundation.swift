@@ -605,7 +605,7 @@ extension DocumentManager {
     // MARK: -
     // MARK: Database related
     //swiftlint:disable:next cyclomatic_complexity function_body_length
-    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, displayAlert: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         let documentManager = DocumentManager()
         do {
             let databaseIds = DatabaseManager().all().map { $0.id }
@@ -688,18 +688,10 @@ extension DocumentManager {
                     }
 
                     note.title = title
+                    note.databaseId = databaseId
                     _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
                 }
                 count += 1
-            }
-
-            if displayAlert {
-                if count != 0 {
-                    UserAlert.showMessage(message: "\(count) documents impacted, must exit.", buttonTitle: "Exit now")
-                    NSApplication.shared.terminate(nil)
-                } else {
-                    UserAlert.showMessage(message: "no document impacted")
-                }
             }
             completion(.success(true))
         } catch {
