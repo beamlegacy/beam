@@ -259,6 +259,12 @@ extension AccountManager {
             moveToSignedIn()
             return state
         }
+
+        guard Persistence.Authentication.email != nil else {
+            moveToSignedOff()
+            return state
+        }
+
         guard AuthenticationManager.shared.isAuthenticated else { return state }
         var pkStatus = PrivateKeySignatureManager.DistantKeyStatus.invalid
         do {
