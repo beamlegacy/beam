@@ -356,7 +356,8 @@ public extension CALayer {
     }
 
     var searchResults: [SearchResult]?
-    var lockCursor: Bool = false
+
+    private let mouseCursorManager = MouseCursorManager()
 
     public var config = TextConfig()
 
@@ -938,10 +939,10 @@ public extension CALayer {
 
     func hideMouseForEditing() {
         guard let rootNode = rootNode else { return }
-        NSCursor.setHiddenUntilMouseMoves(true)
+        mouseCursorManager.hideMouseCursorUntilNextMove(true)
         // dispatch hidden mouse events manually
-        dispatchHover(Set<Widget>())
-        if let lastAppEvent = NSApp.currentEvent {
+        dispatchHover(Set<Widget>(), forceUpdate: true)
+        if let lastAppEvent = NSApp.currentEvent, lastAppEvent.type == .mouseMoved {
             let mouseInfo = MouseInfo(rootNode, CGPoint.zero, lastAppEvent)
             rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
         }
@@ -1135,7 +1136,7 @@ public extension CALayer {
         state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true
     }
     private func shouldAllowHoverEvents() -> Bool {
-        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false
+        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false && !mouseCursorManager.isMouseCursorHidden
     }
 
     override public func updateTrackingAreas() {
@@ -1170,7 +1171,7 @@ public extension CALayer {
         if window?.firstResponder != self {
             window?.makeFirstResponder(self)
         }
-        lockCursor = true
+        mouseCursorManager.lockCursor = true
     }
 
     let scrollXBorder = CGFloat(20)
@@ -1219,13 +1220,14 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
+        mouseCursorManager.mouseMoved()
         guard let rootNode = rootNode, shouldAllowMouseEvents() && shouldAllowHoverEvents() else { return }
         if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             let hoversCardTitle = cardTitleLayer.contains(titleCoord)
             updateCardTitleForHover(hoversCardTitle)
             if hoversCardTitle {
-                NSCursor.pointingHand.set()
+                mouseCursorManager.setMouseCursor(cursor: .pointingHand)
                 return
             }
         }
@@ -1281,7 +1283,6 @@ public extension CALayer {
 
     public override func cursorUpdate(with event: NSEvent) {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
-        guard !lockCursor else { return }
 
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
@@ -1300,16 +1301,17 @@ public extension CALayer {
 
         let cursors = preciseViews.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
-        cursor.set()
+        mouseCursorManager.setMouseCursor(cursor: cursor)
         dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget }))
     }
 
-    func dispatchHover(_ widgets: Set<Widget>) {
+    func dispatchHover(_ widgets: Set<Widget>, forceUpdate: Bool = false) {
+        guard shouldAllowHoverEvents() || forceUpdate else { return }
         rootNode?.dispatchHover(widgets)
     }
 
     override public func mouseUp(with event: NSEvent) {
-        lockCursor = false
+        mouseCursorManager.lockCursor = false
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()
