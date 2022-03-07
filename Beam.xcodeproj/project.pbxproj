@@ -545,17 +545,12 @@
 		8A8CD64F274D146D00DEB52B /* WebNoteControllerTest+setContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */; };
 		8A8FB65627C7ACAD009C546A /* OauthWebViewWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8FB65527C7ACAC009C546A /* OauthWebViewWindow.swift */; };
 		8A9309FD27A04E2C00064133 /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309EF27A04E2B00064133 /* tsconfig.json */; };
-		8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */; };
 		8A9309FF27A04E2C00064133 /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F227A04E2B00064133 /* jest.config.js */; };
 		8A930A0127A04E2C00064133 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F427A04E2B00064133 /* webpack.config.js */; };
 		8A930A0227A04E2C00064133 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F527A04E2C00064133 /* PasswordManager.js */; };
-		8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */; };
-		8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */; };
-		8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F927A04E2C00064133 /* PasswordManager.ts */; };
 		8A930A0727A04E2C00064133 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FA27A04E2C00064133 /* package.json */; };
 		8A930A0827A04E2C00064133 /* yarn.lock in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FB27A04E2C00064133 /* yarn.lock */; };
 		8A930A0927A04E2C00064133 /* PasswordManager_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FC27A04E2C00064133 /* PasswordManager_prod.js */; };
-		8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A930A0E27A0519200064133 /* PasswordManagerHelper.ts */; };
 		8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */; };
 		8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */; };
 		8AA2431626E63A5F002A553A /* SwiftSoup+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */; };
@@ -6071,6 +6066,7 @@
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
 				3390376A26529BD700089E25 /* Sign AutoUpdate XPC */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
+				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
 			);
 			buildRules = (
 			);
@@ -6332,8 +6328,6 @@
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
-				8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */,
-				8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				A03B908D27BE99AC001FBE64 /* Capture.json in Resources */,
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
@@ -6369,10 +6363,8 @@
 				33F8832127BD3DE700E7673D /* status-update_restart.json in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */,
-				8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
-				8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */,
@@ -6419,7 +6411,6 @@
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */,
-				8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */,
 				8A4723C227C539E100E76893 /* WindowCleanup.js in Resources */,
 				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
@@ -6604,6 +6595,25 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ $ACTION == \"indexbuild\" ]\nthen\n    echo \"Skipping the script because of Xcode indexing\"\nelif [ $ENABLE_PREVIEWS == \"YES\" ]\nthen\n    echo \"Skipping the script because of SwiftUI preview mode\"\nelse\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    cp ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\nfi\n";
 			showEnvVarsInLog = 0;
+		};
+		870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Remove Mock HTTP Server";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "scripts/delete_mock_http_server.sh\n";
 		};
 		8A0D274726D5338600CE0AC9 /* Write xcfilelist: Point and Shoot */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -7976,6 +7986,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
@@ -8200,6 +8211,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Beta;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8435,6 +8447,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Beta;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8458,6 +8471,7 @@
 					"beam-logo-test.png",
 					Beam.css,
 					video.mov,
+					"UITests-Passwords.csv",
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -8683,6 +8697,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Debug;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8918,6 +8933,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8941,6 +8957,7 @@
 					"beam-logo-test.png",
 					Beam.css,
 					video.mov,
+					"UITests-Passwords.csv",
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9318,6 +9335,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Debug;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -9374,6 +9392,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -9397,6 +9416,7 @@
 					"beam-logo-test.png",
 					Beam.css,
 					video.mov,
+					"UITests-Passwords.csv",
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9605,6 +9625,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
