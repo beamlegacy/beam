@@ -99,6 +99,7 @@
 		3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997326CBDDC900F52C23 /* SearchInContentView.swift */; };
 		3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997526CBE0AE00F52C23 /* SearchViewModel.swift */; };
 		3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */ = {isa = PBXBuildFile; fileRef = 3355999526CBF11E00F52C23 /* SearchWebPage.js */; };
+		335CBA9127CF617A005FE658 /* MouseCursorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335CBA9027CF617A005FE658 /* MouseCursorManager.swift */; };
 		33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
@@ -1456,6 +1457,7 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		3355999526CBF11E00F52C23 /* SearchWebPage.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SearchWebPage.js; sourceTree = "<group>"; };
+		335CBA9027CF617A005FE658 /* MouseCursorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseCursorManager.swift; sourceTree = "<group>"; };
 		338981C02795B9BD00477941 /* Bundle+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Beam.swift"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
@@ -3488,6 +3490,7 @@
 				A0F558F426BD8F260024C47E /* DebugSection.swift */,
 				33AA4EDE270DF5D200B74868 /* ResizableNode.swift */,
 				33DE802B273A481F00B7FCAF /* CollapsableNode.swift */,
+				335CBA9027CF617A005FE658 /* MouseCursorManager.swift */,
 			);
 			path = BeamTextEdit;
 			sourceTree = "<group>";
@@ -7065,6 +7068,7 @@
 				873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */,
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
+				335CBA9127CF617A005FE658 /* MouseCursorManager.swift in Sources */,
 				33353ED426F3672F00063078 /* ShortcutModifier.swift in Sources */,
 				8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */,
 				A0EFCFF527162499004A7C7B /* CalendarManager.swift in Sources */,
