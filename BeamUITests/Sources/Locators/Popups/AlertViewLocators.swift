@@ -10,7 +10,7 @@ import Foundation
 enum AlertViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case alertDeleteButton = "Delete..."
+        case alertDeleteButton = "Delete"
         case alertCancelButton = "Cancel"
         case alertRemoveButton = "Remove"
         case alertNotNowButton = "Not Now"

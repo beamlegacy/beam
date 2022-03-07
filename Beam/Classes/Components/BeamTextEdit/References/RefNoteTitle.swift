@@ -41,12 +41,7 @@ class RefNoteTitle: Widget {
         self.noteTitle = title
         super.init(parent: parent, availableWidth: availableWidth)
 
-        titleLayer.string = NSAttributedString(string: noteTitle.capitalized, attributes: [
-            .font: BeamFont.medium(size: 15).nsFont,
-            .foregroundColor: BeamColor.LinkedSection.title.nsColor,
-            .underlineStyle: NSUnderlineStyle.single.rawValue,
-            .underlineColor: BeamColor.Generic.transparent.nsColor
-        ])
+        updateText()
 
         cardTitleLayer = ButtonLayer("cardTitleLayer", titleLayer, activated: {[weak self] in
             guard let self = self else { return }
@@ -78,13 +73,29 @@ class RefNoteTitle: Widget {
         24
     }
 
+    override func updateColors() {
+        super.updateColors()
+
+        updateText()
+        updateTitleForHover(hover)
+    }
+
     private func updateTitleForHover(_ hover: Bool) {
         if let attributedString = (titleLayer.string as AnyObject).mutableCopy() as? NSMutableAttributedString {
-            let underlineColor = hover ? BeamColor.LinkedSection.title.nsColor : BeamColor.Generic.transparent.nsColor
+            let underlineColor = hover ? BeamColor.LinkedSection.title.cgColor : BeamColor.Generic.transparent.cgColor
             attributedString.removeAttribute(.underlineColor, range: attributedString.wholeRange)
             attributedString.addAttributes([.underlineColor: underlineColor], range: attributedString.wholeRange)
             titleLayer.string = attributedString
         }
+    }
+
+    private func updateText() {
+        titleLayer.string = NSAttributedString(string: noteTitle.capitalized, attributes: [
+            .font: BeamFont.medium(size: 15).nsFont,
+            .foregroundColor: BeamColor.LinkedSection.title.cgColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .underlineColor: BeamColor.Generic.transparent.cgColor
+        ])
     }
 
     func makeLinksToNoteExplicit(forNote title: String) {

@@ -108,7 +108,6 @@ struct OmniboxSearchField: View {
                     placeholderColor: BeamColor.Generic.placeholder.nsColor,
                     selectedRange: autocompleteManager.searchQuerySelectedRange,
                     selectedRangeColor: textSelectionColor.nsColor,
-                    multiline: true, // without this, the height is incorrect.
                     textWillChange: { autocompleteManager.replacementTextForProposedText($0) },
                     onCommit: { modifierFlags in
                         onEnterPressed(modifierFlags: modifierFlags)
@@ -122,7 +121,6 @@ struct OmniboxSearchField: View {
                     .frame(maxHeight: .infinity)
                     .accessibility(addTraits: .isSearchField)
                     .accessibility(identifier: "OmniboxSearchField")
-                    .padding(.top, 0.25)
                 if let subtitle = resultSubtitle, !textFieldText.wrappedValue.isEmpty {
                     HStack(spacing: 0) {
                         Text(textFieldText.wrappedValue)

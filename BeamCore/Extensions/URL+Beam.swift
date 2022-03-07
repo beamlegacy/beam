@@ -54,7 +54,7 @@ public extension URL {
     /// Exemple: `https://wikipedia.org` and `wikipedia.org/` are pointing to the same page.
     /// This method could be improved with more unnecessary strings to remove, like `index.html` , etc.
     var urlStringByRemovingUnnecessaryCharacters: String {
-        var str = self.urlStringWithoutScheme.lowercased()
+        var str = self.urlStringWithoutScheme
         let last = str.last
         if ["/", "?"].contains(last) {
             str = String(str.dropLast())
@@ -91,7 +91,7 @@ public extension URL {
         else {
             return nil
         }
-        return URL(string: "\(scheme)://\(host)/")
+        return URL(string: "\(scheme)://\(removeWWWPrefix(in: host))/")
     }
 
     /// Returns a string containing only the scheme and host.
@@ -130,5 +130,19 @@ public extension URL {
     func isSameOrigin(as url: URL) -> Bool {
         guard self.scheme == url.scheme, self.host == url.host, self.port == url.port else { return false }
         return true
+    }
+
+    var withRootPath: URL {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return self }
+        if components.path == "" {
+            components.path = "/"
+        }
+        return components.url ?? self
+    }
+
+    // TODO: Implement all semantic preserving transformation listed here:
+    // https://en.wikipedia.org/wiki/URI_normalization
+    var normalized: URL {
+        withRootPath
     }
 }

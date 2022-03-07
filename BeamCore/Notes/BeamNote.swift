@@ -113,6 +113,8 @@ public class BeamNote: BeamElement {
     @Published public var updateAttempts: Int = 0
     @Published public var updates: Int = 0
     public var contactId: UUID? { didSet { change(.meta) } }
+    /// Tombstones is an array containing all the beamelement that once where in this note but that have been erased from it at some point.
+    public var tombstones = Set<UUID>()
 
     public var titleAndId: String {
         "\(title) {\(id)} v\(version)"
@@ -124,6 +126,9 @@ public class BeamNote: BeamElement {
 
     public override func checkHasNote() {
         hasNote = true
+        for child in children {
+            child.checkHasNote()
+        }
     }
 
     public init(title: String) {
@@ -166,6 +171,7 @@ public class BeamNote: BeamElement {
         case publicationStatus
         case browsingSessionIds
         case contactId
+        case tombstones
     }
 
     public required init(from decoder: Decoder) throws {
@@ -205,6 +211,7 @@ public class BeamNote: BeamElement {
         }
         browsingSessionIds = (try container.decodeIfPresent([UUID].self, forKey: .browsingSessionIds) ?? [UUID]())
         contactId = try? container.decodeIfPresent(UUID.self, forKey: .contactId)
+        tombstones = (try? container.decodeIfPresent(Set<UUID>.self, forKey: .tombstones)) ?? tombstones
         switch type {
         case .note:
             break
@@ -243,28 +250,14 @@ public class BeamNote: BeamElement {
         newNote.version.store(version.load(ordering: .relaxed), ordering: .relaxed)
         newNote.savedVersion = savedVersion
         newNote.publicationStatus = publicationStatus
+        if !withNewId { // We don't need to copy the tombstones if we create a separate new note
+            newNote.tombstones = tombstones
+        }
 
         return newNote
     }
 
     public var activeDocumentCancellables = [AnyCancellable]()
-    public func merge(other: BeamNote) {
-        var oldElems = [UUID: BeamElement]()
-        for e in flatElements {
-            oldElems[e.id] = e
-        }
-
-        var newElems = [UUID: BeamElement]()
-        for e in other.flatElements {
-            newElems[e.id] = e
-        }
-
-        for (uuid, element) in newElems {
-            if let oldElement = oldElems[uuid] {
-                oldElement.text = element.text
-            }
-        }
-    }
 
     private static func cacheKeyFromTitle(_ title: String) -> String {
         validTitle(fromTitle: title).lowercased()
@@ -285,6 +278,10 @@ public class BeamNote: BeamElement {
         return Self.fetchedNotes[id]?.ref
     }
 
+    public static func getFetchedNote(_ journalDate: Date) -> BeamNote? {
+        getFetchedNote(BeamDate.journalNoteTitle(for: journalDate))
+    }
+
     public func getFetchedNote(_ title: String) -> BeamNote? {
         return Self.getFetchedNote(title)
     }
@@ -293,12 +290,16 @@ public class BeamNote: BeamElement {
         fetchedLock.readLock()
         defer { fetchedLock.readUnlock() }
 
-        guard let uid = Self.fetchedNotesTitles[title] else { return nil }
+        guard let uid = Self.fetchedNotesTitles[cacheKeyFromTitle(title)] else { return nil }
         return Self.getFetchedNote(uid)
     }
 
     public func getFetchedNote(_ id: UUID) -> BeamNote? {
         return Self.getFetchedNote(id)
+    }
+
+    public func getFetchedNote(_ journalDate: Date) -> BeamNote? {
+        getFetchedNote(BeamDate.journalNoteTitle(for: journalDate))
     }
 
     static public func visitFetchedNotes(_ visitor: @escaping (BeamNote) -> Void) {
@@ -317,7 +318,7 @@ public class BeamNote: BeamElement {
         fetchedLock.writeLock()
         defer { fetchedLock.writeUnlock() }
         fetchedNotes[note.id] = WeakReference<BeamNote>(note)
-        fetchedNotesTitles[note.title] = note.id
+        fetchedNotesTitles[cacheKeyFromTitle(note.title)] = note.id
         let cancellableKey = cancellableKeyFromNote(note)
         fetchedNotesCancellables.removeValue(forKey: cancellableKey)
 
@@ -330,7 +331,7 @@ public class BeamNote: BeamElement {
             }
 
         fetchedNotes[note.id] = WeakReference(note)
-        fetchedNotesTitles[note.title] = note.id
+        fetchedNotesTitles[cacheKeyFromTitle(note.title)] = note.id
     }
 
     public static func clearCancellables() {
@@ -364,7 +365,7 @@ public class BeamNote: BeamElement {
 
         fetchedNotesCancellables.removeValue(forKey: cancellableKeyFromNote(note))
         fetchedNotes.removeValue(forKey: note.id)
-        fetchedNotesTitles.removeValue(forKey: note.title)
+        fetchedNotesTitles.removeValue(forKey: cacheKeyFromTitle(note.title))
     }
 
     public static func reloadAfterRename(previousTitle: String, note: BeamNote) {
@@ -465,6 +466,18 @@ public class BeamNote: BeamElement {
 
     public static var signPost = SignPost("BeamNote")
     public var sign: SignPostId!
+
+    public override func dispatchChildRemoved(_ child: BeamElement) {
+        guard changePropagationEnabled else { return }
+        guard child.parent != self else { return }
+        tombstones.insert(child.id)
+    }
+
+    public override func dispatchChildAdded(_ child: BeamElement) {
+        guard changePropagationEnabled else { return }
+        tombstones.remove(child.id)
+    }
+
 }
 
 public func beamCheckMainThread() {

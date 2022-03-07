@@ -17,7 +17,11 @@ class JournalSimpleStackView: NSView {
     var onStartEditing: (() -> Void)?
 
     var notes: [BeamNote] = []
-    var views: [BeamNote: BeamTextEdit] = [:]
+    var views: [BeamNote: BeamTextEdit] = [:] {
+        didSet {
+            countChanged = !initialLayout
+        }
+    }
     var scope: [AnyCancellable] = []
 
     override var wantsUpdateLayer: Bool { true }
@@ -80,7 +84,6 @@ class JournalSimpleStackView: NSView {
         guard enclosingScrollView != nil else { return }
         defer {
             countChanged = false
-            initialLayout = false
         }
 
         let textEditViews = self.notes.compactMap { views[$0] }
@@ -112,11 +115,7 @@ class JournalSimpleStackView: NSView {
     }
 
     override public var intrinsicContentSize: NSSize {
-        guard let firstNote = notes.first,
-              let textEdit = views[firstNote]
-        else { return .zero }
-
-        let width = textEdit.intrinsicContentSize.width
+        let width = BeamTextEdit.minimumEmptyEditorWidth
 
         var height = topOffset
         for note in self.notes {
@@ -168,13 +167,18 @@ class JournalSimpleStackView: NSView {
         for note in noteSet {
             // Remove the notes that are not there any more:
             if note.shouldAppearInJournal {
-                addNote(note)
-                countChanged = true
+                let forceInit: Bool = {
+                    guard let j1 = note.type.journalDate,
+                          let j2 = focussingOn?.type.journalDate else { return false }
+
+                    return j1 >= j2
+                }()
+
+                addNote(note, forceInit: forceInit)
             } else {
                 guard let view = views[note] else { continue }
                 view.removeFromSuperview()
                 views.removeValue(forKey: note)
-                countChanged = true
             }
         }
 
@@ -186,20 +190,30 @@ class JournalSimpleStackView: NSView {
                 let view = tuple.value
                 view.removeFromSuperview()
                 views.removeValue(forKey: note)
-                countChanged = true
             }
         }
 
         if countChanged {
-            invalidateLayout()
+            layout()
         }
     }
 
-    public func addNote(_ note: BeamNote) {
+    private let typicalEditorHeightWhenWeDontKnow = CGFloat(800)
+    public func addNote(_ note: BeamNote, forceInit: Bool) {
         guard views[note] == nil else { return }
-        let view = getTextEditView(for: note, enableDelayedInit: views.count > 3)
+        let maxHeight: CGFloat
+        if frame.height > 0 {
+            maxHeight = frame.height
+        } else if let windowHeight = window?.frame.height {
+            maxHeight = windowHeight
+        } else if let screen = window?.screen ?? NSScreen.main {
+            maxHeight = screen.frame.height
+        } else {
+            maxHeight = typicalEditorHeightWhenWeDontKnow
+        }
+        let delayInit = forceInit ? false : (views.count > 1 + Int(maxHeight / BeamTextEdit.minimumEmptyEditorHeight))
+        let view = getTextEditView(for: note, enableDelayedInit: delayInit)
         views[note] = view
-        countChanged = true
         addSubview(view)
     }
 
@@ -209,7 +223,7 @@ class JournalSimpleStackView: NSView {
     }
 
     private func getTextEditView(for note: BeamNote, enableDelayedInit: Bool) -> BeamTextEdit {
-        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit)
+        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit, frame: NSRect(origin: .zero, size: CGSize(width: frame.width, height: BeamTextEdit.minimumEmptyEditorHeight)))
         textEditView.state = state
         textEditView.onStartEditing = onStartEditing
         textEditView.openURL = { [weak state] url, element in
@@ -251,4 +265,7 @@ class JournalSimpleStackView: NSView {
         super.mouseDown(with: event)
     }
 
+    override func viewDidMoveToWindow() {
+        initialLayout = false
+    }
 }

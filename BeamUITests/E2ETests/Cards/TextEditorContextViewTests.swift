@@ -74,7 +74,7 @@ class TextEditorContextViewTests: BaseTest {
         XCTAssertEqual(composedText, cardView.getLinkContentByIndex(0))
     }
     
-    func testCreateHyperlinkViaContextView() throws {
+    func SKIPtestCreateHyperlinkViaContextView() throws {
         try XCTSkipIf(true, "Dialog is not being locatable on CI. To be ran locally so far")
         let linkTitle = "the link"
         let linkURL = "www.google.com"

@@ -222,6 +222,11 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 
     public func addEvent(_ type: ReadingEventType, date: Date = BeamDate.now, webSessionId: UUID = WebSessionnizer.shared.sessionId) {
+        if let previousEvent = events.last,
+           date.timeIntervalSince(previousEvent.date) < 0 {
+            Logger.shared.logWarning("⚠️ Pair of reading event dates in wrong order for url: \(url) - previous: \(previousEvent.date), \(previousEvent.type) - current: \(date), \(type)", category: .web)
+        }
+
         let incrementalReadingTime = readingTimeSinceLastEvent(date: date)
         score.readingTimeToLastEvent += incrementalReadingTime
         longTermScoreApply { $0.readingTimeToLastEvent += incrementalReadingTime }
@@ -237,8 +242,12 @@ public class BrowsingNode: ObservableObject, Codable {
             if let lastStartReading = lastStartReading {
                 let readingTime = Float(date.timeIntervalSince(lastStartReading))
                 if let scorer = tree.frecencyScorer {
-                    scorer.update(id: link, value: readingTime, eventType: visitType, date: lastStartReading, paramKey: .webReadingTime30d0)
-                    Self.updateDomainFrecency(scorer: scorer, id: link, value: readingTime, date: lastStartReading, paramKey: .webReadingTime30d0)
+                    if readingTime >= 0 {
+                        scorer.update(id: link, value: readingTime, eventType: visitType, date: lastStartReading, paramKey: .webReadingTime30d0)
+                        Self.updateDomainFrecency(scorer: scorer, id: link, value: readingTime, date: lastStartReading, paramKey: .webReadingTime30d0)
+                    } else {
+                        Logger.shared.logWarning("⚠️ Negative reading time encountered for url: \(url) - start time: \(lastStartReading) - end time: \(date)", category: .web)
+                    }
                 }
                 self.lastStartReading = nil
             }

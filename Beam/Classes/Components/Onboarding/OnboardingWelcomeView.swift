@@ -63,6 +63,7 @@ struct OnboardingWelcomeView: View {
                     Separator(horizontal: true)
                         .padding(.vertical, BeamSpacing._40)
                     ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                        OnboardingNoteCreator.shared.createOnboardingNotes()
                         finish(nil)
                     }
                 }
@@ -82,14 +83,25 @@ struct OnboardingWelcomeView: View {
     private func onSigninDone() {
         DispatchQueue.main.async {
             guard AuthenticationManager.shared.isAuthenticated else { return }
+            if let pkStatus = try? PrivateKeySignatureManager.shared.distantKeyStatus(), pkStatus == .none {
+                // We do this to show the saveEncyptionView, user probably register his account with Google
+                onboardingManager.userDidSignUp = true
+            }
+
             self.onboardingManager.checkForPrivateKey { nextStep in
                 guard nextStep != nil else {
                     self.viewIsLoading = true
                     self.isLoadingDataStartTime = BeamDate.now
-                    onDataSyncDone()
                     return
                 }
                 finish(nextStep)
+            } syncCompletion: { result in
+                switch result {
+                case .success:
+                    onDataSyncDone()
+                default:
+                    Logger.shared.logError("Run first Sync failed when trying to connect with Google", category: .network)
+                }
             }
         }
     }

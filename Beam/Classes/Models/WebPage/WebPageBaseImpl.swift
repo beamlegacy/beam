@@ -14,7 +14,7 @@ import Foundation
  */
 class WebPageBaseImpl: WebPage {
 
-    weak var webView: BeamWebView!
+    var webView: BeamWebView
 
     init(webView: BeamWebView) {
         self.webView = webView
@@ -36,6 +36,7 @@ class WebPageBaseImpl: WebPage {
     var responseStatusCode: Int = 200
 
     var pointAndShoot: PointAndShoot?
+    var webFrames: WebFrames?
     var webPositions: WebPositions?
     var navigationController: WebNavigationController?
     var errorPageManager: ErrorPageManager?

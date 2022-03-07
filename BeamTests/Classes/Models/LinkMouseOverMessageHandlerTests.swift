@@ -5,7 +5,7 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
 
     private var messageHandler: LinkMouseOverMessageHandler!
     private var webPage: TestWebPage!
-    private var browserTabConfiguration: BrowserTabConfiguration!
+    private var browserTabConfiguration: BeamWebViewConfigurationBase!
 
     override func setUp() {
         webPage = TestWebPage(
@@ -17,8 +17,8 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
             navigationController: nil
         )
 
-        browserTabConfiguration = BrowserTabConfiguration()
-        messageHandler = LinkMouseOverMessageHandler(config: browserTabConfiguration)
+        messageHandler = LinkMouseOverMessageHandler()
+        browserTabConfiguration = BeamWebViewConfigurationBase(handlers: [messageHandler])
     }
 
     func testMouseOverLink() {

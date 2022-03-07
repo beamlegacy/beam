@@ -22,13 +22,21 @@ extension NSImage {
         image.isTemplate = true
         image.lockFocus()
 
-        color.set()
-
-        let imageRect = NSRect(origin: NSPoint.zero, size: image.size)
-        imageRect.fill(using: .sourceAtop)
+        NSAppearance.withAppAppearance {
+            color.set()
+            let imageRect = NSRect(origin: NSPoint.zero, size: image.size)
+            imageRect.fill(using: .sourceAtop)
+        }
 
         image.unlockFocus()
 
         return image
+    }
+
+    var jpegRepresentation: Data {
+        let cgImage = self.cgImage(forProposedRect: nil, context: nil, hints: nil)!
+        let bitmapRep = NSBitmapImageRep(cgImage: cgImage)
+        let jpegData = bitmapRep.representation(using: NSBitmapImageRep.FileType.jpeg, properties: [:])!
+        return jpegData
     }
 }

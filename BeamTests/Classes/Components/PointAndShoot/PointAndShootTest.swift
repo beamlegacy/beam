@@ -18,6 +18,7 @@ class TestWebPage: WebPage {
     var requestedURL: URL?
     var score: Float = 0
     var pointAndShoot: PointAndShoot?
+    var webFrames: WebFrames?
     var webPositions: WebPositions?
     var browsingScorer: BrowsingScorer?
     var storage: BeamFileStorage?
@@ -32,7 +33,7 @@ class TestWebPage: WebPage {
     var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
     var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
-    var webView: BeamWebView!
+    var webView: BeamWebView
     var activeNote: BeamNote {
         if let note = testNotes.values.first {
             return note
@@ -57,7 +58,9 @@ class TestWebPage: WebPage {
         self.downloadManager = downloadManager
         self.navigationController = navigationController
         self.webView = BeamWebView()
-        self.webPositions = WebPositions()
+        let webFrames = WebFrames()
+        self.webFrames = webFrames
+        self.webPositions = WebPositions(webFrames: webFrames)
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {
@@ -78,6 +81,7 @@ class TestWebPage: WebPage {
         events.append("createNewWindow \(targetURL) \(setCurrent))")
         let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
                                   fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+
         return webPage.webView
     }
 

@@ -97,7 +97,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         data = BeamData()
         if deleteAllLocalDataAtStartup {
-            self.deleteAllData(includedRemote: false)
+            self.deleteAllLocalData()
         }
 
         startDisplayingBrowserImportErrors()
@@ -261,8 +261,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         if let newDefaultDB = newDefaultDB {
             // We have a new current DB so let's move all the notes to the current DB:
             let moveSemaphore = DispatchSemaphore(value: 0)
-            DispatchQueue.main.sync {
-                self.documentManager.moveAllOrphanNotes(databaseId: newDefaultDB, onlyOrphans: false, displayAlert: false) { result in
+            DispatchQueue.mainSync {
+                self.documentManager.moveAllOrphanNotes(databaseId: newDefaultDB, onlyOrphans: false) { result in
                     switch result {
                     case let .failure(error):
                         Logger.shared.logError("Error while moving all notes to database \(newDefaultDB): \(error)", category: .database)
@@ -369,12 +369,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     // MARK: -
     // MARK: Windows
-    var oauthWindow: OauthWindow?
-    func openOauthWindow(title: String?) -> OauthWindow {
-        if let oauthWindow = oauthWindow { return oauthWindow }
+    var oauthWebViewWindow: OauthWebViewWindow?
+    func openOauthWebViewWindow(title: String?) -> OauthWebViewWindow {
+        if let oauthWindow = oauthWebViewWindow { return oauthWindow }
 
-        oauthWindow = OauthWindow(contentRect: NSRect(x: 0, y: 0, width: 600, height: 700))
-        guard let oauthWindow = oauthWindow else { fatalError("Can't create oauthwindow") }
+        let windowSize = CGSize(width: 600, height: 700)
+        oauthWebViewWindow = OauthWebViewWindow(contentRect: CGRect(origin: .zero, size: windowSize))
+        oauthWebViewWindow?.setContentSize(windowSize)
+
+        guard let oauthWindow = oauthWebViewWindow else { fatalError("Can't create oauthwindow") }
 
         if let title = title {
             oauthWindow.title = title
@@ -545,9 +548,17 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
 
+    ///Should only be used to say that the full sync on quit is done
+    ///Set to true to directly return .terminateNow in shouldTerminate
+    var fullSyncOnQuitStatus: FullSyncOnQuitStatus = .notStarted
+
     // MARK: -
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
-        guard !skipTerminateMethods else { return .terminateNow }
+        guard !skipTerminateMethods, fullSyncOnQuitStatus != .done else { return .terminateNow }
+        guard fullSyncOnQuitStatus != .ongoing else {
+            Logger.shared.logDebug("Tried to quit while full syncing")
+            return .terminateCancel }
+
         AccountManager.logoutIfNeeded()
         data.saveData()
         saveCloseTabsCmd(onExit: true)
@@ -586,16 +597,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return .terminateCancel
         }
 
+        //We need to trigger full sync before quitting the app
+        //To make it feel more instant, we first close all the windows
+        windows.forEach {
+            $0.close()
+        }
+
+        //Then start the full sync.
+        //As this code is async, but uses at some point the main thread, we could not ."terminateLater"
+        //because it will set its RunLoop in the modalPanel mode and that will make dispatch to main queue fail
+        //More explanations here: https://www.thecave.com/2015/08/10/dispatch-async-to-main-queue-doesnt-work-with-modal-window-on-mac-os-x
+        fullSyncOnQuitStatus = .ongoing
         syncDataWithBeamObject(force: false, showAlert: false) { _ in
-            Logger.shared.logDebug("Sending toApplicationShouldTerminate true")
-            RunLoop.main.perform(inModes: [.modalPanel]) {
-                Logger.shared.logDebug("Sending toApplicationShouldTerminate true (main thread)")
-                NSApplication.shared.reply(toApplicationShouldTerminate: true)
+            Logger.shared.logDebug("Full sync finished. Asking again to quit, without full sync")
+            DispatchQueue.main.async {
+                self.fullSyncOnQuitStatus = .done
+                NSApp.terminate(nil)
             }
         }
 
-        Logger.shared.logDebug("applicationShouldTerminate: terminateLater")
-        return .terminateLater
+        //We cancel the quit for now. Will ask again after full sync is over
+        return .terminateCancel
     }
 
     private func cancelQuitAlertForImports() -> Bool {
@@ -734,6 +756,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return true
     }
 
+}
+
+// MARK: - Full sync on quit
+extension AppDelegate {
+    enum FullSyncOnQuitStatus {
+        case notStarted
+        case ongoing
+        case done
+    }
 }
 
 // MARK: - NSAppearance

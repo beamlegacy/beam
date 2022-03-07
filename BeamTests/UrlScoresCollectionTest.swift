@@ -24,13 +24,6 @@ class UrlScoresCollectionTest: XCTestCase {
         }
     }
     
-    class FakeBeamWebViewConfiguration: BeamWebViewConfiguration {
-        var id = UUID()
-        func addCSS(source: String, when: WKUserScriptInjectionTime) {}
-        func addJS(source: String, when: WKUserScriptInjectionTime, forMainFrameOnly: Bool) {}
-        func obfuscate(str: String) -> String { return "" }
-    }
-    
     func testNodeCreationScores() throws {
         //first url is visited once then sencond url and first url once again
 
@@ -78,7 +71,7 @@ class UrlScoresCollectionTest: XCTestCase {
     }
 
     func testJsRelatedScores() throws {
-        let config = BrowserTabConfiguration()
+        let config = BeamWebViewConfigurationBase()
         let webView = BeamWebView(frame: CGRect(), configuration: config)
         let page = WebPageBaseImpl(webView: webView)
         let store = FakeLongTermScoreStore()
@@ -86,7 +79,9 @@ class UrlScoresCollectionTest: XCTestCase {
         let scorer = BrowsingTreeScorer(browsingTree: tree)
         page.browsingScorer = scorer
         scorer.page = page
-        let positions = WebPositions()
+        let frames = WebFrames()
+        let positions = WebPositions(webFrames: frames)
+        page.webFrames = frames
         page.webPositions = positions
 
         let creationDate = try XCTUnwrap(tree.root.events.first?.date)

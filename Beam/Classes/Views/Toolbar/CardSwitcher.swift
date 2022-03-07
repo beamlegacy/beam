@@ -43,6 +43,7 @@ struct CardSwitcher: View {
             }
             .fixedSize(horizontal: true, vertical: false)
             .layoutPriority(2)
+            .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription)
             .accessibilityIdentifier("card-switcher-journal")
             .onHover { h in
                 if h {
@@ -74,6 +75,7 @@ struct CardSwitcher: View {
             }
             .fixedSize(horizontal: true, vertical: false)
             .layoutPriority(2)
+            .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
             .accessibilityIdentifier("card-switcher-all-cards")
             .onHover { h in
                 if h {

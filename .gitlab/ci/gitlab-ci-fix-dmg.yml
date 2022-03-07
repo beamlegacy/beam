@@ -1,0 +1,19 @@
+fix:dmg:
+  dependencies: []
+  stage: dmg
+  artifacts:
+    expire_in: 14d
+    paths:
+      - builds/
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  before_script:
+    - echo "${PATH}"
+    - pwd
+  script:
+    - ./scripts/fix_dmg.sh
+  tags:
+    - macos-scaleway3-macos-mono
+  interruptible: true
+  retry:
+    max: 2

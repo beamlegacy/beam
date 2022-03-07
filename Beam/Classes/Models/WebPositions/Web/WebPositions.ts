@@ -35,7 +35,8 @@ export class WebPositions<UI extends WebPositionsUI> {
    * @type {number}
    */
   touchDuration = 2500
-  mutationObserver: BeamMutationObserver
+  frameMutationObserver: BeamMutationObserver
+  bodyZoomMutationObserver: BeamMutationObserver
   logger: BeamLogger
 
   /**
@@ -46,10 +47,9 @@ export class WebPositions<UI extends WebPositionsUI> {
     this.win = win
     this.logger = new BeamLogger(win, BeamLogCategory.webpositions)
     this.onScroll() // Init/refresh scroll info
-    this.installFrameObserver()
-    this.sendFramesInfo()
     this.registerEventListeners()
-    this.setObserver("body", this.zoomMutationCallback)
+    this.createFrameMutationObserver()
+    this.createZoomMutationObserver("body", this.zoomMutationCallback.bind(this))
   }
 
   framesInfo = []
@@ -59,42 +59,71 @@ export class WebPositions<UI extends WebPositionsUI> {
     this.win.addEventListener("beam_historyLoad", this.onLoad.bind(this))
     this.win.addEventListener("scroll", this.onScroll.bind(this), true)
     this.win.addEventListener("resize", this.onResize.bind(this), true)
+    this.win.addEventListener("keydown", this.onKeyDown.bind(this))
   }
 
-  setObserver(query, fn): void {
+  createZoomMutationObserver(query, fn): void {
     const self = this
-    this.mutationObserver = this.createMutationObserver((records) => fn(records, self))
+    this.bodyZoomMutationObserver = this.createMutationObserver((records) => fn(records, self))
     const target = this.win.document.querySelector(query) as unknown as BeamNode
     const options = {
       attributes: true,
       attributeFilter: ["style"]
     }
-    this.mutationObserver.observe(target, options)
+    this.bodyZoomMutationObserver.observe(target, options)
   }
 
   createMutationObserver(fn): BeamMutationObserver {
     return new MutationObserver(fn) as unknown as BeamMutationObserver
   }
 
-  zoomMutationCallback(mutationRecords, self): void {
+  zoomMutationCallback(mutationRecords, _self): void {
     mutationRecords.map((mutationRecord) => {
       if (mutationRecord.attributeName == "style") {
-        const resizeInfo = self.resizeInfo()
-        self.ui.setResizeInfo(resizeInfo)
+        const resizeInfo = this.resizeInfo()
+        this.ui.setResizeInfo(resizeInfo)
       }
     })
   }
 
-  installFrameObserver(): void {
-    const observer = this.createMutationObserver((changes) => this.sendFramesInfo())
+  createFrameMutationObserver(): void {
+    const observer = this.createMutationObserver(this.frameMutationCallback.bind(this))
     const options = {
       childList: true,
-      subtree: true
+      subtree: true,
+      attributes: true
     }
     observer.observe(this.win.document, options)
   }
 
-  sendFramesInfo(): void {
+  frameMutationCallback(mutationRecords, _self): void {
+    mutationRecords.map((mutationRecord) => {
+      if (mutationRecord.target.nodeName == "IFRAME") {
+        this.debouncedFrameInfoTrailling()
+      }
+      for (const node of mutationRecord.removedNodes) {
+        if (node.nodeName == "IFRAME") {
+          this.debouncedFrameInfoTrailling()
+        }
+      }
+
+      for (const node of mutationRecord.addedNodes) {
+        if (node.nodeName == "IFRAME") {
+          this.debouncedFrameInfoTrailling()
+        }
+      }
+    })
+  }
+
+  onKeyDown(ev) {
+    const altKey = ev.altKey || ev.key == "Alt"
+    const isOnlyAltKey = altKey && !ev.ctrlKey && !ev.metaKey && !ev.shiftKey
+    if (isOnlyAltKey) {
+      this.debouncedFrameInfoTrailling()
+    }
+  }
+
+  sendFramesInfo(includeMainFrame = true): void {
     const frameEls = this.win.document.querySelectorAll("iframe") as BeamHTMLIFrameElement[]
     const framesInfo: FrameInfo[] = []
     for (const frameEl of frameEls) {
@@ -112,15 +141,17 @@ export class WebPositions<UI extends WebPositionsUI> {
       framesInfo.push(frameInfo)
     }
 
-    framesInfo.push({
-      href: this.win.location.href,
-      bounds: {
-        x: 0,
-        y: 0,
-        width: this.win.innerWidth,
-        height: this.win.innerHeight
-      }
-    })
+    if (includeMainFrame) {
+      framesInfo.push({
+        href: this.win.location.href,
+        bounds: {
+          x: 0,
+          y: 0,
+          width: this.win.innerWidth,
+          height: this.win.innerHeight
+        }
+      })
+    }
     if (!isDeepEqual(framesInfo, this.framesInfo)) {
       this.framesInfo = framesInfo
       this.ui.setFramesInfo(framesInfo)
@@ -133,14 +164,17 @@ export class WebPositions<UI extends WebPositionsUI> {
       y: this.win.scrollY
     }
     this.ui.setScrollInfo(scrollInfo)
-    const immediate = true
-    debounce(this.sendFramesInfo, 200, immediate)
+    this.debouncedFrameInfoLeading()
   }
 
   onResize(_ev): void {
     const resizeInfo = this.resizeInfo()
     this.ui.setResizeInfo(resizeInfo)
+    // Because iframe postions can update when resizing we want to re-send their coordinates
+    this.debouncedFrameInfoTrailling()
   }
+  debouncedFrameInfoLeading = debounce(this.sendFramesInfo.bind(this), 200, true)
+  debouncedFrameInfoTrailling = debounce(this.sendFramesInfo.bind(this), 200, false)
 
   protected resizeInfo(): BeamResizeInfo  {
     return { width: this.win.innerWidth, height: this.win.innerHeight }
@@ -148,7 +182,7 @@ export class WebPositions<UI extends WebPositionsUI> {
 
   onLoad(_ev): void {
     this.onScroll()
-    this.sendFramesInfo()
+    this.debouncedFrameInfoTrailling()
   }
 
   toString(): string {

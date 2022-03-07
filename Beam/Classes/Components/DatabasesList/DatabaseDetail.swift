@@ -142,7 +142,7 @@ struct DatabaseDetail: View {
                 refreshing = true
             }
 
-            DocumentManager().moveAllOrphanNotes(databaseId: database.id, onlyOrphans: true, displayAlert: true) { _ in
+            DocumentManager().moveAllOrphanNotes(databaseId: database.id, onlyOrphans: true) { _ in
                 timer.invalidate()
                 refreshing = false
             }
@@ -157,7 +157,7 @@ struct DatabaseDetail: View {
                 refreshing = true
             }
 
-            DocumentManager().moveAllOrphanNotes(databaseId: database.id, onlyOrphans: false, displayAlert: true) { _ in
+            DocumentManager().moveAllOrphanNotes(databaseId: database.id, onlyOrphans: false) { _ in
                 timer.invalidate()
                 refreshing = false
             }

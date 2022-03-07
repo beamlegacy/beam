@@ -32,7 +32,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private var passwordMenuPopover: WebAutofillPopoverContainer?
     private let encoder: JSONEncoder
     private let decoder: JSONDecoder
-    private var autocompleteContext: WebAutocompleteContext
     private var fieldWithIcon: String?
     private var buttonPopover: WebAutofillPopoverContainer?
     private var currentlyFocusedElementId: String?
@@ -41,17 +40,21 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private var disabledForSubmit = false
     private var valuesOnFocusOut: [String: String]?
     private var currentPasswordManagerViewModel: PasswordManagerMenuViewModel?
-    private var currentInputFrame: WKFrameInfo?
+    private var currentInputFrame: WKFrameInfo? // web frame containing the selected field when the menu is displayed (used in menu delegate)
     private var currentFrameIdentifier = 0
     private let JSObjectName = "PasswordManager"
     weak var page: WebPage?
+
+    private lazy var fieldClassifiers: WebFieldClassifiers? = {
+        guard let webFrames = self.page?.webFrames else { return nil }
+        return WebFieldClassifiers(webFrames: webFrames)
+    }()
 
     init(userInfoStore: UserInformationsStore) {
         self.userInfoStore = userInfoStore
         credentialsBuilder = PasswordManagerCredentialsBuilder()
         encoder = JSONEncoder()
         decoder = JSONDecoder()
-        autocompleteContext = WebAutocompleteContext()
         super.init()
         PreferencesManager.$autofillUsernamePasswords.sink { [weak self] autofill in
             if !autofill {
@@ -62,8 +65,9 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     func prepareForLoading() {
         credentialsBuilder.enterPage(url: self.page?.url)
-        autocompleteContext.clear()
+        fieldClassifiers?.clear()
         dismissPasswordManagerMenu()
+        clearInputFocus()
         currentFrameIdentifier = 0
     }
 
@@ -98,7 +102,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         } catch {
             Logger.shared.logError(String(describing: error), category: .passwordManager)
             dismissPasswordManagerMenu()
-            currentlyFocusedElementId = nil
+            clearInputFocus()
             return
         }
 
@@ -109,20 +113,18 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         if let elementId = currentlyFocusedElementId ?? previouslyFocusedElementId, !elements.map(\.beamId).contains(elementId) {
             Logger.shared.logDebug("Focused field just disappeared", category: .passwordManagerInternal)
             dismissPasswordManagerMenu()
-            self.currentlyFocusedElementId = nil
             saveCredentialsIfChanged(allowEmptyUsername: false)
+            clearInputFocus()
         }
 
-        let addedIds = autocompleteContext.update(with: elements, on: getPageHost())
-        let values = [String: String](uniqueKeysWithValues: elements.compactMap { element in
+        let addedIds = fieldClassifiers?.classify(fields: elements, host: getPageHost(), frameInfo: frameInfo) ?? []
+        let values: [String: String] = elements.reduce(into: [:]) { dict, element in
             if let value = element.value {
-                return (element.beamId, value)
-            } else {
-                return nil
+                dict[element.beamId] = value
             }
-        })
+        }
         if !values.isEmpty {
-            self.updateStoredValues(with: values, userInput: false)
+            self.updateStoredValues(with: values, userInput: false, frameInfo: frameInfo)
         }
         if !addedIds.isEmpty {
             self.page?.executeJS("installSubmitHandler()", objectName: JSObjectName, frameInfo: frameInfo, successLogCategory: .passwordManagerInternal).then { _ in
@@ -157,9 +159,9 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             Logger.shared.logDebug("Focus in detected within 100ms after focus out on the same field, ignoring", category: .passwordManagerInternal)
             return
         }
-        guard let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId) else {
+        guard let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo) else {
             dismissPasswordManagerMenu()
-            currentlyFocusedElementId = nil
+            clearInputFocus()
             return
         }
         guard !disabledForSubmit else {
@@ -167,6 +169,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             return
         }
         currentlyFocusedElementId = elementId
+        currentInputFrame = frameInfo
         if let contents = contents, contents.isEmpty, autocompleteGroup.action.isPasswordRelated, !autocompleteGroup.isAmbiguous {
             checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
                 self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
@@ -184,13 +187,13 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         requestValuesFromTextFields(frameInfo: frameInfo) { dict in
             if let dict = dict {
                 self.valuesOnFocusOut = dict
-                self.updateStoredValues(with: dict, userInput: true)
+                self.updateStoredValues(with: dict, userInput: true, frameInfo: frameInfo)
             }
         }
         dismissPasswordManagerMenu()
         lastFocusOutTimestamp = BeamDate.now
         previouslyFocusedElementId = elementId
-        currentlyFocusedElementId = nil
+        clearInputFocus()
     }
 
     func updateScrollPosition(for frame: WebPositions.FrameInfo) {
@@ -214,7 +217,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                     let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, frameURL: frameInfo?.request.url?.absoluteString, scrollUpdater: self.scrollUpdater)
                     self.passwordMenuPopover?.orderFront()
                     let buttonView = WebFieldAutofillButton { [weak self] in
-                        if let self = self, self.passwordMenuPopover == nil, let autocompleteGroup = self.autocompleteContext.autocompleteGroup(for: elementId) {
+                        if let self = self, self.passwordMenuPopover == nil, let autocompleteGroup = self.fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo) {
                             self.checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
                                 self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
                             }
@@ -274,7 +277,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         let passwordManagerMenu = PasswordManagerMenu(viewModel: viewModel)
         guard let page = page,
               let webView = (page as? BrowserTab)?.webView,
-              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, storedInPresenter: true)
+              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true)
         else { return }
         var updatedRect = convertRect(location, relativeTo: webView)
         updatedRect.origin.y += location.height
@@ -302,8 +305,12 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         CustomPopoverPresenter.shared.dismissPopovers()
         passwordMenuPopover = nil
         currentPasswordManagerViewModel = nil
-        currentInputFrame = nil
         clearIcon() // required: the child window containing the icon is not visible anymore, but fieldWithIcon has not been reset
+    }
+
+    private func clearInputFocus() {
+        currentInputFrame = nil
+        currentlyFocusedElementId = nil
     }
 
     private func convertRect(_ rect: CGRect, relativeTo webView: WKWebView) -> CGRect {
@@ -319,6 +326,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         DispatchQueue.main.async {
             if self.passwordMenuPopover != nil {
                 self.dismissPasswordManagerMenu()
+                self.clearInputFocus()
             }
             self.clearIcon()
         }
@@ -336,7 +344,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             } else {
                 offset = .zero
             }
-            let scale = self.page?.webView?.zoomLevel() ?? 1
+            let scale = self.page?.webView.zoomLevel() ?? 1
             Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .passwordManagerInternal)
             let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y + rect.height) * scale, width: rect.width * scale, height: rect.height * scale)
             completion(frame)
@@ -350,10 +358,10 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         requestValuesFromTextFields(frameInfo: frameInfo) { [weak self] dict in
             guard let self = self else { return }
             if let values = dict ?? self.valuesOnFocusOut {
-                self.updateStoredValues(with: values, userInput: true)
+                self.updateStoredValues(with: values, userInput: true, frameInfo: frameInfo)
                 self.saveCredentialsIfChanged(allowEmptyUsername: true)
             }
-            self.autocompleteContext.clear()
+            self.fieldClassifiers?.clear()
         }
     }
 
@@ -386,7 +394,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func requestValuesFromTextFields(frameInfo: WKFrameInfo?, completion: @escaping (([String: String]?) -> Void)) {
-        let ids = autocompleteContext.allInputFieldIds
+        let ids = fieldClassifiers?.allInputFieldIds(frameInfo: frameInfo) ?? []
         requestValuesFromTextFields(ids: ids, frameInfo: frameInfo) { values in
             if let values = values {
                 let dict = Dictionary(uniqueKeysWithValues: zip(ids, values))
@@ -412,8 +420,8 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    private func updateStoredValues(with values: [String: String], userInput: Bool) {
-        let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage()
+    private func updateStoredValues(with values: [String: String], userInput: Bool, frameInfo: WKFrameInfo?) {
+        let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage(frameInfo: frameInfo)
         let firstNonEmptyLogin = values.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
         let firstNonEmptyPassword = values.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
         credentialsBuilder.updateValues(username: firstNonEmptyLogin, password: firstNonEmptyPassword, userInput: userInput)
@@ -474,8 +482,8 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    private func passwordFieldIdsForStorage() -> (usernameIds: [String], passwordIds: [String]) {
-        let inputFields = autocompleteContext.allInputFields
+    private func passwordFieldIdsForStorage(frameInfo: WKFrameInfo?) -> (usernameIds: [String], passwordIds: [String]) {
+        let inputFields = fieldClassifiers?.allInputFields(frameInfo: frameInfo) ?? []
         let newPasswordIds = inputFields.filter { $0.role == .newPassword }.map(\.id)
         let currentPasswordIds = inputFields.filter { $0.role == .currentPassword }.map(\.id)
         let passwordIds = newPasswordIds + currentPasswordIds
@@ -507,7 +515,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func fillCredentials(_ entry: PasswordManagerEntry) {
-        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .login || autocompleteGroup.isAmbiguous else {
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: currentInputFrame), autocompleteGroup.action == .login || autocompleteGroup.isAmbiguous else {
             Logger.shared.logError("AutocompleteContext (login) mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
             dismissPasswordManagerMenu()
             return
@@ -541,7 +549,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     func fillNewPassword(_ password: String, dismiss: Bool = true) {
-        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId), autocompleteGroup.action == .createAccount || autocompleteGroup.isAmbiguous else {
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: currentInputFrame), autocompleteGroup.action == .createAccount || autocompleteGroup.isAmbiguous else {
             Logger.shared.logError("AutocompleteContext (createAccount) mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
             dismissPasswordManagerMenu()
             return
@@ -587,11 +595,11 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     }
 
     private var passwordFieldIds: [String] {
-        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = autocompleteContext.autocompleteGroup(for: elementId) else {
+        guard let elementId = currentlyFocusedElementId, let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: currentInputFrame) else {
             return []
         }
         return autocompleteGroup.relatedFields
-            .filter { $0.role == .currentPassword || $0.role == .newPassword }
+            .filter { $0.role.isPassword }
             .map(\.id)
     }
 

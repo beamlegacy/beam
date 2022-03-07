@@ -88,7 +88,7 @@ public extension CALayer {
     }
 
     public var enableDelayedInit: Bool
-    var delayedInit = true
+    private var delayedInit: Bool
     func updateRoot(with note: BeamElement) {
         sign.begin(Signs.updateRoot)
 
@@ -190,8 +190,9 @@ public extension CALayer {
     public override var wantsUpdateLayer: Bool { true }
     internal var scope = Set<AnyCancellable>()
 
-    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool) {
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil) {
         self.enableDelayedInit = enableDelayedInit
+        self.delayedInit = enableDelayedInit
         self.journalMode = journalMode
 
         note = root
@@ -229,6 +230,14 @@ public extension CALayer {
         setupCardHeader()
         registerForDraggedTypes([.fileURL])
         refreshAndHandleDeletionsAsync()
+
+        if let frame = frame {
+            self.frame = frame
+            if !enableDelayedInit {
+                prepareRoot()
+            }
+        }
+
     }
 
     var unpreparedRoot: BeamElement?
@@ -293,15 +302,8 @@ public extension CALayer {
     public override func viewDidChangeEffectiveAppearance() {
         super.viewDidChangeEffectiveAppearance()
 
-        NSAppearance.withAppAppearance {
-            layer?.backgroundColor = BeamColor.Generic.background.cgColor
-        }
-
-        layer?.setNeedsDisplay()
-        setupCardHeader()
-        updateLayersColorsForAppearance()
-        rootNode?.deepInvalidateRendering()
-        rootNode?.deepInvalidateText()
+        updateColors()
+        rootNode?.updateColorsIfNeeded()
     }
 
     var timer: Timer!
@@ -354,7 +356,8 @@ public extension CALayer {
     }
 
     var searchResults: [SearchResult]?
-    var lockCursor: Bool = false
+
+    private let mouseCursorManager = MouseCursorManager()
 
     public var config = TextConfig()
 
@@ -532,20 +535,20 @@ public extension CALayer {
         addToMainLayer(cardHeaderLayer)
     }
 
-    private func updateLayersColorsForAppearance() {
+    private func updateColors() {
+        layer?.backgroundColor = BeamColor.Generic.background.cgColor
         updateCardTitleForHover(false)
     }
 
     private func updateCardTitleForHover(_ hover: Bool) {
         guard let cardNote = note as? BeamNote, showTitle else { return }
-        NSAppearance.withAppAppearance {
-            cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
-                .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
-                .foregroundColor: BeamColor.Generic.text.cgColor,
-                .underlineStyle: NSUnderlineStyle.single.rawValue,
-                .underlineColor: hover ? BeamColor.Generic.text.cgColor : BeamColor.Generic.transparent.cgColor
-            ])
-        }
+
+        cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
+            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
+            .foregroundColor: BeamColor.Generic.text.cgColor,
+            .underlineStyle: NSUnderlineStyle.single.rawValue,
+            .underlineColor: hover ? BeamColor.Generic.text.cgColor : BeamColor.Generic.transparent.cgColor
+        ])
     }
 
     private var cardHeaderPosY: CGFloat {
@@ -568,19 +571,20 @@ public extension CALayer {
         }
     }
 
+    static let minimumEmptyEditorHeight = CGFloat(184)
+    static let minimumEmptyEditorWidth = CGFloat(670)
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
     override public var intrinsicContentSize: NSSize {
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
-            let minHeight = 184
             if let root = unpreparedRoot, journalMode {
                 let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                return NSSize(width: 670, height: max(minHeight, size))
+                return NSSize(width: Self.minimumEmptyEditorWidth, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
             }
-            return NSSize(width: 670, height: minHeight)
+            return NSSize(width: Self.minimumEmptyEditorWidth, height: Self.minimumEmptyEditorHeight)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
@@ -606,7 +610,7 @@ public extension CALayer {
         _ = scrollToVisible(centeredSpot)
     }
 
-    var layoutInvalidated = false
+    var layoutInvalidated = true
     public func invalidateLayout() {
         guard !inRelayout, !layoutInvalidated else { return }
         layoutInvalidated = true
@@ -935,10 +939,10 @@ public extension CALayer {
 
     func hideMouseForEditing() {
         guard let rootNode = rootNode else { return }
-        NSCursor.setHiddenUntilMouseMoves(true)
+        mouseCursorManager.hideMouseCursorUntilNextMove(true)
         // dispatch hidden mouse events manually
-        dispatchHover(Set<Widget>())
-        if let lastAppEvent = NSApp.currentEvent {
+        dispatchHover(Set<Widget>(), forceUpdate: true)
+        if let lastAppEvent = NSApp.currentEvent, lastAppEvent.type == .mouseMoved {
             let mouseInfo = MouseInfo(rootNode, CGPoint.zero, lastAppEvent)
             rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
         }
@@ -1105,7 +1109,7 @@ public extension CALayer {
 
     // MARK: Paste properties
     internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.rtf, .string]
-    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSAttributedString.self, NSString.self]
+    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSImage.self, NSAttributedString.self, NSString.self]
 
     func initBlinking() {
         let defaults = UserDefaults.standard
@@ -1132,7 +1136,7 @@ public extension CALayer {
         state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true
     }
     private func shouldAllowHoverEvents() -> Bool {
-        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false
+        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false && !mouseCursorManager.isMouseCursorHidden
     }
 
     override public func updateTrackingAreas() {
@@ -1167,7 +1171,7 @@ public extension CALayer {
         if window?.firstResponder != self {
             window?.makeFirstResponder(self)
         }
-        lockCursor = true
+        mouseCursorManager.lockCursor = true
     }
 
     let scrollXBorder = CGFloat(20)
@@ -1216,13 +1220,14 @@ public extension CALayer {
     }
 
     override public func mouseMoved(with event: NSEvent) {
+        mouseCursorManager.mouseMoved()
         guard let rootNode = rootNode, shouldAllowMouseEvents() && shouldAllowHoverEvents() else { return }
         if showTitle {
             let titleCoord = cardTitleLayer.convert(event.locationInWindow, from: nil)
             let hoversCardTitle = cardTitleLayer.contains(titleCoord)
             updateCardTitleForHover(hoversCardTitle)
             if hoversCardTitle {
-                NSCursor.pointingHand.set()
+                mouseCursorManager.setMouseCursor(cursor: .pointingHand)
                 return
             }
         }
@@ -1278,7 +1283,6 @@ public extension CALayer {
 
     public override func cursorUpdate(with event: NSEvent) {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
-        guard !lockCursor else { return }
 
         let point = convert(event.locationInWindow)
         let views = rootNode.getWidgetsAt(point, point, ignoreX: true)
@@ -1297,16 +1301,17 @@ public extension CALayer {
 
         let cursors = preciseViews.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
-        cursor.set()
+        mouseCursorManager.setMouseCursor(cursor: cursor)
         dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget }))
     }
 
-    func dispatchHover(_ widgets: Set<Widget>) {
+    func dispatchHover(_ widgets: Set<Widget>, forceUpdate: Bool = false) {
+        guard shouldAllowHoverEvents() || forceUpdate else { return }
         rootNode?.dispatchHover(widgets)
     }
 
     override public func mouseUp(with event: NSEvent) {
-        lockCursor = false
+        mouseCursorManager.lockCursor = false
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         stopSelectionDrag()

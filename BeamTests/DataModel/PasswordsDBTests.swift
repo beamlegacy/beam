@@ -23,8 +23,7 @@ class PasswordsDBTests: XCTestCase {
 
         BeamTestsHelper.logout()
         PasswordManager.shared.deleteAll(includedRemote: false)
-        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-//        try? EncryptionManager.shared.replacePrivateKey(Configuration.testPrivateKey)
+        Persistence.Encryption.localPrivateKey = Configuration.testPrivateKey
     }
 
     func testSavingPassword() {
@@ -37,6 +36,23 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
+        cleanupPasswordsAfterTest()
+    }
+
+    func testUpdatingUsername() {
+        PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
+
+        let initialEntries = PasswordManager.shared.fetchAll()
+        XCTAssertEqual(initialEntries.count, 1, "After first save, entry count should be 1")
+
+        let initialEntry = PasswordManagerEntry(minimizedHost: Self.host.minimizedHost!, username: Self.username)
+        PasswordManager.shared.save(entry: initialEntry, hostname: Self.host.minimizedHost!, username: "newuser@beamapp.co", password: Self.password)
+
+        let updatedEntries = PasswordManager.shared.fetchAll()
+        XCTAssertEqual(updatedEntries.count, 1, "After username change, entry count should still be 1")
+
+        XCTAssertEqual(updatedEntries.last?.minimizedHost, Self.host.minimizedHost)
+        XCTAssertEqual(updatedEntries.last?.username, "newuser@beamapp.co")
         cleanupPasswordsAfterTest()
     }
 

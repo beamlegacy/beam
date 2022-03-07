@@ -1,0 +1,566 @@
+{
+  "id" : "82EFF1CE-7451-40AD-A725-DD6D1D2B3C52",
+  "textStats" : {
+    "wordsCount" : 213
+  },
+  "visitedSearchResults" : [
+
+  ],
+  "type" : {
+    "type" : "note"
+  },
+  "title" : "How to beam",
+  "searchQueries" : [
+
+  ],
+  "contactId" : null,
+  "children" : [
+    {
+      "creationDate" : 663597374.15375602,
+      "id" : "CF324DC0-6832-4021-8C00-32F47CDB989F",
+      "textStats" : {
+        "wordsCount" : 8
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Everything you need to beam like a pro."
+          }
+        ]
+      }
+    },
+    {
+      "id" : "4C93B8F2-EEFF-444A-8954-F7238BFAF361",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "creationDate" : 663597597.01140404
+    },
+    {
+      "creationDate" : 666541406.811975,
+      "id" : "5ADFC0E5-07B4-4BB8-9F7D-70A2C1B096C9",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 40
+      },
+      "children" : [
+        {
+          "creationDate" : 663597534.59216595,
+          "id" : "11BC2054-54B0-4EE4-8C1A-C9990E617E62",
+          "textStats" : {
+            "wordsCount" : 12
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Use "
+              },
+              {
+                "string" : "⌘T or ⌘K  to ",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : "search the entire web or your notes."
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 663597534.59337795,
+          "id" : "8E79ABD6-9473-456F-9A42-356E98988008",
+          "textStats" : {
+            "wordsCount" : 18
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "If you’re not into shortcuts, you can click on the magnifying glass icon in the top-right corner."
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 666618504.35841894,
+          "id" : "8F92089E-09B9-4C47-8FE8-7488126D7844",
+          "textStats" : {
+            "wordsCount" : 9
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "You can also create notes straight from the omnibox."
+              }
+            ]
+          }
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Search"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666541434.39749002,
+      "id" : "F661AD73-9E0D-4505-9F04-B01506E9449F",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 49
+      },
+      "children" : [
+        {
+          "creationDate" : 666543196.81882203,
+          "id" : "E218C7C9-EEDD-486C-B55C-4EA689C0B5DA",
+          "textStats" : {
+            "wordsCount" : 46
+          },
+          "children" : [
+            {
+              "creationDate" : 663597534.59833097,
+              "id" : "0A9137EE-1455-4F0F-84F8-516FBEF977E4",
+              "textStats" : {
+                "wordsCount" : 13
+              },
+              "text" : {
+                "ranges" : [
+                  {
+                    "string" : "Hold ⌥ OPTION",
+                    "attributes" : [
+                      {
+                        "type" : "strong"
+                      }
+                    ]
+                  },
+                  {
+                    "string" : " on your keyboard and click on what you want to capture "
+                  }
+                ]
+              }
+            },
+            {
+              "creationDate" : 666541463.76040995,
+              "id" : "9A07CE7D-308E-4143-A272-21A284F1293F",
+              "textStats" : {
+                "wordsCount" : 10
+              },
+              "text" : {
+                "ranges" : [
+                  {
+                    "string" : "Select text and press "
+                  },
+                  {
+                    "string" : "⌥ OPTION",
+                    "attributes" : [
+                      {
+                        "type" : "strong"
+                      }
+                    ]
+                  },
+                  {
+                    "string" : " to capture the text snippet"
+                  }
+                ]
+              }
+            },
+            {
+              "creationDate" : 666541484.22558105,
+              "id" : "CC18D0AF-CF72-4FFA-9A8D-57E13316FF80",
+              "textStats" : {
+                "wordsCount" : 10
+              },
+              "text" : {
+                "ranges" : [
+                  {
+                    "string" : "Press "
+                  },
+                  {
+                    "string" : "Cmd-S or ⌥S",
+                    "attributes" : [
+                      {
+                        "type" : "strong"
+                      }
+                    ]
+                  },
+                  {
+                    "string" : " to capture a whole page"
+                  }
+                ]
+              }
+            }
+          ],
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Beam comes with a new way to easily "
+              },
+              {
+                "string" : "Capture",
+                "attributes" : [
+                  {
+                    "type" : "internalLink",
+                    "payload" : "48CB6F79-7136-4F2D-AFB4-5889B7DB9DDC"
+                  }
+                ]
+              },
+              {
+                "string" : " things on the web:"
+              }
+            ]
+          }
+        },
+        {
+          "id" : "92ED908E-8384-47B8-BEF8-DD595E24F074",
+          "kind" : {
+            "source" : "7CB43217-E9E6-5D12-94D4-BAA5A03A4D7D",
+            "type" : "image",
+            "sourceMetadata" : null,
+            "displayInfos" : {
+              "width" : 960,
+              "height" : 540
+            }
+          },
+          "creationDate" : 666618738.94132805
+        },
+        {
+          "id" : "FC120B76-24EA-4733-B15F-3E67DCD8732A",
+          "creationDate" : 666623492.08294702
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Capture the web"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666623568.94230998,
+      "id" : "B4A09A45-C95A-42EC-BEE9-E3EE50ACFA9D",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 12
+      },
+      "children" : [
+        {
+          "creationDate" : 666623582.93547702,
+          "id" : "1023B200-7742-44B1-B932-25D57E149546",
+          "textStats" : {
+            "wordsCount" : 9
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "⌘D ",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : "to switch from web to notes and back"
+              }
+            ]
+          }
+        },
+        {
+          "id" : "35C0DF52-48DD-47FC-9E65-155B78BE1466",
+          "creationDate" : 666623651.106884
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Toggle Web <-> Notes"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666541509.95593798,
+      "id" : "35080D9E-E195-45B9-9EC3-14B0825677FE",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 34
+      },
+      "children" : [
+        {
+          "creationDate" : 663597534.60112405,
+          "id" : "8B648EB6-0868-4038-B531-32538FDCDB69",
+          "textStats" : {
+            "wordsCount" : 9
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Backlinks are the core of Beam’s powerful text editor."
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 663597534.60211205,
+          "id" : "76EF3019-7903-4DD2-B1F2-368FFF0FC194",
+          "textStats" : {
+            "wordsCount" : 10
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Using "
+              },
+              {
+                "string" : "@",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " or "
+              },
+              {
+                "string" : "[[",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " , easily create a network of notes to navigate."
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 663597534.60315001,
+          "id" : "425CC7D0-DD37-45D8-95A2-D702A735A54E",
+          "textStats" : {
+            "wordsCount" : 14
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Notice the "
+              },
+              {
+                "string" : "Link section",
+                "attributes" : [
+                  {
+                    "type" : "emphasis"
+                  }
+                ]
+              },
+              {
+                "string" : " at the bottom of this note? It's all connected already!"
+              }
+            ]
+          }
+        },
+        {
+          "id" : "D834707F-A1D5-4F96-B8ED-039A982CDC09",
+          "creationDate" : 666623498.34419596
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Backlinks"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666541514.51735103,
+      "id" : "FBA37E1F-BEBB-478A-9916-8DF9660E7330",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 41
+      },
+      "children" : [
+        {
+          "creationDate" : 663597534.60678995,
+          "id" : "AC54C0F6-5EFC-4E41-AFF2-D3B2A1A50164",
+          "textStats" : {
+            "wordsCount" : 12
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Every note you create on Beam is "
+              },
+              {
+                "string" : "private and encrypted",
+                "attributes" : [
+                  {
+                    "type" : "strong"
+                  }
+                ]
+              },
+              {
+                "string" : " by default."
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 663597534.60775805,
+          "id" : "5F20A9AE-4F8C-48FF-ABF8-91752F29FBB5",
+          "textStats" : {
+            "wordsCount" : 13
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "You can share them with the rest of the world in an instant."
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 666541621.36786699,
+          "id" : "8118E979-1A3E-4292-AF38-90EC2CAE12E7",
+          "textStats" : {
+            "wordsCount" : 15
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Just click on the pointy arrow icon in the top right corner of any note"
+              }
+            ]
+          }
+        },
+        {
+          "id" : "B1ABCFCA-DE28-4E6A-A8EB-678D2A3BD16F",
+          "kind" : {
+            "source" : "114D6E32-1AA7-510F-B196-300A2BFA1737",
+            "type" : "image",
+            "sourceMetadata" : null,
+            "displayInfos" : {
+              "width" : 1000,
+              "height" : 623
+            }
+          },
+          "creationDate" : 666625789.01685297
+        },
+        {
+          "id" : "E5A9F052-70D4-44A0-978E-7B6B24C897B0",
+          "creationDate" : 666624073.73387694
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Publish"
+          }
+        ]
+      }
+    },
+    {
+      "creationDate" : 666618433.52984703,
+      "id" : "B228FC22-56CC-4243-B2F1-DDC4C5CC1C81",
+      "kind" : {
+        "type" : "heading",
+        "level" : 2
+      },
+      "textStats" : {
+        "wordsCount" : 29
+      },
+      "children" : [
+        {
+          "creationDate" : 666618439.50635898,
+          "id" : "C141A604-2945-499C-9910-A7FAAF5919EC",
+          "textStats" : {
+            "wordsCount" : 7
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "In Preferences > Account, connect your Google Calendar"
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 666618463.27379298,
+          "id" : "215F9905-F4AF-4C9B-95A4-217BF9EAD0B9",
+          "textStats" : {
+            "wordsCount" : 8
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "All your events will appear in your Journal"
+              }
+            ]
+          }
+        },
+        {
+          "creationDate" : 666618844.93347502,
+          "id" : "7AF041E0-3793-4857-A707-F6C56BFA9CA4",
+          "textStats" : {
+            "wordsCount" : 13
+          },
+          "text" : {
+            "ranges" : [
+              {
+                "string" : "Jumping straight into video calls or taking meeting notes could not be easier"
+              }
+            ]
+          }
+        },
+        {
+          "id" : "B4468590-8C4F-4EAC-8A74-6002BB4AAA08",
+          "kind" : {
+            "source" : "E3ACF5B3-2BC0-5647-9ACB-D52EF1FE9DF5",
+            "type" : "image",
+            "sourceMetadata" : null,
+            "displayInfos" : {
+              "width" : 796,
+              "height" : 296
+            }
+          },
+          "creationDate" : 666619026.00108194
+        }
+      ],
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "Calendar"
+          }
+        ]
+      }
+    }
+  ],
+  "browsingSessionIds" : [
+
+  ],
+  "score" : 0.40000000596046448,
+  "creationDate" : 663597374.073663
+}

@@ -22,8 +22,14 @@ class ClusteringManager: ObservableObject {
         var pageScore: Float = 0
     }
 
+    typealias PageID = UUID
+    public struct BrowsingTreeOpenInTab {
+        weak var browsingTree: BrowsingTree?
+        let browserTabManagerId: UUID
+    }
+
     public struct PageOpenInTab {
-        let pageId: UUID
+        let pageId: PageID?
     }
 
     enum InitialiseNotes {
@@ -32,7 +38,7 @@ class ClusteringManager: ObservableObject {
         case twoOrMorePagesAdded
     }
 
-    var clusteredPagesId: [[UUID]] = [[]] {
+    var clusteredPagesId: [[PageID]] = [[]] {
         didSet {
             transformToClusteredPages()
         }
@@ -42,7 +48,7 @@ class ClusteringManager: ObservableObject {
             transformToClusteredNotes()
             if clusteredNotesId.count > 1 {
                 updateNoteSources()
-                if Configuration.tabColoringEnabled {
+                if PreferencesManager.showTabsColoring {
                     updateTabColors()
                 }
             }
@@ -52,7 +58,7 @@ class ClusteringManager: ObservableObject {
     var initialiseNotes = false
     var ranker: SessionLinkRanker
     var activeSources: ActiveSources
-    @Published var noteToAdd: BeamNote?
+    let noteToAdd = PassthroughSubject<BeamNote, Never>()
     @Published var clusteredTabs: [[TabInformation?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
@@ -64,7 +70,7 @@ class ClusteringManager: ObservableObject {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
-    var tabColoringUpdater: TabColoringUpdater
+    var tabGroupingUpdater: TabGroupingUpdater
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
     var similarities = [UUID: [UUID: Double]]()
@@ -72,9 +78,14 @@ class ClusteringManager: ObservableObject {
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
     let frecencyFetcher = LinkStoreFrecencyUrlStorage()
     var summary: SummaryForNewDay
+    var allOpenBrowsingTrees: [BrowsingTreeOpenInTab]? {
+        didSet {
+            self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
+        }
+    }
     var allOpenPages: [PageOpenInTab]?
     public var continueToNotes = [UUID]()
-    public var continueToPage: UUID?
+    public var continueToPage: PageID?
 
     // swiftlint:disable:next function_body_length
     init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
@@ -84,7 +95,7 @@ class ClusteringManager: ObservableObject {
         self.weightEntities = entities
         self.activeSources = activeSources
         self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId)
-        self.tabColoringUpdater = TabColoringUpdater()
+        self.tabGroupingUpdater = TabGroupingUpdater()
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
         self.sessionId = sessionId
@@ -129,12 +140,10 @@ class ClusteringManager: ObservableObject {
     }
 
     private func setupObservers() {
-        $noteToAdd
+        self.noteToAdd
             .debounce(for: .milliseconds(1000), scheduler: RunLoop.main)
             .sink { value in
-                if let note = value {
-                    self.addNote(note: note)
-                }
+                self.addNote(note: value)
             }.store(in: &scope)
     }
 
@@ -168,7 +177,7 @@ class ClusteringManager: ObservableObject {
         }.store(in: &scope)
     }
 
-    func findPageGroupForID(pageID: UUID, pageGroups: [[UUID]]) -> Int? {
+    func findPageGroupForID(pageID: PageID, pageGroups: [[UUID]]) -> Int? {
         for pageGroup in pageGroups.enumerated() {
             if pageGroup.element.contains(pageID) {
                 return pageGroup.offset
@@ -433,7 +442,8 @@ class ClusteringManager: ObservableObject {
     }
 
     private func updateTabColors() {
-        self.tabColoringUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
+        self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
+        self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
     }
 
     private func updateNoteSources() {
@@ -463,7 +473,8 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt))
+                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
     }
@@ -474,10 +485,30 @@ class ClusteringManager: ObservableObject {
         for (id, group) in orphanedUrlGroups.enumerated() {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
-                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt))
+                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
         orphanedUrlManager.save()
+    }
+
+    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL) {
+        for group in self.clusteredPagesId.enumerated() {
+            let notesInGroup = self.clusteredNotesId[group.offset]
+            for noteId in notesInGroup {
+                let informationForId = self.cluster.getExportInformationForId(id: noteId)
+                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, userCorrectionGroup: nil))
+            }
+            for urlId in group.element {
+                let url = LinkStore.linkFor(urlId)?.url
+                let informationForId = self.cluster.getExportInformationForId(id: urlId)
+                let isOpenAtExport = self.allOpenPages?.map { $0.pageId }.contains(urlId)
+                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, userCorrectionGroup: nil))
+                //TODO: Add userCorrectionGroup when UI is ready
+            }
+        }
+        sessionExporter.export(to: to, sessionId: self.sessionId)
+        sessionExporter.urls = [AnyUrl]()
     }
 
     // swiftlint:disable:next cyclomatic_complexity
