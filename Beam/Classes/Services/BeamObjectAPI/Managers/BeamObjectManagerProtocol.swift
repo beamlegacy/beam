@@ -75,30 +75,4 @@ extension BeamObjectManagerDelegate {
 
         try receivedObjects(parsedObjects)
     }
-
-//    func saveOnBeamObjectsAPI(_ objects: [BeamObjectType]) throws {
-//        guard !objects.isEmpty else { return }
-//
-//        var error: Error?
-//
-//        let semaphore = DispatchSemaphore(value: 0)
-//
-//        try self.saveOnBeamObjectsAPI(objects) { result in
-//            switch result {
-//            case .failure(let returnedError):
-//                Logger.shared.logError("Can't save: \(returnedError.localizedDescription)", category: .beamObjectNetwork)
-//                error = returnedError
-//            case .success:
-//                Logger.shared.logDebug("Saved \(objects.count) objects", category: .beamObjectNetwork)
-//            }
-//            semaphore.signal()
-//        }
-//
-//        let semaphoreResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
-//        if case .timedOut = semaphoreResult {
-//            Logger.shared.logError("Semaphore timedout", category: .beamObjectNetwork)
-//        }
-//
-//        if let error = error { throw error }
-//    }
 }

@@ -18,7 +18,6 @@ class BeamObjectsRequests: QuickSpec {
         beforeEach {
             sut = BeamObjectRequest()
             Beam.Configuration.reset()
-            Beam.Configuration.apiHostname = "http://api.beam.lvh.me"
 
             BeamDate.freeze("2021-03-19T12:21:03Z")
 
