@@ -1175,6 +1175,7 @@
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
+		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
 		DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */; };
@@ -2607,6 +2608,7 @@
 		BAA67F956840E0DD3B5D7B53 /* BeamElementHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamElementHelper.ts; sourceTree = "<group>"; };
 		BAA67FA6403B5D2284B56F13 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.ts; sourceTree = "<group>"; };
 		BAA67FB8275D3AA84301AE01 /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
+		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
 		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
@@ -5496,6 +5498,7 @@
 			children = (
 				B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */,
 				375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */,
+				D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -7777,6 +7780,7 @@
 				B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */,
 				B5BA078926AF3E4700D31FED /* UITestsMenuBar.swift in Sources */,
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
+				D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */,
 				B50E1C9126FCC30D00E767AE /* SignInSuccessfullyTests.swift in Sources */,
 				B5E8010E26AEA63300C8BD61 /* WebTestView.swift in Sources */,
 				B5DC1FC226B9608D00A4C94B /* DownloadTestView.swift in Sources */,
