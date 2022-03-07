@@ -136,14 +136,14 @@ class SearchOnCardTests: BaseTest {
         XCTAssertTrue(searchView.assertResultsCounterNumber("1/5"))
     }
     
-    func testSearchFieldLinksReferenceTakenIntoConsideration() throws {
+    func SKIPtestSearchFieldLinksReferenceTakenIntoConsideration() throws {
         try XCTSkipIf(true, "WIP once https://linear.app/beamapp/issue/BE-2085/card-search-includes-links-and-references is implemented")
     }
     
     func prepareTest(populateCardTimes: Int) -> SearchTestView {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        JournalTestView().createCardViaOmniboxSearch("Search note")
+        JournalTestView().createCardViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
         testRailPrint("Given I populate the note")
         for _ in 1...populateCardTimes {
             helper.tapCommand(.insertTextInCurrentNote)

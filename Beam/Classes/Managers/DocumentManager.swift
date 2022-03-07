@@ -65,11 +65,16 @@ enum DocumentFilter {
 public class DocumentManager: NSObject {
     var coreDataManager: CoreDataManager
     var context: NSManagedObjectContext
-    static let backgroundQueue = DispatchQueue(label: "co.beamapp.documentManager.backgroundQueue", qos: .default)
+    static let backgroundQueue = DispatchQueue(label: "co.beamapp.documentManager.backgroundQueue", qos: .userInitiated)
     var backgroundQueue: DispatchQueue { Self.backgroundQueue }
 
     static let saveDocumentQueue = DispatchQueue(label: "co.beamapp.documentManager.saveQueue", qos: .userInitiated)
     var saveDocumentQueue: DispatchQueue { Self.saveDocumentQueue }
+    /// waitForNetworkCompletionOnSyncSave is used to force waiting for the network completion during tests when saving objects from the sync (in case they are modified and we need to send them back)
+    static var waitForNetworkCompletionOnSyncSave = false
+
+    static let saveNetworkQueue = DispatchQueue(label: "co.beamapp.documentManager.saveNetworkQueue", qos: .userInitiated)
+    var saveNetworkQueue: DispatchQueue { Self.saveNetworkQueue }
 
     var saveDocumentPromiseCancels: [UUID: () -> Void] = [:]
 
@@ -264,18 +269,7 @@ public class DocumentManager: NSObject {
     }
 
     func parseDocumentBody(_ document: Document) -> DocumentStruct {
-        DocumentStruct(id: document.id,
-                       databaseId: document.database_id,
-                       title: document.title,
-                       createdAt: document.created_at,
-                       updatedAt: document.updated_at,
-                       deletedAt: document.deleted_at,
-                       data: document.data ?? Data(),
-                       documentType: DocumentType(rawValue: document.document_type) ?? DocumentType.note,
-                       version: document.version,
-                       isPublic: document.is_public,
-                       journalDate: document.document_type == DocumentType.journal.rawValue ? JournalDateConverter.toString(from: document.journal_day) : nil
-        )
+        DocumentStruct(document: document)
     }
 
     /// Update local coredata instance with data we fetched remotely, we detected the need for a merge between both versions
@@ -353,6 +347,7 @@ public class DocumentManager: NSObject {
             document.database_id == documentStruct.databaseId &&
             document.document_type == documentStruct.documentType.rawValue &&
             document.deleted_at?.intValue == documentStruct.deletedAt?.intValue &&
+            document.journal_day == JournalDateConverter.toInt(from: documentStruct.journalDate ?? "") &&
             document.id == documentStruct.id
     }
 
@@ -376,59 +371,61 @@ public class DocumentManager: NSObject {
     @discardableResult
     func saveContext(file: StaticString = #file, line: UInt = #line) throws -> Bool {
         checkThread()
-        Logger.shared.logDebug("\(self) saveContext called from \(file):\(line). hasChanges: \(context.hasChanges)",
-                               category: .document)
+        return try self.context.performAndWait {
+            Logger.shared.logDebug("\(self) saveContext called from \(file):\(line). hasChanges: \(context.hasChanges)",
+                                   category: .document)
 
-        guard context.hasChanges else {
-            Logger.shared.logDebug("DocumentManager.saveContext: no changes!", category: .document)
-            return false
-        }
-
-        addLogLine(context.insertedObjects, name: "Inserted")
-        addLogLine(context.deletedObjects, name: "Deleted")
-        addLogLine(context.updatedObjects, name: "Updated")
-        addLogLine(context.registeredObjects, name: "Registered")
-
-        Self.savedCount += 1
-
-        do {
-            let inserted = context.insertedObjects.compactMap { ($0 as? Document)?.documentStruct }
-            let updated = context.updatedObjects.compactMap { ($0 as? Document)?.documentStruct }
-            let saved = Set(inserted + updated)
-            let softDeleted = Set(saved.compactMap { object -> UUID? in
-                return object.deletedAt == nil ? nil : object.id
-            })
-            let deleted = softDeleted.union(Set(context.deletedObjects.compactMap { ($0 as? Document)?.id }))
-
-            let localTimer = BeamDate.now
-            try CoreDataManager.save(context)
-            Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
-
-            for noteSaved in saved {
-                Self.notifyDocumentSaved(noteSaved)
+            guard context.hasChanges else {
+                Logger.shared.logDebug("DocumentManager.saveContext: no changes!", category: .document)
+                return false
             }
 
-            for noteDeleted in deleted {
-                Self.notifyDocumentDeleted(noteDeleted)
-            }
+            addLogLine(context.insertedObjects, name: "Inserted")
+            addLogLine(context.deletedObjects, name: "Deleted")
+            addLogLine(context.updatedObjects, name: "Updated")
+            addLogLine(context.registeredObjects, name: "Registered")
 
-            return true
-        } catch let error as NSError {
-            switch error.code {
-            case 133021:
-                // Constraint conflict
-                Logger.shared.logError("Couldn't save context because of a constraint: \(error)", category: .coredata)
-                logConstraintConflict(error)
-            case 133020:
-                // Saving a version of NSManagedObject which is outdated
-                Logger.shared.logError("Couldn't save context because the object is outdated and more recent in CoreData: \(error)",
-                                       category: .coredata)
-                logMergeConflict(error)
-            default:
-                Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
-            }
+            Self.savedCount += 1
 
-            throw error
+            do {
+                let inserted = context.insertedObjects.compactMap { ($0 as? Document)?.documentStruct }
+                let updated = context.updatedObjects.compactMap { ($0 as? Document)?.documentStruct }
+                let saved = Set(inserted + updated)
+                let softDeleted = Set(saved.compactMap { object -> UUID? in
+                    return object.deletedAt == nil ? nil : object.id
+                })
+                let deleted = softDeleted.union(Set(context.deletedObjects.compactMap { ($0 as? Document)?.id }))
+
+                let localTimer = BeamDate.now
+                try CoreDataManager.save(context)
+                Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
+
+                for noteSaved in saved {
+                    Self.notifyDocumentSaved(noteSaved)
+                }
+
+                for noteDeleted in deleted {
+                    Self.notifyDocumentDeleted(noteDeleted)
+                }
+
+                return true
+            } catch let error as NSError {
+                switch error.code {
+                case 133021:
+                    // Constraint conflict
+                    Logger.shared.logError("Couldn't save context because of a constraint: \(error)", category: .coredata)
+                    logConstraintConflict(error)
+                case 133020:
+                    // Saving a version of NSManagedObject which is outdated
+                    Logger.shared.logError("Couldn't save context because the object is outdated and more recent in CoreData: \(error)",
+                                           category: .coredata)
+                    logMergeConflict(error)
+                default:
+                    Logger.shared.logError("Couldn't save context: \(error)", category: .coredata)
+                }
+
+                throw error
+            }
         }
     }
 
@@ -530,10 +527,10 @@ public class DocumentManager: NSObject {
         // If document is deleted, we don't need to check version uniqueness
         guard document.deleted_at == nil else { return }
 
-        let existingDocument = try? fetchWithId(document.id, includeDeleted: false)
+        guard let existingDocument = try? fetchWithId(document.id, includeDeleted: false) else { return }
 
-        if let existingVersion = existingDocument?.version, existingVersion >= newVersion {
-            let errString = "\(document.title): coredata version: \(existingVersion) should be < newVersion: \(newVersion)"
+        if existingDocument.version >= newVersion {
+            let errString = "\(document.title): coredata version: \(existingDocument.version) should be < newVersion: \(newVersion)"
             let userInfo: [String: Any] = [NSLocalizedFailureReasonErrorKey: errString, NSValidationObjectErrorKey: self]
             throw NSError(domain: "DOCUMENT_ERROR_DOMAIN", code: 1002, userInfo: userInfo)
         }
@@ -652,7 +649,7 @@ public class DocumentManager: NSObject {
         Self.networkTasks[document_id] = (networkTask, networkTaskStarted, networkCompletion)
         // `asyncAfter` will not execute before `deadline` but might be executed later. It is not accurate.
         // TODO: use `Timer.scheduledTimer` or `perform:with:afterDelay`
-        backgroundQueue.asyncAfter(deadline: .now() + delay, execute: networkTask)
+        saveNetworkQueue.asyncAfter(deadline: .now() + delay, execute: networkTask)
         Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): adding network task for later",
                                category: .documentNetwork)
     }
@@ -851,8 +848,10 @@ extension DocumentManager {
                 }
             }()
             let allDocuments = try fetchAll(filters: filters)
-            for document in allDocuments {
-                context.delete(document)
+            self.context.performAndWait {
+                for document in allDocuments {
+                    context.delete(document)
+                }
             }
 
             if !allDocuments.isEmpty {
@@ -912,17 +911,22 @@ extension DocumentManager {
 
     func create(id: UUID, title: String? = nil, deletedAt: Date?, shouldSaveContext: Bool = true) throws -> Document {
         checkThread()
-        let document = Document(context: context)
-        document.id = id
-        document.database_id = DatabaseManager.defaultDatabase.id
-        document.version = 0
-        document.document_type = DocumentType.note.rawValue
-        document.deleted_at = deletedAt
-        if let title = title {
-            document.title = title
+        let document: Document = try context.performAndWait {
+            let document = Document(context: context)
+            document.id = id
+            document.database_id = DatabaseManager.defaultDatabase.id
+            document.version = 0
+            document.document_type = DocumentType.note.rawValue
+            document.deleted_at = deletedAt
+            if let title = title {
+                document.title = title
+            }
+
+            try checkValidations(document)
+
+            return document
         }
 
-        try checkValidations(document)
         if shouldSaveContext {
             try saveContext()
         }
@@ -935,15 +939,16 @@ extension DocumentManager {
         // Fetch existing if any
         let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: nil)
 
-        do {
-            let fetchedTransactions = try context.count(for: fetchRequest)
-            return fetchedTransactions
-        } catch {
-            // TODO: raise error?
-            Logger.shared.logError("Can't count: \(error)", category: .coredata)
+        return self.context.performAndWait {
+            do {
+                let fetchedTransactions = try context.count(for: fetchRequest)
+                return fetchedTransactions
+            } catch {
+                // TODO: raise error?
+                Logger.shared.logError("Can't count: \(error)", category: .coredata)
+                return 0
+            }
         }
-
-        return 0
     }
 
     enum SortingKey {
@@ -984,8 +989,12 @@ extension DocumentManager {
         checkThread()
         let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: sortingKey)
 
-        let fetchedDocuments = try context.fetch(fetchRequest)
-        return fetchedDocuments
+        return try context.performAndWait {
+            try context.fetch(fetchRequest).map({ document in
+                context.refresh(document, mergeChanges: true)
+                return document
+            })
+        }
     }
 
     func fetchAllNames(filters: [DocumentFilter], sortingKey: SortingKey? = nil) -> [String] {
@@ -993,15 +1002,16 @@ extension DocumentManager {
         let fetchRequest = DocumentManager.fetchRequest(filters: filters, sortingKey: sortingKey)
         fetchRequest.propertiesToFetch = ["title"]
 
-        do {
-            let fetchedDocuments = try context.fetch(fetchRequest)
-            return fetchedDocuments.compactMap { $0.title }
-        } catch {
-            // TODO: raise error?
-            Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+        return self.context.performAndWait {
+            do {
+                let fetchedDocuments = try context.fetch(fetchRequest)
+                return fetchedDocuments.compactMap { $0.title }
+            } catch {
+                // TODO: raise error?
+                Logger.shared.logError("Can't fetch all: \(error)", category: .coredata)
+            }
+            return []
         }
-
-        return []
     }
 
     func fetchAllWithIds(_ ids: [UUID]) throws -> [Document] {

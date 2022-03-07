@@ -12,7 +12,7 @@ class DownloadsTest: BaseTest {
     
     let downloadLink = "devimages-cdn.apple.com/design/resources/download/SF-Symbols-3.dmg"
 
-    func testDownloadView() throws {
+    func SKIPtestDownloadView() throws {
         try XCTSkipIf(true, "WIP on the false failure with downloading 200 MB is few seconds. Mock is needed")
         let journalView = launchApp()
         
@@ -46,7 +46,7 @@ class DownloadsTest: BaseTest {
         XCTAssertTrue(omniBoxView.button(OmniBoxLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)*/
     }
     
-    func testClearDownload() throws {
+    func SKIPtestClearDownload() throws {
         try XCTSkipIf(true, "WIP on the false failure with downloading 200 MB is few seconds. Mock is needed")
         let journalView = launchApp()
         

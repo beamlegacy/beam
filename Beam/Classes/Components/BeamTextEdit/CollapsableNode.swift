@@ -30,6 +30,7 @@ protocol Collapsable: AnyObject {
 
     func buildCollapsedTitle(mouseInteractionType: MouseInteractionType?) -> NSAttributedString
     func layoutCollapseExpand(contentLayer: CALayer, verticalOffset: CGFloat)
+    func setLottieViewColor(color: NSColor)
 }
 
 extension Collapsable where Self: ElementNode {
@@ -147,11 +148,12 @@ extension Collapsable where Self: ElementNode {
         return layer
     }
 
-    private func setLottieViewColor(color: NSColor) {
-        if let color = color.usingColorSpace(NSScreen.main?.colorSpace ?? .sRGB) {
+    func setLottieViewColor(color: NSColor) {
+        NSAppearance.withAppAppearance {
+            guard let color = color.usingColorSpace(NSScreen.main?.colorSpace ?? .sRGB) else { return }
             let colorProvider = ColorValueProvider(Color(r: color.redComponent, g: color.greenComponent, b: color.blueComponent, a: 1))
             let fillKeypath = AnimationKeypath(keypath: "**.Fill 1.Color")
-            self.lottieView?.setValueProvider(colorProvider, keypath: fillKeypath)
+            lottieView?.setValueProvider(colorProvider, keypath: fillKeypath)
         }
     }
 

@@ -92,11 +92,11 @@ class SignInAutocompleteTests: BaseTest {
         XCTAssertEqual(passwordPage.getInputValue(.password), "••••••••••")
     }
     
-    func testSearchPasswords() throws {
+    func SKIPtestSearchPasswords() throws {
         try XCTSkipIf(true, "Identifiers needed")
     }
     
-    func testSortPasswords() throws {
+    func SKIPtestSortPasswords() throws {
         try XCTSkipIf(true, "Identifiers needed")
     }
     

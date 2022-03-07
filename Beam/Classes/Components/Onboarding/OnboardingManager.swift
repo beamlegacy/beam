@@ -181,9 +181,13 @@ class OnboardingManager: ObservableObject {
     }
 
     private func onboardingDidFinish() {
+        let userDidSignUp = userDidSignUp
         Persistence.Authentication.hasSeenOnboarding = true
         resetOnboarding()
         delegate?.onboardingManagerDidFinish()
+        if userDidSignUp {
+            OnboardingNoteCreator.shared.createOnboardingNotes()
+        }
     }
 
     func userHasUsername() -> Bool {

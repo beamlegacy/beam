@@ -49,8 +49,7 @@ struct OtherPasswordModal: View {
                 .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
                     if let doubleTappedRow = viewModel.doubleTappedRow,
                        let password = PasswordManager.shared.password(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: viewModel.filteredPasswordEntries[doubleTappedRow].username) {
-                        PasswordEditView(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost,
-                                         username: viewModel.filteredPasswordEntries[doubleTappedRow].username,
+                        PasswordEditView(entry: viewModel.filteredPasswordEntries[doubleTappedRow],
                                          password: password, editType: .update)
                             .frame(width: 400, height: 179, alignment: .center)
                     }

@@ -49,7 +49,11 @@ extension BeamObjectManager {
             try self.parseFilteredObjects(self.filteredObjects(beamObjects))
             return true
         }.recover(on: backgroundQueue) { error -> Promise<Bool> in
-            AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+            let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
+            Logger.shared.logError(message, category: .beamObject)
+            if Configuration.env == .debug {
+                AppDelegate.showMessage(message)
+            }
             return .value(false)
         }
     }

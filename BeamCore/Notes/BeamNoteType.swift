@@ -88,6 +88,11 @@ public enum BeamNoteType: Codable, Equatable {
         return .journal(titleForDate(date))
     }
 
+    public static func dateFrom(journalDateString: String) -> Date? {
+        guard !journalDateString.isEmpty else { return nil }
+        return Self.dateFormater.date(from: journalDateString)
+    }
+
     static func fromOldType(_ oldType: NoteType, title: String, fallbackDate: Date) -> BeamNoteType {
         switch oldType {
         case .journal:

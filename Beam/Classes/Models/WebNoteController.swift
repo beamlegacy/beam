@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import Combine
 
 enum NoteElementAddReason {
     /**
@@ -90,6 +91,8 @@ class WebNoteController: Encodable, Decodable {
         self.note = note
         _rootElement = from
         _element = _rootElement
+
+        setupObservers()
     }
 
     func setDestination(note: BeamNote?, rootElement: BeamElement? = nil) {
@@ -164,6 +167,7 @@ class WebNoteController: Encodable, Decodable {
                 _element = nil
             }
         }
+        setupObservers()
     }
 
     func encode(to encoder: Encoder) throws {
@@ -217,5 +221,23 @@ class WebNoteController: Encodable, Decodable {
             titleStr = text
         }
         return titleStr.isEmpty ? url.absoluteString : titleStr
+    }
+
+    var cancellables = [AnyCancellable]()
+    private func setupObservers() {
+        cancellables.append(DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
+                                .sink { id in
+            if self.note?.id == id {
+                self.note = nil
+            }
+            if self._rootElement?.id == id {
+                self._rootElement = nil
+            }
+            if self._element?.id == id {
+                self._element = nil
+            }
+        }
+
+        )
     }
 }

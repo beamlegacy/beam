@@ -9,13 +9,13 @@ import {
   BeamRangeGroup,
   BeamRect,
   BeamShootGroup,
-  FrameInfo,
   MessageHandlers
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import {BeamElementHelper} from "../../../Helpers/Utils/Web/BeamElementHelper"
 import {BeamRectHelper} from "../../../Helpers/Utils/Web/BeamRectHelper"
 import {PointAndShootHelper} from "./PointAndShootHelper"
 import {dequal as isDeepEqual} from "dequal"
+import { BeamEmbedHelper } from "../../../Helpers/Utils/Web/BeamEmbedHelper"
 
 export class PointAndShootUI_native implements PointAndShootUI {
   native
@@ -25,12 +25,11 @@ export class PointAndShootUI_native implements PointAndShootUI {
   constructor(native: Native<MessageHandlers>) {
     this.native = native
     this.datasetKey = `${this.prefix}Collect`
-  }
-  setFramesInfo(framesInfo: FrameInfo[]): void {
-    this.native.sendMessage("frameBounds", { frames: framesInfo })
+    this.embedHelper = new BeamEmbedHelper(native.win)
   }
   prefix = "__ID__"
   datasetKey
+  embedHelper: BeamEmbedHelper
 
   pointPayload = {}
   pointBounds(pointTarget?: BeamShootGroup) {
@@ -238,6 +237,20 @@ export class PointAndShootUI_native implements PointAndShootUI {
    */
   elementBounds(el: BeamHTMLElement | BeamElement, area?: BeamRect, clippingArea?: BeamRect, count = 5): BeamElementBounds {
     const {win} = this.native
+
+    // If we are inside an embeddable iframe, collect the whole frame
+    if (this.embedHelper.isOnFullEmbeddablePage()) {
+      const { width, height } = win.visualViewport
+      return {
+        element: el,
+        rect: {
+          x: 0,
+          y: 0,
+          width,
+          height
+        }
+      }
+    }
     // Find svg root if any and use it for bounds calculation
     const svgRoot = BeamElementHelper.getSvgRoot(el)
     if (svgRoot) {
@@ -296,7 +309,7 @@ export class PointAndShootUI_native implements PointAndShootUI {
     }
 
     // If it's an image or media, select the whole element
-    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el) || BeamElementHelper.isEmbed(el, win)
+    const selectWholeElement = BeamElementHelper.isImage(el, win) || BeamElementHelper.isMedia(el) || this.embedHelper.isEmbeddableElement(el)
 
     // We have meaningful children, inspect them and compute their bounds
     if (childNodes.length > 0 && !selectWholeElement) {

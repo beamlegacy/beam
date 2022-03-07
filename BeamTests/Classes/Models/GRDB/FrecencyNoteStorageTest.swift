@@ -84,6 +84,7 @@ class FrecencyNoteStorageTest: XCTestCase {
 
         let db = GRDBDatabase.empty()
         let storage = GRDBNoteFrecencyStorage(db: db)
+        storage.resetApiSaveLimiter()
         let noteIds = (0..<10).map { _ in UUID() }
         var correspondingRecords = [FrecencyNoteRecord]()
 
@@ -99,6 +100,24 @@ class FrecencyNoteStorageTest: XCTestCase {
             XCTAssertNotNil(fetchedRecord)
         }
         stopNetworkTests()
+    }
+
+    func testReceivedDeduplication() throws {
+        let noteId = UUID()
+        let now = BeamDate.now
+        let db = GRDBDatabase.empty()
+        let storage = GRDBNoteFrecencyStorage(db: db)
+
+        let records = [
+            FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 1, frecencySortScore: 1, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: noteId, lastAccessAt: now + 1, frecencyScore: 2, frecencySortScore: 2, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: noteId, lastAccessAt: now, frecencyScore: 3, frecencySortScore: 3, frecencyKey: .note30d1),
+        ]
+        try storage.receivedObjects(records)
+        let score0 = try XCTUnwrap(storage.fetchOne(id: noteId, paramKey: .note30d0))
+        XCTAssertEqual(score0.lastScore, 2) //highest last access at is kept
+        let score1 = try XCTUnwrap(storage.fetchOne(id: noteId, paramKey: .note30d1))
+        XCTAssertEqual(score1.lastScore, 3)
     }
 
     private func beforeNetworkTests() {

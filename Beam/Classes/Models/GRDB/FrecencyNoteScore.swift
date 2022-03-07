@@ -10,6 +10,14 @@ import GRDB
 import BeamCore
 
 public struct FrecencyNoteRecord: Codable, BeamObjectProtocol {
+    struct UniqueKey: Hashable {
+        let frecencyKey: FrecencyParamKey
+        let noteId: UUID
+    }
+    var uniqueKey: UniqueKey {
+        UniqueKey(frecencyKey: frecencyKey, noteId: noteId)
+    }
+
     public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
     static var beamObjectType: BeamObjectObjectType = .noteFrecency
     static let BeamElementForeignKey = ForeignKey([FrecencyNoteRecord.Columns.noteId], to: [BeamElementRecord.Columns.noteId])
@@ -111,7 +119,7 @@ class NoteFrecencyApiSaveLimiter {
         }
         saveCount += 1
     }
-    private func reset() {
+    func reset() {
         saveCount = 0
         records = [UUID: FrecencyNoteRecord]()
     }
@@ -132,6 +140,9 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         self.db = db
     }
 
+    func resetApiSaveLimiter() {
+        Self.apiSaveLimiter.reset()
+    }
     public func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
         do {
             if let record = try db.fetchOneFrecencyNote(noteId: id, paramKey: paramKey) {
@@ -212,8 +223,19 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
     internal static var backgroundQueue = DispatchQueue(label: "NoteFrecency BeamObjectManager backgroundQueue", qos: .userInitiated)
 
+    private func deduplicated(records: [FrecencyNoteRecord]) -> [FrecencyNoteRecord] {
+        let keyValues = records.map { ($0.uniqueKey, $0) }
+        let deduplicatedDict = Dictionary(
+            keyValues,
+            uniquingKeysWith: { (leftRec, rightRec) in
+                leftRec.lastAccessAt > rightRec.lastAccessAt ? leftRec : rightRec
+            }
+        )
+        return Array(deduplicatedDict.values)
+    }
+
     func receivedObjects(_ objects: [FrecencyNoteRecord]) throws {
-        try self.db.save(noteFrecencies: objects)
+        try self.db.save(noteFrecencies: deduplicated(records: objects))
     }
 
     func allObjects(updatedSince: Date?) throws -> [FrecencyNoteRecord] {

@@ -20,7 +20,7 @@ class ChevronButton: ButtonLayer {
     init(_ name: String, icon: String = "editor-arrow_right", open: Bool, changed: @escaping (Bool) -> Void = { _ in }) {
         self.changed = changed
         self.open = open
-        chevron = Layer.icon(named: icon, color: BeamColor.Editor.chevron.nsColor)
+        chevron = Layer.icon(named: icon)
         super.init(name, CALayer())
         activated = { [unowned self] in
             self.open.toggle()
@@ -40,6 +40,12 @@ class ChevronButton: ButtonLayer {
     func updateChevron() {
         chevron.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
         setAccessibilityLabel("disclosure triangle \(open ? "opened" : "closed")")
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        chevron.backgroundColor = BeamColor.Editor.chevron.cgColor
     }
 
     override func isAccessibilityDisclosed() -> Bool {

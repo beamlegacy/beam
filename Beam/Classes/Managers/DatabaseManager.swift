@@ -462,7 +462,7 @@ class DatabaseManager {
             let semaphore = DispatchSemaphore(value: 0)
             var error: Error?
 
-            // If the database has already been synced once that we need to soft delete it, otherwise we can safely erase completely is localy
+            // If the database has already been synced once that we need to soft delete it, otherwise we can safely erase completely is locally
             if defaultDatabase.hasBeenSyncedOnce {
                 softDelete(defaultDatabase) { result in
                     switch result {

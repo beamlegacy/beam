@@ -14,7 +14,7 @@ class CardViewTests: BaseTest {
     let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
     let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
     
-    func testDefaultCardView() throws {
+    func SKIPtestDefaultCardView() throws {
         try XCTSkipIf(true, "Workaround to open a note from journal/all notes menu is pending")
         let defaultNumberOfCardsAtFreshInstallation = 1
         let journalView = launchApp()

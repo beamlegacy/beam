@@ -1,4 +1,5 @@
 import BeamCore
+import Combine
 
 protocol WebPositionsDelegate: AnyObject {
     func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo)
@@ -35,6 +36,17 @@ class WebPositions: ObservableObject {
     }
 
     weak var delegate: WebPositionsDelegate?
+
+    private var cancellables = Set<AnyCancellable>()
+
+    init(webFrames: WebFrames) {
+        webFrames.removedFrames.sink { href in
+            self.framesInfo[href] = nil
+        }
+        .store(in: &cancellables)
+    }
+
+    private init() {}
 
     /// Utility to check if provided frame is a child frame
     /// - Parameter frame: frame to set

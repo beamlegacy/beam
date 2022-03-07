@@ -74,6 +74,7 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
         HStack(spacing: 1) {
             if state.mode != .today {
                 ToolbarButton(icon: "nav-journal", action: goToJournal)
+                    .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.description)
                     .accessibilityIdentifier("journal")
                     .animation(nil)
             }
@@ -101,9 +102,12 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
                 } else {
                     state.startFocusOmnibox(fromTab: false)
                 }
-            }).accessibilityIdentifier("nav-omnibox")
+            })
+                .tooltipOnHover(Shortcut.AvailableShortcut.newSearch.description)
+                .accessibilityIdentifier("nav-omnibox")
             if showPivotButton {
                 ToolbarModeSwitcher(modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)
+                    .tooltipOnHover(Shortcut.AvailableShortcut.toggleNoteWeb.description)
             }
         }
         .padding(.trailing, BeamSpacing._140)

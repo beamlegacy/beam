@@ -35,7 +35,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
         testRailPrint("Then alert box is displayed and interacted")
         XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
         XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].waitForExistence(timeout: minimumWaitTimeout))
-        alert.buttons["Ok"].firstMatch.tap()
+        alert.buttons["OK"].firstMatch.tap()
     }
     
     func testJSNativePromptInteraction() {

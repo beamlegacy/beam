@@ -7,6 +7,7 @@
 
 import Foundation
 import SwiftUI
+import BeamCore
 
 struct ToolbarChevrons: View {
     @EnvironmentObject var state: BeamState
@@ -20,10 +21,18 @@ struct ToolbarChevrons: View {
             if state.canGoBack || alwaysShowBack {
                 ToolbarButton(icon: "nav-back", customIconSize: CGSize(width: 20, height: 24), customContainerSize: CGSize(width: 22, height: 28), action: goBack)
                     .disabled(!state.canGoBack)
+                    .tooltipOnHover(
+                        (state.mode != .web ? Shortcut.AvailableShortcut.goBackEditor : Shortcut.AvailableShortcut.goBack)
+                            .description
+                    )
                     .accessibilityIdentifier("goBack")
             }
             if state.canGoForward {
                 ToolbarButton(icon: "nav-forward", customIconSize: CGSize(width: 20, height: 24), customContainerSize: CGSize(width: 22, height: 28), action: goForward)
+                    .tooltipOnHover(
+                        (state.mode != .web ? Shortcut.AvailableShortcut.goForwardEditor : Shortcut.AvailableShortcut.goForward)
+                            .description
+                    )
                     .accessibilityIdentifier("goForward")
             }
         }

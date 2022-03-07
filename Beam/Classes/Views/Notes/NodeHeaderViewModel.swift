@@ -248,7 +248,7 @@ extension NoteHeaderView {
             let alert = NSAlert()
             alert.messageText = "Are you sure you want to delete the note \"\(note.title)\"?"
             alert.informativeText = "This cannot be undone."
-            alert.addButton(withTitle: "Delete...")
+            alert.addButton(withTitle: "Delete")
             alert.addButton(withTitle: "Cancel")
             alert.alertStyle = .warning
             guard let window = AppDelegate.main.window else { return }

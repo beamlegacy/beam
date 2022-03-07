@@ -13,6 +13,7 @@ import {
   BeamWindow
 } from "../../../Helpers/Utils/Web/BeamTypes"
 import { BeamElementHelper } from "../../../Helpers/Utils/Web/BeamElementHelper"
+import { BeamEmbedHelper } from "../../../Helpers/Utils/Web/BeamEmbedHelper"
 
 export class PointAndShootHelper {
   /**
@@ -55,8 +56,9 @@ export class PointAndShootHelper {
    * @param win
    */
   static isMeaningful(element: BeamElement, win: BeamWindow): boolean {
+    const embedHelper = new BeamEmbedHelper(win)
     return (
-      (BeamElementHelper.isEmbed(element, win) ||
+      (embedHelper.isEmbeddableElement(element) ||
         BeamElementHelper.isMedia(element) ||
         BeamElementHelper.isImageContainer(element, win) ||
         PointAndShootHelper.isTextMeaningful(BeamElementHelper.getTextValue(element))) &&

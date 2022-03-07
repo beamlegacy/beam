@@ -16,10 +16,11 @@ enum LogLevel: String {
 /**
  Handles logging messages sent from web page's javascript.
  */
-class LoggingMessageHandler: BeamMessageHandler<LogMessages> {
+class LoggingMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: LogMessages.self, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
+    init() {
+        let messages = LogMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from: WebPage, frameInfo: WKFrameInfo?) {

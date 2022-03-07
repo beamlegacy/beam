@@ -13,6 +13,19 @@ enum ShortcutModifier: Hashable {
     case shift
     case control
 
+    var stringValue: String {
+        switch self {
+        case .option:
+            return "⌥"
+        case .command:
+            return "⌘"
+        case .shift:
+            return "⇧"
+        case .control:
+            return "⌃"
+        }
+    }
+
     func symbol(withBackground: Bool = true) -> some View {
         let image: Image
         switch self {

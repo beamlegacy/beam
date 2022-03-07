@@ -28,7 +28,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         }
     }
 
-    enum Source: Equatable, Hashable {
+    enum Source: Equatable, Hashable, Comparable {
 
         case history
         case note(noteId: UUID? = nil, elementId: UUID? = nil)
@@ -59,7 +59,11 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             return Source.note(noteId: nil, elementId: nil)
         }
 
-        var priority: Int {
+        static func < (lhs: AutocompleteResult.Source, rhs: AutocompleteResult.Source) -> Bool {
+            lhs.priority > rhs.priority
+        }
+        /// lowest value priority means it's more important.
+        private var priority: Int {
             switch self {
             case .history:
                 return 0
@@ -207,8 +211,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         return BoosterResult(base: newBase, score: score, boostedScore: boosterWeight * score, takeOverCandidate: fullMatch && matchInRange)
     }
 
-    /// The weighted score is used to sort AutocompleResults. It combines all subscore, higher is better. Can be nil if there is no original score.
-    var weightedScore: Float? {
+    /// The weighted score is used to sort AutocompleResults. It combines all subscore, higher is better.
+    var weightedScore: Float {
         return (score ?? 1.0) * prefixScore
     }
 
@@ -223,19 +227,23 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         rawInfoPrefixScore > rawTextPrefixScore ? text : information
     }
 
+    /// inferior result means it should appear lower in the search results.
     static func < (lhs: AutocompleteResult, rhs: AutocompleteResult) -> Bool {
-        if let slhs = lhs.weightedScore,
-           let srhs = rhs.weightedScore {
-            if slhs == srhs {
-                return lhs.text < rhs.text
-            }
-            return slhs < srhs
+        let lScore = lhs.weightedScore
+        let rScore = rhs.weightedScore
+        if lScore != rScore {
+            return lScore < rScore
         }
-        if lhs.score != nil { return false }
-        if rhs.score != nil { return true }
-        return lhs.text.count < rhs.text.count
-
+        if lhs.score != rhs.score {
+            if lhs.score != nil { return false }
+            if rhs.score != nil { return true }
+        }
+        if lhs.urlFields.contains(.text) {
+            return lhs.text.count > rhs.text.count
+        }
+        return lhs.text < rhs.text
     }
+
     var description: String {
         var urlToPrint: String
         if let url = url {

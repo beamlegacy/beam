@@ -8,7 +8,7 @@ import Promises
  */
 protocol WebPage: AnyObject, Scorable {
 
-    var webView: BeamWebView! { get }
+    var webView: BeamWebView { get }
     var webviewWindow: NSWindow? { get }
 
     var frame: NSRect { get }
@@ -33,6 +33,7 @@ protocol WebPage: AnyObject, Scorable {
     var pointAndShootInstalled: Bool { get }
     var pointAndShootEnabled: Bool { get }
     var pointAndShoot: PointAndShoot? { get }
+    var webFrames: WebFrames? { get }
     var webPositions: WebPositions? { get }
 
     var authenticationViewModel: AuthenticationViewModel? { get set }
@@ -141,7 +142,7 @@ extension WebPage {
     func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) { }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
-        webView
+        return webView
     }
 
     func addTextToClusteringManager(_ text: String, url: URL) { }
@@ -162,21 +163,21 @@ extension WebPage {
 
         let viewModel = SearchViewModel(context: .web) { [weak self] search in
             self?.find(search, using: "find")
-        } onLocationIndicatorTap: { position in
-            _ = self.executeJS("window.scrollTo(0, \(position));", objectName: nil)
+        } onLocationIndicatorTap: { [weak self] position in
+            self?.executeJS("window.scrollTo(0, \(position));", objectName: nil)
         } next: { [weak self] search in
             self?.find(search, using: "findNext")
         } previous: { [weak self] search in
             self?.find(search, using: "findPrevious")
         } done: { [weak self] in
-            self?.webView.page?.executeJS("findDone()", objectName: "SearchWebPage")
+            self?.executeJS("findDone()", objectName: "SearchWebPage")
             self?.searchViewModel = nil
         }
 
         self.searchViewModel = viewModel
 
         if fromSelection {
-            self.webView.page?.executeJS("getSelection()", objectName: "SearchWebPage")
+            self.executeJS("getSelection()", objectName: "SearchWebPage")
         }
     }
 
@@ -188,6 +189,6 @@ extension WebPage {
 
     func find(_ search: String, using function: String) {
         let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
-        self.webView.page?.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
+        self.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
     }
 }

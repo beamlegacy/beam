@@ -369,7 +369,7 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func update(record: PasswordRecord, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
+    func update(record: PasswordRecord, hostname: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
                 guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password, EncryptionManager.shared.localPrivateKey()) else {
@@ -380,6 +380,9 @@ class PasswordsDB: PasswordStore {
                 if let uuid = uuid {
                     updatedRecord.uuid = uuid
                 }
+                updatedRecord.entryId = id(for: hostname, and: username)
+                updatedRecord.hostname = hostname
+                updatedRecord.username = username
                 updatedRecord.password = encryptedPassword
                 updatedRecord.updatedAt = BeamDate.now
                 updatedRecord.privateKeySignature = privateKeySignature

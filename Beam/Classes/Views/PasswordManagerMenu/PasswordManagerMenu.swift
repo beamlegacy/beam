@@ -32,7 +32,7 @@ struct PasswordManagerMenu: View {
                     if !viewModel.display.entriesForHost.isEmpty {
                         VStack(spacing: 0) {
                             ForEach(viewModel.display.entriesForHost.prefix(viewModel.display.entryDisplayLimit)) { entry in
-                                StoredPasswordCell(host: entry.minimizedHost, username: entry.username) { newState in
+                                StoredPasswordCell(host: viewModel.displayedHost(for: entry), username: entry.username) { newState in
                                     if newState == .clicked {
                                         viewModel.fillCredentials(entry)
                                     }

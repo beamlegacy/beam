@@ -1,4 +1,4 @@
-import {BeamRangeGroup, BeamShootGroup, FrameInfo} from "../../../Helpers/Utils/Web/BeamTypes"
+import {BeamRangeGroup, BeamShootGroup} from "../../../Helpers/Utils/Web/BeamTypes"
 import {PointAndShootUI} from "./PointAndShootUI"
 import {PointAndShootUI_native} from "./PointAndShootUI_native"
 import {PointAndShootUI_web} from "./PointAndShootUI_web"
@@ -21,18 +21,6 @@ export class PointAndShootUI_debug implements PointAndShootUI {
     throw new Error("Method not implemented.")
   }
   hasSelection(_hasSelection: boolean): void {
-    throw new Error("Method not implemented.")
-  }
-  setFramesInfo(_framesInfo: FrameInfo[]): void {
-    throw new Error("Method not implemented.")
-  }
-  setScrollInfo(_scrollInfo: unknown): void {
-    throw new Error("Method not implemented.")
-  }
-  setResizeInfo(_resizeInfo: unknown): void {
-    throw new Error("Method not implemented.")
-  }
-  setOnLoadInfo(_framesInfo: FrameInfo[]): void {
     throw new Error("Method not implemented.")
   }
   pinched(_pinchInfo: unknown): void {

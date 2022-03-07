@@ -13,7 +13,7 @@ class PopoverWindow: NSWindow {
 
     static let customShadowPadding: CGFloat = 40
     private let strokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
-    private let shadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.16), darkColor: .From(color: .black, alpha: 0.7))
+    private let shadowColor: BeamColor
 
     private(set) var didMove = false
     private var moveNotificationToken: NSObjectProtocol?
@@ -22,10 +22,11 @@ class PopoverWindow: NSWindow {
     private var _canBecomeMain: Bool
     private var _useBeamShadow: Bool
 
-    init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false) {
+    init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false) {
         _canBecomeKey = canBecomeKey
         _canBecomeMain = canBecomeMain
         _useBeamShadow = useBeamShadow
+        shadowColor = lightBeamShadow ? .From(color: .black, alpha: 0.16) : .combining(lightColor: .From(color: .black, alpha: 0.16), darkColor: .From(color: .black, alpha: 0.7))
         super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
     }
 
