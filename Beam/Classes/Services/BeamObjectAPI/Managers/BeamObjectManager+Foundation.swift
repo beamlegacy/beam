@@ -414,24 +414,6 @@ extension BeamObjectManager {
         completion(.success(objects))
 
         return nil
-
-//        let request = BeamObjectRequest()
-//        try request.save(objectsToSave) { result in
-//            switch result {
-//            case .failure(let error):
-//                self.saveToAPIFailure(objects, error, completion)
-//            case .success:
-//                do {
-//                    try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSave)
-//                    try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSave)
-//                    completion(.success(objects))
-//                } catch {
-//                    completion(.failure(error))
-//                }
-//            }
-//        }
-//
-//        return request
     }
 
     // swiftlint:disable:next cyclomatic_complexity
