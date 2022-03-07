@@ -209,4 +209,19 @@ class BeamLinkDBTests: XCTestCase {
         
         BeamDate.reset()
     }
+
+    func testUrlNormalization() {
+        let nonStandardUrl = "http://lemonde.fr"
+        let standardUrl = "http://lemonde.fr/"
+        let id0 = BeamLinkDB.shared.getOrCreateIdFor(url: nonStandardUrl, title: nil, content: nil, destination: nil)
+        let id1 = BeamLinkDB.shared.getOrCreateIdFor(url: standardUrl, title: nil, content: nil, destination: nil)
+        XCTAssertEqual(id0, id1)
+
+        let link0 = BeamLinkDB.shared.visit(nonStandardUrl, title: nil, content: nil, destination: nil)
+        let link1 = BeamLinkDB.shared.visit(standardUrl, title: nil, content: nil, destination: nil)
+        XCTAssertEqual(link0.id, id0)
+        XCTAssertEqual(link1.id, id0)
+        XCTAssertEqual(link0.url, standardUrl)
+        XCTAssertEqual(link1.url, standardUrl)
+    }
 }
