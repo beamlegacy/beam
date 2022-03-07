@@ -106,4 +106,10 @@ class URLBeamTest: XCTestCase {
         //Port made explicit, this is a change
         XCTAssertFalse(URL(string: "http://www.example.com:80/dir/page.html")!.isSameOrigin(as: firstUrl))
     }
+
+    func testRootPathAdded() {
+        XCTAssertEqual(URL(string: "http://www.google.com/")!.withRootPath.absoluteString, "http://www.google.com/")
+        XCTAssertEqual(URL(string: "http://www.google.com")!.withRootPath.absoluteString, "http://www.google.com/")
+        XCTAssertEqual(URL(string: "http://www.google.com/search")!.withRootPath.absoluteString, "http://www.google.com/search")
+    }
 }
