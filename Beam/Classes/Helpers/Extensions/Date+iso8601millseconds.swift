@@ -60,9 +60,3 @@ extension JSONEncoder.DateEncodingStrategy {
         try container.encode(Formatter.iso8601withFractionalSeconds.string(from: $0))
     }
 }
-
-class ISO8601withFractionalSeconds: DateFormatter {
-    override func date(from string: String) -> Date? {
-        Formatter.iso8601withFractionalSeconds.date(from: string)
-    }
-}

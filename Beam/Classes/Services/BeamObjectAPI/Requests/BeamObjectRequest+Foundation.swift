@@ -1,6 +1,5 @@
 import Foundation
 import BeamCore
-import XCTest
 
 // swiftlint:disable function_length file_length
 
@@ -593,8 +592,6 @@ extension BeamObjectRequest {
                 Logger.shared.logDebug("Decrypted \(decryptedObjects.count) objects", category: .beamObject, localTimer: localTimer)
 
                 if decryptedObjects.count < beamObjects.count && raisePrivateKeyError {
-//                            UserAlert.showError(message: "Encryption error",
-//                                                informativeText: "\(beamObjects.count - decryptedObjects.count) objects we fetched couldn't be decrypted, check logs for more details. You probably have a different local private key than the one used to encrypt objects on the API side. Either use a different account, or copy/paste your private key in the advanced settings.")
                     completion(.failure(BeamObjectRequestError.privateKeyError(validObjects: decryptedObjects, invalidObjects: invalidObjects)))
                 } else {
                     completion(.success(decryptedObjects))

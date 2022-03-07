@@ -2,8 +2,6 @@ import Foundation
 import os.log
 import BeamCore
 import Vinyl
-import ZippyJSON
-import IkigaJSON
 
 // swiftlint:disable file_length
 
@@ -60,7 +58,7 @@ class APIRequest: NSObject {
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
             "Accept-Language": Locale.current.languageCode ?? "en",
-            "Accept-Encoding": "gzip, deflate, br"
+//            "Accept-Encoding": "gzip, deflate, br"
         ]
 
         request.httpMethod = "POST"
@@ -402,27 +400,9 @@ class APIRequest: NSObject {
         } as [String]
     }
 
-    func defaultDecoder() -> IkigaJSONDecoder {
-        ikigaJSONDecoder()
-    }
-
-    // This is surprinsigly slower :( About 3x slower than Swift
-    func ikigaJSONDecoder() -> IkigaJSONDecoder {
-        let decoder = IkigaJSONDecoder()
-        decoder.settings.dateDecodingStrategy = .formatted(ISO8601withFractionalSeconds())
-        decoder.settings.nilValueDecodingStrategy = .decodeNilForKeyNotFound
-        return decoder
-    }
-
-    func defaultJSONSwiftDecoder() -> JSONDecoder {
+    func defaultDecoder() -> JSONDecoder {
         let decoder = JSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
-        return decoder
-    }
-
-    func zippyJSONDecoder() -> ZippyJSONDecoder {
-        let decoder = ZippyJSONDecoder()
-        decoder.dateDecodingStrategy = .formatted(ISO8601withFractionalSeconds())
         return decoder
     }
 
