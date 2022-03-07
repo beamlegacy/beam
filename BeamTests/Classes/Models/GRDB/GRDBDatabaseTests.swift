@@ -102,10 +102,10 @@ La recopie vidéo est également au menu depuis le centre de contrôle de l'appa
             LinkStore.getOrCreateIdFor("https://destination.co"),
         ]
         let historyItems = [
-            (urlId: urlIds[0], url: "https://foobar.co", title: "foo bar", content: "", sortScore: Float(0.42), destination: nil),
-            (urlId: urlIds[1], url: "https://foobar1.co", title: "foo baz", content: nil, sortScore: Float(-0.05), destination: nil),
-            (urlId: urlIds[2], url: "https://foobar2.co", title: "foo·bar baz", content: nil, sortScore: Float(-10), destination: "https://destination.co"),
-            (urlId: urlIds[3], url: "https://destination.co", title: "destination", content: nil, sortScore: Float(2.5), destination: nil)
+            (urlId: urlIds[0], url: "https://foobar.co/", title: "foo bar", content: "", sortScore: Float(0.42), destination: nil),
+            (urlId: urlIds[1], url: "https://foobar1.co/", title: "foo baz", content: nil, sortScore: Float(-0.05), destination: nil),
+            (urlId: urlIds[2], url: "https://foobar2.co/", title: "foo·bar baz", content: nil, sortScore: Float(-10), destination: "https://destination.co/"),
+            (urlId: urlIds[3], url: "https://destination.co/", title: "destination", content: nil, sortScore: Float(2.5), destination: nil)
         ]
 
         for history in historyItems {

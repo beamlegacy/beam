@@ -132,10 +132,14 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
         return db.getLinks(matchingUrl: url)
     }
+    private func normalized(url: String) -> String {
+        URL(string: url)?.normalized.absoluteString ?? url
+    }
 
     public func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID {
         guard url != Link.missing.url else { return Link.missing.id }
-        return db.getOrCreateIdFor(url: url, title: title, content: content, destination: destination)
+        let normalizedUrl = normalized(url: url)
+        return db.getOrCreateIdFor(url: normalizedUrl, title: title, content: content, destination: destination)
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -176,7 +180,8 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     @discardableResult
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link {
         guard url != Link.missing.url else { return Link.missing }
-        let link: Link = db.visit(url: url, title: title, content: content, destination: destination)
+        let normalizedUrl = normalized(url: url)
+        let link: Link = db.visit(url: normalizedUrl, title: title, content: content, destination: destination)
         saveOnNetwork(link)
         return link
     }
