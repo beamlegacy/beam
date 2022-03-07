@@ -131,4 +131,18 @@ public extension URL {
         guard self.scheme == url.scheme, self.host == url.host, self.port == url.port else { return false }
         return true
     }
+
+    var withRootPath: URL {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return self }
+        if components.path == "" {
+            components.path = "/"
+        }
+        return components.url ?? self
+    }
+
+    // TODO: Implement all semantic preserving transformation listed here:
+    // https://en.wikipedia.org/wiki/URI_normalization
+    var normalized: URL {
+        withRootPath
+    }
 }
