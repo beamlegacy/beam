@@ -231,7 +231,6 @@ struct AccountsView: View {
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
         })
         .disabled(!viewModel.isloggedIn)
-
     }
 
     private var manageAccountView: some View {
@@ -318,13 +317,26 @@ struct AccountsView: View {
                         }
                     })
 
-            Text("Your encryption key is used to decrypt your notes on Beam Web. Click to copy it and paste it on Beam Web.")
+            Text("Your private key is used to sync your account and decrypt your notes on Beam Web. Click to copy it and paste it on Beam Web.")
                 .lineLimit(2)
                 .fixedSize(horizontal: false, vertical: true)
                 .multilineTextAlignment(.leading)
                 .font(BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(width: 354, height: 26, alignment: .leading)
+                .padding(.bottom, 21)
+
+            Button {
+                EncryptionManager.shared.saveKeyToFile(completion: nil)
+            } label: {
+                Text("Save Private Key...")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+            }.frame(width: 132, height: 20, alignment: .center)
+            Text("Save your private key as a .beamkey file.")
+                .font(BeamFont.regular(size: 11).swiftUI)
+                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                .frame(height: 13, alignment: .leading)
         }
     }
 
@@ -348,7 +360,7 @@ struct AccountsView: View {
             guard response == .alertFirstButtonReturn else { return }
             AccountManager.logout()
             if self.checkboxHelper.isOn {
-                AppDelegate.main.deleteAllData()
+                AppDelegate.main.deleteAllLocalData()
             }
             viewModel.isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
         }

@@ -8,10 +8,11 @@ enum NavigationMessages: String, CaseIterable {
     case nav_locationChanged
 }
 
-class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
+class WebNavigationMessageHandler: SimpleBeamMessageHandler {
 
-    init(config: BeamWebViewConfiguration) {
-        super.init(config: config, messages: NavigationMessages.self, jsFileName: "navigation_prod")
+    init() {
+        let messages = NavigationMessages.self.allCases.map { $0.rawValue }
+        super.init(messages: messages, jsFileName: "navigation_prod")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
@@ -37,7 +38,7 @@ class WebNavigationMessageHandler: BeamMessageHandler<NavigationMessages> {
             guard let navigationController = webPage.navigationController else { return }
             let replace: Bool = type == "replaceState" ? true : false
             navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace, fromJS: true)
-            _ = webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
+            webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
         }
     }
 }

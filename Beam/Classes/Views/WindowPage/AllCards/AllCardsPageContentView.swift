@@ -165,6 +165,7 @@ struct AllCardsPageContentView: View {
     @State private var selectedRowsIndexes = IndexSet()
     @State private var hoveredRowIndex: Int?
     @State private var hoveredRowFrame: NSRect?
+    @State private var publishingNote = false
 
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
@@ -301,6 +302,7 @@ struct AllCardsPageContentView: View {
                     .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                 }
             )
+            .disabled(publishingNote)
             .frame(maxHeight: .infinity)
             .background(Color.clear
                     .onHover { hovering in
@@ -369,7 +371,21 @@ struct AllCardsPageContentView: View {
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic {
-                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true)
+                publishingNote = true
+                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .failure(let e):
+                            UserAlert.showError(message: loc("Could not publish note. Try again from the note view."), error: e)
+                            // Saving the private note at least and showing it to user.
+                            newNote.save()
+                            listType = .privateNotes
+                        case .success:
+                            model.refreshAllNotes()
+                        }
+                        publishingNote = false
+                    }
+                }
             } else {
                 newNote.save()
             }

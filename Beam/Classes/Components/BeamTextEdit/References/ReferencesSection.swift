@@ -20,11 +20,9 @@ class ReferencesSection: LinksSection {
 
         linkActionLayer.font = BeamFont.medium(size: 0).nsFont
         linkActionLayer.fontSize = 12
-        linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
         linkActionLayer.contentsScale = contentsScale
         linkActionLayer.alignmentMode = .center
         linkActionLayer.string = "Link All"
-        linkActionLayer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
     }
 
     override var links: [BeamNoteReference] { note.fastReferences }
@@ -115,6 +113,13 @@ class ReferencesSection: LinksSection {
             linkActionLayer.frame = CGRect(x: linkActionLayerXPosition, y: linkActionLayerYPosition,
                                            width: linkActionLayerFrameSize.width, height: linkActionLayerFrameSize.height)
         }
+    }
+
+    override func updateColors() {
+        super.updateColors()
+
+        linkActionLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
+        linkActionLayer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
     }
 
     override var mainLayerName: String {

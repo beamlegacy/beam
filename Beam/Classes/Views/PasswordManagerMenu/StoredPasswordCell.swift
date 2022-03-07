@@ -25,7 +25,7 @@ struct StoredPasswordCell: View {
                     Text(username)
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.WebFieldAutofill.primaryText.swiftUI)
-                    Text("From this website")
+                    Text(host)
                         .font(BeamFont.regular(size: 11).swiftUI)
                         .foregroundColor(BeamColor.WebFieldAutofill.secondaryText.swiftUI)
                         .blendMode(colorScheme == .light ? .multiply : .screen)

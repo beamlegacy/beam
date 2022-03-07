@@ -90,8 +90,7 @@ struct Passwords: View {
                     .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
                         if let doubleTappedRow = passwordsViewModel.doubleTappedRow,
                            let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username) {
-                            PasswordEditView(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost,
-                                             username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username,
+                            PasswordEditView(entry: passwordsViewModel.filteredPasswordEntries[doubleTappedRow],
                                              password: password, editType: .update)
                                 .frame(width: 400, height: 179, alignment: .center)
                         }
@@ -106,9 +105,7 @@ struct Passwords: View {
                             .renderingMode(.template)
                     }.buttonStyle(BorderedButtonStyle())
                         .sheet(isPresented: $showingAddPasswordSheet) {
-                            PasswordEditView(hostname: "",
-                                             username: "",
-                                             password: "", editType: .create)
+                            PasswordEditView(entry: nil, password: "", editType: .create)
                                 .frame(width: 400, height: 179, alignment: .center)
                         }
                     Button {
@@ -127,9 +124,7 @@ struct Passwords: View {
                         .sheet(isPresented: $showingEditPasswordSheet) {
                             if let entry = passwordsViewModel.selectedEntries.first,
                                let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
-                                PasswordEditView(hostname: entry.minimizedHost,
-                                                 username: entry.username,
-                                                 password: password, editType: .update)
+                                PasswordEditView(entry: entry, password: password, editType: .update)
                             }
                         }
                         .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)

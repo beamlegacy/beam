@@ -44,6 +44,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
+    var sessionExporter: ClusteringSessionExporter
     var activeSources = ActiveSources()
     var scope = Set<AnyCancellable>()
     var checkForUpdateCancellable: AnyCancellable?
@@ -81,7 +82,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                                                     withIntermediateDirectories: true,
                                                     attributes: nil)
 
-            if FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
+            if !fileName.isEmpty, FileManager.default.fileExists(atPath: directory + "/\(fileName)") {
                 do {
                     try FileManager.default.moveItem(atPath: directory + "/\(fileName)", toPath: localDirectory + destinationName)
                 } catch {
@@ -106,6 +107,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
+        sessionExporter = ClusteringSessionExporter()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         cookies = HTTPCookieStorage()
@@ -159,7 +161,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                        note.type == .note,
                        let changed = note.lastChangeType,
                        changed == .text || changed == .tree {
-                        self.clusteringManager.noteToAdd = note
+                        self.clusteringManager.noteToAdd.send(note)
                     }
                 }
             }

@@ -23,7 +23,7 @@ class SignInSucessfullyTests: BaseTest {
         super.tearDown()
     }
     
-    func testSigninPage1() throws {
+    func SKIPtestSigninPage1() throws {
         try XCTSkipIf(true, "WIP")
         testRailPrint("Given I ")
     }

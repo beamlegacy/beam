@@ -18,7 +18,8 @@ class URLBeamTest: XCTestCase {
         let expectedWikipedia = "wikipedia.org"
         XCTAssertEqual(URL(string: "wikipedia.org/")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
         XCTAssertEqual(URL(string: "https://wikipedia.org/")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
-        XCTAssertEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
+        XCTAssertEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, "wikipedia.ORG")
+        XCTAssertNotEqual(URL(string: "http://wikipedia.ORG?")?.urlStringByRemovingUnnecessaryCharacters, expectedWikipedia)
         XCTAssertEqual(URL(string: "https://en.wikipedia.org/post/1?lang=en")?.urlStringByRemovingUnnecessaryCharacters, "en.wikipedia.org/post/1?lang=en")
     }
 
@@ -60,9 +61,10 @@ class URLBeamTest: XCTestCase {
         XCTAssertFalse(URL(string: "https://www.wikipedia.org/wiki")!.isDomain)
         XCTAssertFalse(URL(string: "https://wikipedia.org/page.html")!.isDomain)
     }
-    func testBaseUrl() {
-        XCTAssertEqual(URL(string: "https://www.wikipedia.org/wiki")?.domain, URL(string: "https://www.wikipedia.org/"))
-        XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://www.wikipedia.org/"))
+
+    func testDomain() {
+        XCTAssertEqual(URL(string: "https://www.wikipedia.org/wiki")?.domain, URL(string: "https://wikipedia.org/"))
+        XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://wikipedia.org/"))
         XCTAssertNil(URL(string: "www.wikipedia.org/wiki")?.domain)
     }
 
@@ -103,5 +105,11 @@ class URLBeamTest: XCTestCase {
         XCTAssertFalse(URL(string: "http://v2.www.example.com/dir/page.html")!.isSameOrigin(as: firstUrl))
         //Port made explicit, this is a change
         XCTAssertFalse(URL(string: "http://www.example.com:80/dir/page.html")!.isSameOrigin(as: firstUrl))
+    }
+
+    func testRootPathAdded() {
+        XCTAssertEqual(URL(string: "http://www.google.com/")!.withRootPath.absoluteString, "http://www.google.com/")
+        XCTAssertEqual(URL(string: "http://www.google.com")!.withRootPath.absoluteString, "http://www.google.com/")
+        XCTAssertEqual(URL(string: "http://www.google.com/search")!.withRootPath.absoluteString, "http://www.google.com/search")
     }
 }

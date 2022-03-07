@@ -1,0 +1,46 @@
+{
+  "id" : "25D3E6DB-FEA2-43A1-B84C-C14B4F567AB4",
+  "textStats" : {
+    "wordsCount" : 4
+  },
+  "visitedSearchResults" : [
+
+  ],
+  "sources" : {
+    "sources" : [
+
+    ]
+  },
+  "type" : {
+    "type" : "note"
+  },
+  "title" : "test",
+  "searchQueries" : [
+
+  ],
+  "contactId" : null,
+  "children" : [
+    {
+      "creationDate" : 666777188.05344701,
+      "id" : "FC3B2F1C-A89A-4047-9A4E-A83069C376E3",
+      "textStats" : {
+        "wordsCount" : 4
+      },
+      "text" : {
+        "ranges" : [
+          {
+            "string" : "The second bullet point"
+          }
+        ]
+      }
+    }
+  ],
+  "browsingSessionIds" : [
+
+  ],
+  "publicationStatus" : {
+    "status" : "unpublished"
+  },
+  "score" : 0.20000000298023224,
+  "creationDate" : 666777188.04489505
+}

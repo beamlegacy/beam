@@ -40,7 +40,7 @@ extension PreferencesManager {
     static let checkGrammarIsOnDefault = true
     static let correctSpellingIsOnDefault = true
     static let embedContentPreferenceDefault = 1
-    static let alwaysShowBulletsDefault = false
+    static let alwaysShowBulletsDefault = true
 }
 
 extension PreferencesManager {

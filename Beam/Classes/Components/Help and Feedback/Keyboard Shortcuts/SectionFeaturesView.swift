@@ -20,9 +20,10 @@ enum SectionShortcuts: String {
         case .browser:
             return [KeyboardFeature(name: "Capture the Web", shortcuts: [Shortcut(modifiers: [.option], keys: [])], prefix: "hold"),
                     KeyboardFeature(name: "Capture page", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("S")]), Shortcut(modifiers: [.option], keys: [.string("S")])], separationString: "or"),
-                    KeyboardFeature(name: "Go to Note", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("D")])]),
+                    KeyboardFeature(name: "Go to Note", shortcuts: [Shortcut.AvailableShortcut.toggleNoteWeb.value]),
                     KeyboardFeature(name: "Omnibox", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("L")])]),
-                    KeyboardFeature(name: "New Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("T")])]),
+                    KeyboardFeature(name: "New Tab", shortcuts: [Shortcut.AvailableShortcut.newSearch.value,
+                                                                 Shortcut(modifiers: [.command], keys: [.string("K")])], separationString: "or"),
                     KeyboardFeature(name: "Close Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("W")])]),
                     KeyboardFeature(name: "Reload page", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("R")])]),
                     KeyboardFeature(name: "Reopen Last Closed Tab", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("Z")]),
@@ -31,8 +32,8 @@ enum SectionShortcuts: String {
                                                                               Shortcut(modifiers: [.shift, .command], keys: [.bracketReversed])], separationString: "or"),
                     KeyboardFeature(name: "Jump to Next Tab", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.right]),
                                                                           Shortcut(modifiers: [.shift, .command], keys: [.bracket])], separationString: "or"),
-                    KeyboardFeature(name: "Go back", shortcuts: [Shortcut(modifiers: [.command], keys: [.left])]),
-                    KeyboardFeature(name: "Go forward", shortcuts: [Shortcut(modifiers: [.command], keys: [.right])]),
+                    KeyboardFeature(name: "Go back", shortcuts: [Shortcut.AvailableShortcut.goBack.value]),
+                    KeyboardFeature(name: "Go forward", shortcuts: [Shortcut.AvailableShortcut.goForward.value]),
                     KeyboardFeature(name: "Zoom in/out", shortcuts: [Shortcut(modifiers: [.command], keys: [.minus]),
                                                                     Shortcut(modifiers: [.command], keys: [.plus])], separationString: "and"),
                     KeyboardFeature(name: "Find", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("F")])])
@@ -42,7 +43,7 @@ enum SectionShortcuts: String {
                                                                   Shortcut(modifiers: [], keys: [.doubleBracket])], separationString: "or"),
 //                    KeyboardFeature(name: "Block Reference", shortcuts: [Shortcut(modifiers: [], keys: [.string("((")])]),
                     KeyboardFeature(name: "Instant Search", shortcuts: [Shortcut(modifiers: [.command], keys: [.enter])]),
-                    KeyboardFeature(name: "Go to Web", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("D")])]),
+                    KeyboardFeature(name: "Go to Web", shortcuts: [Shortcut.AvailableShortcut.toggleNoteWeb.value]),
                     KeyboardFeature(name: "Indent", shortcuts: [Shortcut(modifiers: [], keys: [.tab])]),
                     KeyboardFeature(name: "Unindent", shortcuts: [Shortcut(modifiers: [.shift], keys: [.tab])]),
                     KeyboardFeature(name: "Fold / Unfold Bullet", shortcuts: [Shortcut(modifiers: [.command], keys: [.up]),
@@ -53,8 +54,8 @@ enum SectionShortcuts: String {
                     KeyboardFeature(name: "Bold", shortcuts: [Shortcut(modifiers: [], keys: [.string("**")])]),
                     KeyboardFeature(name: "Italic", shortcuts: [Shortcut(modifiers: [], keys: [.string("*")])]),
                     KeyboardFeature(name: "Strikeout", shortcuts: [Shortcut(modifiers: [], keys: [.string("~~")])]),
-                    KeyboardFeature(name: "Journal", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("J")])]),
-                    KeyboardFeature(name: "All Notes", shortcuts: [Shortcut(modifiers: [.shift, .command], keys: [.string("H")])]),
+                    KeyboardFeature(name: "Journal", shortcuts: [Shortcut.AvailableShortcut.showJournal.value]),
+                    KeyboardFeature(name: "All Notes", shortcuts: [Shortcut.AvailableShortcut.showAllNotes.value]),
                     KeyboardFeature(name: "Find", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("F")])])
             ]        }
     }

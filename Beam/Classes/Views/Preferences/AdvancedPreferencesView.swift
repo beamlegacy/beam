@@ -32,11 +32,13 @@ struct AdvancedPreferencesView: View {
     @State var showDebugSection = PreferencesManager.showDebugSection
     @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
     @State var showTabGrougpingMenuItem = PreferencesManager.showTabGrougpingMenuItem
+    @State var showTabsColoring = PreferencesManager.showTabsColoring
     @State var isDataBackupOnUpdateOn = PreferencesManager.isDataBackupOnUpdateOn
     @State var isDirectUploadOn = Configuration.beamObjectDataUploadOnSeparateCall
     @State var isDirectDownloadOn = Configuration.beamObjectDataOnSeparateCall
     @State var isWebsocketEnabled = Configuration.websocketEnabled
     @State var restBeamObject = Configuration.beamObjectOnRest
+    @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -169,13 +171,13 @@ struct AdvancedPreferencesView: View {
                         .frame(maxWidth: 387)
                 }
 
-                Preferences.Section(bottomDivider: true) {
-                    Text("TabGrouping Window menu")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                } content: {
+                Preferences.Section(title: "TabGrouping Window menu") {
                     EnableTabGroupingWindowCheckbox
                 }
+                Preferences.Section(title: "TabGrouping Colors", bottomDivider: true) {
+                    EnableTabsColoringCheckbox
+                }
+
                 Preferences.Section(title: "Database", bottomDivider: true) {
                     DatabasePicker
                     Button(action: {
@@ -267,6 +269,7 @@ struct AdvancedPreferencesView: View {
                             export_all_note_sources(to: url)
                             AppDelegate.main.data.clusteringManager.addOrphanedUrlsFromCurrentSession(orphanedUrlManager: AppDelegate.main.data.clusteringOrphanedUrlManager)
                             AppDelegate.main.data.clusteringOrphanedUrlManager.export(to: url)
+                            AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: url)
                         }
                     }, label: {
                         Text("Note Sources").frame(minWidth: 100)
@@ -339,7 +342,7 @@ struct AdvancedPreferencesView: View {
                                             }.foregroundColor(Color.red)
                                         }
                                         TextField("\(key):", text: Binding<String>(get: {
-                                            EncryptionManager.shared.privateKey(for: key).asString()
+                                            EncryptionManager.shared.readPrivateKey(for: key)?.asString() ?? "No private key"
                                         }, set: { value, _ in
                                             _ = try? EncryptionManager.shared.replacePrivateKey(for: key, with: value)
                                             updateKeys()
@@ -436,6 +439,14 @@ struct AdvancedPreferencesView: View {
                     PnsJSEnabledCheckbox
                 }
 
+                Preferences.Section(bottomDivider: true) {
+                    Text("Show Web on launch with tabs")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    showWebOnLaunchIfTabsView
+                }
+
                 Preferences.Section(title: "Actions", bottomDivider: true) {
                     CrashButton
                     CopyAccessToken
@@ -479,7 +490,7 @@ struct AdvancedPreferencesView: View {
     private func updateKeys() {
         var pkeys = [String: String]()
         for email in EncryptionManager.shared.accounts {
-            pkeys[email] = EncryptionManager.shared.privateKey(for: email).asString()
+            pkeys[email] = EncryptionManager.shared.readPrivateKey(for: email)?.asString() ?? ""
         }
         privateKeys = pkeys
         localPrivateKey = EncryptionManager.shared.localPrivateKey().asString()
@@ -550,6 +561,18 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([showTabGrougpingMenuItem].publisher.first()) {
                 PreferencesManager.showTabGrougpingMenuItem = $0
+            }
+
+    }
+
+    private var EnableTabsColoringCheckbox: some View {
+        return Toggle(isOn: $showTabsColoring) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showTabsColoring].publisher.first()) {
+                PreferencesManager.showTabsColoring = $0
             }
 
     }
@@ -927,6 +950,17 @@ struct AdvancedPreferencesView: View {
     func migrateOldPrivateKeyToCurrentAccount() {
         _ = EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString()
         updateKeys()
+    }
+
+    private var showWebOnLaunchIfTabsView: some View {
+        return Toggle(isOn: $showWebOnLaunchIfTabs) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([showWebOnLaunchIfTabs].publisher.first()) {
+                PreferencesManager.showWebOnLaunchIfTabs = $0
+            }
     }
 }
 

@@ -95,7 +95,7 @@ extension DocumentManager {
                          but the `context` attached to `self` seems to return an old version of the coredata object unless
                          we force and refresh that object manually...
                          */
-                        self.context.performAndWait {
+                        self.context.perform {
                             if let localStoredDocument = try? self.fetchWithId(documentStruct.id, includeDeleted: true) {
                                 self.context.refresh(localStoredDocument, mergeChanges: false)
 
@@ -206,18 +206,22 @@ extension DocumentManager {
 
             do {
                 let document: Document = try documentManager.fetchOrCreate(documentStruct.id, title: documentStruct.title, deletedAt: documentStruct.deletedAt)
-                document.update(documentStruct)
-                document.data = documentStruct.data
-                document.updated_at = BeamDate.now
-                try documentManager.checkValidations(document)
-                try documentManager.checkVersion(document, documentStruct.version)
-                document.version = documentStruct.version
+                try documentManager.context.performAndWait {
+                    document.update(documentStruct)
+                    document.data = documentStruct.data
+                    try documentManager.checkValidations(document)
+                    if document.version > 0 {
+                        try documentManager.checkVersion(document, documentStruct.version)
+                    }
 
-                if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
-                    database.updated_at = BeamDate.now
-                } else {
-                    // We should always have a connected database
-                    Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
+                    document.version = documentStruct.version
+
+                    if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
+                        database.updated_at = BeamDate.now
+                    } else {
+                        // We should always have a connected database
+                        Logger.shared.logError("Didn't find database \(document.database_id)", category: .document)
+                    }
                 }
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .document)
@@ -380,6 +384,7 @@ extension DocumentManager {
                     documentStruct.data = Data()
                     document.data = Data()
                 }
+
                 goodObjects.append(documentStruct)
             }
 
@@ -548,9 +553,9 @@ extension DocumentManager {
             switch result {
             case .failure(let error):
                 completion?(.failure(error))
-            case .success(let databases):
+            case .success(let documents):
                 do {
-                    try self.receivedObjects(databases)
+                    try self.receivedObjects(documents)
                     completion?(.success(true))
                 } catch {
                     completion?(.failure(error))
@@ -600,7 +605,7 @@ extension DocumentManager {
     // MARK: -
     // MARK: Database related
     //swiftlint:disable:next cyclomatic_complexity function_body_length
-    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, displayAlert: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+    func moveAllOrphanNotes(databaseId: UUID, onlyOrphans: Bool, _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         let documentManager = DocumentManager()
         do {
             let databaseIds = DatabaseManager().all().map { $0.id }
@@ -628,7 +633,7 @@ extension DocumentManager {
                                 existingNote.children.append(content)
                             }
                             existingNote.resetCommandManager()
-                            _ = existingNote.syncedSave()
+                            _ = existingNote.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
 
                             // Delete source note:
                             documentManager.softDelete(id: note.id) { result in
@@ -643,7 +648,7 @@ extension DocumentManager {
                             }
                         } else {
                             note.databaseId = databaseId
-                            _ = note.syncedSave()
+                            _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
                         }
 
                     }
@@ -683,18 +688,10 @@ extension DocumentManager {
                     }
 
                     note.title = title
-                    _ = note.syncedSave()
+                    note.databaseId = databaseId
+                    _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
                 }
                 count += 1
-            }
-
-            if displayAlert {
-                if count != 0 {
-                    UserAlert.showMessage(message: "\(count) documents impacted, must exit.", buttonTitle: "Exit now")
-                    NSApplication.shared.terminate(nil)
-                } else {
-                    UserAlert.showMessage(message: "no document impacted")
-                }
             }
             completion(.success(true))
         } catch {

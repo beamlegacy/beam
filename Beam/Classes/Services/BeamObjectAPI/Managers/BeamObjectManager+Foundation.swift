@@ -214,7 +214,11 @@ extension BeamObjectManager {
 
                     try self.fetchAllFromAPI(ids: ids, completion)
                 } catch {
-                    AppDelegate.showMessage("Error fetching objects from API then storing locally: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                    let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
+                    Logger.shared.logError(message, category: .beamObject)
+                    if Configuration.env == .debug {
+                        AppDelegate.showMessage(message)
+                    }
                     completion(.failure(error))
                 }
             }
@@ -273,10 +277,16 @@ extension BeamObjectManager {
 
                 do {
                     try self.parseFilteredObjects(self.filteredObjects(beamObjects))
+                    // Note: you don't need to save checksum here, they are saved in `translators[object.beamObjectType]` callback
+                    // called by `parseFilteredObjects`
                     completion(.success(true))
                     return
                 } catch {
-                    AppDelegate.showMessage("Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support.")
+                    let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
+                    Logger.shared.logError(message, category: .beamObject)
+                    if Configuration.env == .debug {
+                        AppDelegate.showMessage(message)
+                    }
                     completion(.failure(error))
                 }
             }

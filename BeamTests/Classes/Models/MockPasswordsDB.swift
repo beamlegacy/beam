@@ -64,8 +64,10 @@ final class MockPasswordsDB: PasswordStore {
         self.passwords = passwords
     }
 
-    func update(record: PasswordRecord, password: String, uuid: UUID?) throws -> PasswordRecord {
+    func update(record: PasswordRecord, hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord {
         var newRecord = record
+        newRecord.hostname = hostname
+        newRecord.username = username
         newRecord.password = password
         if let uuid = uuid {
             newRecord.uuid = uuid

@@ -501,6 +501,17 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
     }
 
+    public var nonRecursiveCopy: BeamElement? {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self) else {
+            Logger.shared.logError("Copy Error while encoding \(self)", category: .document)
+            return nil
+        }
+        let decoder = JSONDecoder()
+        decoder.userInfo[BeamElement.recursiveCoding] = false
+        return try? decoder.decode(Self.self, from: data)
+    }
+
     public func deepCopy(withNewId: Bool, selectedElements: [BeamElement]?, includeFoldedChildren: Bool) -> BeamElement? {
         let encoder = JSONEncoder()
         guard let data = try? encoder.encode(self) else {
@@ -540,6 +551,18 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         if child.parent === self {
             child.parent = nil
         }
+
+        dispatchChildRemoved(child)
+    }
+
+    open func dispatchChildRemoved(_ child: BeamElement) {
+        guard changePropagationEnabled else { return }
+        parent?.dispatchChildRemoved(child)
+    }
+
+    open func dispatchChildAdded(_ child: BeamElement) {
+        guard changePropagationEnabled else { return }
+        parent?.dispatchChildAdded(child)
     }
 
     open func indexOfChild(_ child: BeamElement) -> Int? {
@@ -570,7 +593,10 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         guard child.parent != self else { return }
 
         let previousParent = child.parent
-        defer { previousParent?.removeChild(child) }
+        defer {
+            previousParent?.removeChild(child)
+            dispatchChildAdded(child)
+        }
         child.parent = self
         guard let after = after, let index = indexOfChild(after) else {
             children.insert(child, at: 0)
@@ -589,9 +615,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
     }
 
     func checkHasParent() {
-        let newValue = parent != nil
-        guard newValue != hasParent else { return }
-        hasParent = newValue
+        hasParent = parent != nil
         checkHasNote()
     }
 
@@ -810,6 +834,24 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         }
 
         return nil
+    }
+
+    open func imageElements() -> [BeamElement] {
+        var result: [BeamElement] = []
+
+        switch self.kind {
+        case .image:
+            result.append(self)
+        default: break
+        }
+    
+        for c in children {
+            let imageElements = c.imageElements()
+            if !imageElements.isEmpty {
+                result.append(contentsOf: imageElements)
+            }
+        }
+        return result
     }
 
     open func nextElement() -> BeamElement? {

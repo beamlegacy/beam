@@ -366,6 +366,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     private weak var _root: TextRoot?
     public private(set) var needLayout = false
 
+    /// The app appearance at the time UI elements using dynamic colors were last updated.
+    private var currentAppearance: NSAppearance?
+
     public static func == (lhs: Widget, rhs: Widget) -> Bool {
         return lhs === rhs
     }
@@ -475,6 +478,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         updateSubLayersLayout()
         updateChildrenLayout()
         updateLayout()
+        updateColorsIfNeeded()
 
         if self.currentFrameInDocument != frame {
             invalidatedRendering = true
@@ -516,6 +520,29 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             pos.y += childSize.height
             first = false
         }
+    }
+
+    /// This method is called during a layout pass if the app appearance has changed since the previous pass, and when
+    /// the app appearance has changed.
+    ///
+    /// You can override this method to set all UI elements using dynamic colors.
+    ///
+    /// If you override this method, call this method on super at some point in your implementation.
+    func updateColors() {
+        children.forEach { widget in
+            widget.updateColorsIfNeeded()
+        }
+
+        layers.forEach { _, layer in
+            layer.updateColorsIfNeeded()
+        }
+    }
+
+    final func updateColorsIfNeeded() {
+        // Stop if appearance has not changed since last pass
+        guard currentAppearance == nil || (currentAppearance != NSApp.effectiveAppearance) else { return }
+        updateColors()
+        currentAppearance = NSApp.effectiveAppearance
     }
 
     var selectionLayerWidth: CGFloat {
@@ -732,13 +759,24 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return nil
     }
 
-    internal var layers: [String: Layer] = [:]
+    private var lock = RWLock()
+    private var _layers: [String: Layer] = [:]
+    internal var layers: [String: Layer] {
+        get {
+            lock.read { self._layers }
+        }
+        set {
+            lock.write { self._layers = newValue }
+        }
+    }
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
         CATransaction.disableAnimations {
             layer.widget = self
             layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
 
             layer.layer.deepContentsScale = self.layer.contentsScale
+
+            layer.updateColorsIfNeeded()
 
             if global {
                 editor?.addToMainLayer(layer.layer)

@@ -329,3 +329,9 @@ class WebAutocompleteContextTest: XCTestCase {
         XCTAssertEqual(group!.relatedFields.count, 2)
     }
 }
+
+fileprivate extension WebAutocompleteContext {
+    var allInputFieldIds: [String] {
+        Array(Set(allInputFields.map(\.id)))
+    }
+}

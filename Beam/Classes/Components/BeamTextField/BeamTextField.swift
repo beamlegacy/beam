@@ -60,7 +60,7 @@ struct BeamTextField: NSViewRepresentable {
         view.contentType = contentType
 
         if !multiline {
-            view.usesSingleLineMode = true
+            view.maximumNumberOfLines = 1
         }
         if let textColor = textColor {
             view.textColor = textColor
@@ -84,6 +84,15 @@ struct BeamTextField: NSViewRepresentable {
         textField.onSelectionChanged = { [weak coordinator] range in
             coordinator?.selectionChangedHandler(range)
         }
+
+        if selectedRange == nil {
+            // When NSTextField appear as a first responder, it starts with the whole text selected.
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(20)) {
+                guard let currentRange = view.currentEditor()?.selectedRange, currentRange.length != 0, selectedRange == nil else { return }
+                view.currentEditor()?.selectedRange = NSRange(location: currentRange.length, length: 0)
+            }
+        }
+
         return view
     }
 

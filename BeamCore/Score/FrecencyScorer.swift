@@ -71,7 +71,7 @@ public struct FrecencyScore {
     public var sortValue: Float!
 
     private func scoreSortValue(halfLife: Float) -> Float {
-        guard lastScore != 0.0 else { return -Float.greatestFiniteMagnitude }
+        guard lastScore > 0.0 else { return -Float.greatestFiniteMagnitude }
         return log(lastScore) + Float(lastTimestamp.timeIntervalSinceReferenceDate) * log(2) / halfLife
     }
 
@@ -124,7 +124,7 @@ public class ExponentialFrecencyScorer: FrecencyScorer {
 
     private func updatedScore(id: UUID, value: Float, date: Date, param: FrecencyParam) -> FrecencyScore {
         guard let score = try? storage.fetchOne(id: id, paramKey: param.key) else {
-            return  FrecencyScore(id: id, lastTimestamp: date, lastScore: value, halfLife: param.halfLife)
+            return FrecencyScore(id: id, lastTimestamp: date, lastScore: value, halfLife: param.halfLife)
         }
         return score.updated(date: date, value: value, halfLife: param.halfLife)
     }
