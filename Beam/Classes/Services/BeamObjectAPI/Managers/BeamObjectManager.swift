@@ -37,6 +37,7 @@ class BeamObjectManager {
     static var managerOrder: [BeamObjectObjectType] = []
     static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
     static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
+    static var uploadTypeForTests: BeamObjectRequestUploadType = .multipartUpload
     internal static var disableSendingObjects = true
 
     #if DEBUG
@@ -284,8 +285,7 @@ class BeamObjectManager {
     }
 
     internal func extractGoodObjects<T: BeamObjectProtocol>(_ objects: [T],
-                                                            _ conflictedObject: T,
-                                                            _ remoteBeamObjects: [BeamObject]) -> [T] {
+                                                            _ conflictedObject: T) -> [T] {
         // Set `checksum` on the objects who were saved successfully as this will be used later
         objects.compactMap {
             if conflictedObject.beamObjectId == $0.beamObjectId { return nil }

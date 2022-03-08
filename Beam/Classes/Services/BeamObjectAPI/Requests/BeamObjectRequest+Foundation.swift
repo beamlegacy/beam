@@ -556,6 +556,7 @@ extension BeamObjectRequest {
         }
     }
 
+    // swiftlint:disable function_body_length cyclomatic_complexity
     private func parseBeamObjects(beamObjects: [BeamObject], raisePrivateKeyError: Bool, _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) {
         /*
          We cover all cases:
@@ -648,7 +649,7 @@ extension BeamObjectRequest {
     @discardableResult
     func fetch<T: BeamObjectProtocol> (object: T,
                                        _ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) throws -> URLSessionDataTask {
-        try fetchWithFile(filename: "beam_object",
+        try fetchWithFile(filename: Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
                           beamObjectID: object.beamObjectId,
                           beamObjectType: type(of: object).beamObjectType.rawValue,
                           completionHandler)
@@ -823,7 +824,7 @@ extension BeamObjectRequest {
         request.allHTTPHeaderFields = headers
 
         let session = BeamURLSession.shared
-//        let localTimer = BeamDate.now
+        let localTimer = BeamDate.now
 
         let task = session.dataTask(with: request) { (responseData, response, error) -> Void in
             #if DEBUG
@@ -836,9 +837,9 @@ extension BeamObjectRequest {
             APIRequest.callsCount += 1
 
             // I only enable those log manually, they're very verbose!
-//            Logger.shared.logDebug("[\(data.count.byteSize)] \((response as? HTTPURLResponse)?.statusCode ?? 0) upload \(urlString)",
-//                                   category: .network,
-//                                   localTimer: localTimer)
+            Logger.shared.logDebug("[\(data.count.byteSize)] \((response as? HTTPURLResponse)?.statusCode ?? 0) upload \(urlString)",
+                                   category: .network,
+                                   localTimer: localTimer)
 
             guard let httpResponse = response as? HTTPURLResponse else {
                 completionHandler(.failure(error ?? BeamObjectRequestError.not200))

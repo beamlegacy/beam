@@ -73,17 +73,8 @@ extension BeamObjectManagerDelegate {
 
         var networkTask: APIRequest?
 
-        let defaultUploadType: BeamObjectRequestUploadType = {
-            switch Self.BeamObjectType.beamObjectType {
-            case .file:
-                return .directUpload
-            default:
-                return .multipartUpload
-            }
-        }()
-
         do {
-            networkTask = try objectManager.saveToAPI(objects, force: force, requestUploadType: defaultUploadType) { result in
+            networkTask = try objectManager.saveToAPI(objects, force: force, requestUploadType: Self.uploadType) { result in
                 switch result {
                 case .failure(let error):
                     self.saveOnBeamObjectsAPIError(objects: objects,
@@ -335,17 +326,8 @@ extension BeamObjectManagerDelegate {
 
         var networkTask: APIRequest?
 
-        let defaultUploadType: BeamObjectRequestUploadType = {
-            switch Self.BeamObjectType.beamObjectType {
-            case .file:
-                return .directUpload
-            default:
-                return .multipartUpload
-            }
-        }()
-
         do {
-            networkTask = try objectManager.saveToAPI(object, force: force, requestUploadType: defaultUploadType) { result in
+            networkTask = try objectManager.saveToAPI(object, force: force, requestUploadType: Self.uploadType) { result in
                 switch result {
                 case .failure(let error):
                     self.saveOnBeamObjectAPIError(object: object,
