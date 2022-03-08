@@ -24,6 +24,7 @@ struct OnboardingSaveEncryptionView: View {
         style.horizontalPadding = style.verticalPadding
         return style
     }
+
     private var keyField: some View {
         HStack(spacing: 0) {
             HStack(spacing: BeamSpacing._100) {
@@ -33,9 +34,6 @@ struct OnboardingSaveEncryptionView: View {
                 } else {
                     // Big Sur won't support selecting the text. Sorry.
                     Text(key)
-                }
-                ButtonLabel(icon: "editor-url_copy", customStyle: iconButtonStyle) {
-                    copyKeyToPasteboard()
                 }
             }
             .font(BeamFont.medium(size: 13).swiftUI)
@@ -100,10 +98,6 @@ struct OnboardingSaveEncryptionView: View {
                 return false
             })
         ]
-    }
-
-    private func copyKeyToPasteboard() {
-        EncryptionManager.shared.copyKeyToPasteboard()
     }
 
     private func saveKeyToFile() {
