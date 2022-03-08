@@ -32,7 +32,9 @@ class EmbedNodeMessageHandler:SimpleBeamMessageHandler {
         case EmbedNodeMessages.EmbedNode_contentSize:
             guard let dict = msgPayload,
                   let width = dict["width"] as? CGFloat,
-                  let height = dict["height"] as? CGFloat else {
+                  !width.isNaN,
+                  let height = dict["height"] as? CGFloat,
+                  !height.isNaN else {
                 Logger.shared.logError("Ignored embed event: \(String(describing: msgPayload))", category: .embed)
                 return
             }

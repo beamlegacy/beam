@@ -30,7 +30,7 @@ class EmbedNode: ResizableNode {
     private var toggleButtonBeamLayer: CollapseButtonLayer!
     private var focusBeamLayer: Layer!
 
-    private let initialExpandedContentSize = CGSize(width: 170, height: 128)
+    static let initialExpandedContentSize = CGSize(width: 170, height: 128)
     private let focusLayerBorderRadius: CGFloat = 3
     private let expandedContentSizeUpdateDebounceDelay = 0.5
     private let expandedContentAnimationKey = "expandedContent"
@@ -79,7 +79,7 @@ class EmbedNode: ResizableNode {
 
         } else {
             // Embed is displayed for the first time
-            return initialExpandedContentSize
+            return Self.initialExpandedContentSize
         }
     }
 
@@ -475,7 +475,7 @@ extension EmbedNode: EmbedContentViewDelegate {
         if embedContent.height == nil {
             // If the embed doesn't have a default height, we compute it by applying the same initial aspect ratio
             // from the loading state onto the width
-            height = width * initialExpandedContentSize.aspectRatio
+            height = width * Self.initialExpandedContentSize.aspectRatio
         } else {
             height = embedContent.height!
         }
