@@ -591,9 +591,10 @@ import Sentry
             focusOmniBox = true
             return
         }
+        var selectedRange: Range<Int>?
         if mode == .web {
             if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
-                autocompleteManager.searchQuerySelectedRange = url.wholeRange
+                selectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
             } else if !autocompleteManager.searchQuery.isEmpty {
                 autocompleteManager.resetQuery()
@@ -601,6 +602,9 @@ import Sentry
         }
         autocompleteManager.prepareResultsForAppearance(for: autocompleteManager.searchQuery) { [unowned self] in
             self.focusOmniBox = true
+            if let selectedRange = selectedRange {
+                self.autocompleteManager.searchQuerySelectedRange = selectedRange
+            }
         }
     }
 
