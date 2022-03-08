@@ -480,6 +480,9 @@ enum BeamFileDBManagerError: Error, Equatable {
 
 extension BeamFileDBManager: BeamObjectManagerDelegate {
     static var conflictPolicy: BeamObjectConflictResolution = .replace
+    static var uploadType: BeamObjectRequestUploadType {
+        .directUpload
+    }
     internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "BeamFileDBManager BeamObjectManager backgroundQueue", qos: .userInitiated)
 
     func willSaveAllOnBeamObjectApi() {}

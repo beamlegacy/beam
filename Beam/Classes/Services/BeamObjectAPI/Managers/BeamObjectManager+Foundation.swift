@@ -324,7 +324,7 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable function_body_length
+    // swiftlint:disable function_body_length cyclomatic_complexity
     func saveToAPIClassic<T: BeamObjectProtocol>(_ objects: [T],
                                                  force: Bool = false,
                                                  _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
@@ -349,9 +349,9 @@ extension BeamObjectManager {
 
         localTimer = BeamDate.now
 
-        let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
+        let beamObjectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
 
-        guard !objectsToSave.isEmpty else {
+        guard !beamObjectsToSave.isEmpty else {
             Logger.shared.logDebug("Skip \(beamObjects.count) objects, based on previousChecksum they were already saved",
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
@@ -359,69 +359,81 @@ extension BeamObjectManager {
             return nil
         }
 
-        Logger.shared.logDebug("Filtered \(beamObjects.count) beam objects to \(objectsToSave.count)",
+        Logger.shared.logDebug("Filtered \(beamObjects.count) beam objects to \(beamObjectsToSave.count)",
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
         localTimer = BeamDate.now
 
-        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objectsToSave)
-        objectsToSave.forEach {
+        let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjectsToSave)
+        beamObjectsToSave.forEach {
             $0.previousChecksum = checksums[$0]
         }
 
-        if checksums.count != objectsToSave.count {
-            Logger.shared.logWarning("\(checksums.count) checksums doesn't match \(objectsToSave.count) objects! It's ok if new.",
+        if checksums.count != beamObjectsToSave.count {
+            Logger.shared.logWarning("\(checksums.count) checksums doesn't match \(beamObjectsToSave.count) objects! It's ok if new.",
                                      category: .beamObjectChecksum)
         }
 
-        Logger.shared.logDebug("Set \(checksums.count) checksums for \(objectsToSave.count) objects",
+        Logger.shared.logDebug("Set \(checksums.count) checksums for \(beamObjectsToSave.count) objects",
                                category: .beamObjectChecksum,
                                localTimer: localTimer)
 
-        Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
+        Logger.shared.logDebug("Saving \(beamObjectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
         #if DEBUG
-        let allObjectsSize = objectsToSave.reduce(.zero) { ($1.data?.count ?? 0) + $0 }
+        let allObjectsSize = beamObjectsToSave.reduce(.zero) { ($1.data?.count ?? 0) + $0 }
         if allObjectsSize > 1024 * 1024 * 1024 {
             Logger.shared.logWarning("Total size is > \(allObjectsSize.byteSize), not efficient for multipart uploads",
                                      category: .beamObject)
         }
         #endif
 
+        var errorCompletionCalled = false
+
         // API can't handle too many objects at once. If it fails we return early
-        for objectsToSaveChunked in objectsToSave.chunked(into: 1000) {
+        for beamObjectsToSaveChunked in beamObjectsToSave.chunked(into: 1000) {
             let request = BeamObjectRequest()
 
-            if objectsToSave.count > 1000 {
-                Logger.shared.logDebug("About to save \(objectsToSaveChunked.count) objects",
+            if beamObjectsToSave.count > 1000 {
+                Logger.shared.logDebug("About to save \(beamObjectsToSaveChunked.count) objects",
                                        category: .beamObjectNetwork)
             }
 
             let semaphore = DispatchSemaphore(value: 0)
 
-            try request.save(objectsToSaveChunked) { result in
-                semaphore.signal()
-
+            try request.save(beamObjectsToSaveChunked) { result in
                 switch result {
                 case .failure(let error):
-                    self.saveToAPIFailure(objects, error, completion)
-                    return
+                    // Note: we only pass to saveToAPIFailure the objects we tried saving
+                    let beamObjectsToSaveChunkedIds = beamObjectsToSaveChunked.map { $0.id }
+                    let objectsToSaveChunked = objects.filter {
+                        beamObjectsToSaveChunkedIds.contains($0.beamObjectId)
+                    }
+                    self.saveToAPIFailure(objectsToSaveChunked, error, completion)
+                    errorCompletionCalled = true
                 case .success:
                     do {
-                        try BeamObjectChecksum.savePreviousChecksums(beamObjects: objectsToSaveChunked)
-                        try BeamObjectChecksum.savePreviousObjects(beamObjects: objectsToSaveChunked)
+                        try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjectsToSaveChunked)
+                        try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjectsToSaveChunked)
                     } catch {
                         completion(.failure(error))
-                        return
+                        errorCompletionCalled = true
                     }
                 }
+
+                semaphore.signal()
             }
+
             semaphore.wait()
+
+            if errorCompletionCalled { break }
         }
 
-        completion(.success(objects))
+        if errorCompletionCalled == false {
+            completion(.success(objects))
+        }
 
         return nil
     }
@@ -626,8 +638,13 @@ extension BeamObjectManager {
     internal func saveToAPIFailureBeamObjectInvalidChecksum<T: BeamObjectProtocol>(_ objects: [T],
                                                                                    _ error: Error,
                                                                                    _ completion: @escaping ((Result<[T], Error>) -> Void)) {
-        guard case APIRequestError.beamObjectInvalidChecksum(let updateBeamObjects) = error,
-              let remoteBeamObjects = (updateBeamObjects as? BeamObjectRequest.UpdateBeamObjects)?.beamObjects else {
+        // Note: we used to ask for `beamObjects` in the mutation when saving objects, in case we had issues and have remote objects.
+        // However this means for rare errors, you're asking for remote objects. It also means the mutation on the server-side has to
+        // manage returning objects in a fast way.
+
+        // I removed that, but it means we need to find them manually now, which is what `extractGoodObjects` is doing.
+
+        guard case APIRequestError.beamObjectInvalidChecksum(let updateBeamObjects) = error else {
             completion(.failure(error))
             return
         }
@@ -644,7 +661,7 @@ extension BeamObjectManager {
             return
         }
 
-        let goodObjects: [T] = extractGoodObjects(objects, conflictedObject, remoteBeamObjects)
+        let goodObjects: [T] = extractGoodObjects(objects, conflictedObject)
 
         do {
             try BeamObjectChecksum.savePreviousChecksums(objects: goodObjects)
@@ -889,7 +906,7 @@ extension BeamObjectManager {
     }
 
     // swiftlint:disable:next function_body_length
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func saveToAPIWithDirectUpload<T: BeamObjectProtocol>(_ object: T,
                                                           force: Bool = false,
                                                           _ completion: @escaping ((Result<T, Error>) -> Void)) throws -> APIRequest? {
@@ -1247,7 +1264,7 @@ extension BeamObjectManager {
         }
     }
 
-    // swiftlint:disable function_body_length
+    // swiftlint:disable function_body_length cyclomatic_complexity
     func saveToAPI(_ beamObject: BeamObject,
                    deep: Int = 0,
                    _ completion: @escaping ((Result<BeamObject, Error>) -> Void)) throws -> APIRequest {

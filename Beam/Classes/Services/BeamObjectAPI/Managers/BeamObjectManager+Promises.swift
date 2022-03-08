@@ -117,8 +117,7 @@ extension BeamObjectManager {
 
     internal func saveToAPIFailureBeamObjectInvalidChecksum<T: BeamObjectProtocol>(_ objects: [T],
                                                                                    _ error: Error) -> Promise<[T]> {
-        guard case APIRequestError.beamObjectInvalidChecksum(let updateBeamObjects) = error,
-              let remoteBeamObjects = (updateBeamObjects as? BeamObjectRequest.UpdateBeamObjects)?.beamObjects else {
+        guard case APIRequestError.beamObjectInvalidChecksum(let updateBeamObjects) = error else {
             return Promise(error)
         }
 
@@ -133,7 +132,7 @@ extension BeamObjectManager {
             return Promise(error)
         }
 
-        let goodObjects: [T] = extractGoodObjects(objects, conflictedObject, remoteBeamObjects)
+        let goodObjects: [T] = extractGoodObjects(objects, conflictedObject)
 
         var fetchedObject: T?
         do {

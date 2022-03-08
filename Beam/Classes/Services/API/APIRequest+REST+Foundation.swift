@@ -84,7 +84,7 @@ extension APIRequest {
             "Device": Self.deviceId.uuidString.lowercased(),
             "User-Agent": "Beam client, \(Information.appVersionAndBuild)",
             "Accept": "application/json",
-            "Accept-Language": Locale.current.languageCode ?? "en",
+            "Accept-Language": Locale.current.languageCode ?? "en"
 //            "Accept-Encoding": "gzip, deflate, br"
         ]
 
