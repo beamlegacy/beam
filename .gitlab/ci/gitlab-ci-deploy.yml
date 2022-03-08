@@ -24,7 +24,7 @@ sentry:
   script:
     - bundle exec fastlane ping_sentry --verbose
   tags:
-    - macos
+    - macos-mono
   interruptible: true
   allow_failure: true
   retry:
@@ -59,7 +59,7 @@ build:upload:
   script:
     - bundle exec fastlane deploy
   tags:
-    - macos
+    - macos-mono
   interruptible: false
   retry:
     max: 2
@@ -91,7 +91,7 @@ build:cleanup:
   script:
     - bundle exec fastlane delete_s3
   tags:
-    - macos
+    - macos-mono
   interruptible: false
   retry:
     max: 2

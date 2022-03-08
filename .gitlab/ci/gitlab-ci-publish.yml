@@ -17,6 +17,6 @@ build:publish:
   script:
     - bundle exec fastlane publish
   tags:
-    - macos
+    - macos-mono
   interruptible: true
   allow_failure: true
