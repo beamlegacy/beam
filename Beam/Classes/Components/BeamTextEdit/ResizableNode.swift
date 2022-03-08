@@ -239,6 +239,8 @@ class ResizableNode: ElementNode {
                     width: Int(contentsWidth * widthRatio),
                     height: height
                 )
+            } else {
+                resizableElementContentSize = EmbedNode.initialExpandedContentSize
             }
         default:
             break
