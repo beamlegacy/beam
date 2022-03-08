@@ -31,4 +31,27 @@ extension UserInfoRequest {
             completionHandler(result)
         }
     }
+
+    @discardableResult
+    func updatePassword(currentPassword: String,
+                        newPassword: String,
+                        _ completionHandler: @escaping (Result<UpdatePassword, Error>) -> Void) throws -> URLSessionDataTask? {
+        let variables = UpdatePasswordParameters(currentPassword: currentPassword, newPassword: newPassword)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "update_password", variables: variables)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, authenticatedCall: true) { (result: Result<UpdatePassword, Error>) in
+            switch result {
+            case .failure(let error):
+                completionHandler(.failure(error))
+            case .success(let updatePassword):
+                guard updatePassword.success == true else {
+                    completionHandler(.failure(UserSessionRequestError.updatePasswordFailed))
+                    return
+                }
+
+                completionHandler(.success(updatePassword))
+            }
+        }
+    }
 }

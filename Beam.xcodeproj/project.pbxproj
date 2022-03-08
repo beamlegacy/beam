@@ -48,6 +48,7 @@
 		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
+		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
 		0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */; };
@@ -1410,6 +1411,7 @@
 		0325628C26051D3B006513E4 /* RBClient-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBClient-Private.h"; path = "Extern/RadBlock/RBClient-Private.h"; sourceTree = "<group>"; };
 		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
 		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
+		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
 		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
@@ -3228,6 +3230,7 @@
 				A526E27D2785E02600597F89 /* resend_verification_email.graphql */,
 				3303E10226FA22D300E175AC /* user_infos.graphql */,
 				A54A452927677F9A00B9AE1B /* set_username.graphql */,
+				0564B1B127D20BAE00B74BBD /* update_password.graphql */,
 			);
 			path = UserSession;
 			sourceTree = "<group>";
@@ -6352,6 +6355,7 @@
 				A07B03F0279AF1D200D14C45 /* Inter-Light.otf in Resources */,
 				8AFE8350276B248B00D4B560 /* audio.mp3 in Resources */,
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
+				0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				8A930A0927A04E2C00064133 /* PasswordManager_prod.js in Resources */,
