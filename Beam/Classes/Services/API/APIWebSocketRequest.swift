@@ -181,6 +181,7 @@ class APIWebSocketRequest: APIRequest {
     /// - Parameter completionHandler: the document update
     /// - Returns: The channelId used for calling `unsubscribe()`
     @discardableResult
+    // swiftlint:disable cyclomatic_complexity function_body_length
     func connectBeamObjects(_ completionHandler: @escaping (Swift.Result<BeamObject, Error>) -> Void) -> UUID? {
         guard connected else {
             Logger.shared.logError("Socket isn't connected", category: .webSocket)

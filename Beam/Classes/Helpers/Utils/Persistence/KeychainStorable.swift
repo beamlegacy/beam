@@ -36,6 +36,8 @@ struct KeychainStorable<T> {
                 value = store[key] as? T
             } else if T.self == Data.self {
                 value = store[data: key] as? T
+            } else if T.self == Date.self {
+                value = Formatter.iso8601withFractionalSeconds.date(from: key) as? T
             } else if T.self == [String: String].self {
                 guard let storedValue = store[key] else { return nil }
                 value = unserialize(str: storedValue) as? T
@@ -69,11 +71,14 @@ struct KeychainStorable<T> {
                     try storeWithLabelAndComment.set(value, key: key)
                 } else if let value = newValue as? Data {
                     try storeWithLabelAndComment.set(value, key: key)
+                } else if let value = newValue as? Date {
+                    try storeWithLabelAndComment.set(value.iso8601withFractionalSeconds, key: key)
                 } else if let dictValue = newValue as? [String: String],
                             let value = serialize(dict: dictValue) {
                     try storeWithLabelAndComment.set(value, key: key)
                 } else {
                     Logger.shared.logError("Can't store \(key) -> \(newValue.debugDescription)", category: .keychain)
+                    assert(false)
                 }
             } catch {
                 Logger.shared.logError("Can't store \(key): \(error.localizedDescription)",

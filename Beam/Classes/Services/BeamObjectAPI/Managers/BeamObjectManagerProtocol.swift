@@ -13,6 +13,7 @@ protocol BeamObjectManagerDelegateProtocol {
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
     associatedtype BeamObjectType: BeamObjectProtocol
+    static var uploadType: BeamObjectRequestUploadType { get }
     static var backgroundQueue: DispatchQueue { get }
     func registerOnBeamObjectManager()
 
@@ -54,6 +55,17 @@ extension BeamObjectManagerDelegateError: LocalizedError {
 }
 
 extension BeamObjectManagerDelegate {
+    static var uploadType: BeamObjectRequestUploadType {
+        // Note: we want to be able to "force" a certain type during tests
+        #if DEBUG
+        if EnvironmentVariables.env == "test" {
+            return BeamObjectManager.uploadTypeForTests
+        }
+        #endif
+
+        return .multipartUpload
+    }
+
     func registerOnBeamObjectManager() {
         BeamObjectManager.register(self, object: BeamObjectType.self)
     }
