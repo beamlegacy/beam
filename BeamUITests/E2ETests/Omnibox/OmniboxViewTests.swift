@@ -135,9 +135,7 @@ class OmniboxViewTests: BaseTest {
         testRailPrint("When I open omnibox for a web tab")
         omniboxView.focusOmniBoxSearchField(forCurrenTab: true)
         testRailPrint("Then suggestions contains the correct actions")
-        XCTAssertEqual(results.count, 2)
-        XCTAssertEqual(results.element(boundBy: 0).label, OmniboxLocators.Labels.copyTab.accessibilityIdentifier)
-        XCTAssertEqual(results.element(boundBy: 1).label, OmniboxLocators.Labels.collectTab.accessibilityIdentifier)
+        XCTAssertEqual(results.count, 0)
         XCTAssertEqual(noteResults.count, 0)
 
         // In journal

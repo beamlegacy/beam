@@ -302,36 +302,27 @@ extension AutocompleteManager {
 
     private func defaultActionsResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            guard let self = self, let state = self.beamState else {
+            guard let self = self, let state = self.beamState, !state.focusOmniBoxFromTab else {
                 promise(.success([]))
                 return
             }
             var actions = [AutocompleteResult]()
             let mode = state.mode
-            let isFocusingTab = state.focusOmniBoxFromTab
-
-            if isFocusingTab {
+            if mode == .web {
                 actions.append(contentsOf: [
-                    Self.DefaultActions.copyTabAddressAction,
-                    Self.DefaultActions.captureTabAction
+                    Self.DefaultActions.journalAction,
+                    Self.DefaultActions.allNotesAction,
+                    Self.DefaultActions.switchToNotesAction
                 ])
             } else {
-                if mode == .web {
-                    actions.append(contentsOf: [
-                        Self.DefaultActions.journalAction,
-                        Self.DefaultActions.allNotesAction,
-                        Self.DefaultActions.switchToNotesAction
-                    ])
-                } else {
-                    if mode != .today {
-                        actions.append(Self.DefaultActions.journalAction)
-                    }
-                    if state.mode != .page || state.currentPage?.id != .allCards {
-                        actions.append(Self.DefaultActions.allNotesAction)
-                    }
-                    if state.hasBrowserTabs {
-                        actions.append(Self.DefaultActions.switchToWebAction)
-                    }
+                if mode != .today {
+                    actions.append(Self.DefaultActions.journalAction)
+                }
+                if state.mode != .page || state.currentPage?.id != .allCards {
+                    actions.append(Self.DefaultActions.allNotesAction)
+                }
+                if state.hasBrowserTabs {
+                    actions.append(Self.DefaultActions.switchToWebAction)
                 }
             }
 //            Disabling New Note default action for now
