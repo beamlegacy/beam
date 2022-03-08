@@ -95,7 +95,7 @@ swift lint:
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   tags:
-    - macos
+    - macos-mono
 
 UITestThread1:
   timeout: 25 minutes
