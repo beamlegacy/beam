@@ -4,6 +4,7 @@ enum UserSessionRequestError: Error, Equatable {
     case signInFailed
     case forgotPasswordFailed
     case resendVerificationEmailFailed
+    case updatePasswordFailed
 }
 
 class UserSessionRequest: APIRequest {
