@@ -323,12 +323,11 @@ public class ElementNode: Widget {
 
     func fold() {
         if children.isEmpty {
-            guard let p = parent as? ElementNode else { return }
+            guard let p = parent as? ElementNode, p !== p.root else { return }
             p.fold()
             p.focus()
             return
         }
-
         open = false
     }
 
