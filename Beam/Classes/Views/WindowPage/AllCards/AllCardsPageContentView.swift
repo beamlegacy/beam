@@ -59,8 +59,14 @@ class AllCardsViewModel: ObservableObject, Identifiable {
         allNotes = DocumentManager().loadAll()
     }
 
+    /// We're hiding empty journal notes; except for today's
+    private func noteShouldBeDisplayed(_ doc: DocumentStruct) -> Bool {
+        doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.todaysJournal.journalDateString
+    }
+
     private func updateNoteItemsFromAllNotes() {
         allNotesItems = allNotes.compactMap { doc in
+            guard noteShouldBeDisplayed(doc) else { return nil }
             let note = BeamNote.getFetchedNote(doc.id)
             let item = NoteTableViewItem(document: doc, note: note)
             if let metadata = notesMetadataCache.metadata(for: item.id) {
