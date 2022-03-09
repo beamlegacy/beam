@@ -28,7 +28,7 @@ class AllCardsDeleteTests: BaseTest {
         
         testRailPrint("Then I successfully delete all notes")
         allCardsView.deleteAllCards()
-        XCTAssertEqual(allCardsView.getNumberOfCards(), 0)
+        XCTAssertEqual(allCardsView.getNumberOfCards(), 1) // Today's note will still be there
     }
     
     func testDeleteSingleCard() {
