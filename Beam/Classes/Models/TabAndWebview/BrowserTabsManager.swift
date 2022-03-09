@@ -29,7 +29,7 @@ class BrowserTabsManager: ObservableObject {
         self.delegate?.areTabsVisible(for: self) == true
     }
 
-    private var browserTabManagerId = UUID()
+    var browserTabManagerId = UUID()
     private var data: BeamData
     private weak var state: BeamState?
     @Published public var tabs: [BrowserTab] = [] {
