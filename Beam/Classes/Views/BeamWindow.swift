@@ -117,6 +117,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         AppDelegate.main.windows.removeAll { window in
             if window === self {
                 window.contentView = nil
+                let idToRemove = window.state.browserTabsManager.browserTabManagerId
+                window.data.clusteringManager.allOpenBrowsingTrees = window.data.clusteringManager.allOpenBrowsingTrees?.filter { $0.browserTabManagerId != idToRemove }
             }
             return window === self
         }
