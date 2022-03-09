@@ -66,6 +66,13 @@ class UITestsMenuBar: BaseMenuBar {
         menuItem(UITestMenuAvailableCommands.populatePasswordsDB.rawValue).clickOnExistence()
         return self
     }
+    
+    @discardableResult
+    func clearPasswordsDB() -> UITestsMenuBar {
+        openUITestsMenu()
+        menuItem(UITestMenuAvailableCommands.clearPasswordsDB.rawValue).clickOnExistence()
+        return self
+    }
 
     @discardableResult
     func showWebViewCount() -> UITestsMenuBar {
