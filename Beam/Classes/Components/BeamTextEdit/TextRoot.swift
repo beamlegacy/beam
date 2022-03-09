@@ -116,7 +116,8 @@ public class TextRoot: ElementNode {
 
     var selectedText: String {
         guard let node = focusedWidget as? TextNode else { return "" }
-        return node.text.substring(range: selectedTextRange)
+        let text = node.text
+        return text.substring(range: text.clamp(selectedTextRange))
     }
 
     override var root: TextRoot? {
