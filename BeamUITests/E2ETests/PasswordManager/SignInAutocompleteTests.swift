@@ -74,12 +74,12 @@ class SignInAutocompleteTests: BaseTest {
         let alertView = passPrefView.clickRemove()
         
         testRailPrint("Then it is not removed from the list of passwords")
-        alertView.cancelDeletionFromSheets()
+        XCTAssertTrue(alertView.cancelDeletionFromDialogSheets())
         XCTAssertTrue(passPrefView.staticTextTables("apple.com").exists)
         
         testRailPrint("Then it is removed from the list of passwords")
         passPrefView.clickRemove()
-        alertView.confirmRemoveFromSheets()
+        XCTAssertTrue(alertView.confirmRemoveFromSheets())
         XCTAssertTrue(WaitHelper().waitForDoesntExist(passPrefView.staticTextTables("apple.com")))
         
         testRailPrint("When I choose Fill option for another password")

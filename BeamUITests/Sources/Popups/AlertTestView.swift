@@ -10,6 +10,10 @@ import XCTest
 
 class AlertTestView: BaseView {
     
+    let alert = "alert"
+    let exitButtonText = "Exit now"
+    let restartButtonText = "Restart Beam now"
+    
     @discardableResult
     func confirmDeletion() -> BaseView {
         let deleteButton = button(AlertViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnHittable()
@@ -25,17 +29,27 @@ class AlertTestView: BaseView {
     }
     
     @discardableResult
-    func confirmRemoveFromSheets() -> BaseView {
+    func confirmRemoveFromDialogSheets() -> Bool {
         let deleteButton = getAlertDialogFromSheets().buttons[AlertViewLocators.Buttons.alertRemoveButton.accessibilityIdentifier].clickOnExistence()
-        WaitHelper().waitForDoesntExist(deleteButton)
-        return self
+        return WaitHelper().waitForDoesntExist(deleteButton)
     }
     
     @discardableResult
-    func cancelDeletionFromSheets() -> BaseView {
+    func cancelDeletionFromDialogSheets() -> Bool {
         let cancelButton = getAlertDialogFromSheets().buttons[AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier].clickOnExistence()
-        WaitHelper().waitForDoesntExist(cancelButton)
-        return self
+        return WaitHelper().waitForDoesntExist(cancelButton)
+    }
+    
+    @discardableResult
+    func confirmRemoveFromSheets() -> Bool {
+        let deleteButton = getAlertFromSheets().buttons[AlertViewLocators.Buttons.alertRemoveButton.accessibilityIdentifier].clickOnExistence()
+        return WaitHelper().waitForDoesntExist(deleteButton)
+    }
+    
+    @discardableResult
+    func cancelDeletionFromSheets() -> Bool {
+        let cancelButton = getAlertFromSheets().buttons[AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier].clickOnExistence()
+        return WaitHelper().waitForDoesntExist(cancelButton)
     }
     
     @discardableResult
@@ -56,21 +70,25 @@ class AlertTestView: BaseView {
     
     @discardableResult
     func exitNowClick() -> BaseView {
-        self.getAlertDialog().buttons["Exit now"].click()
+        self.getAlertDialog().buttons[exitButtonText].click()
         return self
     }
 
     @discardableResult
     func restartNowClick() -> BaseView {
-        self.getAlertDialog().buttons["Restart Beam now"].click()
+        self.getAlertDialog().buttons[restartButtonText].click()
         return self
     }
     
+    private func getAlertFromSheets() -> XCUIElement {
+        return app.sheets[alert]
+    }
+    
     private func getAlertDialogFromSheets() -> XCUIElement {
-        return app.dialogs.sheets["alert"]
+        return app.dialogs.sheets[alert]
     }
     
     func getAlertDialog() -> XCUIElement {
-        return app.dialogs["alert"]
+        return app.dialogs[alert]
     }
 }
