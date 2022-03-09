@@ -36,6 +36,30 @@ class EmbedNode: ResizableNode {
     private let expandedContentAnimationKey = "expandedContent"
     private let collapseContentAnimationKey = "collapsedContent"
 
+    private var embedContent: EmbedContent? {
+        didSet {
+            minWidth = embedContent?.minWidth ?? minWidth
+            minHeight = embedContent?.minHeight ?? minHeight
+            maxWidth = embedContent?.maxWidth ?? maxWidth
+            maxHeight = embedContent?.maxHeight ?? maxHeight
+            keepAspectRatio = embedContent?.keepAspectRatio ?? keepAspectRatio
+            responsiveStrategy = embedContent?.responsive ?? responsiveStrategy
+
+            let width = embedContent?.width ?? resizableElementContentSize.width
+            let height: CGFloat
+
+            if let embedHeight = embedContent?.height {
+                height = embedHeight
+            } else {
+                // If the embed doesn't have a default height, we compute it by applying the same initial aspect ratio
+                // from the loading state onto the width
+                height = width * Self.initialExpandedContentSize.aspectRatio
+            }
+
+            resizableElementContentSize = CGSize(width: width, height: height)
+        }
+    }
+
     private var cancellables = Set<AnyCancellable>()
 
     /// A subject that broadcasts the size updates received from the embed content's script message handler.
@@ -299,11 +323,21 @@ extension EmbedNode {
 
         let webViewProvider = BeamWebViewProvider(editor: editor, elementId: elementId, url: url)
 
-        let view = EmbedContentView(frame: .zero, url: url, webViewProvider: webViewProvider)
+        let view = EmbedContentView(frame: .zero, webViewProvider: webViewProvider)
         view.layer?.anchorPoint = .zero
         view.delegate = self
 
-        view.startLoadingContent()
+        Self.fetchEmbedContent(url: url)
+            .sink { [url] completion in
+                if case .failure = completion {
+                    Logger.shared.logError("Embed Node couldn't load content for \(url.absoluteString)", category: .embed)
+                }
+            } receiveValue: { [weak self] embedContent in
+                self?.embedContent = embedContent
+                self?.saveElementTitleIfNeeded()
+                view.startLoadingWebView(embedContent: embedContent)
+            }
+            .store(in: &cancellables)
 
         return view
     }
@@ -444,15 +478,32 @@ extension EmbedNode {
     }
 
     private func updateExpandedContentSize(_ size: CGSize) {
-        if expandedContent?.embedContent?.height == nil {
+        if embedContent?.height == nil {
             setVisibleHeight(size.height)
         }
 
-        if expandedContent?.embedContent?.width == nil {
+        if embedContent?.width == nil {
             setVisibleWidth(size.width)
         }
 
         invalidateLayout()
+    }
+
+    private func saveElementTitleIfNeeded() {
+        guard
+            let embedContent = embedContent,
+            element.text.text != embedContent.title
+        else {
+            return
+        }
+
+        element.text = BeamText(text: embedContent.title)
+    }
+
+    private static func fetchEmbedContent(url: URL) -> AnyPublisher<EmbedContent, EmbedContentError> {
+        EmbedContentBuilder().embeddableContentFromAnyStrategy(for: url)
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
     }
 
 }
@@ -460,28 +511,6 @@ extension EmbedNode {
 // MARK: - EmbedContentViewDelegate
 
 extension EmbedNode: EmbedContentViewDelegate {
-
-    func embedContentView(_ embedContentView: EmbedContentView, didReceiveEmbedContent embedContent: EmbedContent) {
-        minWidth = embedContent.minWidth ?? minWidth
-        minHeight = embedContent.minHeight ?? minHeight
-        maxWidth = embedContent.maxWidth ?? maxWidth
-        maxHeight = embedContent.maxHeight ?? maxHeight
-        keepAspectRatio = embedContent.keepAspectRatio
-        responsiveStrategy = embedContent.responsive ?? responsiveStrategy
-
-        let width = embedContent.width ?? resizableElementContentSize.width
-
-        let height: CGFloat
-        if embedContent.height == nil {
-            // If the embed doesn't have a default height, we compute it by applying the same initial aspect ratio
-            // from the loading state onto the width
-            height = width * Self.initialExpandedContentSize.aspectRatio
-        } else {
-            height = embedContent.height!
-        }
-
-        resizableElementContentSize = CGSize(width: width, height: height)
-    }
 
     func embedContentView(_ embedContentView: EmbedContentView, contentSizeDidChange size: CGSize) {
         if isResizing {
