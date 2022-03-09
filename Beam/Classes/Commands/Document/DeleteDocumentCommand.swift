@@ -18,7 +18,8 @@ class DeleteDocument: DocumentCommand {
     init(documentIds: [UUID] = [], allDocuments: Bool = false) {
         super.init(name: Self.name)
         self.allDocuments = allDocuments
-        self.documentIds = documentIds
+        let todayId = AppDelegate.main.data.todaysNote.id
+        self.documentIds = documentIds.filter { $0 != todayId }
     }
 
     required init(from decoder: Decoder) throws {
@@ -48,8 +49,13 @@ class DeleteDocument: DocumentCommand {
         DocumentManager.disableNotifications()
         defer { DocumentManager.enableNotifications() }
 
+        let todayId = AppDelegate.main.data.todaysNote.id
+
         if allDocuments {
-            let ids = documents.map { $0.id }
+            let ids: [UUID] = documents.compactMap { note in
+                guard todayId != note.id else { return nil }
+                return note.id
+            }
             removeNotesFromIndex(ids)
 
             context?.softDelete(ids: ids) { _ in

@@ -115,11 +115,12 @@ struct NoteHeaderView: View {
     private struct AnimatedActionButton: View {
         let iconName: String
         let lottieName: String
+        let disable: Bool
         let action: () -> Void
         @State private var isHovering = false
 
         var body: some View {
-            ButtonLabel(icon: isHovering ? "transparent" : iconName, action: action)
+            ButtonLabel(icon: isHovering ? "transparent" : iconName, state: disable ? .disabled : .normal, action: action)
                 .overlay(
                     !isHovering ? nil :
                         LottieView(name: lottieName, playing: true,
@@ -127,7 +128,8 @@ struct NoteHeaderView: View {
                         .frame(width: 16, height: 16)
                         .allowsHitTesting(false)
                 )
-                .onHover { isHovering = $0 }
+                .onHover { isHovering = $0 && !disable }
+                .disabled(disable)
         }
     }
 
@@ -151,8 +153,7 @@ struct NoteHeaderView: View {
                                     })
 //            Feature not available yet.
 //            ButtonLabel(icon: "editor-sources", state: .disabled)
-            AnimatedActionButton(iconName: "editor-delete", lottieName: "editor-delete",
-                                 action: model.promptConfirmDelete)
+            AnimatedActionButton(iconName: "editor-delete", lottieName: "editor-delete", disable: model.note?.isTodaysNote ?? false, action: model.promptConfirmDelete)
                 .offset(x: 0, y: -1) // alignment adjustment for the eye
         }
     }

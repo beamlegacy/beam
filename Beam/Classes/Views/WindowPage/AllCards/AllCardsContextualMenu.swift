@@ -34,6 +34,9 @@ class AllCardsContextualMenu {
         let menu = NSMenu()
         menu.font = BeamFont.regular(size: 13).nsFont
 
+        let allIds = selectedNotes.map { $0.id }
+        let containsToday =  allIds.contains(AppDelegate.main.data.todaysNote.id)
+
         var countSuffix = " All"
         if selectedNotes.count > 0 {
             let count = selectedNotes.count
@@ -61,12 +64,14 @@ class AllCardsContextualMenu {
 
        setupExportMenu(in: menu, countSuffix: countSuffix)
 
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(
-            title: "Delete\(countSuffix)...",
-            action: #selector(deleteNotes),
-            keyEquivalent: ""
-        ))
+        if !(allIds.count == 1 && containsToday) {
+            menu.addItem(NSMenuItem.separator())
+            menu.addItem(NSMenuItem(
+                title: "Delete\(countSuffix)...",
+                action: #selector(deleteNotes),
+                keyEquivalent: ""
+            ))
+        }
 
         finalizeAllMenuItems(menu.items)
         let position = CGRect(origin: at, size: .zero).flippedRectToBottomLeftOrigin(in: window).origin
