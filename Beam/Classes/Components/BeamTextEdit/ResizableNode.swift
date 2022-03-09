@@ -70,6 +70,14 @@ class ResizableNode: ElementNode {
         )
     }
 
+    /// For consistency with the web app, we should store a `height` value only if the embed is vertically resizable.
+    private var shouldStoreDisplayHeight: Bool {
+        switch responsiveStrategy {
+        case .vertical, .both: return true
+        default: return false
+        }
+    }
+
     func setVisibleSize(width: CGFloat? = nil, height: CGFloat? = nil) {
         switch responsiveStrategy {
         case .horizontal:
@@ -372,11 +380,14 @@ class ResizableNode: ElementNode {
             ///
             /// Should the embed have the preserveAspectRatio flag, the displayInfo.height will be ignored
             /// to instead respect the aspect ratio, based on the width of the embed
+
+            let height = shouldStoreDisplayHeight ? Int(visibleSize.height) : nil
+
             element.kind = .embed(
                 url,
                 origin: sourceMetadata,
                 displayInfos: MediaDisplayInfos(
-                    height: Int(visibleSize.height),
+                    height: height,
                     displayRatio: visibleSize.width / contentsWidth
                 )
             )
