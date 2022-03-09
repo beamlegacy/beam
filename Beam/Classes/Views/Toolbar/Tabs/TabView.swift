@@ -4,7 +4,7 @@
 //
 //  Created by Remi Santos on 01/12/2021.
 //
-
+// swiftlint:disable file_length
 import SwiftUI
 import BeamCore
 
@@ -13,6 +13,7 @@ struct TabView: View {
     static let pinnedWidth: CGFloat = 32
     static let minimumActiveWidth: CGFloat = 120
     static let height: CGFloat = 29
+    private static let minSingleTabWidth: Double = 350
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) private var colorScheme
@@ -153,64 +154,96 @@ struct TabView: View {
         }
     }
 
-    // swiftlint:disable:next function_body_length
+    private func centerViewDefaultContent(shouldShowSecurity: Bool, shouldShowClose: Bool,
+                                          leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
+        let iconSpacing = iconTitleSpacing(shouldShowSecurity: shouldShowSecurity)
+        return HStack(spacing: iconSpacing) {
+            iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
+            Text(tab.title)
+                .accessibility(identifier: "browserTabTitle")
+                .allowsHitTesting(false)
+        }
+        .if(isSingleTab) {
+            $0.frame(minWidth: Self.minSingleTabWidth)
+        }
+        .if(!isSingleTab) {
+            $0.opacity(0).overlay(GeometryReader { proxy in
+                let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
+                let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
+                HStack(spacing: iconSpacing) {
+                    if shouldShowClose && !hasEnoughSpaceForClose {
+                        closeIcon
+                    } else {
+                        iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
+                    }
+                    Text(tab.title)
+                        .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
+                        .allowsHitTesting(false)
+                        .accessibility(identifier: "browserTabTitle")
+                }
+            }, alignment: .leading)
+        }
+    }
+
+    private func centerViewForegroundHoverContent(shouldShowSecurity: Bool, shouldShowClose: Bool,
+                                                  leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
+        let iconSpacing = iconTitleSpacing(shouldShowSecurity: shouldShowSecurity)
+        let urlString = tab.url?.urlStringWithoutScheme ?? tab.title
+        let iconTitleContent = HStack(spacing: iconSpacing) {
+            iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
+            Text(urlString)
+                .allowsHitTesting(false)
+                .accessibility(identifier: "browserTabURL")
+        }
+        return Group {
+            if isSingleTab {
+                // single tab width should be max(tabTitleWidth, minSingleTabWidth).
+                // Using overlay over unhover content to produce this layout.
+                centerViewDefaultContent(shouldShowSecurity: false, shouldShowClose: false,
+                                            leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                    .frame(minWidth: Self.minSingleTabWidth)
+                    .opacity(0)
+                    .overlay(GeometryReader { proxy in
+                        iconTitleContent
+                            .frame(width: max(proxy.size.width, Self.minSingleTabWidth))
+                            .offset(x: -(Self.minSingleTabWidth - min(Self.minSingleTabWidth, proxy.size.width)) / 2, y: 0)
+                    })
+            } else {
+                iconTitleContent
+            }
+        }
+    }
+
+    private func iconNextToTitle(shouldShowSecurity: Bool) -> some View {
+        Group {
+            if shouldShowSecurity {
+                securityIcon
+            } else {
+                faviconView
+            }
+        }
+    }
+
+    private func iconTitleSpacing(shouldShowSecurity: Bool) -> Double {
+        shouldShowSecurity ? 1 : BeamSpacing._40
+    }
+
     private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
         ZStack {
             let isHovering = isEnabled && (isHovering || isDragging)
             let showForegroundHoverStyle = isHovering && isSelected
             let shouldShowClose = isHovering
-            let iconNextToTitle = Group { if shouldShowSecurity { securityIcon } else { faviconView } }
-            let iconSpacing: CGFloat = shouldShowSecurity ? 1 : BeamSpacing._40
-            if isSingleTab {
-                // Using hidden texts to make sure the intrinsic size used is the largest of these two layout
-                HStack {
-                    iconNextToTitle
-                    ZStack {
-                        Text(tab.url?.urlStringWithoutScheme ?? tab.title)
-                        Text(tab.title)
-                    }
-                }.opacity(0).accessibility(hidden: true)
-            }
             if let copyMessage = copyMessage {
                 copyMessageView(message: copyMessage)
                     .transition(centerViewTransition(foregroundHoverStyle: true))
             } else if showForegroundHoverStyle {
-                HStack(spacing: iconSpacing) {
-                    iconNextToTitle
-                    Text(tab.url?.urlStringWithoutScheme ?? tab.title)
-                        .allowsHitTesting(false)
-                        .accessibility(identifier: "browserTabURL")
-                }
-                .transition(centerViewTransition(foregroundHoverStyle: true))
+                centerViewForegroundHoverContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
+                                                 leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                    .transition(centerViewTransition(foregroundHoverStyle: true))
             } else {
-                HStack(spacing: iconSpacing) {
-                    iconNextToTitle
-                    Text(tab.title)
-                        .accessibility(identifier: "browserTabTitle")
-                        .allowsHitTesting(false)
-                    if isSingleTab && !isHovering && audioIsPlaying {
-                        audioView
-                    }
-                }
-                .if(!isSingleTab) {
-                    $0.opacity(0)
-                    .overlay(GeometryReader { proxy in
-                        let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
-                        let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
-                        HStack(spacing: iconSpacing) {
-                            if shouldShowClose && !hasEnoughSpaceForClose {
-                                closeIcon
-                            } else {
-                                iconNextToTitle
-                            }
-                            Text(tab.title)
-                                .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
-                                .allowsHitTesting(false)
-                                .accessibility(identifier: "browserTabTitle")
-                        }
-                    }, alignment: .leading)
-                }
-                .transition(centerViewTransition(foregroundHoverStyle: false))
+                centerViewDefaultContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
+                                            leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                    .transition(centerViewTransition(foregroundHoverStyle: false))
             }
         }
         .lineLimit(1)
@@ -229,7 +262,7 @@ struct TabView: View {
         let shouldShowCopy = isHovering && shouldShowTitle && tab.url != nil
         let shouldShowCompactSize = shouldShowCompactSize(geometry: containerGeometry)
         let shouldShowClose = !isPinned && isHovering && !shouldShowCompactSize
-        let shouldShowMedia = !shouldShowCompactSize && (!isSingleTab || isHovering) && audioIsPlaying
+        let shouldShowMedia = !shouldShowCompactSize && audioIsPlaying
         let showForegroundHoverStyle = isHovering && isSelected
         let hPadding = shouldShowCompactSize ? 0 : BeamSpacing._80
 
@@ -268,9 +301,6 @@ struct TabView: View {
             // Center Content
             if shouldShowTitle {
                 centerView(shouldShowSecurity: shouldShowSecurity, leadingViewsWidth: estimatedLeadingViewsWidth, trailingViewsWidth: estimatedTrailingViewsWidth)
-                    .if(isSingleTab) {
-                        $0.frame(maxWidth: min(400, containerGeometry.size.width - 60))
-                    }
                     .layoutPriority(2)
             } else if shouldShowCompactSize && audioIsPlaying {
                 audioView
@@ -279,7 +309,7 @@ struct TabView: View {
             }
 
             // Trailing Content
-            if showForegroundHoverStyle {
+            if showForegroundHoverStyle || isSingleTab {
                 Spacer(minLength: BeamSpacing._40)
             }
             ZStack {
@@ -304,7 +334,6 @@ struct TabView: View {
         .fixedSize(horizontal: isSingleTab && !isPinned, vertical: false)
         .coordinateSpace(name: localCoordinateSpaceName)
     }
-    //swiftlint:enable function_body_length
 
     var body: some View {
         GeometryReader { proxy in
@@ -318,8 +347,8 @@ struct TabView: View {
                     .background(
                         // Using Capsule as background instead of Capsule's label property because we have different gestures (drag/click) + paddings
                         // and they don't play well with the rendering updates of the capsule label with parameters.
-                        ToolbarCapsuleButton(isSelected: false, isForeground: isSelected && (!isSingleTab || isDragging),
-                                             tabStyle: true, lonelyStyle: isSingleTab, hueTint: hueTint,
+                        ToolbarCapsuleButton(isSelected: false, isForeground: isSelected,
+                                             tabStyle: true, hueTint: hueTint,
                                              label: { _, _ in Group { } }, action: nil)
                             .onTouchDown { down in
                                 if down { onTouchDown?() }
