@@ -17,11 +17,7 @@ class JournalSimpleStackView: NSView {
     var onStartEditing: (() -> Void)?
 
     var notes: [BeamNote] = []
-    var views: [BeamNote: BeamTextEdit] = [:] {
-        didSet {
-            countChanged = !initialLayout
-        }
-    }
+    var views: [BeamNote: BeamTextEdit] = [:]
     var scope: [AnyCancellable] = []
 
     override var wantsUpdateLayer: Bool { true }
@@ -68,7 +64,6 @@ class JournalSimpleStackView: NSView {
         layer?.backgroundColor = BeamColor.Generic.background.cgColor
     }
 
-    var countChanged = false
     var initialLayout = true
 
     var safeTop: CGFloat {
@@ -79,37 +74,34 @@ class JournalSimpleStackView: NSView {
         }
     }
 
+    var insertedViews = Set<BeamTextEdit>()
+    var removedViews = Set<BeamTextEdit>()
+
     //swiftlint:disable:next function_body_length
     public override func layout() {
         guard enclosingScrollView != nil else { return }
         defer {
-            countChanged = false
+            insertedViews.removeAll()
+            removedViews.removeAll()
         }
 
         let textEditViews = self.notes.compactMap { views[$0] }
         var lastViewY = topOffset
 
-        let animateMoves = countChanged && !initialLayout
-        if animateMoves {
-            NSAnimationContext.beginGrouping()
-            NSAnimationContext.current.duration = 0.2
-        }
-
-        defer {
-            if animateMoves {
-                NSAnimationContext.endGrouping()
-            }
-        }
+        let animateMoves = !initialLayout
 
         for textEdit in textEditViews {
             let newFrame = NSRect(origin: CGPoint(x: 0, y: lastViewY),
                                   size: NSSize(width: self.frame.width, height: textEdit.intrinsicContentSize.height))
-            if !textEdit.frame.isEmpty && animateMoves {
+
+            if animateMoves && !insertedViews.contains(textEdit) {
+                NSAnimationContext.beginGrouping()
+                NSAnimationContext.current.duration = 0.2
                 textEdit.animator().frame = newFrame
+                NSAnimationContext.endGrouping()
             } else {
                 textEdit.frame = newFrame
             }
-
             lastViewY = (newFrame.maxY + verticalSpace).rounded()
         }
     }
@@ -139,6 +131,7 @@ class JournalSimpleStackView: NSView {
         databaseId = DatabaseManager.defaultDatabase.id
     }
 
+    //swiftlint:disable:next cyclomatic_complexity function_body_length
     public func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
         inspectDatabaseChange()
 
@@ -160,6 +153,7 @@ class JournalSimpleStackView: NSView {
         guard force || self.notes != sortedNotes else {
             return
         }
+        let lastDate = notes.last?.type.journalDate
         self.notes = sortedNotes
 
         let noteSet = Set(notes)
@@ -178,6 +172,7 @@ class JournalSimpleStackView: NSView {
             } else {
                 guard let view = views[note] else { continue }
                 view.removeFromSuperview()
+                removedViews.insert(view)
                 views.removeValue(forKey: note)
             }
         }
@@ -193,7 +188,7 @@ class JournalSimpleStackView: NSView {
             }
         }
 
-        if countChanged {
+        if !insertedViews.isEmpty || !removedViews.isEmpty {
             layout()
         }
     }
@@ -215,6 +210,8 @@ class JournalSimpleStackView: NSView {
         let view = getTextEditView(for: note, enableDelayedInit: delayInit)
         views[note] = view
         addSubview(view)
+        insertedViews.insert(view)
+        return
     }
 
     public func getTodaysView() -> BeamTextEdit? {
