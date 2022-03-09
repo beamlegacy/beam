@@ -37,7 +37,6 @@ extension AccountManager {
 
     static func moveToAuthenticated() {
         assert(AuthenticationManager.shared.isAuthenticated)
-        assert(state == .signedOff || state == .authenticated)
         state = .authenticated
     }
 
