@@ -124,7 +124,7 @@ class ScrollViewContentWatcher: NSObject {
                                                object: contentView)
     }
 
-    let spaceBeforeLoadingMoreData = CGFloat(1.0)
+    let spaceBeforeLoadingMoreData = CGFloat(2.0)
 
     @objc private func contentOffsetDidChange(notification: Notification) {
         guard let clipView = notification.object as? NSClipView,
@@ -138,9 +138,7 @@ class ScrollViewContentWatcher: NSObject {
         // Update journal when scrollview is close to the end
         let offset = bounds.minY
         if offset > documentView.frame.maxY - spaceBeforeLoadingMoreData * bounds.height {
-            DispatchQueue.main.async { [weak self] in
-                self?.loadMore()
-            }
+            loadMore()
         }
         onScroll?(clipView.bounds.origin)
     }
