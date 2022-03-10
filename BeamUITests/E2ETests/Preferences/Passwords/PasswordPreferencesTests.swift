@@ -218,6 +218,8 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func testAutofillUsernameAndPasswords() throws {
+        // Test deactivated on Test Plan because we don't have an easy way to restore preferences settings after this test
+        // Especially in case of failure at the middle of the test
         let helper = BeamUITestsHelper(launchApp().app)
         uiMenu.clearPasswordsDB()
         
