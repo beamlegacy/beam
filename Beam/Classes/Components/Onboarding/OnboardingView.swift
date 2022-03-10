@@ -152,7 +152,7 @@ struct OnboardingView: View {
                     ForEach(model.actions) { action in
                         ActionableButton(text: action.title, defaultState: !action.enabled ? .disabled : .normal,
                                          variant: action.secondary ? secondarActionVariant : .primaryPurple,
-                                         minWidth: action.secondary ? 100 : 150,
+                                         minWidth: action.customWidth ?? (action.secondary ? 100 : 150),
                                          height: buttonsHeight,
                                          action: !action.enabled ? nil : {
                             if action.onClick?() != false {
