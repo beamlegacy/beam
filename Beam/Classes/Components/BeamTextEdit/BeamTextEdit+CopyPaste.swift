@@ -7,6 +7,7 @@
 
 import Foundation
 import BeamCore
+import UniformTypeIdentifiers
 
 extension BeamTextEdit {
 
@@ -179,6 +180,8 @@ extension BeamTextEdit {
                 paste(beamTextHolder: bTextHolder)
             } else if let image = objects?.first as? NSImage {
                 paste(image: image)
+            } else if let fileUrl = objects?.first as? NSURL {
+                paste(url: fileUrl as URL)
             } else if let attributedStr = objects?.first as? NSAttributedString {
                 paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
@@ -243,7 +246,18 @@ extension BeamTextEdit {
         }
     }
 
-    private func paste(image: NSImage) {
+    private func paste(url: URL) {
+        guard let type = UTType(tag: url.pathExtension.lowercased(), tagClass: .filenameExtension, conformingTo: nil),
+              type.isSubtype(of: .image),
+              let image = NSImage(contentsOf: url) else {
+            Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
+            return
+        }
+
+        paste(image: image, with: url.lastPathComponent)
+    }
+
+    private func paste(image: NSImage, with name: String? = nil) {
         guard let node = focusedWidget as? ElementNode,
               let parent = node.parent as? ElementNode else {
             Logger.shared.logError("Can't paste on a node that is not an element node", category: .noteEditor)
@@ -262,7 +276,7 @@ extension BeamTextEdit {
                 rootNode?.eraseNodeSelection(createEmptyNodeInPlace: false, createNodeInEmptyParent: false)
             }
 
-            let uid = try fileManager.insert(name: "image\(UUID())", data: jpegImageData)
+            let uid = try fileManager.insert(name: name ?? "image\(UUID())", data: jpegImageData)
             let newElement = BeamElement()
             newElement.kind = .image(uid, displayInfos: MediaDisplayInfos(height: Int(image.size.height), width: Int(image.size.width), displayRatio: nil))
             cmdManager.insertElement(newElement, inNode: parent, afterNode: node)
