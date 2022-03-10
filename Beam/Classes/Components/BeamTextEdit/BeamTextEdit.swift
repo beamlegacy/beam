@@ -771,6 +771,14 @@ public extension CALayer {
             node.cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
         } else if inlineFormatter?.formatterHandlesEnter() != true {
             hideInlineFormatter()
+
+            // swiftlint:disable:next empty_enum_arguments
+            if case .check(_) = node.elementKind, node.elementText.isEmpty {
+                guard let node = node as? TextNode else { return }
+                node.cmdManager.formatText(in: node, for: .bullet, with: nil, for: nil, isActive: true)
+                return
+            }
+
             node.cmdManager.beginGroup(with: "Insert line")
             defer {
                 node.cmdManager.endGroup()
@@ -804,6 +812,10 @@ public extension CALayer {
             }
 
             let newElement = BeamElement(str)
+            // swiftlint:disable:next empty_enum_arguments
+            if case .check(_) = node.elementKind {
+                newElement.kind = .check(false)
+            }
             if insertAsChild {
                 if let parent = node._displayedElement {
                     parent.open = true
