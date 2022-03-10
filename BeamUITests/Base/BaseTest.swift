@@ -20,10 +20,6 @@ class BaseTest: XCTestCase {
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
-        continueAfterFailure = false
-    }
 
     override func tearDownWithError() throws {
         super.tearDown()

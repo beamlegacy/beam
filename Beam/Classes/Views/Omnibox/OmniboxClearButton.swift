@@ -20,7 +20,8 @@ struct OmniboxClearButton: View {
             )
             .onHover { isHovering = $0 }
             .onTouchDown { isTouching = $0 }
-
+            .accessibility(addTraits: .isButton)
+            .accessibilityIdentifier("clear-search-text")
     }
 }
 

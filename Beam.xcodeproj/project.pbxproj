@@ -873,6 +873,7 @@
 		A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
+		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
 		A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */; };
 		A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */; };
 		A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */; };
@@ -1130,6 +1131,7 @@
 		B5E8010E26AEA63300C8BD61 /* WebTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8010D26AEA63300C8BD61 /* WebTestView.swift */; };
 		B5E8011026AEA64E00C8BD61 /* WebViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8010F26AEA64E00C8BD61 /* WebViewLocators.swift */; };
 		B5E8011226AEB7C100C8BD61 /* WaitHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8011126AEB7C100C8BD61 /* WaitHelper.swift */; };
+		B5E949AE27DA404E001AAA82 /* AlertViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */; };
 		B5EB9A6A26C25FB8004C798A /* OmniboxDestinationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A6926C25FB8004C798A /* OmniboxDestinationTests.swift */; };
 		B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A7526C28192004C798A /* GoMenu.swift */; };
 		B5EB9A7826C2A887004C798A /* OmniboxAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A7726C2A887004C798A /* OmniboxAutocompleteTests.swift */; };
@@ -1138,7 +1140,6 @@
 		B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */; };
 		B5FAE2DB270C842700EAC8A3 /* CardPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2DA270C842700EAC8A3 /* CardPublishTests.swift */; };
 		B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */; };
-		B5FAE2EE270DDD9F00EAC8A3 /* AlertViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2ED270DDD9F00EAC8A3 /* AlertViewLocators.swift */; };
 		B5FAE2F9270ECF0100EAC8A3 /* SignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */; };
 		B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */; };
 		B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */; };
@@ -1176,9 +1177,9 @@
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
+		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
-		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
 		DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */; };
@@ -2253,6 +2254,7 @@
 		A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNoteCreator.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
+		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
 		A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewTests.swift; sourceTree = "<group>"; };
 		A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupTestView.swift; sourceTree = "<group>"; };
 		A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupViewLocators.swift; sourceTree = "<group>"; };
@@ -2509,6 +2511,7 @@
 		B5E8010D26AEA63300C8BD61 /* WebTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTestView.swift; sourceTree = "<group>"; };
 		B5E8010F26AEA64E00C8BD61 /* WebViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewLocators.swift; sourceTree = "<group>"; };
 		B5E8011126AEB7C100C8BD61 /* WaitHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitHelper.swift; sourceTree = "<group>"; };
+		B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertViewLocators.swift; sourceTree = "<group>"; };
 		B5EB9A6926C25FB8004C798A /* OmniboxDestinationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxDestinationTests.swift; sourceTree = "<group>"; };
 		B5EB9A7526C28192004C798A /* GoMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoMenu.swift; sourceTree = "<group>"; };
 		B5EB9A7726C2A887004C798A /* OmniboxAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxAutocompleteTests.swift; sourceTree = "<group>"; };
@@ -2522,7 +2525,6 @@
 		B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockReferenceTests.swift; sourceTree = "<group>"; };
 		B5FAE2DA270C842700EAC8A3 /* CardPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPublishTests.swift; sourceTree = "<group>"; };
 		B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertTestView.swift; sourceTree = "<group>"; };
-		B5FAE2ED270DDD9F00EAC8A3 /* AlertViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertViewLocators.swift; sourceTree = "<group>"; };
 		B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInTests.swift; sourceTree = "<group>"; };
 		B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsHelper.swift; sourceTree = "<group>"; };
 		B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesBaseView.swift; sourceTree = "<group>"; };
@@ -2612,9 +2614,9 @@
 		BAA67F956840E0DD3B5D7B53 /* BeamElementHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamElementHelper.ts; sourceTree = "<group>"; };
 		BAA67FA6403B5D2284B56F13 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.ts; sourceTree = "<group>"; };
 		BAA67FB8275D3AA84301AE01 /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
+		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
-		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
 		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
@@ -5097,7 +5099,7 @@
 		A3E7B4B327AC16E40074C9BB /* Popups */ = {
 			isa = PBXGroup;
 			children = (
-				B5FAE2ED270DDD9F00EAC8A3 /* AlertViewLocators.swift */,
+				B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */,
 				A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */,
 			);
 			path = Popups;
@@ -5638,6 +5640,7 @@
 				B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */,
 				B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */,
 				B557155926FA259000F6C9D4 /* UpdateViewLocators.swift */,
+				A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */,
 			);
 			path = Locators;
 			sourceTree = "<group>";
@@ -7818,9 +7821,9 @@
 				B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */,
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				A3E7B4BB27AC1A0C0074C9BB /* MockHTTPWebPages.swift in Sources */,
-				B5FAE2EE270DDD9F00EAC8A3 /* AlertViewLocators.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
+				A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */,
 				B5FAE306270EE17800EAC8A3 /* AccountViewLocators.swift in Sources */,
 				A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */,
 				B5E8010A26AEA1E100C8BD61 /* JournalTestView.swift in Sources */,
@@ -7854,6 +7857,7 @@
 				B57535ED26BD48040053CE2D /* JournalTest.swift in Sources */,
 				B57535F426BD6FFC0053CE2D /* NoteViewLocators.swift in Sources */,
 				B5FAE302270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift in Sources */,
+				B5E949AE27DA404E001AAA82 /* AlertViewLocators.swift in Sources */,
 				8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */,
 				B557156326FAF18200F6C9D4 /* AllCardsViewTests.swift in Sources */,
 				8AA5F0C627ABE53100D25A13 /* GoogleSheetsTests.swift in Sources */,
