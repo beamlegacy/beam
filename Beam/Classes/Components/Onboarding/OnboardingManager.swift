@@ -40,6 +40,7 @@ class OnboardingManager: ObservableObject {
         var title: String
         var enabled: Bool
         var secondary: Bool = false
+        var customWidth: CGFloat?
         /// return true to go to the next step
         var onClick: (() -> Bool)?
     }
