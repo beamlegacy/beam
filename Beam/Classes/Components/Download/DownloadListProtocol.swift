@@ -8,12 +8,10 @@ protocol DownloadListProtocol: ObservableObject {
     var isDownloading: Bool { get }
     var downloads: [Element] { get }
     var progressFractionCompleted: Double { get }
-    var showAlertFileNotFoundForDownload: Element? { get set }
 
     func remove(_ download: Element)
     func openFile(_ download: Element)
     func showInFinder(_ download: Element)
-
 }
 
 extension DownloadListProtocol {
