@@ -3,9 +3,7 @@ import Combine
 import BeamCore
 
 /// A list of file downloads triggered by webview navigation actions.
-final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, DownloadListProtocol {
-
-    @Published var showAlertFileNotFoundForDownload: T?
+final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, DownloadListProtocol, PopoverWindowPresented {
 
     /// Whethers the list contains at least one download item currently running.
     @Published private(set) var isDownloading = false
@@ -16,6 +14,8 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
     private var progress = Progress()
     private var cancellables = Set<AnyCancellable>()
     private let fileManager = FileManager.default
+
+    weak var presentingWindow: PopoverWindow?
 
     /// Adds a download to the list and monitors its progress.
     func addDownload(_ download: T) {
@@ -39,7 +39,7 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
         guard let artifactURL = download.artifactURL,
               fileManager.fileExists(atPath: artifactURL.path)
         else {
-            showAlertFileNotFoundForDownload = download
+            fileNotFoundAlert(for: download)
             return
         }
 
@@ -50,7 +50,7 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
         guard let artifactURL = download.artifactURL,
               fileManager.fileExists(atPath: artifactURL.path)
         else {
-            showAlertFileNotFoundForDownload = download
+            fileNotFoundAlert(for: download)
             return
         }
 
@@ -71,6 +71,18 @@ final class DownloadList<T: DownloadListItem>: NSObject, ObservableObject, Downl
                 self?.computeFractionCompleted()
             }
             .store(in: &cancellables)
+    }
+
+    private func fileNotFoundAlert(for download: T) {
+
+        //To avoid weird positioning due to the popover poping out while presenting the alert modaly, we need to close it before alerting
+        presentingWindow?.closeIfNotMoved()
+        UserAlert.showAlert(message: "Beam can’t show the file “\(download.filename ?? "?")” in the Finder.", informativeText: "The file has moved since you downloaded it. You can download it again or remove it from Beam.", buttonTitle: "Download again", secondaryButtonTitle: "Remove", buttonAction: {
+            self.restart(download)
+        }, secondaryButtonAction: {
+            self.remove(download)
+        }, secondaryIsDestructive: true,
+                            style: .warning)
     }
 
 }
