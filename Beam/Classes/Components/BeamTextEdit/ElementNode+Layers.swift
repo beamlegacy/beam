@@ -69,10 +69,11 @@ extension ElementNode {
         anim.duration = 0.3
         return anim
     }
+
     @discardableResult
     private func createCheckboxLayer(at point: NSPoint) -> CheckboxLayer? {
-        guard let textNode = self as? TextNode else { return nil }
         let checkboxLayer = CheckboxLayer(name: LayerName.checkbox.rawValue) { [weak self] checked in
+            guard let textNode = self as? TextNode else { return }
             self?.cmdManager.formatText(in: textNode, for: .check(checked), with: nil, for: nil, isActive: false)
         }
         checkboxLayer.layer.isHidden = true
