@@ -41,6 +41,7 @@
         "OmniboxDestinationTests",
         "OmniboxViewTests",
         "OnboardingTests",
+        "PasswordPreferencesTests\/testAutofillUsernameAndPasswords()",
         "SearchOnCardTests",
         "SearchOnWebTests",
         "SignInAutocompleteTests",
