@@ -60,7 +60,7 @@ struct Omnibox: View {
                     if !autocompleteManager.searchQuery.isEmpty {
                         OmniboxClearButton()
                             .simultaneousGesture(TapGesture().onEnded {
-                                autocompleteManager.resetQuery()
+                                autocompleteManager.setQuery("", updateAutocompleteResults: true)
                             })
                     }
                 }
