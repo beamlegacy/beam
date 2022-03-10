@@ -18,6 +18,7 @@
         "AllCardsViewTests",
         "BaseTest",
         "BlockReferenceTests",
+        "BrowserFancyUrlTests",
         "BrowserShortcutsTests",
         "BrowserStatusBarTests",
         "BrowserTabViewTests",
