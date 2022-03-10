@@ -19,12 +19,28 @@ class OmniBoxTestView: BaseView {
         return searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
     }
     
+    @discardableResult
+    func typeInOmnibox(_ text: String) -> OmniBoxTestView {
+        getOmniBoxSearchField().typeText(text)
+        return self
+    }
+    
     func getAutocompleteResults() -> XCUIElementQuery {
         return app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'"))
     }
     
     func getSearchFieldValue() -> String {
         return self.getElementStringValue(element: getOmniBoxSearchField())
+    }
+    
+    func waitForSearchFieldValueToEqual(expectedValue: String) -> Bool {
+        return WaitHelper().waitForStringValueEqual(expectedValue, getOmniBoxSearchField())
+    }
+    
+    @discardableResult
+    func clearOmniboxViaXbutton() -> XCUIElement {
+        button(OmniboxViewLocators.Buttons.searchFieldClearButton.accessibilityIdentifier).clickOnExistence()
+        return getOmniBoxSearchField()
     }
     
     func clickBackButton() {
