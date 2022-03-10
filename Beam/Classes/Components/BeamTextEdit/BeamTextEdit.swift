@@ -544,7 +544,7 @@ public extension CALayer {
         guard let cardNote = note as? BeamNote, showTitle else { return }
 
         cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
-            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
+            .font: BeamFont.medium(size: PreferencesManager.journalCardTitleFontSize).nsFont,
             .foregroundColor: BeamColor.Generic.text.cgColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue,
             .underlineColor: hover ? BeamColor.Generic.text.cgColor : BeamColor.Generic.transparent.cgColor
