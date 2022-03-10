@@ -16,12 +16,19 @@ struct CardSwitcher: View {
 
     /// 0 is journal, 1-5 is cards, 6 is all cards
     @State private var hoveredIndex: Int?
+    private let maxNoteTitleLength = 40
 
     private func titleForNote(_ note: BeamNote) -> String {
         guard let journalDate = note.type.journalDate else {
-            return note.title
+            return truncatedTitle(note.title)
         }
-        return BeamDate.journalNoteTitle(for: journalDate, with: .medium)
+        return truncatedTitle(BeamDate.journalNoteTitle(for: journalDate, with: .medium))
+    }
+
+    /// Manually truncating text because using maxWidth in SwiftUI makes the Text spread
+    private func truncatedTitle(_ title: String) -> String {
+        guard title.count > maxNoteTitleLength else { return title }
+        return title.prefix(maxNoteTitleLength).trimmingCharacters(in: .whitespaces) + "…"
     }
 
     private var separator: some View {
