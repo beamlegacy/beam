@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -8270,7 +8270,7 @@
 					"-ObjC",
 					"-liconv",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
@@ -8756,7 +8756,7 @@
 					"-ObjC",
 					"-liconv",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
@@ -9394,7 +9394,7 @@
 					"-ObjC",
 					"-liconv",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
