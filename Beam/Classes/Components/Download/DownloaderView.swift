@@ -122,13 +122,6 @@ struct DownloaderView<List: DownloadListProtocol>: View {
         .frame(width: preferredWidth)
         .background(BeamColor.Generic.secondaryBackground.swiftUI)
         .cornerRadius(10)
-        .alert(item: $downloadList.showAlertFileNotFoundForDownload, content: { download in
-            Alert(title: Text("Beam can’t show the file “\(download.filename ?? "?")” in the Finder."), message: Text("The file has moved since you downloaded it. You can download it again or remove it from Beam."), primaryButton: .default(Text("Download again"), action: {
-                downloadList.restart(download)
-            }), secondaryButton: .destructive(Text("Remove"), action: {
-                downloadList.remove(download)
-            }))
-        })
     }
 
     private var shouldDisplayClearButton: Bool {

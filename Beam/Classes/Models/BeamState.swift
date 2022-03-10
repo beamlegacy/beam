@@ -101,7 +101,6 @@ import Sentry
     }
 
     var downloadButtonPosition: CGPoint?
-    weak var downloaderWindow: PopoverWindow?
 
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()
