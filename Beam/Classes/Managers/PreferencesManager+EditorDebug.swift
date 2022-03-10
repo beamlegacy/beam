@@ -31,6 +31,7 @@ extension PreferencesManager {
 
     static let editorFontSizeKey = "editorFontSize"
     static let editorCardTitleFontSizeKey = "editorCardTitleFontSize"
+    static let journalCardTitleFontSizeKey = "journalCardTitleFontSize"
     static let editorFontSizeHeadingOneKey = "editorFontSizeHeadingOne"
     static let editorFontSizeHeadingTwoKey = "editorFontSizeHeadingTwo"
 
@@ -63,6 +64,7 @@ extension PreferencesManager {
 
     static let editorFontSizeDefault: CGFloat = 14
     static let editorCardTitleFontSizeDefault: CGFloat = 30
+    static let journalCardTitleFontSizeDefault: CGFloat = 24
     static let editorFontSizeHeadingOneDefault: CGFloat = 20
     static let editorFontSizeHeadingTwoDefault: CGFloat = 17
 }
@@ -93,6 +95,8 @@ extension PreferencesManager {
     static var editorFontSize: CGFloat
     @UserDefault(key: editorCardTitleFontSizeKey, defaultValue: editorCardTitleFontSizeDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
     static var editorCardTitleFontSize: CGFloat
+    @UserDefault(key: journalCardTitleFontSizeKey, defaultValue: journalCardTitleFontSizeDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
+    static var journalCardTitleFontSize: CGFloat
     @UserDefault(key: editorFontSizeHeadingOneKey, defaultValue: editorFontSizeHeadingOneDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
     static var editorFontSizeHeadingOne: CGFloat
     @UserDefault(key: editorFontSizeHeadingTwoKey, defaultValue: editorFontSizeHeadingTwoDefault, suiteName: BeamUserDefaults.editorDebugPreferences.suiteName)
