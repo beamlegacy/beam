@@ -690,16 +690,6 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
 
     private func setDefaultDisplayMode() {
-
-        let haveSeenWebOnboarding = Persistence.Authentication.hasSeenWebTutorial
-
-        if haveSeenWebOnboarding == nil || haveSeenWebOnboarding == false {
-            guard let onboardingURL = URL(string: EnvironmentVariables.webOnboardingURL), Configuration.env != .test else { return }
-            createTab(withURL: onboardingURL)
-            Persistence.Authentication.hasSeenWebTutorial = true
-            return
-        }
-
         if PreferencesManager.showWebOnLaunchIfTabs {
             let openTabs = browserTabsManager.tabs
             if openTabs.count > 0 {
@@ -707,6 +697,12 @@ extension BeamState: BrowserTabsManagerDelegate {
             }
             return
         }
+    }
+
+    func displayWelcomeTour() {
+        guard let onboardingURL = URL(string: EnvironmentVariables.webOnboardingURL) else { return }
+        createTab(withURL: onboardingURL)
+        Persistence.Authentication.hasSeenWelcomeTour = true
     }
 }
 
