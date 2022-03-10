@@ -10,6 +10,17 @@ import XCTest
 
 class OmniboxViewTests: BaseTest {
     
+    let webView = WebTestView()
+    let omniboxView = OmniBoxTestView()
+    var stopMockServer = false
+    
+    override func tearDown() {
+        if stopMockServer {
+            UITestsMenuBar().stopMockHTTPServer()
+        }
+        super.tearDown()
+    }
+    
     func testOmniBoxSearchField() {
         let textInput = "Hello World"
         let textEmpty = ""
@@ -47,12 +58,10 @@ class OmniboxViewTests: BaseTest {
     func testOmniboxPivotButtonClicking() {
         let journalView = launchApp()
         testRailPrint("Given I open 2 test pages")
-        let omniboxView = OmniBoxTestView()
         BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         BeamUITestsHelper(journalView.app).openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         
         testRailPrint("Then Webview is opened and browser tab bar is visible")
-        let webView = WebTestView()
         XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
         XCTAssertEqual(omniboxView.getAutocompleteResults().count, 0)
         XCTAssertTrue(omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
@@ -149,4 +158,67 @@ class OmniboxViewTests: BaseTest {
         XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.switchToWeb.accessibilityIdentifier)
         XCTAssertEqual(noteResults.count, 3)
     }
+    
+    func testOmniboxTextSelectionAndEditing() throws {
+        let initialSearch = "http://localhost:8080/"
+        let expectedInitialSearchURLinTab = "http://localhost:8080/"
+        let expectedTabTitle = "Mock Form Server"
+        
+        let editedSourceToSearch = "menu.form.lvh.me"
+        let expectedEditedSourceToSearchURL = "http://menu.form.lvh.me:8080/"
+        let editedSourceToSearchInTab = "menu.form.lvh.me:8080/"
+        
+        let replacedSourceToSearch = "http://nestediframe.form.lvh.me:8080/"
+        let replacedSourceToSearchInTab = "nestediframe.form.lvh.me:8080/"
+        let expectedReplacedSourceToSearchURL = "http://nestediframe.form.lvh.me:8080/"
+        
+        launchApp()
+        UITestsMenuBar().startMockHTTPServer()
+        stopMockServer = true
+        
+        testRailPrint("GIVEN I open \(initialSearch)")
+        omniboxView.typeInOmnibox(initialSearch)
+        omniboxView.typeKeyboardKey(.enter)
+        
+        testRailPrint("THEN I see \(expectedTabTitle) Tab title")
+        XCTAssertTrue(webView.waitForTabTitleToEqual(index: 0, expectedString: expectedTabTitle), "Timeout waiting \(webView.getBrowserTabTitleValueByIndex(index: 0)) to equal \(expectedTabTitle)")
+        
+        testRailPrint("THEN I see \(expectedInitialSearchURLinTab) URL in search field")
+        XCTAssertTrue(webView
+                        .activateSearchFieldFromTab(index: 0)
+                        .waitForSearchFieldValueToEqual(expectedValue: expectedInitialSearchURLinTab),
+                      "Timeout waiting \(webView.getTabUrlAtIndex(index: 0)) to equal \(expectedInitialSearchURLinTab)")
+        
+        testRailPrint("WHEN I edit the host name with \(editedSourceToSearch)")
+        webView.activateSearchFieldFromTab(index: 0)
+        omniboxView.typeKeyboardKey(.rightArrow)
+        omniboxView.typeKeyboardKey(.leftArrow, 6)
+        ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 9)
+        omniboxView.typeInOmnibox(editedSourceToSearch)
+        
+        testRailPrint("THEN I see \(expectedEditedSourceToSearchURL) as a search value")
+        XCTAssertTrue(omniboxView.waitForSearchFieldValueToEqual(expectedValue: expectedEditedSourceToSearchURL), "Timeout waiting \(webView.getTabUrlAtIndex(index: 0)) to equal \(expectedEditedSourceToSearchURL)")
+        
+        testRailPrint("THEN I see \(editedSourceToSearchInTab) URL in tab on search")
+        omniboxView.typeKeyboardKey(.enter)
+        XCTAssertTrue(webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: editedSourceToSearchInTab), "Timeout waiting \(webView.getTabUrlAtIndex(index: 0)) to equal \(editedSourceToSearchInTab)")
+        
+        testRailPrint("THEN I see successfully clear the search field")
+        webView.activateSearchFieldFromTab(index: 0).typeKeyboardKey(.delete)
+            //.clearOmniboxViaXbutton() Currently is blocked due to clear button is not hittable
+        XCTAssertTrue(omniboxView.waitForSearchFieldValueToEqual(expectedValue: emptyString))
+        
+        testRailPrint("WHEN I replace the host with \(replacedSourceToSearch)")
+        omniboxView.typeInOmnibox(replacedSourceToSearch)
+        
+        testRailPrint("THEN I see \(expectedReplacedSourceToSearchURL) as a search value")
+        XCTAssertTrue(omniboxView.waitForSearchFieldValueToEqual(expectedValue: expectedReplacedSourceToSearchURL), "Timeout waiting \(webView.getTabUrlAtIndex(index: 0)) to equal \(expectedReplacedSourceToSearchURL)")
+        
+        testRailPrint("THEN I see \(replacedSourceToSearchInTab) URL in tab on search")
+        omniboxView.typeKeyboardKey(.enter)
+        XCTAssertTrue(webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: replacedSourceToSearchInTab), "Timeout waiting \(webView.getTabUrlAtIndex(index: 0)) to equal \(replacedSourceToSearchInTab)")
+    }
+    
+    
+    
 }
