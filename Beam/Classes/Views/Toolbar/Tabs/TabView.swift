@@ -120,9 +120,22 @@ struct TabView: View {
     }
 
     private var faviconView: some View {
-        TabFaviconView(favIcon: tab.favIcon, isLoading: tab.isLoading,
-                                estimatedLoadingProgress: tab.estimatedLoadingProgress, disableAnimations: isDragging)
-            .allowsHitTesting(false)
+        TabFaviconView(
+            favIcon: faviconImage,
+            isLoading: tab.isLoading,
+            estimatedLoadingProgress: tab.estimatedLoadingProgress,
+            disableAnimations: isDragging
+        ).allowsHitTesting(false)
+    }
+
+    private var faviconImage: NSImage? {
+        switch tab.contentType {
+        case .web:
+            return tab.favIcon
+
+        case .pdf:
+            return NSImage(named: "tabs-file")?.fill(color: BeamColor.LightStoneGray.nsColor)
+        }
     }
 
     private var closeIcon: some View {
