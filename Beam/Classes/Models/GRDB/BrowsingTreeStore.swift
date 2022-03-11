@@ -293,6 +293,7 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     private func saveOnNetwork(_ record: BrowsingTreeRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Self.backgroundQueue.async { [weak self] in
             do {
+                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try self?.saveOnBeamObjectAPI(record) { result in
                     switch result {
@@ -316,6 +317,7 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     func saveAllOnNetwork(_ records: [BrowsingTreeRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Self.backgroundQueue.async { [weak self] in
             do {
+                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try self?.saveOnBeamObjectsAPI(records) { result in
                     switch result {

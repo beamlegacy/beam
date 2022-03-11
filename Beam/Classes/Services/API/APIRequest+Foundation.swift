@@ -111,7 +111,8 @@ extension APIRequest {
     func logCancelledRequest(_ filename: String,
                              _ localTimer: Date) {
         #if DEBUG_API_0
-        let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+        // swiftlint:disable:next date_init
+        let diffTime = Date().timeIntervalSince(localTimer)
         let diff = String(format: "%.2f", diffTime)
         Logger.shared.logDebug("\(diff)sec cancelled \(filename)", category: .network)
         #endif
@@ -149,9 +150,11 @@ extension APIRequest {
                 throw APIRequestError.error
             }
 
+            // swiftlint:disable:next date_init
             let localTimer = Date()
             let jsonStruct = try self.defaultDecoder().decode(APIRequest.APIResult<T>.self, from: data)
-            let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+            // swiftlint:disable:next date_init
+            let diffTime = Date().timeIntervalSince(localTimer)
             if diffTime > 0.1 {
                 Logger.shared.logWarning("Parsed network response from JSON to Beam Objects",
                                          category: .network,

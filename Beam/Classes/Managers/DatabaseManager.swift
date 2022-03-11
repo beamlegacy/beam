@@ -129,6 +129,7 @@ class DatabaseManager {
         savedCount += 1
 
         do {
+            // swiftlint:disable:next date_init
             let localTimer = Date()
             try CoreDataManager.save(context)
             Logger.shared.logDebug("[\(savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)

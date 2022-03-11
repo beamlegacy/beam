@@ -285,11 +285,13 @@ class APIRequest: NSObject {
         }
 
         do {
+            // swiftlint:disable:next date_init
             let localTimer = Date()
 
             let value: T = try self.manageResponse(data, response)
 
-            let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+            // swiftlint:disable:next date_init
+            let diffTime = Date().timeIntervalSince(localTimer)
             if diffTime > 0.1 {
                 Logger.shared.logWarning("Parsed network response (\(data?.count.byteSize ?? "-"))",
                                          category: .network,
