@@ -173,7 +173,7 @@ extension BeamObjectChecksum {
     static func deleteAll() throws {
         Logger.shared.logDebug("Deleted all checksums",
                                category: .beamObjectChecksum)
-        let localTimer = BeamDate.now
+        let localTimer = Date()
         let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
 
@@ -201,7 +201,7 @@ extension BeamObjectChecksum {
             return
         }
 
-        var localTimer = BeamDate.now
+        var localTimer = Date()
 
         let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
 
@@ -209,7 +209,7 @@ extension BeamObjectChecksum {
                                category: .beamObjectChecksum,
                                localTimer: localTimer)
 
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         try context.performAndWait {
             for beamObject in beamObjects {
@@ -239,10 +239,10 @@ extension BeamObjectChecksum {
         // We don't save previous objects for anything else than document for now
         guard beamObjects.compactMap({ $0.beamObjectType == BeamObjectObjectType.document.rawValue }).contains(true) else { return }
 
-        var localTimer = BeamDate.now
+        var localTimer = Date()
 
         let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         try context.performAndWait {
             for beamObject in beamObjects {
@@ -280,7 +280,7 @@ extension BeamObjectChecksum {
             return
         }
 
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let (checksums, context) = findChecksumsForObjects(objects: objects)
 
@@ -313,7 +313,7 @@ extension BeamObjectChecksum {
 
         guard T.beamObjectType == BeamObjectObjectType.document else { return }
 
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let (checksums, context) = findChecksumsForObjects(objects: objects)
 

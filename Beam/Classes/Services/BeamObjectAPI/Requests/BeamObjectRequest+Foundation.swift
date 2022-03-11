@@ -591,7 +591,7 @@ extension BeamObjectRequest {
             do {
                 var invalidObjects = [BeamObject]()
 
-                let localTimer = BeamDate.now
+                let localTimer = Date()
                 let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
                     do {
                         try $0.decrypt()
@@ -809,7 +809,7 @@ extension BeamObjectRequest {
         request.allHTTPHeaderFields = headers
 
         let session = BeamURLSession.shared
-        let localTimer = BeamDate.now
+        let localTimer = Date()
         let task = session.dataTask(with: request) { (data, response, error) -> Void in
             #if DEBUG
             // This is not an API call on our servers but since it's tightly coupled, I still store analytics there
@@ -858,7 +858,7 @@ extension BeamObjectRequest {
         request.allHTTPHeaderFields = headers
 
         let session = BeamURLSession.shared
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let task = session.dataTask(with: request) { (responseData, response, error) -> Void in
             #if DEBUG

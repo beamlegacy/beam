@@ -129,7 +129,7 @@ class DatabaseManager {
         savedCount += 1
 
         do {
-            let localTimer = BeamDate.now
+            let localTimer = Date()
             try CoreDataManager.save(context)
             Logger.shared.logDebug("[\(savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
             return true

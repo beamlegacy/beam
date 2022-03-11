@@ -149,7 +149,7 @@ extension APIRequest {
                 throw APIRequestError.error
             }
 
-            let localTimer = BeamDate.now
+            let localTimer = Date()
             let jsonStruct = try self.defaultDecoder().decode(APIRequest.APIResult<T>.self, from: data)
             let diffTime = BeamDate.now.timeIntervalSince(localTimer)
             if diffTime > 0.1 {
