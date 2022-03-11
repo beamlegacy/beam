@@ -34,7 +34,8 @@ extension APIRequest {
         // code called in the completion handler is blocking, it will prevent new following requests
         // to be parsed in the NSURLSession delegate callback thread
 
-        let localTimer = BeamDate.now
+        // swiftlint:disable:next date_init
+        let localTimer = Date()
 
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             self.parseDataTask(data: data,
@@ -87,7 +88,8 @@ extension APIRequest {
                                    category: .network)
             return
         }
-        let diffTime = BeamDate.now.timeIntervalSince(localTimer)
+        // swiftlint:disable:next date_init
+        let diffTime = Date().timeIntervalSince(localTimer)
         let diff = String(format: "%.3f", diffTime)
         let request_id = httpResponse.allHeaderFields["X-Request-Id"] ?? "-"
 

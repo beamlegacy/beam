@@ -53,7 +53,8 @@ extension APIRequest {
             fatalError("All network calls must be caught by Vinyl in test environment. \(filename) was called.")
         }
 
-        let localTimer = BeamDate.now
+        // swiftlint:disable:next date_init
+        let localTimer = Date()
 
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             self.parseDataTask(data: data,
