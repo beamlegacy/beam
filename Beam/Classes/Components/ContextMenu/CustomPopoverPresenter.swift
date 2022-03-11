@@ -9,7 +9,7 @@ import Foundation
 
 class CustomPopoverPresenter {
     static var shared = CustomPopoverPresenter()
-    static let windowViewPadding: CGFloat = 35
+    static let windowViewPadding: CGFloat = 50
 
     private var presentedFormatterViews: [FormatterView] = []
     private var presentedUnknownWindows: [PopoverWindow] = []

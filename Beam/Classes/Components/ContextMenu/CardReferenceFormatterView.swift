@@ -26,9 +26,10 @@ private struct CardReferenceFormatterContainerView: View {
     }
     var body: some View {
         let computedSize = size
-        return FormatterViewBackground {
+        return FormatterViewBackgroundV2 {
             DestinationNoteAutocompleteList(model: listModel, variation: .TextEditor(leadingPadding: leadingPadding),
                                             allowScroll: true, onSelectAutocompleteResult: onSelectResult)
+                .padding(.top, BeamSpacing._80)
                 .frame(maxHeight: computedSize.height)
         }
         .frame(width: computedSize.width)
@@ -101,9 +102,9 @@ class CardReferenceFormatterView: FormatterView {
         listModel.searchCardContent = searchCardContent
         listModel.allowNewCardShortcut = false
 
-        var leadingPadding: CGFloat = CGFloat(typingPrefix)
+        var leadingPadding: CGFloat = 0
         if !searchCardContent && typingPrefix == 1 {
-            leadingPadding = 5
+            leadingPadding = -3
         }
         let rootView = CardReferenceFormatterContainerView(viewModel: subviewModel, listModel: listModel, leadingPadding: leadingPadding) { [weak self] in
             self?.validateSelectedResult()
