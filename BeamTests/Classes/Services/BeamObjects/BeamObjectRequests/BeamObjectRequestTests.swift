@@ -95,7 +95,7 @@ class BeamObjectsRequests: QuickSpec {
                     }
 
                     it("sends a REST request") {
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(20)) { done in
                             do {
                                 _ = try sut.fetchAllWithRest(ids: objects.map { $0.beamObjectId }) { result in
                                     switch result {
