@@ -708,8 +708,6 @@ class DocumentManagerTests: QuickSpec {
 
                 let newTitle = String.randomTitle()
 
-                let callbackDocumentManager = DocumentManager()
-
                 var cancellable: AnyCancellable!
                 waitUntil(timeout: .seconds(10)) { done in
                     cancellable = DocumentManager.documentSaved.receive(on: DispatchQueue.main)
