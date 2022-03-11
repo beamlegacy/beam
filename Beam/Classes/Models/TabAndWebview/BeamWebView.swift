@@ -49,12 +49,7 @@ class BeamWebView: WKWebView {
     fileprivate var currentConfiguration: WKWebViewConfiguration
 
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
-        if configuration.urlSchemeHandler(forURLScheme: BeamURL.scheme) == nil {
-            BeamSchemeHandler.responders = [
-                ErrorPageHandler.path: ErrorPageHandler()
-            ]
-            configuration.setURLSchemeHandler(BeamSchemeHandler(), forURLScheme: BeamURL.scheme)
-        }
+        Self.setURLSchemeHandlers(in: configuration)
         currentConfiguration = configuration
         super.init(frame: frame, configuration: configuration)
         allowsBackForwardNavigationGestures = true
@@ -213,6 +208,14 @@ class BeamWebView: WKWebView {
         }
 
         menu.items = filteredItems
+    }
+
+    private static func setURLSchemeHandlers(in configuration: WKWebViewConfiguration) {
+        BeamSchemeHandler.responders = [
+            LocalPageSchemeHandler.path: LocalPageSchemeHandler()
+        ]
+        configuration.setURLSchemeHandlerIfNeeded(BeamSchemeHandler(), forURLScheme: BeamURL.scheme)
+        NavigationRouter.setCustomURLSchemeHandlers(in: configuration)
     }
 
 }
