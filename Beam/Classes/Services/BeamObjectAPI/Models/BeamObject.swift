@@ -209,7 +209,7 @@ class BeamObject: Codable {
 
     func encodeObject<T: BeamObjectProtocol>(_ object: T) throws {
         assert(!encoded)
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let jsonData = try Self.encoder.encode(object)
 

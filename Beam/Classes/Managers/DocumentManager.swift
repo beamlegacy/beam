@@ -396,7 +396,7 @@ public class DocumentManager: NSObject {
                 })
                 let deleted = softDeleted.union(Set(context.deletedObjects.compactMap { ($0 as? Document)?.id }))
 
-                let localTimer = BeamDate.now
+                let localTimer = Date()
                 try CoreDataManager.save(context)
                 Logger.shared.logDebug("[\(Self.savedCount)] CoreDataManager saved", category: .coredata, localTimer: localTimer)
 
@@ -588,7 +588,7 @@ public class DocumentManager: NSObject {
             Logger.shared.logDebug("Network task for \(documentStruct.titleAndId): executing",
                                    category: .documentNetwork)
 
-            let localTimer = BeamDate.now
+            let localTimer = Date()
 
             // We want to fetch back the document, to update it's previousChecksum
             // context.refresh(document, mergeChanges: false)
