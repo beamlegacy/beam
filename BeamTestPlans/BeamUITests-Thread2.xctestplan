@@ -9,7 +9,9 @@
     }
   ],
   "defaultOptions" : {
-    "testRepetitionMode" : "retryOnFailure"
+    "maximumTestExecutionTimeAllowance" : 120,
+    "testRepetitionMode" : "retryOnFailure",
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
@@ -33,6 +35,7 @@
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "JavascriptNativeInteractionsTests",
+        "OmniboxViewTests\/testOmniboxTextSelectionAndEditing()",
         "PasswordPreferencesTests",
         "PnSAddToCardTests",
         "ReferencesTests",
