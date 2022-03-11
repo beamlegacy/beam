@@ -22,5 +22,5 @@ notarize:
   script:
     - bundle exec fastlane notarize_build
   tags:
-    - macos
+    - macos-mono
   interruptible: true

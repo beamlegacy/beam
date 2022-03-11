@@ -48,6 +48,8 @@ class BeamUITestsMenuGenerator {
         case .clearPasswordsDB: clearPasswordsDatabase()
         case .startMockHttpServer: startMockHttpServer()
         case .stopMockHttpServer: stopMockHttpServer()
+        case .enableCreateJournalOnce: enableCreateJournalOnce()
+        case .disableCreateJournalOnce: disableCreateJournalOnce()
         default: break
         }
     }
@@ -259,4 +261,18 @@ class BeamUITestsMenuGenerator {
         PreferencesManager.isCollectFeedbackEnabled = true
         PreferencesManager.showsCollectFeedbackAlert = true
     }
+
+    private func enableCreateJournalOnce() {
+        PreferencesManager.createJournalOncePerWindow = true
+    }
+
+    private func disableCreateJournalOnce() {
+        PreferencesManager.createJournalOncePerWindow = false
+        // Destroy the cached journal view if needed
+        for window in AppDelegate.main.windows {
+            window.state.cachedJournalStackView = nil
+            window.state.cachedJournalScrollView = nil
+        }
+    }
+
 }

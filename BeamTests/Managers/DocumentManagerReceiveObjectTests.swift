@@ -116,6 +116,28 @@ class DocumentManagerReceiveObjectTests: XCTestCase {
         XCTAssertEqual(todayNote.joinTexts, BeamText("Some text on the remote versionSome text on the local version"))
     }
 
+    // MARK: receiveConflictingLoadedJournalWithSameId
+    func testReceiveConflictingLoadedJournalWithSameId() throws {
+        let date = BeamDate.now
+        let documentManager = DocumentManager()
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 0)
+        let localToday = BeamNote.fetchOrCreateJournalNote(date: date)
+        localToday.children = [BeamElement("Some text on the local version")]
+        XCTAssertEqual(localToday.children.count, 1)
+        _ = localToday.syncedSave()
+        let remoteToday = BeamNote(journalDate: date)
+        remoteToday.addChild(BeamElement("Some text on the remote version"))
+        remoteToday.id = localToday.id
+        XCTAssertEqual(remoteToday.children.count, 1)
+        let remoteTodayStruct = try XCTUnwrap(remoteToday.documentStruct)
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 1)
+        XCTAssertNoThrow(try documentManager.receivedObjects([remoteTodayStruct]))
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 1)
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: false).count, 1)
+        let todayNote = try XCTUnwrap(BeamNote.fetch(journalDate: date))
+        XCTAssertEqual(todayNote.children.count, 2)
+        XCTAssertEqual(todayNote.joinTexts, BeamText("Some text on the remote versionSome text on the local version"))
+    }
 
     // MARK: receiveConflictingJournal
     func testReceiveConflictingJournal() throws {
@@ -192,5 +214,48 @@ class DocumentManagerReceiveObjectTests: XCTestCase {
         XCTAssertEqual(note2.id, local.id)
         XCTAssertEqual(note2.children.count, 1)
         XCTAssertEqual(note2.joinTexts, BeamText("Some text on the local version"))
+    }
+
+    // MARK: receiveConflictingTitleDeletedDocument
+    func testReceiveConflictingTitleDeletedDocument() throws {
+        let documentManager = DocumentManager()
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 0)
+        let local = BeamNote(title: "MyNote")
+        local.addChild(BeamElement("Some text on the local version"))
+        XCTAssertEqual(local.children.count, 1)
+        let localStruct = try XCTUnwrap(local.documentStruct)
+        let remote = BeamNote(title: "MyNote")
+        remote.id = local.id
+        remote.addChild(BeamElement("Some text on the remote version"))
+        XCTAssertEqual(remote.children.count, 1)
+        let remoteStruct = try XCTUnwrap(remote.documentStruct)
+        XCTAssertNoThrow(try documentManager.receivedObjects([localStruct]))
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 1)
+        let deleteSemaphore = DispatchSemaphore(value: 0)
+        documentManager.softDelete(id: local.id) { result in
+            switch result {
+            case .success:
+                break
+            case .failure(let error):
+                XCTFail("softDelete failed with error \(error)")
+            }
+            deleteSemaphore.signal()
+        }
+        deleteSemaphore.wait()
+
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 1)
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: false).count, 0)
+
+        XCTAssertNoThrow(try documentManager.receivedObjects([remoteStruct]))
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: true).count, 1)
+        XCTAssertEqual(documentManager.allDocumentsIds(includeDeletedNotes: false).count, 1)
+        let note1 = try XCTUnwrap(BeamNote.fetch(title: "MyNote"))
+        XCTAssertEqual(note1.id, remote.id)
+        XCTAssertEqual(note1.children.count, 1)
+        XCTAssertEqual(note1.joinTexts, BeamText("Some text on the remote version"))
+        let note2 = try XCTUnwrap(BeamNote.fetch(title: "MyNote"))
+        XCTAssertEqual(note2.id, local.id)
+        XCTAssertEqual(note2.children.count, 1)
+        XCTAssertEqual(note2.joinTexts, BeamText("Some text on the remote version"))
     }
 }

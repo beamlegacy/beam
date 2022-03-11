@@ -454,7 +454,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     public func saveCloseTabsCmd(onExit: Bool) {
-        guard windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
+        guard windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else {
+            if onExit { ClosedTabDataPersistence.savedTabsData.removeAll() }
+            return
+        }
         var windowForTabsCmd = [Int: Command<BeamState>]()
         var windowCount = 0
         let tmpCmdManager = CommandManager<BeamState>()

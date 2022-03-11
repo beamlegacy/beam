@@ -16,7 +16,7 @@ enum Persistence {
 
         @StandardStorable("authentication.username") static var username: String?
         @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
-        @StandardStorable("authentication.hasSeenWebTutorial") static var hasSeenWebTutorial: Bool?
+        @StandardStorable("authentication.hasSeenWebTutorial") static var hasSeenWelcomeTour: Bool?
     }
 
     enum Development {

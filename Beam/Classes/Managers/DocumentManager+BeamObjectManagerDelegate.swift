@@ -78,27 +78,37 @@ extension DocumentManager: BeamObjectManagerDelegate {
     }
 
     private func receiveConflictingLoadedJournal(_ document: DocumentStruct, note: BeamNote) {
-        // there a conflicting journal note (with the same day but a different id)
+        // there a conflicting journal note (with the same day)
         guard let remoteNote = try? BeamNote.instanciateNote(document, keepInMemory: true) else { return }
         DispatchQueue.mainSync {
             // We have to block the main thread to merge the document
             // other wise the editor may have a race condition
-            remoteNote.concatenate(other: note)
-            let documentManager = DocumentManager()
-            let semaphore = DispatchSemaphore(value: 0)
-            documentManager.softDelete(id: note.id) { result in
-                switch result {
-                case let .failure(error):
-                    Logger.shared.logError("Error while soft deleting redundant journal note  \(document.titleAndId): \(error)", category: .document)
-                case let .success(res):
-                    if !res {
-                        Logger.shared.logError("Error while soft deleting redundant journal note \(document.titleAndId)", category: .document)
+
+            // Do we have a different id?
+            if remoteNote.id == note.id {
+                // then we merge the changes in the local note
+                let ancestorStruct = document.previousSavedObject ?? document
+                let ancestorNote = try? BeamNote.instanciateNote(ancestorStruct, keepInMemory: false)
+                note.merge(other: remoteNote, ancestor: ancestorNote ?? note, advantageOther: false)
+                _ = note.syncedSave()
+            } else {
+                remoteNote.concatenate(other: note)
+                let documentManager = DocumentManager()
+                let semaphore = DispatchSemaphore(value: 0)
+                documentManager.softDelete(id: note.id) { result in
+                    switch result {
+                    case let .failure(error):
+                        Logger.shared.logError("Error while soft deleting redundant journal note  \(document.titleAndId): \(error)", category: .document)
+                    case let .success(res):
+                        if !res {
+                            Logger.shared.logError("Error while soft deleting redundant journal note \(document.titleAndId)", category: .document)
+                        }
                     }
+                    semaphore.signal()
                 }
-                semaphore.signal()
+                semaphore.wait()
+                _ = remoteNote.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
             }
-            semaphore.wait()
-            _ = remoteNote.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
         }
     }
 
@@ -210,11 +220,18 @@ extension DocumentManager: BeamObjectManagerDelegate {
         let semaphore = DispatchSemaphore(value: 0)
         var doc = document
         if let localDocument = localDocument {
-            doc.version = localDocument.version + 1
+            if localDocument.deletedAt != nil {
+                delete(document: localDocument) { result in
+                    Logger.shared.logDebug("Deleted already softdeleted \(localDocument.titleAndId) (there is a new one comming from the sync)",
+                                           category: .document)
+                }
+            } else {
+                doc.version = localDocument.version + 1
 
-            if document.title != localDocument.title {
-                DispatchQueue.mainSync {
-                    BeamNote.updateTitleLocally(id: document.id, document.title)
+                if document.title != localDocument.title {
+                    DispatchQueue.mainSync {
+                        BeamNote.updateTitleLocally(id: document.id, document.title)
+                    }
                 }
             }
         }

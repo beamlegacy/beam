@@ -22,16 +22,16 @@ struct OnboardingProfileCreationView: View {
         if let errorMessage = errorMessage {
             return errorMessage
         }
-        var text = "Choose your username"
+        var text = ""
         if textField.count >= 2 {
-            text += "\nYou can access your profile at beamapp.co/\(textField)"
+            text = "You can access your profile at beamapp.co/%@".localizedStringWith(comment: "Public profile URL", textField)
         }
         return text
     }
 
     var body: some View {
         VStack(spacing: 0) {
-            OnboardingView.TitleText(title: "Create your profile")
+            OnboardingView.TitleText(title: loc("Create your profile"))
             VStack(alignment: .leading, spacing: BeamSpacing._120) {
                 VStack(spacing: 0) {
                     BeamTextField(text: $textField, isEditing: $isEditing, placeholder: "Username", font: BeamFont.regular(size: 14).nsFont,
@@ -58,9 +58,9 @@ struct OnboardingProfileCreationView: View {
 
                 Text(subtitle)
                     .font(BeamFont.regular(size: 12).swiftUI)
-                    .lineLimit(3)
+                    .lineLimit(2)
                     .foregroundColor(errorMessage != nil ? BeamColor.Shiraz.swiftUI : BeamColor.Generic.placeholder.swiftUI)
-                    .frame(minHeight: 80, alignment: .top)
+                    .frame(minHeight: 60, alignment: .top)
             }
             .frame(width: 280)
         }

@@ -70,7 +70,7 @@ class PnSTestView: BaseView {
     
     @discardableResult
     func passFailedToCollectPopUpAlert() -> PnSTestView {
-        button("Send bug report").tap()
+        button("Send bug report").clickOnExistence()
         return self
     }
     

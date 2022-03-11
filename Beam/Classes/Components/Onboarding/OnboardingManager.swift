@@ -26,7 +26,7 @@ struct OnboardingStep: Equatable {
 }
 
 protocol OnboardingManagerDelegate: AnyObject {
-    func onboardingManagerDidFinish()
+    func onboardingManagerDidFinish(userDidSignUp: Bool)
 }
 
 class OnboardingManager: ObservableObject {
@@ -40,6 +40,7 @@ class OnboardingManager: ObservableObject {
         var title: String
         var enabled: Bool
         var secondary: Bool = false
+        var customWidth: CGFloat?
         /// return true to go to the next step
         var onClick: (() -> Bool)?
     }
@@ -184,7 +185,7 @@ class OnboardingManager: ObservableObject {
         let userDidSignUp = userDidSignUp
         Persistence.Authentication.hasSeenOnboarding = true
         resetOnboarding()
-        delegate?.onboardingManagerDidFinish()
+        delegate?.onboardingManagerDidFinish(userDidSignUp: userDidSignUp)
         if userDidSignUp {
             OnboardingNoteCreator.shared.createOnboardingNotes()
         }

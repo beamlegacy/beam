@@ -78,6 +78,18 @@ extension BaseWebNavigationController {
             page?.responseStatusCode = response.statusCode
         }
 
+        if let internalURL = NavigationRouter.responseShouldRedirectToInternalURL(navigationResponse.response) {
+            // Cancel navigation and redirect to the internal URL equivalent.
+            // Because we cancel this navigation, only this internal URL will be added to the web view history, not the
+            // original one.
+            decisionHandler(.cancel)
+
+            let request = URLRequest(url: internalURL)
+            webView.load(request)
+
+            return
+        }
+
         decisionHandler(.allow)
     }
 
@@ -98,6 +110,8 @@ extension BaseWebNavigationController {
             return // webview probably failed to load
         }
 
+        page?.contentDescription = NavigationRouter.browserContentDescription(for: webviewUrl, webView: webView)
+
         if BeamURL(webviewUrl).isErrorPage {
             let beamSchemeUrl = BeamURL(webviewUrl)
             self.page?.url = beamSchemeUrl.originalURLFromErrorPage
@@ -109,8 +123,10 @@ extension BaseWebNavigationController {
                                                     errorUrl: errorUrl,
                                                     defaultLocalizedDescription: BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "localizedDescription"))
             }
+
         } else {
-            self.page?.url = webviewUrl
+            // Present the original, non-internal URL
+            page?.url = NavigationRouter.originalURL(internal: webviewUrl)
         }
         self.page?.leave()
         (page as? BrowserTab)?.updateFavIcon(fromWebView: false, cacheOnly: true)

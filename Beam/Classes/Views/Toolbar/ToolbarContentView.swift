@@ -9,14 +9,12 @@ import Foundation
 import SwiftUI
 import BeamCore
 
-struct ToolbarContentView<List: DownloadListProtocol>: View {
+struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     @ObservedObject private var downloadList: List
     @Environment(\.isMainWindow) private var isMainWindow: Bool
     @Environment(\.colorScheme) private var colorScheme
-
-    @State private var showDownloadPanel: Bool = false
 
     private let windowControlsWidth: CGFloat = 72
 
@@ -27,7 +25,7 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
         let showButton = !downloadList.downloads.isEmpty
         if !showButton {
             DispatchQueue.main.asyncAfter(deadline: .now()) {
-                state.downloaderWindow?.close()
+                downloadList.presentingWindow?.close()
             }
         }
         return showButton
@@ -143,7 +141,7 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
     }
 
     private func onDownloadButtonPressed(containerGeometry: GeometryProxy) {
-        if let downloaderWindow = state.downloaderWindow {
+        if let downloaderWindow = downloadList.presentingWindow {
             downloaderWindow.close()
         } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true) {
             let downloaderView = DownloaderView(downloadList: downloadList) { [weak window] in
@@ -156,7 +154,7 @@ struct ToolbarContentView<List: DownloadListProtocol>: View {
             }
             window.setView(with: downloaderView, at: origin, fromTopLeft: true)
             window.makeKey()
-            state.downloaderWindow = window
+            downloadList.presentingWindow = window
         }
     }
 }

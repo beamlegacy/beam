@@ -9,19 +9,14 @@ final class EmbedContentView: NSView {
     weak var delegate: EmbedContentViewDelegate?
 
     private(set) var webView: BeamWebView?
-    private(set) var embedContent: EmbedContent?
-
-    private let url: URL
 
     private var loadingView: NSView?
     private var webViewProvider: BeamWebViewProviding?
     private var webPage: EmbedNodeWebPage?
-    private var cancellables = Set<AnyCancellable>()
 
     private let borderRadius: CGFloat = 3
 
-    init(frame frameRect: NSRect, url: URL, webViewProvider: BeamWebViewProviding) {
-        self.url = url
+    init(frame frameRect: NSRect, webViewProvider: BeamWebViewProviding) {
         self.webViewProvider = webViewProvider
 
         let loadingView = EmbedLoadingView()
@@ -46,30 +41,7 @@ final class EmbedContentView: NSView {
         layer?.mask = makeMaskLayer(rect: bounds)
     }
 
-    func startLoadingContent() {
-        fetchEmbedContent()
-            .receive(on: DispatchQueue.main)
-            .sink { [url] completion in
-                switch completion {
-                case .failure:
-                    Logger.shared.logError("Embed Node couldn't load content for \(url.absoluteString)", category: .embed)
-                default: break
-                }
-            } receiveValue: { [weak self, weak delegate] embedContent in
-                guard let strongSelf = self else { return }
-                self?.embedContent = embedContent
-                delegate?.embedContentView(strongSelf, didReceiveEmbedContent: embedContent)
-                self?.startLoadingWebView(embedContent: embedContent)
-            }
-            .store(in: &cancellables)
-    }
-
-    private func fetchEmbedContent() -> Future<EmbedContent, EmbedContentError> {
-        let embedContentBuilder = EmbedContentBuilder()
-        return embedContentBuilder.embeddableContentFromAnyStrategy(for: url)
-    }
-
-    private func startLoadingWebView(embedContent: EmbedContent) {
+    func startLoadingWebView(embedContent: EmbedContent) {
         webViewProvider?.webView { [weak self] webView, isReusedWebView in
             self?.prepare(webView, isReusedWebView: isReusedWebView, embedContent: embedContent)
         }
