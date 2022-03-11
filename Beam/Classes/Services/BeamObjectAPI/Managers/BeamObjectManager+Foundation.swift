@@ -80,6 +80,7 @@ extension BeamObjectManager {
 
             // Note: I tried QOS `userInitiated` but I had 50sec latency... `userInteractive` makes it instant.
             DispatchQueue.global(qos: .userInteractive).async {
+                // swiftlint:disable:next date_init
                 let localTimer = Date()
 
                 do {
