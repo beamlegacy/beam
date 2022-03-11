@@ -114,6 +114,8 @@ extension BeamColor {
 extension BeamColor {
     enum PointShoot {
         static let text = BeamColor.From(color: BeamColor.Beam.nsColor)
+        static let placeholder = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.5,
+                                                     darkColor: .Beam, darkAlpha: 0.7)
         static let pointBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.14,
                                                          darkColor: .Beam, darkAlpha: 0.2)
         static let shootBackground = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.28,

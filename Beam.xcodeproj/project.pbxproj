@@ -1076,6 +1076,8 @@
 		A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EC426F8D6A9004B7CDE /* LottieView.swift */; };
 		A5F47EC826F8D718004B7CDE /* editor-publish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC726F8D718004B7CDE /* editor-publish.json */; };
 		A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */ = {isa = PBXBuildFile; fileRef = A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */; };
+		A5FDFA1C27DA44510066A670 /* FormatterViewBackgroundV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FDFA1B27DA44510066A670 /* FormatterViewBackgroundV2.swift */; };
+		A5FDFA2927DB82160066A670 /* DestinationNoteAutocompleteListModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */; };
 		A5FE1615264AD64900B7526D /* CardSwitcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE1614264AD64900B7526D /* CardSwitcher.swift */; };
 		A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */; };
 		B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */; };
@@ -2472,6 +2474,8 @@
 		A5F47EC426F8D6A9004B7CDE /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
 		A5F47EC726F8D718004B7CDE /* editor-publish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-publish.json"; sourceTree = "<group>"; };
 		A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "editor-unpublish.json"; sourceTree = "<group>"; };
+		A5FDFA1B27DA44510066A670 /* FormatterViewBackgroundV2.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FormatterViewBackgroundV2.swift; sourceTree = "<group>"; };
+		A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteListModel.swift; sourceTree = "<group>"; };
 		A5FE1614264AD64900B7526D /* CardSwitcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardSwitcher.swift; sourceTree = "<group>"; };
 		A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteManager.swift; sourceTree = "<group>"; };
 		B5056A8C26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpAndFeedbackTests.swift; sourceTree = "<group>"; };
@@ -3140,6 +3144,7 @@
 			children = (
 				414B98EF25A239F8002E81A3 /* FormatterView.swift */,
 				A5D6250926034B1C00A3E676 /* FormatterViewBackground.swift */,
+				A5FDFA1B27DA44510066A670 /* FormatterViewBackgroundV2.swift */,
 				A56DF8F02625D27500F1CF55 /* TextFormatterView.swift */,
 				418EA94125D696EA005894AA /* HyperlinkFormatterView.swift */,
 			);
@@ -5443,6 +5448,7 @@
 				96988C8225BB0AF2000223A3 /* DestinationNotePicker.swift */,
 				A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */,
 				A545D2FA25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift */,
+				A5FDFA2827DB82160066A670 /* DestinationNoteAutocompleteListModel.swift */,
 				A5C1F049276BEF6A00EF750D /* Tabs */,
 			);
 			path = Toolbar;
@@ -7323,6 +7329,7 @@
 				A5B1DBEE26CE933100F1F81A /* CardReferenceFormatterView.swift in Sources */,
 				A07F2438269D8B0D008918B0 /* UserDefaultStorable.swift in Sources */,
 				52F27FCB25B9B404006E09A2 /* ViewModelFetchedResults.swift in Sources */,
+				A5FDFA2927DB82160066A670 /* DestinationNoteAutocompleteListModel.swift in Sources */,
 				524CF6DB25F29119007312F0 /* SymmetricKey+Serialize.swift in Sources */,
 				0325629426051D3B006513E4 /* NSString+IDNA.m in Sources */,
 				0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */,
@@ -7566,6 +7573,7 @@
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				52842D462715B2610099602C /* AppDelegate+File.swift in Sources */,
 				37C41325278553AF00954FD7 /* PreferredSearchEngine.swift in Sources */,
+				A5FDFA1C27DA44510066A670 /* FormatterViewBackgroundV2.swift in Sources */,
 				A58645E426FB116E00D7FF86 /* WebViewFocusMessageHandler.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
 				8A4172D626A063FD00F93128 /* NSPoint+Beam.swift in Sources */,
