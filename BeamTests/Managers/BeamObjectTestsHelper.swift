@@ -39,7 +39,7 @@ class BeamObjectTestsHelper {
             semaphore.signal()
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(15))
 
         if case .timedOut = semaResult {
             fail("Timedout")
@@ -76,10 +76,11 @@ class BeamObjectTestsHelper {
             return nil
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        let timeout = 50
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(timeout))
 
         if case .timedOut = semaResult {
-            fail("Timedout")
+            fail("Timedout after \(timeout)sec")
         }
 
         return returnedBeamObject
@@ -161,7 +162,7 @@ class BeamObjectTestsHelper {
             return
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(20))
 
 
         if case .timedOut = semaResult {
@@ -232,10 +233,11 @@ class BeamObjectTestsHelper {
             semaphore.signal()
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+        let timeout = 15
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(timeout))
 
         if case .timedOut = semaResult {
-            fail("Timedout")
+            fail("Timedout after \(timeout)secs")
         }
     }
 }
