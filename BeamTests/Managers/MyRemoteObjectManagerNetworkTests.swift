@@ -71,8 +71,14 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                             UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
                     let object = MyRemoteObjectManager.store[key]
                     do {
-                        expect(object) == (try beamObjectHelper.fetchOnAPI(object))
+                        let remoteObject = try beamObjectHelper.fetchOnAPI(object)
+                        expect(object) == remoteObject
+
+                        if object != remoteObject {
+                            dump("ok")
+                        }
                     } catch {
+                        dump(error)
                         fail(error.localizedDescription)
                     }
                 }
@@ -454,15 +460,20 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                     expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                 }
 
-                if let expectedTitle = block["expectedTitle"] as? String {
-                    var expectedResult = object.copy()
-                    expectedResult.title = expectedTitle
-                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-                    expect(expectedResult) == remoteObject
-                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
-                } else {
-                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-                    expect(object) == remoteObject
+                do {
+                    if let expectedTitle = block["expectedTitle"] as? String {
+                        var expectedResult = object.copy()
+                        expectedResult.title = expectedTitle
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                        expect(expectedResult) == remoteObject
+                        expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
+                    } else {
+                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
+                        expect(object) == remoteObject
+                    }
+                } catch {
+                    dump(error)
+                    fail(error.localizedDescription)
                 }
             }
 
@@ -676,12 +687,12 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 MyRemoteObjectManager.store.removeAll()
             }
 
-            xcontext("when objects exist on the API side") {
+            context("when objects exist on the API side") {
                 beforeEach {
                     self.saveAllObjectsAndSaveChecksum()
                 }
 
-                xcontext("when remote updatedAt is more recent") {
+                context("when remote updatedAt is more recent") {
                     beforeEach {
                         // to fetch previousChecksum
                         object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
@@ -692,7 +703,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         _ = BeamObjectTestsHelper().saveOnAPI(object)
                     }
 
-                    xcontext("Foundation") {
+                    context("Foundation") {
                         it("fetches object") {
                             let networkCalls = APIRequest.callsCount
 
@@ -722,7 +733,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with PromiseKit") {
+                    context("with PromiseKit") {
                         it("fetches object") {
                             let networkCalls = APIRequest.callsCount
                             let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
@@ -750,7 +761,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with Promises") {
+                    context("with Promises") {
                         it("fetches object") {
                             let networkCalls = APIRequest.callsCount
                             let promise: Promises.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
@@ -779,9 +790,9 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("when remote updatedAt is older") {
-                    xcontext("when forcing update") {
-                        xcontext("Foundation") {
+                context("when remote updatedAt is older") {
+                    context("when forcing update") {
+                        context("Foundation") {
                             it("fetches object") {
                                 let networkCalls = APIRequest.callsCount
 
@@ -807,7 +818,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
                         }
-                        xcontext("with PromiseKit") {
+                        context("with PromiseKit") {
                             it("fetches object") {
                                 let networkCalls = APIRequest.callsCount
                                 let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1, forced: true)
@@ -831,7 +842,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
                         }
-                        xcontext("with Promises") {
+                        context("with Promises") {
                             it("fetches object") {
                                 let networkCalls = APIRequest.callsCount
                                 let promise: Promises.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1, forced: true)
@@ -857,8 +868,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("when not forcing update") {
-                        xcontext("Foundation") {
+                    context("when not forcing update") {
+                        context("Foundation") {
                             it("doesnt't fetch object") {
                                 let networkCalls = APIRequest.callsCount
 
@@ -880,7 +891,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
                         }
-                        xcontext("with PromiseKit") {
+                        context("with PromiseKit") {
                             it("doesnt't fetch object") {
                                 let networkCalls = APIRequest.callsCount
                                 let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
@@ -902,7 +913,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
                         }
-                        xcontext("with Promises") {
+                        context("with Promises") {
                             it("doesnt't fetch object") {
                                 let networkCalls = APIRequest.callsCount
                                 let promise: Promises.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
@@ -927,8 +938,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("when objects don't exist on the API side") {
-                xcontext("Foundation") {
+            context("when objects don't exist on the API side") {
+                context("Foundation") {
                     it("doesn't return error") {
                         let networkCalls = APIRequest.callsCount
 
@@ -950,7 +961,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                     }
                 }
-                xcontext("PromiseKit") {
+                context("PromiseKit") {
                     it("doesn't return error") {
                         let networkCalls = APIRequest.callsCount
                         let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
@@ -972,7 +983,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                     }
                 }
-                xcontext("Promises") {
+                context("Promises") {
                     it("doesn't return error") {
                         let networkCalls = APIRequest.callsCount
                         let promise: Promises.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
@@ -1015,15 +1026,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 MyRemoteObjectManager.store.removeAll()
             }
 
-            xcontext("when objects don't exist on the API") {
-                xcontext("when we don't send previousChecksum") {
+            context("when objects don't exist on the API") {
+                context("when we don't send previousChecksum") {
                     it("doesn't have previousChecksum") {
                         for (_, object) in MyRemoteObjectManager.store {
                             expect(object.previousChecksum).to(beNil())
                         }
                     }
 
-                    xcontext("without direct upload") {
+                    context("without direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
                         beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = false }
                         afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
@@ -1050,10 +1061,20 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload") {
-                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
-                        beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = true }
-                        afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
+                    context("with direct upload") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
+
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDataOnSeparateCall = true
+                            BeamObjectManager.uploadTypeForTests = .directUpload
+                        }
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -1069,7 +1090,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("when we send a previousChecksum") {
+                context("when we send a previousChecksum") {
                     beforeEach {
                         for (key, object) in MyRemoteObjectManager.store {
                             try? BeamObjectChecksum.savePreviousChecksum(object: object,
@@ -1078,7 +1099,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("without direct upload") {
+                    context("without direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
                         beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = false }
                         afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
@@ -1102,10 +1123,20 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload") {
-                        let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
-                        beforeEach { Configuration.beamObjectDataUploadOnSeparateCall = true }
-                        afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
+                    context("with direct upload") {
+                        let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
+
+                        beforeEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDataOnSeparateCall = true
+                            BeamObjectManager.uploadTypeForTests = .directUpload
+                        }
+                        afterEach {
+                            Configuration.beamObjectDataUploadOnSeparateCall = beforeConfigurationUpload
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration
+                            BeamObjectManager.uploadTypeForTests = .multipartUpload
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -1124,39 +1155,38 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
             context("when all objects already exist, and we save all with 1 conflicted object") {
                 let newTitle1 = "new Title1"
-                var shouldDirectUpload = false
-
-                beforeEach {
-                    self.saveAllObjectsAndSaveChecksum(shouldDirectUpload)
-
-                    dump(Configuration.beamObjectDataUploadOnSeparateCall)
-                    
-                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                    title1 = object1.title!
-                    title2 = object2.title!
-                    title3 = object3.title!
-
-                    BeamDate.travel(2)
-
-                    // Create 1 conflicted object
-                    object1.title = "fake"
-                    object1.updatedAt = BeamDate.now
-                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object1)
-
-                    object1.title = newTitle1
-                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
-                }
 
                 context("with replace policy") {
                     context("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
+
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": newTitle1,
                              "networkCallFiles": ["update_beam_objects",
                                                   "beam_object",
                                                   "update_beam_object"]
@@ -1165,6 +1195,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": newTitle1,
                              "networkCallFiles": ["update_beam_objects",
                                                   "beam_object",
                                                   "update_beam_object"]
@@ -1173,6 +1204,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         itBehavesLike("saveAllOnBeamObjectApi with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": newTitle1,
                              "networkCallFiles": ["update_beam_objects",
                                                   "beam_object",
                                                   "update_beam_object"]
@@ -1180,14 +1212,34 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    fcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
-                        shouldDirectUpload = true
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
                         }
 
                         afterEach {
@@ -1198,6 +1250,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": newTitle1,
                              "networkCallFiles": ["prepare_beam_objects",
                                                   "direct_upload",
                                                   "update_beam_objects",
@@ -1211,19 +1264,44 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with fetch and raise error policy") {
+                context("with fetch and raise error policy") {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
+
                     afterEach {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
+
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
                              "networkCallFiles": ["update_beam_objects",
                                                   "beam_object",
                                                   "update_beam_objects"]
@@ -1232,6 +1310,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
                              "networkCallFiles": ["update_beam_objects",
                                                   "beam_object",
                                                   "update_beam_objects"]
@@ -1240,6 +1319,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         itBehavesLike("saveAllOnBeamObjectApi with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
                              "networkCallFiles": ["update_beam_objects",
                                                   "beam_object",
                                                   "update_beam_objects"]
@@ -1247,13 +1327,34 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
                         }
 
                         afterEach {
@@ -1264,6 +1365,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
+                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
                              "networkCallFiles": ["prepare_beam_objects",
                                                   "direct_upload",
                                                   "update_beam_objects",
@@ -1278,47 +1380,47 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("when all objects exist, and with save with multiple conflicted object") {
+            context("when all objects exist, and with save with multiple conflicted object") {
                 let newTitle1 = "new Title1"
                 let newTitle2 = "new Title2"
 
-                beforeEach {
-                    self.saveAllObjectsAndSaveChecksum()
+                context("with replace policy") {
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
 
-                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+                            self.saveAllObjectsAndSaveChecksum()
 
-                    title1 = object1.title!
-                    title2 = object2.title!
-                    title3 = object3.title!
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
 
-                    BeamDate.travel(2)
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
 
-                    // Create 2 conflicted objects
+                            BeamDate.travel(2)
 
-                    object1.title = "fake"
-                    object2.title = "fake"
+                            // Create 2 conflicted objects
 
-                    object1.updatedAt = BeamDate.now
-                    object2.updatedAt = BeamDate.now
+                            object1.title = "fake"
+                            object2.title = "fake"
 
-                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
-                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
 
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object1)
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
 
-                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
-                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
-                }
+                            object1.title = newTitle1
+                            object2.title = newTitle2
 
-                xcontext("with replace policy") {
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -1345,13 +1447,45 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 2 conflicted objects
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
                         }
 
                         afterEach {
@@ -1378,7 +1512,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with fetch and raise error policy") {
+                context("with fetch and raise error policy") {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
@@ -1386,8 +1520,42 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
+
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 2 conflicted objects
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -1426,13 +1594,45 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 2 conflicted objects
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
                         }
 
                         afterEach {
@@ -1464,52 +1664,52 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("when all objects exist, and we save with all objects in conflict") {
+            context("when all objects exist, and we save with all objects in conflict") {
                 let newTitle1 = "new Title1"
                 let newTitle2 = "new Title2"
                 let newTitle3 = "new Title3"
 
-                beforeEach {
-                    self.saveAllObjectsAndSaveChecksum()
+                context("with replace policy") {
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
 
-                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+                            self.saveAllObjectsAndSaveChecksum()
 
-                    title1 = object1.title!
-                    title2 = object2.title!
-                    title3 = object3.title!
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
 
-                    BeamDate.travel(2)
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
 
-                    object1.title = "fake"
-                    object2.title = "fake"
-                    object3.title = "fake"
+                            BeamDate.travel(2)
 
-                    object1.updatedAt = BeamDate.now
-                    object2.updatedAt = BeamDate.now
-                    object3.updatedAt = BeamDate.now
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
 
-                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
-                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
-                    MyRemoteObjectManager.store[object3.beamObjectId] = object3
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
 
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object1)
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object2)
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
-                    object3.title = newTitle3
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
 
-                    MyRemoteObjectManager.store[object1.beamObjectId] = object1
-                    MyRemoteObjectManager.store[object2.beamObjectId] = object2
-                    MyRemoteObjectManager.store[object3.beamObjectId] = object3
-                }
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
 
-                xcontext("with replace policy") {
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -1536,13 +1736,49 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
                         }
 
                         afterEach {
@@ -1572,7 +1808,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with fetch and raise error policy") {
+                context("with fetch and raise error policy") {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
@@ -1581,8 +1817,46 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
+
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
+                        }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -1630,13 +1904,49 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
+
+                            MyRemoteObjectManager.store[object1.beamObjectId] = object1
+                            MyRemoteObjectManager.store[object2.beamObjectId] = object2
+                            MyRemoteObjectManager.store[object3.beamObjectId] = object3
                         }
 
                         afterEach {
@@ -1701,15 +2011,15 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 MyRemoteObjectManager.store.removeAll()
             }
 
-            xcontext("when objects don't exist on the API") {
-                xcontext("when we don't send previousChecksum") {
+            context("when objects don't exist on the API") {
+                context("when we don't send previousChecksum") {
                     it("doesn't have previousChecksums") {
                         for (_, object) in MyRemoteObjectManager.store {
                             expect(object.previousChecksum).to(beNil())
                         }
                     }
 
-                    xcontext("without direct upload neither direct download") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
@@ -1751,7 +2061,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
@@ -1783,7 +2093,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("when we send a previousChecksum") {
+                context("when we send a previousChecksum") {
                     beforeEach {
                         for object in MyRemoteObjectManager.store.values {
                             try? BeamObjectChecksum.savePreviousChecksum(object: object,
@@ -1791,7 +2101,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("without direct upload neither direct download") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
@@ -1833,7 +2143,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
@@ -1866,7 +2176,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("When called twice") {
+            context("When called twice") {
                 let newTitle1 = "new Title1"
 
                 beforeEach {
@@ -1886,8 +2196,8 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     object1.updatedAt = BeamDate.now
                 }
 
-                xcontext("Foundation") {
-                    xcontext("without direct upload") {
+                context("Foundation") {
+                    context("without direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
@@ -1939,15 +2249,20 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload") {
+                    context("with direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration2 = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDataOnSeparateCall = true
+                            BeamObjectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration2
+                            BeamObjectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         it("doesn't generate conflicts") {
@@ -2003,33 +2318,32 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
             }
 
 
-            xcontext("when all objects already exist, and we save all with 1 conflicted object") {
+            context("when all objects already exist, and we save all with 1 conflicted object") {
                 let newTitle1 = "new Title1"
 
-                beforeEach {
-                    self.saveAllObjectsAndSaveChecksum()
+                context("with replace policy") {
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
+                            self.saveAllObjectsAndSaveChecksum()
 
-                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
 
-                    title1 = object1.title!
-                    title2 = object2.title!
-                    title3 = object3.title!
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
 
-                    BeamDate.travel(2)
+                            BeamDate.travel(2)
 
-                    // Create 1 conflicted object
-                    object1.title = "fake"
-                    object1.updatedAt = BeamDate.now
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
 
-                    object1.title = newTitle1
-                }
-
-                xcontext("with replace policy") {
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                            object1.title = newTitle1
+                        }
 
                         itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -2065,13 +2379,31 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
                         }
 
                         afterEach {
@@ -2098,7 +2430,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with fetch and raise error policy") {
+                context("with fetch and raise error policy") {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
@@ -2106,11 +2438,29 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    xcontext("without direct upload neither direct download") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = false
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
                         }
 
                         afterEach {
@@ -2154,13 +2504,31 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            // Create 1 conflicted object
+                            object1.title = "fake"
+                            object1.updatedAt = BeamDate.now
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+
+                            object1.title = newTitle1
                         }
 
                         afterEach {
@@ -2189,40 +2557,39 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("when all objects exist, and with save with multiple conflicted object") {
+            context("when all objects exist, and with save with multiple conflicted object") {
                 let newTitle1 = "new Title1"
                 let newTitle2 = "new Title2"
 
-                beforeEach {
-                    self.saveAllObjectsAndSaveChecksum()
+                context("with replace policy") {
+                    context("without direct upload neither direct download") {
+                        beforeEach {
+                            Configuration.beamObjectDirectCall = false
+                            self.saveAllObjectsAndSaveChecksum()
 
-                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
 
-                    title1 = object1.title!
-                    title2 = object2.title!
-                    title3 = object3.title!
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
 
-                    // Create 2 conflicted objects
-                    BeamDate.travel(2)
+                            // Create 2 conflicted objects
+                            BeamDate.travel(2)
 
-                    object1.title = "fake"
-                    object2.title = "fake"
+                            object1.title = "fake"
+                            object2.title = "fake"
 
-                    object1.updatedAt = BeamDate.now
-                    object2.updatedAt = BeamDate.now
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
 
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object1)
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
 
-                    object1.title = newTitle1
-                    object2.title = newTitle2
-                }
-
-                xcontext("with replace policy") {
-                    xcontext("without direct upload neither direct download") {
-                        beforeEach { Configuration.beamObjectDirectCall = false }
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                        }
 
                         itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
@@ -2258,13 +2625,38 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            // Create 2 conflicted objects
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
                         }
 
                         afterEach {
@@ -2294,7 +2686,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with fetch and raise error policy") {
+                context("with fetch and raise error policy") {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
@@ -2302,11 +2694,35 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    xcontext("without direct upload neither direct download") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = false
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            // Create 2 conflicted objects
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
                         }
 
                         afterEach {
@@ -2353,13 +2769,37 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            // Create 2 conflicted objects
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
                         }
 
                         afterEach {
@@ -2392,47 +2832,44 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("when all objects exist, and we save with all objects in conflict") {
+            context("when all objects exist, and we save with all objects in conflict") {
                 let newTitle1 = "new Title1"
                 let newTitle2 = "new Title2"
                 let newTitle3 = "new Title3"
 
-                beforeEach {
-                    self.saveAllObjectsAndSaveChecksum()
-
-                    object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
-                    object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
-
-                    title1 = object1.title!
-                    title2 = object2.title!
-                    title3 = object3.title!
-
-                    BeamDate.travel(2)
-
-                    object1.title = "fake"
-                    object2.title = "fake"
-                    object3.title = "fake"
-
-                    object1.updatedAt = BeamDate.now
-                    object2.updatedAt = BeamDate.now
-                    object3.updatedAt = BeamDate.now
-
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object1)
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object2)
-                    try? BeamObjectChecksum.savePreviousChecksum(object: object3)
-
-                    object1.title = newTitle1
-                    object2.title = newTitle2
-                    object3.title = newTitle3
-                }
-
-                xcontext("with replace policy") {
-                    xcontext("without direct upload neither direct download") {
+                context("with replace policy") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = false
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
                         }
 
                         afterEach {
@@ -2473,13 +2910,40 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
                         }
 
                         afterEach {
@@ -2512,7 +2976,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with fetch and raise error policy") {
+                context("with fetch and raise error policy") {
                     beforeEach {
                         MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                     }
@@ -2520,11 +2984,38 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         MyRemoteObjectManager.conflictPolicy = .replace
                     }
 
-                    xcontext("without direct upload neither direct download") {
+                    context("without direct upload neither direct download") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = false
+                            self.saveAllObjectsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
                         }
 
                         afterEach {
@@ -2574,13 +3065,40 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload and direct download") {
+                    context("with direct upload and direct download") {
                         let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                         let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDirectCall = true
                             BeamObjectManager.uploadTypeForTests = .directUpload
+                            self.saveAllObjectsWithDirectUploadsAndSaveChecksum()
+
+                            object1 = self.objectForUUID("195d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object2 = self.objectForUUID("295d94e1-e0df-4eca-93e6-8778984bcd58")
+                            object3 = self.objectForUUID("395d94e1-e0df-4eca-93e6-8778984bcd58")
+
+                            title1 = object1.title!
+                            title2 = object2.title!
+                            title3 = object3.title!
+
+                            BeamDate.travel(2)
+
+                            object1.title = "fake"
+                            object2.title = "fake"
+                            object3.title = "fake"
+
+                            object1.updatedAt = BeamDate.now
+                            object2.updatedAt = BeamDate.now
+                            object3.updatedAt = BeamDate.now
+
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object1)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object2)
+                            try? BeamObjectChecksum.savePreviousChecksum(object: object3)
+
+                            object1.title = newTitle1
+                            object2.title = newTitle2
+                            object3.title = newTitle3
                         }
 
                         afterEach {
@@ -2636,13 +3154,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 MyRemoteObjectManager.store.removeAll()
             }
 
-            xcontext("when object doesn't exist on the API") {
-                xcontext("when we don't send previousChecksum") {
+            context("when object doesn't exist on the API") {
+                context("when we don't send previousChecksum") {
                     it("starts without checksum") {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).to(beNil())
                     }
 
-                    xcontext("without direct upload") {
+                    context("without direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
@@ -2678,15 +3196,20 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload") {
+                    context("with direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration2 = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDataOnSeparateCall = true
+                            BeamObjectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration2
+                            BeamObjectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectAPI with Foundation") {
@@ -2702,7 +3225,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("when we send a previousChecksum") {
+                context("when we send a previousChecksum") {
                     beforeEach {
                         try? BeamObjectChecksum.savePreviousChecksum(object: MyRemoteObjectManager.store[object.beamObjectId]!,
                                                                      previousChecksum: "foobar".SHA256())
@@ -2712,7 +3235,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum).notTo(beNil())
                     }
 
-                    xcontext("without direct upload") {
+                    context("without direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
 
                         beforeEach {
@@ -2748,15 +3271,20 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with direct upload") {
+                    context("with direct upload") {
                         let beforeConfiguration = Configuration.beamObjectDataUploadOnSeparateCall
+                        let beforeConfiguration2 = Configuration.beamObjectDataOnSeparateCall
 
                         beforeEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = true
+                            Configuration.beamObjectDataOnSeparateCall = true
+                            BeamObjectManager.uploadTypeForTests = .directUpload
                         }
 
                         afterEach {
                             Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration
+                            Configuration.beamObjectDataOnSeparateCall = beforeConfiguration2
+                            BeamObjectManager.uploadTypeForTests = .multipartUpload
                         }
 
                         itBehavesLike("saveOnBeamObjectAPI with Foundation") {
@@ -2773,13 +3301,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                 }
             }
 
-            xcontext("when object already exist on the API") {
-                beforeEach {
-                    beamObjectHelper.saveOnAPIAndSaveChecksum(object)
-                }
-
-                xcontext("when called twice") {
+            context("when object already exist on the API") {
+                context("when called twice") {
                     let newTitle = "new Title"
+
+                    beforeEach {
+                        beamObjectHelper.saveOnAPIAndSaveChecksum(object)
+                    }
 
                     it("doesn't generate conflicts") {
                         object.title = newTitle
@@ -2818,22 +3346,24 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                     }
                 }
 
-                xcontext("with conflict") {
+                context("with conflict") {
                     let newTitle = "new Title"
 
-                    beforeEach {
-                        BeamDate.travel(2)
+                    context("with replace policy") {
+                        context("without direct upload neither direct download") {
+                            beforeEach {
+                                Configuration.beamObjectDirectCall = false
 
-                        // Create 1 conflicted object
-                        object.updatedAt = BeamDate.now
-                        try? BeamObjectChecksum.savePreviousChecksum(object: object)
+                                beamObjectHelper.saveOnAPIAndSaveChecksum(object)
 
-                        object.title = newTitle
-                    }
+                                BeamDate.travel(2)
 
-                    xcontext("with replace policy") {
-                        xcontext("without direct upload neither direct download") {
-                            beforeEach { Configuration.beamObjectDirectCall = false }
+                                // Create 1 conflicted object
+                                object.updatedAt = BeamDate.now
+                                try? BeamObjectChecksum.savePreviousChecksum(object: object)
+
+                                object.title = newTitle
+                            }
 
                             itBehavesLike("saveOnBeamObjectAPI with Foundation") {
                                 ["sut": sut as MyRemoteObjectManager,
@@ -2863,13 +3393,23 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        xcontext("with direct upload and direct download") {
+                        context("with direct upload and direct download") {
                             let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                             let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                             beforeEach {
                                 Configuration.beamObjectDirectCall = true
                                 BeamObjectManager.uploadTypeForTests = .directUpload
+
+                                beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(object)
+
+                                BeamDate.travel(2)
+
+                                // Create 1 conflicted object
+                                object.updatedAt = BeamDate.now
+                                try? BeamObjectChecksum.savePreviousChecksum(object: object)
+
+                                object.title = newTitle
                             }
 
                             afterEach {
@@ -2894,7 +3434,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    xcontext("with fetch and raise error policy") {
+                    context("with fetch and raise error policy") {
                         beforeEach {
                             MyRemoteObjectManager.conflictPolicy = .fetchRemoteAndError
                         }
@@ -2902,8 +3442,20 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             MyRemoteObjectManager.conflictPolicy = .replace
                         }
 
-                        xcontext("without direct upload neither direct download") {
-                            beforeEach { Configuration.beamObjectDirectCall = false }
+                        context("without direct upload neither direct download") {
+                            beforeEach {
+                                Configuration.beamObjectDirectCall = false
+
+                                beamObjectHelper.saveOnAPIAndSaveChecksum(object)
+
+                                BeamDate.travel(2)
+
+                                // Create 1 conflicted object
+                                object.updatedAt = BeamDate.now
+                                try? BeamObjectChecksum.savePreviousChecksum(object: object)
+
+                                object.title = newTitle
+                            }
 
                             itBehavesLike("saveOnBeamObjectAPI with Foundation") {
                                 ["sut": sut as MyRemoteObjectManager,
@@ -2936,13 +3488,23 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
                         }
 
-                        xcontext("with direct upload and direct download") {
+                        context("with direct upload and direct download") {
                             let beforeConfigurationUpload = Configuration.beamObjectDataUploadOnSeparateCall
                             let beforeConfiguration = Configuration.beamObjectDataOnSeparateCall
 
                             beforeEach {
                                 Configuration.beamObjectDirectCall = true
                                 BeamObjectManager.uploadTypeForTests = .directUpload
+
+                                beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(object)
+
+                                BeamDate.travel(2)
+
+                                // Create 1 conflicted object
+                                object.updatedAt = BeamDate.now
+                                try? BeamObjectChecksum.savePreviousChecksum(object: object)
+
+                                object.title = newTitle
                             }
 
                             afterEach {
@@ -3010,19 +3572,13 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
     }
 
     /// Save all objects on the API, and store their checksum
-    private func saveAllObjectsAndSaveChecksum(_ shouldDirectUpload: Bool = false) {
+    private func saveAllObjectsAndSaveChecksum() {
         // Can't do `forEach` or vinyl and save will break it
         let beamObjectHelper = BeamObjectTestsHelper()
 
-        if shouldDirectUpload {
-            beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-            beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-            beamObjectHelper.saveOnAPIWithDirectUploadAndSaveChecksum(MyRemoteObjectManager.store["395d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-        } else {
-            beamObjectHelper.saveOnAPIAndSaveChecksum(MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-            beamObjectHelper.saveOnAPIAndSaveChecksum(MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-            beamObjectHelper.saveOnAPIAndSaveChecksum(MyRemoteObjectManager.store["395d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
-        }
+        beamObjectHelper.saveOnAPIAndSaveChecksum(MyRemoteObjectManager.store["195d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
+        beamObjectHelper.saveOnAPIAndSaveChecksum(MyRemoteObjectManager.store["295d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
+        beamObjectHelper.saveOnAPIAndSaveChecksum(MyRemoteObjectManager.store["395d94e1-e0df-4eca-93e6-8778984bcd58".uuid!]!)
     }
 
     /// Save all objects on the API, and store their checksum
