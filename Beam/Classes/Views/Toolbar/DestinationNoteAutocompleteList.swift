@@ -311,18 +311,20 @@ extension DestinationNoteAutocompleteList {
         private func getAutoCompleteResutsForCardReplacement(_ text: String) -> [AutocompleteResult] {
             var autoCompleteResults = [AutocompleteResult]()
 
+            guard text.count >= 1 else { return autoCompleteResults }
+
             CardReplacementKeyword.allCases.forEach { replacement in
-                if replacement.rawValue.lowercased().contains(text.lowercased()) {
+                if replacement.rawValue.lowercased().starts(with: text.lowercased()) {
                     switch replacement {
                     case .today:
                         autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.today.rawValue,
-                                                                      source: .note))
+                                                                      source: .note, completingText: text))
                     case .tomorrow:
                         autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.tomorrow.rawValue,
-                                                                      source: .note))
+                                                                      source: .note, completingText: text))
                     case .yesterday:
                         autoCompleteResults.append(AutocompleteResult(text: CardReplacementKeyword.yesterday.rawValue,
-                                                                      source: .note))
+                                                                      source: .note, completingText: text))
                     }
                 }
             }
@@ -374,7 +376,18 @@ extension DestinationNoteAutocompleteList {
                 scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey)
                 items = documentManager.loadDocumentsById(ids: Array(scores.keys))
             }
-            let itemsSlice = items.map {
+            let cleanedItems: [DocumentStruct] = items.compactMap { doc in
+                if text.containsSymbol || text.containsWhitespace {
+                    return doc
+                }
+                let slicedItem = doc.title.components(separatedBy: .whitespaces.union(.punctuationCharacters))
+                let containsTextPrefixedSlice = slicedItem.contains { slice in
+                    slice.lowercased().starts(with: text.lowercased())
+                }
+                return containsTextPrefixedSlice ? doc : nil
+            }
+
+            let itemsSlice = cleanedItems.map {
                 AutocompleteResult(text: $0.title, source: .note(noteId: $0.id), completingText: searchText, uuid: $0.id, score: scores[$0.id]?.frecencySortScore)
             }
                 .sorted(by: >)
@@ -382,7 +395,7 @@ extension DestinationNoteAutocompleteList {
             autocompleteItems = Array(itemsSlice)
             let cardReplacementResults = getAutoCompleteResutsForCardReplacement(text)
             if !cardReplacementResults.isEmpty {
-                autocompleteItems.insert(contentsOf: cardReplacementResults, at: 0)
+                autocompleteItems.append(contentsOf: cardReplacementResults)
                 autocompleteItems = Array(autocompleteItems.prefix(itemLimit))
             }
             allowCreateCard = allowCreateCard
