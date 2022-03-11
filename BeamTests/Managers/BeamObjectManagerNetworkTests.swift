@@ -1020,7 +1020,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObject = try BeamObject(object)
                                 var remoteBeamObject: BeamObject?
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(30)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObject) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in

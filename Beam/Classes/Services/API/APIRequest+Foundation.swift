@@ -37,6 +37,10 @@ extension APIRequest {
         // swiftlint:disable:next date_init
         let localTimer = Date()
 
+        #if DEBUG
+        Logger.shared.logDebug("Calling \(filename)", category: .network)
+        #endif
+
         dataTask = BeamURLSession.shared.dataTask(with: request) { (data, response, error) -> Void in
             self.parseDataTask(data: data,
                                response: response,

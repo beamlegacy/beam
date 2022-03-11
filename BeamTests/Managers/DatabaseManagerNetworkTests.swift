@@ -91,7 +91,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
 
                     let promise: PromiseKit.Promise<Bool> = sut.save(dbStruct)
 
-                    waitUntil(timeout: .seconds(10)) { done in
+                    waitUntil(timeout: .seconds(30)) { done in
                         promise.done { success in
                             expect(success) == true
                             done()
