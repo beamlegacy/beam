@@ -174,6 +174,7 @@ public final class Logger {
     private func log(_ message: String, level: OSLogType, category: LogCategory, localTimer: Date? = nil) {
         var timeDiff: TimeInterval?
         if let localTimer = localTimer {
+            // swiftlint:disable:next date_init
             timeDiff = Date().timeIntervalSince(localTimer)
         }
 
