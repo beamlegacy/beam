@@ -278,6 +278,10 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         var expectedResult = object.copy()
                         expectedResult.title = expectedTitle
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(expectedResult))
+
+                        if MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum != (try checksum(expectedResult)) {
+                            dump("not ok")
+                        }
                     } else {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
                     }
