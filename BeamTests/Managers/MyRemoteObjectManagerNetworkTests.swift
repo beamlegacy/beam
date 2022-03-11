@@ -713,7 +713,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         it("fetches object") {
                             let networkCalls = APIRequest.callsCount
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(30)) { done in
                                 _ = try? sut.refreshFromBeamObjectAPI(object1) { result in
                                     expect { try result.get() }.toNot(throwError())
 
