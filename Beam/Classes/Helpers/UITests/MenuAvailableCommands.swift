@@ -58,6 +58,10 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case cleanDownloads = "Clean SF-Symbols-3.dmg from Downloads"
     case showWebViewCount = "Show Number of WebView in Memory"
 
+    // Journal
+    case enableCreateJournalOnce = "Enable Create Journal once per window"
+    case disableCreateJournalOnce = "Disable Create Journal once per window"
+
     var group: UITestMenuGroup? {
         switch self {
         case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia,
@@ -76,6 +80,8 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .mockHttpServer
         case .omniboxFillHistory:
             return .omniboxSetup
+        case .enableCreateJournalOnce, .disableCreateJournalOnce:
+            return .journal
         default:
             return nil
         }
@@ -97,4 +103,5 @@ public enum UITestMenuGroup: String, CaseIterable {
     case passwords = "Passwords"
     case mockHttpServer = "Mock HTTP Server"
     case resizeWindow = "Resize Window"
+    case journal = "Journal"
 }

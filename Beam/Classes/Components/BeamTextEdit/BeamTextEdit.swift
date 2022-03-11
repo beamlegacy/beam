@@ -77,6 +77,7 @@ public extension CALayer {
     var isTodaysNote: Bool {
         _isTodaysNote
     }
+    var initialScrollOffset: CGFloat?
     var note: BeamElement {
         didSet {
             _isTodaysNote = note.note?.isTodaysNote ?? false
@@ -241,6 +242,10 @@ public extension CALayer {
     }
 
     var unpreparedRoot: BeamElement?
+
+    public override func viewDidMoveToWindow() {
+        rootNode?.dispatchDidMoveToWindow(window)
+    }
 
     public override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
@@ -441,6 +446,11 @@ public extension CALayer {
         currentIndicativeLayoutHeight = 0
         layoutInvalidated = false
         updateLayout(nodesRect)
+
+        if !journalMode, let initialScrollOffset = initialScrollOffset, bounds.size.height >= intrinsicContentSize.height {
+                scrollToVisible(NSRect(origin: NSPoint(x: 0, y: initialScrollOffset), size: visibleRect.size))
+            self.initialScrollOffset = nil
+        }
     }
 
     internal var nodesRect: NSRect {
@@ -1356,7 +1366,9 @@ public extension CALayer {
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         guard let window = newWindow else {
             _ = self.resignFirstResponder()
-            self.clearRoot()
+            if !journalMode {
+                self.clearRoot()
+            }
             return
         }
         window.acceptsMouseMovedEvents = true

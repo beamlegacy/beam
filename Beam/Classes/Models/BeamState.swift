@@ -84,6 +84,10 @@ import Sentry
         }
     }
 
+    var cachedJournalScrollView: NSScrollView?
+    var cachedJournalStackView: JournalSimpleStackView?
+    var lastScrollOffset = [UUID: CGFloat]()
+
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
@@ -225,6 +229,11 @@ import Sentry
 
     @discardableResult func navigateToJournal(note: BeamNote?, clearNavigation: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note))", category: "BeamState")
+        if mode == .today, note == nil {
+            self.cachedJournalStackView?.scroll(CGPoint())
+            return true
+        }
+
         mode = .today
 
         currentPage = nil

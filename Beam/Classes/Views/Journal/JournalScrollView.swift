@@ -13,6 +13,9 @@ struct JournalScrollView: NSViewRepresentable {
     typealias NSViewType = NSScrollView
     typealias StackView = JournalSimpleStackView
 
+    var USE_SCROLLVIEW_CACHING = false
+    var USE_STACKVIEW_CACHING = PreferencesManager.createJournalOncePerWindow
+
     var axes: Axis.Set
     var showsIndicators: Bool
     var topInset: CGFloat = 0
@@ -27,7 +30,28 @@ struct JournalScrollView: NSViewRepresentable {
         return JournalScrollViewCoordinator(scrollView: self, data: state.data)
     }
 
-    func makeNSView(context: Context) -> NSScrollView {
+    func createStackView() -> StackView {
+        if USE_STACKVIEW_CACHING, let stackView = state.cachedJournalStackView {
+            return stackView
+        }
+        let journalStackView = JournalSimpleStackView(
+            state: state,
+            safeTop: Toolbar.height,
+            onStartEditing: { self.isEditing = true },
+            verticalSpace: 0,
+            topOffset: 63 + Self.firstNoteTopOffset(forProxy: proxy)
+        )
+        journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
+        if USE_STACKVIEW_CACHING {
+            state.cachedJournalStackView = journalStackView
+        }
+        return journalStackView
+    }
+
+    func createScrollAndStackViews() -> NSScrollView {
+        if USE_SCROLLVIEW_CACHING, let scrollView = state.cachedJournalScrollView {
+            return scrollView
+        }
         let scrollView = NSScrollView()
         scrollView.translatesAutoresizingMaskIntoConstraints = false
         scrollView.automaticallyAdjustsContentInsets = false
@@ -43,14 +67,8 @@ struct JournalScrollView: NSViewRepresentable {
             scrollView.contentInsets = NSEdgeInsets(top: topInset, left: 0, bottom: 0, right: 0)
         }
         // Initial document view
-        let journalStackView = StackView(
-            state: state,
-            safeTop: Toolbar.height,
-            onStartEditing: { self.isEditing = true },
-            verticalSpace: 0,
-            topOffset: 63 + Self.firstNoteTopOffset(forProxy: proxy)
-        )
-        journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
+        let journalStackView = createStackView()
+
         scrollView.documentView = journalStackView
 
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .top, relatedBy: .equal, toItem: scrollView.contentView, attribute: .top, multiplier: 1.0, constant: 0))
@@ -59,9 +77,16 @@ struct JournalScrollView: NSViewRepresentable {
 
         journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
+        if USE_SCROLLVIEW_CACHING {
+            state.cachedJournalScrollView = scrollView
+        }
+        return scrollView
+    }
+
+    func makeNSView(context: Context) -> NSScrollView {
+        let scrollView = createScrollAndStackViews()
         context.coordinator.watchScrollViewBounds(scrollView)
         return scrollView
-
     }
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
@@ -94,7 +119,7 @@ struct JournalScrollView: NSViewRepresentable {
         }
 
         func watchScrollViewBounds(_ scrollView: NSScrollView) {
-            scrollViewContentWatcher = ScrollViewContentWatcher(with: scrollView, data: data)
+            scrollViewContentWatcher = ScrollViewContentWatcher(state: parent.state, scrollView: scrollView, data: data)
             scrollViewContentWatcher?.onScroll = parent.onScroll
         }
     }
@@ -111,9 +136,11 @@ class ScrollViewContentWatcher: NSObject {
     private let data: BeamData
     var onScroll: ((CGPoint) -> Void)?
     weak var contentView: NSClipView?
+    weak var state: BeamState?
 
-    init(with scrollView: NSScrollView, data: BeamData) {
+    init(state: BeamState, scrollView: NSScrollView, data: BeamData) {
         self.data = data
+        self.state = state
 
         super.init()
         contentView = scrollView.contentView
@@ -143,6 +170,7 @@ class ScrollViewContentWatcher: NSObject {
             }
         }
         onScroll?(clipView.bounds.origin)
+        state?.lastScrollOffset[UUID.null] = clipView.bounds.origin.y
     }
 
     private func loadMore() {
