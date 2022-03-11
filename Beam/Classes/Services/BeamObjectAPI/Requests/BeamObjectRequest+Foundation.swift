@@ -638,7 +638,17 @@ extension BeamObjectRequest {
 
         // TODO: are all those fetches optimized, what happens when we have 1,000 objects?
         // Could we limit the amount of parallel calls? Can we stream multiple into the same HTTP Request?
-        for beamObject in beamObjects {
+
+        // Sorted is necessary to avoid issues during tests with Vinyl and returning different content for different objects
+        let sortedBeamObjects: [BeamObject] = {
+            if Configuration.env == .test {
+                return beamObjects.sorted(by: { $0.id.uuidString > $1.id.uuidString })
+            } else {
+                return beamObjects
+            }
+        }()
+
+        for beamObject in sortedBeamObjects {
             guard let dataUrl = beamObject.dataUrl else { continue }
 
             do {
