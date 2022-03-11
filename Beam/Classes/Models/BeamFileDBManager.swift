@@ -498,6 +498,7 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Self.backgroundQueue.async { [weak self] in
             do {
+                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try self?.saveOnBeamObjectsAPI(files) { result in
                     switch result {
@@ -521,6 +522,7 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     private func saveOnNetwork(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         Self.backgroundQueue.async { [weak self] in
             do {
+                // swiftlint:disable:next date_init
                 let localTimer = Date()
                 try self?.saveOnBeamObjectAPI(file) { result in
                     switch result {
