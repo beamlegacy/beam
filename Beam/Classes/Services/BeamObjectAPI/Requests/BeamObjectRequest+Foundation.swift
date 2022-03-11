@@ -336,12 +336,30 @@ extension BeamObjectRequest {
                   raisePrivateKeyError: Bool = false,
                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
         if Configuration.beamObjectOnRest {
+            if Configuration.beamObjectDataOnSeparateCall {
+                return try fetchAllWithDataUrlWithRest(receivedAtAfter: receivedAtAfter,
+                                                       ids: ids,
+                                                       beamObjectType: beamObjectType,
+                                                       skipDeleted: skipDeleted,
+                                                       raisePrivateKeyError: raisePrivateKeyError,
+                                                       completion)
+            }
+
             return try fetchAllWithRest(receivedAtAfter: receivedAtAfter,
                                         ids: ids,
                                         beamObjectType: beamObjectType,
                                         skipDeleted: skipDeleted,
                                         raisePrivateKeyError: raisePrivateKeyError,
                                         completion)
+        }
+
+        if Configuration.beamObjectDataOnSeparateCall {
+            return try fetchAllWithDataUrlWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                                      ids: ids,
+                                                      beamObjectType: beamObjectType,
+                                                      skipDeleted: skipDeleted,
+                                                      raisePrivateKeyError: raisePrivateKeyError,
+                                                      completion)
         }
 
         return try fetchAllWithGraphQL(receivedAtAfter: receivedAtAfter,
@@ -602,6 +620,11 @@ extension BeamObjectRequest {
                 completion(.failure(error))
                 return
             }
+        }
+
+        beamObjects.forEach {
+            // Both dataUrl and data nil is weird, shouldn't happen
+            assert($0.dataUrl != nil || $0.data != nil)
         }
 
         guard !beamObjects.compactMap({ $0.dataUrl }).isEmpty else {
