@@ -99,6 +99,10 @@ public extension String {
         self.matches(withRegex: "[!\"#$%&'()*+,-./:;<=>?@\\[\\\\\\]^_`{|}~]")
     }
 
+    var containsWhitespace: Bool {
+        self.rangeOfCharacter(from: .whitespaces) != nil
+    }
+
     var containsDigit: Bool {
         self.matches(withRegex: "[0-9]")
     }
