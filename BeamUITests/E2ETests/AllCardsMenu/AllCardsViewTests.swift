@@ -12,11 +12,9 @@ class AllCardsViewTests: BaseTest {
     
     
     func SKIPtestAllCardsView() throws {
-        try XCTSkipIf(true, "WIP, TBD in next MR")
+        //try XCTSkipIf(true, "WIP, TBD in next MR")
         // Assert all notes exist
-
         // All notes visible only from journal
-        
         // All, Published, Private
         
         // Note default info TODO
