@@ -1,10 +1,10 @@
 /// A fake download list for SwiftUI preview purposes.
-final class DownloadListFake: DownloadListProtocol {
+final class DownloadListFake: DownloadListProtocol, PopoverWindowPresented {
 
     let isDownloading: Bool
     let progressFractionCompleted: Double
     var downloads = [DownloadListItemFake]()
-    var showAlertFileNotFoundForDownload: DownloadListItemFake?
+    var presentingWindow: PopoverWindow?
 
     init(isDownloading: Bool = true, progressFractionCompleted: Double = 0) {
         self.isDownloading = isDownloading

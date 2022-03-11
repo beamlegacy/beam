@@ -63,6 +63,7 @@ struct NoteView: View {
                 centerText: centerText,
                 showTitle: false,
                 initialFocusedState: initialFocusedState,
+                initialScrollOffset: state.lastScrollOffset[note.id],
                 headerView: {
                     HeaderViewContainer(layoutModel: headerLayoutModel, headerViewModel: headerViewModel)
                         .frame(height: headerHeight)

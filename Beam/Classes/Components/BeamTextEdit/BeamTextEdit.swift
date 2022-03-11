@@ -77,6 +77,7 @@ public extension CALayer {
     var isTodaysNote: Bool {
         _isTodaysNote
     }
+    var initialScrollOffset: CGFloat?
     var note: BeamElement {
         didSet {
             _isTodaysNote = note.note?.isTodaysNote ?? false
@@ -241,6 +242,10 @@ public extension CALayer {
     }
 
     var unpreparedRoot: BeamElement?
+
+    public override func viewDidMoveToWindow() {
+        rootNode?.dispatchDidMoveToWindow(window)
+    }
 
     public override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
@@ -441,6 +446,11 @@ public extension CALayer {
         currentIndicativeLayoutHeight = 0
         layoutInvalidated = false
         updateLayout(nodesRect)
+
+        if !journalMode, let initialScrollOffset = initialScrollOffset, bounds.size.height >= intrinsicContentSize.height {
+                scrollToVisible(NSRect(origin: NSPoint(x: 0, y: initialScrollOffset), size: visibleRect.size))
+            self.initialScrollOffset = nil
+        }
     }
 
     internal var nodesRect: NSRect {
@@ -544,7 +554,7 @@ public extension CALayer {
         guard let cardNote = note as? BeamNote, showTitle else { return }
 
         cardTitleLayer.string = NSAttributedString(string: cardNote.title, attributes: [
-            .font: BeamFont.medium(size: PreferencesManager.editorCardTitleFontSize).nsFont,
+            .font: BeamFont.medium(size: PreferencesManager.journalCardTitleFontSize).nsFont,
             .foregroundColor: BeamColor.Generic.text.cgColor,
             .underlineStyle: NSUnderlineStyle.single.rawValue,
             .underlineColor: hover ? BeamColor.Generic.text.cgColor : BeamColor.Generic.transparent.cgColor
@@ -771,6 +781,14 @@ public extension CALayer {
             node.cmdManager.formatText(in: textNode, for: .check(!checked), with: nil, for: nil, isActive: false)
         } else if inlineFormatter?.formatterHandlesEnter() != true {
             hideInlineFormatter()
+
+            // swiftlint:disable:next empty_enum_arguments
+            if case .check(_) = node.elementKind, node.elementText.isEmpty {
+                guard let node = node as? TextNode else { return }
+                node.cmdManager.formatText(in: node, for: .bullet, with: nil, for: nil, isActive: true)
+                return
+            }
+
             node.cmdManager.beginGroup(with: "Insert line")
             defer {
                 node.cmdManager.endGroup()
@@ -804,6 +822,10 @@ public extension CALayer {
             }
 
             let newElement = BeamElement(str)
+            // swiftlint:disable:next empty_enum_arguments
+            if case .check(_) = node.elementKind {
+                newElement.kind = .check(false)
+            }
             if insertAsChild {
                 if let parent = node._displayedElement {
                     parent.open = true
@@ -1109,7 +1131,7 @@ public extension CALayer {
 
     // MARK: Paste properties
     internal let supportedCopyTypes: [NSPasteboard.PasteboardType] = [.rtf, .string]
-    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSImage.self, NSAttributedString.self, NSString.self]
+    internal let supportedPasteObjects = [BeamNoteDataHolder.self, BeamTextHolder.self, NSURL.self, NSImage.self, NSAttributedString.self, NSString.self]
 
     func initBlinking() {
         let defaults = UserDefaults.standard
@@ -1344,7 +1366,9 @@ public extension CALayer {
     public override func viewWillMove(toWindow newWindow: NSWindow?) {
         guard let window = newWindow else {
             _ = self.resignFirstResponder()
-            self.clearRoot()
+            if !journalMode {
+                self.clearRoot()
+            }
             return
         }
         window.acceptsMouseMovedEvents = true

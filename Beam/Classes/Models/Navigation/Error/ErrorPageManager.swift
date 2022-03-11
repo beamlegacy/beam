@@ -93,7 +93,7 @@ class ErrorPageManager {
     }
 
     func loadPage(for url: URL) {
-        guard var components = URLComponents(string: "\(BeamURL.baseUrl)/\(ErrorPageHandler.path)") else {
+        guard var components = URLComponents(string: "\(BeamURL.baseUrl)/\(LocalPageSchemeHandler.path)") else {
             return
         }
 
@@ -138,7 +138,7 @@ class ErrorPageManager {
     }
 }
 
-class ErrorPageHandler: BeamSchemeHandlerResponse {
+class LocalPageSchemeHandler: BeamSchemeHandlerResponse {
 
     static let path = BeamURL.Path.errorpage.rawValue
 

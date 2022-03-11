@@ -25,7 +25,7 @@ build:zip:
   script:
     - ./scripts/build_zip.sh
   tags:
-    - macos
+    - macos-mono
   interruptible: true
   retry:
     max: 2

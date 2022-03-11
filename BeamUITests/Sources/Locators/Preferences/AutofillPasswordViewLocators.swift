@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum PasswordViewLocators {
+enum AutofillPasswordViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case cancelButton = "Cancel"

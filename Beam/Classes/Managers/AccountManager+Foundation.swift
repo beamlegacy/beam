@@ -246,6 +246,14 @@ extension AccountManager {
         Persistence.cleanUp()
         AppDelegate.main.disconnectWebSockets()
         AuthenticationManager.shared.persistenceDidUpdate()
+
+        // BeamObject Coredata Checksum
+        do {
+            try BeamObjectChecksum.deleteAll()
+        } catch {
+            Logger.shared.logError("Could not delete BeamObjectChecksum", category: .general)
+        }
+
         moveToSignedOff()
         Logger.shared.logDebug("Logged out", category: .general)
     }

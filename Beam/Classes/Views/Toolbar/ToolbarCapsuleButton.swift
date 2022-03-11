@@ -14,7 +14,6 @@ struct ToolbarCapsuleButton<Content: View>: View {
     var isSelected = false
     var isForeground = false
     var tabStyle = false
-    var lonelyStyle = false
     var hueTint: Double?
     var label: ((_ isHovering: Bool, _ isPressed: Bool) -> Content)?
     var action: (() -> Void)?
@@ -22,14 +21,13 @@ struct ToolbarCapsuleButton<Content: View>: View {
     @State var isHovering: Bool = false
     @State var isPressed: Bool = false
 
-    init(isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, lonelyStyle: Bool = false, hueTint: Double? = nil,
+    init(isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, hueTint: Double? = nil,
          @ViewBuilder label: @escaping (_ isHovering: Bool, _ isPressed: Bool) -> Content,
          action: (() -> Void)? = nil) {
         self.text = ""
         self.isForeground = isForeground
         self.isSelected = isSelected
         self.tabStyle = tabStyle
-        self.lonelyStyle = lonelyStyle
         self.hueTint = hueTint
         self.label = label
         self.action = action
@@ -54,13 +52,11 @@ struct ToolbarCapsuleButton<Content: View>: View {
         if tabStyle {
             if isForeground, let hueTint = hueTint {
                 return Color(hue: hueTint, saturation: 1, brightness: 0.8, opacity: 0.5)
-            } else if isPressed && lonelyStyle {
-                return BeamColor.ToolBar.capsuleStrokeClicked.swiftUI
             } else if isPressed {
                 return BeamColor.ToolBar.capsuleTabStrokeClicked.swiftUI
-            } else if isForeground && !lonelyStyle {
+            } else if isForeground {
                 return BeamColor.ToolBar.capsuleTabForegroundStroke.swiftUI
-            } else if isHovering && (!isForeground || lonelyStyle) {
+            } else if isHovering {
                 return BeamColor.ToolBar.capsuleStroke.swiftUI
             }
         } else {
@@ -134,13 +130,12 @@ struct ToolbarCapsuleButton<Content: View>: View {
 }
 
 extension ToolbarCapsuleButton where Content == EmptyView {
-    init(text: String, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, lonelyStyle: Bool = false,
+    init(text: String, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false,
          action: (() -> Void)? = nil) {
         self.text = text
         self.isSelected = isSelected
         self.isForeground = isForeground
         self.tabStyle = tabStyle
-        self.lonelyStyle = lonelyStyle
         self.action = action
         self.label = nil
     }

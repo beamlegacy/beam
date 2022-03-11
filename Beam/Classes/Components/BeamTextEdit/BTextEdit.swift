@@ -35,6 +35,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     var centerText = PreferencesManager.editorIsCentered
     var showTitle = true
     var initialFocusedState: NoteEditFocusedState?
+    var initialScrollOffset: CGFloat?
 
     var headerView: () -> Content
 
@@ -45,9 +46,10 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
     }
 
     public func makeNSView(context: Context) -> NSViewType {
-        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: true)
+        let edit = BeamTextEdit(root: note, journalMode: false, enableDelayedInit: initialScrollOffset == nil)
 
         edit.state = state
+        edit.initialScrollOffset = initialScrollOffset
         updateEditorProperties(edit, context: context)
 
         let scrollView = buildScrollView()
@@ -58,6 +60,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
             scrollView.contentView.rightAnchor.constraint(equalTo: edit.rightAnchor),
             scrollView.contentView.topAnchor.constraint(equalTo: edit.topAnchor)
         ])
+
         if let onScroll = onScroll {
             context.coordinator.observeScrollViewScroll(scrollView, onScroll: onScroll)
         }
@@ -173,6 +176,7 @@ extension BTextEditScrollable {
 
         @objc private func contentOffsetDidChange(notification: Notification) {
             guard let clipView = notification.object as? NSClipView else { return }
+            parent.state.lastScrollOffset[parent.note.id] = clipView.bounds.origin.y
             onScroll?(clipView.bounds.origin)
         }
     }

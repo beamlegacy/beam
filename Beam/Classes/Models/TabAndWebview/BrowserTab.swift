@@ -49,7 +49,9 @@ import Promises
 
     var creationDate: Date = BeamDate.now
     var lastViewDate: Date = BeamDate.now
-    private var scope = Set<AnyCancellable>()
+
+    private var webViewCancellables = Set<AnyCancellable>()
+    private var contentDescriptionCancellables = Set<AnyCancellable>()
 
     static var webViewConfiguration = BeamWebViewConfigurationBase(handlers: [
         WebPositionsMessageHandler(),
@@ -76,7 +78,7 @@ import Promises
     // MARK: - WebPage properties
     @Published public var webView: BeamWebView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration) {
         didSet {
-            setupObservers()
+            observeWebView()
         }
     }
     var webviewWindow: NSWindow? { webView.window }
@@ -85,6 +87,13 @@ import Promises
     @Published var originalQuery: String?
     @Published var url: URL?
     @Published var requestedURL: URL?
+
+    @Published var contentDescription: BrowserContentDescription? {
+        didSet {
+            observeContentDescription()
+        }
+    }
+
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
     @Published var mouseHoveringLocation: MouseHoveringLocation = .none
@@ -140,7 +149,7 @@ import Promises
     }()
     var pointAndShootInstalled: Bool = true
     var pointAndShootEnabled: Bool {
-        state?.focusOmniBox != true
+        contentType == .web && state?.focusOmniBox != true
     }
     lazy var webFrames: WebFrames? = {
         let webFrames = WebFrames()
@@ -197,7 +206,7 @@ import Promises
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
         addTreeToNote()
-        setupObservers()
+        observeWebView()
         beamNavigationController?.isNavigatingFromNote = isFromNoteSearch
     }
 
@@ -314,10 +323,6 @@ import Promises
         }
     }
 
-    private func receivedWebviewTitle(_ title: String? = nil) {
-        self.title = title ?? ""
-    }
-
     private var updateFavIconDispatchItem: DispatchWorkItem?
     func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
         guard let url = url else { favIcon = nil; return }
@@ -349,17 +354,11 @@ import Promises
         noteController.score = score
     }
 
-    private func setupObservers() {
-        if !scope.isEmpty {
+    private func observeWebView() {
+        if !webViewCancellables.isEmpty {
             cancelObservers()
         }
         Logger.shared.logDebug("setupObservers", category: .web)
-
-        webView.publisher(for: \.title)
-            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
-            .sink { [unowned self] value in
-            self.receivedWebviewTitle(value)
-        }.store(in: &scope)
 
         webView.publisher(for: \.url).sink { [unowned self] webviewUrl in
             guard let webviewUrl = webviewUrl else {
@@ -372,15 +371,14 @@ import Promises
             if !webView.isLoading, let url = url, webviewUrl.isSameOrigin(as: url) {
                 self.url = webviewUrl
             }
-        }.store(in: &scope)
-        webView.publisher(for: \.isLoading).sink { [unowned self] value in isLoading = value }.store(in: &scope)
-        webView.publisher(for: \.estimatedProgress).sink { [unowned self] value in estimatedLoadingProgress = value }.store(in: &scope)
+        }.store(in: &webViewCancellables)
+
         webView.publisher(for: \.hasOnlySecureContent)
-            .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &scope)
-        webView.publisher(for: \.serverTrust).sink { [unowned self] value in serverTrust = value }.store(in: &scope)
-        webView.publisher(for: \.canGoBack).sink { [unowned self] value in canGoBack = value }.store(in: &scope)
-        webView.publisher(for: \.canGoForward).sink { [unowned self] value in canGoForward = value }.store(in: &scope)
-        webView.publisher(for: \.backForwardList).sink { [unowned self] value in backForwardList = value }.store(in: &scope)
+            .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &webViewCancellables)
+        webView.publisher(for: \.serverTrust).sink { [unowned self] value in serverTrust = value }.store(in: &webViewCancellables)
+        webView.publisher(for: \.canGoBack).sink { [unowned self] value in canGoBack = value }.store(in: &webViewCancellables)
+        webView.publisher(for: \.canGoForward).sink { [unowned self] value in canGoForward = value }.store(in: &webViewCancellables)
+        webView.publisher(for: \.backForwardList).sink { [unowned self] value in backForwardList = value }.store(in: &webViewCancellables)
 
         webView.navigationDelegate = beamNavigationController
         webView.uiDelegate = uiDelegateController
@@ -390,12 +388,36 @@ import Promises
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
                 self?.pointAndShoot?.dismissActiveShootGroup()
             }
-        }.store(in: &scope)
+        }.store(in: &webViewCancellables)
+    }
+
+    private func observeContentDescription() {
+        contentDescriptionCancellables = []
+
+        contentDescription?.titlePublisher
+            .sink { [weak self] title in
+                self?.title = title ?? ""
+            }.store(in: &contentDescriptionCancellables)
+
+        contentDescription?.isLoadingPublisher
+            .sink { [weak self] value in
+                self?.isLoading = value
+            }
+            .store(in: &contentDescriptionCancellables)
+
+        contentDescription?.estimatedProgressPublisher
+            .sink { [weak self] value in
+                self?.estimatedLoadingProgress = value
+            }
+            .store(in: &contentDescriptionCancellables)
     }
 
     func cancelObservers() {
         Logger.shared.logDebug("cancelObservers", category: .javascript)
-        scope.removeAll()
+
+        webViewCancellables = []
+        contentDescriptionCancellables = []
+
         webView.navigationDelegate = nil
         webView.uiDelegate = nil
     }
@@ -427,7 +449,7 @@ import Promises
                 Logger.shared.logDebug("BrowserTab finished loading \(url.absoluteString)", category: .passwordManagerInternal)
                 passwordOverlayController?.webViewFinishedLoading()
             }
-        }.store(in: &scope)
+        }.store(in: &webViewCancellables)
 
     }
 
@@ -446,7 +468,7 @@ import Promises
         uiDelegateController.page = self
         mediaPlayerController = MediaPlayerController(page: self)
         addTreeToNote()
-        setupObservers()
+        observeWebView()
 
         // Load the url
         if let backForwardListUrl = backForwardUrlList {
