@@ -162,8 +162,6 @@ class EmbedNode: ResizableNode {
 
         setAccessibilityLabel("EmbedNode")
         setAccessibilityRole(.textArea)
-
-        applyCollapsedState(animated: false)
     }
 
     override func updateRendering() -> CGFloat {
@@ -241,6 +239,15 @@ class EmbedNode: ResizableNode {
 
     deinit {
         expandedContent?.removeFromSuperview()
+    }
+
+    override func didMoveToWindow(_ window: NSWindow?) {
+        if window != nil, expandedContent == nil {
+            applyCollapsedState(animated: false)
+        } else if window == nil {
+            expandedContent?.removeFromSuperview()
+            expandedContent = nil
+        }
     }
 
 }
