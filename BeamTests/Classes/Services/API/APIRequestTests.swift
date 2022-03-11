@@ -134,7 +134,7 @@ class APIRequestTests: QuickSpec {
                 }
 
                 it("sends a request") {
-                    waitUntil(timeout: .seconds(10)) { [unowned self] done in
+                    waitUntil(timeout: .seconds(30)) { [unowned self] done in
                         let promise: Promises.Promise<ForgotPassword> = self.sut
                             .performRequest(bodyParamsRequest: bodyParamsRequest,
                                             authenticatedCall: false)

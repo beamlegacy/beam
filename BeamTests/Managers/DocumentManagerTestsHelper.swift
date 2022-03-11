@@ -149,7 +149,7 @@ class DocumentManagerTestsHelper {
     }
 
     func deleteDocumentStruct(_ docStruct: DocumentStruct) {
-        waitUntil(timeout: .seconds(10)) { done in
+        waitUntil(timeout: .seconds(60)) { done in
             self.documentManager.delete(document: docStruct) { result in
                 done()
             }
@@ -157,7 +157,7 @@ class DocumentManagerTestsHelper {
     }
 
     func softDeleteDocumentStruct(_ docStruct: DocumentStruct) {
-        waitUntil(timeout: .seconds(10)) { done in
+        waitUntil(timeout: .seconds(20)) { done in
             self.documentManager.softDelete(id: docStruct.id) { result in
                 done()
             }
@@ -165,7 +165,7 @@ class DocumentManagerTestsHelper {
     }
 
     func deleteDatabaseStruct(_ dbStruct: DatabaseStruct, includedRemote: Bool = true) {
-        waitUntil(timeout: .seconds(10)) { done in
+        waitUntil(timeout: .seconds(20)) { done in
             self.databaseManager.delete(dbStruct, includedRemote: includedRemote) { result in
                 done()
             }
