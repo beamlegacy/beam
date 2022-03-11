@@ -85,6 +85,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var mediaPlayerController: MediaPlayerController?
         var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
         var score: Float = 0
+        var contentDescription: BrowserContentDescription?
         var authenticationViewModel: AuthenticationViewModel?
         var searchViewModel: SearchViewModel?
         var errorPageManager: ErrorPageManager?
