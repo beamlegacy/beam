@@ -39,6 +39,7 @@ struct AdvancedPreferencesView: View {
     @State var isWebsocketEnabled = Configuration.websocketEnabled
     @State var restBeamObject = Configuration.beamObjectOnRest
     @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
+    @State var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -445,6 +446,14 @@ struct AdvancedPreferencesView: View {
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     showWebOnLaunchIfTabsView
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Create the journal views once (needs restart")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    createJournalOncePerWindowView
                 }
 
                 Preferences.Section(title: "Actions", bottomDivider: true) {
@@ -960,6 +969,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([showWebOnLaunchIfTabs].publisher.first()) {
                 PreferencesManager.showWebOnLaunchIfTabs = $0
+            }
+    }
+
+    private var createJournalOncePerWindowView: some View {
+        return Toggle(isOn: $createJournalOncePerWindow) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([createJournalOncePerWindow].publisher.first()) {
+                PreferencesManager.createJournalOncePerWindow = $0
             }
     }
 }

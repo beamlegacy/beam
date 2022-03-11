@@ -84,6 +84,10 @@ import Sentry
         }
     }
 
+    var cachedJournalScrollView: NSScrollView?
+    var cachedJournalStackView: JournalSimpleStackView?
+    var lastScrollOffset = [UUID: CGFloat]()
+
     @Published var currentPage: WindowPage?
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
@@ -101,7 +105,6 @@ import Sentry
     }
 
     var downloadButtonPosition: CGPoint?
-    weak var downloaderWindow: PopoverWindow?
 
     private var scope = Set<AnyCancellable>()
     let cmdManager = CommandManager<BeamState>()
@@ -226,6 +229,11 @@ import Sentry
 
     @discardableResult func navigateToJournal(note: BeamNote?, clearNavigation: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note))", category: "BeamState")
+        if mode == .today, note == nil {
+            self.cachedJournalStackView?.scroll(CGPoint())
+            return true
+        }
+
         mode = .today
 
         currentPage = nil
@@ -591,9 +599,10 @@ import Sentry
             focusOmniBox = true
             return
         }
+        var selectedRange: Range<Int>?
         if mode == .web {
             if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
-                autocompleteManager.searchQuerySelectedRange = url.wholeRange
+                selectedRange = url.wholeRange
                 autocompleteManager.setQuery(url, updateAutocompleteResults: false)
             } else if !autocompleteManager.searchQuery.isEmpty {
                 autocompleteManager.resetQuery()
@@ -601,6 +610,9 @@ import Sentry
         }
         autocompleteManager.prepareResultsForAppearance(for: autocompleteManager.searchQuery) { [unowned self] in
             self.focusOmniBox = true
+            if let selectedRange = selectedRange {
+                self.autocompleteManager.searchQuerySelectedRange = selectedRange
+            }
         }
     }
 
@@ -686,16 +698,6 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
 
     private func setDefaultDisplayMode() {
-
-        let haveSeenWebOnboarding = Persistence.Authentication.hasSeenWebTutorial
-
-        if haveSeenWebOnboarding == nil || haveSeenWebOnboarding == false {
-            guard let onboardingURL = URL(string: EnvironmentVariables.webOnboardingURL), Configuration.env != .test else { return }
-            createTab(withURL: onboardingURL)
-            Persistence.Authentication.hasSeenWebTutorial = true
-            return
-        }
-
         if PreferencesManager.showWebOnLaunchIfTabs {
             let openTabs = browserTabsManager.tabs
             if openTabs.count > 0 {
@@ -703,6 +705,12 @@ extension BeamState: BrowserTabsManagerDelegate {
             }
             return
         }
+    }
+
+    func displayWelcomeTour() {
+        guard let onboardingURL = URL(string: EnvironmentVariables.webOnboardingURL) else { return }
+        createTab(withURL: onboardingURL)
+        Persistence.Authentication.hasSeenWelcomeTour = true
     }
 }
 

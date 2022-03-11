@@ -223,7 +223,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     // MARK: Sync
-    static var conflictPolicy: BeamObjectConflictResolution = .replace
+    static var conflictPolicy: BeamObjectConflictResolution = .fetchRemoteAndError
 
     func willSaveAllOnBeamObjectApi() {}
 
@@ -335,7 +335,14 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
     func manageConflict(_ object: Link,
                         _ remoteObject: Link) throws -> Link {
-        fatalError("Managed by BeamObjectManager")
+        var result = object
+        if remoteObject.updatedAt > object.updatedAt {
+            result = remoteObject
+        }
+        result.frecencyVisitScore = remoteObject.frecencyVisitScore ?? object.frecencyVisitScore
+        result.frecencyVisitSortScore = remoteObject.frecencyVisitSortScore ?? object.frecencyVisitSortScore
+        result.frecencyVisitLastAccessAt = remoteObject.frecencyVisitLastAccessAt ?? object.frecencyVisitLastAccessAt
+        return result
     }
 
     func saveObjectsAfterConflict(_ objects: [Link]) throws {

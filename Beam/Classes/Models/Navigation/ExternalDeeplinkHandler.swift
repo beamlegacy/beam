@@ -8,7 +8,10 @@
 import Foundation
 
 class ExternalDeeplinkHandler {
-    static let internalSchemes: Set<String> = ["http", "https", "file", "about", "beam"]
+    static let internalSchemes: Set<String> = {
+        let schemes: Set<String> = ["http", "https", "file", "blob", "about", "beam"]
+        return schemes.union(NavigationRouter.customSchemes)
+    }()
 
     let request: URLRequest
 

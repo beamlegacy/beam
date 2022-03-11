@@ -27,4 +27,14 @@ class UserInfoRequest: APIRequest {
         let me: UserMe?
         let errors: [UserErrorData]?
     }
+
+    struct UpdatePasswordParameters: Encodable {
+        let currentPassword: String
+        let newPassword: String
+    }
+
+    struct UpdatePassword: Decodable, Errorable {
+        let success: Bool?
+        let errors: [UserErrorData]?
+    }
 }

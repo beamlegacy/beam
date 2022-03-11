@@ -112,4 +112,12 @@ class URLBeamTest: XCTestCase {
         XCTAssertEqual(URL(string: "http://www.google.com")!.withRootPath.absoluteString, "http://www.google.com/")
         XCTAssertEqual(URL(string: "http://www.google.com/search")!.withRootPath.absoluteString, "http://www.google.com/search")
     }
+
+    func testReplaceScheme() {
+        XCTAssertEqual(
+            URL(string: "http://example.com/dir/page.html")?.replacingScheme(with: "beam-wsh").absoluteString,
+            "beam-wsh://example.com/dir/page.html"
+        )
+    }
+
 }

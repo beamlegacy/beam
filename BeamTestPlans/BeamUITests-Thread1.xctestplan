@@ -9,12 +9,15 @@
     }
   ],
   "defaultOptions" : {
-    "testRepetitionMode" : "retryOnFailure"
+    "maximumTestExecutionTimeAllowance" : 120,
+    "testRepetitionMode" : "retryOnFailure",
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
       "skippedTests" : [
         "BaseTest",
+        "BrowserFancyUrlTests",
         "JournalTest",
         "LinksTests",
         "LoginPasswordAutocompleteTests",

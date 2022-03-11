@@ -24,6 +24,14 @@ class WebTestView: BaseView {
         return getElementStringValue(element: getDestinationCardElement())
     }
     
+    func getBrowserTabTitleValueByIndex(index: Int) -> String {
+        return getElementStringValue(element: getBrowserTabTitleElements()[index])
+    }
+    
+    func getBrowserTabTitleElements() -> [XCUIElement] {
+        return app.windows.staticTexts.matching(identifier: WebViewLocators.Tabs.tabTitle.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
         button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier).click()
@@ -90,11 +98,43 @@ class WebTestView: BaseView {
     func getTabByIndex(index: Int) -> XCUIElement {
         getTabs().element(boundBy: index)
     }
+    
+    func focusTabByIndex(index: Int) -> XCUIElement {
+        let tab = getTabByIndex(index: index)
+        WaitHelper().waitForIsHittable(tab)
+        getCenterOfElement(element: tab).hover()
+        return tab
+    }
+    
+    @discardableResult
+    func activateSearchFieldFromTab(index: Int) -> OmniBoxTestView {
+        let tab = getTabByIndex(index: index)
+        if !WaitHelper().waitForIsHittable(tab) {
+            //button(WebViewLocators.Buttons.goToJournalButton.accessibilityIdentifier).hover()
+            //XCTAssertTrue(WaitHelper().waitForIsHittable(tab), "Timeout waiting for tab to be hittable")
+            shortcutsHelper.shortcutActionInvoke(action: .openLocation)
+            sleep(1000)
+            shortcutsHelper.shortcutActionInvoke(action: .openLocation)
+        }
+        tab.hover()
+        tab.tapInTheMiddle()
+        return OmniBoxTestView()
+    }
+    
+    func getTabURLElementByIndex(index: Int) -> XCUIElement {
+        return focusTabByIndex(index: index).staticTexts[WebViewLocators.Tabs.tabURL.accessibilityIdentifier].firstMatch
+    }
 
     func getTabUrlAtIndex(index: Int) -> String {
-        let tab = getTabByIndex(index: index)
-        getCenterOfElement(element: tab).hover()
-        return tab.staticTexts[WebViewLocators.Tabs.tabURL.accessibilityIdentifier].firstMatch.value as? String ?? errorFetchStringValue
+        return getTabURLElementByIndex(index: index).value as? String ?? errorFetchStringValue
+    }
+    
+    func waitForTabUrlAtIndexToEqual(index: Int, expectedString: String) -> Bool {
+        return WaitHelper().waitForStringValueEqual(expectedString, getTabURLElementByIndex(index: index))
+    }
+    
+    func waitForTabTitleToEqual(index: Int, expectedString: String) -> Bool {
+        return WaitHelper().waitForStringValueEqual(expectedString, getBrowserTabTitleElements()[index])
     }
 
     private let tabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")

@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 53;
+	objectVersion = 54;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -48,6 +48,7 @@
 		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
+		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
 		0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */; };
@@ -132,6 +133,22 @@
 		33F64F1227283201004EB0CD /* Macaw in Frameworks */ = {isa = PBXBuildFile; productRef = 33F64F1127283201004EB0CD /* Macaw */; };
 		33F8832127BD3DE700E7673D /* status-update_restart.json in Resources */ = {isa = PBXBuildFile; fileRef = 33F8832027BD3DE700E7673D /* status-update_restart.json */; };
 		33FE719826D38A0400E63849 /* SearchLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33FE719726D38A0400E63849 /* SearchLocationView.swift */; };
+		370794BD27D7A17F00D2768B /* CursorOverrideModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794B727D7A17F00D2768B /* CursorOverrideModifier.swift */; };
+		370794BF27D7A21A00D2768B /* FloatingToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794BE27D7A21A00D2768B /* FloatingToolbar.swift */; };
+		370794C127D7A79100D2768B /* WKWebViewConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */; };
+		370794C327D7A90B00D2768B /* Incrementor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794C227D7A90B00D2768B /* Incrementor.swift */; };
+		370794C527D7A92100D2768B /* IncrementorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794C427D7A92100D2768B /* IncrementorTests.swift */; };
+		370794CD27D7AA0300D2768B /* CustomPDFView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794C727D7AA0300D2768B /* CustomPDFView.swift */; };
+		370794CE27D7AA0300D2768B /* PDFContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794C827D7AA0300D2768B /* PDFContentView.swift */; };
+		370794CF27D7AA0300D2768B /* PDFDocumentViewCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794C927D7AA0300D2768B /* PDFDocumentViewCoordinator.swift */; };
+		370794D027D7AA0300D2768B /* PDFToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794CA27D7AA0300D2768B /* PDFToolbar.swift */; };
+		370794D127D7AA0300D2768B /* PDFContentState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794CB27D7AA0300D2768B /* PDFContentState.swift */; };
+		370794D227D7AA0300D2768B /* PDFDocumentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794CC27D7AA0300D2768B /* PDFDocumentView.swift */; };
+		370794D527D7AAF900D2768B /* NavigationRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794D327D7AAF900D2768B /* NavigationRouter.swift */; };
+		370794D627D7AAF900D2768B /* EmptyContentSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794D427D7AAF900D2768B /* EmptyContentSchemeHandler.swift */; };
+		370794DA27D7AB0E00D2768B /* PDFContentDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794D727D7AB0E00D2768B /* PDFContentDescription.swift */; };
+		370794DB27D7AB0E00D2768B /* BrowserContentDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794D827D7AB0E00D2768B /* BrowserContentDescription.swift */; };
+		370794DC27D7AB0E00D2768B /* WebContentDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 370794D927D7AB0E00D2768B /* WebContentDescription.swift */; };
 		3719854927C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3719854827C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift */; };
 		3719855027C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3719854F27C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift */; };
 		3719855227C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */; };
@@ -548,17 +565,12 @@
 		8A8CD64F274D146D00DEB52B /* WebNoteControllerTest+setContents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8CD64E274D146D00DEB52B /* WebNoteControllerTest+setContents.swift */; };
 		8A8FB65627C7ACAD009C546A /* OauthWebViewWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A8FB65527C7ACAC009C546A /* OauthWebViewWindow.swift */; };
 		8A9309FD27A04E2C00064133 /* tsconfig.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309EF27A04E2B00064133 /* tsconfig.json */; };
-		8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F127A04E2B00064133 /* PasswordManagerUIMock.ts */; };
 		8A9309FF27A04E2C00064133 /* jest.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F227A04E2B00064133 /* jest.config.js */; };
 		8A930A0127A04E2C00064133 /* webpack.config.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F427A04E2B00064133 /* webpack.config.js */; };
 		8A930A0227A04E2C00064133 /* PasswordManager.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F527A04E2C00064133 /* PasswordManager.js */; };
-		8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F627A04E2C00064133 /* PasswordManagerUI_native.ts */; };
-		8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F827A04E2C00064133 /* PasswordManagerUI.ts */; };
-		8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309F927A04E2C00064133 /* PasswordManager.ts */; };
 		8A930A0727A04E2C00064133 /* package.json in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FA27A04E2C00064133 /* package.json */; };
 		8A930A0827A04E2C00064133 /* yarn.lock in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FB27A04E2C00064133 /* yarn.lock */; };
 		8A930A0927A04E2C00064133 /* PasswordManager_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A9309FC27A04E2C00064133 /* PasswordManager_prod.js */; };
-		8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */ = {isa = PBXBuildFile; fileRef = 8A930A0E27A0519200064133 /* PasswordManagerHelper.ts */; };
 		8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9526DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift */; };
 		8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A9B1A9E26DD33EA00B3B5FA /* PointAndShoot+Target.swift */; };
 		8AA2431626E63A5F002A553A /* SwiftSoup+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */; };
@@ -879,6 +891,7 @@
 		A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
+		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
 		A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */; };
 		A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */; };
 		A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */; };
@@ -1107,8 +1120,8 @@
 		B57A9B4126AB0947002C954D /* CardCreationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57A9B4026AB0947002C954D /* CardCreationTests.swift */; };
 		B58A175027514E0100A588C4 /* CardViewEmbedsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B58A174F27514E0100A588C4 /* CardViewEmbedsTests.swift */; };
 		B5984C9227031D7A00192B5F /* SignUpAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9127031D7A00192B5F /* SignUpAutocompleteTests.swift */; };
-		B5984C9A27031F3B00192B5F /* PasswordsTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9927031F3B00192B5F /* PasswordsTestView.swift */; };
-		B5984C9D27031F7E00192B5F /* PasswordViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9C27031F7E00192B5F /* PasswordViewLocators.swift */; };
+		B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9927031F3B00192B5F /* AutoFillPasswordsTestView.swift */; };
+		B5984C9D27031F7E00192B5F /* AutofillPasswordViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9C27031F7E00192B5F /* AutofillPasswordViewLocators.swift */; };
 		B5AD2A812760A76700A6A3C5 /* DatePickerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD2A802760A76700A6A3C5 /* DatePickerViewLocators.swift */; };
 		B5BA077D26AF3AE400D31FED /* CardTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA077C26AF3AE400D31FED /* CardTestView.swift */; };
 		B5BA078626AF3B4400D31FED /* CardViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA078526AF3B4400D31FED /* CardViewLocators.swift */; };
@@ -1136,6 +1149,7 @@
 		B5E8010E26AEA63300C8BD61 /* WebTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8010D26AEA63300C8BD61 /* WebTestView.swift */; };
 		B5E8011026AEA64E00C8BD61 /* WebViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8010F26AEA64E00C8BD61 /* WebViewLocators.swift */; };
 		B5E8011226AEB7C100C8BD61 /* WaitHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E8011126AEB7C100C8BD61 /* WaitHelper.swift */; };
+		B5E949AE27DA404E001AAA82 /* AlertViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */; };
 		B5EB9A6A26C25FB8004C798A /* OmniboxDestinationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A6926C25FB8004C798A /* OmniboxDestinationTests.swift */; };
 		B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A7526C28192004C798A /* GoMenu.swift */; };
 		B5EB9A7826C2A887004C798A /* OmniboxAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5EB9A7726C2A887004C798A /* OmniboxAutocompleteTests.swift */; };
@@ -1144,7 +1158,6 @@
 		B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */; };
 		B5FAE2DB270C842700EAC8A3 /* CardPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2DA270C842700EAC8A3 /* CardPublishTests.swift */; };
 		B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */; };
-		B5FAE2EE270DDD9F00EAC8A3 /* AlertViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2ED270DDD9F00EAC8A3 /* AlertViewLocators.swift */; };
 		B5FAE2F9270ECF0100EAC8A3 /* SignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */; };
 		B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */; };
 		B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */; };
@@ -1182,6 +1195,9 @@
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
+		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
+		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
+		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
 		DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */; };
@@ -1416,6 +1432,7 @@
 		0325628C26051D3B006513E4 /* RBClient-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBClient-Private.h"; path = "Extern/RadBlock/RBClient-Private.h"; sourceTree = "<group>"; };
 		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
 		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
+		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
 		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
@@ -1486,6 +1503,22 @@
 		33F047FC26B14C0000855A08 /* CustomPopoverPresenter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomPopoverPresenter.swift; sourceTree = "<group>"; };
 		33F8832027BD3DE700E7673D /* status-update_restart.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "status-update_restart.json"; sourceTree = "<group>"; };
 		33FE719726D38A0400E63849 /* SearchLocationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchLocationView.swift; sourceTree = "<group>"; };
+		370794B727D7A17F00D2768B /* CursorOverrideModifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CursorOverrideModifier.swift; sourceTree = "<group>"; };
+		370794BE27D7A21A00D2768B /* FloatingToolbar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FloatingToolbar.swift; sourceTree = "<group>"; };
+		370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WKWebViewConfiguration.swift; sourceTree = "<group>"; };
+		370794C227D7A90B00D2768B /* Incrementor.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Incrementor.swift; sourceTree = "<group>"; };
+		370794C427D7A92100D2768B /* IncrementorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncrementorTests.swift; sourceTree = "<group>"; };
+		370794C727D7AA0300D2768B /* CustomPDFView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomPDFView.swift; sourceTree = "<group>"; };
+		370794C827D7AA0300D2768B /* PDFContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFContentView.swift; sourceTree = "<group>"; };
+		370794C927D7AA0300D2768B /* PDFDocumentViewCoordinator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFDocumentViewCoordinator.swift; sourceTree = "<group>"; };
+		370794CA27D7AA0300D2768B /* PDFToolbar.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFToolbar.swift; sourceTree = "<group>"; };
+		370794CB27D7AA0300D2768B /* PDFContentState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFContentState.swift; sourceTree = "<group>"; };
+		370794CC27D7AA0300D2768B /* PDFDocumentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFDocumentView.swift; sourceTree = "<group>"; };
+		370794D327D7AAF900D2768B /* NavigationRouter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NavigationRouter.swift; sourceTree = "<group>"; };
+		370794D427D7AAF900D2768B /* EmptyContentSchemeHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EmptyContentSchemeHandler.swift; sourceTree = "<group>"; };
+		370794D727D7AB0E00D2768B /* PDFContentDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PDFContentDescription.swift; sourceTree = "<group>"; };
+		370794D827D7AB0E00D2768B /* BrowserContentDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowserContentDescription.swift; sourceTree = "<group>"; };
+		370794D927D7AB0E00D2768B /* WebContentDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebContentDescription.swift; sourceTree = "<group>"; };
 		3719854827C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPURLResponse+RequestsHTTPDownload.swift"; sourceTree = "<group>"; };
 		3719854F27C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPURLResponse+RequestsHTTPDownloadTests.swift"; sourceTree = "<group>"; };
 		3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKNavigationResponse+ShouldPerformDownload.swift"; sourceTree = "<group>"; };
@@ -2257,6 +2290,7 @@
 		A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNoteCreator.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
+		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
 		A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewTests.swift; sourceTree = "<group>"; };
 		A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupTestView.swift; sourceTree = "<group>"; };
 		A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupViewLocators.swift; sourceTree = "<group>"; };
@@ -2484,8 +2518,8 @@
 		B57A9B4026AB0947002C954D /* CardCreationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardCreationTests.swift; sourceTree = "<group>"; };
 		B58A174F27514E0100A588C4 /* CardViewEmbedsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewEmbedsTests.swift; sourceTree = "<group>"; };
 		B5984C9127031D7A00192B5F /* SignUpAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpAutocompleteTests.swift; sourceTree = "<group>"; };
-		B5984C9927031F3B00192B5F /* PasswordsTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordsTestView.swift; sourceTree = "<group>"; };
-		B5984C9C27031F7E00192B5F /* PasswordViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordViewLocators.swift; sourceTree = "<group>"; };
+		B5984C9927031F3B00192B5F /* AutoFillPasswordsTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillPasswordsTestView.swift; sourceTree = "<group>"; };
+		B5984C9C27031F7E00192B5F /* AutofillPasswordViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutofillPasswordViewLocators.swift; sourceTree = "<group>"; };
 		B5AD2A802760A76700A6A3C5 /* DatePickerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerViewLocators.swift; sourceTree = "<group>"; };
 		B5BA077C26AF3AE400D31FED /* CardTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardTestView.swift; sourceTree = "<group>"; };
 		B5BA078526AF3B4400D31FED /* CardViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewLocators.swift; sourceTree = "<group>"; };
@@ -2513,6 +2547,7 @@
 		B5E8010D26AEA63300C8BD61 /* WebTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebTestView.swift; sourceTree = "<group>"; };
 		B5E8010F26AEA64E00C8BD61 /* WebViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewLocators.swift; sourceTree = "<group>"; };
 		B5E8011126AEB7C100C8BD61 /* WaitHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WaitHelper.swift; sourceTree = "<group>"; };
+		B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AlertViewLocators.swift; sourceTree = "<group>"; };
 		B5EB9A6926C25FB8004C798A /* OmniboxDestinationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxDestinationTests.swift; sourceTree = "<group>"; };
 		B5EB9A7526C28192004C798A /* GoMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoMenu.swift; sourceTree = "<group>"; };
 		B5EB9A7726C2A887004C798A /* OmniboxAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxAutocompleteTests.swift; sourceTree = "<group>"; };
@@ -2526,7 +2561,6 @@
 		B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockReferenceTests.swift; sourceTree = "<group>"; };
 		B5FAE2DA270C842700EAC8A3 /* CardPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPublishTests.swift; sourceTree = "<group>"; };
 		B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertTestView.swift; sourceTree = "<group>"; };
-		B5FAE2ED270DDD9F00EAC8A3 /* AlertViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertViewLocators.swift; sourceTree = "<group>"; };
 		B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInTests.swift; sourceTree = "<group>"; };
 		B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsHelper.swift; sourceTree = "<group>"; };
 		B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesBaseView.swift; sourceTree = "<group>"; };
@@ -2616,6 +2650,9 @@
 		BAA67F956840E0DD3B5D7B53 /* BeamElementHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamElementHelper.ts; sourceTree = "<group>"; };
 		BAA67FA6403B5D2284B56F13 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.ts; sourceTree = "<group>"; };
 		BAA67FB8275D3AA84301AE01 /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
+		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
+		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
+		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
 		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
@@ -3014,6 +3051,19 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		370794C627D7AA0300D2768B /* PDFDocumentView */ = {
+			isa = PBXGroup;
+			children = (
+				370794C727D7AA0300D2768B /* CustomPDFView.swift */,
+				370794C827D7AA0300D2768B /* PDFContentView.swift */,
+				370794C927D7AA0300D2768B /* PDFDocumentViewCoordinator.swift */,
+				370794CA27D7AA0300D2768B /* PDFToolbar.swift */,
+				370794CB27D7AA0300D2768B /* PDFContentState.swift */,
+				370794CC27D7AA0300D2768B /* PDFDocumentView.swift */,
+			);
+			path = PDFDocumentView;
+			sourceTree = "<group>";
+		};
 		375D83C0278D6ACE0064C246 /* WebViewStatusBar */ = {
 			isa = PBXGroup;
 			children = (
@@ -3236,6 +3286,7 @@
 				A526E27D2785E02600597F89 /* resend_verification_email.graphql */,
 				3303E10226FA22D300E175AC /* user_infos.graphql */,
 				A54A452927677F9A00B9AE1B /* set_username.graphql */,
+				0564B1B127D20BAE00B74BBD /* update_password.graphql */,
 			);
 			path = UserSession;
 			sourceTree = "<group>";
@@ -3360,6 +3411,7 @@
 				33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */,
 				A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */,
 				A5BD34DD27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift */,
+				370794C227D7A90B00D2768B /* Incrementor.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -3435,9 +3487,11 @@
 				A5C1F04A276BEF7400EF750D /* Omnibox */,
 				A5B7184B274B929D0010FE8E /* Toolbar */,
 				A54936B0260B71FE00EF7622 /* BottomToolbar */,
+				370794C627D7AA0300D2768B /* PDFDocumentView */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
 				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
+				370794BE27D7A21A00D2768B /* FloatingToolbar.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -3685,6 +3739,7 @@
 				A5D88584274E4E2100F37859 /* BlendModePerColorScheme.swift */,
 				A06B27D32758DC4900688A83 /* NSButtonCheckboxHelper.swift */,
 				A570D32D27591C27003B239D /* ReadSizeViewModifier.swift */,
+				370794B727D7A17F00D2768B /* CursorOverrideModifier.swift */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -4207,6 +4262,7 @@
 				52C3078025C311A50027C4B1 /* Date */,
 				562A8B4F25B5E385004D3D8A /* Extensions */,
 				A5BD34D627C4CFF3002AA8C6 /* DistributedRandomGeneratorTests.swift */,
+				370794C427D7A92100D2768B /* IncrementorTests.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -4712,6 +4768,7 @@
 				37B85B3F27A2C21D003871F9 /* URL+AvailableFileURL.swift */,
 				3719854827C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift */,
 				3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */,
+				370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -5115,7 +5172,7 @@
 		A3E7B4B327AC16E40074C9BB /* Popups */ = {
 			isa = PBXGroup;
 			children = (
-				B5FAE2ED270DDD9F00EAC8A3 /* AlertViewLocators.swift */,
+				B5E949AD27DA404E001AAA82 /* AlertViewLocators.swift */,
 				A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */,
 			);
 			path = Popups;
@@ -5294,6 +5351,9 @@
 				A055CE79274E8DD5003DB3D0 /* ClosedTabDataPersistence.swift */,
 				375D83B9278D636C0064C246 /* LinkMouseOverMessageHandler.swift */,
 				375D83BA278D636D0064C246 /* ScriptMessageBodyDecodable.swift */,
+				370794D827D7AB0E00D2768B /* BrowserContentDescription.swift */,
+				370794D927D7AB0E00D2768B /* WebContentDescription.swift */,
+				370794D727D7AB0E00D2768B /* PDFContentDescription.swift */,
 			);
 			path = TabAndWebview;
 			sourceTree = "<group>";
@@ -5523,6 +5583,7 @@
 			children = (
 				B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */,
 				375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */,
+				D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -5655,6 +5716,7 @@
 				B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */,
 				B5056A9026F88CFD00FFD2A2 /* HelpViewLocators.swift */,
 				B557155926FA259000F6C9D4 /* UpdateViewLocators.swift */,
+				A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */,
 			);
 			path = Locators;
 			sourceTree = "<group>";
@@ -5725,9 +5787,10 @@
 		B5984C9827031F2200192B5F /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
-				B5984C9927031F3B00192B5F /* PasswordsTestView.swift */,
+				B5984C9927031F3B00192B5F /* AutoFillPasswordsTestView.swift */,
 				B5FAE2FF270ED94300EAC8A3 /* GeneralPreferenceTestView.swift */,
 				B5FAE303270EE16800EAC8A3 /* AccountTestView.swift */,
+				D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -5735,9 +5798,10 @@
 		B5984C9B27031F6B00192B5F /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
-				B5984C9C27031F7E00192B5F /* PasswordViewLocators.swift */,
+				B5984C9C27031F7E00192B5F /* AutofillPasswordViewLocators.swift */,
 				B5FAE301270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift */,
 				B5FAE305270EE17800EAC8A3 /* AccountViewLocators.swift */,
+				D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -5873,6 +5937,8 @@
 				75A1E5B9271D98F1000824B1 /* ExternalDeeplinkHandler.swift */,
 				BAA67226F0A10301D829E071 /* WebNavigationContext.swift */,
 				75FD7B6E2707006400BEFBA7 /* BeamSchemeHandler.swift */,
+				370794D427D7AAF900D2768B /* EmptyContentSchemeHandler.swift */,
+				370794D327D7AAF900D2768B /* NavigationRouter.swift */,
 				BAA6747E1CA3ED378855E915 /* Web */,
 			);
 			path = Navigation;
@@ -6095,6 +6161,7 @@
 				52C60BFF258B63A5008B7C10 /* Embed XPC Services */,
 				3390376A26529BD700089E25 /* Sign AutoUpdate XPC */,
 				A0C83F12276E408400DD29FB /* Embed BeamHelper Tool */,
+				870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */,
 			);
 			buildRules = (
 			);
@@ -6356,8 +6423,6 @@
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				8AFE8359276B248B00D4B560 /* UITests-3.html in Resources */,
 				8AC643CF271DA98B00DDC899 /* pns_prod.js in Resources */,
-				8A9309FE27A04E2C00064133 /* PasswordManagerUIMock.ts in Resources */,
-				8A930A0F27A0519300064133 /* PasswordManagerHelper.ts in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				A03B908D27BE99AC001FBE64 /* Capture.json in Resources */,
 				8ABFD6A12791D82B001E35DE /* collect.aif in Resources */,
@@ -6377,6 +6442,7 @@
 				A07B03F0279AF1D200D14C45 /* Inter-Light.otf in Resources */,
 				8AFE8350276B248B00D4B560 /* audio.mp3 in Resources */,
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
+				0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */,
 				96C5FE44268F4D5700889B5E /* Geolocation.js in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				8A930A0927A04E2C00064133 /* PasswordManager_prod.js in Resources */,
@@ -6393,10 +6459,8 @@
 				33F8832127BD3DE700E7673D /* status-update_restart.json in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
 				8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */,
-				8A930A0627A04E2C00064133 /* PasswordManager.ts in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
-				8A930A0327A04E2C00064133 /* PasswordManagerUI_native.ts in Resources */,
 				56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */,
 				41B4277B25E52DCA00A8243F /* Localizable.stringsdict in Resources */,
 				A52A559727592EB7002D0C99 /* Inter-Italic.otf in Resources */,
@@ -6443,7 +6507,6 @@
 				520BC40E26D7B05F00A82966 /* subscription_beam_object_updated.graphql in Resources */,
 				522F149327033DE000EDF2F6 /* beam_object_checksums.graphql in Resources */,
 				A526E27E2785E02600597F89 /* resend_verification_email.graphql in Resources */,
-				8A930A0527A04E2C00064133 /* PasswordManagerUI.ts in Resources */,
 				8A4723C227C539E100E76893 /* WindowCleanup.js in Resources */,
 				A5347A6C2763B53F006EEF8C /* nav-pivot_card.json in Resources */,
 				8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */,
@@ -6628,6 +6691,25 @@
 			shellPath = /bin/sh;
 			shellScript = "if [ $ACTION == \"indexbuild\" ]\nthen\n    echo \"Skipping the script because of Xcode indexing\"\nelif [ $ENABLE_PREVIEWS == \"YES\" ]\nthen\n    echo \"Skipping the script because of SwiftUI preview mode\"\nelse\n    # your code to execute here\n    PATH=/opt/homebrew/bin:${PATH}\n    direnv allow ..\n    eval \"$(direnv export bash)\"\n\n    cp ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables.swift ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift\n    if which variable-injector >/dev/null; then\n      variable-injector --file ${SRCROOT}/BeamCore/Configuration/EnvironmentVariables_generated.swift # --verbose # Pass your paramenters\n    else\n      echo \"Warning: Swift Variable Injector not installed, download from https://github.com/penso/variable-injector\"\n      exit 1\n    fi\nfi\n";
 			showEnvVarsInLog = 0;
+		};
+		870DDB7927CF8A2D00F85F2B /* Remove Mock HTTP Server */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Remove Mock HTTP Server";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "scripts/delete_mock_http_server.sh\n";
 		};
 		8A0D274726D5338600CE0AC9 /* Write xcfilelist: Point and Shoot */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -6853,6 +6935,7 @@
 				96A5DADE27C0250D00746719 /* Array.swift in Sources */,
 				3719855227C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift in Sources */,
 				9635C980276AABB300015575 /* SignPost.swift in Sources */,
+				370794C127D7A79100D2768B /* WKWebViewConfiguration.swift in Sources */,
 				96A5DB0427C1B61A00746719 /* DispatchQueue+MainSync.swift in Sources */,
 				96319D5D261626BE00D1CF31 /* Score.swift in Sources */,
 				96319D3A2616233E00D1CF31 /* CommandManager.swift in Sources */,
@@ -6962,6 +7045,7 @@
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
 				A0614EEA270B382400C38F82 /* GoogleCalendar.swift in Sources */,
 				52B17AC7262449DA00CB4728 /* DatabaseDetail.swift in Sources */,
+				370794D527D7AAF900D2768B /* NavigationRouter.swift in Sources */,
 				525C5472261F619D00378FAA /* Binding+onChange.swift in Sources */,
 				52C5A40926DFAB2D00CD559F /* DocumentStruct+Debug.swift in Sources */,
 				0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */,
@@ -6980,6 +7064,7 @@
 				87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */,
 				872644772619903B0070E83D /* StepperControl.swift in Sources */,
 				37C413182785529300954FD7 /* GoogleSearch.swift in Sources */,
+				370794CD27D7AA0300D2768B /* CustomPDFView.swift in Sources */,
 				A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */,
 				33FE719826D38A0400E63849 /* SearchLocationView.swift in Sources */,
 				A05ADF3F264D67D3002DF91A /* PasswordsDB.swift in Sources */,
@@ -7000,6 +7085,7 @@
 				33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */,
 				A52B5017271D72FB0078670C /* PinnedBrowserTabsManager.swift in Sources */,
 				3303E0EC26F8DC3F00E175AC /* PublicNote.swift in Sources */,
+				370794DB27D7AB0E00D2768B /* BrowserContentDescription.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
 				9606616827AC1F5E007D3DD0 /* PrivateKeySignature.swift in Sources */,
 				52842D502715B3A80099602C /* FilesContentView.swift in Sources */,
@@ -7048,6 +7134,7 @@
 				A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */,
 				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,
 				4181724A2581107C00317ED8 /* TextView.swift in Sources */,
+				370794BD27D7A17F00D2768B /* CursorOverrideModifier.swift in Sources */,
 				A587690426FA0E8200E8CC93 /* NoteHeaderPublishButton.swift in Sources */,
 				5242279A275524C900457345 /* BeamObjectChecksum+CoreData.swift in Sources */,
 				0325628F26051D3B006513E4 /* RBSQLite.m in Sources */,
@@ -7097,6 +7184,7 @@
 				A0EFCFF527162499004A7C7B /* CalendarManager.swift in Sources */,
 				A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */,
 				52FC002325E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
+				370794C327D7A90B00D2768B /* Incrementor.swift in Sources */,
 				DAA0A50A270CA8ED00F952E5 /* BrowsingTreeStore.swift in Sources */,
 				522BC3F526A872740018B51E /* BeamObjectManagerError.swift in Sources */,
 				5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */,
@@ -7199,6 +7287,7 @@
 				A5336C0B273AB6050075AF92 /* OnboardingView.swift in Sources */,
 				A5CA5DBA2624FF4A004E9D3E /* BeamNSTableView.swift in Sources */,
 				8AF61F14267BA292006DD5C2 /* RBAllowlistEntry.m in Sources */,
+				370794D127D7AA0300D2768B /* PDFContentState.swift in Sources */,
 				521EEDE525937F7F00BA2485 /* DocumentsList.swift in Sources */,
 				87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */,
 				962AC88A27901953001B7142 /* OmniboxContentDebuggerView.swift in Sources */,
@@ -7230,6 +7319,7 @@
 				A54A45312767970E00B9AE1B /* UserInfoRequest+Foundation.swift in Sources */,
 				96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
+				370794DC27D7AB0E00D2768B /* WebContentDescription.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				9635C96D276945CD00015575 /* OldJournalStackView.swift in Sources */,
 				5298EAFD26272CCC0033862C /* CoreDataMigrator.swift in Sources */,
@@ -7356,6 +7446,7 @@
 				873528BC27343871005E7CBC /* SafariImporter.swift in Sources */,
 				8A8FB65627C7ACAD009C546A /* OauthWebViewWindow.swift in Sources */,
 				DA69304D268B4DD9008EF756 /* BrowsingTreeSender.swift in Sources */,
+				370794CE27D7AA0300D2768B /* PDFContentView.swift in Sources */,
 				37DB5A0C27BB514400534760 /* EmbedContentView.swift in Sources */,
 				032562AC26051D3B006513E4 /* punycode.c in Sources */,
 				96120D4B260CD5E100592546 /* TextEdit+Hyperlink.swift in Sources */,
@@ -7447,6 +7538,7 @@
 				A52596E3273EAA75004B27E4 /* OnboardingEmailConnectView.swift in Sources */,
 				A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */,
 				961EC50B25B495DB009FA322 /* ButtonLayer.swift in Sources */,
+				370794DA27D7AB0E00D2768B /* PDFContentDescription.swift in Sources */,
 				75BDCDAD26F339B1004BBC7E /* ErrorPageManager.swift in Sources */,
 				8A34EAE527C7BDD20063DAF6 /* BaseWebNavigationController.swift in Sources */,
 				418172542581107C00317ED8 /* ToolbarContentView.swift in Sources */,
@@ -7573,15 +7665,19 @@
 				5224CD8C26860C0900D4179E /* BeamObjectManager.swift in Sources */,
 				87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */,
 				BAA676F2C83EBA770CB34F36 /* Scorable.swift in Sources */,
+				370794D627D7AAF900D2768B /* EmptyContentSchemeHandler.swift in Sources */,
 				A5A2314526FB355B00D01D08 /* DividerNode.swift in Sources */,
 				52DB02662716DCE800F3881D /* LoggerRecorder.swift in Sources */,
+				370794BF27D7A21A00D2768B /* FloatingToolbar.swift in Sources */,
 				A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */,
 				A09FBA612705AD44009E44F7 /* CheckboxButtonStyle.swift in Sources */,
 				BAA670C2CFE33BC83DF12343 /* PointAndShootCardPickerPositioning.swift in Sources */,
 				3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */,
+				370794D027D7AA0300D2768B /* PDFToolbar.swift in Sources */,
 				52019A6D26DE42C9005E8278 /* DocumentManager+PromiseKit.swift in Sources */,
 				BAA675A0EEE5F4636AECCE5D /* PointAndShootCardPicker.swift in Sources */,
 				37B85B7927A2C81B003871F9 /* DownloadListItem.swift in Sources */,
+				370794CF27D7AA0300D2768B /* PDFDocumentViewCoordinator.swift in Sources */,
 				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
 				A5297F3A27AC3465006B3E1F /* SearchEngineAutocompleter.swift in Sources */,
@@ -7604,6 +7700,7 @@
 				8AB94F632769EFEF00F62241 /* HtmlVisitor+Helpers.swift in Sources */,
 				A52596E9273EB8AC004B27E4 /* OnboardingImportsView.swift in Sources */,
 				A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */,
+				370794D227D7AA0300D2768B /* PDFDocumentView.swift in Sources */,
 				BAA67A0791B680C684C00DFD /* BeamWebkitUIDelegate.swift in Sources */,
 				A5A2D53727394F55003D0925 /* ActionableButton+Gradient.swift in Sources */,
 				A08C7FA8276CA4130006B386 /* OnboardingWindow.swift in Sources */,
@@ -7747,6 +7844,7 @@
 				DAEEA77C26A701CC00AE72DE /* NoteSourceTests.swift in Sources */,
 				8A14155A267393E2005F2464 /* WebPositionsTest.swift in Sources */,
 				A5316A192667B9110039ED9C /* Range+BeamTests.swift in Sources */,
+				370794C527D7A92100D2768B /* IncrementorTests.swift in Sources */,
 				52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */,
 				032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */,
 				032562C726051D4B006513E4 /* RBMockClient.m in Sources */,
@@ -7791,6 +7889,8 @@
 				B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */,
 				B5BA078926AF3E4700D31FED /* UITestsMenuBar.swift in Sources */,
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
+				D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */,
+				D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */,
 				B50E1C9126FCC30D00E767AE /* SignInSuccessfullyTests.swift in Sources */,
 				B5E8010E26AEA63300C8BD61 /* WebTestView.swift in Sources */,
 				B5DC1FC226B9608D00A4C94B /* DownloadTestView.swift in Sources */,
@@ -7817,15 +7917,15 @@
 				B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */,
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				A3E7B4BB27AC1A0C0074C9BB /* MockHTTPWebPages.swift in Sources */,
-				B5FAE2EE270DDD9F00EAC8A3 /* AlertViewLocators.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
+				A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */,
 				B5FAE306270EE17800EAC8A3 /* AccountViewLocators.swift in Sources */,
 				A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */,
 				B5E8010A26AEA1E100C8BD61 /* JournalTestView.swift in Sources */,
 				B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */,
 				B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */,
-				B5984C9D27031F7E00192B5F /* PasswordViewLocators.swift in Sources */,
+				B5984C9D27031F7E00192B5F /* AutofillPasswordViewLocators.swift in Sources */,
 				A53F1C5627B8A8A8009AE2D0 /* OmniboxLocators.swift in Sources */,
 				B5792591275E4FE30093B32B /* FileMenu.swift in Sources */,
 				B57A9B3B26AB08A5002C954D /* AllCardsViewLocators.swift in Sources */,
@@ -7853,6 +7953,7 @@
 				B57535ED26BD48040053CE2D /* JournalTest.swift in Sources */,
 				B57535F426BD6FFC0053CE2D /* NoteViewLocators.swift in Sources */,
 				B5FAE302270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift in Sources */,
+				B5E949AE27DA404E001AAA82 /* AlertViewLocators.swift in Sources */,
 				8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */,
 				B557156326FAF18200F6C9D4 /* AllCardsViewTests.swift in Sources */,
 				8AA5F0C627ABE53100D25A13 /* GoogleSheetsTests.swift in Sources */,
@@ -7862,10 +7963,11 @@
 				B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */,
 				B5FAE304270EE16800EAC8A3 /* AccountTestView.swift in Sources */,
 				B5984C9227031D7A00192B5F /* SignUpAutocompleteTests.swift in Sources */,
+				D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */,
 				52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */,
 				B5E38D5826EA23D900236FBD /* SearchTestView.swift in Sources */,
 				B557155726FA257700F6C9D4 /* UpdateTestView.swift in Sources */,
-				B5984C9A27031F3B00192B5F /* PasswordsTestView.swift in Sources */,
+				B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */,
 				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* CardEditTests.swift in Sources */,
 				B5BA078626AF3B4400D31FED /* CardViewLocators.swift in Sources */,
@@ -8002,6 +8104,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Mac Developer";
@@ -8038,7 +8141,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -8076,7 +8179,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8101,7 +8204,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8126,7 +8229,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8227,6 +8330,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Beta;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8262,13 +8366,13 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-liconv",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
@@ -8299,7 +8403,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8324,7 +8428,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8348,7 +8452,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8463,6 +8567,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Beta;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8487,6 +8592,7 @@
 					"beam-logo-test.png",
 					Beam.css,
 					video.mov,
+					"UITests-Passwords.csv",
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -8508,7 +8614,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -8544,7 +8650,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8568,7 +8674,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8592,7 +8698,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8712,6 +8818,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Debug;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8747,13 +8854,13 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-liconv",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
@@ -8784,7 +8891,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -8809,7 +8916,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -8833,7 +8940,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -8948,6 +9055,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -8972,6 +9080,7 @@
 					"beam-logo-test.png",
 					Beam.css,
 					video.mov,
+					"UITests-Passwords.csv",
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -8993,7 +9102,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -9029,7 +9138,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9053,7 +9162,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9077,7 +9186,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -9144,7 +9253,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -9171,7 +9280,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -9349,6 +9458,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon_Debug;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -9384,13 +9494,13 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp=none";
 				OTHER_LDFLAGS = (
 					"-ObjC",
 					"-liconv",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos;
+				PRODUCT_BUNDLE_IDENTIFIER = co.beamapp.macos.dev;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_OBJC_BRIDGING_HEADER = "Beam/ObjCBridge/Beam-Bridging-Header.h";
@@ -9406,6 +9516,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 0;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -9430,6 +9541,7 @@
 					"beam-logo-test.png",
 					Beam.css,
 					video.mov,
+					"UITests-Passwords.csv",
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9451,7 +9563,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -9487,7 +9599,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9518,7 +9630,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9542,7 +9654,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9565,7 +9677,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9638,6 +9750,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				BEAM_ENABLE_MOCK_HTTP_SERVER = 1;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Beam/Configuration/Beam.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -9669,7 +9782,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/Extern/libgit2/build",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				OTHER_CODE_SIGN_FLAGS = "--timestamp";
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -9705,7 +9818,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_OBJC_BRIDGING_HEADER = "BeamTests/Helpers/BeamTests-Bridging-Header.h";
@@ -9729,7 +9842,7 @@
 					"@executable_path/Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beam.BeamUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -9754,7 +9867,7 @@
 					"@executable_path/../Frameworks",
 					"@loader_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.2.1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.beamapp.BeamCore;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;

@@ -145,4 +145,14 @@ public extension URL {
     var normalized: URL {
         withRootPath
     }
+
+    func replacingScheme(with other: String) -> Self {
+        guard var urlComponents = URLComponents(url: self, resolvingAgainstBaseURL: false) else {
+            return self
+        }
+
+        urlComponents.scheme = other
+        return urlComponents.url ?? self
+    }
+
 }

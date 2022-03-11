@@ -17,6 +17,10 @@ protocol WebPage: AnyObject, Scorable {
     var url: URL? { get set }
     /// The URL before any website implicit redirection. (ex: gmail.com redirects to mail.google.com)
     var requestedURL: URL? { get set }
+
+    /// An object publishing updates about the content currently displayed.
+    var contentDescription: BrowserContentDescription? { get set }
+
     /// The user typed text that ended up opening this page.
     var originalQuery: String? { get }
     var hasError: Bool { get set }
@@ -155,29 +159,37 @@ extension WebPage {
 
 extension WebPage {
 
+    var contentType: BrowserContentType {
+        contentDescription?.type ?? .web
+    }
+
     func searchInContent(fromSelection: Bool = false) {
         guard self.searchViewModel == nil else {
             self.searchViewModel?.isEditing = true
             return
         }
 
-        let viewModel = SearchViewModel(context: .web) { [weak self] search in
-            self?.find(search, using: "find")
-        } onLocationIndicatorTap: { [weak self] position in
-            self?.executeJS("window.scrollTo(0, \(position));", objectName: nil)
-        } next: { [weak self] search in
-            self?.find(search, using: "findNext")
-        } previous: { [weak self] search in
-            self?.find(search, using: "findPrevious")
-        } done: { [weak self] in
-            self?.executeJS("findDone()", objectName: "SearchWebPage")
-            self?.searchViewModel = nil
-        }
+        switch contentType {
+        case .web:
+            searchViewModel = SearchViewModel(context: .web) { [weak self] search in
+                self?.find(search, using: "find")
+            } onLocationIndicatorTap: { [weak self] position in
+                self?.executeJS("window.scrollTo(0, \(position));", objectName: nil)
+            } next: { [weak self] search in
+                self?.find(search, using: "findNext")
+            } previous: { [weak self] search in
+                self?.find(search, using: "findPrevious")
+            } done: { [weak self] in
+                self?.executeJS("findDone()", objectName: "SearchWebPage")
+                self?.searchViewModel = nil
+            }
 
-        self.searchViewModel = viewModel
+            if fromSelection {
+                self.executeJS("getSelection()", objectName: "SearchWebPage")
+            }
 
-        if fromSelection {
-            self.executeJS("getSelection()", objectName: "SearchWebPage")
+        default:
+            searchViewModel = nil
         }
     }
 

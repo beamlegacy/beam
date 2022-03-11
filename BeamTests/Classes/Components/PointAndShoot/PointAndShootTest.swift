@@ -45,6 +45,7 @@ class TestWebPage: WebPage {
     var fileStorage: BeamFileStorage? {
         storage
     }
+    var contentDescription: BrowserContentDescription?
     var authenticationViewModel: AuthenticationViewModel?
     var searchViewModel: SearchViewModel?
     var mouseHoveringLocation: MouseHoveringLocation = .none
@@ -61,6 +62,7 @@ class TestWebPage: WebPage {
         let webFrames = WebFrames()
         self.webFrames = webFrames
         self.webPositions = WebPositions(webFrames: webFrames)
+        contentDescription = WebContentDescription(webView: webView)
     }
 
     func addCSS(source: String, when: WKUserScriptInjectionTime) {

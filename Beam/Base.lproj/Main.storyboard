@@ -844,7 +844,7 @@
                                                 <action selector="toggleInsertLinkAction:" target="Ady-hI-5gd" id="1n8-Ra-cb3"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Bi-directional Link" tag="3" keyEquivalent="K" id="VSb-Zp-ItO" userLabel="Bi-directional Link">
+                                        <menuItem title="Backlink" tag="3" keyEquivalent="K" id="VSb-Zp-ItO" userLabel="Bi-directional Link">
                                             <connections>
                                                 <action selector="toggleBidiLinkAction:" target="Ady-hI-5gd" id="obf-Ue-9NR"/>
                                             </connections>

@@ -8,6 +8,10 @@
 import AppKit
 import SwiftUI
 
+protocol PopoverWindowPresented: AnyObject {
+    var presentingWindow: PopoverWindow? { get set }
+}
+
 /// Use this class if you need a NSWindow that can close itself once it looses key status, if it hasn't been moved.
 class PopoverWindow: NSWindow {
 
@@ -61,6 +65,11 @@ class PopoverWindow: NSWindow {
     func setView(with view: NSView, at origin: NSPoint, fromTopLeft: Bool = false) {
         self.contentView = view
         setOrigin(origin, fromTopLeft: fromTopLeft)
+    }
+
+    func closeIfNotMoved() {
+        guard !didMove else { return }
+        close()
     }
 
     override var canBecomeKey: Bool {
