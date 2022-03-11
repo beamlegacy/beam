@@ -622,10 +622,11 @@ extension BeamObjectRequest {
             }
         }
 
-        beamObjects.forEach {
-            // Both dataUrl and data nil is weird, shouldn't happen
-            assert($0.dataUrl != nil || $0.data != nil)
-        }
+        // I used this during debug
+//        beamObjects.forEach {
+//            // Both dataUrl and data nil is weird, shouldn't happen
+//            assert($0.dataUrl != nil || $0.data != nil)
+//        }
 
         guard !beamObjects.compactMap({ $0.dataUrl }).isEmpty else {
             callback()

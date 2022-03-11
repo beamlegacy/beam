@@ -40,7 +40,7 @@ struct Configuration {
 
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
-    static private(set) var apiHostnameDefault = "http://api.beam.lvh.me" // "https://api.beamapp.co" // "http://api.beam.lvh.me"
+    static private(set) var apiHostnameDefault = "https://api.beamapp.co" // "http://api.beam.lvh.me"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
     static private(set) var beamObjectDataOnSeparateCallDefault = false
