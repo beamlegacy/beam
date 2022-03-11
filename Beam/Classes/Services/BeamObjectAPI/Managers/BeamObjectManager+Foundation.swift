@@ -9,7 +9,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        var localTimer = BeamDate.now
+        var localTimer = Date()
 
         try fetchAllByChecksumsFromAPI(force: force) { result in
             switch result {
@@ -30,7 +30,7 @@ extension BeamObjectManager {
                         prepareBeforeSaveAll()
                     }
 
-                    localTimer = BeamDate.now
+                    localTimer = Date()
                     Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
                                            category: .beamObjectNetwork)
                     let objectsCount = try self.saveAllToAPI(force: force)
@@ -78,7 +78,7 @@ extension BeamObjectManager {
 
             // Note: I tried QOS `userInitiated` but I had 50sec latency... `userInteractive` makes it instant.
             DispatchQueue.global(qos: .userInteractive).async {
-                let localTimer = BeamDate.now
+                let localTimer = Date()
 
                 do {
                     Logger.shared.logDebug("saveAllToAPI using \(manager)",
@@ -165,7 +165,7 @@ extension BeamObjectManager {
             return
         }
 
-        var localTimer = BeamDate.now
+        var localTimer = Date()
 
         try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
                                           skipDeleted: Persistence.Sync.BeamObjects.last_received_at == nil) { result in
@@ -190,14 +190,14 @@ extension BeamObjectManager {
                                        localTimer: localTimer)
 
                 do {
-                    localTimer = BeamDate.now
+                    localTimer = Date()
                     let changedObjects = self.parseObjectChecksums(beamObjects)
 
                     Logger.shared.logDebug("parsed \(beamObjects.count) checksums, got \(changedObjects.count) objects after",
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
 
-                    localTimer = BeamDate.now
+                    localTimer = Date()
 
                     let ids: [UUID] = changedObjects.map { $0.id }
 
@@ -337,7 +337,7 @@ extension BeamObjectManager {
             return nil
         }
 
-        var localTimer = BeamDate.now
+        var localTimer = Date()
 
         let beamObjects: [BeamObject] = try objects.map {
             try BeamObject(object: $0)
@@ -347,7 +347,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         let beamObjectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
 
@@ -363,7 +363,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjectsToSave)
         beamObjectsToSave.forEach {
@@ -452,7 +452,7 @@ extension BeamObjectManager {
             return nil
         }
 
-        var localTimer = BeamDate.now
+        var localTimer = Date()
 
         let beamObjects: [BeamObject] = try objects.map {
             try BeamObject(object: $0)
@@ -461,7 +461,7 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Converted \(objects.count) \(T.beamObjectType) to beam objects",
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
 
@@ -477,7 +477,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objectsToSave)
         for objectToSave in objectsToSave {
@@ -497,7 +497,7 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
-        localTimer = BeamDate.now
+        localTimer = Date()
 
         let request = BeamObjectRequest()
 
@@ -529,7 +529,7 @@ extension BeamObjectManager {
                     Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: starting",
                                            category: .beamObjectNetwork)
 
-                    localTimer = BeamDate.now
+                    localTimer = Date()
                     var totalSize = 0
 
                     // TODO: limit parallelization?
@@ -583,7 +583,7 @@ extension BeamObjectManager {
                     }
 
                     let request = BeamObjectRequest()
-                    localTimer = BeamDate.now
+                    localTimer = Date()
 
                     try request.save(objectsToSave) { result in
                         switch result {
@@ -859,7 +859,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let beamObject = try BeamObject(object: object)
         beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)
@@ -914,7 +914,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let beamObject = try BeamObject(object: object)
         beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(object: object)

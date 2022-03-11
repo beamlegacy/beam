@@ -177,7 +177,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // My feeling is we should sync + trigger notification and only start network calls when
         // this sync has finished.
 
-        let localTimer = BeamDate.now
+        let localTimer = Date()
 
         let initialDBs = Set(databaseManager.all())
 
@@ -320,7 +320,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     private func deleteEmptyDatabases(showAlert: Bool = true,
                                       _ completionHandler: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        let localTimer = BeamDate.now
+        let localTimer = Date()
         let previousDefaultDatabase = DatabaseManager.defaultDatabase
 
         Logger.shared.logInfo("Deleting Empty databases", category: .database)

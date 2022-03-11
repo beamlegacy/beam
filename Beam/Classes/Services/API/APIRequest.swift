@@ -285,7 +285,7 @@ class APIRequest: NSObject {
         }
 
         do {
-            let localTimer = BeamDate.now
+            let localTimer = Date()
 
             let value: T = try self.manageResponse(data, response)
 

@@ -90,6 +90,8 @@ class BeamObjectTestsHelper {
     func saveOnAPIWithDirectUploadAndSaveChecksum<T: BeamObjectProtocol>(_ object: T) {
         let semaphore = DispatchSemaphore(value: 0)
 
+        Logger.shared.logDebug("saveOnAPIWithDirectUploadAndSaveChecksum: starts", category: .beamObjectNetwork)
+
         do {
             let beamObject = try BeamObject(object)
             try beamObject.encrypt()
@@ -148,7 +150,6 @@ class BeamObjectTestsHelper {
                                     semaphore.signal()
                                 }
                             }
-
                         }
                     } catch {
                         fail(error.localizedDescription)
@@ -162,9 +163,12 @@ class BeamObjectTestsHelper {
             return
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(20))
+        let timeout = 60
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(timeout))
 
         if case .timedOut = semaResult {
+            Logger.shared.logDebug("failed waiting \(timeout)sec", category: .beamObjectNetwork)
+
             fail("Timedout")
         }
     }

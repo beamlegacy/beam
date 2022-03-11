@@ -67,7 +67,7 @@ class LoggerRecorder {
 
         do {
             try context.performAndWait {
-                let localTimer = BeamDate.now
+                let localTimer = Date()
 
                 let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "LogEntry")
                 fetchRequest.predicate = NSPredicate(format: "created_at < %@", previousDate as NSDate)

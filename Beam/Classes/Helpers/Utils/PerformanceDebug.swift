@@ -19,7 +19,7 @@ enum PerformanceDebugCategory: String {
 }
 
 class PerformanceDebug {
-    var localTimer = BeamDate.now
+    var localTimer = Date()
     let message: String?
     let maximumTime = 0.9
     var disabled = false
@@ -80,7 +80,7 @@ class PerformanceDebug {
             let finalMessage = "\(diff)sec \(longDiffTime ? "🛑 " : "")\(message ?? "") \(newMessage ?? "")"
             PerformanceDebug.debugLog(category, finalMessage, longDiffTime, disabled)
         }
-        localTimer = BeamDate.now
+        localTimer = Date()
     }
 
     func done(_ preMessage: String? = nil) {
