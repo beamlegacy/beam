@@ -153,7 +153,6 @@ class JournalSimpleStackView: NSView {
         guard force || self.notes != sortedNotes else {
             return
         }
-        let lastDate = notes.last?.type.journalDate
         self.notes = sortedNotes
 
         let noteSet = Set(notes)
@@ -264,5 +263,8 @@ class JournalSimpleStackView: NSView {
 
     override func viewDidMoveToWindow() {
         initialLayout = false
+        if let offset = state.lastScrollOffset[UUID.null] {
+            scroll(NSPoint(x: 0, y: offset))
+        }
     }
 }
