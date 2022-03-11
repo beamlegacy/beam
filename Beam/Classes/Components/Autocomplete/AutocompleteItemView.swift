@@ -21,6 +21,8 @@ struct AutocompleteItemView: View {
     var allowsShortcut: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
+    var height: CGFloat = Self.defaultHeight
+    var fontSize: CGFloat = 14
     var additionalLeadingPadding: CGFloat = 0
     var cornerRadius: Double = 6
 
@@ -150,16 +152,16 @@ struct AutocompleteItemView: View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
                     StyledText(verbatim: mainText)
-                        .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges())
-                        .font(BeamFont.regular(size: 14).swiftUI)
+                        .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges())
+                        .font(BeamFont.regular(size: fontSize).swiftUI)
                         .foregroundColor(mainTextColor)
                 }
                 .layoutPriority(10)
                 if let info = secondaryText {
                     HStack {
                         StyledText(verbatim: info)
-                            .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
-                            .font(BeamFont.regular(size: 14).swiftUI)
+                            .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
+                            .font(BeamFont.regular(size: fontSize).swiftUI)
                             .foregroundColor(informationColor)
                     }
                     .layoutPriority(0)
@@ -168,7 +170,7 @@ struct AutocompleteItemView: View {
                 if PreferencesManager.showOmniboxScoreSection {
                     Spacer()
                     Text(debugString(score: item.weightedScore))
-                        .font(BeamFont.regular(size: 14).swiftUI)
+                        .font(BeamFont.regular(size: fontSize).swiftUI)
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
                         .layoutPriority(10)
                 }
@@ -186,7 +188,7 @@ struct AutocompleteItemView: View {
         .padding(.vertical, BeamSpacing._100)
         .padding(.horizontal, BeamSpacing._120)
         .padding(.leading, additionalLeadingPadding)
-        .frame(height: Self.defaultHeight)
+        .frame(height: height)
         .background(backgroundColor.blendModeLightMultiplyDarkScreen())
         .cornerRadius(cornerRadius)
         .onTouchDown { t in
