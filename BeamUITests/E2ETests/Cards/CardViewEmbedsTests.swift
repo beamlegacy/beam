@@ -55,7 +55,22 @@ class CardViewEmbedsTests: BaseTest {
         XCTAssertEqual(sizeBeforeCollapse.height, sizeAfterExpand.height)
     }
 
-    func testEmbedVideoMediaControl() {
+    func testEmbedVideoMediaControlOld() {
+        let journalView = launchApp()
+        let helper = BeamUITestsHelper(journalView.app)
+        helper.tapCommand(.disableCreateJournalOnce)
+        _testEmbedVideoMediaControl(expectedWebViewCount: 1)
+    }
+
+    func testEmbedVideoMediaControlNew() {
+        let journalView = launchApp()
+        let helper = BeamUITestsHelper(journalView.app)
+        helper.tapCommand(.enableCreateJournalOnce)
+        _testEmbedVideoMediaControl(expectedWebViewCount: 1)
+        helper.tapCommand(.disableCreateJournalOnce)
+    }
+
+    func _testEmbedVideoMediaControl(expectedWebViewCount: Int) {
         testRailPrint("Given open today's card")
         let journalView = launchApp()
         let cardView = journalView
@@ -77,7 +92,7 @@ class CardViewEmbedsTests: BaseTest {
         let embedNode = cardView.getEmbedNodeByIndex(nodeIndex: 0)
         embedNode.tapInTheMiddle()
         let webView = WebTestView()
-        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
+        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), expectedWebViewCount)
 
         testRailPrint("Then the note media mute button is shown")
         let mediaPlayingButton = cardView.image(CardViewLocators.Buttons.noteMediaPlaying.accessibilityIdentifier)
@@ -95,7 +110,7 @@ class CardViewEmbedsTests: BaseTest {
         testRailPrint("Then the video is still playing")
         embedNode.hoverInTheMiddle()
         XCTAssertTrue(youtubePlayPauseButton.exists)
-        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
+        XCTAssertEqual(webView.getNumberOfWebViewInMemory(), expectedWebViewCount)
 
         testRailPrint("When I pause the video")
         embedNode.tapInTheMiddle()

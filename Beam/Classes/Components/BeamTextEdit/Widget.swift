@@ -289,6 +289,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             }
 
             _root = nil
+
+            dispatchDidMoveToWindow(editor?.window)
         }
     }
 
@@ -381,11 +383,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layer = CALayer()
         layer.isHidden = true
         selectionLayer = CALayer()
+        self.availableWidth = availableWidth
         super.init()
         setupWidget()
-        self.availableWidth = availableWidth
-
-        setupAccessibility()
     }
 
     // this version should only be used by TextRoot
@@ -406,6 +406,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         configureSelectionLayer()
 
         setupAccessibility()
+        didMoveToWindow(editor?.window)
     }
 
     func setupAccessibility() {
@@ -1226,6 +1227,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return root.cmdManager
     }
 
+    func didMoveToWindow(_ window: NSWindow?) {
+    }
 }
 
 extension Widget {
@@ -1254,6 +1257,15 @@ extension Widget {
         selectionLayer.add(animation, forKey: "highlightBackgroundColor")
         children.forEach { c in
             c.highlight()
+        }
+    }
+}
+
+extension Widget {
+    func dispatchDidMoveToWindow(_ window: NSWindow?) {
+        didMoveToWindow(window)
+        for child in children {
+            child.dispatchDidMoveToWindow(window)
         }
     }
 }
