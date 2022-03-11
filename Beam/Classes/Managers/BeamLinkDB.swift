@@ -250,6 +250,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         Self.backgroundQueue.async { [weak self] in
@@ -276,6 +277,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     private func saveOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
@@ -305,6 +307,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",

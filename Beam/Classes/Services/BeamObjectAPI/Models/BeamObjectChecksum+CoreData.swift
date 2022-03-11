@@ -173,6 +173,7 @@ extension BeamObjectChecksum {
     static func deleteAll() throws {
         Logger.shared.logDebug("Deleted all checksums",
                                category: .beamObjectChecksum)
+        // swiftlint:disable:next date_init
         let localTimer = Date()
         let request: NSFetchRequest<BeamObjectChecksum> = BeamObjectChecksum.fetchRequest()
         let context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
@@ -201,6 +202,7 @@ extension BeamObjectChecksum {
             return
         }
 
+        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
@@ -239,9 +241,11 @@ extension BeamObjectChecksum {
         // We don't save previous objects for anything else than document for now
         guard beamObjects.compactMap({ $0.beamObjectType == BeamObjectObjectType.document.rawValue }).contains(true) else { return }
 
+        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         try context.performAndWait {
@@ -280,6 +284,7 @@ extension BeamObjectChecksum {
             return
         }
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let (checksums, context) = findChecksumsForObjects(objects: objects)
@@ -313,6 +318,7 @@ extension BeamObjectChecksum {
 
         guard T.beamObjectType == BeamObjectObjectType.document else { return }
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let (checksums, context) = findChecksumsForObjects(objects: objects)

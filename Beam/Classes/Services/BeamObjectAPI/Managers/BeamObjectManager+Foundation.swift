@@ -9,6 +9,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         try fetchAllByChecksumsFromAPI(force: force) { result in
@@ -30,6 +31,7 @@ extension BeamObjectManager {
                         prepareBeforeSaveAll()
                     }
 
+                    // swiftlint:disable:next date_init
                     localTimer = Date()
                     Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
                                            category: .beamObjectNetwork)
@@ -165,6 +167,7 @@ extension BeamObjectManager {
             return
         }
 
+        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         try beamRequest.fetchAllChecksums(receivedAtAfter: lastReceivedAt,
@@ -190,6 +193,7 @@ extension BeamObjectManager {
                                        localTimer: localTimer)
 
                 do {
+                    // swiftlint:disable:next date_init
                     localTimer = Date()
                     let changedObjects = self.parseObjectChecksums(beamObjects)
 
@@ -197,6 +201,7 @@ extension BeamObjectManager {
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
 
+                    // swiftlint:disable:next date_init
                     localTimer = Date()
 
                     let ids: [UUID] = changedObjects.map { $0.id }
@@ -337,6 +342,7 @@ extension BeamObjectManager {
             return nil
         }
 
+        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let beamObjects: [BeamObject] = try objects.map {
@@ -347,6 +353,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let beamObjectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
@@ -363,6 +370,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: beamObjectsToSave)
@@ -452,6 +460,7 @@ extension BeamObjectManager {
             return nil
         }
 
+        // swiftlint:disable:next date_init
         var localTimer = Date()
 
         let beamObjects: [BeamObject] = try objects.map {
@@ -461,6 +470,7 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Converted \(objects.count) \(T.beamObjectType) to beam objects",
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let objectsToSave = force ? beamObjects : updatedObjectsOnly(beamObjects)
@@ -477,6 +487,7 @@ extension BeamObjectManager {
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
 
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let checksums = BeamObjectChecksum.previousChecksums(beamObjects: objectsToSave)
@@ -497,6 +508,7 @@ extension BeamObjectManager {
         Logger.shared.logDebug("Saving \(objectsToSave.count) objects of type \(T.beamObjectType) on API",
                                category: .beamObjectNetwork)
 
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         let request = BeamObjectRequest()
@@ -529,6 +541,7 @@ extension BeamObjectManager {
                     Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: starting",
                                            category: .beamObjectNetwork)
 
+                    // swiftlint:disable:next date_init
                     localTimer = Date()
                     var totalSize = 0
 
@@ -583,6 +596,7 @@ extension BeamObjectManager {
                     }
 
                     let request = BeamObjectRequest()
+                    // swiftlint:disable:next date_init
                     localTimer = Date()
 
                     try request.save(objectsToSave) { result in
@@ -859,6 +873,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let beamObject = try BeamObject(object: object)
@@ -914,6 +929,7 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let beamObject = try BeamObject(object: object)

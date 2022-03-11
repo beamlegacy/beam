@@ -10,6 +10,7 @@ extension BeamObjectManagerDelegate {
 
         self.willSaveAllOnBeamObjectApi()
 
+        // swiftlint:disable:next date_init
         let localTimer = Date()
 
         let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)

@@ -174,7 +174,7 @@ public final class Logger {
     private func log(_ message: String, level: OSLogType, category: LogCategory, localTimer: Date? = nil) {
         var timeDiff: TimeInterval?
         if let localTimer = localTimer {
-            timeDiff = BeamDate.now.timeIntervalSince(localTimer)
+            timeDiff = Date().timeIntervalSince(localTimer)
         }
 
         var tid: UInt64 = 0

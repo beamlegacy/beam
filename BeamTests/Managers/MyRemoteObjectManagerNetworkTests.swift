@@ -218,7 +218,7 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                 let object2 = block["object2"] as! MyRemoteObject
                 let object3 = block["object3"] as! MyRemoteObject
 
-                waitUntil(timeout: .seconds(10)) { done in
+                waitUntil(timeout: .seconds(30)) { done in
                     do {
                         _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                             expect { try result.get() }.toNot(throwError())
@@ -259,7 +259,7 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                 let object2 = block["object2"] as! MyRemoteObject
                 let object3 = block["object3"] as! MyRemoteObject
 
-                waitUntil(timeout: .seconds(10)) { done in
+                waitUntil(timeout: .seconds(30)) { done in
                     do {
                         _ = try sut.saveOnBeamObjectsAPI([object1, object2, object3]) { result in
                             expect { try result.get() }.toNot(throwError())
@@ -280,7 +280,9 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(expectedResult))
 
                         if MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum != (try checksum(expectedResult)) {
-                            dump("not ok")
+                            dump(MyRemoteObjectManager.store[object.beamObjectId])
+                            dump(expectedResult)
+                            dump("not ok :(")
                         }
                     } else {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
@@ -580,7 +582,7 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                 let networkCalls = APIRequest.callsCount
 
                 let promise: Promises.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
-                waitUntil(timeout: .seconds(10)) { done in
+                waitUntil(timeout: .seconds(30)) { done in
                     promise.then { remoteObject in
                         done()
                     }.catch { error in
