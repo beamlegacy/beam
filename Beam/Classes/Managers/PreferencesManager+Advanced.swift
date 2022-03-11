@@ -20,6 +20,7 @@ extension PreferencesManager {
     private static let showsCollectFeedbackAlertKey = "showsCollectFeedbackAlert"
     private static let showTabsColoringKey = "showTabsColoring"
     private static let showWebOnLaunchIfTabsKey = "showWebOnLaunchIfTabs"
+    private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
 }
 
 // MARK: - Default Values
@@ -37,6 +38,7 @@ extension PreferencesManager {
     private static let showsCollectFeedbackAlertDefault = true
     private static let showTabsColoringDefault = false
     private static let showWebOnLaunchIfTabsDefault = true
+    private static let createJournalOncePerWindowDefault = false
 }
 
 extension PreferencesManager {
@@ -69,4 +71,8 @@ extension PreferencesManager {
 
     @UserDefault(key: showWebOnLaunchIfTabsKey, defaultValue: showWebOnLaunchIfTabsDefault, suiteName: BeamUserDefaults.browserPreferences.suiteName)
     static var showWebOnLaunchIfTabs: Bool
+
+    @UserDefault(key: createJournalOncePerWindowKey, defaultValue: createJournalOncePerWindowDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var createJournalOncePerWindow: Bool
+
 }
