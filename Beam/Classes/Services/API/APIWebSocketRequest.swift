@@ -148,8 +148,10 @@ class APIWebSocketRequest: APIRequest {
     private func enforceDisconnect(callDisconnectHandler: Bool = false) {
         self.connected = false
 
-        checkTimer?.invalidate()
-        checkTimer = nil
+        DispatchQueue.mainSync {
+            self.checkTimer?.invalidate()
+            self.checkTimer = nil
+        }
 
         if callDisconnectHandler {
             self.disconnectHandler?()
