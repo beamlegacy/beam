@@ -1,6 +1,15 @@
 // From https://stackoverflow.com/questions/28016578/how-can-i-parse-create-a-date-time-stamp-formatted-with-fractional-seconds-utc
 
 import Foundation
+import BeamCore
+import JJLISO8601DateFormatter
+
+// JJLISO8601DateFormatter is a 10x+ faster drop-in replacement for NSISO8601DateFormatter
+private var _iso8601withFractionalSeconds: JJLISO8601DateFormatter = {
+    let formatter = JJLISO8601DateFormatter()
+    formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+    return formatter
+}()
 
 extension ISO8601DateFormatter {
     convenience init(_ formatOptions: Options) {
@@ -10,7 +19,7 @@ extension ISO8601DateFormatter {
 }
 
 extension Formatter {
-    static let iso8601withFractionalSeconds = ISO8601DateFormatter([.withInternetDateTime, .withFractionalSeconds])
+    static let iso8601withFractionalSeconds = _iso8601withFractionalSeconds
     static let iso8601 = ISO8601DateFormatter()
 }
 
@@ -42,7 +51,14 @@ extension String {
     var iso8601withFractionalSeconds: Date? { return Formatter.iso8601withFractionalSeconds.date(from: self) }
 }
 
-extension JSONDecoder.DateDecodingStrategy {
+extension JSONEncoder.DateEncodingStrategy {
+    static let iso8601withFractionalSeconds = custom {
+        var container = $1.singleValueContainer()
+        try container.encode(Formatter.iso8601withFractionalSeconds.string(from: $0))
+    }
+}
+
+extension BeamJSONDecoder.DateDecodingStrategy {
     static let iso8601withFractionalSeconds = custom {
         let container = try $0.singleValueContainer()
         let string = try container.decode(String.self)
@@ -51,12 +67,5 @@ extension JSONDecoder.DateDecodingStrategy {
                   debugDescription: "Invalid date: " + string)
         }
         return date
-    }
-}
-
-extension JSONEncoder.DateEncodingStrategy {
-    static let iso8601withFractionalSeconds = custom {
-        var container = $1.singleValueContainer()
-        try container.encode(Formatter.iso8601withFractionalSeconds.string(from: $0))
     }
 }

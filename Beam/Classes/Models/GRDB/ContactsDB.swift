@@ -108,7 +108,7 @@ extension ContactRecord: FetchableRecord {
         uuid = row[Columns.uuid]
         noteId = row[Columns.noteId]
         if let data = row[Columns.emails] as? Data {
-            let decodedEmails = try? JSONDecoder().decode([Email].self, from: data)
+            let decodedEmails = try? BeamJSONDecoder().decode([Email].self, from: data)
             emails = decodedEmails ?? []
         } else {
             emails = []

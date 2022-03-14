@@ -15,7 +15,7 @@ import Nimble
 extension String {
     var toBeamText: BeamText? {
         guard let data = self.data(using: .utf8) else { return nil }
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         return try? decoder.decode(BeamText.self, from: data)
     }
 }

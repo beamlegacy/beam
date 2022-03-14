@@ -60,7 +60,7 @@ class BrowsingTreeSenderTest: XCTestCase {
             return try XCTUnwrap(sentData, "sent data should decode")
         }
 
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         let tree = BrowsingTree(nil)
         subject.send(browsingTree: tree)
         let unwrappedData = try sentData(session: session)

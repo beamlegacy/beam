@@ -225,7 +225,7 @@ extension BeamTextEdit {
                 return
             }
 
-            let decodedNote = try JSONDecoder().decode(BeamNote.self, from: elementHolder.noteData)
+            let decodedNote = try BeamJSONDecoder().decode(BeamNote.self, from: elementHolder.noteData)
             for element in decodedNote.children {
                 guard let newElement = element.deepCopy(withNewId: true, selectedElements: nil, includeFoldedChildren: true) else {
                     Logger.shared.logError("Paste error, unable to copy \(element)", category: .noteEditor)

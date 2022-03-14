@@ -58,7 +58,7 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
                 guard let itemData = cachedItemString.data(using: .utf8) else {
                     throw EmbedContentAPIStrategyError.parsingCachedItem
                 }
-                let cachedItem = try JSONDecoder().decode(EmbedAPIResult.self, from: itemData)
+                let cachedItem = try BeamJSONDecoder().decode(EmbedAPIResult.self, from: itemData)
                 // for now api returns cached item wrapped in another object
                 url = cachedItem.url
                 title = cachedItem.title
