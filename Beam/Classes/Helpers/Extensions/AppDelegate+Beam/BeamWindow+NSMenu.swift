@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 /// NSMenu bar methods handling
 ///
@@ -67,7 +68,7 @@ extension BeamWindow {
     }
 
     private func restoreTabs(from data: Data) {
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
         for windowCommand in windowCommands.keys {
             guard var beamWindow = AppDelegate.main.windows.first,

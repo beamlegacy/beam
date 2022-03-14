@@ -67,7 +67,7 @@ class BeamTestsHelper {
     }
 
     static let encoder = JSONEncoder()
-    static let decoder = JSONDecoder()
+    static let decoder = BeamJSONDecoder()
     private func saveAPIRequestsFilename() -> URL {
         let recordingPath = NSSearchPathForDirectoriesInDomains(.libraryDirectory, .userDomainMask, true).first!
         var filename = testName.c99ExtendedIdentifier

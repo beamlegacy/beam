@@ -104,8 +104,8 @@ extension BeamObjectChecksum {
         return encoder
     }
 
-    private static var decoder: JSONDecoder {
-        let decoder = JSONDecoder()
+    private static var decoder: BeamJSONDecoder {
+        let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder

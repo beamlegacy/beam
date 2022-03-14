@@ -285,7 +285,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
 
     func indexDocument(_ docStruct: DocumentStruct) {
         BeamNote.indexingQueue.addOperation {
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             do {
                 let note = try decoder.decode(BeamNote.self, from: docStruct.data)
                 try GRDBDatabase.shared.append(note: note)
