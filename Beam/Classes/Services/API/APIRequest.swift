@@ -310,8 +310,8 @@ class APIRequest: NSObject {
         } as [String]
     }
 
-    func defaultDecoder() -> JSONDecoder {
-        let decoder = JSONDecoder()
+    func defaultDecoder() -> BeamJSONDecoder {
+        let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         return decoder
     }

@@ -237,7 +237,7 @@ extension BrowserTabsManager {
 
     func reOpenedClosedTabFromHistory() -> Bool {
         if !tabHistory.isEmpty {
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             let lastClosedTabData = tabHistory.removeLast()
             guard let lastClosedTab = try? decoder.decode(BrowserTab.self, from: lastClosedTabData) else { return false }
             lastClosedTab.id = UUID()

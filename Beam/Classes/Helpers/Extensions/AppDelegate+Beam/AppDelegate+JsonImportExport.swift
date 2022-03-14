@@ -97,7 +97,7 @@ extension AppDelegate {
                 Logger.shared.logError("Unable to import data from \(url)", category: .general)
                 return
             }
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             guard let note = try? decoder.decode(BeamNote.self, from: data) else {
                 Logger.shared.logError("Unable to decode beam note from \(url)", category: .general)
                 return
