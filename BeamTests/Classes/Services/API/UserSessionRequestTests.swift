@@ -171,7 +171,7 @@ class UserSessionRequestTests: QuickSpec {
             context("with PromiseKit") {
                 context("with existing account") {
                     it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(30)) { done in
                             let promise: PromiseKit.Promise<UserSessionRequest.ForgotPassword> = sut
                                 .forgotPassword(email: existingAccountEmail)
 
@@ -203,7 +203,7 @@ class UserSessionRequestTests: QuickSpec {
             context("with Promises") {
                 context("with existing account") {
                     it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(30)) { done in
                             let promise: Promises.Promise<UserSessionRequest.ForgotPassword> = sut
                                 .forgotPassword(email: existingAccountEmail)
 
