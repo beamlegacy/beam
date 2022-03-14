@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 /**
  Generic Wrapper around NSCache
@@ -145,7 +146,7 @@ extension Cache: Codable where Key: Codable, Value: Codable {
 
         let fileURL = folderURLs[0].appendingPathComponent(name + ".cache")
         let data = try Data(contentsOf: fileURL)
-        let cache = try JSONDecoder().decode(self, from: data)
+        let cache = try BeamJSONDecoder().decode(self, from: data)
         return cache
     }
 }

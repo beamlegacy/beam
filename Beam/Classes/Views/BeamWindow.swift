@@ -198,7 +198,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.MD5)")
 
             do {
-                let decoder = JSONDecoder()
+                let decoder = BeamJSONDecoder()
                 let note = try decoder.decode(BeamNote.self, from: data)
                 note.resetIds() // use a new UUID to be sure not to overwrite an existing note
                 let titleBase = note.title

@@ -48,7 +48,11 @@
 		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
+		0507201227DBF51A0023705C /* ZippyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 0507201127DBF51A0023705C /* ZippyJSON */; };
+		0507201427DBF98E0023705C /* ZippyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 0507201327DBF98E0023705C /* ZippyJSON */; };
+		0507201527DBFC6B0023705C /* BeamJSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83727DB51E20075533D /* BeamJSONDecoder.swift */; };
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
+		05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
 		0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */; };
@@ -1433,6 +1437,8 @@
 		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
 		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
 		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
+		0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+iso8601millisecondsTests.swift"; sourceTree = "<group>"; };
+		0572B83727DB51E20075533D /* BeamJSONDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamJSONDecoder.swift; sourceTree = "<group>"; };
 		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
@@ -2711,6 +2717,7 @@
 				9624A65727431B4200B8D012 /* Atomics in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
 				9684F26F270F8DDA006BF53E /* Sentry in Frameworks */,
+				0507201227DBF51A0023705C /* ZippyJSON in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2778,6 +2785,7 @@
 				A0A84FC52636FA9A008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				9684F273270F9C25006BF53E /* Sentry in Frameworks */,
 				9624A6592743212500B8D012 /* Atomics in Frameworks */,
+				0507201427DBF98E0023705C /* ZippyJSON in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3438,6 +3446,7 @@
 				A0129BD22758E87900522183 /* NSApplication+Relaunch.swift */,
 				338981C02795B9BD00477941 /* Bundle+Beam.swift */,
 				525C5471261F619D00378FAA /* Binding+onChange.swift */,
+				5268FD0F27020A9B003677B2 /* Date+iso8601millseconds.swift */,
 				5284895326C5650A0064878B /* Error+NotFound.swift */,
 				418171A42581107C00317ED8 /* Range+Beam.swift */,
 				8AD38F982768AC8F003D6B48 /* CGSize+Beam.swift */,
@@ -3466,7 +3475,6 @@
 				8A4172D526A063FD00F93128 /* NSPoint+Beam.swift */,
 				8AA2431526E63A5F002A553A /* SwiftSoup+Beam.swift */,
 				8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */,
-				5268FD0F27020A9B003677B2 /* Date+iso8601millseconds.swift */,
 				378751F027AA9B5000DDDC9E /* NSUserInterfaceItemIdentifier+Beam.swift */,
 				8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */,
 			);
@@ -4257,6 +4265,7 @@
 				562A8B5025B5E38D004D3D8A /* String+Beam */,
 				A5316A182667B9110039ED9C /* Range+BeamTests.swift */,
 				A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */,
+				0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4798,6 +4807,7 @@
 				9676143725CAAD5300BDA862 /* RWLock.swift */,
 				9635C97F276AABB300015575 /* SignPost.swift */,
 				9635C97327696C5700015575 /* DebugHelpers.swift */,
+				0572B83727DB51E20075533D /* BeamJSONDecoder.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -6095,6 +6105,7 @@
 				96C0F72C26FCAE6100385449 /* UUIDKit */,
 				9684F26E270F8DDA006BF53E /* Sentry */,
 				9624A65627431B4200B8D012 /* Atomics */,
+				0507201127DBF51A0023705C /* ZippyJSON */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -6227,6 +6238,7 @@
 				96C0F73326FCBC0D00385449 /* UUIDKit */,
 				9684F272270F9C25006BF53E /* Sentry */,
 				9624A6582743212500B8D012 /* Atomics */,
+				0507201327DBF98E0023705C /* ZippyJSON */,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -6321,6 +6333,7 @@
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -6913,6 +6926,7 @@
 				8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */,
 				DA1EB2A126CD33D5006AEB86 /* WebSessionizer.swift in Sources */,
 				DAD4024A27908601005310DE /* BrowsingTree+Flatten.swift in Sources */,
+				0507201527DBFC6B0023705C /* BeamJSONDecoder.swift in Sources */,
 				964FE64D262D8ED300966E03 /* Dictionary+valuesMatchingKeys.swift in Sources */,
 				DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */,
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
@@ -7845,6 +7859,7 @@
 				37B85B8C27A2C83B003871F9 /* BeamDownloadDocumentTests.swift in Sources */,
 				BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */,
 				BAA67A6498E4E69779855E19 /* DownloadManagerTests.swift in Sources */,
+				05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */,
 				A501B4D1273439C500407F3E /* EmbedContentAPIStrategyTests.swift in Sources */,
 				BAA6734B9E1478E3084B0A3A /* WebNoteControllerTest.swift in Sources */,
 				8A8CD64F274D146D00DEB52B /* WebNoteControllerTest+setContents.swift in Sources */,
@@ -10061,6 +10076,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/michaeleisel/ZippyJSON";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 		33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
@@ -10280,6 +10303,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		0507201127DBF51A0023705C /* ZippyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */;
+			productName = ZippyJSON;
+		};
+		0507201327DBF98E0023705C /* ZippyJSON */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */;
+			productName = ZippyJSON;
+		};
 		33088D6226B06677004FAE99 /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */;

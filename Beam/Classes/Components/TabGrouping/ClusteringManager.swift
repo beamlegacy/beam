@@ -102,7 +102,7 @@ class ClusteringManager: ObservableObject {
         self.summary = SummaryForNewDay()
         if let summaryString = Persistence.ContinueTo.summary,
            let jsonData = summaryString.data(using: .utf8),
-           let unwrappedSummary = try? JSONDecoder().decode(SummaryForNewDay.self, from: jsonData) {
+           let unwrappedSummary = try? BeamJSONDecoder().decode(SummaryForNewDay.self, from: jsonData) {
             self.summary = unwrappedSummary
         }
         if let notesWithActivity = summary.notes {

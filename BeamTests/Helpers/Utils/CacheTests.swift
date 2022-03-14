@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import BeamCore
 @testable import Beam
 
 class CacheTests: XCTestCase {
@@ -44,7 +45,7 @@ class CacheTests: XCTestCase {
         let encoded = try JSONEncoder().encode(cache)
         XCTAssertNotNil(encoded)
 
-        let decoded = try JSONDecoder().decode(Cache<String, String>.self, from: encoded)
+        let decoded = try BeamJSONDecoder().decode(Cache<String, String>.self, from: encoded)
         XCTAssertNotNil(decoded)
         XCTAssertEqual(decoded.countLimit, 5)
         XCTAssertEqual(decoded.numberOfValues, 5)

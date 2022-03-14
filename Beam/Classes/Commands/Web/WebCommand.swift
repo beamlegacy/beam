@@ -32,7 +32,7 @@ class WebCommand: Command<BeamState> {
         guard let data = data else { return nil }
         var tab: BrowserTab?
         do {
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             tab = try decoder.decode(BrowserTab.self, from: data)
         } catch {
             Logger.shared.logError("Can't decode BrowserTab data", category: .general)

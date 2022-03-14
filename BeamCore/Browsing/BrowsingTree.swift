@@ -354,7 +354,7 @@ public class BrowsingNode: ObservableObject, Codable {
             return nil
         }
 
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         guard let newBrowsingNode = try? decoder.decode(Self.self, from: data) else {
             Logger.shared.logError("DeepCopy Error while decoding \(self)", category: .document)
             return nil
@@ -500,7 +500,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
             return nil
         }
 
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         guard let newBrowsingTree = try? decoder.decode(Self.self, from: data) else {
             Logger.shared.logError("DeepCopy Error while decoding \(self)", category: .document)
             return nil

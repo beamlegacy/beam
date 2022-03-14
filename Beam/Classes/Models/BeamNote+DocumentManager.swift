@@ -117,7 +117,7 @@ extension BeamNote: BeamNoteDocument {
         }
 
         self.updates += 1
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         guard let newSelf = try? decoder.decode(BeamNote.self, from: docStruct.data) else {
             Logger.shared.logError("Unable to decode new documentStruct \(docStruct.title) {\(docStruct.id)} [caller: \(context)]",
                                    category: .document)
@@ -416,7 +416,7 @@ extension BeamNote: BeamNoteDocument {
             Logger.shared.logError("We just tried loading a note from a database that is NOT the default database!", category: .database)
         }
 
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         if decodeChildren == false {
             decoder.userInfo[BeamElement.recursiveCoding] = false
         }
@@ -434,7 +434,7 @@ extension BeamNote: BeamNoteDocument {
 
     static func instanciateNoteWithPreviousData(_ documentStruct: DocumentStruct,
                                                 decodeChildren: Bool = true) throws -> BeamNote? {
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         if decodeChildren == false {
             decoder.userInfo[BeamElement.recursiveCoding] = false
         }

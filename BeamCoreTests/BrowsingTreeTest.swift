@@ -55,7 +55,7 @@ class BrowsingTreeTest: XCTestCase {
                      "videoTotalDuration": 0}]}
         """.data(using: .utf8)!
 
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         do {
             _ = try decoder.decode(BrowsingTree.self, from: jsonTree)
         } catch { XCTFail("Error: \(error)") }
@@ -133,7 +133,7 @@ class BrowsingTreeTest: XCTestCase {
 
     func testBrowsingNodeOriginSerialization() throws {
         let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
 
         //decode(encode(x)) is identity
         let origin: BrowsingTreeOrigin = .browsingNode(id: UUID(), pageLoadId: UUID(), rootOrigin: .searchBar(query: "rolex pas cher", referringRootId: nil), rootId: UUID())
@@ -188,7 +188,7 @@ class BrowsingTreeTest: XCTestCase {
         }
         """.data(using: .utf8)!
 
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         let encoder = JSONEncoder()
         var legacyDecoded = try XCTUnwrap(try? decoder.decode(BrowsingTree.self, from: legacyJson))
         var legacyRoot = try XCTUnwrap(legacyDecoded.root)
@@ -287,7 +287,7 @@ class BrowsingTreeTest: XCTestCase {
         let flattened = tree.flattened
         XCTAssertEqual(flattened.nodes.count, 5)
         let encoder = JSONEncoder()
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         let data = try encoder.encode(flattened)
         let decoded = try decoder.decode(FlatennedBrowsingTree.self, from: data)
 
