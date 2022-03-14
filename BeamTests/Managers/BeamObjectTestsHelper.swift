@@ -39,7 +39,7 @@ class BeamObjectTestsHelper {
             semaphore.signal()
         }
 
-        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(15))
+        let semaResult = semaphore.wait(timeout: DispatchTime.now() + .seconds(30))
 
         if case .timedOut = semaResult {
             fail("Timedout")
