@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 struct Ecosia: SearchEngineDescription {
 
@@ -11,7 +12,7 @@ struct Ecosia: SearchEngineDescription {
     var suggestionsHost: String? { "ac.ecosia.org" }
 
     func decodeSuggestions(from data: Data) throws -> [String] {
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         let response = try decoder.decode(SuggestionsResponse.self, from: data)
         return response.suggestions
     }

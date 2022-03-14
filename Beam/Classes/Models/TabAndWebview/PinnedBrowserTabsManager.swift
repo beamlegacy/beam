@@ -22,8 +22,8 @@ class PinnedBrowserTabsManager {
     private var encoder: JSONEncoder {
         JSONEncoder()
     }
-    private var decoder: JSONDecoder {
-        JSONDecoder()
+    private var decoder: BeamJSONDecoder {
+        BeamJSONDecoder()
     }
 
     private func getPinnedTabsInfos() throws -> [PinnedTabInfo] {

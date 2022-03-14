@@ -31,7 +31,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private let scrollUpdater = PassthroughSubject<WebPositions.FrameInfo, Never>()
     private var passwordMenuPopover: WebAutofillPopoverContainer?
     private let encoder: JSONEncoder
-    private let decoder: JSONDecoder
+    private let decoder: BeamJSONDecoder
     private var fieldWithIcon: String?
     private var buttonPopover: WebAutofillPopoverContainer?
     private var currentlyFocusedElementId: String?
@@ -54,7 +54,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         self.userInfoStore = userInfoStore
         credentialsBuilder = PasswordManagerCredentialsBuilder()
         encoder = JSONEncoder()
-        decoder = JSONDecoder()
+        decoder = BeamJSONDecoder()
         super.init()
         PreferencesManager.$autofillUsernamePasswords.sink { [weak self] autofill in
             if !autofill {

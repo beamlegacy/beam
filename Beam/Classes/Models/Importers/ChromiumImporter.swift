@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 class ChromiumImporter {
     private(set) var browser: ChromiumBrowserInfo
@@ -28,7 +29,7 @@ class ChromiumImporter {
                 return nil // cancelled by user
             }
             let localStateData = try Data(contentsOf: localStateFile)
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             decoder.keyDecodingStrategy = .convertFromSnakeCase
             let localState = try decoder.decode(LocalState.self, from: localStateData)
             return browserDirectory.appendingPathComponent(localState.profile.lastUsed, isDirectory: true)

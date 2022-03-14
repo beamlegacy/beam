@@ -299,8 +299,8 @@ class DocumentManagerTestsHelper {
         return localDocStruct
     }
 
-    func defaultDecoder() -> JSONDecoder {
-        let decoder = JSONDecoder()
+    func defaultDecoder() -> BeamJSONDecoder {
+        let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .iso8601
         return decoder
     }
