@@ -85,6 +85,7 @@ extension AppDelegate {
                         }
                         AppDelegate.main.closePreferencesWindow()
                         self.data.onboardingManager.forceDisplayOnboarding()
+                        self.data.onboardingManager.delegate = self
                         self.data.onboardingManager.presentOnboardingWindow()
                     }
                 }
