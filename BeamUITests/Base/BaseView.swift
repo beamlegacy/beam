@@ -124,9 +124,7 @@ class BaseView {
         if !omniSearchField.exists {
             shortcutsHelper.shortcutActionInvoke(action: .openLocation)
         }
-        omniSearchField.tapInTheMiddle()
-        omniSearchField.clear()
-        omniSearchField.typeText(text)
+        omniSearchField.clickClearAndType(text)
         WaitHelper().waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), minimumWaitTimeout)
         return OmniBoxTestView()
     }
