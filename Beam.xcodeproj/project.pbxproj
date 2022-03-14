@@ -979,6 +979,7 @@
 		A552DF2925F0E22B00570C85 /* DestinationNotePickerBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */; };
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
+		A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
@@ -2379,6 +2380,7 @@
 		A552DF2825F0E22B00570C85 /* DestinationNotePickerBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationNotePickerBackground.swift; sourceTree = "<group>"; };
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
+		A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTableCellLottieView.swift; sourceTree = "<group>"; };
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
 		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
@@ -5308,6 +5310,7 @@
 				A56696B02614CF7F00B814D2 /* TableView.swift */,
 				A55760812665501000DEE86C /* TableViewColumn.swift */,
 				A57BFEA02615B45C00CFB646 /* TableCellView.swift */,
+				A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */,
 				A57BFEBC2615B49C00CFB646 /* TableRowView.swift */,
 				A5CA5DB92624FF4A004E9D3E /* BeamNSTableView.swift */,
 				A57BFEB82615B48300CFB646 /* CheckBoxTableCellView.swift */,
@@ -7465,6 +7468,7 @@
 				52A8698D26CBB3C000FCCC69 /* AppDelegate+ShowError.swift in Sources */,
 				52842D4E2715B3180099602C /* FilesWindow.swift in Sources */,
 				A5946804265CE5B30044A892 /* DeleteDocumentCommand.swift in Sources */,
+				A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */,
 				A050047525DA918A009CFEB6 /* NoteAutoSaveService.swift in Sources */,
 				375D83BB278D636D0064C246 /* LinkMouseOverMessageHandler.swift in Sources */,
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
