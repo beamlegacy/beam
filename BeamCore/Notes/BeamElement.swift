@@ -507,7 +507,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             Logger.shared.logError("Copy Error while encoding \(self)", category: .document)
             return nil
         }
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         decoder.userInfo[BeamElement.recursiveCoding] = false
         return try? decoder.decode(Self.self, from: data)
     }
@@ -518,7 +518,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             Logger.shared.logError("DeepCopy Error while encoding \(self)", category: .document)
             return nil
         }
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         guard let newElement = try? decoder.decode(Self.self, from: data) else {
             Logger.shared.logError("DeepCopy Error while decoding \(self)", category: .document)
             return nil

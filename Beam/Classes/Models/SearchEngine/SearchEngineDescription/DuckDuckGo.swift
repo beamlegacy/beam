@@ -1,4 +1,5 @@
 import Foundation
+import BeamCore
 
 struct DuckDuckGo: SearchEngineDescription {
 
@@ -11,7 +12,7 @@ struct DuckDuckGo: SearchEngineDescription {
     var suggestionsPath: String { "/ac/" }
 
     func decodeSuggestions(from data: Data) throws -> [String] {
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         let response = try decoder.decode(SuggestionsResponse.self, from: data)
         return response.suggestions
     }

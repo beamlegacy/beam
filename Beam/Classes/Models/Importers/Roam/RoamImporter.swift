@@ -38,8 +38,8 @@ struct RoamNote: Decodable {
 }
 
 class RoamImporter {
-    lazy var decoder: JSONDecoder = {
-        let decoder = JSONDecoder()
+    lazy var decoder: BeamJSONDecoder = {
+        let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .millisecondsSince1970
 
         return decoder
