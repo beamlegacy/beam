@@ -148,9 +148,9 @@ class EmbedNode: ResizableNode {
     }
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
-        super.init(parent: parent, element: element, availableWidth: availableWidth)
-
         isUserCollapsed = element.collapsed
+
+        super.init(parent: parent, element: element, availableWidth: availableWidth)
 
         addFocusLayer()
 
@@ -236,11 +236,7 @@ class EmbedNode: ResizableNode {
 
         stopNotePlaying()
     }
-
-    deinit {
-        expandedContent?.removeFromSuperview()
-    }
-
+    
     override func didMoveToWindow(_ window: NSWindow?) {
         if window != nil, expandedContent == nil {
             applyCollapsedState(animated: false)
@@ -248,6 +244,10 @@ class EmbedNode: ResizableNode {
             expandedContent?.removeFromSuperview()
             expandedContent = nil
         }
+    }
+
+    deinit {
+        expandedContent?.removeFromSuperview()
     }
 
 }
