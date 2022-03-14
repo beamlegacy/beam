@@ -68,13 +68,15 @@ struct AnyUrl: CsvRow {
     let language: NLLanguage?
     let isOpenAtExport: Bool?
     let userCorrectionGroup: Int?
+    let id: UUID?
+    let parentId: UUID?
 
     static var columnNames: [String] {
-        ["noteName", "url", "groupId", "navigationGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "userCorrectionGroup"]
+        ["noteName", "url", "groupId", "navigationGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "userCorrectionGroup", "pageId", "parentId"]
     }
 
     var columns: [String] {
-        [optionalToString(noteName), optionalToString(url), String(groupId), String(navigationGroupId ?? -1), optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue), optionalToString(isOpenAtExport), optionalToString(userCorrectionGroup)]
+        [optionalToString(noteName), optionalToString(url), String(groupId), String(navigationGroupId ?? -1), optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue), optionalToString(isOpenAtExport), optionalToString(userCorrectionGroup), optionalToString(id), optionalToString(parentId)]
     }
 }
 
