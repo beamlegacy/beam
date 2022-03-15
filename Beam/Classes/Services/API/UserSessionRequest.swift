@@ -73,4 +73,13 @@ class UserSessionRequest: APIRequest {
         let refreshToken: String?
         let errors: [UserErrorData]?
     }
+    
+    struct AccountExistsParameters: Encodable {
+        let email: String
+    }
+
+    struct AccountExists: Decodable, Errorable {
+        let exists: Bool
+        let errors: [UserErrorData]?
+    }
 }
