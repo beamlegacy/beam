@@ -1,7 +1,7 @@
 {
   "configurations" : [
     {
-      "id" : "2892E86E-6DA0-4704-8C1F-18EC02B05797",
+      "id" : "D0297821-0096-4FFB-922F-AB2EDB1468FC",
       "name" : "Configuration 1",
       "options" : {
 
@@ -16,26 +16,41 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AllCardsDeleteTests",
+        "AllCardsViewTests",
         "BaseTest",
+        "BlockReferenceTests",
         "BrowserFancyUrlTests",
-        "CardEditTests",
-        "EditorShortcutsTests",
+        "BrowserShortcutsTests",
+        "BrowserStatusBarTests",
+        "BrowserTabViewTests",
+        "CardCreationTests",
+        "CardPublishTests",
+        "CardViewEmbedsTests",
+        "CardViewTests",
+        "DeleteNotesTests",
+        "DownloadsTest",
+        "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "JavascriptNativeInteractionsTests",
         "JournalTest",
         "LinksTests",
-        "LoginPasswordAutocompleteTests",
         "LoginTest",
         "NoteEditorTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
-        "OmniboxViewTests",
+        "OmniboxViewTests\/testOmniboxDefaultActions()",
+        "OmniboxViewTests\/testOmniboxTextSelectionAndEditing()",
         "OnboardingTests",
-        "PasswordPreferencesTests",
+        "PasswordPreferencesTests\/testAutofillUsernameAndPasswords()",
+        "PasswordPreferencesTests\/testExportPasswords()",
+        "PasswordPreferencesTests\/testImportPasswords()",
+        "PasswordPreferencesTests\/testRemovePasswordItem()",
+        "PasswordPreferencesTests\/testSearchForPassword()",
+        "PasswordPreferencesTests\/testSortPasswords()",
+        "PasswordPreferencesTests\/testViewPasswordItemDetails()",
         "PnSAddToCardTests",
-        "ReferencesTests",
         "SearchOnCardTests",
-        "SearchOnWebTests",
         "SignInAutocompleteTests",
         "SignInSucessfullyTests",
         "SignInTests",
@@ -44,8 +59,7 @@
         "TextEditorContextViewTests",
         "UpdateViewTests",
         "WaitHelper",
-        "WebsiteAuthTest",
-        "dummytests"
+        "WebsiteAuthTest"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",
