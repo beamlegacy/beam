@@ -232,5 +232,31 @@ class UserSessionRequestTests: QuickSpec {
                 }
             }
         }
+        
+        describe(".accountExists()") {
+            context("with Foundation") {
+                context("with existing accounts") {
+                    it("returns true") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let _: URLSessionDataTask? = try? sut.accountExists(email: existingAccountEmail) { result in
+                                expect { try result.get().exists }.to(beTrue())
+                                done()
+                            }
+                        }
+                    }
+                }
+
+                context("with unknown account") {
+                    it("returns false") {
+                        waitUntil(timeout: .seconds(10)) { done in
+                            let _: URLSessionDataTask? = try? sut.accountExists(email: nonExistingAccountEmail) { result in
+                                expect { try result.get().exists }.to(beFalse())
+                                done()
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 }
