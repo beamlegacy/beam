@@ -8,7 +8,7 @@
 import SwiftUI
 import Lottie
 
-private extension Lottie.Color {
+extension Lottie.Color {
     init(color nscolor: NSColor) {
         var r: CGFloat = 0
         var g: CGFloat = 0
