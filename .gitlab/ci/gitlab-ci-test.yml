@@ -265,6 +265,48 @@ UITestThread4:
     - macos-mono
   interruptible: true
   
+UITestThread5:
+  timeout: 25 minutes
+  dependencies: []
+#  needs: ["build for testing"]
+  stage: test
+  artifacts:
+    expire_in: 4d
+    when: always
+    paths:
+      - cobertura.xml
+      - fastlane/test_output/tests.xml
+      - fastlane/test_output
+      - screenshots
+      - logs
+    reports:
+      cobertura: cobertura.xml
+      junit: fastlane/test_output/tests.xml
+  coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - time bundle exec fastlane uitestsThread5
+  after_script:
+    - xcparse screenshots --activity-type attachmentContainer userCreated testAssertionFailure --test --os --model fastlane/test_output/Beam.xcresult screenshots
+    - xcparse screenshots --test-status Failure --test --os --model fastlane/test_output/Beam.xcresult screenshots
+    - find screenshots -type d -empty -delete
+    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - mkdir -p logs
+    - mv ${HOME}/Library/logs/scan/*.log logs
+    - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
+    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -r ${HOME}/Downloads/*
+  tags:
+    - macos-mono
+  interruptible: true
+  
 #Teardown:
 #  timeout: 10 minutes
 #  dependencies: []
