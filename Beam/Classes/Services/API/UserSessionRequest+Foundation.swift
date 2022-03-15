@@ -112,4 +112,15 @@ extension UserSessionRequest {
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
     }
+
+    @discardableResult
+    func accountExists(email: String,
+                       _ completionHandler: @escaping (Result<AccountExists, Error>) -> Void) throws -> URLSessionDataTask? {
+        let variables = AccountExistsParameters(email: email)
+
+        let bodyParamsRequest = GraphqlParameters(fileName: "account_exists", variables: variables)
+
+        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+    }
+
 }
