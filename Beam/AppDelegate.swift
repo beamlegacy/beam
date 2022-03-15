@@ -49,7 +49,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var importErrorCancellable: AnyCancellable?
 
     private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
-    private let defaultWindowSize = CGSize(width: 800, height: 600)
+    private let defaultWindowSize = CGSize(width: 1024, height: 768)
     public private(set) lazy var documentManager = DocumentManager()
     public private(set) lazy var databaseManager = DatabaseManager()
     public private(set) lazy var beamObjectManager = BeamObjectManager()
