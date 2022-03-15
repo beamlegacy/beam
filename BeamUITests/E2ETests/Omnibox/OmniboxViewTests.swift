@@ -24,35 +24,47 @@ class OmniboxViewTests: BaseTest {
     func testOmniBoxSearchField() {
         let textInput = "Hello World"
         let textEmpty = ""
-        launchApp()
-        
+
         let omniboxView = OmniBoxTestView()
         let omniboxSearchField = omniboxView.getOmniBoxSearchField()
         
-        testRailPrint("Then Omnibox search field is focused on launched")
-        XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
+        step("Given I launch the app") {
+            launchApp()
+        }
+
+        step("Then Omnibox search field is focused on launched") {
+            XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
+        }
         
-        testRailPrint("When I type in Omnibox search field: \(textInput)")
-        omniboxSearchField.typeText(textInput)
+        step("When I type in Omnibox search field: \(textInput)") {
+            omniboxSearchField.typeText(textInput)
+        }
         
-        testRailPrint("Then \(textInput) is correctly displayed in Omnibox search field")
-        XCTAssertEqual(omniboxSearchField.value as? String, textInput)
+        step("Then \(textInput) is correctly displayed in Omnibox search field") {
+            XCTAssertEqual(omniboxSearchField.value as? String, textInput)
+        }
         
-        testRailPrint("When I delete: \(textInput)")
-        omniboxView.typeKeyboardKey(.delete, 2)
+        step("When I delete: \(textInput)") {
+            omniboxView.typeKeyboardKey(.delete, 2)
+        }
+        
         let startIndex = textInput.index(textInput.startIndex, offsetBy: 0)
         let endIndex = textInput.index(textInput.endIndex, offsetBy: -3)
         let partiallyDeletedSearchText = String(textInput[startIndex...endIndex])
+
+        step("Then \(textInput) is correctly displayed in Omnibox search field") {
+            XCTAssertEqual(omniboxSearchField.value as? String, partiallyDeletedSearchText)
+        }
         
-        testRailPrint("Then \(textInput) is correctly displayed in Omnibox search field")
-        XCTAssertEqual(omniboxSearchField.value as? String, partiallyDeletedSearchText)
+        step("When I delete all input: \(partiallyDeletedSearchText)") {
+            ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+            omniboxView.typeKeyboardKey(.delete)
+        }
         
-        testRailPrint("When I delete all input: \(partiallyDeletedSearchText)")
-        ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
-        omniboxView.typeKeyboardKey(.delete)
+        step("Then Omnibox search field is empty") {
+            XCTAssertEqual(omniboxSearchField.value as? String, textEmpty)
+        }
         
-        testRailPrint("Then Omnibox search field is empty")
-        XCTAssertEqual(omniboxSearchField.value as? String, textEmpty)
     }
     
     func testOmniboxPivotButtonClicking() {
