@@ -52,6 +52,7 @@
 		0507201427DBF98E0023705C /* ZippyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 0507201327DBF98E0023705C /* ZippyJSON */; };
 		0507201527DBFC6B0023705C /* BeamJSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83727DB51E20075533D /* BeamJSONDecoder.swift */; };
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
+		05A3D59E27DF970A004CC7F1 /* account_exists.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05A3D59D27DF970A004CC7F1 /* account_exists.graphql */; };
 		05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
@@ -1439,6 +1440,7 @@
 		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
 		0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+iso8601millisecondsTests.swift"; sourceTree = "<group>"; };
 		0572B83727DB51E20075533D /* BeamJSONDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamJSONDecoder.swift; sourceTree = "<group>"; };
+		05A3D59D27DF970A004CC7F1 /* account_exists.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = account_exists.graphql; sourceTree = "<group>"; };
 		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
@@ -3295,6 +3297,7 @@
 				3303E10226FA22D300E175AC /* user_infos.graphql */,
 				A54A452927677F9A00B9AE1B /* set_username.graphql */,
 				0564B1B127D20BAE00B74BBD /* update_password.graphql */,
+				05A3D59D27DF970A004CC7F1 /* account_exists.graphql */,
 			);
 			path = UserSession;
 			sourceTree = "<group>";
@@ -6515,6 +6518,7 @@
 				8A930A0827A04E2C00064133 /* yarn.lock in Resources */,
 				A03B909527BEA5B7001FBE64 /* cpt-0.jpg in Resources */,
 				8AFE8357276B248B00D4B560 /* UITests-Alerts.html in Resources */,
+				05A3D59E27DF970A004CC7F1 /* account_exists.graphql in Resources */,
 				33BBA507274423E700FE92DB /* editor-embed_expand.json in Resources */,
 				A07B03F1279AF1D200D14C45 /* Inter-SemiBoldItalic.otf in Resources */,
 				A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */,
