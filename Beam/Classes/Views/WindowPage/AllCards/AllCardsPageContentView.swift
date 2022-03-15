@@ -24,6 +24,7 @@ class AllCardsViewModel: ObservableObject, Identifiable {
     @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
     @Published fileprivate var publicNotesItems = [NoteTableViewItem]()
     @Published fileprivate var shouldReloadData: Bool? = false
+    @Published fileprivate var publishingNoteTitle: String?
 
     private var coreDataObservers = Set<AnyCancellable>()
     private var metadataFetchers = Set<AnyCancellable>()
@@ -61,7 +62,10 @@ class AllCardsViewModel: ObservableObject, Identifiable {
 
     /// We're hiding empty journal notes; except for today's
     private func noteShouldBeDisplayed(_ doc: DocumentStruct) -> Bool {
-        doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.todaysJournal.journalDateString
+        if doc.title == publishingNoteTitle {
+            return false
+        }
+        return doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.todaysJournal.journalDateString
     }
 
     private func updateNoteItemsFromAllNotes() {
@@ -171,7 +175,6 @@ struct AllCardsPageContentView: View {
     @State private var selectedRowsIndexes = IndexSet()
     @State private var hoveredRowIndex: Int?
     @State private var hoveredRowFrame: NSRect?
-    @State private var publishingNote = false
 
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
@@ -191,15 +194,15 @@ struct AllCardsPageContentView: View {
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
-        TableViewColumn(key: "title", title: "Title", editable: true, isLink: true,
+        TableViewColumn(key: "title", title: loc("Title"), editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
-        TableViewColumn(key: "words", title: "Words", width: 70, font: secondaryCellFont,
+        TableViewColumn(key: "words", title: loc("Words"), width: 70, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "mentions", title: "Mentions", width: 80, font: secondaryCellFont,
+        TableViewColumn(key: "mentions", title: loc("Links"), width: 80, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "createdAt", title: "Created", font: secondaryCellFont,
+        TableViewColumn(key: "createdAt", title: loc("Created"), font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -207,7 +210,7 @@ struct AllCardsPageContentView: View {
             }
             return ""
         }),
-        TableViewColumn(key: "updatedAt", title: "Updated", isInitialSortDescriptor: true, font: secondaryCellFont,
+        TableViewColumn(key: "updatedAt", title: loc("Updated"), isInitialSortDescriptor: true, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -250,6 +253,13 @@ struct AllCardsPageContentView: View {
         return username
     }
 
+    private var creationRowPlaceholder: String {
+        if let publishingNoteTitle = model.publishingNoteTitle {
+            return loc("Publishing '\(publishingNoteTitle)'...")
+        }
+        return listType == .publicNotes ? loc("New Published Note") : loc("New Private Note")
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
@@ -267,7 +277,7 @@ struct AllCardsPageContentView: View {
                 if model.isAuthenticated {
                     cardsFilters
                 } else {
-                    ButtonLabel("Connect to Beam to publish your notes") {
+                    ButtonLabel(loc("Connect to Beam to publish your notes")) {
                         model.showConnectWindow()
                     }
                 }
@@ -276,7 +286,7 @@ struct AllCardsPageContentView: View {
             .padding(.top, 85)
             .padding(.trailing, 20)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: listType == .publicNotes ? "New Published Note" : "New Private Note",
+                      creationRowTitle: creationRowPlaceholder, isCreationRowLoading: model.publishingNoteTitle != nil,
                       shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
@@ -308,7 +318,7 @@ struct AllCardsPageContentView: View {
                     .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                 }
             )
-            .disabled(publishingNote)
+            .disabled(model.publishingNoteTitle != nil)
             .frame(maxHeight: .infinity)
             .background(Color.clear
                     .onHover { hovering in
@@ -377,19 +387,20 @@ struct AllCardsPageContentView: View {
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic {
-                publishingNote = true
+                model.publishingNoteTitle = newNote.title
                 BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true) { result in
                     DispatchQueue.main.async {
+                        model.publishingNoteTitle = nil
                         switch result {
                         case .failure(let e):
                             UserAlert.showError(message: loc("Could not publish note. Try again from the note view."), error: e)
                             // Saving the private note at least and showing it to user.
+                            newNote.publicationStatus = .unpublished
                             newNote.save()
                             listType = .privateNotes
                         case .success:
                             model.refreshAllNotes()
                         }
-                        publishingNote = false
                     }
                 }
             } else {
