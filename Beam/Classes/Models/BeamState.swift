@@ -13,7 +13,7 @@ import SwiftSoup
 import BeamCore
 import Sentry
 
-@objc class BeamState: NSObject, ObservableObject, Codable {
+@objc public class BeamState: NSObject, ObservableObject, Codable {
     var data: BeamData
     private let searchEngine: SearchEngineDescription = PreferredSearchEngine()
 
@@ -555,7 +555,7 @@ import Sentry
         setupObservers()
     }
 
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         if let note = currentNote {
