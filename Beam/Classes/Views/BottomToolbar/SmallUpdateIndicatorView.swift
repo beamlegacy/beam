@@ -60,7 +60,7 @@ struct SmallUpdateIndicatorView: View {
                         opacityTimer.upstream.connect().cancel()
                     })
             case .downloading(progress: _):
-                EmptyView()
+                ButtonLabel("Downloading update…", lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
             case .downloaded(let downloadedRelease):
                 GeometryReader { proxy in
                     ButtonLabel("Update now", icon: "status-publish", customStyle: buttonLabelStyle) {

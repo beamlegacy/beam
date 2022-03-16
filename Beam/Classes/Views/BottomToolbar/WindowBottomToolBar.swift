@@ -7,6 +7,7 @@
 
 import SwiftUI
 import BeamCore
+import AutoUpdate
 
 struct WindowBottomToolBar: View {
     @EnvironmentObject var state: BeamState
@@ -38,9 +39,9 @@ struct WindowBottomToolBar: View {
 
     var body: some View {
         HStack {
-            SmallUpdateIndicatorView(versionChecker: state.data.versionChecker)
-                .padding(.leading, 7)
-                .offset(x: 0, y: -6)
+            BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
+                .padding(.leading, 10)
+                .offset(y: -9)
             Spacer(minLength: 20)
             HStack {
                 BottomToolBarTrailingIconView()
@@ -53,6 +54,81 @@ struct WindowBottomToolBar: View {
         .frame(height: barHeight)
         .frame(maxWidth: .infinity)
     }
+}
+
+private struct BottomToolBarLeadingIconView: View {
+
+    @ObservedObject var versionChecker: VersionChecker
+    @EnvironmentObject var state: BeamState
+
+    var body: some View {
+        if shouldShowUpdateStatus {
+            SmallUpdateIndicatorView(versionChecker: versionChecker)
+        } else {
+            helpButton
+        }
+    }
+
+    private var helpButton: some View {
+        GeometryReader { proxy in
+            ButtonLabel("Help", icon: "help-question", customStyle: buttonStyle) {
+                showHelpAndFeedbackMenuView(proxy: proxy)
+            }
+            .onReceive(state.$showHelpAndFeedback, perform: { showHelp in
+                if showHelp {
+                    showHelpAndFeedbackMenuView(proxy: proxy)
+                    state.showHelpAndFeedback = false
+                }
+            })
+            .accessibility(identifier: "HelpButton")
+        }
+    }
+
+    private var shouldShowUpdateStatus: Bool {
+        switch versionChecker.state {
+        case .noUpdate where versionChecker.currentRelease == nil:
+            return false
+
+        case .checking:
+            return false
+
+        default:
+            return true
+        }
+    }
+
+    private let buttonStyle: ButtonLabelStyle = {
+        ButtonLabelStyle(
+            font: BeamFont.medium(size: 12).swiftUI,
+            spacing: 1,
+            foregroundColor: BeamColor.LightStoneGray.swiftUI,
+            activeForegroundColor: BeamColor.Niobium.swiftUI,
+            backgroundColor: BeamColor.Generic.background.swiftUI,
+            hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
+            activeBackgroundColor: BeamColor.Mercury.swiftUI,
+            leadingPaddingAdjustment: 4
+        )
+    }()
+
+    private func showHelpAndFeedbackMenuView(proxy: GeometryProxy) {
+        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
+        let view = HelpAndFeedbackMenuView(window: window)
+            .environmentObject(state)
+
+        let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)
+        var origin = CGPoint(
+            x: buttonFrame.origin.x,
+            y: buttonFrame.minY - 7
+        )
+        if let parentWindow = window?.parent {
+            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
+        }
+
+        window?.setView(with: view, at: origin)
+        window?.isMovable = false
+        window?.makeKey()
+    }
+
 }
 
 private struct BottomToolBarTrailingIconView: View {
@@ -72,49 +148,8 @@ private struct BottomToolBarTrailingIconView: View {
                     }
                 })
                 .padding(.trailing, BeamSpacing._50)
-            } else {
-                GeometryReader { proxy in
-                    ButtonLabel("?", customStyle: ButtonLabelStyle(font: BeamFont.medium(size: 11).swiftUI, horizontalPadding: 5, verticalPadding: 2)) {
-                        showHelpAndFeedbackMenuView(proxy: proxy)
-                    }.onReceive(self.state.$showHelpAndFeedback, perform: { showHelp in
-                        if showHelp {
-                            showHelpAndFeedbackMenuView(proxy: proxy)
-                            self.state.showHelpAndFeedback = false
-                        }
-                    })
-                    .accessibility(identifier: "HelpButton")
-                    .background(
-                        Circle()
-                            .foregroundColor(BeamColor.Generic.background.swiftUI)
-                            .frame(width: 16, height: 16)
-                            .offset(x: -0.5)
-                    )
-                    .overlay(
-                        Circle().stroke(BeamColor.Button.activeBackground.swiftUI, lineWidth: 1)
-                            .frame(width: 16, height: 16)
-                            .offset(x: -0.5)
-                    )
-                    .frame(width: 18, height: 18)
-                    .cornerRadius(9)
-                }.frame(width: 18, height: 18)
             }
         }
-    }
-
-    func showHelpAndFeedbackMenuView(proxy: GeometryProxy) {
-        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
-        let view = HelpAndFeedbackMenuView(window: window)
-            .environmentObject(state)
-        let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)
-        let y = buttonFrame.minY - 7
-        let x = buttonFrame.origin.x - HelpAndFeedbackMenuView.menuWidth + 16
-        var origin = CGPoint(x: x, y: y)
-        if let parentWindow = window?.parent {
-            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
-        }
-        window?.setView(with: view, at: origin)
-        window?.isMovable = false
-        window?.makeKey()
     }
 }
 
