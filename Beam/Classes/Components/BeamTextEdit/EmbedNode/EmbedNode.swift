@@ -236,7 +236,7 @@ class EmbedNode: ResizableNode {
 
         stopNotePlaying()
     }
-    
+
     override func didMoveToWindow(_ window: NSWindow?) {
         if window != nil, expandedContent == nil {
             applyCollapsedState(animated: false)

@@ -307,7 +307,7 @@ extension DestinationNoteAutocompleteList {
             allowCreateCard = allowCreateCard
             && !items.contains(where: { $0.title.lowercased() == text.lowercased() })
             if allowCreateCard && !text.isEmpty {
-                let createItem = AutocompleteResult(text: text, source: .createNote, information: loc("New Note"),
+                let createItem = AutocompleteResult(text: loc("New Note:"), source: .createNote, information: text,
                                                     shortcut: Shortcut(modifiers: [.option], keys: [.enter]))
                 if autocompleteItems.count >= itemLimit {
                     autocompleteItems[autocompleteItems.count - 1] = createItem
