@@ -176,7 +176,7 @@ extension BTextEditScrollable {
 
         @objc private func contentOffsetDidChange(notification: Notification) {
             guard let clipView = notification.object as? NSClipView else { return }
-            parent.state.lastScrollOffset[parent.note.id] = clipView.bounds.origin.y
+            parent.state.lastScrollOffset[parent.note.id] = clipView.bounds.origin.y.rounded() + 85
             onScroll?(clipView.bounds.origin)
         }
     }
