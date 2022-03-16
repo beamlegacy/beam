@@ -38,8 +38,8 @@ struct CardSwitcher: View {
             .blendModeLightMultiplyDarkScreen()
     }
 
-    private var isAllCardsActive: Bool {
-        state.mode == .page && state.currentPage?.id == .allCards
+    private var isAllNotesActive: Bool {
+        state.mode == .page && state.currentPage?.id == .allNotes
     }
 
     var body: some View {
@@ -77,8 +77,8 @@ struct CardSwitcher: View {
                         .opacity(hoveredIndex == index + 1 || hoveredIndex == index + 2 ? 0 : 1)
                 }
             }
-            ToolbarCapsuleButton(text: "All Notes", isSelected: isAllCardsActive) {
-                state.navigateToPage(.allCardsWindowPage)
+            ToolbarCapsuleButton(text: "All Notes", isSelected: isAllNotesActive) {
+                state.navigateToPage(.allNotesWindowPage)
             }
             .fixedSize(horizontal: true, vertical: false)
             .layoutPriority(2)

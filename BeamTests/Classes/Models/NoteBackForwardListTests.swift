@@ -21,7 +21,7 @@ class NoteBackForwardListTests: XCTestCase {
 
     private func fillList(_ list: NoteBackForwardList) {
         list.push(.journal)
-        list.push(.page(.allCardsWindowPage))
+        list.push(.page(.allNotesWindowPage))
         list.push(.note(noteA))
         list.push(.journal)
     }
@@ -33,7 +33,7 @@ class NoteBackForwardListTests: XCTestCase {
         let popped = list.goBack()
         XCTAssertEqual(popped, .note(noteA))
         XCTAssertEqual(list.backList.count, 2)
-        XCTAssertEqual(list.backList.last, .page(.allCardsWindowPage))
+        XCTAssertEqual(list.backList.last, .page(.allNotesWindowPage))
         XCTAssertEqual(list.forwardList.count, 1)
     }
 
@@ -56,7 +56,7 @@ class NoteBackForwardListTests: XCTestCase {
         fillList(list)
         list.purgeDeletedNote(withId: noteA.id)
         XCTAssertEqual(list.backList.count, 2)
-        XCTAssertEqual(list.backList.last, .page(.allCardsWindowPage))
+        XCTAssertEqual(list.backList.last, .page(.allNotesWindowPage))
     }
 
     func testPurgeDeletedNoteCleanDuplicates() {
@@ -67,6 +67,6 @@ class NoteBackForwardListTests: XCTestCase {
         // once noteA delete, two consecutive .journal are detected and cleaned up into one.
         list.purgeDeletedNote(withId: noteA.id)
         XCTAssertEqual(list.backList.count, 2)
-        XCTAssertEqual(list.backList.last, .page(.allCardsWindowPage))
+        XCTAssertEqual(list.backList.last, .page(.allNotesWindowPage))
     }
 }

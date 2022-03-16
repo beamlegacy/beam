@@ -23,7 +23,7 @@ extension AutocompleteManager {
             AutocompleteResult(text: loc("All Notes"), source: .action,
                                shortcut: Shortcut.AvailableShortcut.showAllNotes.value,
                                handler: { beamState in
-                beamState.navigateToPage(.allCardsWindowPage)
+                beamState.navigateToPage(.allNotesWindowPage)
             })
         }
 
