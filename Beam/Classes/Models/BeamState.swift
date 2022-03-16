@@ -623,9 +623,12 @@ import Sentry
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         if focusOmniBox {
-            autocompleteManager.shakeOmniBox()
+            // disabling shake from users feedback - https://linear.app/beamapp/issue/BE-2546/cmd-t-on-already-summoned-omnibox-makes-it-bounce
+            // autocompleteManager.shakeOmniBox()
+            stopFocusOmnibox()
+        } else {
+            startFocusOmnibox(fromTab: false)
         }
-        startFocusOmnibox(fromTab: false)
     }
 
     func resetDestinationCard() {
