@@ -10,11 +10,12 @@ import Combine
 import BeamCore
 import SwiftUI
 
-// BeamState Autocomplete management
+/// Omnibox results management
 class AutocompleteManager: ObservableObject {
     static let noteFrecencyParamKey: FrecencyParamKey = .note30d0
     static let urlFrecencyParamKey: FrecencyParamKey = .webVisit30d0
 
+    @Published var mode: Mode = .general
     @Published var searchQuery: String = ""
     weak private(set) var beamState: BeamState?
 
@@ -35,7 +36,7 @@ class AutocompleteManager: ObservableObject {
 
     @Published var animateInputingCharacter = false
 
-    private let searchEngineCompleter: SearchEngineAutocompleter
+    let searchEngineCompleter: SearchEngineAutocompleter
     var searchEngine: SearchEngineDescription {
         searchEngineCompleter.searchEngine
     }
@@ -92,7 +93,7 @@ class AutocompleteManager: ObservableObject {
         if let realText = replacedProposedText {
             searchText = realText
             replacedProposedText = nil
-        } else if !isRemovingCharacters && autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .searchEngine {
+        } else if !isRemovingCharacters && !shouldResetSelectionBeforeNewResults() {
             // if we autoselect a search engine result that is alone,
             // let's the keep selection until have new results.
         } else {
@@ -105,8 +106,7 @@ class AutocompleteManager: ObservableObject {
         if shouldDisplayDefaultSuggestions(for: searchText) {
             publishers = getDefaultSuggestionsPublishers()
         } else {
-            publishers = getAutocompletePublishers(for: searchText) +
-            [getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)]
+            publishers = getAutocompletePublishers(for: searchText)
             #if DEBUG
             // Use this to help you recreate situation producing bugs.
             //  publishers = getAutocompleteMockPublishers(for: searchText)
@@ -164,6 +164,15 @@ class AutocompleteManager: ObservableObject {
         }
     }
 
+    private func shouldResetSelectionBeforeNewResults() -> Bool {
+        guard mode != .noteCreation else { return false } // note creation always auto select
+        if autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .searchEngine {
+            // selected search enginer result will most likely be auto selected on next input
+            return false
+        }
+        return true
+    }
+
     func isResultCandidateForAutoselection(_ result: AutocompleteResult, forSearch searchText: String) -> Bool {
         switch result.source {
         case .mnemonic: return true // a mnemonic is by definition something that can take over the result
@@ -174,6 +183,8 @@ class AutocompleteManager: ObservableObject {
         case .searchEngine:
             return result.takeOverCandidate && result.url != nil || // search engine result found in history 
             (autocompleteResults.count == 2 && !searchQuery.mayBeURL && result.text == searchQuery) // 1 search engine result + 1 create note
+        case .createNote where mode == .noteCreation:
+            return true
         default:
             return false
         }
@@ -189,32 +200,33 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
-        if let i = selectedIndex, i >= 0, i < autocompleteResults.count {
-            let result = autocompleteResults[i]
-            let resultText = result.displayText
+        guard let i = selectedIndex, i >= 0, i < autocompleteResults.count else { return }
+        guard mode != .noteCreation else { return }
 
-            // if the first result is compatible with autoselection, select the added string
-            if i == 0, let completingText = result.completingText,
-               isResultCandidateForAutoselection(result, forSearch: completingText) {
-                let completingTextEnd = completingText.wholeRange.upperBound
-                var newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
-                var queryToSet: String?
-                if newSelection.count > 0 && resultText.prefix(newSelection.lowerBound).lowercased() == completingText.lowercased() {
-                    let additionalText = resultText.substring(range: newSelection)
-                    queryToSet = completingText + additionalText
-                } else if searchQuery != completingText && searchQuerySelectedRange?.isEmpty != true {
-                    queryToSet = completingText
-                    newSelection = completingText.count..<completingText.count
-                }
+        let result = autocompleteResults[i]
+        let resultText = result.displayText
 
-                if let queryToSet = queryToSet {
-                    setQuery(queryToSet, updateAutocompleteResults: false)
-                    searchQuerySelectedRange = newSelection
-                }
-            } else if searchQuery != resultText {
-                setQuery(resultText, updateAutocompleteResults: false)
-                searchQuerySelectedRange = resultText.count..<resultText.count
+        // if the first result is compatible with autoselection, select the added string
+        if i == 0, let completingText = result.completingText,
+           isResultCandidateForAutoselection(result, forSearch: completingText) {
+            let completingTextEnd = completingText.wholeRange.upperBound
+            var newSelection = completingTextEnd..<max(resultText.count, completingTextEnd)
+            var queryToSet: String?
+            if newSelection.count > 0 && resultText.prefix(newSelection.lowerBound).lowercased() == completingText.lowercased() {
+                let additionalText = resultText.substring(range: newSelection)
+                queryToSet = completingText + additionalText
+            } else if searchQuery != completingText && searchQuerySelectedRange?.isEmpty != true {
+                queryToSet = completingText
+                newSelection = completingText.count..<completingText.count
             }
+
+            if let queryToSet = queryToSet {
+                setQuery(queryToSet, updateAutocompleteResults: false)
+                searchQuerySelectedRange = newSelection
+            }
+        } else if searchQuery != resultText {
+            setQuery(resultText, updateAutocompleteResults: false)
+            searchQuerySelectedRange = resultText.count..<resultText.count
         }
     }
 
@@ -362,5 +374,12 @@ extension AutocompleteManager {
                 self?.animateInputingCharacter = false
             }
         }
+    }
+}
+
+extension AutocompleteManager {
+    enum Mode {
+        case noteCreation
+        case general
     }
 }

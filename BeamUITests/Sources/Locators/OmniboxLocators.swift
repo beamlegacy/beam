@@ -16,6 +16,8 @@ enum OmniboxLocators {
         case switchToWeb = "Switch to Web"
         case copyTab = "Copy Address"
         case collectTab = "Capture Page"
+        case createNote = "Create Note..."
+        case createNotePrefix = "Create Note:"
     }
 
 }

@@ -355,7 +355,7 @@ struct TabsListView: View {
         guard let query = NSPasteboard.general.string(forType: .string) else {  return }
         state.autocompleteManager.searchQuery = query
         state.focusOmniBoxFromTab = true
-        state.startQuery()
+        state.startOmniboxQuery()
     }
 
     private func onTabToggleMute(at index: Int) {

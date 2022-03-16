@@ -30,7 +30,7 @@ struct AutocompleteListView: View {
                 let isSelected = isSelectedItem(item)
                 let displaySubtitle = shouldItemDisplaySubtitle(item, atIndex: index)
                 let allowsShortcut = item.shortcut != nil || (isSelected && !isItemSelectedByHovering(item))
-                if item.source == .createNote && elements.count > 1 {
+                if item.source == .createNote && elements.count > 1 && index > 0 {
                     Separator(horizontal: true, color: BeamColor.Autocomplete.separatorColor)
                         .blendModeLightMultiplyDarkScreen()
                         .padding(.vertical, BeamSpacing._60)
@@ -44,8 +44,7 @@ struct AutocompleteListView: View {
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
-                            selectedIndex = indexFor(item: item)
-                            state.startQuery()
+                            state.startOmniboxQuery(selectingNewIndex: indexFor(item: item))
                         }
                     )
                     .onHoverOnceVisible { hovering in
