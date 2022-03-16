@@ -36,6 +36,7 @@ class BeamTextFieldViewFieldEditor: NSTextView {
 protocol BeamNSTextFieldProtocol {
 
     var isFirstResponder: Bool { get }
+    var ignoreResponderChanges: Bool { get }
     var shouldUseIntrinsicContentSize: Bool { get set }
     var selectedRange: NSRange? { get }
     var placeholderColor: NSColor { get set }
@@ -64,6 +65,7 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
 
     private var _selectionRangeColor: NSColor = BeamColor.Generic.textSelection.nsColor
     private var flagsMonitor: Any?
+    fileprivate var ignoreResponderChanges = false
 
     var isFirstResponder: Bool {
         guard let textField = textField, let window = textField.window else { return false }
@@ -147,7 +149,16 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
             stringWithAttachment.append(placeholderString)
             placeholderString = stringWithAttachment
         }
+        // changing placeholderAttributedString resigns first responder from NSCell._restartEditingWithTextView(_ :)
+        let wasFirstResponder = isFirstResponder
+        if wasFirstResponder {
+            ignoreResponderChanges = true
+        }
+        textField?.placeholderString = placeholder
         textField?.placeholderAttributedString = placeholderString
+        if wasFirstResponder {
+            ignoreResponderChanges = false
+        }
     }
 
     func updateTextSelectionColor(_ color: NSColor? = nil) {
@@ -180,14 +191,14 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
     }
 
     func handleBecomeFirstResponder(became: Bool) {
-        if became {
+        if became && !ignoreResponderChanges {
             parent?.onFocusChanged(true)
         }
         updateTextSelectionColor()
     }
 
     func handleResignFirstResponder(resigned: Bool) {
-        if resigned {
+        if resigned && !ignoreResponderChanges {
             parent?.onFocusChanged(false)
         }
     }
@@ -206,6 +217,9 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
 
     var isFirstResponder: Bool {
         sharedImpl.isFirstResponder
+    }
+    var ignoreResponderChanges: Bool {
+        sharedImpl.ignoreResponderChanges
     }
     var shouldUseIntrinsicContentSize: Bool {
         get { sharedImpl.shouldUseIntrinsicContentSize }
@@ -255,7 +269,9 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
 
     @discardableResult
     override func becomeFirstResponder() -> Bool {
+        sharedImpl.ignoreResponderChanges = true
         let became = super.becomeFirstResponder()
+        sharedImpl.ignoreResponderChanges = false
         sharedImpl.handleBecomeFirstResponder(became: became)
         return became
     }
@@ -307,6 +323,9 @@ class BeamNSSecureTextField: NSSecureTextField, BeamNSTextFieldProtocol {
 
     var isFirstResponder: Bool {
         sharedImpl.isFirstResponder
+    }
+    var ignoreResponderChanges: Bool {
+        sharedImpl.ignoreResponderChanges
     }
     var shouldUseIntrinsicContentSize: Bool {
         get { sharedImpl.shouldUseIntrinsicContentSize }

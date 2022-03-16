@@ -23,7 +23,7 @@ import Sentry
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
             }
-            focusOmniBox = false
+            stopFocusOmnibox()
         }
     }
 
@@ -33,7 +33,7 @@ import Sentry
             if let note = currentNote {
                 recentsManager.currentNoteChanged(note)
             }
-            focusOmniBox = false
+            stopFocusOmnibox()
         }
     }
 
@@ -76,7 +76,7 @@ import Sentry
             EventsTracker.logBreadcrumb(message: "mode changed to \(mode)", category: "BeamState")
             browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
-            focusOmniBox = false
+            stopFocusOmnibox()
 
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
                 BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true)
@@ -257,7 +257,7 @@ import Sentry
         currentNote = nil
         autocompleteManager.resetQuery()
         autocompleteManager.autocompleteSelectedIndex = nil
-        focusOmniBox = false
+        stopFocusOmnibox()
         currentPage = page
         backForwardList.push(.page(page))
         updateCanGoBackForward()
@@ -472,27 +472,27 @@ import Sentry
         case .action:
             result.handler?(self)
         case .createNote:
-            if result.text.isEmpty {
-                navigateToNote(createNewUntitledNote())
+            if let noteTitle = result.information {
+                navigateToNote(fetchOrCreateNoteForQuery(noteTitle))
             } else {
-                navigateToNote(fetchOrCreateNoteForQuery(result.text))
+                autocompleteManager.mode = .noteCreation
             }
         }
         autocompleteManager.clearAutocompleteResults()
     }
 
-    func startQuery() {
+    func startOmniboxQuery(selectingNewIndex: Int? = nil) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        focusOmniBox = false
-        if let result = autocompleteManager.autocompleteResult(at: autocompleteManager.autocompleteSelectedIndex) {
+        if let result = autocompleteManager.autocompleteResult(at: selectingNewIndex ?? autocompleteManager.autocompleteSelectedIndex) {
             selectAutocompleteResult(result)
             DispatchQueue.main.async { [unowned self] in
                 self.autocompleteManager.resetQuery()
             }
             return
         }
+        stopFocusOmnibox()
 
         guard let url: URL = urlFor(query: queryString) else {
             Logger.shared.logError("Couldn't build search url from: \(queryString)", category: .search)
@@ -592,9 +592,10 @@ import Sentry
         }
     }
 
-    func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true) {
+    func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true, autocompleteMode: AutocompleteManager.Mode = .general) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         focusOmniBoxFromTab = fromTab && mode == .web
+        autocompleteManager.mode = autocompleteMode
         guard updateResults else {
             focusOmniBox = true
             return
@@ -689,7 +690,7 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
     func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?) {
         resetDestinationCard()
-        focusOmniBox = false
+        stopFocusOmnibox()
     }
 
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {
