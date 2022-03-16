@@ -318,7 +318,7 @@ extension AutocompleteManager {
                 if mode != .today {
                     actions.append(Self.DefaultActions.journalAction)
                 }
-                if state.mode != .page || state.currentPage?.id != .allCards {
+                if state.mode != .page || state.currentPage?.id != .allNotes {
                     actions.append(Self.DefaultActions.allNotesAction)
                 }
                 if state.hasBrowserTabs {
