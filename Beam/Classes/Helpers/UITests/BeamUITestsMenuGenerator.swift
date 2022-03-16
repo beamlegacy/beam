@@ -204,6 +204,7 @@ class BeamUITestsMenuGenerator {
         checker.logMessage = {
             Logger.shared.logInfo($0, category: .autoUpdate)
         }
+        appDel.window?.state.objectWillChange.send()
         appDel.data.versionChecker = checker
     }
 

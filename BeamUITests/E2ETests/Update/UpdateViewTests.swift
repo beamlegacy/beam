@@ -21,7 +21,6 @@ class UpdateViewTests: BaseTest {
     func testUpdateViewAppearance() {
         testRailPrint("Given I enable Update for the app")
         helper.tapCommand(.setAutoUpdateToMock)
-        triggerUIRefresh()
         testRailPrint("Then I can open and close it. It has required items")
         let updateView = journalView.clickUpdateNow()
         XCTAssertTrue(updateView.button(UpdateViewLocators.Buttons.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
@@ -34,7 +33,6 @@ class UpdateViewTests: BaseTest {
     func testUpdateAvailableEverywhereInCardView() {
         testRailPrint("Given I enable Update for the app")
         helper.tapCommand(.setAutoUpdateToMock)
-        triggerUIRefresh()
         XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
         journalView.createCardViaOmniboxSearch("Update")
         testRailPrint("Then it is visible in note view")
@@ -43,11 +41,4 @@ class UpdateViewTests: BaseTest {
         testRailPrint("Then it is visible in All notes view")
         XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
     }
-
-    /// An extremely hacky workaround for the bug delaying the display of the update button.
-    private func triggerUIRefresh() {
-        helper.tapCommand(.resizeWindowLandscape)
-        helper.tapCommand(.resizeWindowPortrait)
-    }
-
 }
