@@ -403,12 +403,12 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let value = item.value(forKey: column.key)
         let text = column.stringFromKeyValue(value)
         let editable = column.editable && !column.isLink
-        textCell.textField?.stringValue = text
         textCell.textField?.isEditable = editable
         textCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
         textCell.textField?.setAccessibilityIdentifier("\(column.title)")
-        textCell.isLink = column.isLink
         textCell.textField?.delegate = self
+        textCell.isLink = column.isLink
+        textCell.setText(text)
         textCell.foregroundColor = column.foregroundColor
         textCell.selectedForegroundColor = column.selectedForegroundColor
         textCell.isSelected = currentSelectedIndexes?.contains(row) == true
