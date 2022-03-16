@@ -22,7 +22,8 @@ class TextEditorContextTestView: BaseView {
 
     @discardableResult
     func confirmBidiLinkCreation(cardName: String) -> CardTestView {
-        app.otherElements["autocompleteResult-selected-\(cardName)-createNote"].clickOnExistence()
+        let helper = OmniBoxUITestsHelper(app)
+        app.otherElements.matching(helper.autocompleteCreateCardPredicate).firstMatch.clickOnExistence()
         return CardTestView()
     }
 
