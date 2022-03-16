@@ -101,11 +101,23 @@ struct OmniboxContainer: View {
     private let boxMaxX: CGFloat = 11
     private let boxMinY: CGFloat = 11
 
-    @State private var isFirstLaunchAppear = true
+    private var opacity: CGFloat {
+        guard boxIsInsideNote, !state.focusOmniBox else { return 1.0 }
+        guard state.showOmnibox else { return 0.0 }
+        if state.journalScrollOffset < ModeView.omniboxStartFadeOffset {
+            return 1.0
+        } else if state.journalScrollOffset > ModeView.omniboxEndFadeOffset && state.focusOmniBox {
+            return 1.0
+        }
+        let v = state.journalScrollOffset.clamp(ModeView.omniboxStartFadeOffset, ModeView.omniboxEndFadeOffset)
+        let val = v - ModeView.omniboxStartFadeOffset
+        let value = 1.0 - val / ModeView.omniboxEndFadeOffset
+        return value
+    }
     private var boxOffset: CGSize {
         var offset: CGSize = CGSize(width: 0, height: 190)
 
-        if boxIsInsideNote {
+        if boxIsInsideNote || state.omniboxWasShownFromJournalTop {
             offset.height = 140
         } else if state.mode == .web && state.focusOmniBoxFromTab && browserTabsManager.currentTab?.url != nil,
                     let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
@@ -114,46 +126,52 @@ struct OmniboxContainer: View {
         }
         return offset
     }
-
     private var showPressedState: Bool {
         autocompleteManager.animateInputingCharacter
     }
 
     private var boxIsInsideNote: Bool {
-        isFirstLaunchAppear && state.mode == .today
+        state.mode == .today &&
+        ((state.journalScrollOffset <= ModeView.omniboxEndFadeOffset) || !state.focusOmniBox)
     }
 
+    private var boxInstance: some View {
+        VStack(spacing: 0) {
+            let offset = boxOffset
+            Spacer(minLength: boxMinY)
+                .frame(maxHeight: offset.height)
+            HStack(spacing: 0) {
+                Spacer(minLength: boxMinX)
+                    .if(offset.width != 0) {
+                        $0.frame(maxWidth: offset.width != 0 ? offset.width : .infinity)
+                    }
+                Omnibox(isInsideNote: boxIsInsideNote)
+                    .frame(idealWidth: boxWidth, maxWidth: boxWidth)
+                Spacer(minLength: boxMaxX)
+            }
+            Spacer(minLength: boxMinY)
+        }
+    }
     var body: some View {
         Group {
-            if state.focusOmniBox {
-                let offset = boxOffset
-                VStack(spacing: 0) {
-                    Spacer(minLength: boxMinY)
-                        .frame(maxHeight: offset.height)
-                    HStack(spacing: 0) {
-                        Spacer(minLength: boxMinX)
-                            .if(offset.width != 0) {
-                                $0.frame(maxWidth: offset.width != 0 ? offset.width : .infinity)
-                            }
-                        Omnibox(isInsideNote: boxIsInsideNote)
-                            .frame(idealWidth: boxWidth, maxWidth: boxWidth)
-                        Spacer(minLength: boxMaxX)
+            if state.showOmnibox {
+                boxInstance
+                .onDisappear {
+                    if state.keepDestinationNote {
+                        state.keepDestinationNote = false
                     }
-                    Spacer(minLength: boxMinY)
                 }
+            } else if state.focusOmniBox {
+                boxInstance
                 .transition(customTranstion)
                 .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
                 .onDisappear {
                     if state.keepDestinationNote {
                         state.keepDestinationNote = false
                     }
-                    guard isFirstLaunchAppear else { return }
-                    DispatchQueue.main.async {
-                        isFirstLaunchAppear = false
-                    }
                 }
             }
-        }
+        }.opacity(opacity)
     }
 
     private var customTranstion: AnyTransition {
