@@ -43,31 +43,68 @@ struct ModeView: View {
         }
     }
 
+    static var omniboxStartFadeOffset = CGFloat(20)
+    static var omniboxEndFadeOffset = CGFloat(140)
+
     private func journalContent(containerGeometry: GeometryProxy) -> some View {
         JournalScrollView(axes: [.vertical],
                           showsIndicators: false,
                           topInset: cardScrollViewTopInset,
-                          proxy: containerGeometry) { scrollPoint in
-            contentIsScrolled = scrollPoint.y >
-            JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
-            CustomPopoverPresenter.shared.dismissPopovers()
-            if state.focusOmniBox &&
-                scrollPoint.y + cardScrollViewTopInset > 10 &&
-                state.autocompleteManager.searchQuery.isEmpty {
-                state.stopFocusOmnibox()
+                          proxy: containerGeometry,
+                          onScroll: { scrollPoint in
+            onScroll(scrollPoint, containerGeometry: containerGeometry)
+        }, onEndLiveScroll: { scrollPoint in
+            onEndLiveScroll(scrollPoint)
+        })
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .clipped()
+            .onAppear {
+                DispatchQueue.main.async {
+                    state.data.reloadAllEvents()
+                }
+                state.startShowingOmnibox()
+                contentIsScrolled = false
             }
+            .onDisappear(perform: {
+                state.stopShowingOmnibox()
+            })
+            .animation(nil)
+            .transition(.noteContentTransition(transitionModel: transitionModel))
+            .accessibility(identifier: "journalView")
+    }
+
+    private func onScroll(_ scrollPoint: CGPoint, containerGeometry: GeometryProxy) {
+        contentIsScrolled = scrollPoint.y + 52 >
+        JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
+
+        CustomPopoverPresenter.shared.dismissPopovers()
+        if state.showOmnibox &&
+            state.autocompleteManager.searchQuery.isEmpty {
+            if state.showOmnibox, scrollPoint.y >= Self.omniboxEndFadeOffset {
+                state.stopFocusOmnibox()
+                state.stopShowingOmnibox()
+            }
+        } else if scrollPoint.y < Self.omniboxEndFadeOffset {
+            state.startShowingOmnibox()
+            state.autocompleteManager.clearAutocompleteResults()
         }
-                          .frame(maxWidth: .infinity, maxHeight: .infinity)
-                          .clipped()
-                          .onAppear {
-                              DispatchQueue.main.async {
-                                  state.data.reloadAllEvents()
-                              }
-                              contentIsScrolled = false
-                          }
-                          .animation(nil)
-                          .transition(.noteContentTransition(transitionModel: transitionModel))
-                          .accessibility(identifier: "journalView")
+    }
+
+    private func onEndLiveScroll(_ scrollPoint: CGPoint) {
+        if scrollPoint.y > Self.omniboxEndFadeOffset / 2, scrollPoint.y < Self.omniboxEndFadeOffset {
+            guard let scrollView = state.cachedJournalStackView?.enclosingScrollView else {
+                return
+            }
+            let clipView = scrollView.contentView
+            let animationDuration = 0.3
+            NSAnimationContext.beginGrouping()
+            NSAnimationContext.current.duration = animationDuration
+            var p = clipView.bounds.origin
+            p.y = Self.omniboxEndFadeOffset
+            clipView.animator().setBoundsOrigin(p)
+            scrollView.reflectScrolledClipView(clipView)
+            NSAnimationContext.endGrouping()
+        }
     }
 
     private var pageContent: some View {

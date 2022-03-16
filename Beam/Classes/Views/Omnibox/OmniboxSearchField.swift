@@ -206,6 +206,9 @@ struct OmniboxSearchField: View {
         let query = autocompleteManager.searchQuery
         if (query.isEmpty && autocompleteManager.mode == .general) || (state.mode == .web && query == state.browserTabsManager.currentTab?.url?.absoluteString) {
             unfocusField()
+            if state.showOmnibox {
+                autocompleteManager.clearAutocompleteResults()
+            }
         } else {
             autocompleteManager.mode = .general
             autocompleteManager.setQuery("", updateAutocompleteResults: true)
