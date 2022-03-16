@@ -119,8 +119,8 @@ class BeamWebNavigationController: BaseWebNavigationController, WebPageRelated, 
     }
 
     override func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction,
-                              preferences: WKWebpagePreferences,
-                              decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
+                          preferences: WKWebpagePreferences,
+                          decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void) {
 
         super.webView(webView, decidePolicyFor: navigationAction, preferences: preferences, decisionHandler: decisionHandler)
 

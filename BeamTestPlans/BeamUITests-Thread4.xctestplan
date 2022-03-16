@@ -44,6 +44,7 @@
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
         "OmniboxViewTests\/testOmniBoxSearchField()",
+        "OmniboxViewTests\/testOmniboxCreateNoteMode()",
         "OmniboxViewTests\/testOmniboxPivotButtonClicking()",
         "OmniboxViewTests\/testOmniboxTextSelectionAndEditing()",
         "OnboardingTests",

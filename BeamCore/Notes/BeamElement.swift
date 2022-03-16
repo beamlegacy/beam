@@ -844,7 +844,7 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
             result.append(self)
         default: break
         }
-    
+
         for c in children {
             let imageElements = c.imageElements()
             if !imageElements.isEmpty {

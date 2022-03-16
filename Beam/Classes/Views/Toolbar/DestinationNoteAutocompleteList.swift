@@ -28,15 +28,8 @@ struct DestinationNoteAutocompleteList: View {
         selectedBackgroundColor: BeamColor.NotePicker.selected,
         touchdownBackgroundColor: BeamColor.NotePicker.active)
 
-    private let customTextEditorColorPalette = AutocompleteItemColorPalette(
-        textColor: BeamColor.Beam,
-        informationTextColor: BeamColor.LightStoneGray,
-        selectedBackgroundColor: BeamColor.NotePicker.selected,
-        touchdownBackgroundColor: BeamColor.NotePicker.active)
-
     private var colorPalette: AutocompleteItemColorPalette {
         guard !model.searchCardContent else { return AutocompleteItemView.defaultColorPalette }
-        if case .TextEditor = variation { return customTextEditorColorPalette}
         return customColorPalette
     }
 
