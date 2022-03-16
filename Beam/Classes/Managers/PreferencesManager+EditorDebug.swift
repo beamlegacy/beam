@@ -46,7 +46,7 @@ extension PreferencesManager {
     static let editorLeadingPercentageDefault: CGFloat = 45
 
     static let editorHeaderTopPaddingDefault: CGFloat = 160
-    static let editorJournalTopPaddingDefault: CGFloat = 82
+    static let editorJournalTopPaddingDefault: CGFloat = 50
     static let editorCardTopPaddingDefault: CGFloat = 20
     static let editorToolbarOverlayOpacityDefault: CGFloat = 0.4
 
@@ -64,7 +64,7 @@ extension PreferencesManager {
 
     static let editorFontSizeDefault: CGFloat = 14
     static let editorCardTitleFontSizeDefault: CGFloat = 30
-    static let journalCardTitleFontSizeDefault: CGFloat = 24
+    static let journalCardTitleFontSizeDefault: CGFloat = 17
     static let editorFontSizeHeadingOneDefault: CGFloat = 20
     static let editorFontSizeHeadingTwoDefault: CGFloat = 17
 }
