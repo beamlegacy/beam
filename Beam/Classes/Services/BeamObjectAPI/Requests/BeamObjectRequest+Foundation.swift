@@ -559,7 +559,7 @@ extension BeamObjectRequest {
 
     @discardableResult
     public func fetchDataFromUrl(urlString: String,
-                                  _ completionHandler: @escaping (Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
+                                 _ completionHandler: @escaping (Result<Data, Error>) -> Void) throws -> URLSessionDataTask {
 
         guard let url = URL(string: urlString) else {
              throw BeamObjectRequestError.malformattedURL
