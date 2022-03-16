@@ -86,14 +86,8 @@ private struct BottomToolBarLeadingIconView: View {
 
     private var shouldShowUpdateStatus: Bool {
         switch versionChecker.state {
-        case .noUpdate where versionChecker.currentRelease == nil:
-            return false
-
-        case .checking:
-            return false
-
-        default:
-            return true
+        case .noUpdate, .checking: return false
+        default: return true
         }
     }
 
