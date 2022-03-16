@@ -246,6 +246,10 @@ public extension CALayer {
     var unpreparedRoot: BeamElement?
 
     public override func viewDidMoveToWindow() {
+        isResizing = true
+        DispatchQueue.main.async { [weak self] in
+            self?.isResizing = false
+        }
         rootNode?.dispatchDidMoveToWindow(window)
     }
 
