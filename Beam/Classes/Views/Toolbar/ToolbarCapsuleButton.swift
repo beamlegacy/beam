@@ -10,6 +10,7 @@ import SwiftUI
 struct ToolbarCapsuleButton<Content: View>: View {
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) private var colorScheme
+    var iconName: String?
     var text: String
     var isSelected = false
     var isForeground = false
@@ -89,7 +90,13 @@ struct ToolbarCapsuleButton<Content: View>: View {
                     Spacer(minLength: BeamSpacing._80)
                 }
             } else {
-                Text(text)
+                HStack {
+                    if let iconName = iconName {
+                        Icon(name: iconName, width: 12, color: foregroundColor)
+                            .offset(x: 4, y: 0)
+                    }
+                    Text(text)
+                }
             }
         }
         .font(defaultFont)
@@ -98,8 +105,17 @@ struct ToolbarCapsuleButton<Content: View>: View {
         .padding(.horizontal, minHPadding)
         .frame(height: 28)
         .overlay(
-            isSelected ? Text(text).font(selectedFont).lineLimit(1).padding(.horizontal, minHPadding - 1) : nil
+            isSelected ?
+            HStack {
+                if let iconName = iconName {
+                    Icon(name: iconName, width: 12, color: foregroundColor)
+                        .offset(x: 4, y: 0)
+                }
+                Text(text).font(selectedFont)
+            }
+            : nil
         )
+        .lineLimit(1)
         .foregroundColor(foregroundColor)
         .background(backgroundColor)
         .cornerRadius(6)
@@ -130,8 +146,9 @@ struct ToolbarCapsuleButton<Content: View>: View {
 }
 
 extension ToolbarCapsuleButton where Content == EmptyView {
-    init(text: String, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false,
+    init(iconName: String? = nil, text: String, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false,
          action: (() -> Void)? = nil) {
+        self.iconName = iconName
         self.text = text
         self.isSelected = isSelected
         self.isForeground = isForeground
@@ -144,7 +161,8 @@ extension ToolbarCapsuleButton where Content == EmptyView {
 private extension ToolbarCapsuleButton where Content == EmptyView {
 
     /// init for previews
-    init(text: String, isSelected: Bool = false, isHovering: Bool = false, isPressed: Bool = false) {
+    init(iconName: String? = nil, text: String, isSelected: Bool = false, isHovering: Bool = false, isPressed: Bool = false) {
+        self.iconName = iconName
         self.text = text
         self.isSelected = isSelected
         self._isHovering = State(initialValue: isHovering)

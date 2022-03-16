@@ -57,15 +57,24 @@ import Sentry
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
-    @Published private(set) var focusOmniBox: Bool = true
-    @Published var focusOmniBoxFromTab: Bool = false
+    @Published private(set) var focusOmniBox: Bool = true {
+        didSet {
+            if showOmnibox {
+                autocompleteManager.resetQuery()
+                autocompleteManager.clearAutocompleteResults()
+            }
+        }
+    }
+    @Published private(set) var showOmnibox = true
+    @Published private(set) var omniboxWasShownFromJournalTop = false
+    @Published var focusOmniBoxFromTab = false
 
-    @Published var showHelpAndFeedback: Bool = false
+    @Published var showHelpAndFeedback = false
 
-    @Published var destinationCardIsFocused: Bool = false
+    @Published var destinationCardIsFocused = false
     @Published var destinationCardName: String = ""
     @Published var destinationCardNameSelectedRange: Range<Int>?
-    var keepDestinationNote: Bool = false
+    var keepDestinationNote = false
 
     var associatedWindow: NSWindow? {
         AppDelegate.main.windows.first { $0.state === self }
@@ -78,6 +87,12 @@ import Sentry
             updateCanGoBackForward()
             stopFocusOmnibox()
 
+            if oldValue == .today {
+                stopShowingOmnibox()
+            } else if mode == .today {
+                startShowingOmnibox()
+            }
+
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
                 BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true)
             }
@@ -86,6 +101,7 @@ import Sentry
 
     var cachedJournalScrollView: NSScrollView?
     var cachedJournalStackView: JournalSimpleStackView?
+    @Published var journalScrollOffset: CGFloat = 0
     var lastScrollOffset = [UUID: CGFloat]()
 
     @Published var currentPage: WindowPage?
@@ -592,9 +608,20 @@ import Sentry
         }
     }
 
+    func startShowingOmnibox() {
+        guard !showOmnibox else { return }
+        showOmnibox = true
+    }
+
+    func stopShowingOmnibox() {
+        guard showOmnibox else { return }
+        showOmnibox = false
+    }
+
     func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true, autocompleteMode: AutocompleteManager.Mode = .general) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         focusOmniBoxFromTab = fromTab && mode == .web
+        omniboxWasShownFromJournalTop = mode == .today && showOmnibox
         autocompleteManager.mode = autocompleteMode
         guard updateResults else {
             focusOmniBox = true
@@ -619,6 +646,7 @@ import Sentry
 
     func stopFocusOmnibox() {
         focusOmniBox = false
+        autocompleteManager.mode = .general
     }
 
     func startNewSearch() {

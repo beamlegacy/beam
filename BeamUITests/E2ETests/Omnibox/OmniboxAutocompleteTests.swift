@@ -52,8 +52,9 @@ class OmniboxAutocompleteTests: BaseTest {
 
         testRailPrint("When I press ESC key 2nd time")
         omniboxView.typeKeyboardKey(.escape)
-        testRailPrint("Then omnibox is dismissed")
-        XCTAssertFalse(omniboxView.getOmniBoxSearchField().exists)
+        testRailPrint("Then the journal omnibox is still here")
+        XCTAssertTrue(omniboxView.getOmniBoxSearchField().exists)
+        XCTAssertEqual(omniboxView.getAutocompleteResults().count, 0)
     }
 
     func testAutoCompleteURLSelection() {

@@ -167,12 +167,8 @@ class OmniboxViewTests: BaseTest {
         helper.showJournal()
         omniboxView.focusOmniBoxSearchField()
         testRailPrint("Then suggestions contains the correct actions")
-        XCTAssertEqual(results.count, 6)
-        XCTAssertEqual(results.element(boundBy: 0).label, noteATitle)
-        XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
-        XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.switchToWeb.accessibilityIdentifier)
-        XCTAssertEqual(results.element(boundBy: 5).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
-        XCTAssertEqual(noteResults.count, 3)
+        XCTAssertEqual(results.count, 0)
+        XCTAssertEqual(noteResults.count, 0)
     }
     
     func testOmniboxTextSelectionAndEditing() throws {
