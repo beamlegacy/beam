@@ -472,14 +472,20 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             CATransaction.setDisableActions(true)
         }
 
-        layer.bounds = contentsFrame
-        layer.position = CGPoint(x: frameInDocument.origin.x + contentsFrame.origin.x, y: frameInDocument.origin.y + contentsFrame.origin.y)
+        let _contentsFrame = contentsFrame
+        let _frameInDocument = frameInDocument
+        DispatchQueue.mainSync {
+            self.layer.bounds = _contentsFrame
+            self.layer.position = CGPoint(x: _frameInDocument.origin.x + _contentsFrame.origin.x, y: _frameInDocument.origin.y + _contentsFrame.origin.y)
+        }
 
         if disableActions {
             CATransaction.commit()
         }
 
+        #if DEBUG
         layer.backgroundColor = debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
+        #endif
 
         updateSubLayersLayout()
         updateChildrenLayout()
