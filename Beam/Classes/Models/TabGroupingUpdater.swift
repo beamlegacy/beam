@@ -19,6 +19,7 @@ class TabClusteringGroup: Identifiable, Equatable {
 
 class TabGroupingUpdater {
     private let myQueue = DispatchQueue(label: "tabGroupingUpdaterQueue")
+    var hueGenerator = DistributedRandomGenerator(range: 0.0..<1.0)
 
     @Published private(set) var builtPagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
 
@@ -92,7 +93,6 @@ class TabGroupingUpdater {
     private func buildTabClusteringGroups(urlGroups: [[ClusteringManager.PageID]]) {
         let previousGroups = self.builtPagesGroups
         var pagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
-        let hueGenerator = HueGenerator()
         urlGroups.forEach({ group in
             let groupHue = hueGenerator.generate()
             hueGenerator.taken.append(groupHue)
@@ -124,5 +124,6 @@ class TabGroupingUpdater {
             }
         })
         self.builtPagesGroups = pagesGroups
+        hueGenerator.taken = Array(Set(self.builtPagesGroups.map { $0.value.hueTint }))
     }
 }
