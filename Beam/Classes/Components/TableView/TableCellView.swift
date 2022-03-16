@@ -38,6 +38,8 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
         _textField.wantsLayer = true
         _textField.backgroundColor = .clear
         _textField.isBordered = false
+        _textField.maximumNumberOfLines = 1
+        _textField.cell?.truncatesLastVisibleLine = true
         _textField.translatesAutoresizingMaskIntoConstraints = false
         _textField.font = BeamFont.regular(size: 13).nsFont
         defaultFontBottomBaselineOffset = _textField.baselineOffsetFromBottom
@@ -90,6 +92,13 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
         self.addTrackingArea(newArea)
     }
 
+    func setText(_ text: String) {
+        textField?.stringValue = text
+        if isLink {
+            textField?.attributedStringValue = NSAttributedString(string: text, attributes: [:])
+        }
+    }
+
     override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
         if let tf = textField, isLink {
@@ -104,7 +113,7 @@ class BeamTableCellView: NSTableCellView, SelectableTableCellView {
 
     override func mouseExited(with event: NSEvent) {
         if let tf = textField, isLink {
-            tf.attributedStringValue = NSAttributedString(string: tf.stringValue, attributes: [:])
+            setText(tf.stringValue)
         }
     }
 
