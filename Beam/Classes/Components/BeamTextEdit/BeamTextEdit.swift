@@ -191,10 +191,12 @@ public extension CALayer {
     public override var wantsUpdateLayer: Bool { true }
     internal var scope = Set<AnyCancellable>()
 
-    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil) {
+    public init(root: BeamElement, journalMode: Bool, enableDelayedInit: Bool, frame: CGRect? = nil, state: BeamState? = nil) {
         self.enableDelayedInit = enableDelayedInit
         self.delayedInit = enableDelayedInit
         self.journalMode = journalMode
+        self.state = state
+        self.data = state?.data
 
         note = root
 

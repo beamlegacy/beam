@@ -219,7 +219,7 @@ class JournalSimpleStackView: NSView {
     }
 
     private func getTextEditView(for note: BeamNote, enableDelayedInit: Bool) -> BeamTextEdit {
-        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit, frame: NSRect(origin: .zero, size: CGSize(width: frame.width, height: BeamTextEdit.minimumEmptyEditorHeight)))
+        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit, frame: NSRect(origin: .zero, size: CGSize(width: frame.width, height: BeamTextEdit.minimumEmptyEditorHeight)), state: state)
         textEditView.state = state
         textEditView.onStartEditing = onStartEditing
         textEditView.openURL = { [weak state] url, element in
