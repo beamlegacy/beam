@@ -44,7 +44,7 @@ class TextEditorCommand: Command<Widget> {
         guard let data = data else { return nil }
         var element: BeamElement?
         do {
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             element = try decoder.decode(BeamElement.self, from: data)
         } catch {
             Logger.shared.logError("Can't decode BeamElement data", category: .general)

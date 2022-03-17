@@ -1,0 +1,72 @@
+{
+  "configurations" : [
+    {
+      "id" : "D0297821-0096-4FFB-922F-AB2EDB1468FC",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "maximumTestExecutionTimeAllowance" : 120,
+    "testRepetitionMode" : "retryOnFailure",
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AllCardsDeleteTests",
+        "AllCardsViewTests",
+        "BaseTest",
+        "BlockReferenceTests",
+        "BrowserFancyUrlTests",
+        "BrowserShortcutsTests",
+        "BrowserStatusBarTests",
+        "BrowserTabViewTests",
+        "CardCreationTests",
+        "CardPublishTests",
+        "CardViewEmbedsTests",
+        "CardViewTests",
+        "DeleteNotesTests",
+        "DownloadsTest",
+        "GoogleSheetsTests",
+        "HelpAndFeedbackTests",
+        "JavascriptNativeInteractionsTests",
+        "JournalTest",
+        "LinksTests",
+        "LoginTest",
+        "NoteEditorTests",
+        "OmniboxAutocompleteTests",
+        "OmniboxDestinationTests",
+        "OmniboxViewTests\/testOmniboxDefaultActions()",
+        "OmniboxViewTests\/testOmniboxTextSelectionAndEditing()",
+        "OnboardingTests",
+        "PasswordPreferencesTests\/testAutofillUsernameAndPasswords()",
+        "PasswordPreferencesTests\/testExportPasswords()",
+        "PasswordPreferencesTests\/testImportPasswords()",
+        "PasswordPreferencesTests\/testRemovePasswordItem()",
+        "PasswordPreferencesTests\/testSearchForPassword()",
+        "PasswordPreferencesTests\/testSortPasswords()",
+        "PasswordPreferencesTests\/testViewPasswordItemDetails()",
+        "PnSAddToCardTests",
+        "SearchOnCardTests",
+        "SignInAutocompleteTests",
+        "SignInSucessfullyTests",
+        "SignInTests",
+        "SignUpAutocompleteTests",
+        "SlashMenuTests",
+        "TextEditorContextViewTests",
+        "UpdateViewTests",
+        "WaitHelper",
+        "WebsiteAuthTest"
+      ],
+      "target" : {
+        "containerPath" : "container:Beam.xcodeproj",
+        "identifier" : "965A78472514F149009980D4",
+        "name" : "BeamUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

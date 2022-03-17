@@ -153,8 +153,8 @@ class BeamObject: Codable {
         return encoder
     }
 
-    static var decoder: JSONDecoder {
-        let decoder = JSONDecoder()
+    static var decoder: BeamJSONDecoder {
+        let decoder = BeamJSONDecoder()
         decoder.dateDecodingStrategy = .iso8601withFractionalSeconds
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder

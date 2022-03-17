@@ -535,7 +535,7 @@ extension BeamObjectManager {
                         Logger.shared.logError("We don't get the same object counts", category: .beamObjectNetwork)
                     }
 
-                    let decoder = JSONDecoder()
+                    let decoder = BeamJSONDecoder()
                     var errors: [Error] = []
                     let lock = DispatchSemaphore(value: 1)
 
@@ -959,7 +959,7 @@ extension BeamObjectManager {
                 completion(.failure(error))
             case .success(let beamObjectUpload):
                 do {
-                    let decoder = JSONDecoder()
+                    let decoder = BeamJSONDecoder()
                     let headers: [String: String] = try decoder.decode([String: String].self,
                                                                        from: beamObjectUpload.uploadHeaders.asData)
 

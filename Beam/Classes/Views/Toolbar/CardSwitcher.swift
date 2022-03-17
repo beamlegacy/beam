@@ -38,14 +38,14 @@ struct CardSwitcher: View {
             .blendModeLightMultiplyDarkScreen()
     }
 
-    private var isAllCardsActive: Bool {
-        state.mode == .page && state.currentPage?.id == .allCards
+    private var isAllNotesActive: Bool {
+        state.mode == .page && state.currentPage?.id == .allNotes
     }
 
     var body: some View {
         HStack(spacing: 0) {
             Spacer(minLength: 0)
-            ToolbarCapsuleButton(text: "Journal", isSelected: state.mode == .today) {
+            ToolbarCapsuleButton(iconName: "editor-journal", text: "Journal", isSelected: state.mode == .today) {
                 state.navigateToJournal(note: nil)
             }
             .fixedSize(horizontal: true, vertical: false)
@@ -57,6 +57,24 @@ struct CardSwitcher: View {
                     hoveredIndex = 0
                 }
             }
+
+            Spacer(minLength: 5)
+
+            ToolbarCapsuleButton(iconName: "editor-allnotes", text: "All Notes", isSelected: isAllNotesActive) {
+                state.navigateToPage(.allNotesWindowPage)
+            }
+            .fixedSize(horizontal: true, vertical: false)
+            .layoutPriority(2)
+            .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
+            .accessibilityIdentifier("card-switcher-all-cards")
+            .onHover { h in
+                if h {
+                    hoveredIndex = recentsManager.recentNotes.count + 1
+                }
+            }
+
+            Spacer(minLength: 3)
+
             separator
                 .opacity(hoveredIndex != 0 && hoveredIndex != 1 ? 1 : 0)
             if recentsManager.recentNotes.count > 0 {
@@ -73,20 +91,6 @@ struct CardSwitcher: View {
                             hoveredIndex = index + 1
                         }
                     }
-                    separator
-                        .opacity(hoveredIndex == index + 1 || hoveredIndex == index + 2 ? 0 : 1)
-                }
-            }
-            ToolbarCapsuleButton(text: "All Notes", isSelected: isAllCardsActive) {
-                state.navigateToPage(.allCardsWindowPage)
-            }
-            .fixedSize(horizontal: true, vertical: false)
-            .layoutPriority(2)
-            .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
-            .accessibilityIdentifier("card-switcher-all-cards")
-            .onHover { h in
-                if h {
-                    hoveredIndex = recentsManager.recentNotes.count + 1
                 }
             }
             Spacer(minLength: 0)

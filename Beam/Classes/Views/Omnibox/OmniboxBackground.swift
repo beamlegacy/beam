@@ -23,13 +23,13 @@ extension Omnibox {
         private let pulledShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.07), darkColor: .From(color: .black, alpha: 0.3))
 
         private var shadowColor: Color {
-            (isLow ? pulledShadowColor : baseShadowColor).swiftUI
+            (isLow ? pulledShadowColor.alpha(0) : baseShadowColor).swiftUI
         }
         private var shadowRadius: CGFloat {
-            (isLow ? 10 : 32) * (isPressingCharacter ? 1/3 : 1.0)
+            (isLow ? 0 : 32) * (isPressingCharacter ? 1/3 : 1.0)
         }
         private var shadowOffsetY: CGFloat {
-            (isLow ? 3 : 14) * (isPressingCharacter ? 1/3 : 1.0)
+            (isLow ? 0 : 14) * (isPressingCharacter ? 1/3 : 1.0)
         }
 
         private let animationDuration: Double = 0.3
@@ -37,7 +37,7 @@ extension Omnibox {
         var body: some View {
             ZStack(alignment: alignment) {
                 RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .stroke(strokeColor.swiftUI, lineWidth: 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
+                    .stroke(strokeColor.swiftUI, lineWidth: isLow ? 2 : 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
                 RoundedRectangle(cornerRadius: boxCornerRadius)
                     .fill(backgroundColor.swiftUI)
                     .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)

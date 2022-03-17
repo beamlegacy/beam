@@ -45,7 +45,8 @@ struct TableView: NSViewRepresentable {
     var allowsMultipleSelection: Bool = true
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
-    var creationRowTitle: String? = "New Private Note"
+    var creationRowTitle: String?
+    var isCreationRowLoading = false
     @Binding var shouldReloadData: Bool?
 
     var onEditingText: ((String?, Int) -> Void)?
@@ -149,6 +150,7 @@ struct TableView: NSViewRepresentable {
 
     func updateNSView(_ view: Self.NSViewType, context: Self.Context) {
         context.coordinator.creationRowTitle = creationRowTitle
+        context.coordinator.isCreationRowLoading = isCreationRowLoading
         context.coordinator.originalData = items
         if shouldReloadData == true {
             context.coordinator.reloadData(soft: true)
@@ -164,18 +166,20 @@ class TableViewCoordinator: NSObject {
 
     var originalData = [TableViewItem]() {
         didSet {
-            if originalData != oldValue {
-                reloadData()
-            }
+            reloadDataIfPropertyChanged(newValue: originalData, oldValue: oldValue)
         }
     }
     var creationRowTitle: String? {
         didSet {
-            if creationRowTitle != oldValue {
-                reloadData()
-            }
+            reloadDataIfPropertyChanged(newValue: creationRowTitle, oldValue: oldValue)
         }
     }
+    var isCreationRowLoading: Bool = false {
+        didSet {
+            reloadDataIfPropertyChanged(newValue: isCreationRowLoading, oldValue: oldValue)
+        }
+    }
+
     private var creationgRowTextField: NSTextField?
 
     private var sortedData = [TableViewItem]()
@@ -217,6 +221,12 @@ class TableViewCoordinator: NSObject {
             tableView?.selectRowIndexes(selectedIndexes, byExtendingSelection: false)
         }
         updateSelectAllCheckBox()
+    }
+
+    private func reloadDataIfPropertyChanged<T: Equatable>(newValue: T, oldValue: T) {
+        if newValue != oldValue {
+            reloadData()
+        }
     }
 
     func updateSelectAllCheckBox() {
@@ -352,11 +362,17 @@ extension TableViewCoordinator: NSTableViewDelegate {
         if isRowCreationRow(row) {
             // creation row
             if column.type == .CheckBox {
-                let iconCell = BeamTableCellIconView()
-                let img = NSImage(named: "tool-new")
-                img?.isTemplate = true
-                iconCell.updateWithIcon(img)
-                return iconCell
+                if isCreationRowLoading {
+                    let lottieCell = BeamTableCellLottieView()
+                    lottieCell.updateWithLottie(named: "status-update_restart")
+                    return lottieCell
+                } else {
+                    let iconCell = BeamTableCellIconView()
+                    let img = NSImage(named: "tool-new")
+                    img?.isTemplate = true
+                    iconCell.updateWithIcon(img)
+                    return iconCell
+                }
             } else {
                 let textCell = BeamTableCellView()
                 textCell.textField?.isEditable = false
@@ -387,12 +403,12 @@ extension TableViewCoordinator: NSTableViewDelegate {
         let value = item.value(forKey: column.key)
         let text = column.stringFromKeyValue(value)
         let editable = column.editable && !column.isLink
-        textCell.textField?.stringValue = text
         textCell.textField?.isEditable = editable
         textCell.textField?.font = column.font ?? BeamFont.regular(size: column.fontSize).nsFont
         textCell.textField?.setAccessibilityIdentifier("\(column.title)")
-        textCell.isLink = column.isLink
         textCell.textField?.delegate = self
+        textCell.isLink = column.isLink
+        textCell.setText(text)
         textCell.foregroundColor = column.foregroundColor
         textCell.selectedForegroundColor = column.selectedForegroundColor
         textCell.isSelected = currentSelectedIndexes?.contains(row) == true

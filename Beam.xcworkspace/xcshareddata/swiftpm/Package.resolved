@@ -60,7 +60,7 @@
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
           "branch": null,
-          "revision": "c7f5dcdcdb6a7a72bdb9e2ad11eda258ee5dc9c3",
+          "revision": "d693c60cf36a377c6e5596197386ba0ce44079ea",
           "version": null
         }
       },
@@ -233,6 +233,15 @@
           "branch": null,
           "revision": "60b7887c6f4051e5cb76b5faa0a7d6db510ddcb0",
           "version": "1.2.0"
+        }
+      },
+      {
+        "package": "JJLISO8601DateFormatter",
+        "repositoryURL": "https://github.com/michaeleisel/JJLISO8601DateFormatter",
+        "state": {
+          "branch": null,
+          "revision": "99fadf2e6425a0f827b1b485ea60bc2b7ecdd22c",
+          "version": "0.1.4"
         }
       },
       {
@@ -447,8 +456,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "967f04b3cd6989df3f9ced3060481a21646c146d",
-          "version": "7.9.0"
+          "revision": "32f29184d0d8ffd5a7299a37b90ab3cb343db1f3",
+          "version": "7.10.1"
         }
       },
       {
@@ -611,6 +620,24 @@
           "branch": null,
           "revision": "7254c74b49cec2cb81520523ba993c671f71b066",
           "version": "0.9.14"
+        }
+      },
+      {
+        "package": "ZippyJSON",
+        "repositoryURL": "https://github.com/michaeleisel/ZippyJSON",
+        "state": {
+          "branch": "master",
+          "revision": "71a46d3ed2749a150202346aec83a6cd78340cc5",
+          "version": null
+        }
+      },
+      {
+        "package": "ZippyJSONCFamily",
+        "repositoryURL": "https://github.com/michaeleisel/ZippyJSONCFamily",
+        "state": {
+          "branch": null,
+          "revision": "c55123b23f0faa898b22bf1b967e72a2df51fdb4",
+          "version": "1.2.4"
         }
       }
     ]

@@ -24,7 +24,6 @@ class BaseTest: XCTestCase {
     override func tearDownWithError() throws {
         super.tearDown()
         terminateAppInstance()
-        storeScreenshot()
     }
     
     override func tearDown() {

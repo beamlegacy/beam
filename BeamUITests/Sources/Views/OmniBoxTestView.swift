@@ -24,6 +24,12 @@ class OmniBoxTestView: BaseView {
         getOmniBoxSearchField().typeText(text)
         return self
     }
+
+    @discardableResult
+    func enterCreateCardMode() -> OmniBoxTestView {
+        getOmniBoxSearchField().typeKey(.enter, modifierFlags: .option)
+        return OmniBoxTestView()
+    }
     
     func getAutocompleteResults() -> XCUIElementQuery {
         return app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'"))

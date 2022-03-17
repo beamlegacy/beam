@@ -18,6 +18,10 @@
       "skippedTests" : [
         "BaseTest",
         "BrowserFancyUrlTests",
+        "CardEditTests",
+        "EditorShortcutsTests",
+        "HelpAndFeedbackTests",
+        "JavascriptNativeInteractionsTests",
         "JournalTest",
         "LinksTests",
         "LoginPasswordAutocompleteTests",
