@@ -8,9 +8,9 @@ class EmbedNode: ResizableNode {
 
     var isExpandable: Bool { true }
 
-    override var hover: Bool {
+    override var frontmostHover: Bool {
         didSet {
-            toggleButtonBeamLayer?.layer.opacity = hover ? 1 : 0
+            toggleButtonBeamLayer?.layer.opacity = frontmostHover ? 1 : 0
         }
     }
 

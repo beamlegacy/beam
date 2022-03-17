@@ -116,18 +116,18 @@ class ResizableNode: ElementNode {
         }
     }
 
-    override var hover: Bool {
+    override var frontmostHover: Bool {
         didSet {
             if let handle = layers["handle_horizontal"],
                let handleLayer = handle.layer as? CAShapeLayer {
                 guard !isResizing else { return }
-                handleLayer.opacity = hover ? 1.0 : 0.0
+                handleLayer.opacity = frontmostHover ? 1.0 : 0.0
             }
 
             if let handle = layers["handle_vertical"],
                let handleLayer = handle.layer as? CAShapeLayer {
                 guard !isResizing else { return }
-                handleLayer.opacity = hover ? 1.0 : 0.0
+                handleLayer.opacity = frontmostHover ? 1.0 : 0.0
             }
             invalidate()
         }
