@@ -454,7 +454,7 @@ public extension CALayer {
         updateLayout(nodesRect)
 
         if !journalMode, let initialScrollOffset = initialScrollOffset, bounds.size.height >= intrinsicContentSize.height {
-                scrollToVisible(NSRect(origin: NSPoint(x: 0, y: initialScrollOffset), size: visibleRect.size))
+            scrollToVisible(NSRect(origin: NSPoint(x: 0, y: initialScrollOffset), size: visibleRect.size))
             self.initialScrollOffset = nil
         }
     }
