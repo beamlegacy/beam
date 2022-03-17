@@ -41,6 +41,8 @@ class BeamUITestsMenuGenerator {
         case .setAutoUpdateToMock: setAutoUpdateToMock()
         case .cleanDownloads: cleanDownloadFolder()
         case .omniboxFillHistory: fillHistory()
+        case .omniboxEnableSearchInHistoryContent: omniboxEnableSearchInHistoryContent()
+        case .omniboxDisableSearchInHistoryContent: omniboxDisableSearchInHistoryContent()
         case .signInWithTestAccount: signInWithTestAccount()
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()
@@ -194,6 +196,14 @@ class BeamUITestsMenuGenerator {
                          title: "Hubert Blaine Wolfeschlegelsteinhausenbergerdorff Sr.")
         addPageToHistory(url: "https://www.google.com/search?q=Beam%20the%20best%20browser&client=safari", title: "Beam the best browser")
         addPageToHistory(url: "https://beamapp.co", aliasUrl: "https://alternateurl.com", title: "Beam")
+    }
+
+    private func omniboxEnableSearchInHistoryContent() {
+        PreferencesManager.includeHistoryContentsInOmniBox = true
+    }
+
+    private func omniboxDisableSearchInHistoryContent() {
+        PreferencesManager.includeHistoryContentsInOmniBox = false
     }
 
     private func addPageToHistory(url: String, aliasUrl: String? = nil, title: String) {

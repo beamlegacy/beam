@@ -1204,6 +1204,14 @@
 		BAA67E2CEDBE8BF2696AB646 /* BeamWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA670D131DF7CAE7FA6664E /* BeamWebView.swift */; };
 		BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA674174D9C44BC3C8FF465 /* ContentTypes.swift */; };
 		BAA67FA1EA0AEC590CEE0AB8 /* WebNavigationContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67226F0A10301D829E071 /* WebNavigationContext.swift */; };
+		CE304C2D27DB544B005AE274 /* GCPAuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C2C27DB544B005AE274 /* GCPAuthenticationManager.swift */; };
+		CE304C2F27DB5469005AE274 /* Digest+convert.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C2E27DB5469005AE274 /* Digest+convert.swift */; };
+		CE304C3127DB547C005AE274 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3027DB547C005AE274 /* Errors.swift */; };
+		CE304C3527DB54C0005AE274 /* GCPAuthenticationDataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3427DB54C0005AE274 /* GCPAuthenticationDataTypes.swift */; };
+		CE304C3727DB54D7005AE274 /* GCSDataTypes.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3627DB54D7005AE274 /* GCSDataTypes.swift */; };
+		CE304C3927DB54EC005AE274 /* GCSObjectManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3827DB54EC005AE274 /* GCSObjectManager.swift */; };
+		CE304C3B27DB5501005AE274 /* URLSession+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3A27DB5501005AE274 /* URLSession+async.swift */; };
+		CE304C3D27DB566D005AE274 /* String+base64url.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE304C3C27DB566D005AE274 /* String+base64url.swift */; };
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
@@ -2667,6 +2675,14 @@
 		BAA67FA6403B5D2284B56F13 /* Native.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = Native.ts; sourceTree = "<group>"; };
 		BAA67FB8275D3AA84301AE01 /* EventsMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = EventsMock.ts; sourceTree = "<group>"; };
 		D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread5.xctestplan"; sourceTree = "<group>"; };
+		CE304C2C27DB544B005AE274 /* GCPAuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCPAuthenticationManager.swift; sourceTree = "<group>"; };
+		CE304C2E27DB5469005AE274 /* Digest+convert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Digest+convert.swift"; sourceTree = "<group>"; };
+		CE304C3027DB547C005AE274 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		CE304C3427DB54C0005AE274 /* GCPAuthenticationDataTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCPAuthenticationDataTypes.swift; sourceTree = "<group>"; };
+		CE304C3627DB54D7005AE274 /* GCSDataTypes.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCSDataTypes.swift; sourceTree = "<group>"; };
+		CE304C3827DB54EC005AE274 /* GCSObjectManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GCSObjectManager.swift; sourceTree = "<group>"; };
+		CE304C3A27DB5501005AE274 /* URLSession+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URLSession+async.swift"; sourceTree = "<group>"; };
+		CE304C3C27DB566D005AE274 /* String+base64url.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+base64url.swift"; sourceTree = "<group>"; };
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
@@ -3692,6 +3708,7 @@
 		418172A625811A3A00317ED8 /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				CE304C2627DB542D005AE274 /* GoogleCloudPlatform */,
 				962AC87F279017D1001B7142 /* OmnibarContentDebugger */,
 				A5336C04273AB4EA0075AF92 /* Onboarding */,
 				52842D4C2715B2FF0099602C /* FilesList */,
@@ -4791,6 +4808,7 @@
 				3719854827C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift */,
 				3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */,
 				370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */,
+				CE304C3C27DB566D005AE274 /* String+base64url.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -6064,6 +6082,20 @@
 			path = Mock;
 			sourceTree = "<group>";
 		};
+		CE304C2627DB542D005AE274 /* GoogleCloudPlatform */ = {
+			isa = PBXGroup;
+			children = (
+				CE304C2E27DB5469005AE274 /* Digest+convert.swift */,
+				CE304C3027DB547C005AE274 /* Errors.swift */,
+				CE304C2C27DB544B005AE274 /* GCPAuthenticationManager.swift */,
+				CE304C3427DB54C0005AE274 /* GCPAuthenticationDataTypes.swift */,
+				CE304C3627DB54D7005AE274 /* GCSDataTypes.swift */,
+				CE304C3827DB54EC005AE274 /* GCSObjectManager.swift */,
+				CE304C3A27DB5501005AE274 /* URLSession+async.swift */,
+			);
+			path = GoogleCloudPlatform;
+			sourceTree = "<group>";
+		};
 		DA0EA6FB269836B600BD5D2F /* Score */ = {
 			isa = PBXGroup;
 			children = (
@@ -6939,6 +6971,7 @@
 				96319D462616233E00D1CF31 /* String+URL.swift in Sources */,
 				8ABC6519274FD7230068166E /* SourceMetadata.swift in Sources */,
 				96319D492616233E00D1CF31 /* BeamNote.swift in Sources */,
+				CE304C3D27DB566D005AE274 /* String+base64url.swift in Sources */,
 				96319D58261626AC00D1CF31 /* BrowsingTree.swift in Sources */,
 				3719854927C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift in Sources */,
 				528DBBC226C440820054F9FF /* BeamDate.swift in Sources */,
@@ -7177,6 +7210,7 @@
 				A567157125F66F8600B46110 /* StyledText.swift in Sources */,
 				418172012581107C00317ED8 /* Document+CoreDataProperties.swift in Sources */,
 				A54936C6260B721600EF7622 /* WindowBottomToolBar.swift in Sources */,
+				CE304C3927DB54EC005AE274 /* GCSObjectManager.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				33353ED626F3675000063078 /* ShortcutKey.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
@@ -7202,6 +7236,7 @@
 				96FACC8626050B1E0088DD67 /* SetSelection.swift in Sources */,
 				A5D8858E274E4F0100F37859 /* OmniboxBackground.swift in Sources */,
 				A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */,
+				CE304C3B27DB5501005AE274 /* URLSession+async.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				37DB5A0B27BB514400534760 /* EmbedAnimator.swift in Sources */,
 				5241E5F626F8B0A900B08F69 /* AccountManager+Foundation.swift in Sources */,
@@ -7267,6 +7302,7 @@
 				528F296D26B449EA006857E5 /* Beam.xcdatamodeld in Sources */,
 				33DE802C273A482000B7FCAF /* CollapsableNode.swift in Sources */,
 				52B9A39A264566D60063AEEF /* OauthButton.swift in Sources */,
+				CE304C2D27DB544B005AE274 /* GCPAuthenticationManager.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				A5CD2343270C83E900240987 /* MeetingFormatterView.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
@@ -7277,6 +7313,7 @@
 				A0E9B0E326668C1300FC99A5 /* FaviconView.swift in Sources */,
 				37B85B8227A2C81B003871F9 /* DownloadProxyDelegate.swift in Sources */,
 				8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */,
+				CE304C3527DB54C0005AE274 /* GCPAuthenticationDataTypes.swift in Sources */,
 				87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */,
 				5284895426C5650A0064878B /* Error+NotFound.swift in Sources */,
 				52019A6126DE2ACB005E8278 /* BeamObjectRequest+Promises.swift in Sources */,
@@ -7290,6 +7327,7 @@
 				A0689E6D25DE623D00B19CBB /* DeleteText.swift in Sources */,
 				A05123CA27708D88009B81CF /* MeetingCalendar.swift in Sources */,
 				338981C12795B9BD00477941 /* Bundle+Beam.swift in Sources */,
+				CE304C3727DB54D7005AE274 /* GCSDataTypes.swift in Sources */,
 				52B17AB62624422800CB4728 /* DatabasesContentView.swift in Sources */,
 				529826A62641A46E00E9448C /* GoogleButton.swift in Sources */,
 				A0F558E626BD51A70024C47E /* EditorDebugPreferencesView.swift in Sources */,
@@ -7587,6 +7625,7 @@
 				A5234030279DEDD80027E339 /* ThirdPartyLibrariesManager+Firebase.swift in Sources */,
 				8AF4F7C4275A66DF0081B6B5 /* SupportedEmbedDomains.swift in Sources */,
 				418172182581107C00317ED8 /* PerformanceDebug.swift in Sources */,
+				CE304C2F27DB5469005AE274 /* Digest+convert.swift in Sources */,
 				A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */,
 				8A34EADC27C7AF750063DAF6 /* TransientWebViewWindow.swift in Sources */,
 				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
@@ -7718,6 +7757,7 @@
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
 				A5297F3A27AC3465006B3E1F /* SearchEngineAutocompleter.swift in Sources */,
 				A0614EEC270B383000C38F82 /* GoogleEvent.swift in Sources */,
+				CE304C3127DB547C005AE274 /* Errors.swift in Sources */,
 				BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */,
 				8AD9DEBE26C6ACF00015B559 /* PointAndShootOffsetWithAnimation.swift in Sources */,
 				A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */,
@@ -8630,6 +8670,7 @@
 					Beam.css,
 					video.mov,
 					"UITests-Passwords.csv",
+					gcp_service_account_credentials.json,
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9118,6 +9159,7 @@
 					Beam.css,
 					video.mov,
 					"UITests-Passwords.csv",
+					gcp_service_account_credentials.json,
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -9579,6 +9621,7 @@
 					Beam.css,
 					video.mov,
 					"UITests-Passwords.csv",
+					gcp_service_account_credentials.json,
 				);
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
