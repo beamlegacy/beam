@@ -62,7 +62,7 @@ class PnSAddToCardTests: BaseTest {
     
         let textElementToAdd = pnsView.staticText(" capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime")
         
-        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, "", true)
+        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, true)
         
         print("Then it is successfully added to the note")
         // Commented out as far as it is too unreliable
@@ -110,7 +110,6 @@ class PnSAddToCardTests: BaseTest {
     }
     
     func testAddTextUsingNotes() {
-        let noteText = "this is a note"
         let journalView = launchApp()
         let helper = BeamUITestsHelper(pnsView.app)
         print("Given I create \(cardNameToBeCreated) note")
@@ -123,14 +122,13 @@ class PnSAddToCardTests: BaseTest {
         testRailPrint("When I collect a text via PnS")
         let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
         
-        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, noteText)
+        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
         
         print("Then it is successfully added to the note")
         OmniBoxTestView().navigateToCardViaPivotButton()
         _ = cardView.waitForCardViewToLoad()
         let cardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertTrue(cardNotes.count == 3 || cardNotes.count == 4) //CI specific issue handling
-        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[cardNotes.count - 1]), noteText) //CI specific issue handling
+        XCTAssertTrue(cardNotes.count == 2 || cardNotes.count == 3) //CI specific issue handling
     }
     
     func testCollectImage() {
@@ -319,7 +317,6 @@ class PnSAddToCardTests: BaseTest {
         testRailPrint("TBD")
         // PointAndShootPopup is now also visible
         XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
-        XCTAssertTrue(pnsView.textField(PnSViewLocators.TextFields.addComment.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
 
         // Add to today's note
         let noteTitle = "Ultralight Beam"

@@ -174,3 +174,29 @@ extension BeamUITestsHelper {
         Faker(locale: "en-US").internet.password(minimumLength: 5, maximumLength: 17)
     }
 }
+
+extension XCTest {
+
+    func epic(_ values: String...) {
+        label(name: "epic", values: values)
+    }
+    func feature(_ values: String...) {
+        label(name: "feature", values: values)
+    }
+    func story(_ stories: String...) {
+        label(name: "story", values: stories)
+    }
+    func label(_ name: String,_ values: [String]) {
+        label(name: name, values: values)
+    }
+    func step(_ name: String, step: () -> Void) {
+        XCTContext.runActivity(named: name) { _ in
+            step()
+        }
+    }
+    private func label(name: String, values: [String]) {
+        for value in values {
+            XCTContext.runActivity(named: "allure.label." + name + ":" + value, block: {_ in})
+        }
+    }
+}

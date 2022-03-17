@@ -28,23 +28,39 @@ extension AutocompleteManager {
     }
 
     func getAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
-        [
+        let notesPublishers = [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
+            getCreateNotePublisher(for: searchText)
+        ]
+
+        if mode == .noteCreation {
+            return notesPublishers
+        }
+
+        let webPublishers = [
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteMnemonicResults(for: searchText), source: .mnemonic),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
             futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
-            self.autocompleteCanCreateNoteResult(for: searchText)
-                .replaceError(with: false)
-                .map { canCreate in
-                    var results = [AutocompleteResult]()
-                    if canCreate {
-                        results.append(Self.DefaultActions.createNoteResult(for: searchText))
-                    }
-                    return AutocompletePublisherSourceResults(source: .createNote, results: results)
-                }.eraseToAnyPublisher()
+            getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)
         ]
+
+        let otherPublishers = [futureToPublisher(autocompleteActionsResults(for: searchText), source: .action)]
+
+        return notesPublishers + webPublishers + otherPublishers
+    }
+
+    private func getCreateNotePublisher(for searchText: String) -> AnyPublisher<AutocompletePublisherSourceResults, Never> {
+        autocompleteCanCreateNoteResult(for: searchText)
+            .replaceError(with: false)
+            .map { [unowned self] canCreate in
+                var results = [AutocompleteResult]()
+                if canCreate {
+                    results.append(Self.DefaultActions.createNoteResult(for: searchText, mode: self.mode, asAction: false))
+                }
+                return AutocompletePublisherSourceResults(source: .createNote, results: results)
+            }.eraseToAnyPublisher()
     }
 
     func getSearchEnginePublisher(for searchText: String,
@@ -300,6 +316,31 @@ extension AutocompleteManager {
         }
     }
 
+    private func autocompleteActionsResults(for searchText: String) -> Future<[AutocompleteResult], Error> {
+        Future { [weak self] promise in
+            guard let self = self, let state = self.beamState, !state.focusOmniBoxFromTab else {
+                promise(.success([]))
+                return
+            }
+            let searchableActions: [AutocompleteResult] = [
+                Self.DefaultActions.createNoteResult(for: nil, mode: self.mode, asAction: true)
+            ]
+            let match = searchText.lowercased()
+            let results = searchableActions.filter { r in
+                let lowercasedText = r.text.lowercased()
+                if lowercasedText.hasPrefix(match) {
+                    return true
+                }
+                var words = lowercasedText.wordRanges.map { r.text[$0] }
+                if let additionalSearchTerms = r.additionalSearchTerms {
+                    words += additionalSearchTerms.map { Substring($0) }
+                }
+                return words.contains { $0.lowercased().hasPrefix(match) }
+            }
+            promise(.success(results))
+        }
+    }
+
     private func defaultActionsResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
             guard let self = self, let state = self.beamState, !state.focusOmniBoxFromTab else {
@@ -308,6 +349,7 @@ extension AutocompleteManager {
             }
             var actions = [AutocompleteResult]()
             let mode = state.mode
+            let isFocusingTab = state.focusOmniBoxFromTab
             if mode == .web {
                 actions.append(contentsOf: [
                     Self.DefaultActions.journalAction,
@@ -318,18 +360,16 @@ extension AutocompleteManager {
                 if mode != .today {
                     actions.append(Self.DefaultActions.journalAction)
                 }
-                if state.mode != .page || state.currentPage?.id != .allCards {
+                if state.mode != .page || state.currentPage?.id != .allNotes {
                     actions.append(Self.DefaultActions.allNotesAction)
                 }
                 if state.hasBrowserTabs {
                     actions.append(Self.DefaultActions.switchToWebAction)
                 }
             }
-//            Disabling New Note default action for now
-//            See https://linear.app/beamapp/issue/BE-2402/omnibox-default-states
-//            if !isFocusingTab {
-//                actions.append(Self.DefaultActions.createNoteResult(for: ""))
-//            }
+            if !isFocusingTab {
+                actions.append(Self.DefaultActions.createNoteResult(for: nil, mode: self.mode, asAction: false))
+            }
             promise(.success(actions))
         }
     }

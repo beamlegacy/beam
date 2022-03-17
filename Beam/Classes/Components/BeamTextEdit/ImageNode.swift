@@ -40,7 +40,7 @@ class ImageNode: ResizableNode {
             element.collapsed = isCollapsed
             configureCollapsed(isCollapsed)
             if !element.isProxy {
-                setupCollapseExpandLayer(hidden: !hover)
+                setupCollapseExpandLayer(hidden: !frontmostHover)
             }
             if let imageLayer = imageLayer {
                 layoutCollapseExpand(contentLayer: imageLayer.layer, verticalOffset: imageVerticalOffset)
@@ -101,7 +101,7 @@ class ImageNode: ResizableNode {
         setupImageLayer(using: imageRecord, uid: uid, width: width)
         configureCollapsed(isCollapsed)
         if !element.isProxy {
-            setupCollapseExpandLayer(hidden: !hover)
+            setupCollapseExpandLayer(hidden: !frontmostHover)
         }
 
         updateLayout()
@@ -374,11 +374,11 @@ class ImageNode: ResizableNode {
         return true
     }
 
-    override var hover: Bool {
+    override var frontmostHover: Bool {
         didSet {
             if let source = layers["source"] {
-                source.layer.opacity = hover ? 1.0 : 0.0
-                if hover, let blur = CIFilter(name: "CIGaussianBlur") {
+                source.layer.opacity = frontmostHover ? 1.0 : 0.0
+                if frontmostHover, let blur = CIFilter(name: "CIGaussianBlur") {
                     blur.name = "blur"
                     source.layer.backgroundFilters = [blur]
                 } else {
@@ -387,12 +387,12 @@ class ImageNode: ResizableNode {
             }
             if let collapseExpand = self.layers["global-expand"],
                   let textLayer = collapseExpand.layer.sublayers?[1] as? CATextLayer {
-                collapseExpand.layer.opacity = hover ? 1.0 : 0.0
-                textLayer.opacity = hover ? 1.0 : 0.0
+                collapseExpand.layer.opacity = frontmostHover ? 1.0 : 0.0
+                textLayer.opacity = frontmostHover ? 1.0 : 0.0
             }
 
             invalidate()
-            super.hover = hover
+            super.frontmostHover = frontmostHover
         }
     }
 

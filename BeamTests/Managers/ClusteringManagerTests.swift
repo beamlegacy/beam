@@ -216,7 +216,7 @@ class ClusteringManagerTests: XCTestCase {
         var newSummary = ClusteringManager.SummaryForNewDay()
         if let summaryString = Persistence.ContinueTo.summary,
            let jsonData = summaryString.data(using: .utf8),
-           let unwrappedSummary = try? JSONDecoder().decode(ClusteringManager.SummaryForNewDay.self, from: jsonData) {
+           let unwrappedSummary = try? BeamJSONDecoder().decode(ClusteringManager.SummaryForNewDay.self, from: jsonData) {
             newSummary = unwrappedSummary
         }
         expect(newSummary.notes?.count).toEventually(equal(10))

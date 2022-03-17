@@ -93,6 +93,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private var customIcon: String?
     private(set) var shortcut: Shortcut?
     private(set) var completingText: String?
+    private(set) var additionalSearchTerms: [String]?
     private(set) var uuid: UUID
     private(set) var score: Float?
     private(set) var handler: ((BeamState) -> Void)?
@@ -113,7 +114,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private(set) var takeOverCandidate = false
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
-         information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil,
+         information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil, additionalSearchTerms: [String]? = nil,
          uuid: UUID = UUID(), score: Float? = nil, handler: ((BeamState) -> Void)? = nil, urlFields: URLFields = []) {
         self.text = text
         self.source = source
@@ -124,6 +125,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         self.customIcon = customIcon
         self.shortcut = shortcut
         self.completingText = completingText
+        self.additionalSearchTerms = additionalSearchTerms
         self.uuid = uuid
         self.score = score
         self.handler = handler

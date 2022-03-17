@@ -11,7 +11,14 @@ import Combine
 
 class JournalSimpleStackView: NSView {
     public var verticalSpace: CGFloat
-    public var topOffset: CGFloat
+    public var topOffset: CGFloat {
+        didSet {
+            if oldValue != topOffset {
+                initialLayout = true
+                invalidateIntrinsicContentSize()
+            }
+        }
+    }
 
     var state: BeamState
     var onStartEditing: (() -> Void)?
@@ -104,6 +111,8 @@ class JournalSimpleStackView: NSView {
             }
             lastViewY = (newFrame.maxY + verticalSpace).rounded()
         }
+
+        updateScrollingFrames()
     }
 
     override public var intrinsicContentSize: NSSize {
@@ -219,7 +228,7 @@ class JournalSimpleStackView: NSView {
     }
 
     private func getTextEditView(for note: BeamNote, enableDelayedInit: Bool) -> BeamTextEdit {
-        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit, frame: NSRect(origin: .zero, size: CGSize(width: frame.width, height: BeamTextEdit.minimumEmptyEditorHeight)))
+        let textEditView = BeamTextEdit(root: note, journalMode: true, enableDelayedInit: enableDelayedInit, frame: NSRect(origin: .zero, size: CGSize(width: frame.width, height: BeamTextEdit.minimumEmptyEditorHeight)), state: state)
         textEditView.state = state
         textEditView.onStartEditing = onStartEditing
         textEditView.openURL = { [weak state] url, element in
@@ -245,7 +254,30 @@ class JournalSimpleStackView: NSView {
         return textEditView
     }
 
+    private var otherNotesAlpha = CGFloat(0)
     func updateScrollingFrames() {
+        guard let scrollView = enclosingScrollView else { return }
+        let clipView = scrollView.contentView
+        let minFadingOffset = ModeView.omniboxEndFadeOffset
+        DispatchQueue.main.async { [weak self] in
+            self?.state.journalScrollOffset = clipView.bounds.minY
+        }
+        otherNotesAlpha = min(1, clipView.bounds.minY / minFadingOffset)
+
+        var first = true
+        for note in notes {
+            guard let view = views[note] else { continue }
+            if first {
+                first = false
+                if view.alphaValue != 1.0 {
+                    view.alphaValue = 1.0
+                }
+            } else {
+                if view.alphaValue != otherNotesAlpha {
+                    view.alphaValue = otherNotesAlpha
+                }
+            }
+        }
     }
 
     override func mouseDown(with event: NSEvent) {

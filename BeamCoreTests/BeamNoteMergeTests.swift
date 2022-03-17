@@ -29,7 +29,7 @@ class BeamNoteMergeTests: XCTestCase {
     func note(_ filename: String, forScenario scenario: String) throws -> BeamNote {
         let path = URL(fileURLWithPath: filename, relativeTo: try URLFor(scenario: scenario))
         let data = try Data(contentsOf: path)
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         return try decoder.decode(BeamNote.self, from: data)
     }
 

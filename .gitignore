@@ -154,3 +154,6 @@ fastlane/swiftlint.json
 **/junit.xml
 /Beam/Classes/Components/PointAndShoot/test.http
 BeamCore/Configuration/EnvironmentVariables_generated.swift
+
+# allure_report
+allure-report/

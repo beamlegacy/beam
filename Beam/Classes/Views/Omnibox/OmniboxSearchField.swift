@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Combine
+import BeamCore
 
 struct OmniboxSearchField: View {
     @EnvironmentObject var state: BeamState
@@ -22,15 +23,24 @@ struct OmniboxSearchField: View {
         $autocompleteManager.searchQuery
     }
 
+    private var placeholder: String {
+        if autocompleteManager.mode == .noteCreation {
+            return loc("Create Note")
+        }
+        return loc("Search the web and your notes")
+    }
+
     private var leadingIconName: String? {
         if let tab = browserTabsManager.currentTab, let url = tab.url,
            state.mode == .web,
            autocompleteManager.searchQuery == url.absoluteString {
             return AutocompleteResult.Source.url.iconName
-        }
-        if let autocompleteResult = selectedAutocompleteResult {
+        } else if let autocompleteResult = selectedAutocompleteResult {
             return autocompleteResult.icon
+        } else if autocompleteManager.mode == .noteCreation {
+            return AutocompleteResult.Source.createNote.iconName
         }
+
         return AutocompleteResult.Source.searchEngine.iconName
     }
 
@@ -59,7 +69,7 @@ struct OmniboxSearchField: View {
     }
 
     private var resultSubtitle: String? {
-        guard isEditing else { return nil }
+        guard isEditing, autocompleteManager.mode == .general else { return nil }
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
         if let info = autocompleteResult.displayInformation {
             return info
@@ -101,7 +111,7 @@ struct OmniboxSearchField: View {
                 BeamTextField(
                     text: textFieldText,
                     isEditing: $isEditing,
-                    placeholder: "Search the web and your notes",
+                    placeholder: placeholder,
                     font: textFont.nsFont,
                     textColor: textColor.nsColor,
                     placeholderFont: BeamFont.light(size: 17).nsFont,
@@ -113,6 +123,7 @@ struct OmniboxSearchField: View {
                         onEnterPressed(modifierFlags: modifierFlags)
                     },
                     onEscape: onEscapePressed,
+                    onBackspace: onBackspacePressed,
                     onCursorMovement: { handleCursorMovement($0) },
                     onModifierFlagPressed: { event in
                         modifierFlagsPressed = event.modifierFlags
@@ -173,7 +184,7 @@ struct OmniboxSearchField: View {
         if autocompleteManager.searchQuery.isEmpty {
             return
         }
-        state.startQuery()
+        state.startOmniboxQuery()
     }
 
     func handleCursorMovement(_ move: CursorMovement) -> Bool {
@@ -193,10 +204,20 @@ struct OmniboxSearchField: View {
 
     private func onEscapePressed() {
         let query = autocompleteManager.searchQuery
-        if query.isEmpty || (state.mode == .web && query == state.browserTabsManager.currentTab?.url?.absoluteString) {
+        if (query.isEmpty && autocompleteManager.mode == .general) || (state.mode == .web && query == state.browserTabsManager.currentTab?.url?.absoluteString) {
             unfocusField()
+            if state.showOmnibox {
+                autocompleteManager.clearAutocompleteResults()
+            }
         } else {
+            autocompleteManager.mode = .general
             autocompleteManager.setQuery("", updateAutocompleteResults: true)
+        }
+    }
+
+    private func onBackspacePressed() {
+        if autocompleteManager.searchQuery.isEmpty && autocompleteManager.mode != .general {
+            autocompleteManager.mode = .general
         }
     }
 }

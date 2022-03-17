@@ -236,7 +236,7 @@ struct BeamTextField: NSViewRepresentable {
 
         // MARK: Delegates
         func controlTextDidEndEditing(_ obj: Notification) {
-            guard let textField = obj.object as? BeamNSTextFieldProtocol else { return }
+            guard let textField = obj.object as? BeamNSTextFieldProtocol, !textField.ignoreResponderChanges else { return }
             textField.onFocusChanged(false)
         }
 

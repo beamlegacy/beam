@@ -19,6 +19,7 @@ class TabClusteringGroup: Identifiable, Equatable {
 
 class TabGroupingUpdater {
     private let myQueue = DispatchQueue(label: "tabGroupingUpdaterQueue")
+    var hueGenerator = DistributedRandomGenerator(range: 0.0..<1.0)
 
     @Published private(set) var builtPagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
 
@@ -59,14 +60,41 @@ class TabGroupingUpdater {
         }
     }
 
+    /// The HueGenerator provides us with hues for each groups such that they are as differentiable as possible
+    private class HueGenerator {
+        let numTentatives = 10
+        var taken = [Double]()
+
+        func generate() -> Double {
+            guard taken.count > 0 else {
+                let hueToReturn = Double.random(in: 0.0..<1.0)
+                self.taken.append(hueToReturn)
+                return hueToReturn
+            }
+            var hue: Double?
+            var distance = -0.1
+            for _ in 0..<numTentatives {
+                let hueTemp = Double.random(in: 0.0..<1.0)
+                let distanceTemp = taken.map { pow($0 - hueTemp, 2.0) }.min()
+                if let distanceTemp = distanceTemp,
+                   distanceTemp > distance {
+                    distance = distanceTemp
+                    hue = hueTemp
+                }
+            }
+            let hueToReturn = hue ?? Double.random(in: 0.0..<1.0)
+            self.taken.append(hueToReturn)
+            return hueToReturn
+        }
+    }
+
     /// Transforms the pageIDs groups into TabClusteringGroup associated to each pageID.
     /// It will try to maintain the same group properties for each update.
     private func buildTabClusteringGroups(urlGroups: [[ClusteringManager.PageID]]) {
         let previousGroups = self.builtPagesGroups
         var pagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
-        var hueGenerator = DistributedRandomGenerator(range: Double(0.0)..<Double(1.0), taken: [])
         urlGroups.forEach({ group in
-            guard let groupHue = hueGenerator.randomElement() else { return }
+            let groupHue = hueGenerator.generate()
             hueGenerator.taken.append(groupHue)
             let pageGroup = TabClusteringGroup(pageIDs: [], hueTint: groupHue)
             var previousGroupsFound = [TabClusteringGroup]()
@@ -96,5 +124,6 @@ class TabGroupingUpdater {
             }
         })
         self.builtPagesGroups = pagesGroups
+        hueGenerator.taken = Array(Set(self.builtPagesGroups.map { $0.value.hueTint }))
     }
 }

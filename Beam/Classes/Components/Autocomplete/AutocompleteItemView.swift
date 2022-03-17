@@ -21,6 +21,8 @@ struct AutocompleteItemView: View {
     var allowsShortcut: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
+    var height: CGFloat = Self.defaultHeight
+    var fontSize: CGFloat = 14
     var additionalLeadingPadding: CGFloat = 0
     var cornerRadius: Double = 6
 
@@ -52,7 +54,9 @@ struct AutocompleteItemView: View {
             return subtitleLinkColor
         case .url where !isUrlWithTitle:
             return subtitleLinkColor
-        case .note, .createNote:
+        case .note:
+            return cardColor
+        case .createNote where item.information != nil:
             return cardColor
         default:
             return defaultTextColor
@@ -63,7 +67,7 @@ struct AutocompleteItemView: View {
         case .history, .url:
             return subtitleLinkColor
         case .createNote:
-            return defaultTextColor
+            return BeamColor.Generic.text.swiftUI
         default:
             return colorPalette.informationTextColor.swiftUI
         }
@@ -96,20 +100,17 @@ struct AutocompleteItemView: View {
     }
 
     var mainText: String {
-        switch item.source {
-        case .createNote:
-            return secondaryText?.isEmpty == false ? loc("New Note:") : loc("New Note")
-        default:
-            return item.displayText
-        }
+        item.displayText
     }
 
     var secondaryText: String? {
         guard displaySubtitle else { return nil }
         switch item.source {
         case .createNote:
-            let displayText = item.displayText
-            return displayText.isEmpty ? nil : " " + displayText
+            if let info = item.information {
+                return " " + info
+            }
+            return nil
         default:
             if let info = item.displayInformation {
                 return " - " + info
@@ -134,6 +135,14 @@ struct AutocompleteItemView: View {
         return selected
     }
 
+    private var axIdentifier: String {
+        var importantText = mainText
+        if item.source == .createNote, let info = item.information {
+            importantText = info
+        }
+        return "autocompleteResult\(selected ? "-selected":"")-\(importantText)-\(item.source)"
+    }
+
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
             if displayIcon {
@@ -150,16 +159,16 @@ struct AutocompleteItemView: View {
             HStack(alignment: .firstTextBaseline, spacing: 0) {
                 ZStack {
                     StyledText(verbatim: mainText)
-                        .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges())
-                        .font(BeamFont.regular(size: 14).swiftUI)
+                        .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges())
+                        .font(BeamFont.regular(size: fontSize).swiftUI)
                         .foregroundColor(mainTextColor)
                 }
                 .layoutPriority(10)
                 if let info = secondaryText {
                     HStack {
                         StyledText(verbatim: info)
-                            .style(.font(BeamFont.semibold(size: 14).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
-                            .font(BeamFont.regular(size: 14).swiftUI)
+                            .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
+                            .font(BeamFont.regular(size: fontSize).swiftUI)
                             .foregroundColor(informationColor)
                     }
                     .layoutPriority(0)
@@ -168,7 +177,7 @@ struct AutocompleteItemView: View {
                 if PreferencesManager.showOmniboxScoreSection {
                     Spacer()
                     Text(debugString(score: item.weightedScore))
-                        .font(BeamFont.regular(size: 14).swiftUI)
+                        .font(BeamFont.regular(size: fontSize).swiftUI)
                         .foregroundColor(BeamColor.CharmedGreen.swiftUI)
                         .layoutPriority(10)
                 }
@@ -186,7 +195,7 @@ struct AutocompleteItemView: View {
         .padding(.vertical, BeamSpacing._100)
         .padding(.horizontal, BeamSpacing._120)
         .padding(.leading, additionalLeadingPadding)
-        .frame(height: Self.defaultHeight)
+        .frame(height: height)
         .background(backgroundColor.blendModeLightMultiplyDarkScreen())
         .cornerRadius(cornerRadius)
         .onTouchDown { t in
@@ -206,7 +215,7 @@ struct AutocompleteItemView: View {
         }
         .accessibilityElement()
         .accessibilityLabel(item.displayText)
-        .accessibility(identifier: "autocompleteResult\(selected ? "-selected":"")-\(item.displayText)-\(item.source)")
+        .accessibility(identifier: axIdentifier)
     }
 
     private func debugString(score: Float?) -> String {
@@ -233,7 +242,7 @@ extension AutocompleteItemView {
 
 struct AutocompleteItem_Previews: PreviewProvider {
     static let items = [
-        AutocompleteResult(text: "James Dean", source: .createNote, information: "New Note"),
+        AutocompleteResult(text: "New Note:", source: .createNote, information: "James Dean"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .searchEngine, information: "Google Search"),
         AutocompleteResult(text: "jamesdean.com", source: .url, urlFields: .text),

@@ -102,7 +102,7 @@ class ClusteringManager: ObservableObject {
         self.summary = SummaryForNewDay()
         if let summaryString = Persistence.ContinueTo.summary,
            let jsonData = summaryString.data(using: .utf8),
-           let unwrappedSummary = try? JSONDecoder().decode(SummaryForNewDay.self, from: jsonData) {
+           let unwrappedSummary = try? BeamJSONDecoder().decode(SummaryForNewDay.self, from: jsonData) {
             self.summary = unwrappedSummary
         }
         if let notesWithActivity = summary.notes {
@@ -497,13 +497,13 @@ class ClusteringManager: ObservableObject {
             let notesInGroup = self.clusteredNotesId[group.offset]
             for noteId in notesInGroup {
                 let informationForId = self.cluster.getExportInformationForId(id: noteId)
-                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, userCorrectionGroup: nil))
+                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, userCorrectionGroup: nil, id: nil, parentId: nil))
             }
             for urlId in group.element {
                 let url = LinkStore.linkFor(urlId)?.url
                 let informationForId = self.cluster.getExportInformationForId(id: urlId)
                 let isOpenAtExport = self.allOpenPages?.map { $0.pageId }.contains(urlId)
-                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, userCorrectionGroup: nil))
+                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, userCorrectionGroup: nil, id: urlId, parentId: informationForId.parentId))
                 //TODO: Add userCorrectionGroup when UI is ready
             }
         }

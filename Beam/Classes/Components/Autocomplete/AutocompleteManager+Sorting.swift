@@ -39,6 +39,7 @@ extension AutocompleteManager {
                                        topDomainResults: autocompleteResults[.topDomain] ?? [],
                                        mnemonicResults: autocompleteResults[.mnemonic] ?? [],
                                        searchEngineResults: autocompleteResults[.searchEngine] ?? [],
+                                       expectSearchEngineResultsLater: mode == .general && !searchText.isEmpty,
                                        actionsResults: autocompleteResults[.action] ?? [],
                                        createCardResults: autocompleteResults[.createNote] ?? [])
 
@@ -53,6 +54,7 @@ extension AutocompleteManager {
                              topDomainResults: [AutocompleteResult],
                              mnemonicResults: [AutocompleteResult],
                              searchEngineResults: [AutocompleteResult],
+                             expectSearchEngineResultsLater: Bool,
                              actionsResults: [AutocompleteResult],
                              createCardResults: [AutocompleteResult]) -> [AutocompleteResult] {
         let start = DispatchTime.now()
@@ -81,7 +83,8 @@ extension AutocompleteManager {
                             searchEngineResults: filteredSearchEngineResults,
                             actionsResults: actionsResults,
                             createCardResults: createCardResults,
-                            limit: Self.resultsLimit)
+                            limit: Self.resultsLimit,
+                            expectSearchEngineResultsLater: expectSearchEngineResultsLater)
         return results
     }
 
@@ -102,16 +105,24 @@ extension AutocompleteManager {
                        searchEngineResults: [AutocompleteResult],
                        actionsResults: [AutocompleteResult],
                        createCardResults: [AutocompleteResult],
-                       limit: Int) -> [AutocompleteResult] {
-        // leave space for at least 2 search engine result and 1 create card
+                       limit: Int,
+                       expectSearchEngineResultsLater: Bool) -> [AutocompleteResult] {
         let hasCreateCard = !createCardResults.isEmpty
-        let searchEngineSpace = searchEngineResults.count > 0 ? min(2, searchEngineResults.count) : 2
-        let truncateLength = limit - searchEngineSpace - (hasCreateCard ? 1 : 0)
+        var searchEngineSpace: Int = 0
+        // leave space for at least 2 search engine result, even if they arrive later.
+        if !searchEngineResults.isEmpty || expectSearchEngineResultsLater {
+            searchEngineSpace = searchEngineResults.count > 0 ? min(2, searchEngineResults.count) : 2
+        }
+        let truncateLength = limit - searchEngineSpace - (hasCreateCard ? 1 : 0) - actionsResults.count
         var results = Array(sortableResults.prefix(truncateLength))
-        let searchEngineMax = limit - results.count - (hasCreateCard ? 1 : 0)
+        let searchEngineMax = truncateLength - results.count + searchEngineSpace
         results.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: sortableResults.isEmpty ? 0 : 1)
         results.append(contentsOf: actionsResults)
-        results.append(contentsOf: createCardResults)
+        if mode == .noteCreation {
+            results.insert(contentsOf: createCardResults, at: 0)
+        } else {
+            results.append(contentsOf: createCardResults)
+        }
         return results
     }
 
