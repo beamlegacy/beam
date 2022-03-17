@@ -64,7 +64,7 @@ extension PreferencesManager {
 
     static let editorFontSizeDefault: CGFloat = 14
     static let editorCardTitleFontSizeDefault: CGFloat = 30
-    static let journalCardTitleFontSizeDefault: CGFloat = 17
+    static let journalCardTitleFontSizeDefault: CGFloat = 20
     static let editorFontSizeHeadingOneDefault: CGFloat = 20
     static let editorFontSizeHeadingTwoDefault: CGFloat = 17
 }

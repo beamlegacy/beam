@@ -68,7 +68,7 @@ struct WindowBottomToolBar: View {
                     let clipView = scrollView.contentView
                     let height = clipView.bounds.height
                     var p = clipView.bounds.origin
-                    p.y += height / 4
+                    p.y = ModeView.omniboxEndFadeOffsetFor(height: height)
 
                     let animationDuration = 0.3
                     NSAnimationContext.beginGrouping()
@@ -77,6 +77,7 @@ struct WindowBottomToolBar: View {
                     scrollView.reflectScrolledClipView(clipView)
                     NSAnimationContext.endGrouping()
                 }
+                .cursorOverride(.arrow)
                 Spacer(minLength: 20)
             }
             .padding(.vertical, BeamSpacing._70)
