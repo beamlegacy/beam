@@ -167,7 +167,7 @@ class RestAPIServer {
 
         private func errorMessage(from data: Data?) -> String? {
             guard let data = data else { return nil }
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             let error = try? decoder.decode(RestAPIServer.ErrorMessage.self, from: data)
             return error?.message
         }
@@ -196,7 +196,7 @@ class RestAPIServer {
                     return
                 }
 
-                let jsonDecoder = JSONDecoder()
+                let jsonDecoder = BeamJSONDecoder()
                 guard let data = data else {
                     completion(.failure(RestAPIServer.Error.noDataReceived))
                     return

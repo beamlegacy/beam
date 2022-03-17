@@ -31,12 +31,8 @@ class PnSTestView: BaseView {
         }
     }
     
-    func addToCardByName(_ elementToAdd: XCUIElement, _ cardName: String, _ noteText: String = "", _ isNewCard: Bool = false) {
+    func addToCardByName(_ elementToAdd: XCUIElement, _ cardName: String, _ isNewCard: Bool = false) {
         triggerAddToCardPopup(elementToAdd)
-        
-        if noteText != "" {
-            textField(PnSViewLocators.TextFields.addComment.accessibilityIdentifier).clickAndType(noteText)
-        }
         
         let destinationCard = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
         destinationCard.clickOnExistence()
@@ -49,9 +45,6 @@ class PnSTestView: BaseView {
         let cardsDropDown = otherElement(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier)
         XCTAssertTrue(cardsDropDown.waitForExistence(timeout: implicitWaitTimeout), "PnS Note picker drop down didn't appear")
         app.windows.children(matching: .other).matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
-        destinationCard.tapInTheMiddle()
-        XCTAssertTrue(WaitHelper().waitForDoesntExist(cardsDropDown), "PnS Note picker drop down remains opened")
-        typeKeyboardKey(.enter)
     }
     
     func addToTodayCard(_ elementToAdd: XCUIElement) {

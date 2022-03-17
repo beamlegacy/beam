@@ -24,35 +24,47 @@ class OmniboxViewTests: BaseTest {
     func testOmniBoxSearchField() {
         let textInput = "Hello World"
         let textEmpty = ""
-        launchApp()
-        
+
         let omniboxView = OmniBoxTestView()
         let omniboxSearchField = omniboxView.getOmniBoxSearchField()
         
-        testRailPrint("Then Omnibox search field is focused on launched")
-        XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
+        step("Given I launch the app") {
+            launchApp()
+        }
+
+        step("Then Omnibox search field is focused on launched") {
+            XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
+        }
         
-        testRailPrint("When I type in Omnibox search field: \(textInput)")
-        omniboxSearchField.typeText(textInput)
+        step("When I type in Omnibox search field: \(textInput)") {
+            omniboxSearchField.typeText(textInput)
+        }
         
-        testRailPrint("Then \(textInput) is correctly displayed in Omnibox search field")
-        XCTAssertEqual(omniboxSearchField.value as? String, textInput)
+        step("Then \(textInput) is correctly displayed in Omnibox search field") {
+            XCTAssertEqual(omniboxSearchField.value as? String, textInput)
+        }
         
-        testRailPrint("When I delete: \(textInput)")
-        omniboxView.typeKeyboardKey(.delete, 2)
+        step("When I delete: \(textInput)") {
+            omniboxView.typeKeyboardKey(.delete, 2)
+        }
+        
         let startIndex = textInput.index(textInput.startIndex, offsetBy: 0)
         let endIndex = textInput.index(textInput.endIndex, offsetBy: -3)
         let partiallyDeletedSearchText = String(textInput[startIndex...endIndex])
+
+        step("Then \(textInput) is correctly displayed in Omnibox search field") {
+            XCTAssertEqual(omniboxSearchField.value as? String, partiallyDeletedSearchText)
+        }
         
-        testRailPrint("Then \(textInput) is correctly displayed in Omnibox search field")
-        XCTAssertEqual(omniboxSearchField.value as? String, partiallyDeletedSearchText)
+        step("When I delete all input: \(partiallyDeletedSearchText)") {
+            ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+            omniboxView.typeKeyboardKey(.delete)
+        }
         
-        testRailPrint("When I delete all input: \(partiallyDeletedSearchText)")
-        ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
-        omniboxView.typeKeyboardKey(.delete)
+        step("Then Omnibox search field is empty") {
+            XCTAssertEqual(omniboxSearchField.value as? String, textEmpty)
+        }
         
-        testRailPrint("Then Omnibox search field is empty")
-        XCTAssertEqual(omniboxSearchField.value as? String, textEmpty)
     }
     
     func testOmniboxPivotButtonClicking() {
@@ -108,9 +120,10 @@ class OmniboxViewTests: BaseTest {
         journalView.openAllCardsMenu()
         omniboxView.focusOmniBoxSearchField()
         testRailPrint("Then suggestions contains the correct actions")
-        XCTAssertEqual(results.count, 4)
+        XCTAssertEqual(results.count, 5)
         XCTAssertEqual(results.element(boundBy: 2).label, noteATitle) // Note A is last
         XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
         XCTAssertEqual(noteResults.count, 3)
 
         // In a note
@@ -119,12 +132,13 @@ class OmniboxViewTests: BaseTest {
         journalView.openRecentCardByName(noteBTitle)
         omniboxView.focusOmniBoxSearchField()
         testRailPrint("Then suggestions contains the correct actions")
-        XCTAssertEqual(results.count, 5)
+        XCTAssertEqual(results.count, 6)
         XCTAssertEqual(results.element(boundBy: 0).label, noteATitle) // Note A moved up in the list of recents
         XCTAssertNotEqual(results.element(boundBy: 1).label, noteBTitle) // Note B is not suggested because we're already on it.
         XCTAssertNotEqual(results.element(boundBy: 2).label, noteBTitle) // Note B is not suggested because we're already on it.
         XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
         XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 5).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
         XCTAssertEqual(noteResults.count, 3)
         journalView.openRecentCardByName(noteATitle)
 
@@ -133,11 +147,12 @@ class OmniboxViewTests: BaseTest {
         helper.openTestPage(page: .page1)
         omniboxView.focusOmniBoxSearchField()
         testRailPrint("Then suggestions contains the correct actions")
-        XCTAssertEqual(results.count, 6)
+        XCTAssertEqual(results.count, 7)
         XCTAssertEqual(results.element(boundBy: 0).label, noteATitle)
         XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
         XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
         XCTAssertEqual(results.element(boundBy: 5).label, OmniboxLocators.Labels.switchToNotes.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 6).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
         XCTAssertEqual(noteResults.count, 3)
 
         // In Web tab focus
@@ -152,11 +167,8 @@ class OmniboxViewTests: BaseTest {
         helper.showJournal()
         omniboxView.focusOmniBoxSearchField()
         testRailPrint("Then suggestions contains the correct actions")
-        XCTAssertEqual(results.count, 5)
-        XCTAssertEqual(results.element(boundBy: 0).label, noteATitle)
-        XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
-        XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.switchToWeb.accessibilityIdentifier)
-        XCTAssertEqual(noteResults.count, 3)
+        XCTAssertEqual(results.count, 0)
+        XCTAssertEqual(noteResults.count, 0)
     }
     
     func testOmniboxTextSelectionAndEditing() throws {
@@ -219,6 +231,49 @@ class OmniboxViewTests: BaseTest {
         XCTAssertTrue(webView.waitForTabUrlAtIndexToEqual(index: 0, expectedString: replacedSourceToSearchInTab), "Timeout waiting \(webView.getTabUrlAtIndex(index: 0)) to equal \(replacedSourceToSearchInTab)")
     }
     
-    
+    func testOmniboxCreateNoteMode() {
+        let omniboxView = OmniBoxTestView()
+        let journalView = launchApp()
+        let omniboxHelper = OmniBoxUITestsHelper(OmniBoxTestView().app)
+
+        testRailPrint("Given I have at least 1 note")
+        let noteATitle = "Note A"
+        journalView.createCardViaOmniboxSearch(noteATitle)
+
+        let results = omniboxView.getAutocompleteResults()
+        testRailPrint("When I open omnibox")
+        omniboxView.focusOmniBoxSearchField()
+        testRailPrint("Then suggestions contains the correct note and actions")
+        let defaultSuggestionsCount = results.count
+        XCTAssertGreaterThan(defaultSuggestionsCount, 0)
+        XCTAssertEqual(results.element(boundBy: results.count - 1).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
+
+        testRailPrint("When I enter create note mode")
+        omniboxView.enterCreateCardMode()
+        testRailPrint("Then no suggestion is shown")
+        XCTAssertEqual(results.count, 0)
+
+        testRailPrint("When I press escape")
+        omniboxView.typeKeyboardKey(.escape)
+        testRailPrint("Then I leave create note mode")
+        XCTAssertEqual(results.count, defaultSuggestionsCount)
+
+        let secondNoteTitle = "Not"
+        testRailPrint("When I enter create note mode and type a new note name")
+        omniboxView.enterCreateCardMode()
+        omniboxView.typeInOmnibox(secondNoteTitle)
+        testRailPrint("Then create action is selected and notes are suggested")
+        XCTAssertEqual(results.count, 2)
+        XCTAssertEqual(results.element(boundBy: 0).label, OmniboxLocators.Labels.createNotePrefix.accessibilityIdentifier)
+        XCTAssertEqual(results.element(boundBy: 1).label, noteATitle)
+        XCTAssertEqual(results.matching(omniboxHelper.autocompleteCreateCardPredicate).count, 1)
+
+        testRailPrint("When I press enter")
+        omniboxView.typeKeyboardKey(.enter)
+        testRailPrint("Then the note is created")
+        let cardView = CardTestView()
+        XCTAssertTrue(cardView.waitForCardViewToLoad())
+        XCTAssertTrue(cardView.textField(secondNoteTitle).waitForExistence(timeout: implicitWaitTimeout))
+    }
     
 }

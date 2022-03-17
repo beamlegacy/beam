@@ -375,7 +375,7 @@ struct GRDBDatabase {
 
         migrator.registerMigration("flattenBrowsingTrees") { db in
             let rows = try Row.fetchAll(db, sql: "SELECT rootId, data from BrowsingTreeRecord")
-            let decoder = JSONDecoder()
+            let decoder = BeamJSONDecoder()
             let encoder = JSONEncoder()
             let now = BeamDate.now
             for row in rows {

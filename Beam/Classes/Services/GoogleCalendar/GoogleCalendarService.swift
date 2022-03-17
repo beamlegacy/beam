@@ -61,7 +61,7 @@ class GoogleCalendarService {
                     completionHandler(.failure(CalendarError.responseDataIsEmpty))
                     return
                 }
-                guard let response = try? JSONDecoder().decode(GoogleAccount.self, from: data) else {
+                guard let response = try? BeamJSONDecoder().decode(GoogleAccount.self, from: data) else {
                     completionHandler(.failure(CalendarError.cantDecode))
                     return
                 }
@@ -81,7 +81,7 @@ class GoogleCalendarService {
                     completionHandler(.failure(CalendarError.responseDataIsEmpty))
                     return
                 }
-                let decoder = JSONDecoder()
+                let decoder = BeamJSONDecoder()
                 guard let calendarList = try? decoder.decode(GoogleCalendarList.self, from: responseData) else {
                     completionHandler(.failure(CalendarError.cantDecode))
                     return
@@ -116,7 +116,7 @@ class GoogleCalendarService {
                     completionHandler(.failure(CalendarError.responseDataIsEmpty))
                     return
                 }
-                let decoder = JSONDecoder()
+                let decoder = BeamJSONDecoder()
                 guard let calendar = try? decoder.decode(GoogleCalendar.self, from: responseData) else {
                     completionHandler(.failure(CalendarError.cantDecode))
                     return
@@ -151,7 +151,7 @@ class GoogleCalendarService {
                     completionHandler(.failure(CalendarError.responseDataIsEmpty))
                     return
                 }
-                let decoder = JSONDecoder()
+                let decoder = BeamJSONDecoder()
                 guard let eventList = try? decoder.decode(GoogleEventList.self, from: responseData) else {
                     completionHandler(.failure(CalendarError.cantDecode))
                     return

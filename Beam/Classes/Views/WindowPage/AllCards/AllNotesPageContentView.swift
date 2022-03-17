@@ -1,5 +1,5 @@
 //
-//  AllCardsPageContentView.swift
+//  AllNotesPageContentView.swift
 //  Beam
 //
 //  Created by Remi Santos on 30/03/2021.
@@ -9,149 +9,7 @@ import SwiftUI
 import BeamCore
 import Combine
 
-class AllCardsViewModel: ObservableObject, Identifiable {
-    fileprivate var data: BeamData?
-    @Published fileprivate var allNotes = [DocumentStruct]() {
-        didSet {
-            updateNoteItemsFromAllNotes()
-        }
-    }
-    @Published fileprivate var username: String?
-    @Published fileprivate var isAuthenticated: Bool = false
-    private var signinScope = Set<AnyCancellable>()
-
-    @Published fileprivate var allNotesItems = [NoteTableViewItem]()
-    @Published fileprivate var privateNotesItems = [NoteTableViewItem]()
-    @Published fileprivate var publicNotesItems = [NoteTableViewItem]()
-    @Published fileprivate var shouldReloadData: Bool? = false
-
-    private var coreDataObservers = Set<AnyCancellable>()
-    private var metadataFetchers = Set<AnyCancellable>()
-    private var notesCancellables = Set<AnyCancellable>()
-    private var notesMetadataCache: NoteListMetadataCache {
-        NoteListMetadataCache.shared
-    }
-
-    init() {
-        CoreDataContextObserver.shared
-            .publisher(for: .anyDocumentChange)
-            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.refreshAllNotes()
-            }
-            .store(in: &coreDataObservers)
-        NotificationCenter.default
-            .publisher(for: .defaultDatabaseUpdate, object: nil)
-            .sink { [weak self] _ in
-                self?.refreshAllNotes()
-            }
-            .store(in: &notesCancellables)
-
-        username = AuthenticationManager.shared.username
-        isAuthenticated = AuthenticationManager.shared.isAuthenticated
-        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
-            self?.isAuthenticated = isAuthenticated
-            self?.username = AuthenticationManager.shared.username
-        }.store(in: &signinScope)
-    }
-
-    fileprivate func refreshAllNotes() {
-        allNotes = DocumentManager().loadAll()
-    }
-
-    /// We're hiding empty journal notes; except for today's
-    private func noteShouldBeDisplayed(_ doc: DocumentStruct) -> Bool {
-        doc.documentType != .journal || !doc.isEmpty || doc.journalDate == BeamNoteType.todaysJournal.journalDateString
-    }
-
-    private func updateNoteItemsFromAllNotes() {
-        allNotesItems = allNotes.compactMap { doc in
-            guard noteShouldBeDisplayed(doc) else { return nil }
-            let note = BeamNote.getFetchedNote(doc.id)
-            let item = NoteTableViewItem(document: doc, note: note)
-            if let metadata = notesMetadataCache.metadata(for: item.id) {
-                item.mentions = metadata.mentions
-                if item.words < 0 {
-                    item.words = metadata.wordsCount
-                }
-            }
-            return item
-        }
-        updatePublicPrivateLists()
-        asyncComputeNotesMetadata(notesItems: allNotesItems)
-    }
-
-    private func updatePublicPrivateLists() {
-        publicNotesItems = allNotesItems.filter({ $0.isPublic })
-        privateNotesItems = allNotesItems.filter({ !$0.isPublic })
-    }
-
-    private func updateMetadatasForItems(with fetchedNotes: [UUID: BeamNote]) {
-        var shouldReload = false
-        allNotesItems = allNotesItems.map { item in
-            if let metadata = notesMetadataCache.metadata(for: item.id), let note = fetchedNotes[item.id] {
-                item.mentions = metadata.mentions
-                item.words = metadata.wordsCount
-                item.note = note
-                shouldReload = true
-            }
-            return item
-        }
-        updatePublicPrivateLists()
-        shouldReloadData = shouldReload
-    }
-
-    private func asyncComputeNotesMetadata(notesItems: [NoteTableViewItem]) {
-        metadataFetchers.removeAll()
-        fetchAllNotesMetadata(for: notesItems)
-            .receive(on: DispatchQueue.main)
-            .sink { fetchedNotes in
-                self.updateMetadatasForItems(with: fetchedNotes)
-            }
-            .store(in: &metadataFetchers)
-    }
-
-    private func fetchAllNotesMetadata(for notesItems: [NoteTableViewItem]) -> AnyPublisher<[UUID: BeamNote], Never> {
-        Future { promise in
-            var metadatas = [UUID: NoteListMetadata]()
-            var fetchedNotes = [UUID: BeamNote]()
-            DispatchQueue.global(qos: .userInteractive).async {
-                notesItems.forEach { item in
-                    guard item.note == nil || item.mentions < 0 else { return }
-                    guard let note = item.note ?? item.getNote() else { return }
-                    let mentions = note.mentionsCount
-                    let metadata = NoteListMetadata(mentions: mentions, wordsCount: note.textStats.wordsCount)
-                    metadatas[item.id] = metadata
-                    fetchedNotes[item.id] = note
-                }
-                DispatchQueue.main.async {
-                    metadatas.forEach { key, value in
-                        NoteListMetadataCache.shared.saveMetadata(value, for: key)
-                    }
-                    promise(.success(fetchedNotes))
-                }
-            }
-        }.eraseToAnyPublisher()
-    }
-
-    fileprivate func showConnectWindow() {
-        let onboardingManager = data?.onboardingManager
-        onboardingManager?.prepareForConnectOnly()
-        onboardingManager?.presentOnboardingWindow()
-    }
-}
-
-extension AllCardsViewModel: AllCardsContextualMenuDelegate {
-    func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool) {
-        if all {
-            allNotes.removeAll()
-        } else {
-            allNotes.removeAll { ids.contains($0.id) }
-        }
-    }
-}
-
-struct AllCardsPageContentView: View {
+struct AllNotesPageContentView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
     @Environment(\.undoManager) var undoManager
@@ -167,11 +25,10 @@ struct AllCardsPageContentView: View {
         }
     }
 
-    @ObservedObject private var model = AllCardsViewModel()
+    @StateObject private var model = AllNotesPageViewModel()
     @State private var selectedRowsIndexes = IndexSet()
     @State private var hoveredRowIndex: Int?
     @State private var hoveredRowFrame: NSRect?
-    @State private var publishingNote = false
 
     private static var dateFormatter: DateFormatter = {
         let fmt = DateFormatter()
@@ -191,27 +48,27 @@ struct AllCardsPageContentView: View {
     private var columns = [
         TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
-        TableViewColumn(key: "title", title: "Title", editable: true, isLink: true,
+        TableViewColumn(key: "title", title: loc("Title"), editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
-        TableViewColumn(key: "words", title: "Words", width: 70, font: secondaryCellFont,
+        TableViewColumn(key: "words", title: loc("Words"), width: 70, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "mentions", title: "Mentions", width: 80, font: secondaryCellFont,
+        TableViewColumn(key: "mentions", title: loc("Links"), width: 80, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "createdAt", title: "Created", font: secondaryCellFont,
+        TableViewColumn(key: "createdAt", title: loc("Created"), font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
-                return AllCardsPageContentView.dateFormatter.string(from: date)
+                return AllNotesPageContentView.dateFormatter.string(from: date)
             }
             return ""
         }),
-        TableViewColumn(key: "updatedAt", title: "Updated", isInitialSortDescriptor: true, font: secondaryCellFont,
+        TableViewColumn(key: "updatedAt", title: loc("Updated"), isInitialSortDescriptor: true, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
-                return AllCardsPageContentView.dateFormatter.string(from: date)
+                return AllNotesPageContentView.dateFormatter.string(from: date)
             }
             return ""
         })
@@ -250,6 +107,13 @@ struct AllCardsPageContentView: View {
         return username
     }
 
+    private var creationRowPlaceholder: String {
+        if let publishingNoteTitle = model.publishingNoteTitle {
+            return loc("Publishing '\(publishingNoteTitle)'...")
+        }
+        return listType == .publicNotes ? loc("New Published Note") : loc("New Private Note")
+    }
+
     var body: some View {
         VStack(spacing: 20) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
@@ -267,7 +131,7 @@ struct AllCardsPageContentView: View {
                 if model.isAuthenticated {
                     cardsFilters
                 } else {
-                    ButtonLabel("Connect to Beam to publish your notes") {
+                    ButtonLabel(loc("Connect to Beam to publish your notes")) {
                         model.showConnectWindow()
                     }
                 }
@@ -276,7 +140,7 @@ struct AllCardsPageContentView: View {
             .padding(.top, 85)
             .padding(.trailing, 20)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: listType == .publicNotes ? "New Published Note" : "New Private Note",
+                      creationRowTitle: creationRowPlaceholder, isCreationRowLoading: model.publishingNoteTitle != nil,
                       shouldReloadData: $model.shouldReloadData) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
@@ -308,7 +172,7 @@ struct AllCardsPageContentView: View {
                     .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                 }
             )
-            .disabled(publishingNote)
+            .disabled(model.publishingNoteTitle != nil)
             .frame(maxHeight: .infinity)
             .background(Color.clear
                     .onHover { hovering in
@@ -357,7 +221,7 @@ struct AllCardsPageContentView: View {
             selectedNotes = notes.enumerated().filter { i, _ in selectedRowsIndexes.contains(i) }.compactMap({ _, item -> BeamNote? in item.getNote()
             })
         }
-        let handler = AllCardsContextualMenu(selectedNotes: selectedNotes, onFinish: { shouldReload in
+        let handler = AllNotesPageContextualMenu(selectedNotes: selectedNotes, onFinish: { shouldReload in
             if shouldReload {
                 model.refreshAllNotes()
             }
@@ -377,19 +241,20 @@ struct AllCardsPageContentView: View {
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic {
-                publishingNote = true
+                model.publishingNoteTitle = newNote.title
                 BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true) { result in
                     DispatchQueue.main.async {
+                        model.publishingNoteTitle = nil
                         switch result {
                         case .failure(let e):
                             UserAlert.showError(message: loc("Could not publish note. Try again from the note view."), error: e)
                             // Saving the private note at least and showing it to user.
+                            newNote.publicationStatus = .unpublished
                             newNote.save()
                             listType = .privateNotes
                         case .success:
                             model.refreshAllNotes()
                         }
-                        publishingNote = false
                     }
                 }
             } else {
@@ -406,10 +271,10 @@ struct AllCardsPageContentView: View {
     }
 }
 
-struct AllCardsPageContentView_Previews: PreviewProvider {
+struct AllNotesPageContentView_Previews: PreviewProvider {
     static let state = BeamState()
     static var previews: some View {
-        AllCardsPageContentView()
+        AllNotesPageContentView()
             .environmentObject(state)
             .environmentObject(state.data)
             .background(BeamColor.Generic.background.swiftUI)
@@ -424,43 +289,7 @@ private enum ColumnIdentifiers {
     static let CreatedColumn = NSUserInterfaceItemIdentifier("createdAt")
     static let UpdatedColumn = NSUserInterfaceItemIdentifier("updatedAt")
 }
+
 private enum CellIdentifiers {
     static let DefaultCell = NSUserInterfaceItemIdentifier("DefaultCellID")
-}
-
-@objcMembers
-private class NoteTableViewItem: TableViewItem {
-    var id: UUID { note?.id ?? document.id }
-    var isPublic: Bool { note?.publicationStatus.isPublic ?? document.isPublic }
-    var note: BeamNote? {
-        didSet {
-            words = note?.textStats.wordsCount ?? words
-        }
-    }
-    private var document: DocumentStruct
-
-    var title: String
-    var createdAt: Date = BeamDate.now
-    var updatedAt: Date = BeamDate.now
-    var words: Int = -1
-    var mentions: Int = -1
-
-    init(document: DocumentStruct, note: BeamNote?) {
-        self.note = note
-        self.document = document
-        title = note?.title ?? document.title
-        createdAt = document.createdAt
-        updatedAt = document.updatedAt
-        words = note?.textStats.wordsCount ?? -1
-    }
-
-    func getNote() -> BeamNote? {
-        note ?? BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: false)
-    }
-
-    override func isEqual(_ object: Any?) -> Bool {
-        guard let otherNote = object as? NoteTableViewItem else { return false }
-        return note?.id == otherNote.note?.id
-    }
-    // swiftlint:disable:next file_length
 }

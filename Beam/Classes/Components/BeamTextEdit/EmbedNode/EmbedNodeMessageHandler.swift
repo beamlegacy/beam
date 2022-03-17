@@ -15,7 +15,7 @@ enum EmbedNodeMessages: String, CaseIterable {
 /**
  Handles logging messages sent from web page's javascript.
  */
-class EmbedNodeMessageHandler:SimpleBeamMessageHandler {
+class EmbedNodeMessageHandler: SimpleBeamMessageHandler {
 
     init() {
         let messages = EmbedNodeMessages.self.allCases.map { $0.rawValue }

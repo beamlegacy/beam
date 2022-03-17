@@ -1,5 +1,5 @@
 //
-//  AllCardsContextualMenu.swift
+//  AllNotesPageContextualMenu.swift
 //  Beam
 //
 //  Created by Remi Santos on 08/04/2021.
@@ -9,11 +9,11 @@ import Foundation
 import BeamCore
 import Promises
 
-protocol AllCardsContextualMenuDelegate: AnyObject {
+protocol AllNotesPageContextualMenuDelegate: AnyObject {
     func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool)
 }
 
-class AllCardsContextualMenu {
+class AllNotesPageContextualMenu {
 
     private let selectedNotes: [BeamNote]
     private let onLoadBlock: ((_ isLoading: Bool) -> Void)?
@@ -21,7 +21,7 @@ class AllCardsContextualMenu {
     private let cmdManager = CommandManagerAsync<DocumentManager>()
 
     var undoManager: UndoManager?
-    weak var delegate: AllCardsContextualMenuDelegate?
+    weak var delegate: AllNotesPageContextualMenuDelegate?
 
     init(selectedNotes: [BeamNote], onLoad: ((_ isLoading: Bool) -> Void)? = nil, onFinish: ((_ needReload: Bool) -> Void)? = nil) {
         self.selectedNotes = selectedNotes

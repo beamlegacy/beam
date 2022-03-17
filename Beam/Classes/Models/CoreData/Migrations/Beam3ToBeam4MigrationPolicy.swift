@@ -4,7 +4,7 @@ import BeamCore
 
 class Beam3ToBeam4MigrationPolicy: NSEntityMigrationPolicy {
     @objc func addJournalDate(forData: Data) -> String? {
-        let decoder = JSONDecoder()
+        let decoder = BeamJSONDecoder()
         decoder.userInfo[BeamElement.recursiveCoding] = false
         guard let note = try? decoder.decode(BeamNote.self, from: forData) else { return nil }
 

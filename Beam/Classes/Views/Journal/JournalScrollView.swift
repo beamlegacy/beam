@@ -21,6 +21,7 @@ struct JournalScrollView: NSViewRepresentable {
     var topInset: CGFloat = 0
     let proxy: GeometryProxy
     let onScroll: ((CGPoint) -> Void)?
+    let onEndLiveScroll: ((CGPoint) -> Void)?
 
     @State private var isEditing = false
     @EnvironmentObject var state: BeamState
@@ -95,6 +96,7 @@ struct JournalScrollView: NSViewRepresentable {
         if state.data.newDay {
             state.data.reloadJournal()
         }
+        journalStackView.topOffset = Self.firstNoteTopOffset(forProxy: proxy)
         journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
     }
@@ -121,13 +123,14 @@ struct JournalScrollView: NSViewRepresentable {
         func watchScrollViewBounds(_ scrollView: NSScrollView) {
             scrollViewContentWatcher = ScrollViewContentWatcher(state: parent.state, scrollView: scrollView, data: data)
             scrollViewContentWatcher?.onScroll = parent.onScroll
+            scrollViewContentWatcher?.onEndLiveScroll = parent.onEndLiveScroll
         }
     }
 }
 
 extension JournalScrollView {
     static func firstNoteTopOffset(forProxy proxy: GeometryProxy) -> CGFloat {
-        return (proxy.size.height * 0.2).rounded()
+        return (proxy.size.height * 0.45).rounded()
     }
 }
 
@@ -135,6 +138,7 @@ class ScrollViewContentWatcher: NSObject {
     private var bounds: NSRect = .zero
     private let data: BeamData
     var onScroll: ((CGPoint) -> Void)?
+    var onEndLiveScroll: ((CGPoint) -> Void)?
     weak var contentView: NSClipView?
     weak var state: BeamState?
 
@@ -149,6 +153,10 @@ class ScrollViewContentWatcher: NSObject {
                                                selector: #selector(contentOffsetDidChange(notification:)),
                                                name: NSView.boundsDidChangeNotification,
                                                object: contentView)
+        NotificationCenter.default.addObserver(self,
+                                               selector: #selector(didEndLiveScroll(notification:)),
+                                               name: NSScrollView.didEndLiveScrollNotification,
+                                               object: scrollView)
     }
 
     let spaceBeforeLoadingMoreData = CGFloat(2.0)
@@ -171,6 +179,11 @@ class ScrollViewContentWatcher: NSObject {
         }
         onScroll?(clipView.bounds.origin)
         state?.lastScrollOffset[UUID.null] = clipView.bounds.origin.y
+    }
+
+    @objc private func didEndLiveScroll(notification: Notification) {
+        guard let scrollView = notification.object as? NSScrollView else { return }
+        onEndLiveScroll?(scrollView.contentView.bounds.origin)
     }
 
     private func loadMore() {
