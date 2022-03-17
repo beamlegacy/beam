@@ -104,7 +104,10 @@ public class ImportsManager: NSObject, ObservableObject {
                     self?.cancellableScope.removeValue(forKey: id)
                 }, receiveValue: { record in
                     if let hostname = record.item.url.minimizedHost, let password = String(data: record.item.password, encoding: .utf8) {
-                        PasswordManager.shared.save(hostname: hostname, username: record.item.username, password: password)
+                        Logger.shared.logDebug("[\(record.itemCount)] Saving password for \(record.item.username) at \(record.item.url)", category: .browserImport)
+                        if PasswordManager.shared.save(hostname: hostname, username: record.item.username, password: password) == nil {
+                            Logger.shared.logError("Failed to save password for \(record.item.username) at \(record.item.url)", category: .browserImport)
+                        }
                     } else {
                         Logger.shared.logError("Password could not be imported for \(record.item.username) at \(record.item.url)", category: .browserImport)
                     }
