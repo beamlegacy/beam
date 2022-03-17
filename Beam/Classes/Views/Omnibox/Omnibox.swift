@@ -94,6 +94,7 @@ struct OmniboxContainer: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
+    var containerGeometry: GeometryProxy
 
     private let boxWidth: CGFloat = 760
     private let boxMinX: CGFloat = 11
@@ -101,24 +102,38 @@ struct OmniboxContainer: View {
     private let boxMaxX: CGFloat = 11
     private let boxMinY: CGFloat = 11
 
+    static func topOffsetForJournal(height: CGFloat) -> CGFloat {
+        return height * 0.3
+    }
+    static let minDistanceFromOmniboxToFirstNote = CGFloat(30)
+    static func firstNoteTopOffsetForJournal(height: CGFloat) -> CGFloat {
+        let boxOffset = topOffsetForJournal(height: height)
+        return boxOffset + max(minDistanceFromOmniboxToFirstNote, height * 0.15)
+    }
+
     private var opacity: CGFloat {
-        guard boxIsInsideNote, !state.focusOmniBox else { return 1.0 }
-        guard state.showOmnibox else { return 0.0 }
-        if state.journalScrollOffset < ModeView.omniboxStartFadeOffset {
-            return 1.0
-        } else if state.journalScrollOffset > ModeView.omniboxEndFadeOffset && state.focusOmniBox {
+        guard boxIsInsideNote, autocompleteManager.searchQuery.isEmpty
+        else {
             return 1.0
         }
-        let v = state.journalScrollOffset.clamp(ModeView.omniboxStartFadeOffset, ModeView.omniboxEndFadeOffset)
-        let val = v - ModeView.omniboxStartFadeOffset
-        let value = 1.0 - val / ModeView.omniboxEndFadeOffset
+        guard state.showOmnibox else { return 0.0 }
+        let omniboxStartFadeOffset = ModeView.omniboxStartFadeOffsetFor(height: containerGeometry.size.height)
+        let omniboxEndFadeOffset = ModeView.omniboxEndFadeOffsetFor(height: containerGeometry.size.height)
+        let scrollOffset = state.journalScrollOffset + 52
+        if scrollOffset < omniboxStartFadeOffset {
+            return 1.0
+        } else if scrollOffset > omniboxEndFadeOffset && state.focusOmniBox {
+            return 1.0
+        }
+        let v = scrollOffset.clamp(omniboxStartFadeOffset, omniboxEndFadeOffset)
+        let value = 1.0 - v / omniboxEndFadeOffset
         return value
     }
     private var boxOffset: CGSize {
         var offset: CGSize = CGSize(width: 0, height: 190)
 
         if boxIsInsideNote || state.omniboxWasShownFromJournalTop {
-            offset.height = 140
+            offset.height = Self.topOffsetForJournal(height: containerGeometry.size.height)
         } else if state.mode == .web && state.focusOmniBoxFromTab && browserTabsManager.currentTab?.url != nil,
                     let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
             let x = max(boxMinXInToolBar, currentTabUIFrame.midX - boxWidth / 2)
@@ -131,8 +146,11 @@ struct OmniboxContainer: View {
     }
 
     private var boxIsInsideNote: Bool {
-        state.mode == .today &&
-        ((state.journalScrollOffset <= ModeView.omniboxEndFadeOffset) || !state.focusOmniBox)
+        let height = containerGeometry.size.height
+        let endOffset = ModeView.omniboxEndFadeOffsetFor(height: height)
+        let result = state.mode == .today &&
+        ((state.journalScrollOffset <= endOffset) || !state.focusOmniBox)
+        return result
     }
 
     private var boxInstance: some View {
@@ -156,6 +174,8 @@ struct OmniboxContainer: View {
         Group {
             if state.showOmnibox {
                 boxInstance
+                .transition(.asymmetric(insertion: .opacity.animation(.easeInOut(duration: 0.1)),
+                                        removal: .opacity.animation(.easeInOut(duration: 0.06))))
                 .onDisappear {
                     if state.keepDestinationNote {
                         state.keepDestinationNote = false
