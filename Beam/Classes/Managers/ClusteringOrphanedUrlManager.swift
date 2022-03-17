@@ -83,6 +83,15 @@ struct AnyUrl: CsvRow {
 class ClusteringSessionExporter {
     var urls: [AnyUrl] = [AnyUrl]()
     let fileManager = FileManager.default
+    var gcsManager: GCSObjectManager?
+
+    init() {
+        do {
+            gcsManager = try GCSObjectManager(bucket: "clustering-beam-exports")
+        } catch let err {
+            Logger.shared.logError(err.localizedDescription, category: .general)
+        }
+    }
 
     func add(anyUrl: AnyUrl) {
         urls.append(anyUrl)
@@ -93,6 +102,19 @@ class ClusteringSessionExporter {
         let writer = CsvRowsWriter(header: AnyUrl.header, rows: self.urls)
         do {
             try writer.overWrite(to: destination)
+            if let gcsManager = gcsManager,
+               let email = Persistence.Authentication.email,
+               let filename = (email + "/" + destination.lastPathComponent).addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
+                Task {
+                    do {
+                        _ = try await gcsManager.uploadFile(filename: filename, path: destination)
+                    } catch let err as GCSObjectManagerErrors where err == GCSObjectManagerErrors.disabledService {
+                        Logger.shared.logWarning(err.localizedDescription, category: .general)
+                    } catch let err {
+                        Logger.shared.logError(err.localizedDescription, category: .general)
+                    }
+                }
+            }
         } catch {
             Logger.shared.logError("Unable to save session urls to \(destination)", category: .web)
         }
@@ -105,10 +127,16 @@ class ClusteringOrphanedUrlManager {
     var savePath: URL
     var savePathTemp: URL?
     let fileManager = FileManager.default
+    var gcsManager: GCSObjectManager?
 
     init(savePath: URL) {
         self.savePath = savePath
         self.savePathTemp =  URL(string: savePath.deletingLastPathComponent().string + "temp.csv")
+        do {
+            gcsManager = try GCSObjectManager(bucket: "clustering-beam-exports")
+        } catch let err {
+            Logger.shared.logError(err.localizedDescription, category: .general)
+        }
     }
 
     func add(orphanedUrl: OrphanedUrl) {
@@ -141,6 +169,19 @@ class ClusteringOrphanedUrlManager {
                 let writer = CsvRowsWriter(header: OrphanedUrl.header, rows: tempUrls)
                 try writer.append(to: savePathTemp)
                 _ = fileManager.secureCopyItem(at: savePathTemp, to: destination)
+                if let gcsManager = gcsManager,
+                   let email = Persistence.Authentication.email,
+                   let filename = (email + "/" + destination.lastPathComponent).addingPercentEncoding(withAllowedCharacters: .alphanumerics) {
+                    Task {
+                        do {
+                            _ = try await gcsManager.uploadFile(filename: filename, path: destination)
+                        } catch let err as GCSObjectManagerErrors where err == GCSObjectManagerErrors.disabledService {
+                            Logger.shared.logWarning(err.localizedDescription, category: .general)
+                        } catch let err {
+                            Logger.shared.logError(err.localizedDescription, category: .general)
+                        }
+                    }
+                }
             } catch {
                 Logger.shared.logError("Couldn't add orphans from current session", category: .web)
                 _ = fileManager.secureCopyItem(at: savePath, to: destination)
