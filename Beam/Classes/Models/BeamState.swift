@@ -85,12 +85,10 @@ import Sentry
             EventsTracker.logBreadcrumb(message: "mode changed to \(mode)", category: "BeamState")
             browserTabsManager.updateTabsForStateModeChange(mode, previousMode: oldValue)
             updateCanGoBackForward()
-            stopFocusOmnibox()
 
+            stopFocusOmnibox()
             if oldValue == .today {
                 stopShowingOmnibox()
-            } else if mode == .today {
-                startShowingOmnibox()
             }
 
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {

@@ -258,7 +258,7 @@ class JournalSimpleStackView: NSView {
     func updateScrollingFrames() {
         guard let scrollView = enclosingScrollView else { return }
         let clipView = scrollView.contentView
-        let minFadingOffset = ModeView.omniboxEndFadeOffset
+        let minFadingOffset = ModeView.omniboxEndFadeOffsetFor(height: scrollView.bounds.height)
         DispatchQueue.main.async { [weak self] in
             self?.state.journalScrollOffset = clipView.bounds.minY
         }
@@ -271,10 +271,12 @@ class JournalSimpleStackView: NSView {
                 first = false
                 if view.alphaValue != 1.0 {
                     view.alphaValue = 1.0
+                    view.enabled = true
                 }
             } else {
                 if view.alphaValue != otherNotesAlpha {
                     view.alphaValue = otherNotesAlpha
+                    view.enabled = otherNotesAlpha >= 0.25
                 }
             }
         }

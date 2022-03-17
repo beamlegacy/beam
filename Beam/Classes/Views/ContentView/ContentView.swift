@@ -25,7 +25,7 @@ struct ContentView: View {
                          WindowBottomToolBar()
                             .transition(AnyTransition.opacity.animation(Animation.easeInOut(duration: 0.2))) : nil, alignment: .bottom)
                 .overlay(
-                    OmniboxContainer().environmentObject(state.autocompleteManager),
+                    OmniboxContainer(containerGeometry: geometry).environmentObject(state.autocompleteManager),
                     alignment: .top
                 )
         }
