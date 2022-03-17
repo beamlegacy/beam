@@ -43,7 +43,7 @@ struct WindowBottomToolBar: View {
             HStack {
                 BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
                     .padding(.leading, 10)
-                    .offset(y: -9)
+                    .offset(y: -4)
                 Spacer(minLength: 20)
                 HStack {
                     BottomToolBarTrailingIconView()
