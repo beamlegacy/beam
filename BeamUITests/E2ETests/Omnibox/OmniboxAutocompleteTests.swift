@@ -154,6 +154,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let waitHelper = WaitHelper()
 
         launchApp()
+        helper.tapCommand(.omniboxEnableSearchInHistoryContent)
         helper.tapCommand(.omniboxFillHistory)
 
         testRailPrint("When I type: \(partiallyTypedSearchText)")
@@ -198,6 +199,7 @@ class OmniboxAutocompleteTests: BaseTest {
         testRailPrint("Then search field value is updated accordingly and there is 1 selected result")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
         XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
+        helper.tapCommand(.omniboxDisableSearchInHistoryContent)
     }
 
     func testAutoCompleteHistoryFromAliasUrlSelection() {
@@ -227,6 +229,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let waitHelper = WaitHelper()
 
         launchApp()
+        helper.tapCommand(.omniboxEnableSearchInHistoryContent)
         helper.tapCommand(.omniboxFillHistory)
 
         testRailPrint("When I type: \(partiallyTypedSearchText)")
@@ -264,5 +267,6 @@ class OmniboxAutocompleteTests: BaseTest {
 
         testRailPrint("Then search field value is \(partiallyTypedSearchText)")
         XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText, omniboxView.getOmniBoxSearchField()))
+        helper.tapCommand(.omniboxDisableSearchInHistoryContent)
     }
 }
