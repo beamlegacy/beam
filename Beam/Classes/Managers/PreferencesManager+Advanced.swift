@@ -21,6 +21,7 @@ extension PreferencesManager {
     private static let showTabsColoringKey = "showTabsColoring"
     private static let showWebOnLaunchIfTabsKey = "showWebOnLaunchIfTabs"
     private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
+    private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
 }
 
 // MARK: - Default Values
@@ -39,6 +40,7 @@ extension PreferencesManager {
     private static let showTabsColoringDefault = false
     private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = false
+    private static let includeHistoryContentsInOmniBoxDefault = false
 }
 
 extension PreferencesManager {
@@ -74,5 +76,8 @@ extension PreferencesManager {
 
     @UserDefault(key: createJournalOncePerWindowKey, defaultValue: createJournalOncePerWindowDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var createJournalOncePerWindow: Bool
+
+    @UserDefault(key: includeHistoryContentsInOmniBoxKey, defaultValue: includeHistoryContentsInOmniBoxDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var includeHistoryContentsInOmniBox: Bool
 
 }
