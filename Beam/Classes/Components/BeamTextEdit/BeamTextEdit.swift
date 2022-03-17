@@ -1162,10 +1162,10 @@ public extension CALayer {
 
     // MARK: - Mouse Event
     private func shouldAllowMouseEvents() -> Bool {
-        state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true
+        state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true && enabled
     }
     private func shouldAllowHoverEvents() -> Bool {
-        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false && !mouseCursorManager.isMouseCursorHidden
+        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false && !mouseCursorManager.isMouseCursorHidden && enabled
     }
 
     override public func updateTrackingAreas() {
@@ -1366,9 +1366,9 @@ public extension CALayer {
         mouseHandler = nil
     }
 
-    public override var acceptsFirstResponder: Bool { true }
+    public override var acceptsFirstResponder: Bool { enabled }
     public override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
-        return true
+        return enabled
     }
 
     public override func viewWillMove(toWindow newWindow: NSWindow?) {

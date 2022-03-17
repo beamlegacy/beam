@@ -43,8 +43,16 @@ struct ModeView: View {
         }
     }
 
-    static var omniboxStartFadeOffset = CGFloat(20)
-    static var omniboxEndFadeOffset = CGFloat(140)
+    static func omniboxStartFadeOffsetFor(height: CGFloat) -> CGFloat {
+        0.2 * (OmniboxContainer.firstNoteTopOffsetForJournal(height: height) - OmniboxContainer.topOffsetForJournal(height: height))
+
+    }
+    static func omniboxEndFadeOffsetFor(height: CGFloat) -> CGFloat {
+        OmniboxContainer.firstNoteTopOffsetForJournal(height: height) - OmniboxContainer.topOffsetForJournal(height: height)
+
+    }
+    var omniboxEndFadeOffset: CGFloat { Self.omniboxEndFadeOffsetFor(height: containerGeometry.size.height) }
+    var omniboxStartFadeOffset: CGFloat { Self.omniboxStartFadeOffsetFor(height: containerGeometry.size.height) }
 
     private func journalContent(containerGeometry: GeometryProxy) -> some View {
         JournalScrollView(axes: [.vertical],
@@ -62,36 +70,43 @@ struct ModeView: View {
                 DispatchQueue.main.async {
                     state.data.reloadAllEvents()
                 }
-                state.startShowingOmnibox()
                 contentIsScrolled = false
             }
-            .onDisappear(perform: {
+            .onChange(of: transitionModel.isTransitioning) { isTransitioning in
+                guard !isTransitioning && state.mode == .today else { return }
+                state.startShowingOmnibox()
+                state.autocompleteManager.clearAutocompleteResults()
+            }
+            .onDisappear {
                 state.stopShowingOmnibox()
-            })
+            }
             .animation(nil)
             .transition(.noteContentTransition(transitionModel: transitionModel))
             .accessibility(identifier: "journalView")
     }
 
     private func onScroll(_ scrollPoint: CGPoint, containerGeometry: GeometryProxy) {
-        contentIsScrolled = scrollPoint.y + 52 >
+        let scrollOffset = scrollPoint.y + 52
+        contentIsScrolled = scrollOffset >
         JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
 
         CustomPopoverPresenter.shared.dismissPopovers()
+        guard !transitionModel.isTransitioning else { return }
         if state.showOmnibox &&
             state.autocompleteManager.searchQuery.isEmpty {
-            if state.showOmnibox, scrollPoint.y >= Self.omniboxEndFadeOffset {
+            if state.showOmnibox, scrollOffset >= omniboxEndFadeOffset {
                 state.stopFocusOmnibox()
                 state.stopShowingOmnibox()
             }
-        } else if scrollPoint.y < Self.omniboxEndFadeOffset {
+        } else if scrollOffset < omniboxEndFadeOffset {
             state.startShowingOmnibox()
             state.autocompleteManager.clearAutocompleteResults()
         }
     }
 
     private func onEndLiveScroll(_ scrollPoint: CGPoint) {
-        if scrollPoint.y > Self.omniboxEndFadeOffset / 2, scrollPoint.y < Self.omniboxEndFadeOffset {
+        let scrollOffset = scrollPoint.y + 52
+        if scrollOffset < omniboxEndFadeOffset {
             guard let scrollView = state.cachedJournalStackView?.enclosingScrollView else {
                 return
             }
@@ -100,7 +115,12 @@ struct ModeView: View {
             NSAnimationContext.beginGrouping()
             NSAnimationContext.current.duration = animationDuration
             var p = clipView.bounds.origin
-            p.y = Self.omniboxEndFadeOffset
+            if scrollOffset > (omniboxEndFadeOffset + omniboxStartFadeOffset) * 0.5 {
+                p.y = omniboxEndFadeOffset
+            } else {
+                p.y = 0
+            }
+
             clipView.animator().setBoundsOrigin(p)
             scrollView.reflectScrolledClipView(clipView)
             NSAnimationContext.endGrouping()
