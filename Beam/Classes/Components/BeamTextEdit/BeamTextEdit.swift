@@ -245,10 +245,11 @@ public extension CALayer {
 
     var unpreparedRoot: BeamElement?
 
+    var didJustMoveToWindow = false
     public override func viewDidMoveToWindow() {
-        isResizing = true
+        didJustMoveToWindow = true
         DispatchQueue.main.async { [weak self] in
-            self?.isResizing = false
+            self?.didJustMoveToWindow = false
         }
         rootNode?.dispatchDidMoveToWindow(window)
     }
@@ -454,7 +455,7 @@ public extension CALayer {
         updateLayout(nodesRect)
 
         if !journalMode, let initialScrollOffset = initialScrollOffset, bounds.size.height >= intrinsicContentSize.height {
-                scrollToVisible(NSRect(origin: NSPoint(x: 0, y: initialScrollOffset), size: visibleRect.size))
+            scrollToVisible(NSRect(origin: NSPoint(x: 0, y: initialScrollOffset), size: visibleRect.size))
             self.initialScrollOffset = nil
         }
     }
@@ -497,7 +498,7 @@ public extension CALayer {
 
             self.doRunAfterNextLayout()
         }
-        if isResizing || shouldDisableAnimationAtNextLayout {
+        if isResizing || shouldDisableAnimationAtNextLayout || didJustMoveToWindow {
             shouldDisableAnimationAtNextLayout = false
             CATransaction.disableAnimations {
                 workBlock()
@@ -1161,10 +1162,10 @@ public extension CALayer {
 
     // MARK: - Mouse Event
     private func shouldAllowMouseEvents() -> Bool {
-        state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true
+        state?.editorShouldAllowMouseEvents != false && inlineFormatter?.isMouseInsideView != true && enabled
     }
     private func shouldAllowHoverEvents() -> Bool {
-        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false && !mouseCursorManager.isMouseCursorHidden
+        shouldAllowMouseEvents() && state?.editorShouldAllowMouseHoverEvents != false && !mouseCursorManager.isMouseCursorHidden && enabled
     }
 
     override public func updateTrackingAreas() {
@@ -1365,9 +1366,9 @@ public extension CALayer {
         mouseHandler = nil
     }
 
-    public override var acceptsFirstResponder: Bool { true }
+    public override var acceptsFirstResponder: Bool { enabled }
     public override func acceptsFirstMouse(for event: NSEvent?) -> Bool {
-        return true
+        return enabled
     }
 
     public override func viewWillMove(toWindow newWindow: NSWindow?) {

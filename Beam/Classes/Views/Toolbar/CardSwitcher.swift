@@ -14,8 +14,6 @@ struct CardSwitcher: View {
 
     var currentNote: BeamNote?
 
-    /// 0 is journal, 1-5 is cards, 6 is all cards
-    @State private var hoveredIndex: Int?
     private let maxNoteTitleLength = 40
 
     private func titleForNote(_ note: BeamNote) -> String {
@@ -52,13 +50,6 @@ struct CardSwitcher: View {
             .layoutPriority(2)
             .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription)
             .accessibilityIdentifier("card-switcher-journal")
-            .onHover { h in
-                if h {
-                    hoveredIndex = 0
-                }
-            }
-
-            Spacer(minLength: 5)
 
             ToolbarCapsuleButton(iconName: "editor-allnotes", text: "All Notes", isSelected: isAllNotesActive) {
                 state.navigateToPage(.allNotesWindowPage)
@@ -67,16 +58,12 @@ struct CardSwitcher: View {
             .layoutPriority(2)
             .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
             .accessibilityIdentifier("card-switcher-all-cards")
-            .onHover { h in
-                if h {
-                    hoveredIndex = recentsManager.recentNotes.count + 1
-                }
-            }
+            .offset(x: -3, y: 0)
 
-            Spacer(minLength: 3)
-
+            Spacer(minLength: 2)
             separator
-                .opacity(hoveredIndex != 0 && hoveredIndex != 1 ? 1 : 0)
+            Spacer(minLength: 5)
+
             if recentsManager.recentNotes.count > 0 {
                 ForEach(Array(recentsManager.recentNotes.enumerated()), id: \.1.id) { index, note in
                     let isToday = state.mode == .today
@@ -86,19 +73,9 @@ struct CardSwitcher: View {
                         state.navigateToNote(note)
                     }
                     .accessibilityIdentifier("card-switcher")
-                    .onHover { h in
-                        if h {
-                            hoveredIndex = index + 1
-                        }
-                    }
                 }
             }
             Spacer(minLength: 0)
-        }
-        .onHover { h in
-            if !h {
-                hoveredIndex = -1
-            }
         }
     }
 }
