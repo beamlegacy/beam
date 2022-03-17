@@ -40,7 +40,7 @@ struct JournalScrollView: NSViewRepresentable {
             safeTop: Toolbar.height,
             onStartEditing: { self.isEditing = true },
             verticalSpace: 0,
-            topOffset: 63 + Self.firstNoteTopOffset(forProxy: proxy)
+            topOffset: Self.firstNoteTopOffset(forProxy: proxy)
         )
         journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
         if USE_STACKVIEW_CACHING {
@@ -130,7 +130,7 @@ struct JournalScrollView: NSViewRepresentable {
 
 extension JournalScrollView {
     static func firstNoteTopOffset(forProxy proxy: GeometryProxy) -> CGFloat {
-        return (proxy.size.height * 0.45).rounded()
+        return OmniboxContainer.firstNoteTopOffsetForJournal(height: proxy.size.height).rounded()
     }
 }
 
