@@ -969,7 +969,7 @@ public extension CALayer {
         guard let rootNode = rootNode else { return }
         mouseCursorManager.hideMouseCursorUntilNextMove(true)
         // dispatch hidden mouse events manually
-        dispatchHover(Set<Widget>(), forceUpdate: true)
+        dispatchHover(Set<Widget>(), forceUpdate: true, last: nil)
         if let lastAppEvent = NSApp.currentEvent, lastAppEvent.type == .mouseMoved {
             let mouseInfo = MouseInfo(rootNode, CGPoint.zero, lastAppEvent)
             rootNode.dispatchMouseMoved(mouseInfo: mouseInfo)
@@ -1330,12 +1330,13 @@ public extension CALayer {
         let cursors = preciseViews.compactMap { $0.cursor }
         let cursor = cursors.last ?? .arrow
         mouseCursorManager.setMouseCursor(cursor: cursor)
-        dispatchHover(Set<Widget>(views.compactMap { $0 as? Widget }))
+        let widgets = views.compactMap { $0 as? Widget }
+        dispatchHover(Set<Widget>(widgets), last: widgets.last)
     }
 
-    func dispatchHover(_ widgets: Set<Widget>, forceUpdate: Bool = false) {
+    func dispatchHover(_ widgets: Set<Widget>, forceUpdate: Bool = false, last: Widget?) {
         guard shouldAllowHoverEvents() || forceUpdate else { return }
-        rootNode?.dispatchHover(widgets)
+        rootNode?.dispatchHover(widgets, last: last)
     }
 
     override public func mouseUp(with event: NSEvent) {
