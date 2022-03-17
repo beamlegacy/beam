@@ -98,7 +98,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var invalidateOnHover = true
-    var hover: Bool = false {
+
+    /// Returns true if the mouse cursor is over this widget or one of its children.
+    var hover: Bool = false
+
+    /// Returns true if this is the frontmost hovered widget. That's means the mouse is hover this widget, not one of its children.
+    var frontmostHover: Bool = false {
         didSet {
             guard invalidateOnHover else { return }
             invalidate()
@@ -803,13 +808,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         layers.removeValue(forKey: name)
     }
 
-    func dispatchHover(_ widgets: Set<Widget>) {
+    func dispatchHover(_ widgets: Set<Widget>, last: Widget?) {
         var isHovering = widgets.contains(self)
         for c in children {
-            c.dispatchHover(widgets)
+            c.dispatchHover(widgets, last: last)
             isHovering = isHovering || c.hover
         }
         hover = isHovering
+        frontmostHover = self == last
     }
 
     func dispatchMouseDown(mouseInfo: MouseInfo) -> Widget? {
