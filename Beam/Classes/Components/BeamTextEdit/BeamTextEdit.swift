@@ -245,10 +245,11 @@ public extension CALayer {
 
     var unpreparedRoot: BeamElement?
 
+    var didJustMoveToWindow = false
     public override func viewDidMoveToWindow() {
-        isResizing = true
+        didJustMoveToWindow = true
         DispatchQueue.main.async { [weak self] in
-            self?.isResizing = false
+            self?.didJustMoveToWindow = false
         }
         rootNode?.dispatchDidMoveToWindow(window)
     }
@@ -497,7 +498,7 @@ public extension CALayer {
 
             self.doRunAfterNextLayout()
         }
-        if isResizing || shouldDisableAnimationAtNextLayout {
+        if isResizing || shouldDisableAnimationAtNextLayout || didJustMoveToWindow {
             shouldDisableAnimationAtNextLayout = false
             CATransaction.disableAnimations {
                 workBlock()
