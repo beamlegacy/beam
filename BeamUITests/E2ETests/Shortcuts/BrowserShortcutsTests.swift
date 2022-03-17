@@ -142,10 +142,10 @@ class BrowserShortcutsTests: BaseTest {
     }
     
     func isMediaPageOpened() -> Bool {
-        return webView.button("Play Audio").waitForExistence(timeout: minimumWaitTimeout)
+        webView.button("Play Audio").waitForExistence(timeout: minimumWaitTimeout)
     }
     
     func isAlertsPageOpened() -> Bool {
-        return webView.button("Trigger an alert").waitForExistence(timeout: minimumWaitTimeout)
+        webView.button("Trigger an alert").waitForExistence(timeout: minimumWaitTimeout)
     }
 }
