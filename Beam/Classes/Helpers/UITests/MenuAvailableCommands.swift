@@ -51,6 +51,8 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 
     // Omnibox setup
     case omniboxFillHistory = "Fill History with Results"
+    case omniboxEnableSearchInHistoryContent = "Enable search in history content"
+    case omniboxDisableSearchInHistoryContent = "Disable search in history content"
 
     // Others
     case separatorB
