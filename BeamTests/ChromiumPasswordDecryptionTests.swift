@@ -42,7 +42,7 @@ class ChromiumPasswordDecryptionTests: XCTestCase {
                 results.append(result)
             })
         .store(in: &subscriptions)
-        try importer.importPasswords(from: passwordsURL, keychainSecret: keychainSecret)
+        try importer.importPasswords(from: [passwordsURL], keychainSecret: keychainSecret)
         wait(for: [expectation], timeout: 2.0)
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].itemCount, 1)

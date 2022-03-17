@@ -70,7 +70,7 @@ struct ChromiumPasswordItem: BrowserPasswordItem, Decodable, FetchableRecord {
 }
 
 /**
- Passwords for Chromium-based browsers are stored in the `password_value`  column of the `logins` table, in a `Login Data` SQLite DB.
+ Passwords for Chromium-based browsers are stored in the `password_value`  column of the `logins` table, in a `Login Data` or `Login Data For Account` SQLite DB.
  Each entry starts with a 3-byte header (always `v10 in ASCII`) , foilowed by the encrypted password.
  On macOS, the passwords are encrypted in AES-128, CBC, IV = 16 0x20 bytes, with PKCS7 padding.
  The encryption key is derived from a secret stored in the keychain, using PBKDF2 (SHA-1, salt = `saltysalt`, 1003 iterations).
@@ -145,11 +145,13 @@ final class ChromiumPasswordImporter: ChromiumImporter {
 
     private var currentSubject: PassthroughSubject<BrowserPasswordResult, Swift.Error>?
 
-    private func passwordsDatabaseURL() throws -> URL? {
+    private func passwordsDatabaseURL(fileName: String) throws -> URL? {
         guard let browserDirectory = try chromiumDirectory() else {
             return nil
         }
-        return try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent("Login Data"))
+        let endorsedURL = try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent(fileName))
+        guard SandboxEscape.endorsedIfExists(url: browserDirectory.appendingPathComponent("\(fileName)-journal")) else { return nil }
+        return endorsedURL
     }
 }
 
@@ -165,33 +167,60 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
     }
 
     func importPasswords() throws {
-        guard let databaseURL = try passwordsDatabaseURL() else {
+        let databaseURLs = try ["Login Data", "Login Data For Account"].compactMap(endorsedDatabaseURL(fileName:))
+        guard !databaseURLs.isEmpty else {
             throw Error.noDatabaseURL
         }
         let keychainSecret = try secretFromKeychain()
-        try importPasswords(from: databaseURL, keychainSecret: keychainSecret)
+        try importPasswords(from: databaseURLs, keychainSecret: keychainSecret)
     }
 
-    func importPasswords(from databaseURL: URL, keychainSecret: String) throws {
+    private func endorsedDatabaseURL(fileName: String) throws -> URL? {
+        do {
+            return try passwordsDatabaseURL(fileName: fileName)
+        } catch {
+            let decodedError = error as NSError
+            guard decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError else {
+                throw error
+            }
+            return nil
+        }
+    }
+
+    // can't be made private (used in unit tests)
+    internal func importPasswords(from databaseURLs: [URL], keychainSecret: String) throws {
+        var importError: Swift.Error?
+        for databaseURL in databaseURLs {
+            do {
+                try importPasswords(from: databaseURL, keychainSecret: keychainSecret)
+            } catch {
+                importError = error
+            }
+        }
+        if let importError = importError {
+            currentSubject?.send(completion: .failure(importError))
+        } else {
+            currentSubject?.send(completion: .finished)
+        }
+        currentSubject = nil
+    }
+
+    private func importPasswords(from databaseURL: URL, keychainSecret: String) throws {
+        Logger.shared.logInfo("Importing passwords from \(databaseURL.path)", category: .browserImport)
         let symmetricKey = try Self.derivedKey(secret: keychainSecret)
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: databaseURL.path, configuration: configuration)
         try dbQueue.read { db in
-            do {
-                guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM logins") else {
-                    throw Error.countNotAvailable
-                }
-                // timestamps are number of microseconds since 1601-01-01, the SQL query converts them to seconds since UNIX Epoch.
-                let rows = try ChromiumPasswordItem.fetchCursor(db, sql: "SELECT origin_url, username_value, password_value, date_created / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_created, date_last_used / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_last_used FROM logins")
-                while let row = rows.nextPasswordItem(using: symmetricKey) {
-                    currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
-                }
-                currentSubject?.send(completion: .finished)
-            } catch {
-                currentSubject?.send(completion: .failure(error))
+            guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM logins") else {
+                throw Error.countNotAvailable
             }
-            currentSubject = nil
+            // timestamps are number of microseconds since 1601-01-01, the SQL query converts them to seconds since UNIX Epoch.
+            let rows = try ChromiumPasswordItem.fetchCursor(db, sql: "SELECT origin_url, username_value, password_value, date_created / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_created, date_last_used / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS date_last_used FROM logins")
+            while let row = rows.nextPasswordItem(using: symmetricKey) {
+                Logger.shared.logDebug("Successfully decoded row for \(row.username) at \(row.url.absoluteString)", category: .browserImport)
+                currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
+            }
         }
     }
 }
@@ -204,7 +233,7 @@ fileprivate extension RecordCursor where Record == ChromiumPasswordItem {
                 item.password = try ChromiumPasswordImporter.decryptedPassword(for: item.password, using: symmetricKey)
                 return item
             } catch {
-                Logger.shared.logError("Couldn't import row: \(error)", category: .browserImport)
+                Logger.shared.logWarning("Couldn't import row, skipping: \(error)", category: .browserImport)
             }
         }
     }
