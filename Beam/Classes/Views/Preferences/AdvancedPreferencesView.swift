@@ -39,6 +39,7 @@ struct AdvancedPreferencesView: View {
     @State var isWebsocketEnabled = Configuration.websocketEnabled
     @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
     @State var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
+    @State var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -406,12 +407,20 @@ struct AdvancedPreferencesView: View {
                     DebugSectionCheckbox
                 }
 
-                Preferences.Section(bottomDivider: true) {
+                Preferences.Section(bottomDivider: false) {
                     Text("Show frecency / score in Omnibox")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     OmniboxScoreSectionCheckbox
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Include history contents in Omnibox")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    HistoryInOmniboxCheckbox
                 }
 
                 Preferences.Section(verticalAlignment: .top) {
@@ -555,6 +564,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([showOmniboxScoreSection].publisher.first()) {
                 PreferencesManager.showOmniboxScoreSection = $0
+            }
+    }
+
+    private var HistoryInOmniboxCheckbox: some View {
+        return Toggle(isOn: $includeHistoryContentsInOmniBox) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([includeHistoryContentsInOmniBox].publisher.first()) {
+                PreferencesManager.includeHistoryContentsInOmniBox = $0
             }
     }
 
