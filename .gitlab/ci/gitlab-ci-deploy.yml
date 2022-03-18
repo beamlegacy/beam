@@ -1,8 +1,7 @@
 sentry:
   timeout: 8 minutes
   dependencies:
-    - build:dmg
-    - build:zip
+    - build:macos
   stage: deploy
   artifacts:
     expire_in: 14d
@@ -32,8 +31,7 @@ sentry:
 
 build:upload:
   dependencies:
-   - build:zip
-   - build:dmg
+   - build:macos
   stage: deploy
   environment:
     name: review/$CI_COMMIT_REF_NAME
@@ -95,3 +93,21 @@ build:cleanup:
   interruptible: false
   retry:
     max: 2
+
+build:cleanup:derived_data:
+  timeout: 10 minutes
+  dependencies: []
+  stage: deploy
+  rules:
+    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
+    - if: '$CI_COMMIT_BRANCH == "master"'
+    - if: '$CI_COMMIT_BRANCH == "develop"'
+    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
+    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  script:
+    - bundle exec fastlane delete_s3_derived_data
+  tags:
+    - macos-mono
+  interruptible: true
+  allow_failure: true
