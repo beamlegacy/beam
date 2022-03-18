@@ -1,8 +1,7 @@
 build:publish:
   stage: deploy
   dependencies:
-    - build:zip
-    - build:dmg
+    - build:macos
   artifacts:
     expire_in: 14d
     paths:

@@ -178,19 +178,17 @@ platform :mac do
       profile_name: "Beam Development",
       build_configurations: ["Test"]
     )
-    
+
     begin
       run_tests(
-        scheme: "Beam",
-        testplan: "BeamTests",
-        workspace: "Beam.xcworkspace",
-        output_files: "tests.xml",
-        use_system_scm: true,
-        result_bundle: true,
-        fail_build: true,
-        # derived_data_path: "derived_data",
-        # clean: false
-      )
+      scheme: "Beam",
+      testplan: "BeamTests",
+      workspace: "Beam.xcworkspace",
+      output_files: "tests.xml",
+      use_system_scm: true,
+      result_bundle: true,
+      fail_build: true,
+    )
     ensure
       generate_allure_report
    end
@@ -220,37 +218,38 @@ platform :mac do
         build_configurations: ["Test"]
       )
 
-      # Dir.chdir("..") do
-      #   sh "mkdir -p builds"
-      # end
+      Dir.chdir("..") do
+        sh "mkdir -p builds"
+      end
 
-      # download_previous_file(filename: "build_products.zip", channel:s3_path_for_build(), publish: false)
-      # download_previous_file(filename: "sourcepackages.zip", channel:s3_path_for_build(), publish: false)
+      download_previous_file(filename: "build_products.zip", channel:s3_path_for_build(), publish: false)
+      download_previous_file(filename: "sourcepackages.zip", channel:s3_path_for_build(), publish: false)
 
-      # unzip(file: "builds/build_products.zip",destination_path: "build_products")
-      # unzip(file: "builds/sourcepackages.zip",destination_path: "sourcepackages")
+      unzip(file: "builds/build_products.zip",destination_path: "build_products")
+      unzip(file: "builds/sourcepackages.zip",destination_path: "sourcepackages")
 
-      # Dir.chdir("..") do
-      #   sh "mkdir -p derived_data/Build/Products"
-      #   sh "mv build_products/* derived_data/Build/Products"
-      #   sh "mv sourcepackages/* derived_data"
-      # end
+      Dir.chdir("..") do
+        sh "mkdir -p derived_data/Build/Products"
+        sh "mv build_products/* derived_data/Build/Products"
+        sh "mv sourcepackages/* derived_data"
+      end
+
       begin
         run_tests(
-          scheme: "Beam",
-          testplan: "BeamUITests-#{name}",
-          workspace: "Beam.xcworkspace",
-          output_types: "html,junit",
-          output_files: "tests.html,tests.xml",
-          result_bundle: true,
-          use_system_scm: true,
-          code_coverage: true,
-          fail_build: true,
-          # test_without_building: true,
-          # derived_data_path: "derived_data",
-          # skip_package_dependencies_resolution: true,
-          # clean: false
-        )
+        scheme: "Beam",
+        testplan: "BeamUITests-#{name}",
+        workspace: "Beam.xcworkspace",
+        output_types: "html,junit",
+        output_files: "tests.html,tests.xml",
+        result_bundle: true,
+        use_system_scm: true,
+        code_coverage: true,
+        fail_build: true,
+        test_without_building: true,
+        derived_data_path: "derived_data",
+        skip_package_dependencies_resolution: true,
+        clean: false
+      )
       ensure
         generate_allure_report
       end
