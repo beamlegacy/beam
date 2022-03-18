@@ -28,6 +28,7 @@ class BaseTest: XCTestCase {
     
     override func tearDown() {
         if isAppRunning() {
+            storeScreenshot()
             UITestsMenuBar().destroyDB()
         }
         super.tearDown()
@@ -80,18 +81,6 @@ class BaseTest: XCTestCase {
     func openFirstCardInAllCardsList() -> CardTestView {
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         return AllCardsTestView().openFirstCard()
-    }
-
-    /// Uses XCTContext internally to log to the `.xcresult` steps.
-    ///
-    /// More information:
-    /// - https://qualitytesting.tumblr.com/post/161515906184/easier-debugging-with-xctactivity-and
-    /// - https://developer.apple.com/documentation/xctest/activities_and_attachments/grouping_tests_into_substeps_with_activities
-    /// 
-    /// - Parameter text: String to log. Will be prefixed with `testRail: `
-    func testRailPrint(_ text: String) {
-        print(text)
-        XCTContext.runActivity(named: "testRail: " + text) { _ in }
     }
 
     func terminateAppInstance() {
