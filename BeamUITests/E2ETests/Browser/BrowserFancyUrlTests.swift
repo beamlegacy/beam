@@ -9,7 +9,7 @@ import Foundation
 import XCTest
 
 class BrowserFancyUrlTests: BaseTest {
-
+    
     func testFancyUrlOpening() throws {
         let journalView = launchApp()
 
@@ -20,17 +20,22 @@ class BrowserFancyUrlTests: BaseTest {
             "www.anne.cafe",
             "www.amaZon.com" // checking if capital cases are handled
         ]
+        
+        var url: String?
         for urlToTest in urlsToTest {
-            testRailPrint("Given I open \(urlToTest) web page")
-            journalView.openWebsite(urlToTest)
-            testRailPrint("Then Google is not launching a search")
-            ShortcutsHelper().shortcutActionInvoke(action: .openLocation)
-            let url = OmniBoxTestView().getOmniBoxSearchField().value as? String
-            XCTAssertFalse(url!.contains("google"))
+            step("Given I open \(urlToTest) web page"){
+                journalView.openWebsite(urlToTest)
+            }
+            step("Then Google is not launching a search"){
+                ShortcutsHelper().shortcutActionInvoke(action: .openLocation)
+                url = OmniBoxTestView().getSearchFieldValue()
+                XCTAssertFalse(url!.contains("google"))
+            }
             if (!urlToTest.contains("localhost")){ // localhost is http
-                testRailPrint("And \(urlToTest) is opened")
-                // Verify that https is correctly added
-                XCTAssertTrue(url!.contains("https://" + urlToTest.lowercased()), "\(url!) does not contain \("https://" + urlToTest.lowercased())")
+                step("And \(urlToTest) is opened"){
+                    // Verify that https is correctly added
+                    XCTAssertTrue(url!.contains("https://" + urlToTest.lowercased()), "\(url!) does not contain \("https://" + urlToTest.lowercased())")
+                }
             }
         }
     }

@@ -78,7 +78,7 @@ class CardTestView: BaseView {
     }
     
     func getCardNoteValueByIndex(_ index: Int) -> String {
-        return self.getCardNoteElementByIndex(index).value as? String ?? errorFetchStringValue
+        return self.getElementStringValue(element:  getCardNoteElementByIndex(index))
     }
     
     func getCardNoteElementByIndex(_ index: Int) -> XCUIElement {
