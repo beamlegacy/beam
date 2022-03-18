@@ -61,22 +61,23 @@ struct AnyUrl: CsvRow {
     let url: String?
     let groupId: Int
     let navigationGroupId: Int?
+    let tabColouringGroupId: UUID?
+    let userCorrectionGroupId: UUID?
     let title: String?
     let cleanedContent: String?
     let entities: EntitiesInText?
     let entitiesInTitle: EntitiesInText?
     let language: NLLanguage?
     let isOpenAtExport: Bool?
-    let userCorrectionGroup: Int?
     let id: UUID?
     let parentId: UUID?
 
     static var columnNames: [String] {
-        ["noteName", "url", "groupId", "navigationGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "userCorrectionGroup", "pageId", "parentId"]
+        ["noteName", "url", "groupId", "navigationGroupId", "tabColouringGroupId", "userCorrectionGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "pageId", "parentId"]
     }
 
     var columns: [String] {
-        [optionalToString(noteName), optionalToString(url), String(groupId), String(navigationGroupId ?? -1), optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue), optionalToString(isOpenAtExport), optionalToString(userCorrectionGroup), optionalToString(id), optionalToString(parentId)]
+        [optionalToString(noteName), optionalToString(url), String(groupId), String(navigationGroupId ?? -1), optionalToString(tabColouringGroupId), optionalToString(userCorrectionGroupId), optionalToString(title), optionalToString(cleanedContent), optionalToString(entities?.description), optionalToString(entitiesInTitle?.description), optionalToString(language?.rawValue), optionalToString(isOpenAtExport), optionalToString(id), optionalToString(parentId)]
     }
 }
 
