@@ -340,7 +340,7 @@ extension PointAndShootCardPicker {
             fetchOrCreateNote(named: finalCardName)
         } else {
             // else get the note name from the autocomplete model
-            finalCardName = autocompleteModel.realNameForCardName(result.text)
+            finalCardName = autocompleteModel.realNameForCardName(result.information ?? result.text)
         }
         // Update search input to real note name
         cardSearchField = finalCardName
