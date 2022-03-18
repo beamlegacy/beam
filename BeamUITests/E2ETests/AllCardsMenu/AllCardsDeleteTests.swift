@@ -12,44 +12,53 @@ class AllCardsDeleteTests: BaseTest {
     
     let cardName1 = "Note All 1"
     let cardName2 = "Note All 2"
+    var allCardsView: AllCardsTestView?
     
     func testDeleteAllCards() {
         launchApp()
         UITestsMenuBar().destroyDB()
         let journalView = self.restartApp()
         
-        testRailPrint("Given I create 2 notes")
-        journalView.createCardViaOmniboxSearch(cardName1)
-        journalView.createCardViaOmniboxSearch(cardName2)
-        let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
-        //Workaround for a random issue where Today's card duplicates are created
-        //main thing is to make sure there are some multiple notes available for deletion
-        XCTAssertTrue(allCardsView.getNumberOfCards() >= 3)
-        
-        testRailPrint("Then I successfully delete all notes")
-        allCardsView.deleteAllCards()
-        XCTAssertEqual(allCardsView.getNumberOfCards(), 1) // Today's note will still be there
+        step ("Given I create 2 notes"){
+            journalView.createCardViaOmniboxSearch(cardName1)
+            journalView.createCardViaOmniboxSearch(cardName2)
+            allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+            //Workaround for a random issue where Today's card duplicates are created
+            //main thing is to make sure there are some multiple notes available for deletion
+            XCTAssertTrue(allCardsView!.getNumberOfCards() >= 3)
+        }
+
+        step ("Then I successfully delete all notes"){
+            allCardsView!.deleteAllCards()
+            XCTAssertEqual(allCardsView!.getNumberOfCards(), 1) // Today's note will still be there
+        }
+
     }
     
     func testDeleteSingleCard() {
         launchApp()
         UITestsMenuBar().destroyDB()
         let journalView = self.restartApp()
-        
         let indexOfCard = 1
-        testRailPrint("Given I create 2 notes")
-        journalView.createCardViaOmniboxSearch(cardName1)
-        journalView.createCardViaOmniboxSearch(cardName2)
-        let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
-        //Workaround for a random issue where Today's card duplicates are created
-        //main thing is to make sure there are some multiple notes available for deletion
-        let cardsBeforeDeletion = allCardsView.getNumberOfCards()
-        XCTAssertTrue(cardsBeforeDeletion >= 3)
         
-        let cardName = allCardsView.getCardNameValueByIndex(indexOfCard)
-        testRailPrint("Then I successfully delete all notes")
-        allCardsView.deleteCardByIndex(indexOfCard)
-        XCTAssertEqual(allCardsView.getNumberOfCards(), cardsBeforeDeletion - 1)
-        XCTAssertFalse(allCardsView.isCardNameAvailable(cardName))
+        var cardsBeforeDeletion: Int?
+        
+        step ("Given I create 2 notes"){
+            journalView.createCardViaOmniboxSearch(cardName1)
+            journalView.createCardViaOmniboxSearch(cardName2)
+            allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+            //Workaround for a random issue where Today's card duplicates are created
+            //main thing is to make sure there are some multiple notes available for deletion
+            cardsBeforeDeletion = allCardsView!.getNumberOfCards()
+            XCTAssertTrue(cardsBeforeDeletion! >= 3)
+        }
+
+        step ("Then I successfully delete all notes"){
+            let cardName = allCardsView!.getCardNameValueByIndex(indexOfCard)
+            allCardsView!.deleteCardByIndex(indexOfCard)
+            XCTAssertEqual(allCardsView!.getNumberOfCards(), cardsBeforeDeletion! - 1)
+            XCTAssertFalse(allCardsView!.isCardNameAvailable(cardName))
+        }
+
     }
 }
