@@ -80,7 +80,7 @@ class AllCardsTestView: BaseView {
         let cards = getCardsNamesElements()
         var i = cards.count
         repeat {
-            let cardInList = cards[i - 1].value as? String
+            let cardInList = self.getElementStringValue(element: cards[i - 1])
             if cardInList == cardName {
                 return true
             }
@@ -88,12 +88,6 @@ class AllCardsTestView: BaseView {
         } while i > 0
         return false
     }
-    
-    //TBD
-    /*func selectCardByName(_ cardName: String) -> AllCardsTestView {
-        app.windows.tables.staticTexts[AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier].click()
-        return self
-    }*/
     
     @discardableResult
     func openFirstCard() -> CardTestView {

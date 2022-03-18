@@ -23,20 +23,25 @@ class SlashMenuTests: BaseTest {
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         AllCardsTestView().openFirstCard()
         
-        testRailPrint("Given I trigger context menu appearance")
         let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
-        XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
+
+        step("Given I trigger context menu appearance"){
+            XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
+        }
+
+        step("When I select \(dayToSelect) \(monthToSelect) \(yearToSelect) date in Date picker"){
+            contextMenuView.clickSlashMenuItem(item: .datePickerItem)
+            datePicker.selectYear(year: yearToSelect)
+                    .selectMonth(month: monthToSelect)
+                    .selectDate(date: dayToSelect)
+        }
         
-        testRailPrint("When I select \(dayToSelect) \(monthToSelect) \(yearToSelect) date in Date picker")
-        contextMenuView.clickSlashMenuItem(item: .datePickerItem)
-        datePicker.selectYear(year: yearToSelect)
-                .selectMonth(month: monthToSelect)
-                .selectDate(date: dayToSelect)
-        
-        testRailPrint("Then \(dayToSelect) \(monthToSelect) \(yearToSelect) note is successfully created and accessible via BiDi link")
-        cardTestView.openBiDiLink(0)
-        XCTAssertTrue(cardTestView.getCardStaticTitle() == localDateFormat || cardTestView.getCardStaticTitle() == ciDateFormat,
-        "\(cardTestView.getCardStaticTitle()) is incorrect comparing to \(localDateFormat) OR \(ciDateFormat)")
+        step("Then \(dayToSelect) \(monthToSelect) \(yearToSelect) note is successfully created and accessible via BiDi link"){
+            cardTestView.openBiDiLink(0)
+            XCTAssertTrue(cardTestView.getCardStaticTitle() == localDateFormat || cardTestView.getCardStaticTitle() == ciDateFormat,
+            "\(cardTestView.getCardStaticTitle()) is incorrect comparing to \(localDateFormat) OR \(ciDateFormat)")
+        }
+
     }
     
     func testNoteDividerCreation() {
@@ -45,26 +50,28 @@ class SlashMenuTests: BaseTest {
         launchApp()
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         
-        testRailPrint("Given I populate 2 notes accordingly with texts: \(row1Text) & \(row2Text)")
-        AllCardsTestView()
-            .openFirstCard()
-            .typeInCardNoteByIndex(noteIndex: 0, text: row1Text)
-            .typeKeyboardKey(.enter)
-        cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: row2Text)
-            .getCardNoteElementByIndex(0)
-            .tapInTheMiddle()
-        
-        testRailPrint("When I add divider item between 2 rows")
-        cardTestView.typeKeyboardKey(.space)
-        cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
-            .clickSlashMenuItem(item: .dividerItem)
-        
-        testRailPrint("Then divider appears in the note area")
-        XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-        XCTAssertEqual(cardTestView.getNumberOfVisibleNotes(), 3)
-        XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), row1Text + " ")
-        XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), emptyString)
-        XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), row2Text)
+        step("Given I populate 2 notes accordingly with texts: \(row1Text) & \(row2Text)"){
+            AllCardsTestView()
+                .openFirstCard()
+                .typeInCardNoteByIndex(noteIndex: 0, text: row1Text)
+                .typeKeyboardKey(.enter)
+            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: row2Text)
+                .getCardNoteElementByIndex(0)
+                .tapInTheMiddle()
+        }
+
+        step("When I add divider item between 2 rows"){
+            cardTestView.typeKeyboardKey(.space)
+            cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
+                .clickSlashMenuItem(item: .dividerItem)
+        }
+
+        step("Then divider appears in the note area"){
+            XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertEqual(cardTestView.getNumberOfVisibleNotes(), 3)
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), row1Text + " ")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), emptyString)
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), row2Text)
+        }
     }
-    
 }

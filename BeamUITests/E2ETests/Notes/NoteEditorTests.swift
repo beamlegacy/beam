@@ -32,25 +32,31 @@ class NoteEditorTests: BaseTest {
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.clear()
         
-        testRailPrint("Then note displays typed text correctly")
-        cardTestView.getCardNotesForVisiblePart().first?.click()
-        journalView.app.typeText(texts[0])
-        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
+        step("Then note displays typed text correctly"){
+            cardTestView.getCardNotesForVisiblePart().first?.click()
+            journalView.app.typeText(texts[0])
+            XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
+        }
+
+        step("Then note displays typed text from the beginning of the note correctly"){
+            helper.shortcutActionInvoke(action: .beginOfNote)
+            journalView.app.typeText(texts[1])
+            XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + texts[0])
+        }
+
         
-        testRailPrint("Then note displays typed text from the beginning of the note correctly")
-        helper.shortcutActionInvoke(action: .beginOfNote)
-        journalView.app.typeText(texts[1])
-        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + texts[0])
-        
-        testRailPrint("Then note displays replaced typed text correctly")
-        helper.shortcutActionInvoke(action: .selectAll)
-        journalView.app.typeText(texts[2])
-        XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[2])
-        
-        journalView.typeKeyboardKey(.enter)
-        testRailPrint("Then second note displays changed text correctly")
-        let expectedResult = BeamUITestsHelper(journalView.app).typeAndEditHardcodedText(journalView)
-        XCTAssertEqual(journalView.getElementStringValue(element:journalView.getNoteByIndex(2)), expectedResult)
+        step("Then note displays replaced typed text correctly"){
+            helper.shortcutActionInvoke(action: .selectAll)
+            journalView.app.typeText(texts[2])
+            XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[2])
+        }
+
+        step("Then second note displays changed text correctly"){
+            journalView.typeKeyboardKey(.enter)
+            let expectedResult = BeamUITestsHelper(journalView.app).typeAndEditHardcodedText(journalView)
+            XCTAssertEqual(journalView.getElementStringValue(element:journalView.getNoteByIndex(2)), expectedResult)
+        }
+
     }
     
     func testSlashCommandsView() {
@@ -59,39 +65,48 @@ class NoteEditorTests: BaseTest {
         BeamUITestsHelper(journalView.app).tapCommand(.destroyDB)
         launchApp()
         
-        testRailPrint("Given I type \(contextMenuTriggerKey) char")
-        cardTestView.getCardNotesForVisiblePart().first?.click()
-        let firstJournalEntry = journalView.getNoteByIndex(1)
-        firstJournalEntry.tapInTheMiddle()
-        firstJournalEntry.clear()
+        step("Given I type \(contextMenuTriggerKey) char"){
+            cardTestView.getCardNotesForVisiblePart().first?.click()
+            let firstJournalEntry = journalView.getNoteByIndex(1)
+            firstJournalEntry.tapInTheMiddle()
+            firstJournalEntry.clear()
+        }
         let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
         
-        testRailPrint("Then Context menu is displayed")
-        XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
-        
-        testRailPrint("Then Context menu items exist, enabled and hittable")
-        for item in NoteViewLocators.SlashContextMenuItems.allCases {
-            let identifier = item.accessibilityIdentifier
-            let element = contextMenuView.staticText(identifier).firstMatch
-            XCTAssertTrue(element.exists && element.isEnabled && element.isHittable, "element \(identifier) couldn't be reached")
+        step("Then Context menu is displayed"){
+            XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
         }
         
-        testRailPrint("When I press delete button")
-        journalView.typeKeyboardKey(.delete)
+        step("Then Context menu items exist, enabled and hittable"){
+            for item in NoteViewLocators.SlashContextMenuItems.allCases {
+                let identifier = item.accessibilityIdentifier
+                let element = contextMenuView.staticText(identifier).firstMatch
+                XCTAssertTrue(element.exists && element.isEnabled && element.isHittable, "element \(identifier) couldn't be reached")
+            }
+        }
+
         
-        testRailPrint("Then Context menu is NOT displayed")
-        XCTAssertTrue(WaitHelper().waitForDoesntExist(contextMenuView.menuElement()))
+        step("When I press delete button"){
+            journalView.typeKeyboardKey(.delete)
+        }
+        
+        step("Then Context menu is NOT displayed"){
+            XCTAssertTrue(WaitHelper().waitForDoesntExist(contextMenuView.menuElement()))
+        }
         
         journalView.app.typeText(contextMenuTriggerKey + "bol")
         let boldMenuItem = contextMenuView.staticText(NoteViewLocators.SlashContextMenuItems.boldItem.accessibilityIdentifier)
         
-        testRailPrint("Then Bold context menu item is displayed")
-        XCTAssertTrue(boldMenuItem.waitForExistence(timeout: implicitWaitTimeout))
+        step("Then Bold context menu item is displayed"){
+            XCTAssertTrue(boldMenuItem.waitForExistence(timeout: implicitWaitTimeout))
+        }
         
-        testRailPrint("When I press return button")
-        journalView.typeKeyboardKey(.enter)
+        step("When I press return button"){
+            journalView.typeKeyboardKey(.enter)
+        }
         
-        testRailPrint("Then Bold context menu item is NOT displayed")
-        XCTAssertTrue(WaitHelper().waitForDoesntExist(boldMenuItem))
+        step("Then Bold context menu item is NOT displayed"){
+            XCTAssertTrue(WaitHelper().waitForDoesntExist(boldMenuItem))
+        }
     }
 }

@@ -21,12 +21,15 @@ class GoogleSheetsTests: BaseTest {
     }
 
     func testGoogleSheetsIsUnableToLoadFile() throws {
-        testRailPrint("Given I open website: \(url)")
-        let webView = omniboxView.searchInOmniBox(url, true)
-        testRailPrint("Then browser tab bar appears")
-        XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
-        let textElement = XCUIApplication().windows.staticTexts["Unable to load file"].firstMatch
-        XCTAssertTrue(waitHelper.waitForDoesntExist(textElement), "No alert should be shown")
+        var webView: WebTestView?
+        step("Given I open website: \(url)"){
+            webView = omniboxView.searchInOmniBox(url, true)
+        }
+        step("Then browser tab bar appears"){
+            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
+            let textElement = XCUIApplication().windows.staticTexts["Unable to load file"].firstMatch
+            XCTAssertTrue(waitHelper.waitForDoesntExist(textElement), "No alert should be shown")
+        }
     }
 
 }

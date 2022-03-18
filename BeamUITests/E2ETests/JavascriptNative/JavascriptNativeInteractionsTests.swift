@@ -16,26 +16,32 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
         
-        testRailPrint("Given I open a test page to \(buttonTitle)")
-        helper.openTestPage(page: .alerts)
+        step("Given I open a test page to \(buttonTitle)"){
+            helper.openTestPage(page: .alerts)
+        }
         
         let webViewElement = journalView.app.webViews.containing(.button, identifier: buttonTitle).element
         let button = webViewElement.buttons[buttonTitle].firstMatch
-        button.clickOnHittable()
-        testRailPrint("When \(buttonTitle) is invoked")
         let alert = journalView.app.dialogs.firstMatch
-        XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+
+        step("When \(buttonTitle) is invoked"){
+            button.clickOnHittable()
+            XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+        }
         return (webViewElement, alert, button)
+
     }
     
     func testJSNativeAlertInteraction() {
         let preparationResult = prepareTest("Trigger an alert")
         let alert = preparationResult.1
         
-        testRailPrint("Then alert box is displayed and interacted")
-        XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
-        XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].waitForExistence(timeout: minimumWaitTimeout))
-        alert.buttons["OK"].firstMatch.tap()
+        step("Then alert box is displayed and interacted"){
+            XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].waitForExistence(timeout: minimumWaitTimeout))
+            alert.buttons["OK"].firstMatch.tap()
+        }
+
     }
     
     func testJSNativePromptInteraction() {
@@ -43,13 +49,15 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let webView = preparationResult.0
         let alert = preparationResult.1
         
-        testRailPrint("Then prompt is interactable")
-        let textField = alert.textFields.firstMatch
-        textField.tap()
-        textField.typeText("Scotty")
+        step("Then prompt is interactable"){
+            let textField = alert.textFields.firstMatch
+            textField.tap()
+            textField.typeText("Scotty")
 
-        alert.buttons["Submit"].firstMatch.tap()
-        XCTAssertTrue(webView.staticTexts["Beam me up, Scotty!"].waitForExistence(timeout: minimumWaitTimeout))
+            alert.buttons["Submit"].firstMatch.tap()
+            XCTAssertTrue(webView.staticTexts["Beam me up, Scotty!"].waitForExistence(timeout: minimumWaitTimeout))
+        }
+
     }
     
     func testJSNativeConfirmationInteraction() {
@@ -58,63 +66,70 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let alert = preparationResult.1
         let button = preparationResult.2
         
-        testRailPrint("Then confirmation pop-up is interactable for cancelation and confirmation")
-        let ok = alert.buttons["OK"].firstMatch
-        let cancel = alert.buttons["Cancel"].firstMatch
-        
-        ok.tap()
-        XCTAssertTrue(webView.staticTexts["YES"].waitForExistence(timeout: minimumWaitTimeout))
-        
-        button.tap()
-        XCTAssertTrue(alert.waitForExistence(timeout: minimumWaitTimeout))
-        
-        cancel.tap()
-        XCTAssertTrue(webView.staticTexts["NO"].waitForExistence(timeout: minimumWaitTimeout))
+        step("Then confirmation pop-up is interactable for cancelation and confirmation"){
+            let ok = alert.buttons["OK"].firstMatch
+            let cancel = alert.buttons["Cancel"].firstMatch
+            
+            ok.tap()
+            XCTAssertTrue(webView.staticTexts["YES"].waitForExistence(timeout: minimumWaitTimeout))
+            
+            button.tap()
+            XCTAssertTrue(alert.waitForExistence(timeout: minimumWaitTimeout))
+            
+            cancel.tap()
+            XCTAssertTrue(webView.staticTexts["NO"].waitForExistence(timeout: minimumWaitTimeout))
+        }
+
     }
     
     func testJSNativeFileDialogInteraction() {
         let fileExistanceLabel = "NO FILE"
-        let journalView = launchApp()
-        
-        testRailPrint("Given I open a test page with Upload File dialog")
-        BeamUITestsHelper(journalView.app).openTestPage(page: .alerts)
         let message = "no file selected"
-        let webView = journalView.app.webViews.containing(.button, identifier: message).element
-        XCTAssert(webView.waitForExistence(timeout: minimumWaitTimeout))
-        XCTAssertTrue(webView.staticTexts[fileExistanceLabel].waitForExistence(timeout: minimumWaitTimeout))
+        let journalView = launchApp()
+        var webView: XCUIElement?
         
-        testRailPrint("When \(message) is clicked")
-        webView.buttons[message].tap()
-
-        testRailPrint("Then I can successfully upload the file")
-        let alert = journalView.app.dialogs.firstMatch
-        XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
-        let open = alert.buttons["Open"].firstMatch
-
-        journalView.app.typeKey("g", modifierFlags: [.command, .shift])
-
-        let sheet = alert.sheets.firstMatch
-        XCTAssert(sheet.waitForExistence(timeout: minimumWaitTimeout))
-
-        let goButton = alert.buttons["Go"]
-        let input = sheet.comboBoxes.firstMatch
-        
-        let textField = journalView.app.dialogs.sheets.textFields.matching(identifier: "PathTextField").element //workaround for Monterrey diff from Big Sur
-        if textField.exists {
-            ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
-            textField.typeText("/Applications")
-            journalView.typeKeyboardKey(.enter)
-        } else {
-            input.typeText("/Applications")
+        step("Given I open a test page with Upload File dialog"){
+            BeamUITestsHelper(journalView.app).openTestPage(page: .alerts)
+            webView = journalView.app.webViews.containing(.button, identifier: message).element
+            XCTAssert(webView!.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(webView!.staticTexts[fileExistanceLabel].waitForExistence(timeout: minimumWaitTimeout))
         }
-        
-        if goButton.exists {
-            goButton.tap()
-            WaitHelper().waitForDoesntExist(goButton)
+ 
+        step("When \(message) is clicked"){
+            webView!.buttons[message].tap()
         }
-        journalView.typeKeyboardKey(.downArrow)
-        open.clickOnEnabled()
-        XCTAssertTrue(WaitHelper().waitForDoesntExist(webView.staticTexts[fileExistanceLabel]))
+
+        step("Then I can successfully upload the file"){
+            let alert = journalView.app.dialogs.firstMatch
+            XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+            let open = alert.buttons["Open"].firstMatch
+
+            journalView.app.typeKey("g", modifierFlags: [.command, .shift])
+
+            let sheet = alert.sheets.firstMatch
+            XCTAssert(sheet.waitForExistence(timeout: minimumWaitTimeout))
+
+            let goButton = alert.buttons["Go"]
+            let input = sheet.comboBoxes.firstMatch
+            
+            let textField = journalView.app.dialogs.sheets.textFields.matching(identifier: "PathTextField").element //workaround for Monterrey diff from Big Sur
+            if textField.exists {
+                ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+                textField.typeText("/Applications")
+                journalView.typeKeyboardKey(.enter)
+            } else {
+                input.typeText("/Applications")
+            }
+            
+            if goButton.exists {
+                goButton.tap()
+                WaitHelper().waitForDoesntExist(goButton)
+            }
+            journalView.typeKeyboardKey(.downArrow)
+            open.clickOnEnabled()
+            XCTAssertTrue(WaitHelper().waitForDoesntExist(webView!.staticTexts[fileExistanceLabel]))
+        }
+
     }
     
 }

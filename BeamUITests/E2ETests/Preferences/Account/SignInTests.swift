@@ -20,7 +20,6 @@ class SignInTests: BaseTest {
         
         _ = AccountTestView().signIn()
         self.restartApp()
-        testRailPrint("Then ")
         
     }
     

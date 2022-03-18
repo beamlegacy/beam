@@ -31,86 +31,104 @@ class OmniboxDestinationTests: BaseTest {
     func SKIPtestTodayCardDisplayedByDefault() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
-        testRailPrint("Given I clean the DB and create a note named: \(cardNameToBeCreated)")
-        helper.cleanupDB(logout: false)
-        createDestinationNote(journalView, cardNameToBeCreated)
+        step("Given I clean the DB and create a note named: \(cardNameToBeCreated)"){
+            helper.cleanupDB(logout: false)
+            createDestinationNote(journalView, cardNameToBeCreated)
+        }
+
+        step("When I search in omnibox and click on destination note"){
+            omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
+            omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
+            _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
+            destinationCardTitle.click()
+        }
+
+        step("Then destination note has a focus, empty search field and a note name"){
+            _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
+            XCTAssertTrue(omniboxView.inputHasFocus(destinationCardSearchField))
+            XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
+            XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
+                          "Actual note name is \(String(describing: destinationCardSearchField.placeholderValue))")
+        }
         
-        testRailPrint("When I search in omnibox and click on destination note")
-        omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
-        omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
-        _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
-        destinationCardTitle.click()
-        
-        testRailPrint("Then destination note has a focus, empty search field and a note name")
-        _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
-        XCTAssertTrue(omniboxView.inputHasFocus(destinationCardSearchField))
-        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
-        XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
-                      "Actual note name is \(String(describing: destinationCardSearchField.placeholderValue))")
-        
-        testRailPrint("Then Selected autocomplete note is \(expectedNumberOfAutocompletedCards)")
         let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
-        XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedCards)
-        
-        testRailPrint("When I click down arrow")
+        step("Then Selected autocomplete note is \(expectedNumberOfAutocompletedCards)"){
+            XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedCards)
+        }
+
         let firstResult = selectedResultQuery.firstMatch.identifier
-        omniboxView.typeKeyboardKey(.downArrow)
+        step("When I click down arrow"){
+            omniboxView.typeKeyboardKey(.downArrow)
+        }
         let secondResult = selectedResultQuery.firstMatch.identifier
+        step("Then destination note is changed"){
+            XCTAssertNotEqual(secondResult, firstResult)
+        }
         
-        testRailPrint("Then destination note is changed")
-        XCTAssertNotEqual(secondResult, firstResult)
-        
-        testRailPrint("When I click up arrow")
-        omniboxView.typeKeyboardKey(.upArrow)
+        step("When I click up arrow"){
+            omniboxView.typeKeyboardKey(.upArrow)
+        }
         let thirdResult = selectedResultQuery.firstMatch.identifier
+
+        step("Then destination note is changed back"){
+            XCTAssertEqual(thirdResult, firstResult)
+        }
         
-        testRailPrint("Then destination note is changed back")
-        XCTAssertEqual(thirdResult, firstResult)
+        step("When I type in search field: \(partialSearchKeyword)"){
+            destinationCardSearchField.typeText(partialSearchKeyword)
+            destinationCardSearchField.typeText("\r")
+        }
+
+        step("Then I see \(cardNameToBeCreated) in search results"){
+            XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
+        }
         
-        testRailPrint("When I type in search field: \(partialSearchKeyword)")
-        destinationCardSearchField.typeText(partialSearchKeyword)
-        destinationCardSearchField.typeText("\r")
+        step("When I click escape button"){
+            omniboxView.typeKeyboardKey(.escape)
+        }
         
-        testRailPrint("Then I see \(cardNameToBeCreated) in search results")
-        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
-        
-        testRailPrint("When I click escape button")
-        omniboxView.typeKeyboardKey(.escape)
-        
-        testRailPrint("Then destination note search field is closed and note title is still displayed")
-        XCTAssertFalse(omniboxView.inputHasFocus(destinationCardSearchField))
-        XCTAssertTrue(destinationCardTitle.exists)
-        
-        testRailPrint("When I switch to note view and back to web")
-        let cardView = omniboxView.navigateToCardViaPivotButton()
-        cardView.navigateToWebView()
-        
-        testRailPrint("Then I see \(cardNameToBeCreated) as destination note")
-        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
+        step("Then destination note search field is closed and note title is still displayed"){
+            XCTAssertFalse(omniboxView.inputHasFocus(destinationCardSearchField))
+            XCTAssertTrue(destinationCardTitle.exists)
+        }
+
+        step("When I switch to note view and back to web"){
+            let cardView = omniboxView.navigateToCardViaPivotButton()
+            cardView.navigateToWebView()
+        }
+
+        step("Then I see \(cardNameToBeCreated) as destination note"){
+            XCTAssertEqual(journalView.getElementStringValue(element: destinationCardTitle), cardNameToBeCreated)
+        }
     }
     
     func SKIPtestFocusDestinationCardUsingShortcut() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
-        testRailPrint("Given I clean the DB and create a note named: \(cardNameToBeCreated)")
-        helper.cleanupDB(logout: false)
-        createDestinationNote(journalView, cardNameToBeCreated)
-        
-        testRailPrint("When I search in omnibox change note using shortcut")
-        omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
-        _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
-        ShortcutsHelper().shortcutActionInvoke(action: .changeDestinationCard)
-        
-        testRailPrint("Then destination note has a focus, empty search field and a note name")
-        _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
-        XCTAssertTrue(omniboxView.inputHasFocus(destinationCardSearchField))
-        XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
-        XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat ||
-            destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
-                      "Actual note name is \(String(describing: destinationCardSearchField.placeholderValue))")
-        
-        testRailPrint("Then Selected autocomplete note is \(expectedNumberOfAutocompletedCards)")
-        let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
-        XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedCards)
+        step("Given I clean the DB and create a note named: \(cardNameToBeCreated)"){
+            helper.cleanupDB(logout: false)
+            createDestinationNote(journalView, cardNameToBeCreated)
+        }
+
+        step("When I search in omnibox change note using shortcut"){
+            omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
+            _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
+            ShortcutsHelper().shortcutActionInvoke(action: .changeDestinationCard)
+        }
+
+        step("Then destination note has a focus, empty search field and a note name"){
+            _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
+            XCTAssertTrue(omniboxView.inputHasFocus(destinationCardSearchField))
+            XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
+            XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat ||
+                destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
+                          "Actual note name is \(String(describing: destinationCardSearchField.placeholderValue))")
+        }
+
+        step("Then Selected autocomplete note is \(expectedNumberOfAutocompletedCards)"){
+            let selectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
+            XCTAssertEqual(selectedResultQuery.count, expectedNumberOfAutocompletedCards)
+        }
+
     }
 }

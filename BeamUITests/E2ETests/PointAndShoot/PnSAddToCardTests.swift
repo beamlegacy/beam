@@ -12,15 +12,17 @@ class PnSAddToCardTests: BaseTest {
        
     let cardNameToBeCreated = "PnS Note"
     let shortcutsHelper = ShortcutsHelper()
-        let waitHelper = WaitHelper()
-        let pnsView = PnSTestView()
-        let webView = WebTestView()
-        let titles = [
-            "Point And Shoot Test Fixture Ultralight Beam",
-            "Point And Shoot Test Fixture I-Beam",
-            "Point And Shoot Test Fixture Cursor"
-        ]
-    
+    let waitHelper = WaitHelper()
+    let pnsView = PnSTestView()
+    let webView = WebTestView()
+    let titles = [
+        "Point And Shoot Test Fixture Ultralight Beam",
+        "Point And Shoot Test Fixture I-Beam",
+        "Point And Shoot Test Fixture Cursor"
+    ]
+    var cardNotes: [XCUIElement]?
+    var cardView: CardTestView?
+
     func SKIPtestAddTextToTodaysCard() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
         let journalView = launchApp()
@@ -28,28 +30,34 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
         let expectedItemText1 = "Point And Shoot Test Fixture Cursor"
         let expectedItemText2 = "Go to UITests-1"
+        var todaysDateInCardTitleFormat: String?
         
-        print("Given I open Test page")
-        helper.openTestPage(page: .page3)
+        step("Given I open Test page"){
+            helper.openTestPage(page: .page3)
+        }
         
-        print("When I point and shoot the following text and add it to Todays card")
-        let prefix = "Go to "
-        let linkText = "UITests-1"
-        let parent = pnsView.app.webViews.containing(.staticText, identifier: linkText).element
-        let textElement = parent.staticTexts[prefix].firstMatch
-        pnsView.addToTodayCard(textElement)
-        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+        step("When I point and shoot the following text and add it to Todays card"){
+            let prefix = "Go to "
+            let linkText = "UITests-1"
+            let parent = pnsView.app.webViews.containing(.staticText, identifier: linkText).element
+            let textElement = parent.staticTexts[prefix].firstMatch
+            pnsView.addToTodayCard(textElement)
+            todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+        }
         
-        print("Then it is successfully added to the note")
-        XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(todaysDateInCardTitleFormat))
-        OmniBoxTestView().navigateToCardViaPivotButton()
-        journalView.waitForJournalViewToLoad()
-        let cardNotes = CardTestView().getCardNotesForVisiblePart()
+        step("Then it is successfully added to the note"){
+            XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(todaysDateInCardTitleFormat!))
+            OmniBoxTestView().navigateToCardViaPivotButton()
+            journalView.waitForJournalViewToLoad()
+            cardNotes = CardTestView().getCardNotesForVisiblePart()
+        }
         
-        print("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the note")
-        XCTAssertEqual(cardNotes.count, 2)
-        XCTAssertEqual(cardNotes[0].value as? String, expectedItemText1)
-        XCTAssertEqual(cardNotes[1].value as? String, expectedItemText2)
+        step("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the note"){
+            XCTAssertEqual(cardNotes!.count, 2)
+            XCTAssertEqual(pnsView.getElementStringValue(element:  cardNotes![0]), expectedItemText1)
+            XCTAssertEqual(pnsView.getElementStringValue(element:cardNotes![1]), expectedItemText2)
+        }
+
     }
     
     func testAddTextToNewCard() {
@@ -57,101 +65,113 @@ class PnSAddToCardTests: BaseTest {
         UITestsMenuBar().destroyDB()
         let helper = BeamUITestsHelper(pnsView.app)
         
-        print("Given I open Test page")
-        helper.openTestPage(page: .page3)
+        step("Given I open Test page"){
+            helper.openTestPage(page: .page3)
+            let textElementToAdd = pnsView.staticText(" capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime")
+            pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, true)
+        }
     
-        let textElementToAdd = pnsView.staticText(" capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime")
+        step("Then it is successfully added to the note"){
+            OmniBoxTestView().navigateToCardViaPivotButton()
+            cardView = CardTestView()
+            _ = cardView!.waitForCardViewToLoad()
+            cardNotes = cardView!.getCardNotesForVisiblePart()
+        }
         
-        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, true)
         
-        print("Then it is successfully added to the note")
-        // Commented out as far as it is too unreliable
-        //XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(cardNameToBeCreated))
-        OmniBoxTestView().navigateToCardViaPivotButton()
-        let cardView = CardTestView()
-        _ = cardView.waitForCardViewToLoad()
-        let cardNotes = cardView.getCardNotesForVisiblePart()
-        
-        print("Then 2 non-empty notes are added")
-        XCTAssertEqual(cardNotes.count, 2)
-        XCTAssertNotEqual(cardView.getElementStringValue(element: cardNotes[0]), emptyString, "note added is an empty string")
+        step("Then 2 non-empty notes are added"){
+            XCTAssertEqual(cardNotes!.count, 2)
+            XCTAssertNotEqual(cardView!.getElementStringValue(element: cardNotes![0]), emptyString, "note added is an empty string")
+        }
+
     }
     
     func testAddTextToExistingCard() {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(pnsView.app)
-        print("Given I create \(cardNameToBeCreated) note")
-        //To be replaced with UITests helper - note creation
-        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
-        
-        print("Given I open Test page")
-        helper.openTestPage(page: .page3)
-    
-        let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
-        
-        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
-        
-        print("Then it is successfully added to the note")
-        XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        OmniBoxTestView().navigateToCardViaPivotButton()
-        _ = cardView.waitForCardViewToLoad()
-        let cardNotes = cardView.getCardNotesForVisiblePart()
-        
-        print("Then 2 non-empty notes are added to an empty first one?")
-        XCTAssertTrue(cardNotes.count == 2 || cardNotes.count == 3) //CI specific issue handling
-        if cardNotes.count == 2 {
-            XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), "Point And Shoot Test Fixture Cursor")
-            XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
-        } else {
-            XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), emptyString)
-            XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), "Point And Shoot Test Fixture Cursor")
-            XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[2]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+        step("Given I create \(cardNameToBeCreated) note"){
+            //To be replaced with UITests helper - note creation
+            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         }
+        
+        step("Given I open Test page"){
+            helper.openTestPage(page: .page3)
+            let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
+            pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
+        }
+    
+        step("Then it is successfully added to the note"){
+            XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            OmniBoxTestView().navigateToCardViaPivotButton()
+            _ = cardView!.waitForCardViewToLoad()
+            cardNotes = cardView!.getCardNotesForVisiblePart()
+        }
+
+        step("Then 2 non-empty notes are added to an empty first one?"){
+            XCTAssertTrue(cardNotes!.count == 2 || cardNotes!.count == 3) //CI specific issue handling
+            if cardNotes!.count == 2 {
+                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![0]), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+            } else {
+                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![0]), emptyString)
+                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![1]), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![2]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+            }
+        }
+        
     }
     
     func testAddTextUsingNotes() {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(pnsView.app)
-        print("Given I create \(cardNameToBeCreated) note")
-        //To be replaced with UITests helper - note creation
-        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        step("Given I create \(cardNameToBeCreated) note"){
+            //To be replaced with UITests helper - note creation
+            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        }
         
-        print("Given I open Test page")
-        helper.openTestPage(page: .page3)
+        step("Given I open Test page"){
+            helper.openTestPage(page: .page3)
+        }
         
-        testRailPrint("When I collect a text via PnS")
-        let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
-        
-        pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
-        
-        print("Then it is successfully added to the note")
-        OmniBoxTestView().navigateToCardViaPivotButton()
-        _ = cardView.waitForCardViewToLoad()
-        let cardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertTrue(cardNotes.count == 2 || cardNotes.count == 3) //CI specific issue handling
+        step ("When I collect a text via PnS"){
+            let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
+            pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
+        }
+
+        step("Then it is successfully added to the note"){
+            OmniBoxTestView().navigateToCardViaPivotButton()
+            _ = cardView!.waitForCardViewToLoad()
+            cardNotes = cardView!.getCardNotesForVisiblePart()
+            XCTAssertTrue(cardNotes!.count == 2 || cardNotes!.count == 3) //CI specific issue handling
+        }
+
     }
     
     func testCollectImage() {
         let journalView = launchApp()
         let helper = BeamUITestsHelper(journalView.app)
         helper.tapCommand(.resizeSquare1000)
-        print("Given I create \(cardNameToBeCreated) note")
-        journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        step("Given I create \(cardNameToBeCreated) note"){
+            journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        }
         
-        testRailPrint("Then I successfully collect gif")
-        helper.openTestPage(page: .page2)
-        let webView = WebTestView()
-        let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
-        pnsView.addToCardByName(gifItemToAdd, cardNameToBeCreated)
-        let cardView = webView.openDestinationCard()
-        XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
-        
-        testRailPrint("Then I successfully collect image")
-        helper.openTestPage(page: .page4)
-        let imageItemToAdd = pnsView.image("forest")
-        pnsView.addToCardByName(imageItemToAdd, cardNameToBeCreated)
-        webView.openDestinationCard()
-        XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
+        step ("Then I successfully collect gif"){
+            helper.openTestPage(page: .page2)
+            let webView = WebTestView()
+            let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
+            pnsView.addToCardByName(gifItemToAdd, cardNameToBeCreated)
+            cardView = webView.openDestinationCard()
+            XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
+        }
+
+        step ("Then I successfully collect image"){
+            helper.openTestPage(page: .page4)
+            let imageItemToAdd = pnsView.image("forest")
+            pnsView.addToCardByName(imageItemToAdd, cardNameToBeCreated)
+            webView.openDestinationCard()
+            XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
+        }
+
     }
     
     func testCollectVideo() throws {
@@ -162,17 +182,19 @@ class PnSAddToCardTests: BaseTest {
         let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
         pnsView.addToTodayCard(itemToCollect)
 
-        testRailPrint("Then switch to journal")
-        let cardView = OmniBoxTestView().navigateToCardViaPivotButton()
-        journalView.waitForJournalViewToLoad()
+        step ("Then switch to journal"){
+            cardView = OmniBoxTestView().navigateToCardViaPivotButton()
+            journalView.waitForJournalViewToLoad()
+        }
 
-        testRailPrint("Then the note contains video link")
-        let cardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertEqual(cardNotes.count, 2)
-        if let videoNote = cardNotes[1].value as? String {
-            XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
-        } else {
-            XCTFail("expected cardNote[0].value to be a string")
+        step ("Then the note contains video link"){
+            cardNotes = cardView!.getCardNotesForVisiblePart()
+            XCTAssertEqual(cardNotes!.count, 2)
+            if let videoNote = cardView?.getElementStringValue(element:  cardNotes![1]) {
+                XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
+            } else {
+                XCTFail("expected cardNote[0].value to be a string")
+            }
         }
     }
 
@@ -182,25 +204,31 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
         helper.tapCommand(.resetCollectAlert)
 
-        testRailPrint("When the journal is first loaded the note is empty by default")
-        let cardView = CardTestView()
-        let beforeCardNotes = cardView.getCardNotesForVisiblePart()
-        XCTAssertEqual(beforeCardNotes.count, 1)
-        XCTAssertEqual(cardView.getElementStringValue(element: beforeCardNotes[0]), emptyString)
-        helper.openTestPage(page: .media)
-        let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
-        pnsView.addToTodayCard(itemToCollect)
+        step ("When the journal is first loaded the note is empty by default"){
+            cardView = CardTestView()
+            let beforeCardNotes = cardView!.getCardNotesForVisiblePart()
+            XCTAssertEqual(beforeCardNotes.count, 1)
+            XCTAssertEqual(cardView!.getElementStringValue(element: beforeCardNotes[0]), emptyString)
+            helper.openTestPage(page: .media)
+            let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
+            pnsView.addToTodayCard(itemToCollect)
+        }
 
-        testRailPrint("Then Failed to collect message appears")
-        pnsView.passFailedToCollectPopUpAlert()
-        XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        OmniBoxTestView().navigateToCardViaPivotButton()
-        journalView.waitForJournalViewToLoad()
 
-        testRailPrint("Then the note is still empty")
-        let cardNotes = CardTestView().getCardNotesForVisiblePart()
-        XCTAssertEqual(cardNotes.count, 1)
-        XCTAssertTrue(cardView.getElementStringValue(element: cardNotes[0]) == emptyString || cardView.getElementStringValue(element: cardNotes[0]) == "Media Player Test Page") //CI specific issue handling
+        step ("Then Failed to collect message appears"){
+            pnsView.passFailedToCollectPopUpAlert()
+            XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            OmniBoxTestView().navigateToCardViaPivotButton()
+            journalView.waitForJournalViewToLoad()
+        }
+
+
+        step ("Then the note is still empty"){
+            cardNotes = CardTestView().getCardNotesForVisiblePart()
+            XCTAssertEqual(cardNotes!.count, 1)
+            XCTAssertTrue(cardView!.getElementStringValue(element: cardNotes![0]) == emptyString || cardView!.getElementStringValue(element: cardNotes![0]) == "Media Player Test Page") //CI specific issue handling
+        }
+
     }
     
     func testCollectFullPage() {
@@ -209,21 +237,25 @@ class PnSAddToCardTests: BaseTest {
         let shortcutsHelper = ShortcutsHelper()
         let expectedNoteText = "Point And Shoot Test Fixture Cursor"
         
-        testRailPrint("Given I open Test page")
-        helper.openTestPage(page: .page3)
+        step ("Given I open Test page"){
+            helper.openTestPage(page: .page3)
+        }
         
-        testRailPrint("When I collect full page")
-        shortcutsHelper.shortcutActionInvoke(action: .collectFullPage)
-        pnsView.waitForCollectPopUpAppear()
-        pnsView.typeKeyboardKey(.enter)
-        shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
+        step ("When I collect full page"){
+            shortcutsHelper.shortcutActionInvoke(action: .collectFullPage)
+            pnsView.waitForCollectPopUpAppear()
+            pnsView.typeKeyboardKey(.enter)
+            shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
+        }
         
-        testRailPrint("Then I see \(expectedNoteText) as collected link")
-        let cardView = CardTestView()
-        let cardNotes = cardView.getCardNotesForVisiblePart()
-        //To be refactored once BE-2117 merged
-        XCTAssertEqual(cardNotes.count, 1)
-        XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
+        step ("Then I see \(expectedNoteText) as collected link"){
+            cardView = CardTestView()
+            cardNotes = cardView!.getCardNotesForVisiblePart()
+            //To be refactored once BE-2117 merged
+            XCTAssertEqual(cardNotes!.count, 1)
+            XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![0]), expectedNoteText)
+        }
+
     }
     
     func testFramePositionPlacementOnSelect() {
@@ -234,100 +266,121 @@ class PnSAddToCardTests: BaseTest {
         let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
         let parentElement = pnsView.staticText(searchText).firstMatch
 
-        testRailPrint("When I click and drag between start and end of full text")
-        webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
+        step ("When I click and drag between start and end of full text"){
+            webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
+        }
 
-        testRailPrint("Then I see Shoot Frame Selection after Option button press")
-        pnsView.pressOptionButtonFor(seconds: 1)
-        XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
+        step ("Then I see Shoot Frame Selection after Option button press"){
+            pnsView.pressOptionButtonFor(seconds: 1)
+            XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
+        }
         
-        /*testRailPrint("TBD") //Scroll to be fixed
+        /*step (""){
+            
+        }("TBD") //Scroll to be fixed
         webView.scrollDown()
         XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
         
-        testRailPrint("TBD")
+        step (""){
+            
+        }("TBD")
         webView.scrollUp()
         XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))*/
         
-        testRailPrint("Then I see Shoot Frame Selection remained after zoom in")
-        pnsView.zoomIn(numberOfTimes: 3)
-        XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
-        
-        testRailPrint("Then I see Shoot Frame Selection remained after zoom out")
-        pnsView.zoomOut(numberOfTimes: 3)
-        XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
-        
-        testRailPrint("Then I see Shoot Frame Selection remained after window resize")
-        helper.tapCommand(.resizeWindowPortrait)
-        XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
+        step ("And I see Shoot Frame Selection remained after zoom in"){
+            pnsView.zoomIn(numberOfTimes: 3)
+            XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
+        }
 
-        testRailPrint("Then after shooting then pressing and releasing option shouldn't keep shootframe active")
-        helper.addNote()
-        pnsView.pressOptionButtonFor(seconds: 1)
-        XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(0))
+        step ("And I see Shoot Frame Selection remained after zoom out"){
+            pnsView.zoomOut(numberOfTimes: 3)
+            XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
+        }
+
+        step ("And I see Shoot Frame Selection remained after window resize"){
+            helper.tapCommand(.resizeWindowPortrait)
+            XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(1))
+        }
+
+        step ("And after shooting then pressing and releasing option shouldn't keep shootframe active"){
+            helper.addNote()
+            pnsView.pressOptionButtonFor(seconds: 1)
+            XCTAssertTrue(pnsView.assertNumberOfAvailableShootFrameSelection(0))
+        }
+
     }
     
     func testFramePositionPlacementOnPoint() throws {
         //Point "frame position placement"
         let helper = BeamUITestsHelper(launchApp().app)
-        helper.tapCommand(.resizeWindowLandscape)
-        helper.openTestPage(page: .page1)
-        
-        let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
-        let parent = webView.staticText(searchText).firstMatch
+        var center: XCUICoordinate?
+        step ("Given I open test page in landscape mode"){
+            helper.tapCommand(.resizeWindowLandscape)
+            helper.openTestPage(page: .page1)
+            
+            let searchText = "The True Story Of Kanye West's \"Ultralight Beam,\" As Told By Fonzworth Bentley"
+            let parent = webView.staticText(searchText).firstMatch
 
-        //let child = parent.staticTexts[searchText]
-        let center = webView.getCenterOfElement(element: parent)
-        // click at middle of searchText to focus on page
-        center.click()
+            center = webView.getCenterOfElement(element: parent)
+            // click at middle of searchText to focus on page
+            center!.click()
+        }
 
-//        let identifierForPositionsAssertion = PnSViewLocators.Other.pointFrame.accessibilityIdentifier
         // Hold option to enable point mode
-        testRailPrint("TBD")
-        XCUIElement.perform(withKeyModifiers: .option) {
-            // While holding option
-            testRailPrint("TBD")
-            center.hover()
-            //sleep(1)
-            XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
-            
-            testRailPrint("TBD")
-            pnsView.zoomIn(numberOfTimes: 3)
-            XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
-            
-            testRailPrint("TBD")
-            pnsView.zoomOut(numberOfTimes: 3)
-            XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
-            
+        step ("When I hold OPTION"){
+            XCUIElement.perform(withKeyModifiers: .option) {
+                // While holding option
+                step ("Then point Frame is available"){
+                    center!.hover()
+                    XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
+                }
+                
+                step ("And point Frame is available after Zooming In"){
+                    pnsView.zoomIn(numberOfTimes: 3)
+                    XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
+                }
+                
+                step ("And point Frame is available after Zooming Out"){
+                    pnsView.zoomOut(numberOfTimes: 3)
+                    XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
+                }
+        
             // Scroll page
-            /*testRailPrint("TBD")
+            /*step (""){
+            
+        }("TBD")
             webView.scrollDown()
             pnsView.assertFramePositions(searchText: searchText, identifier: identifierForPositionsAssertion)*/
             
             // Resize window
-            testRailPrint("TBD")
-            helper.tapCommand(.resizeWindowPortrait)
-            center.hover()
-            XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
-            // Shoot
-            center.click()
-            // Release option
+                step ("And point Frame is available after resizing"){
+                    helper.tapCommand(.resizeWindowPortrait)
+                    center!.hover()
+                    XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
+                    // Shoot
+                    center!.click()
+                    // Release option
+                }
+            }
         }
 
-        testRailPrint("TBD")
-        // PointAndShootPopup is now also visible
-        XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
+        step ("TBD"){
+            // PointAndShootPopup is now also visible
+            XCTAssertTrue(pnsView.assertNumberOfAvailablePointFrames(1))
 
-        // Add to today's note
-        let noteTitle = "Ultralight Beam"
-        helper.addNote(noteTitle: noteTitle)
+            // Add to today's note
+            let noteTitle = "Ultralight Beam"
+            helper.addNote(noteTitle: noteTitle)
 
-        // Assert card association
-        XCUIElement.perform(withKeyModifiers: .option) {
-            // While holding option, hover text
-            // testRailPrint("TBD")
-            // center.hover()
-            // pnsView.assertFramePositions(searchText: searchText, identifier: identifierForPositionsAssertion)
+            // Assert card association
+            XCUIElement.perform(withKeyModifiers: .option) {
+                // While holding option, hover text
+                // step (""){
+                    // center.hover()
+                    // pnsView.assertFramePositions(searchText: searchText, identifier: identifierForPositionsAssertion)
+                //}("TBD")
+                
+            }
         }
     }
     
@@ -344,32 +397,37 @@ class PnSAddToCardTests: BaseTest {
         let parentElement = webView.staticText(searchText).firstMatch
 
        // click and drag between start and end of full text
-       testRailPrint("TBD")
-       webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
+       step ("TBD"){
+           webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
+        }
        
        // click and drag between start and end of full text
        let child = parent.staticTexts[searchText]
        
        // Press option once to enable shoot mode
-       testRailPrint("TBD")
-       pnsView.pressOptionButtonFor(seconds: 1)
-       XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
-       
-       testRailPrint("TBD")
-       let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
-       emptyLocation.click()
-       XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
-       
-       testRailPrint("TBD")
-       webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
-       // Press option once to enable shoot mode
-       pnsView.pressOptionButtonFor(seconds: 1)
-       XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
+       step ("TBD"){
+           pnsView.pressOptionButtonFor(seconds: 1)
+           XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
+        }
 
-       testRailPrint("TBD")
-       // dismiss shootCardPicker with escape
-       webView.typeKeyboardKey(.escape)
-       XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+       step ("TBD"){
+           let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
+           emptyLocation.click()
+           XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+        }
+
+       step ("TBD"){
+           webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
+           // Press option once to enable shoot mode
+           pnsView.pressOptionButtonFor(seconds: 1)
+           XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
+       }
+
+       step ("TBD"){
+          // dismiss shootCardPicker with escape
+          webView.typeKeyboardKey(.escape)
+          XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+        }
     }
     
     
@@ -379,18 +437,20 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         let webView = WebTestView()
 
-        testRailPrint("Given I open a test page")
-        helper.openTestPage(page: .page1)
+        step ("Given I open a test page"){
+            helper.openTestPage(page: .page1)
+        }
 
-        testRailPrint("Then I'm not redireceted after pointing a URL")
-        // Press option once to enable pointing mode
-        XCUIElement.perform(withKeyModifiers: .option) {
-            sleep(1)
-            // get the url before clicking
-            let beforeUrl = webView.getTabUrlAtIndex(index: 0)
-            webView.staticText("I-Beam").clickOnExistence()
-            // compare with url after clicking
-            XCTAssertEqual(beforeUrl, webView.getTabUrlAtIndex(index: 0))
+        step ("Then I'm not redireceted after pointing a URL"){
+            // Press option once to enable pointing mode
+            XCUIElement.perform(withKeyModifiers: .option) {
+                sleep(1)
+                // get the url before clicking
+                let beforeUrl = webView.getTabUrlAtIndex(index: 0)
+                webView.staticText("I-Beam").clickOnExistence()
+                // compare with url after clicking
+                XCTAssertEqual(beforeUrl, webView.getTabUrlAtIndex(index: 0))
+            }
         }
     }
     
@@ -442,9 +502,5 @@ class PnSAddToCardTests: BaseTest {
         XCTAssertTrue(page2Link.waitForExistence(timeout: 4))
         page2Link.tap()
         helper.showJournal()
-        // let title2Predicate = NSPredicate(format: "value = %@", titles[1])
-        // XCTAssertTrue(journalChildren.element(matching: title2Predicate).waitForExistence(timeout: 4))
-        // XCTAssertEqual(journalChildren.count, 3)
-        // XCTAssertEqual(journalChildren.element(boundBy: 2).value as? String, titles[1])
     }
 }

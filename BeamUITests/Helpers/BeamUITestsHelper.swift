@@ -87,7 +87,7 @@ class BeamUITestsHelper {
     func logsValue() -> String? {
         let allLogsWindow = XCUIApplication().windows["All Logs"]
         allLogsWindow.click()
-        return allLogsWindow.scrollViews.containing(.button, identifier: "Bottom").element.value as? String
+        return BaseView().getElementStringValue(element:  allLogsWindow.scrollViews.containing(.button, identifier: "Bottom").element)
     }
 
     func makeDeviceScreenShot() {

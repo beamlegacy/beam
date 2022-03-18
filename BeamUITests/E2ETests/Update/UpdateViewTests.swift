@@ -19,26 +19,32 @@ class UpdateViewTests: BaseTest {
     }
     
     func testUpdateViewAppearance() {
-        testRailPrint("Given I enable Update for the app")
-        helper.tapCommand(.setAutoUpdateToMock)
-        testRailPrint("Then I can open and close it. It has required items")
-        let updateView = journalView.clickUpdateNow()
-        XCTAssertTrue(updateView.button(UpdateViewLocators.Buttons.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-        updateView.closeUpdateWindow()
-        XCTAssertTrue(WaitHelper().waitForDoesntExist( updateView.button(UpdateViewLocators.Buttons.updateNowButton.accessibilityIdentifier)))
-        //Beam app should be a default browser. TBD
-        //XCTAssertEqual(journalView.clickUpdateNow().viewAll().getNumberOfTabs(), 1)
+        step ("Given I enable Update for the app"){
+            helper.tapCommand(.setAutoUpdateToMock)
+        }
+        
+        step ("Then I can open and close it. It has required items"){
+            let updateView = journalView.clickUpdateNow()
+            XCTAssertTrue(updateView.button(UpdateViewLocators.Buttons.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            updateView.closeUpdateWindow()
+            XCTAssertTrue(WaitHelper().waitForDoesntExist( updateView.button(UpdateViewLocators.Buttons.updateNowButton.accessibilityIdentifier)))
+        }
     }
     
     func testUpdateAvailableEverywhereInCardView() {
-        testRailPrint("Given I enable Update for the app")
-        helper.tapCommand(.setAutoUpdateToMock)
-        XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        journalView.createCardViaOmniboxSearch("Update")
-        testRailPrint("Then it is visible in note view")
-        XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-        let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
-        testRailPrint("Then it is visible in All notes view")
-        XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        step ("Given I enable Update for the app"){
+            helper.tapCommand(.setAutoUpdateToMock)
+            XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            journalView.createCardViaOmniboxSearch("Update")
+        }
+
+        step ("Then it is visible in note view"){
+            XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        }
+
+        step ("Then it is visible in All notes view"){
+            let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+            XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        }
     }
 }
