@@ -71,6 +71,9 @@ struct ModeView: View {
                     state.data.reloadAllEvents()
                 }
                 contentIsScrolled = false
+                guard !transitionModel.isTransitioning && state.mode == .today else { return }
+                state.startShowingOmnibox()
+                state.autocompleteManager.clearAutocompleteResults()
             }
             .onChange(of: transitionModel.isTransitioning) { isTransitioning in
                 guard !isTransitioning && state.mode == .today else { return }
