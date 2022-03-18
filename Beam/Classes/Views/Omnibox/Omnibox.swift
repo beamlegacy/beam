@@ -175,7 +175,7 @@ struct OmniboxContainer: View {
             if state.showOmnibox {
                 boxInstance
                 .transition(.asymmetric(insertion: .opacity.animation(.easeInOut(duration: 0.1)),
-                                        removal: .opacity.animation(.easeInOut(duration: 0.06))))
+                                        removal: .identity))
                 .onDisappear {
                     if state.keepDestinationNote {
                         state.keepDestinationNote = false
