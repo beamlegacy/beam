@@ -108,7 +108,8 @@ UITestThread1:
     when: always
     paths:
       - cobertura.xml
-      - fastlane/test_output/tests.xml
+      - fastlane/test_output
+      - screenshots
       - allure-report
       - logs
     reports:
@@ -146,7 +147,8 @@ UITestThread2:
     when: always
     paths:
       - cobertura.xml
-      - fastlane/test_output/tests.xml
+      - fastlane/test_output
+      - screenshots
       - allure-report
       - logs
     reports:
@@ -184,7 +186,8 @@ UITestThread3:
     when: always
     paths:
       - cobertura.xml
-      - fastlane/test_output/tests.xml
+      - fastlane/test_output
+      - screenshots
       - allure-report
       - logs
     reports:
@@ -222,7 +225,8 @@ UITestThread4:
     when: always
     paths:
       - cobertura.xml
-      - fastlane/test_output/tests.xml
+      - fastlane/test_output
+      - screenshots
       - allure-report
       - logs
     reports:
@@ -260,7 +264,8 @@ UITestThread5:
     when: always
     paths:
       - cobertura.xml
-      - fastlane/test_output/tests.xml
+      - fastlane/test_output
+      - screenshots
       - allure-report
       - logs
     reports:
