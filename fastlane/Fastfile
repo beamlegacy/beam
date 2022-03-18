@@ -151,6 +151,9 @@ platform :mac do
         sh "npm install allure-commandline"
         sh "brew tap adoptopenjdk/openjdk"
         sh "brew install --cask adoptopenjdk8"
+        sh "cd fastlane/test_output/*.xcresult/Data" 
+        sh "(file data* | grep 'HEIF Image' || echo '') | cut -f1 -d\":\" | time xargs -n 1 -P 4 -I {} convert {} -quality 50% jpeg:{}"
+        sh "cd ../../"
         sh "xcresults export fastlane/test_output/Beam.xcresult fastlane/allure-result"
         sh "npx allure generate ./fastlane/allure-result --clean"
     end

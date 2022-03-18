@@ -88,7 +88,7 @@ class WebTestView: BaseView {
         UITestsMenuBar().showWebViewCount()
         let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
         var intValue: Int?
-        if let value = (element.value as? String)?.split(separator: ":").last {
+        if let value = self.getElementStringValue(element: element).split(separator: ":").last {
             intValue = Int(value)
         }
         app.dialogs.buttons.firstMatch.click()
@@ -126,7 +126,7 @@ class WebTestView: BaseView {
     }
 
     func getTabUrlAtIndex(index: Int) -> String {
-        return getTabURLElementByIndex(index: index).value as? String ?? errorFetchStringValue
+        return self.getElementStringValue(element:  getTabURLElementByIndex(index: index))
     }
     
     func waitForTabUrlAtIndexToEqual(index: Int, expectedString: String) -> Bool {
