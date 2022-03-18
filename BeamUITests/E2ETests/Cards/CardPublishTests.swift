@@ -10,19 +10,23 @@ import XCTest
 
 class CardPublishTests: BaseTest {
     
+    var cardView: CardTestView?
     func testDefaultPublishStatus() {
         launchApp()
-        testRailPrint("Given I publish default note without being logged in")
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
-        let cardView = AllCardsTestView().openFirstCard()
+        step("Given I publish default note without being logged in"){
+            ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+            cardView = AllCardsTestView().openFirstCard()
+        }
         
-        testRailPrint("Then by default there is no copy link button")
-        XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-        
-        cardView.publishCard()
-        testRailPrint("Then I get the error message and link button doesn't appear")
-        XCTAssertTrue(cardView.staticText("You need to be logged in").waitForExistence(timeout: minimumWaitTimeout))
-        XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        step("Then by default there is no copy link button"){
+            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            cardView!.publishCard()
+        }
+
+        step("Then I get the error message and link button doesn't appear"){
+            XCTAssertTrue(cardView!.staticText("You need to be logged in").waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+        }
     }
     
     func SKIPtestPublishCard() throws {
@@ -33,21 +37,27 @@ class CardPublishTests: BaseTest {
         //UITestsMenuBar().logout()
         UITestsMenuBar().signInApp()
         
-        testRailPrint("Given I create \(cardNameToBeCreated) note")
-        //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
-                                                                        
-        testRailPrint("Then the note is private by default")
-        XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        step("Given I create \(cardNameToBeCreated) note"){
+            //To be replaced with UITests helper - card creation
+            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        }
+
+        step("Then the note is private by default"){
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        }
                         
-        testRailPrint("When I publish the note")
-        cardView.publishCard()
+        step("When I publish the note"){
+            cardView!.publishCard()
+        }
         
-        testRailPrint("Then published label and link icon are displayed")
-        XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.publishedLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        XCTAssertTrue(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        step("Then published label and link icon are displayed"){
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishedLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        }
+
+        step("Then I can open the link in web browser"){
         
-        testRailPrint("Then I can open the link in web browser")
+        }
     }
     
     func SKIPtestPublishedCardContentCorrectness() throws {
@@ -59,16 +69,20 @@ class CardPublishTests: BaseTest {
         let cardNameToBeCreated = "Unpublish"
         let journalView = launchApp()
         
-        testRailPrint("Given I create \(cardNameToBeCreated) note")
-        //To be replaced with UITests helper - card creation
-        let cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
-        
-        testRailPrint("When I publish and then unpublish the note")
-        cardView.publishCard()
-        cardView.unpublishCard()
-        
-        testRailPrint("Then private label and lock icon are displayed")
-        XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-        XCTAssertTrue(cardView.image(CardViewLocators.Buttons.privateLock.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        step("Given I create \(cardNameToBeCreated) note"){
+            //To be replaced with UITests helper - card creation
+            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        }
+
+        step("When I publish and then unpublish the note"){
+            cardView!.publishCard()
+            cardView!.unpublishCard()
+        }
+
+        step("Then private label and lock icon are displayed"){
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.privateLock.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+        }
+
     }    
 }
