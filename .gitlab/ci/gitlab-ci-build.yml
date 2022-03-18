@@ -16,7 +16,14 @@ build:macos:
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
-    - time bundle exec fastlane build
+    - |-
+        time bundle exec fastlane build
+        if [[ ! ${BUILD_DMG_DISABLED} ]] && [[ ${CI_PIPELINE_SOURCE} != "schedule" ]]
+        then
+          bundle exec fastlane notarize_build
+          ./scripts/build_dmg.sh
+          ./scripts/build_zip.sh
+        fi
   tags:
     - macos-mono
   interruptible: true
