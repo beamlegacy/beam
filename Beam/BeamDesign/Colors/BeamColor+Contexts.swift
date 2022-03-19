@@ -144,6 +144,8 @@ extension BeamColor {
                                                        darkColor: .From(color: .black), darkAlpha: 0.4)
         static let separatorColor = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.8,
                                                         darkColor: .Mercury, darkAlpha: 0.3)
+        static let selectedActionBackground = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.9, darkColor: .Nero, darkAlpha: 0.65)
+        static let clickedActionBackground = BeamColor.combining(lightColor: .AlphaGray, lightAlpha: 0.6, darkColor: .AlphaGray, darkAlpha: 0.6)
     }
 }
 
