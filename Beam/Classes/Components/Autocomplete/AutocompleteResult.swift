@@ -173,7 +173,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         switch source {
         case .note, .createNote:
             canMatchInside = false
-        case .searchEngine:
+        case .searchEngine, .action:
             canReplaceBase = false
         default:
             break

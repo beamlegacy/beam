@@ -233,9 +233,6 @@ import Sentry
             notesFocusedStates.currentFocusedState = notesFocusedStates.getSavedNoteFocusedState(noteId: note.id)
         }
 
-        autocompleteManager.resetQuery()
-        autocompleteManager.autocompleteSelectedIndex = nil
-
         backForwardList.push(.note(note))
         updateCanGoBackForward()
         return true
@@ -252,8 +249,6 @@ import Sentry
 
         currentPage = nil
         currentNote = nil
-        autocompleteManager.resetQuery()
-        autocompleteManager.autocompleteSelectedIndex = nil
 
         if clearNavigation {
             backForwardList.clear()
@@ -269,8 +264,6 @@ import Sentry
         mode = .page
 
         currentNote = nil
-        autocompleteManager.resetQuery()
-        autocompleteManager.autocompleteSelectedIndex = nil
         stopFocusOmnibox()
         currentPage = page
         backForwardList.push(.page(page))
@@ -489,10 +482,9 @@ import Sentry
             if let noteTitle = result.information {
                 navigateToNote(fetchOrCreateNoteForQuery(noteTitle))
             } else {
-                autocompleteManager.mode = .noteCreation
+                autocompleteManager.animateToMode(.noteCreation)
             }
         }
-        autocompleteManager.clearAutocompleteResults()
     }
 
     func startOmniboxQuery(selectingNewIndex: Int? = nil) {
@@ -501,9 +493,6 @@ import Sentry
 
         if let result = autocompleteManager.autocompleteResult(at: selectingNewIndex ?? autocompleteManager.autocompleteSelectedIndex) {
             selectAutocompleteResult(result)
-            DispatchQueue.main.async { [unowned self] in
-                self.autocompleteManager.resetQuery()
-            }
             return
         }
         stopFocusOmnibox()
@@ -522,9 +511,6 @@ import Sentry
         }
         autocompleteManager.clearAutocompleteResults()
         mode = .web
-        DispatchQueue.main.async { [unowned self] in
-            self.autocompleteManager.resetQuery()
-        }
     }
 
     override public init() {
@@ -643,8 +629,8 @@ import Sentry
     }
 
     func stopFocusOmnibox() {
+        guard focusOmniBox else { return }
         focusOmniBox = false
-        autocompleteManager.mode = .general
     }
 
     func startNewSearch() {

@@ -17,27 +17,26 @@ struct OmniboxSearchField: View {
 
     @Binding var isEditing: Bool
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
-    var enableAnimations: Bool = true
 
     private var textFieldText: Binding<String> {
         $autocompleteManager.searchQuery
     }
 
-    private var placeholder: String {
-        if autocompleteManager.mode == .noteCreation {
+    private func placeholder(for mode: AutocompleteManager.Mode) -> String {
+        if mode == .noteCreation {
             return loc("Create Note")
         }
         return loc("Search the web and your notes")
     }
 
-    private var leadingIconName: String? {
+    private func leadingIconName(for mode: AutocompleteManager.Mode) -> String? {
         if let tab = browserTabsManager.currentTab, let url = tab.url,
            state.mode == .web,
            autocompleteManager.searchQuery == url.absoluteString {
             return AutocompleteResult.Source.url.iconName
         } else if let autocompleteResult = selectedAutocompleteResult {
             return autocompleteResult.icon
-        } else if autocompleteManager.mode == .noteCreation {
+        } else if mode == .noteCreation {
             return AutocompleteResult.Source.createNote.iconName
         }
 
@@ -94,6 +93,8 @@ struct OmniboxSearchField: View {
         BeamColor.Generic.blueTextSelection
     }
     private let textFont = BeamFont.regular(size: 17)
+    private let placeholderFont = BeamFont.light(size: 17)
+    private let placeholderColor = BeamColor.Generic.placeholder
 
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
@@ -103,7 +104,7 @@ struct OmniboxSearchField: View {
                     .scaledToFit()
                     .frame(width: 16)
                     .transition(.identity)
-            } else if let iconName = leadingIconName {
+            } else if let iconName = leadingIconName(for: autocompleteManager.mode) {
                 Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
                     .transition(.identity)
             }
@@ -111,11 +112,11 @@ struct OmniboxSearchField: View {
                 BeamTextField(
                     text: textFieldText,
                     isEditing: $isEditing,
-                    placeholder: placeholder,
+                    placeholder: placeholder(for: autocompleteManager.mode),
                     font: textFont.nsFont,
                     textColor: textColor.nsColor,
-                    placeholderFont: BeamFont.light(size: 17).nsFont,
-                    placeholderColor: BeamColor.Generic.placeholder.nsColor,
+                    placeholderFont: placeholderFont.nsFont,
+                    placeholderColor: placeholderColor.nsColor,
                     selectedRange: autocompleteManager.searchQuerySelectedRange,
                     selectedRangeColor: textSelectionColor.nsColor,
                     textWillChange: { autocompleteManager.replacementTextForProposedText($0) },
@@ -160,8 +161,11 @@ struct OmniboxSearchField: View {
                     .lineLimit(1)
                 }
             }
+
         }
-        .animation(nil)
+        // UITests on BigSur fails when setting textfield opacity to zero.
+        .opacity(autocompleteManager.animatingToMode != nil ? 0.01 : 1)
+        .overlay(animatingToModeOverlay(with: autocompleteManager))
     }
 
     func onEnterPressed(modifierFlags: NSEvent.ModifierFlags?) {
@@ -170,21 +174,16 @@ struct OmniboxSearchField: View {
             if let createCardIndex = autocompleteManager.autocompleteResults.firstIndex(where: { (result) -> Bool in
                 return result.source == .createNote
             }) {
-                autocompleteManager.autocompleteSelectedIndex = createCardIndex
+                state.startOmniboxQuery(selectingNewIndex: createCardIndex)
+                return
             }
         }
-        startQuery()
+        guard !autocompleteManager.searchQuery.isEmpty else { return }
+        state.startOmniboxQuery()
     }
 
     func unfocusField() {
         isEditing = false
-    }
-
-    func startQuery() {
-        if autocompleteManager.searchQuery.isEmpty {
-            return
-        }
-        state.startOmniboxQuery()
     }
 
     func handleCursorMovement(_ move: CursorMovement) -> Bool {
@@ -218,8 +217,48 @@ struct OmniboxSearchField: View {
     private func onBackspacePressed() {
         if autocompleteManager.searchQuery.isEmpty && autocompleteManager.mode != .general {
             autocompleteManager.mode = .general
+            autocompleteManager.setQuery("", updateAutocompleteResults: true)
         }
     }
+}
+
+// MARK: Mode Animations
+extension OmniboxSearchField {
+    fileprivate func animatingToModeOverlay(with autocompleteManager: AutocompleteManager) -> some View {
+        let isAnimating = autocompleteManager.animatingToMode != nil
+        return Color.clear
+            .overlay(!isAnimating ? nil : fakeSearchField(for: autocompleteManager.mode, animatingOut: true),
+                     alignment: .leading)
+            .overlay(!isAnimating ? nil : fakeSearchField(for: autocompleteManager.animatingToMode ?? .general, animatingOut: false),
+                     alignment: .leading)
+            .allowsHitTesting(false)
+    }
+
+    private func fakeSearchField(for mode: AutocompleteManager.Mode, animatingOut: Bool) -> some View {
+        var transition: AnyTransition
+        if animatingOut {
+            transition = .asymmetric(insertion: .modifier(active: _OpacityEffect(opacity: 1), identity: _OpacityEffect(opacity: 0))
+                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 10)))
+                                        .animation(BeamAnimation.easeInOut(duration: 0.1)),
+                                     removal: .identity)
+        } else {
+            transition = .asymmetric(insertion: .opacity
+                                        .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 10)))
+                                        .animation(BeamAnimation.easeInOut(duration: 0.1).delay(0.05)),
+                                     removal: .identity)
+        }
+        return HStack(spacing: BeamSpacing._120) {
+            if let iconName = leadingIconName(for: mode) {
+                Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
+            }
+            Text(placeholder(for: mode))
+                .font(textFont.swiftUI)
+                .foregroundColor(placeholderColor.swiftUI)
+        }
+        .offset(x: 0, y: animatingOut ? -10 : 0)
+        .transition(transition)
+    }
+
 }
 
 struct OmniboxSearchField_Previews: PreviewProvider {

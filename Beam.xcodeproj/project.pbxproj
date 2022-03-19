@@ -912,6 +912,7 @@
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
 		A51058102786E7E600E4F1F2 /* BrowserTab+WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */; };
 		A5105ADF26F3863B00E9A0BA /* TableHeaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */; };
+		A5141FF027E3E19F009D2D71 /* AutocompleteManager+Animations.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5141FEF27E3E19F009D2D71 /* AutocompleteManager+Animations.swift */; };
 		A5144001263803600021DD56 /* TrackableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5144000263803600021DD56 /* TrackableScrollView.swift */; };
 		A5153EDD260CC4DC00C84902 /* ButtonLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */; };
 		A5153EE3260DD58A00C84902 /* RecentsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5153EE2260DD58A00C84902 /* RecentsManager.swift */; };
@@ -2327,6 +2328,7 @@
 		A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowserTab+WebPage.swift"; sourceTree = "<group>"; };
 		A5105ADE26F3863B00E9A0BA /* TableHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableHeaderView.swift; sourceTree = "<group>"; };
 		A5109F902670227800304B3A /* CommandManagerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandManagerTests.swift; sourceTree = "<group>"; };
+		A5141FEF27E3E19F009D2D71 /* AutocompleteManager+Animations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Animations.swift"; sourceTree = "<group>"; };
 		A5144000263803600021DD56 /* TrackableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackableScrollView.swift; sourceTree = "<group>"; };
 		A5153EDC260CC4DC00C84902 /* ButtonLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ButtonLabel.swift; sourceTree = "<group>"; };
 		A5153EE2260DD58A00C84902 /* RecentsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecentsManager.swift; sourceTree = "<group>"; };
@@ -3540,6 +3542,7 @@
 				A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */,
 				A5EE8C6327BB861D00800661 /* AutocompleteManager+DefaultActions.swift */,
 				A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */,
+				A5141FEF27E3E19F009D2D71 /* AutocompleteManager+Animations.swift */,
 				4181715B2581107C00317ED8 /* AutocompleteResult.swift */,
 				418171AB2581107C00317ED8 /* AutocompleteListView.swift */,
 				418171AD2581107C00317ED8 /* AutocompleteItemView.swift */,
@@ -7527,6 +7530,7 @@
 				A05123D927720F00009B81CF /* AccountCalendar.swift in Sources */,
 				9611995E25A27A17005BEC82 /* BeamObjCBridge.m in Sources */,
 				DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */,
+				A5141FF027E3E19F009D2D71 /* AutocompleteManager+Animations.swift in Sources */,
 				96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */,
 				A5C2023B2761FDA2008BB2FB /* TabFaviconView.swift in Sources */,
 				0325629126051D3B006513E4 /* RBDigest.m in Sources */,

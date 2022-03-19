@@ -24,7 +24,7 @@ struct DestinationNoteAutocompleteList: View {
     private let itemHeight: CGFloat = 30
     private let customColorPalette = AutocompleteItemColorPalette(
         textColor: BeamColor.Beam,
-        informationTextColor: BeamColor.LightStoneGray,
+        informationTextColor: BeamColor.Generic.text,
         selectedBackgroundColor: BeamColor.NotePicker.selected,
         touchdownBackgroundColor: BeamColor.NotePicker.active)
 
