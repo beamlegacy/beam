@@ -1514,11 +1514,13 @@ extension GRDBDatabase {
 
         dbReader.asyncRead { (dbResult: Result<GRDB.Database, Error>) in
             do {
+                let joint = PreferencesManager.includeHistoryContentsInOmniBox ? Link.contentAssociation.matching(pattern) : Link.contentAssociation.filter(Column("title").match(pattern))
+
                 let db = try dbResult.get()
                 let destinationAlias = TableAlias()
                 let association = Link.destinationLink.aliased(destinationAlias)
                 let request = Link
-                    .joining(required: Link.contentAssociation.matching(pattern))
+                    .joining(required: joint)
                     .including(optional: association)
                     .order((destinationAlias["frecencyVisitSortScore"] ?? Link.Columns.frecencyVisitSortScore).desc)
                     .limit(limit)
