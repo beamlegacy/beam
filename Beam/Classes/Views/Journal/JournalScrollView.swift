@@ -81,6 +81,7 @@ struct JournalScrollView: NSViewRepresentable {
         if USE_SCROLLVIEW_CACHING {
             state.cachedJournalScrollView = scrollView
         }
+        journalStackView.scrollToTop(animated: false)
         return scrollView
     }
 

@@ -138,7 +138,7 @@ class AutocompleteManager: ObservableObject {
 
     private func shouldDisplayDefaultSuggestions(for searchText: String) -> Bool {
         searchText.isEmpty ||
-        (beamState?.focusOmniBoxFromTab == true && searchText == beamState?.browserTabsManager.currentTab?.url?.absoluteString)
+        (beamState?.omniboxInfo.isFocusedFromTab == true && searchText == beamState?.browserTabsManager.currentTab?.url?.absoluteString)
     }
 
     private func logAutocompleteResultFinished(for searchText: String, finalResults: [AutocompleteResult], startedAt: DispatchTime) {

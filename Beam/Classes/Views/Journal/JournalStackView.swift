@@ -301,4 +301,28 @@ class JournalSimpleStackView: NSView {
             scroll(NSPoint(x: 0, y: offset))
         }
     }
+
+    func scrollToTop(animated: Bool) {
+        guard let scrollView = enclosingScrollView else { return }
+        let y = -scrollView.contentInsets.top
+        if animated {
+            scroll(toVerticalOffset: y)
+        } else {
+            scroll(CGPoint(x: 0, y: y))
+        }
+    }
+
+    func scroll(toVerticalOffset verticalOffset: CGFloat) {
+        guard let scrollView = enclosingScrollView else { return }
+        let clipView = scrollView.contentView
+        let animationDuration = 0.3
+        NSAnimationContext.beginGrouping()
+        NSAnimationContext.current.duration = animationDuration
+        var p = clipView.bounds.origin
+        p.y = verticalOffset
+
+        clipView.animator().setBoundsOrigin(p)
+        scrollView.reflectScrolledClipView(clipView)
+        NSAnimationContext.endGrouping()
+    }
 }

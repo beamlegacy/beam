@@ -16,12 +16,20 @@ extension Omnibox {
         var content: () -> Content
 
         private let boxCornerRadius: CGFloat = 10
-        private let strokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
-        private let backgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
+        private let defaultStrokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.3))
+        private let lowStrokeColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.1), darkColor: .From(color: .white, alpha: 0.15))
+        private let defaultBackgroundColor = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
+        private let lowBackgroundColor = BeamColor.Generic.background
 
         private let baseShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.36), darkColor: .From(color: .black, alpha: 0.7))
         private let pulledShadowColor = BeamColor.combining(lightColor: .From(color: .black, alpha: 0.07), darkColor: .From(color: .black, alpha: 0.3))
 
+        private var backgroundColor: Color {
+            (isLow ? lowBackgroundColor : defaultBackgroundColor).swiftUI
+        }
+        private var strokeColor: Color {
+            (isLow ? lowStrokeColor : defaultStrokeColor).swiftUI
+        }
         private var shadowColor: Color {
             (isLow ? pulledShadowColor.alpha(0) : baseShadowColor).swiftUI
         }
@@ -37,9 +45,9 @@ extension Omnibox {
         var body: some View {
             ZStack(alignment: alignment) {
                 RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .stroke(strokeColor.swiftUI, lineWidth: isLow ? 2 : 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
+                    .stroke(strokeColor, lineWidth: isLow ? 2 : 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
                 RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .fill(backgroundColor.swiftUI)
+                    .fill(backgroundColor)
                     .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
                 content()
                     .cornerRadius(boxCornerRadius)
