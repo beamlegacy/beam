@@ -64,7 +64,7 @@ extension AutocompleteManager {
             })
         }
 
-        static func createNoteResult(for noteTitle: String?, mode: AutocompleteManager.Mode, asAction: Bool = true) -> AutocompleteResult {
+        static func createNoteResult(for noteTitle: String?, mode: AutocompleteManager.Mode, asAction: Bool = true, completingText: String? = nil) -> AutocompleteResult {
             let hasNoteTitle = noteTitle?.isEmpty == false
             var shortcut: Shortcut?
             if mode != .noteCreation {
@@ -78,9 +78,9 @@ extension AutocompleteManager {
             let text = hasNoteTitle ? loc("Create Note:") : loc("Create Note...")
             let source: AutocompleteResult.Source = hasNoteTitle || !asAction ? .createNote : .action
             return AutocompleteResult(text: text, source: source, information: noteTitle, customIcon: icon,
-                                      shortcut: shortcut, completingText: noteTitle, additionalSearchTerms: ["@", "new"],
+                                      shortcut: shortcut, completingText: completingText ?? noteTitle, additionalSearchTerms: ["@", "new"],
                                       handler: hasNoteTitle ? nil : { beamState in
-                beamState.autocompleteManager.mode = .noteCreation
+                beamState.autocompleteManager.animateToMode(.noteCreation)
             })
         }
     }

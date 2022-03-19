@@ -28,6 +28,7 @@ class OmniBoxTestView: BaseView {
     @discardableResult
     func enterCreateCardMode() -> OmniBoxTestView {
         getOmniBoxSearchField().typeKey(.enter, modifierFlags: .option)
+        _ = getOmniBoxSearchField().waitForExistence(timeout: minimumWaitTimeout)
         return OmniBoxTestView()
     }
     

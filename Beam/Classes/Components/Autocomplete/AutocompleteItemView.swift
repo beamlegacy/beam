@@ -30,12 +30,7 @@ struct AutocompleteItemView: View {
 
     @State private var favicon: NSImage?
     var backgroundColor: Color {
-        switch item.source {
-        case .createNote, .note:
-            return isTouchDown ? colorPalette.touchdownCardBackgroundColor.swiftUI : colorPalette.selectedCardBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
-        default:
-            return isTouchDown ? colorPalette.touchdownBackgroundColor.swiftUI : colorPalette.selectedBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
-        }
+        isTouchDown ? colorPalette.touchdownBackgroundColor.swiftUI : colorPalette.selectedBackgroundColor.swiftUI.opacity(selected ? 1.0 : 0.0)
     }
 
     private var isUrlWithTitle: Bool {
@@ -66,8 +61,6 @@ struct AutocompleteItemView: View {
         switch item.source {
         case .history, .url:
             return subtitleLinkColor
-        case .createNote:
-            return BeamColor.Generic.text.swiftUI
         default:
             return colorPalette.informationTextColor.swiftUI
         }
@@ -89,7 +82,7 @@ struct AutocompleteItemView: View {
             else {
                 return []
             }
-            if alwaysHighlightCompletingText || [.searchEngine, .history, .url, .topDomain, .mnemonic].contains(item.source) {
+            if alwaysHighlightCompletingText || [.searchEngine, .history, .url, .topDomain, .mnemonic, .action].contains(item.source) {
                 return text.ranges(of: completingText, options: .caseInsensitive)
             }
             if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
@@ -232,12 +225,23 @@ struct AutocompleteItemColorPalette {
     var informationTextColor = BeamColor.Autocomplete.subtitleText
     var selectedBackgroundColor = BeamColor.Autocomplete.selectedBackground
     var touchdownBackgroundColor = BeamColor.Autocomplete.clickedBackground
-    var selectedCardBackgroundColor = BeamColor.Autocomplete.selectedCardBackground
-    var touchdownCardBackgroundColor = BeamColor.Autocomplete.clickedCardBackground
 }
 
 extension AutocompleteItemView {
     static let defaultColorPalette = AutocompleteItemColorPalette()
+    static let noteColorPalette = AutocompleteItemColorPalette(
+        selectedBackgroundColor: BeamColor.Autocomplete.selectedCardBackground,
+        touchdownBackgroundColor: BeamColor.Autocomplete.clickedCardBackground
+    )
+    static let createNoteColorPalette = AutocompleteItemColorPalette(
+        informationTextColor: BeamColor.Generic.text,
+        selectedBackgroundColor: BeamColor.Autocomplete.selectedCardBackground,
+        touchdownBackgroundColor: BeamColor.Autocomplete.clickedCardBackground
+    )
+    static let actionColorPalette = AutocompleteItemColorPalette(
+        selectedBackgroundColor: BeamColor.Autocomplete.selectedActionBackground,
+        touchdownBackgroundColor: BeamColor.Autocomplete.clickedActionBackground
+    )
 }
 
 struct AutocompleteItem_Previews: PreviewProvider {
