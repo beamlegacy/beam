@@ -25,7 +25,7 @@ struct WindowBottomToolBar: View {
         state.currentNote
     }
 
-    private let barHeight: CGFloat = 30
+    private let barHeight: CGFloat = 42
     private let verticalPadding: CGFloat = BeamSpacing._50
     private var buttonsHeight: CGFloat { barHeight - verticalPadding * 2 }
 
@@ -37,54 +37,50 @@ struct WindowBottomToolBar: View {
         .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)
     }
 
-    var scrollLabelStyle = ButtonLabelStyle(foregroundColor: BeamColor.AlphaGray.swiftUI.opacity(0.70), activeForegroundColor: BeamColor.Niobium.swiftUI, activeBackgroundColor: Color(white: 0, opacity: 0))
-    var body: some View {
-        ZStack {
-            HStack {
-                BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
-                    .padding(.leading, 10)
-                    .offset(y: -4)
-                Spacer(minLength: 20)
-                HStack {
-                    BottomToolBarTrailingIconView()
-                        .environmentObject(state.noteMediaPlayerManager)
-                }
-                .fixedSize(horizontal: true, vertical: false)
-                .padding(.trailing, BeamSpacing._70)
-            }
-            .padding(.vertical, BeamSpacing._70)
-            .frame(height: barHeight)
-            .frame(maxWidth: .infinity)
+    private static let scrollLabelStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle.tinyIconStyle
+        style.horizontalPadding = 10
+        style.foregroundColor = BeamColor.AlphaGray.swiftUI.opacity(0.70)
+        style.hoveredBackgroundColor = Color.clear
+        style.activeBackgroundColor = Color.clear
+        return style
+    }()
 
-            HStack {
-                Spacer(minLength: 20)
-                ButtonLabel(
-                    icon: "editor-journal_scroll",
-                    customStyle: scrollLabelStyle
-                ) {
-                    guard let scrollView = state.cachedJournalStackView?.enclosingScrollView else {
-                        return
-                    }
-                    let clipView = scrollView.contentView
-                    let height = clipView.bounds.height
-                    var p = clipView.bounds.origin
-                    p.y = ModeView.omniboxEndFadeOffsetFor(height: height)
-
-                    let animationDuration = 0.3
-                    NSAnimationContext.beginGrouping()
-                    NSAnimationContext.current.duration = animationDuration
-                    clipView.animator().setBoundsOrigin(p)
-                    scrollView.reflectScrolledClipView(clipView)
-                    NSAnimationContext.endGrouping()
-                }
-                .cursorOverride(.arrow)
-                Spacer(minLength: 20)
-            }
-            .padding(.vertical, BeamSpacing._70)
-            .frame(height: barHeight + 10)
-            .frame(maxWidth: .infinity)
-            .opacity(state.journalScrollOffset < (state.cachedJournalStackView?.enclosingScrollView?.contentView.bounds.height ?? 0) / 8 ? 1 : 0)
+    private func scrollJournalDown() {
+        guard let stackView = state.cachedJournalStackView, let scrollView = stackView.enclosingScrollView else {
+            return
         }
+        let height = scrollView.contentView.bounds.height
+        let verticalOffset = ModeView.omniboxEndFadeOffsetFor(height: height)
+        stackView.scroll(toVerticalOffset: verticalOffset)
+    }
+
+    private var journalScrollButton: some View {
+        HStack(spacing: 0) {
+            ButtonLabel(icon: "editor-journal_scroll", customStyle: Self.scrollLabelStyle, action: scrollJournalDown)
+                .cursorOverride(.arrow)
+        }
+        .frame(maxWidth: .infinity)
+        .opacity(state.journalScrollOffset < (state.cachedJournalStackView?.enclosingScrollView?.contentView.bounds.height ?? 0) / 8 ? 1 : 0)
+    }
+
+    var body: some View {
+        HStack {
+            BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
+            if state.mode == .today {
+                journalScrollButton
+            } else {
+                Spacer(minLength: BeamSpacing._200)
+            }
+            HStack {
+                BottomToolBarTrailingIconView()
+                    .environmentObject(state.noteMediaPlayerManager)
+            }
+            .frame(maxWidth: .infinity, alignment: .trailing)
+        }
+        .padding(BeamSpacing._100)
+        .frame(height: barHeight)
+        .frame(maxWidth: .infinity)
     }
 }
 
