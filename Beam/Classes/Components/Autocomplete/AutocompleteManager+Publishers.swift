@@ -21,7 +21,8 @@ extension AutocompleteManager {
     }
 
     func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
-        [
+        guard mode == .general else { return [] }
+        return [
             futureToPublisher(defaultSuggestionsNotesResults(), source: .note),
             futureToPublisher(defaultActionsResults(), source: .action)
         ]
@@ -296,7 +297,7 @@ extension AutocompleteManager {
     }
 
     private func searchEngineArrivedTooLate(_ results: [AutocompleteResult]) {
-        self.autocompleteResults = insertSearchEngineResults(results, in: autocompleteResults)
+        self.setAutocompleteResults(insertSearchEngineResults(results, in: autocompleteResults))
     }
 
     // MARK: - Empty Query Suggestions
@@ -328,7 +329,7 @@ extension AutocompleteManager {
                 return
             }
             let searchableActions: [AutocompleteResult] = [
-                Self.DefaultActions.createNoteResult(for: nil, mode: self.mode, asAction: true)
+                Self.DefaultActions.createNoteResult(for: nil, mode: self.mode, asAction: true, completingText: searchText)
             ]
             let match = searchText.lowercased()
             let results = searchableActions.filter { r in
