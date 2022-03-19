@@ -136,11 +136,6 @@ extension AutocompleteManager {
 
     private func autocompleteHistoryResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
-            guard PreferencesManager.includeHistoryContentsInOmniBox else {
-                promise(.success([]))
-                return
-            }
-
             let start = DispatchTime.now()
             GRDBDatabase.shared.searchLink(query: query, enabledFrecencyParam: AutocompleteManager.urlFrecencyParamKey) { result in
                 switch result {
