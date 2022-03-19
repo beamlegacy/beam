@@ -354,7 +354,7 @@ struct TabsListView: View {
     private func pasteAndGo(on tab: BrowserTab) {
         guard let query = NSPasteboard.general.string(forType: .string) else {  return }
         state.autocompleteManager.searchQuery = query
-        state.focusOmniBoxFromTab = true
+        state.omniboxInfo.isFocusedFromTab = true
         state.startOmniboxQuery()
     }
 

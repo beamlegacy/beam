@@ -59,7 +59,7 @@ struct OmniboxSearchField: View {
                     }
                 }
             }
-        } else if state.focusOmniBoxFromTab,
+        } else if state.omniboxInfo.isFocusedFromTab,
                   let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
                   let favicon = tab.favIcon {
             icon = favicon
@@ -205,7 +205,7 @@ struct OmniboxSearchField: View {
         let query = autocompleteManager.searchQuery
         if (query.isEmpty && autocompleteManager.mode == .general) || (state.mode == .web && query == state.browserTabsManager.currentTab?.url?.absoluteString) {
             unfocusField()
-            if state.showOmnibox {
+            if state.omniboxInfo.isShownInJournal {
                 autocompleteManager.clearAutocompleteResults()
             }
         } else {

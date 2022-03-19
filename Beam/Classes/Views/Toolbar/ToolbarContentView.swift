@@ -95,7 +95,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                     })
             }
             ToolbarButton(icon: "nav-omnibox", action: {
-                if state.focusOmniBox {
+                if state.omniboxInfo.isFocused {
                     state.stopFocusOmnibox()
                 } else {
                     state.startFocusOmnibox(fromTab: false)
