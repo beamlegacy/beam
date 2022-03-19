@@ -6,6 +6,16 @@ import XCTest
 @testable import BeamCore
 
 class GRDBDatabaseHistoryTests: XCTestCase {
+
+    override func setUp() {
+        PreferencesManager.includeHistoryContentsInOmniBox = true
+    }
+
+
+    override func tearDown() {
+        PreferencesManager.includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBoxDefault
+    }
+
     /// Check the GRDBDatabase schema creation can be called twice.
     func testDBReopen() throws {
         let dbQueue = DatabaseQueue()
