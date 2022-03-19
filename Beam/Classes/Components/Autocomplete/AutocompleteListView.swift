@@ -11,7 +11,7 @@ import AppKit
 struct AutocompleteListView: View {
     @EnvironmentObject var state: BeamState
     @Binding var selectedIndex: Int?
-    @Binding var elements: [AutocompleteResult]
+    var elements: [AutocompleteResult]
     var modifierFlagsPressed: NSEvent.ModifierFlags?
 
     @State private var hoveredItemIndex: Int?
@@ -22,6 +22,19 @@ struct AutocompleteListView: View {
 
     private func shouldItemDisplaySubtitle(_ item: AutocompleteResult, atIndex: Int) -> Bool {
         item.source != .searchEngine || atIndex <= 0 || elements[atIndex-1].information != item.information
+    }
+
+    private func colorPalette(for item: AutocompleteResult) -> AutocompleteItemColorPalette {
+        switch item.source {
+        case .action:
+            return AutocompleteItemView.actionColorPalette
+        case .note:
+            return AutocompleteItemView.noteColorPalette
+        case .createNote:
+            return item.information != nil ? AutocompleteItemView.createNoteColorPalette : AutocompleteItemView.actionColorPalette
+        default:
+            return AutocompleteItemView.defaultColorPalette
+        }
     }
 
     var body: some View {
@@ -38,9 +51,7 @@ struct AutocompleteListView: View {
                 AutocompleteItemView(item: item, selected: isSelected,
                                  displaySubtitle: displaySubtitle,
                                  allowsShortcut: allowsShortcut,
-                                 colorPalette: item.source == .createNote ?
-                                 AutocompleteItemColorPalette(informationTextColor: BeamColor.Autocomplete.newCardSubtitle) :
-                                    AutocompleteItemView.defaultColorPalette)
+                                 colorPalette: colorPalette(for: item))
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
@@ -90,6 +101,6 @@ struct AutocompleteList_Previews: PreviewProvider {
         AutocompleteResult(text: "result.com", source: .url, urlFields: .text),
         AutocompleteResult(text: "My Own Note", source: .createNote)]
     static var previews: some View {
-        AutocompleteListView(selectedIndex: .constant(1), elements: .constant(Self.elements), modifierFlagsPressed: nil)
+        AutocompleteListView(selectedIndex: .constant(1), elements: Self.elements, modifierFlagsPressed: nil)
     }
 }

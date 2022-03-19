@@ -41,7 +41,8 @@ struct Omnibox: View {
     private var boxIsLow: Bool {
         isInsideNote &&
         autocompleteManager.autocompleteResults.isEmpty &&
-        autocompleteManager.searchQuery.isEmpty
+        autocompleteManager.searchQuery.isEmpty &&
+        (autocompleteManager.mode == .general && !autocompleteManager.isPreparingForAnimatingToMode && autocompleteManager.animatingToMode == nil)
     }
 
     private var showPressedState: Bool {
@@ -53,8 +54,8 @@ struct Omnibox: View {
             VStack(spacing: 0) {
                 HStack(spacing: BeamSpacing._180) {
                     OmniboxSearchField(isEditing: isEditingBinding,
-                                       modifierFlagsPressed: $modifierFlagsPressed,
-                                       enableAnimations: false)
+                                       modifierFlagsPressed: $modifierFlagsPressed)
+                        .animation(nil)
                         .frame(height: Self.defaultHeight)
                         .frame(maxWidth: .infinity)
                     if !autocompleteManager.searchQuery.isEmpty {
@@ -71,12 +72,13 @@ struct Omnibox: View {
                          alignment: .bottom)
                 .frame(height: Self.defaultHeight, alignment: .top)
                 if shouldShowAutocompleteResults {
-                    AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex, elements: $autocompleteManager.autocompleteResults, modifierFlagsPressed: modifierFlagsPressed)
+                    AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
+                                         elements: autocompleteManager.autocompleteResults,
+                                         modifierFlagsPressed: modifierFlagsPressed)
                 }
             }
         }
         .fixedSize(horizontal: false, vertical: true)
-        .animation(BeamAnimation.easeInOut(duration: 0.3), value: autocompleteManager.autocompleteResults)
     }
 
     private func setIsEditing(_ editing: Bool) {
@@ -142,7 +144,7 @@ struct OmniboxContainer: View {
         return offset
     }
     private var showPressedState: Bool {
-        autocompleteManager.animateInputingCharacter
+        autocompleteManager.animateInputingCharacter || autocompleteManager.isPreparingForAnimatingToMode
     }
 
     private var boxIsInsideNote: Bool {
@@ -169,32 +171,35 @@ struct OmniboxContainer: View {
             }
             Spacer(minLength: boxMinY)
         }
+        .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
+        .onDisappear {
+            DispatchQueue.main.async {
+                state.autocompleteManager.resetQuery()
+            }
+
+            if state.keepDestinationNote {
+                state.keepDestinationNote = false
+            }
+        }
     }
     var body: some View {
         Group {
             if state.showOmnibox {
                 boxInstance
-                .transition(.asymmetric(insertion: .opacity.animation(.easeInOut(duration: 0.1)),
-                                        removal: .identity))
-                .onDisappear {
-                    if state.keepDestinationNote {
-                        state.keepDestinationNote = false
-                    }
-                }
+                    .transition(inJournalTranstion)
             } else if state.focusOmniBox {
                 boxInstance
-                .transition(customTranstion)
-                .animatableOffsetEffect(offset: CGSize(width: 0, height: showPressedState ? 10 : 0))
-                .onDisappear {
-                    if state.keepDestinationNote {
-                        state.keepDestinationNote = false
-                    }
-                }
+                    .transition(defaultTranstion)
             }
         }.opacity(opacity)
     }
 
-    private var customTranstion: AnyTransition {
+    private var inJournalTranstion: AnyTransition {
+        .asymmetric(insertion: .opacity.animation(.easeInOut(duration: 0.1)),
+                    removal: .identity)
+    }
+
+    private var defaultTranstion: AnyTransition {
         .asymmetric(
             insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.06))
                 .combined(with:
@@ -214,12 +219,12 @@ struct Omnibox_Previews: PreviewProvider {
         let mngr = AutocompleteManager(searchEngine: MockSearchEngine(), beamState: nil)
         mngr.setQuery("Res", updateAutocompleteResults: false)
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(100)) {
-            mngr.autocompleteResults = [
+            mngr.setAutocompleteResults([
                 .init(text: "Result A", source: .searchEngine),
                 .init(text: "Result B", source: .searchEngine),
                 .init(text: "Result C", source: .searchEngine),
                 .init(text: "Result D", source: .searchEngine)
-            ]
+            ])
         }
         return mngr
     }
