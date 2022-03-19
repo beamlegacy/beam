@@ -28,9 +28,9 @@ enum BeamSpacing {
     static let _140: CGFloat = 14
     /** 160% = 16pt */
     static let _160: CGFloat = 16
-    /** 200% = 20pt */
-    static let _180: CGFloat = 18
     /** 180% = 18pt */
+    static let _180: CGFloat = 18
+    /** 200% = 20pt */
     static let _200: CGFloat = 20
     /** 400% = 40pt */
     static let _400: CGFloat = 40

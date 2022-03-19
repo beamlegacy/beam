@@ -298,7 +298,7 @@ extension AutocompleteManager {
     // MARK: - Empty Query Suggestions
     private func defaultSuggestionsNotesResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            guard let beamState = self?.beamState, !beamState.focusOmniBoxFromTab else {
+            guard let beamState = self?.beamState, !beamState.omniboxInfo.isFocusedFromTab else {
                 promise(.success([]))
                 return
             }
@@ -319,7 +319,7 @@ extension AutocompleteManager {
 
     private func autocompleteActionsResults(for searchText: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            guard let self = self, let state = self.beamState, !state.focusOmniBoxFromTab else {
+            guard let self = self, let state = self.beamState, !state.omniboxInfo.isFocusedFromTab else {
                 promise(.success([]))
                 return
             }
@@ -344,13 +344,13 @@ extension AutocompleteManager {
 
     private func defaultActionsResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
-            guard let self = self, let state = self.beamState, !state.focusOmniBoxFromTab else {
+            guard let self = self, let state = self.beamState, !state.omniboxInfo.isFocusedFromTab else {
                 promise(.success([]))
                 return
             }
             var actions = [AutocompleteResult]()
             let mode = state.mode
-            let isFocusingTab = state.focusOmniBoxFromTab
+            let isFocusingTab = state.omniboxInfo.isFocusedFromTab
             if mode == .web {
                 actions.append(contentsOf: [
                     Self.DefaultActions.journalAction,

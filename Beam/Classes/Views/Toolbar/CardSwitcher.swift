@@ -41,38 +41,39 @@ struct CardSwitcher: View {
     }
 
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 5) {
             Spacer(minLength: 0)
-            ToolbarCapsuleButton(iconName: "editor-journal", text: "Journal", isSelected: state.mode == .today) {
-                state.navigateToJournal(note: nil)
-            }
-            .fixedSize(horizontal: true, vertical: false)
-            .layoutPriority(2)
-            .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription)
-            .accessibilityIdentifier("card-switcher-journal")
+            HStack(spacing: 0) {
+                ToolbarCapsuleButton(iconName: "editor-journal", text: "Journal", isSelected: state.mode == .today) {
+                    state.navigateToJournal(note: nil)
+                }
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(2)
+                .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription)
+                .accessibilityIdentifier("card-switcher-journal")
 
-            ToolbarCapsuleButton(iconName: "editor-allnotes", text: "All Notes", isSelected: isAllNotesActive) {
-                state.navigateToPage(.allNotesWindowPage)
+                ToolbarCapsuleButton(iconName: "editor-allnotes", text: "All Notes", isSelected: isAllNotesActive) {
+                    state.navigateToPage(.allNotesWindowPage)
+                }
+                .fixedSize(horizontal: true, vertical: false)
+                .layoutPriority(2)
+                .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
+                .accessibilityIdentifier("card-switcher-all-cards")
             }
-            .fixedSize(horizontal: true, vertical: false)
-            .layoutPriority(2)
-            .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription)
-            .accessibilityIdentifier("card-switcher-all-cards")
-            .offset(x: -3, y: 0)
 
-            Spacer(minLength: 2)
             separator
-            Spacer(minLength: 5)
 
             if recentsManager.recentNotes.count > 0 {
-                ForEach(Array(recentsManager.recentNotes.enumerated()), id: \.1.id) { index, note in
-                    let isToday = state.mode == .today
-                    let isActive = !isToday && note.id == currentNote?.id
-                    let text = titleForNote(note)
-                    ToolbarCapsuleButton(text: text, isSelected: isActive) {
-                        state.navigateToNote(note)
+                HStack(spacing: 0) {
+                    ForEach(recentsManager.recentNotes) { note in
+                        let isToday = state.mode == .today
+                        let isActive = !isToday && note.id == currentNote?.id
+                        let text = titleForNote(note)
+                        ToolbarCapsuleButton(text: text, isSelected: isActive) {
+                            state.navigateToNote(note)
+                        }
+                        .accessibilityIdentifier("card-switcher")
                     }
-                    .accessibilityIdentifier("card-switcher")
                 }
             }
             Spacer(minLength: 0)
