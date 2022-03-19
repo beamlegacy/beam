@@ -189,8 +189,8 @@ class OmniboxViewTests: BaseTest {
         }
 
         step("Then suggestions contains the correct actions"){
-            XCTAssertEqual(results.count, 0)
-            XCTAssertEqual(noteResults.count, 0)
+            XCTAssertEqual(results.count, 6)
+            XCTAssertEqual(noteResults.count, 3)
         }
     }
     

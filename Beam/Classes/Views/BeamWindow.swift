@@ -322,7 +322,7 @@ class TitleBarViewControllerWithMouseDown: NSTitlebarAccessoryViewController {
 
 extension BeamWindow {
     fileprivate func allowsWindowDragging(with event: NSEvent) -> Bool {
-        if state.mode == .web && state.focusOmniBox && state.focusOmniBoxFromTab, let searchField = self.firstResponder as? BeamTextFieldViewFieldEditor {
+        if state.mode == .web && state.omniboxInfo.isFocused && state.omniboxInfo.isFocusedFromTab, let searchField = self.firstResponder as? BeamTextFieldViewFieldEditor {
             let omniboxFrame = omniboxFrameFromSearchField(searchField)
             return !omniboxFrame.contains(event.locationInWindow)
         } else if state.mode == .web && !windowInfo.undraggableWindowRects.isEmpty &&

@@ -72,16 +72,16 @@ struct ModeView: View {
                 }
                 contentIsScrolled = false
                 guard !transitionModel.isTransitioning && state.mode == .today else { return }
-                state.startShowingOmnibox()
+                state.startShowingOmniboxInJournal()
                 state.autocompleteManager.clearAutocompleteResults()
             }
             .onChange(of: transitionModel.isTransitioning) { isTransitioning in
                 guard !isTransitioning && state.mode == .today else { return }
-                state.startShowingOmnibox()
+                state.startShowingOmniboxInJournal()
                 state.autocompleteManager.clearAutocompleteResults()
             }
             .onDisappear {
-                state.stopShowingOmnibox()
+                state.stopShowingOmniboxInJournal()
             }
             .animation(nil)
             .transition(.noteContentTransition(transitionModel: transitionModel))
@@ -89,44 +89,36 @@ struct ModeView: View {
     }
 
     private func onScroll(_ scrollPoint: CGPoint, containerGeometry: GeometryProxy) {
-        let scrollOffset = scrollPoint.y + 52
+        let scrollOffset = scrollPoint.y + cardScrollViewTopInset
         contentIsScrolled = scrollOffset >
         JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
 
         CustomPopoverPresenter.shared.dismissPopovers()
         guard !transitionModel.isTransitioning else { return }
-        if state.showOmnibox &&
+        if state.omniboxInfo.isShownInJournal &&
             state.autocompleteManager.searchQuery.isEmpty {
-            if state.showOmnibox, scrollOffset >= omniboxEndFadeOffset {
+            if state.omniboxInfo.isShownInJournal, scrollOffset >= omniboxEndFadeOffset {
                 state.stopFocusOmnibox()
-                state.stopShowingOmnibox()
+                state.stopShowingOmniboxInJournal()
             }
         } else if scrollOffset < omniboxEndFadeOffset {
-            state.startShowingOmnibox()
+            state.startShowingOmniboxInJournal()
+        } else if scrollOffset > omniboxEndFadeOffset {
+            state.autocompleteManager.resetQuery()
             state.autocompleteManager.clearAutocompleteResults()
         }
     }
 
     private func onEndLiveScroll(_ scrollPoint: CGPoint) {
-        let scrollOffset = scrollPoint.y + 52
+        let scrollOffset = scrollPoint.y + cardScrollViewTopInset
         if scrollOffset < omniboxEndFadeOffset {
-            guard let scrollView = state.cachedJournalStackView?.enclosingScrollView else {
-                return
-            }
-            let clipView = scrollView.contentView
-            let animationDuration = 0.3
-            NSAnimationContext.beginGrouping()
-            NSAnimationContext.current.duration = animationDuration
-            var p = clipView.bounds.origin
+            guard let stackView = state.cachedJournalStackView else { return }
             if scrollOffset > (omniboxEndFadeOffset + omniboxStartFadeOffset) * 0.5 {
-                p.y = omniboxEndFadeOffset
+                stackView.scroll(toVerticalOffset: omniboxEndFadeOffset)
             } else {
-                p.y = 0
+                stackView.scrollToTop(animated: true)
             }
 
-            clipView.animator().setBoundsOrigin(p)
-            scrollView.reflectScrolledClipView(clipView)
-            NSAnimationContext.endGrouping()
         }
     }
 

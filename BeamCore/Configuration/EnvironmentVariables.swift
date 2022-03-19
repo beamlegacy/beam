@@ -34,7 +34,7 @@ public struct EnvironmentVariables {
             static public private(set) var tokenURI = "$(GCP_SERVICE_ACCOUNT_TOKEN_URI)"
         }
     }
-    
+
     public struct BrowsingTree {
         static public private(set) var accessToken = "$(BROWSING_TREE_ACCESS_TOKEN)"
         static public private(set) var url = "$(BROWSING_TREE_URL)"
@@ -81,7 +81,7 @@ public struct EnvironmentVariables {
     }
 
     static public private(set) var webOnboardingURL = "$(WEB_ONBOARDING_URL)"
-    
+
     #if BEAM_BETA
     static public private(set) var branchType = "beta"
     #elseif BEAM_PUBLIC
