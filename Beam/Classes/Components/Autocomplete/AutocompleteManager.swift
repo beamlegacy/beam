@@ -24,7 +24,7 @@ class AutocompleteManager: ObservableObject {
     private var autocompleteResultsAreFromEmptyQuery = false
 
     @Published var searchQuerySelectedRange: Range<Int>?
-    @Published var autocompleteResults = [AutocompleteResult]()
+    @Published private(set) var autocompleteResults = [AutocompleteResult]()
     @Published var rawAutocompleteResults = [AutocompletePublisherSourceResults]()
     @Published var rawSortedURLResults = [AutocompleteResult]()
 
@@ -35,6 +35,8 @@ class AutocompleteManager: ObservableObject {
     }
 
     @Published var animateInputingCharacter = false
+    @Published var isPreparingForAnimatingToMode = false
+    @Published var animatingToMode: Mode?
 
     let searchEngineCompleter: SearchEngineAutocompleter
     var searchEngine: SearchEngineDescription {
@@ -127,7 +129,7 @@ class AutocompleteManager: ObservableObject {
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
-                self.autocompleteResults = finalResults
+                self.setAutocompleteResults(finalResults)
                 if !isRemovingCharacters {
                     self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: selectionWasReset)
                 }
@@ -297,9 +299,19 @@ extension AutocompleteManager {
         resetAutocompleteSelection(resetText: false)
     }
 
-    func clearAutocompleteResults() {
+    func setAutocompleteResults(_ newResults: [AutocompleteResult], animated: Bool = true) {
+        if animated {
+            withAnimation(BeamAnimation.easeInOut(duration: 0.3)) {
+                autocompleteResults = newResults
+            }
+        } else {
+            autocompleteResults = newResults
+        }
+    }
+
+    func clearAutocompleteResults(animated: Bool = true) {
         resetAutocompleteSelection()
-        autocompleteResults = []
+        setAutocompleteResults([], animated: animated)
         autocompleteResultsAreFromEmptyQuery = false
         stopCurrentCompletionWork()
     }
@@ -307,8 +319,9 @@ extension AutocompleteManager {
     func resetQuery() {
         setQuery("", updateAutocompleteResults: false)
         if !autocompleteResultsAreFromEmptyQuery {
-            clearAutocompleteResults()
+            clearAutocompleteResults(animated: false)
         }
+        mode = .general
         stopCurrentCompletionWork()
     }
 
@@ -360,20 +373,6 @@ extension AutocompleteManager {
             return true
         }
         return false
-    }
-
-    // MARK: - Animations
-    func shakeOmniBox() {
-        let animationIn = BeamAnimation.easeIn(duration: 0.08)
-        let animationOut = BeamAnimation.defaultiOSEasing(duration: 0.3)
-        withAnimation(animationIn) {
-            animateInputingCharacter = true
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(80)) { [weak self] in
-            withAnimation(animationOut) {
-                self?.animateInputingCharacter = false
-            }
-        }
     }
 }
 
