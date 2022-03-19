@@ -40,7 +40,7 @@ extension PreferencesManager {
     private static let showTabsColoringDefault = false
     private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = false
-    private static let includeHistoryContentsInOmniBoxDefault = false
+    static let includeHistoryContentsInOmniBoxDefault = false
 }
 
 extension PreferencesManager {
