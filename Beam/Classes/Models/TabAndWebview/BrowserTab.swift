@@ -149,7 +149,7 @@ import Promises
     }()
     var pointAndShootInstalled: Bool = true
     var pointAndShootEnabled: Bool {
-        contentType == .web && state?.focusOmniBox != true
+        contentType == .web && state?.omniboxInfo.isFocused != true
     }
     lazy var webFrames: WebFrames? = {
         let webFrames = WebFrames()
@@ -383,8 +383,8 @@ import Promises
         webView.navigationDelegate = beamNavigationController
         webView.uiDelegate = uiDelegateController
 
-        state?.$focusOmniBox.sink { [weak self] value in
-            guard value else { return }
+        state?.$omniboxInfo.sink { [weak self] value in
+            guard value.isFocused else { return }
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
                 self?.pointAndShoot?.dismissActiveShootGroup()
             }
@@ -515,11 +515,11 @@ import Promises
 
         lastViewDate = BeamDate.now
         browsingTree.startReading()
-        guard !isLoading && url != nil && state?.focusOmniBox != true else { return }
+        guard !isLoading && url != nil && state?.omniboxInfo.isFocused != true else { return }
         // bring back the focus to where it was
         refocusDispatchItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
-            guard let webView = self?.webView, self?.isActiveTab() == true, self?.state?.focusOmniBox == false else { return }
+            guard let webView = self?.webView, self?.isActiveTab() == true, self?.state?.omniboxInfo.isFocused == false else { return }
             webView.window?.makeFirstResponder(webView)
             webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
             self?.updateFavIcon(fromWebView: true)

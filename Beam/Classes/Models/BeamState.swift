@@ -57,17 +57,7 @@ import Sentry
     @Published var canGoBack: Bool = false
     @Published var canGoForward: Bool = false
     @Published var isFullScreen: Bool = false
-    @Published private(set) var focusOmniBox: Bool = true {
-        didSet {
-            if showOmnibox {
-                autocompleteManager.resetQuery()
-                autocompleteManager.clearAutocompleteResults()
-            }
-        }
-    }
-    @Published private(set) var showOmnibox = true
-    @Published private(set) var omniboxWasShownFromJournalTop = false
-    @Published var focusOmniBoxFromTab = false
+    @Published var omniboxInfo = OmniboxLayoutInformation()
 
     @Published var showHelpAndFeedback = false
 
@@ -88,7 +78,7 @@ import Sentry
 
             stopFocusOmnibox()
             if oldValue == .today {
-                stopShowingOmnibox()
+                stopShowingOmniboxInJournal()
             }
 
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
@@ -112,7 +102,7 @@ import Sentry
         overlayViewModel.modalView == nil
     }
     var editorShouldAllowMouseHoverEvents: Bool {
-        !focusOmniBox
+        !omniboxInfo.isFocused
     }
     var isShowingOnboarding: Bool {
         data.onboardingManager.needsToDisplayOnboard
@@ -241,7 +231,7 @@ import Sentry
     @discardableResult func navigateToJournal(note: BeamNote?, clearNavigation: Bool = false) -> Bool {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note))", category: "BeamState")
         if mode == .today, note == nil {
-            self.cachedJournalStackView?.scroll(CGPoint())
+            self.cachedJournalStackView?.scrollToTop(animated: true)
             return true
         }
 
@@ -303,7 +293,7 @@ import Sentry
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
-            guard self?.focusOmniBox == false, let tab = tab else { return }
+            guard self?.omniboxInfo.isFocused == false, let tab = tab else { return }
             tab.webviewWindow?.makeFirstResponder(tab.webView)
         }
         return tab
@@ -445,7 +435,7 @@ import Sentry
                 break
             }
 
-            if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if mode == .web && currentTab != nil && omniboxInfo.isFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -466,7 +456,7 @@ import Sentry
                 _ = try? GRDBDatabase.shared.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateIdFor(url: url.absoluteString, title: nil))
             }
 
-            if  mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if  mode == .web && currentTab != nil && omniboxInfo.isFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
@@ -504,7 +494,7 @@ import Sentry
 
         // Logger.shared.logDebug("Start query: \(url)")
 
-        if mode == .web && currentTab != nil && focusOmniBoxFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
+        if mode == .web && currentTab != nil && omniboxInfo.isFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
             _ = createTab(withURL: url, originalQuery: queryString, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
@@ -592,23 +582,31 @@ import Sentry
         }
     }
 
-    func startShowingOmnibox() {
-        guard !showOmnibox else { return }
-        showOmnibox = true
+    // MARK: Omnibox handling
+    struct OmniboxLayoutInformation {
+        fileprivate(set) var isFocused: Bool = true
+        fileprivate(set) var isShownInJournal = true
+        fileprivate(set) var wasShownFromJournalTop = false
+        var isFocusedFromTab = false
     }
 
-    func stopShowingOmnibox() {
-        guard showOmnibox else { return }
-        showOmnibox = false
+    func startShowingOmniboxInJournal() {
+        guard !omniboxInfo.isShownInJournal else { return }
+        omniboxInfo.isShownInJournal = true
+    }
+
+    func stopShowingOmniboxInJournal() {
+        guard omniboxInfo.isShownInJournal else { return }
+        omniboxInfo.isShownInJournal = false
     }
 
     func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true, autocompleteMode: AutocompleteManager.Mode = .general) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        focusOmniBoxFromTab = fromTab && mode == .web
-        omniboxWasShownFromJournalTop = mode == .today && showOmnibox
+        omniboxInfo.isFocusedFromTab = fromTab && mode == .web
+        omniboxInfo.wasShownFromJournalTop = mode == .today && omniboxInfo.isShownInJournal
         autocompleteManager.mode = autocompleteMode
         guard updateResults else {
-            focusOmniBox = true
+            omniboxInfo.isFocused = true
             return
         }
         var selectedRange: Range<Int>?
@@ -621,7 +619,7 @@ import Sentry
             }
         }
         autocompleteManager.prepareResultsForAppearance(for: autocompleteManager.searchQuery) { [unowned self] in
-            self.focusOmniBox = true
+            self.omniboxInfo.isFocused = true
             if let selectedRange = selectedRange {
                 self.autocompleteManager.searchQuerySelectedRange = selectedRange
             }
@@ -629,13 +627,17 @@ import Sentry
     }
 
     func stopFocusOmnibox() {
-        guard focusOmniBox else { return }
-        focusOmniBox = false
+        guard omniboxInfo.isFocused else { return }
+        omniboxInfo.isFocused = false
+        if omniboxInfo.isShownInJournal {
+            autocompleteManager.resetQuery()
+            autocompleteManager.clearAutocompleteResults()
+        }
     }
 
     func startNewSearch() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        if focusOmniBox {
+        if omniboxInfo.isFocused && (!omniboxInfo.isShownInJournal || !autocompleteManager.autocompleteResults.isEmpty) {
             // disabling shake from users feedback - https://linear.app/beamapp/issue/BE-2546/cmd-t-on-already-summoned-omnibox-makes-it-bounce
             // autocompleteManager.shakeOmniBox()
             stopFocusOmnibox()
