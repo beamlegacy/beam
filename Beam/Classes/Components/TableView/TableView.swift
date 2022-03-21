@@ -47,7 +47,8 @@ struct TableView: NSViewRepresentable {
     var columns: [TableViewColumn] = []
     var creationRowTitle: String?
     var isCreationRowLoading = false
-    @Binding var shouldReloadData: Bool?
+    var shouldReloadData: Binding<Bool?>?
+    var sortDescriptor: Binding<NSSortDescriptor?>?
 
     var onEditingText: ((String?, Int) -> Void)?
     var onSelectionChanged: ((IndexSet) -> Void)?
@@ -143,7 +144,7 @@ struct TableView: NSViewRepresentable {
             }
             tableView.addTableColumn(tableColumn)
         }
-        if let sortDescriptor = initialSortDescriptor {
+        if let sortDescriptor = sortDescriptor?.wrappedValue ?? initialSortDescriptor {
             tableView.sortDescriptors = [sortDescriptor]
         }
     }
@@ -152,9 +153,9 @@ struct TableView: NSViewRepresentable {
         context.coordinator.creationRowTitle = creationRowTitle
         context.coordinator.isCreationRowLoading = isCreationRowLoading
         context.coordinator.originalData = items
-        if shouldReloadData == true {
+        if shouldReloadData?.wrappedValue == true {
             context.coordinator.reloadData(soft: true)
-            self.shouldReloadData = false
+            self.shouldReloadData?.wrappedValue = false
         }
     }
 }
@@ -183,7 +184,11 @@ class TableViewCoordinator: NSObject {
     private var creationgRowTextField: NSTextField?
 
     private var sortedData = [TableViewItem]()
-    private var sortDescriptor: NSSortDescriptor?
+    private var sortDescriptor: NSSortDescriptor? {
+        didSet {
+            parent.sortDescriptor?.wrappedValue = sortDescriptor
+        }
+    }
 
     private var currentSelectedIndexes: IndexSet?
     private var hoveredRow: Int?
