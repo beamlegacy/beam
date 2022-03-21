@@ -185,6 +185,7 @@ class OmniboxViewTests: BaseTest {
         // In journal
         step("When I open omnibox for the journal"){
             helper.showJournal()
+            journalView.waitForJournalViewToLoad()
             omniboxView.focusOmniBoxSearchField()
         }
 
