@@ -45,7 +45,12 @@ class CalendarManager: ObservableObject {
     @Published var meetingsForNote = [BeamNote.ID: [Meeting]]()
     @Published var updated: Bool = false
 
-    init() { }
+    @UserDefault(key: "showedNotConnectedViewKey", defaultValue: 0)
+    var showedNotConnectedView: Int
+
+    init() {
+        showedNotConnectedView += 1
+    }
 
     private var didLazyInitConnectedSources = false
 
