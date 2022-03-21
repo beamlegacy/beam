@@ -129,7 +129,7 @@ extension BaseWebNavigationController {
             page?.url = NavigationRouter.originalURL(internal: webviewUrl)
         }
         self.page?.leave()
-        (page as? BrowserTab)?.updateFavIcon(fromWebView: false, cacheOnly: true)
+        (page as? BrowserTab)?.updateFavIcon(fromWebView: false, cacheOnly: true, clearIfNotFound: true)
     }
 
     /// Tells the delegate that navigation is complete.
