@@ -21,7 +21,7 @@ struct PasswordsTableView: View {
 
     var body: some View {
         TableView(hasSeparator: false, items: passwordEntries,
-                  columns: Self.passwordColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
+                  columns: Self.passwordColumns, creationRowTitle: nil) { (_, _) in
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
         } onDoubleTap: { row in
