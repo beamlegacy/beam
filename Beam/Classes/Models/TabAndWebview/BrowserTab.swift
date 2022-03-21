@@ -324,7 +324,7 @@ import Promises
     }
 
     private var updateFavIconDispatchItem: DispatchWorkItem?
-    func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false) {
+    func updateFavIcon(fromWebView: Bool, cacheOnly: Bool = false, clearIfNotFound: Bool = false) {
         guard let url = url else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
         let dispatchItem = DispatchWorkItem { [weak self] in
@@ -332,7 +332,11 @@ import Promises
             FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
                 guard let self = self else { return }
                 guard let image = favicon?.image else {
-                    if fromWebView {
+                    if clearIfNotFound {
+                        DispatchQueue.main.async {
+                            self.favIcon = nil
+                        }
+                    } else if fromWebView {
                         // no favicon found from webview, try url instead.
                         self.updateFavIcon(fromWebView: false)
                     }
