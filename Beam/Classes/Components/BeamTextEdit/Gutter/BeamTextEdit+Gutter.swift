@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 extension BeamTextEdit {
 
@@ -75,9 +76,13 @@ extension BeamTextEdit {
         }
     }
 
-    func updateCalendarLeadingGutter(for noteId: UUID) {
-        guard let calendarManager = state?.data.calendarManager, !calendarManager.connectedSources.isEmpty else { return }
-        let viewModel = CalendarGutterViewModel(root: self.rootNode, calendarManager: calendarManager, noteId: noteId, todaysCalendar: state?.data.todaysNote.id == noteId)
+    func updateCalendarLeadingGutter(for note: BeamElement) {
+        guard let isJournal = note.note?.type.isJournal, isJournal else {
+            self.leadingGutter?.removeFromSuperview()
+            return
+        }
+        guard let calendarManager = state?.data.calendarManager else { return }
+        let viewModel = CalendarGutterViewModel(root: self.rootNode, calendarManager: calendarManager, noteId: note.id, todaysCalendar: state?.data.todaysNote.id == note.id)
         self.leadingGutter?.leadingGutterViewType = LeadingGutterView.LeadingGutterViewType.calendarGutterView(viewModel: viewModel)
     }
 
