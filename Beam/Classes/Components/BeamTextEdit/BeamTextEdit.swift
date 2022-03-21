@@ -84,7 +84,7 @@ public extension CALayer {
             note.updateNoteNamesInInternalLinks(recursive: true)
             updateRoot(with: note)
             searchViewModel?.search()
-            updateCalendarLeadingGutter(for: note.id)
+            updateCalendarLeadingGutter(for: note)
         }
     }
 

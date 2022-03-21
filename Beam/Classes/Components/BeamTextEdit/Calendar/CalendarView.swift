@@ -17,8 +17,6 @@ class CalendarGutterViewModel: ObservableObject {
     var isConnected: Bool {
         calendarManager.connectedSources.count > 0
     }
-    @UserDefault(key: "showedNotConnectedViewKey", defaultValue: 0)
-    var showedNotConnectedView: Int
 
     @Published var meetings: [Meeting] = []
     var scope = Set<AnyCancellable>()
@@ -92,13 +90,18 @@ struct CalendarView: View {
                     isHoveringConnect = isHovering
                 }
             }
-        } else if viewModel.todaysCalendar && viewModel.showedNotConnectedView <= 3 && !viewModel.isConnected {
+        } else if viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView <= 3 && !viewModel.isConnected {
             isNotConnectedView
                 .padding(.leading, 14)
                 .onHover { isHoveringNotConnect = $0 }
                 .animation(.easeInOut(duration: 0.3))
                 .onTapGesture {
-                    AppDelegate.main.openPreferencesWindow(to: .accounts)
+                    viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                        if connected {
+                            viewModel.calendarManager.updated = true
+                            isHoveringConnect = true
+                        }
+                    }
                 }
         }
     }
@@ -128,9 +131,6 @@ struct CalendarView: View {
                 }
             }
         }.frame(width: 161, alignment: .leading)
-            .onAppear {
-                viewModel.showedNotConnectedView += 1
-            }
     }
 
     private func prompt(_ meeting: Meeting) {
