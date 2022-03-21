@@ -45,18 +45,21 @@ struct AllNotesPageContentView: View {
     static private let secondaryCellFont = BeamFont.regular(size: 10).nsFont
     static private let secondaryCellTextColor = BeamColor.AlphaGray.nsColor
     static private let secondaryCellSelectedColor = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray).nsColor
-    private var columns = [
-        TableViewColumn(key: "checkbox", title: "", type: TableViewColumn.ColumnType.CheckBox,
+    private let columns = [
+        TableViewColumn(key: ColumnID.checkbox.rawValue, title: "", type: .CheckBox,
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
-        TableViewColumn(key: "title", title: loc("Title"), editable: true, isLink: true,
+        TableViewColumn(key: ColumnID.title.rawValue, title: loc("Title"),
+                        editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
-        TableViewColumn(key: "words", title: loc("Words"), width: 70, font: secondaryCellFont,
+        TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"),
+                        width: 70, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "mentions", title: loc("Links"), width: 80, font: secondaryCellFont,
+        TableViewColumn(key: ColumnID.mentions.rawValue, title: loc("Links"),
+                        width: 80, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: "createdAt", title: loc("Created"), font: secondaryCellFont,
+        TableViewColumn(key: ColumnID.createdAt.rawValue, title: loc("Created"), font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -64,7 +67,8 @@ struct AllNotesPageContentView: View {
             }
             return ""
         }),
-        TableViewColumn(key: "updatedAt", title: loc("Updated"), isInitialSortDescriptor: true, font: secondaryCellFont,
+        TableViewColumn(key: ColumnID.updatedAt.rawValue, title: loc("Updated"),
+                        isInitialSortDescriptor: true, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -140,8 +144,10 @@ struct AllNotesPageContentView: View {
             .padding(.top, 85)
             .padding(.trailing, 20)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
-                      creationRowTitle: creationRowPlaceholder, isCreationRowLoading: model.publishingNoteTitle != nil,
-                      shouldReloadData: $model.shouldReloadData) { (newText, row) in
+                      creationRowTitle: creationRowPlaceholder,
+                      isCreationRowLoading: model.publishingNoteTitle != nil,
+                      shouldReloadData: $model.shouldReloadData,
+                      sortDescriptor: model.sortDescriptor) { (newText, row) in
                 onEditingText(newText, row: row, in: currentNotesList)
             } onSelectionChanged: { (selectedIndexes) in
                 Logger.shared.logDebug("selected: \(selectedIndexes.map { $0 })")
@@ -281,15 +287,11 @@ struct AllNotesPageContentView_Previews: PreviewProvider {
     }
 }
 
-private enum ColumnIdentifiers {
-    static let CheckColumn = NSUserInterfaceItemIdentifier("CheckColumnID")
-    static let TitleColumn = NSUserInterfaceItemIdentifier("title")
-    static let WordsColumn = NSUserInterfaceItemIdentifier("words")
-    static let MentionsColumn = NSUserInterfaceItemIdentifier("mentions")
-    static let CreatedColumn = NSUserInterfaceItemIdentifier("createdAt")
-    static let UpdatedColumn = NSUserInterfaceItemIdentifier("updatedAt")
-}
-
-private enum CellIdentifiers {
-    static let DefaultCell = NSUserInterfaceItemIdentifier("DefaultCellID")
+private enum ColumnID: String {
+    case checkbox
+    case title
+    case words
+    case mentions
+    case createdAt
+    case updatedAt
 }

@@ -10,6 +10,12 @@ import Combine
 import BeamCore
 
 class AllNotesPageViewModel: ObservableObject, Identifiable {
+
+    private struct PersistedState {
+        var sortDescriptor: NSSortDescriptor?
+    }
+    static private var persistedState = PersistedState()
+
     var data: BeamData?
     @Published private var allNotes = [DocumentStruct]() {
         didSet {
@@ -31,6 +37,13 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     private var notesCancellables = Set<AnyCancellable>()
     private var notesMetadataCache: NoteListMetadataCache {
         NoteListMetadataCache.shared
+    }
+    var sortDescriptor: Binding<NSSortDescriptor?> {
+        .init {
+            Self.persistedState.sortDescriptor
+        } set: {
+            Self.persistedState.sortDescriptor = $0
+        }
     }
 
     init() {

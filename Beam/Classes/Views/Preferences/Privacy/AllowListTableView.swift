@@ -23,7 +23,7 @@ struct AllowListTableView: View {
         TableView(hasSeparator: false,
                   items: searchStr.isEmpty ? viewModel.allAllowListItems : filterAllowListItemsBy(searchStr: searchStr),
                   columns: allowListColumns,
-                  creationRowTitle: creationRowTitle, shouldReloadData: .constant(nil)) { title, _ in
+                  creationRowTitle: creationRowTitle) { title, _ in
             guard let titleStr = title else { return }
             viewModel.add(domain: titleStr)
             creationRowTitle = nil

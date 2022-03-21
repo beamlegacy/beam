@@ -133,7 +133,7 @@ struct UserInformationsTableView: View {
 
     var body: some View {
         TableView(customRowHeight: 37, hasSeparator: true, hasHeader: false, allowsMultipleSelection: false,
-                  items: allUserInformationsItems, columns: adressesColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
+                  items: allUserInformationsItems, columns: adressesColumns, creationRowTitle: nil) { (_, _) in
 
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
