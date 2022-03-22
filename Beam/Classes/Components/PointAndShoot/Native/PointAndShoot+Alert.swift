@@ -33,9 +33,9 @@ extension PointAndShoot {
         pasteboard.setString(message, forType: .string)
 
         // Add a confirmation button
-        let saveButton = alert.addButton(withTitle: "Send bug report")
+        let saveButton = alert.addButton(withTitle: "Send Bug Report")
         // and cancel button
-        let cancelButton = alert.addButton(withTitle: "Don't send")
+        let cancelButton = alert.addButton(withTitle: "Don't Send")
         saveButton.tag = NSApplication.ModalResponse.OK.rawValue
         cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
 
