@@ -11,7 +11,6 @@ import XCTest
 class BrowserShortcutsTests: BaseTest {
     
     let shortcutHelper = ShortcutsHelper()
-    let wait = WaitHelper()
     let webView = WebTestView()
     let omniboxView = OmniBoxTestView()
     let testPage = UITestPagePasswordManager()
@@ -135,24 +134,24 @@ class BrowserShortcutsTests: BaseTest {
         step ("Then tabs are reopened on app relaunch"){
             journalView.waitForJournalViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .reOpenClosedTab)
-            XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: expectedTabsNumber, elementQuery: webView.getTabs()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: expectedTabsNumber, elementQuery: webView.getTabs()))
         }
         
         step ("Then no other tabs are reopened on additional CMD+T action"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 5)
-            XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: expectedTabsNumber, elementQuery: webView.getTabs()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: expectedTabsNumber, elementQuery: webView.getTabs()))
         }
         
         step ("When I close tabs"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: 2)
-            XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
         }
         
         step ("Then no other tabs are reopened on one per CMD+T action"){
             shortcutHelper.shortcutActionInvoke(action: .reOpenClosedTab)
-            XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: webView.getTabs()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: webView.getTabs()))
             shortcutHelper.shortcutActionInvoke(action: .reOpenClosedTab)
-            XCTAssertTrue(WaitHelper().waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 3, elementQuery: webView.getTabs()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 3, elementQuery: webView.getTabs()))
 
             //Clean tabs since restoreLastBeamSessionDefault is ON by default
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: webView.getNumberOfTabs())
@@ -161,10 +160,10 @@ class BrowserShortcutsTests: BaseTest {
     }
     
     func isMediaPageOpened() -> Bool {
-        webView.button("Play Audio").waitForExistence(timeout: minimumWaitTimeout)
+        webView.button("Play Audio").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func isAlertsPageOpened() -> Bool {
-        webView.button("Trigger an alert").waitForExistence(timeout: minimumWaitTimeout)
+        webView.button("Trigger an alert").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
 }

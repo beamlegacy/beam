@@ -14,7 +14,6 @@ class DeleteNotesTests: BaseTest {
     let fileMenu = FileMenu()
     let allCards = AllCardsTestView()
     let shortcutsHeleper = ShortcutsHelper()
-    let waitHelper = WaitHelper()
     
     func testDeleteAllLocalContents() {
         //Tests only notes deletion

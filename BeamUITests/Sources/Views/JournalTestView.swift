@@ -17,7 +17,7 @@ class JournalTestView: BaseView {
     @discardableResult
     func openAllCardsMenu() -> AllCardsTestView {
         let allCardsMenuButton = button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier)
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, allCardsMenuButton)
+        waitFor(PredicateFormat.isHittable.rawValue, allCardsMenuButton)
         allCardsMenuButton.click()
         return AllCardsTestView()
     }
@@ -26,7 +26,7 @@ class JournalTestView: BaseView {
     func openRecentCardByName(_ cardName: String) -> CardTestView {
         let button = app.buttons.matching(identifier: ToolbarLocators.Buttons.cardSwitcher.accessibilityIdentifier)
             .matching(NSPredicate(format: "value = '\(cardName)'")).firstMatch
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, button)
+        waitFor(PredicateFormat.isHittable.rawValue, button)
         button.click()
         return CardTestView()
     }
@@ -60,7 +60,7 @@ class JournalTestView: BaseView {
     
     @discardableResult
     func waitForJournalViewToLoad() -> JournalTestView {
-        _ = scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        _ = scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         return self
     }
     

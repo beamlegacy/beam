@@ -17,7 +17,7 @@ class CardCreationTests: BaseTest {
         let journalView = launchApp()
         
         step("Given I get number of cards in All Notes view"){
-            WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier))
+            waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier))
         }
         let numberOfCardsBeforeAdding = journalView.openAllCardsMenu().getNumberOfCards()
         var allCardsView: AllCardsTestView?
@@ -44,14 +44,14 @@ class CardCreationTests: BaseTest {
         step("When I create \(cardNameToBeCreated) a note from Webview cards search results"){
             let webView = journalView.searchInOmniBox(cardNameToBeCreated, true)
             webView.searchForCardByTitle(cardNameToBeCreated)
-            XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationCardElement()), "Destination note is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationCardElement().value))")
+            XCTAssertTrue(waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationCardElement()), "Destination note is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationCardElement().value))")
             cardView = webView.openDestinationCard()
             
         }
 
         step("Then note with \(cardNameToBeCreated) is opened"){
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
     }
@@ -80,7 +80,7 @@ class CardCreationTests: BaseTest {
         
         step("Then note with \(cardNameToBeCreated) is opened"){
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
 
         step("Then Journal has no mentions for created note"){
@@ -97,14 +97,14 @@ class CardCreationTests: BaseTest {
         
         step("When I create \(cardNameToBeCreated) a note from Omnibox search results via Option+Enter"){
             journalView.searchInOmniBox(cardNameToBeCreated, false)
-            _ = journalView.app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: implicitWaitTimeout)
+            _ = journalView.app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             journalView.app.typeKey("\r", modifierFlags: .option)
         }
 
         step("Then note with \(cardNameToBeCreated) is opened"){
             cardView = CardTestView()
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
     }
