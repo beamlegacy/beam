@@ -58,6 +58,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     @Published var hasActiveSelection: Bool = false
     @Published var isTypingOnWebView: Bool = false
     @Published var mouseLocation: NSPoint = NSPoint()
+    @Published var hasCollectedFullPage: Bool = false
 
     private var isEnabled: Bool {
         guard let page = self.page else { return false }
@@ -368,7 +369,15 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         mutableGroup.setConfirmation(confirmation)
         self.collectedGroups.append(mutableGroup)
         self.activeShootGroup = nil
-        shootConfirmationGroup = mutableGroup
+        self.shootConfirmationGroup = mutableGroup
+
+        // If it's a fullpage collect ShootGroup, disable future
+        // full page collects until the flag is restored
+        if mutableGroup.fullPageCollect {
+            self.hasCollectedFullPage = true
+        }
+
+        // Finish animation
         DispatchQueue.main.asyncAfter(deadline: .now() + 2) { [weak self] in
             guard let self = self else { return }
             self.shootConfirmationGroup = nil
@@ -419,6 +428,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         shootConfirmationGroup = nil
         isAltKeyDown = false
         hasActiveSelection = false
+        hasCollectedFullPage = false
     }
 
     func cancelShoot() {
