@@ -9,6 +9,8 @@ import Combine
 @testable import BeamCore
 
 class BeamObjectManagerNetworkTests: QuickSpec {
+    static let networkTimeout = 30
+
     override func spec() {
         var sut: BeamObjectManager!
         let beamObjectHelper = BeamObjectTestsHelper()
@@ -91,7 +93,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 it("fetches all objects") {
                     let networkCalls = APIRequest.callsCount
 
-                    waitUntil(timeout: .seconds(10)) { done in
+                    waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                         do {
                             try sut.fetchAllFromAPI { result in
                                 done()
@@ -148,7 +150,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                             title: title)
                 context("with non-existing object") {
                     it("returns 404") {
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                             do {
                                 try sut.delete(object: object, raise404: true) { result in
                                     expect { try result.get() }.to(throwError { (error: APIRequestError) in
@@ -171,7 +173,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                     it("returns object") {
                         var beamObject: BeamObject?
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                             do {
                                 try sut.delete(object: object) { result in
                                     expect { beamObject = try result.get() }.toNot(throwError())
@@ -238,7 +240,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         var returnedObjects: [MyRemoteObject] = []
 
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                             do {
                                 _ = try sut.saveToAPI(objects) { result in
                                     expect { returnedObjects = try result.get() }.toNot(throwError())
@@ -268,7 +270,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         let beamObjects: [BeamObject] = [try BeamObject(object),  try BeamObject(object2)]
 
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                             do {
                                 _ = try sut.saveToAPI(beamObjects) { result in
                                     expect { try result.get() }.toNot(throwError())
@@ -302,7 +304,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                             let objects: [MyRemoteObject] = [object, object2]
                             var returnedObjects: [MyRemoteObject] = []
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                 do {
                                     _ = try sut.saveToAPI(objects) { result in
                                         expect { returnedObjects = try result.get() }.toNot(throwError())
@@ -335,7 +337,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                             let beamObject2 = try BeamObject(object2)
                             let beamObjects: [BeamObject] = [beamObject, beamObject2]
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                 do {
                                     _ = try sut.saveToAPI(beamObjects) { result in
                                         expect { try result.get() }.toNot(throwError())
@@ -375,7 +377,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let objects: [MyRemoteObject] = [object, object2]
                                 var returnedObjects: [MyRemoteObject] = []
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(objects) { result in
                                             expect { returnedObjects = try result.get() }.toNot(throwError())
@@ -418,7 +420,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObjects: [BeamObject] = [try BeamObject(object),
                                                                  try BeamObject(object2)]
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
                                             expect { try result.get() }.toNot(throwError())
@@ -455,7 +457,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 let beamObjects: [MyRemoteObject] = [object, object2]
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
@@ -505,7 +507,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                                                  try BeamObject(object2)]
                                 var remoteBeamObjects: [BeamObject] = []
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in
@@ -584,7 +586,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 let objects: [MyRemoteObject] = [object, object2]
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(objects) { result in
                                             expect { try result.get() }.toNot(throwError())
@@ -621,7 +623,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObject2 = try BeamObject(object2)
                                 let beamObjects: [BeamObject] = [beamObject, beamObject2]
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
                                             expect { try result.get() }.toNot(throwError())
@@ -666,7 +668,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 let beamObjects: [MyRemoteObject] = [object, object2]
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
@@ -713,7 +715,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObjects: [BeamObject] = [try BeamObject(object), try BeamObject(object2)]
                                 var remoteBeamObjects: [BeamObject] = []
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObjects) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in
@@ -798,7 +800,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                         let networkCalls = APIRequest.callsCount
                         var returnedObject: MyRemoteObject?
 
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                             do {
                                 _ = try sut.saveToAPI(object) { result in
                                     expect { returnedObject = try result.get() }.toNot(throwError())
@@ -824,7 +826,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                         let beamObject = try BeamObject(object)
 
-                        waitUntil(timeout: .seconds(10)) { done in
+                        waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                             do {
                                 _ = try sut.saveToAPI(beamObject) { result in
                                     expect { try result.get() }.toNot(throwError())
@@ -863,7 +865,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             var returnedObject: MyRemoteObject?
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                 do {
                                     _ = try sut.saveToAPI(object) { result in
                                         expect { returnedObject = try result.get() }.toNot(throwError())
@@ -889,7 +891,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                             let beamObject = try BeamObject(object)
 
-                            waitUntil(timeout: .seconds(10)) { done in
+                            waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                 do {
                                     _ = try sut.saveToAPI(beamObject) { result in
                                         expect { try result.get() }.toNot(throwError())
@@ -924,7 +926,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let networkCalls = APIRequest.callsCount
                                 var returnedObject: MyRemoteObject?
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(object) { result in
                                             expect { returnedObject = try result.get() }.toNot(throwError())
@@ -984,7 +986,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 var remoteObject: MyRemoteObject?
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(object) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
@@ -1020,7 +1022,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObject = try BeamObject(object)
                                 var remoteBeamObject: BeamObject?
 
-                                waitUntil(timeout: .seconds(30)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObject) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in
@@ -1068,7 +1070,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                             it("updates object") {
                                 let networkCalls = APIRequest.callsCount
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(object) { result in
                                             expect { try result.get() }.toNot(throwError())
@@ -1095,7 +1097,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 let beamObject = try BeamObject(object)
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObject) { result in
                                             expect { try result.get() }.toNot(throwError())
@@ -1125,7 +1127,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
                                 var remoteObject: MyRemoteObject?
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(object) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerObjectError<MyRemoteObject>) in
@@ -1161,7 +1163,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                                 let beamObject = try BeamObject(object)
                                 var remoteBeamObject: BeamObject?
 
-                                waitUntil(timeout: .seconds(10)) { done in
+                                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                                     do {
                                         _ = try sut.saveToAPI(beamObject) { result in
                                             expect { try result.get() }.to(throwError { (error: BeamObjectManagerError) in
