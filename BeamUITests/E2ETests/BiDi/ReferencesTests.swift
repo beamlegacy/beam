@@ -13,7 +13,6 @@ class ReferencesTests: BaseTest {
     let cardName1 = "Note Reference 1"
     let cardName2 = "Note Reference 2"
     let shortcutsHelper = ShortcutsHelper()
-    let waitHelper = WaitHelper()
     var cardView: CardTestView?
 
     private func createCardsAndReferenceThem() -> CardTestView {
@@ -134,7 +133,7 @@ class ReferencesTests: BaseTest {
         }
 
         step ("Then note 1 has no references available"){
-            XCTAssertTrue(waitHelper.waitForDoesntExist(cardView!.getRefereceSectionCounterElement()))
+            XCTAssertTrue(waitForDoesntExist(cardView!.getRefereceSectionCounterElement()))
         }
         
         step ("Given I rename the note in note 2 to \(renamedCard1)"){
@@ -204,7 +203,7 @@ class ReferencesTests: BaseTest {
 
         
         step ("Then the card has no references available"){
-            XCTAssertTrue(waitHelper.waitForDoesntExist(cardView!.getRefereceSectionCounterElement()))
+            XCTAssertTrue(waitForDoesntExist(cardView!.getRefereceSectionCounterElement()))
         }
     }
     

@@ -27,7 +27,7 @@ class BrowserStatusBarTests: BaseTest {
         let statusText = webView.getElementStringValue(element:  webView.statusText)
 
         step("Then the status bar must appear"){
-            XCTAssertTrue(webView.statusText.waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(webView.statusText.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertEqual(statusText, "https://twitter.com/kanyewest/status/692435575836676097?lang=en")
         }
 
@@ -55,7 +55,7 @@ class BrowserStatusBarTests: BaseTest {
         let statusText = webView.getElementStringValue(element:  webView.statusText)
 
         step("Then the status bar must appear") {
-            XCTAssertTrue(webView.statusText.waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(webView.statusText.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertTrue(statusText.hasPrefix(#"Open "file:///"#))
             XCTAssertTrue(statusText.hasSuffix(#".html" in a new tab"#))
         }
@@ -82,7 +82,7 @@ class BrowserStatusBarTests: BaseTest {
         }
 
         step("Then the status bar must not appear"){
-            XCTAssertFalse(webView.statusText.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(webView.statusText.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
     

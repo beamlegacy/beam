@@ -1,7 +1,7 @@
 import Foundation
 import XCTest
 
-extension XCUIElement {
+extension XCUIElement: WaitHelper {
     
     public func clear() {
         ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
@@ -42,23 +42,23 @@ extension XCUIElement {
     
     @discardableResult
     public func clickOnHittable() -> XCUIElement {
-        _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
-        WaitHelper().waitForIsHittable(self)
+        _ = self.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        BaseTest.waitForIsHittable(self)
         self.click()
         return self
     }
     
     @discardableResult
     public func clickOnExistence() -> XCUIElement {
-        _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
+        _ = self.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         self.click()
         return self
     }
     
     @discardableResult
     public func clickOnEnabled() -> XCUIElement {
-        _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
-        WaitHelper().waitForIsEnabled(self)
+        _ = self.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        waitForIsEnabled(self)
         self.click()
         return self
     }
@@ -88,7 +88,7 @@ extension XCUIElement {
     
     @discardableResult
     public func focusAndTypeTextOnExistence(_ text: String) -> XCUIElement {
-        _ = self.waitForExistence(timeout: WaitHelper().minimumWaitTimeout)
+        _ = self.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         self.tapInTheMiddle()
         self.typeText(text)
         return self

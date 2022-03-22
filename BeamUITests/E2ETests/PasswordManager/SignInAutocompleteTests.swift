@@ -91,7 +91,7 @@ class SignInAutocompleteTests: BaseTest {
         step("Then it is removed from the list of passwords"){
             passPrefView.clickRemove()
             XCTAssertTrue(alertView.confirmRemoveFromSheets())
-            XCTAssertTrue(WaitHelper().waitForDoesntExist(passPrefView.staticTextTables("apple.com")))
+            XCTAssertTrue(waitForDoesntExist(passPrefView.staticTextTables("apple.com")))
         }
 
         step("When I choose Fill option for another password"){

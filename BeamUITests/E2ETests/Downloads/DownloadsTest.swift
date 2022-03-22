@@ -23,14 +23,14 @@ class DownloadsTest: BaseTest {
         let downloadsView = omniBoxView.openDownloadsView()
         
         step("Then downloads view shows corerctlabels and buttons"){
-            if !downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) {
+            if !downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) {
                 journalView.searchInOmniBox(downloadLink, true)
                 omniBoxView.openDownloadsView()
             }
-            XCTAssertTrue(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.closeDownloadButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.viewInFinderButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.closeDownloadButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.viewInFinderButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertFalse(downloadsView.button(DownloadViewLocators.Buttons.resumeDownloadButton.accessibilityIdentifier).exists)
         }
 
@@ -39,7 +39,7 @@ class DownloadsTest: BaseTest {
         }
         
         step("Then resume download button exists and stop download button doesn't exist"){
-            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.resumeDownloadButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(downloadsView.button(DownloadViewLocators.Buttons.resumeDownloadButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertFalse(downloadsView.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).exists)
         }
     }
@@ -54,7 +54,7 @@ class DownloadsTest: BaseTest {
         let downloadsView = omniBoxView.openDownloadsView()
         
         step("When I stop downloading process"){
-            if !downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) {
+            if !downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) {
                 journalView.searchInOmniBox(downloadLink, true)
                 omniBoxView.openDownloadsView()
             }
@@ -62,7 +62,7 @@ class DownloadsTest: BaseTest {
         }
 
         step("Then I can see Clear button available"){
-            XCTAssertTrue(downloadsView.staticText(DownloadViewLocators.Buttons.clearButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(downloadsView.staticText(DownloadViewLocators.Buttons.clearButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
         
         step("When I click Clear button"){
@@ -70,7 +70,7 @@ class DownloadsTest: BaseTest {
         }
         
         step("Then Downloads option is unavailable anymore"){
-            WaitHelper().waitFor(WaitHelper.PredicateFormat.notExists.rawValue, omniBoxView.button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier))
+            waitFor(PredicateFormat.notExists.rawValue, omniBoxView.button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier))
             XCTAssertFalse(downloadsView.staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).exists)
             XCTAssertFalse(omniBoxView.button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier).exists)
         }

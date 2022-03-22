@@ -12,7 +12,6 @@ class PnSAddToCardTests: BaseTest {
        
     let cardNameToBeCreated = "PnS Note"
     let shortcutsHelper = ShortcutsHelper()
-    let waitHelper = WaitHelper()
     let pnsView = PnSTestView()
     let webView = WebTestView()
     let titles = [
@@ -101,7 +100,7 @@ class PnSAddToCardTests: BaseTest {
         }
     
         step("Then it is successfully added to the note"){
-            XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             OmniBoxTestView().navigateToCardViaPivotButton()
             _ = cardView!.waitForCardViewToLoad()
             cardNotes = cardView!.getCardNotesForVisiblePart()
@@ -161,7 +160,7 @@ class PnSAddToCardTests: BaseTest {
             let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
             pnsView.addToCardByName(gifItemToAdd, cardNameToBeCreated)
             cardView = webView.openDestinationCard()
-            XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
+            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
         }
 
         step ("Then I successfully collect image"){
@@ -169,7 +168,7 @@ class PnSAddToCardTests: BaseTest {
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToCardByName(imageItemToAdd, cardNameToBeCreated)
             webView.openDestinationCard()
-            XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
+            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
         }
 
     }
@@ -217,7 +216,7 @@ class PnSAddToCardTests: BaseTest {
 
         step ("Then Failed to collect message appears"){
             pnsView.passFailedToCollectPopUpAlert()
-            XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             OmniBoxTestView().navigateToCardViaPivotButton()
             journalView.waitForJournalViewToLoad()
         }
@@ -407,26 +406,26 @@ class PnSAddToCardTests: BaseTest {
        // Press option once to enable shoot mode
        step ("TBD"){
            pnsView.pressOptionButtonFor(seconds: 1)
-           XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
+           XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
         }
 
        step ("TBD"){
            let emptyLocation = child.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: -1))
            emptyLocation.click()
-           XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+           XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
         }
 
        step ("TBD"){
            webView.clickStartOfTextAndDragTillEnd(textIdentifier: searchText, elementToPerformAction: parentElement)
            // Press option once to enable shoot mode
            pnsView.pressOptionButtonFor(seconds: 1)
-           XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
+           XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: pnsView.getShootFrameSelection()))
        }
 
        step ("TBD"){
           // dismiss shootCardPicker with escape
           webView.typeKeyboardKey(.escape)
-          XCTAssertTrue(waitHelper.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
+          XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 0, elementQuery: pnsView.getShootFrameSelection()))
         }
     }
     

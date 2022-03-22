@@ -36,15 +36,15 @@ class AutoFillPasswordsTestView: PreferencesBaseView {
     }
     
     func isPasswordPreferencesOpened() -> Bool {
-        return staticTextSheets(AutofillPasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        return staticTextSheets(AutofillPasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func isPasswordDisplayedBy(_ text: String) -> Bool {
-        return staticTextTables(text).waitForExistence(timeout: minimumWaitTimeout)
+        return staticTextTables(text).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func waitForPreferenceToClose() -> Bool {
-        return WaitHelper().waitForDoesntExist(staticText(AutofillPasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier))
+        return waitForDoesntExist(staticText(AutofillPasswordViewLocators.StaticTexts.windowTitle.accessibilityIdentifier))
     }
     
 }

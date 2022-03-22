@@ -25,7 +25,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
         step("Then I see \(expectedAutocompleteResultsNumber) autocomplete results, no selected results and focused omnibox search"){
             //on different environment goggle offers either 8 or 7 options
-            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber) || omniboxView.waitForAutocompleteResultsLoad(timeout: implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber - 1))
+            XCTAssertTrue(omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber) || omniboxView.waitForAutocompleteResultsLoad(timeout: BaseTest.implicitWaitTimeout, expectedNumber: expectedAutocompleteResultsNumber - 1))
             XCTAssertEqual(results.matching(self.helper.autocompleteSelectedPredicate).count, 0)
             XCTAssertTrue(omniboxView.inputHasFocus(omniboxSearchField))
         }
@@ -77,15 +77,14 @@ class OmniboxAutocompleteTests: BaseTest {
         let oneLetterToAdd = "p"
         let anotherOneLetterToAdd = "a"
         let helper = OmniBoxUITestsHelper(omniboxView.app)
-        let waitHelper = WaitHelper()
-        var webView: WebTestView?
+            var webView: WebTestView?
 
         step("Given I open website: \(searchText)"){
             webView = omniboxView.searchInOmniBox(searchText, true)
         }
 
         step("Then browser tab bar appears"){
-            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("When I type: \(partiallyTypedSearchText)"){
@@ -98,8 +97,8 @@ class OmniboxAutocompleteTests: BaseTest {
         let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
         
         step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(searchText) search text available"){
-            XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
+            XCTAssertTrue(waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
             XCTAssertTrue(results.count > 1)
         }
 
@@ -109,8 +108,8 @@ class OmniboxAutocompleteTests: BaseTest {
         }
 
         step("Then I see selection persists"){
-            XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
+            XCTAssertTrue(waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
         }
 
 
@@ -119,7 +118,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see selection is cleared"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText + oneLetterToAdd + anotherOneLetterToAdd, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(partiallyTypedSearchText + oneLetterToAdd + anotherOneLetterToAdd, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
         }
         
@@ -128,7 +127,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see selection is cancelled"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText + oneLetterToAdd, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(partiallyTypedSearchText + oneLetterToAdd, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
         }
 
@@ -138,7 +137,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see selection available"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
         }
 
@@ -156,7 +155,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see search text: \(searchText + "s")"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(searchText + "s", omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(searchText + "s", omniboxView.getOmniBoxSearchField()))
         }
     }
 
@@ -165,8 +164,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let expectedSearchFieldText = "Hello world"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let deletePressRepeatTimes = 2
-        let waitHelper = WaitHelper()
-
+    
         launchApp()
         helper.tapCommand(.omniboxEnableSearchInHistoryContent)
         helper.tapCommand(.omniboxFillHistory)
@@ -181,8 +179,8 @@ class OmniboxAutocompleteTests: BaseTest {
         let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
 
         step("Then search field value is \(expectedSearchFieldText)"){
-            XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+            XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
         }
         
         step("When I type: l"){
@@ -190,8 +188,8 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then search field value is \(expectedSearchFieldText)"){
-            XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+            XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
         }
         
         step("When I type: a"){
@@ -199,7 +197,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then search field value is updated accordingly and non of the results is selected"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual("Hella", omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual("Hella", omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
         }
 
@@ -209,7 +207,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then search field value is \(expectedSearchFieldText) and 1 result is selected"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
         }
         
@@ -218,7 +216,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then search field value is updated accordingly and non of the results is selected"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual("Hel", omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual("Hel", omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 0)
         }
 
@@ -227,7 +225,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then search field value is updated accordingly and there is 1 selected result"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
             helper.tapCommand(.omniboxDisableSearchInHistoryContent)
         }
@@ -237,8 +235,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let partiallyTypedSearchText = "alter"
         let expectedSearchFieldText = "alternateurl.com"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-url"
-        let waitHelper = WaitHelper()
-
+    
         launchApp()
         helper.tapCommand(.omniboxFillHistory)
 
@@ -251,7 +248,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let firstResult = results.firstMatch
 
         step("Then search field value is \(expectedSearchFieldText)"){
-            XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
         }
     }
 
@@ -260,8 +257,7 @@ class OmniboxAutocompleteTests: BaseTest {
         let expectedSearchFieldText = "Hello world"
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let expectedURL = "fr.wikipedia.org/wiki/Hello_world"
-        let waitHelper = WaitHelper()
-
+    
         launchApp()
         helper.tapCommand(.omniboxEnableSearchInHistoryContent)
         helper.tapCommand(.omniboxFillHistory)
@@ -276,8 +272,8 @@ class OmniboxAutocompleteTests: BaseTest {
 
 
         step("Then search field value is \(expectedSearchFieldText)"){
-            XCTAssertTrue(waitHelper.waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+            XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
         }
         
         step("When I press right arrow key"){
@@ -291,7 +287,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then search field value is \(expectedURL)"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedURL, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(expectedURL, omniboxView.getOmniBoxSearchField()))
         }
 
         step("When I press down arrow key"){
@@ -311,7 +307,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
 
         step("Then search field value is \(partiallyTypedSearchText)"){
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(partiallyTypedSearchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(partiallyTypedSearchText, omniboxView.getOmniBoxSearchField()))
             helper.tapCommand(.omniboxDisableSearchInHistoryContent)
         }
     }

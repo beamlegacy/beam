@@ -26,7 +26,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
 
         step("When \(buttonTitle) is invoked"){
             button.clickOnHittable()
-            XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssert(alert.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         return (webViewElement, alert, button)
 
@@ -37,8 +37,8 @@ class JavascriptNativeInteractionsTests: BaseTest {
         let alert = preparationResult.1
         
         step("Then alert box is displayed and interacted"){
-            XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssert(alert.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(alert.staticTexts["Hello! I am an alert box!"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             alert.buttons["OK"].firstMatch.tap()
         }
 
@@ -55,7 +55,7 @@ class JavascriptNativeInteractionsTests: BaseTest {
             textField.typeText("Scotty")
 
             alert.buttons["Submit"].firstMatch.tap()
-            XCTAssertTrue(webView.staticTexts["Beam me up, Scotty!"].waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(webView.staticTexts["Beam me up, Scotty!"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
 
     }
@@ -71,13 +71,13 @@ class JavascriptNativeInteractionsTests: BaseTest {
             let cancel = alert.buttons["Cancel"].firstMatch
             
             ok.tap()
-            XCTAssertTrue(webView.staticTexts["YES"].waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(webView.staticTexts["YES"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             
             button.tap()
-            XCTAssertTrue(alert.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(alert.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             
             cancel.tap()
-            XCTAssertTrue(webView.staticTexts["NO"].waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(webView.staticTexts["NO"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
 
     }
@@ -91,8 +91,8 @@ class JavascriptNativeInteractionsTests: BaseTest {
         step("Given I open a test page with Upload File dialog"){
             BeamUITestsHelper(journalView.app).openTestPage(page: .alerts)
             webView = journalView.app.webViews.containing(.button, identifier: message).element
-            XCTAssert(webView!.waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertTrue(webView!.staticTexts[fileExistanceLabel].waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssert(webView!.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(webView!.staticTexts[fileExistanceLabel].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
  
         step("When \(message) is clicked"){
@@ -101,13 +101,13 @@ class JavascriptNativeInteractionsTests: BaseTest {
 
         step("Then I can successfully upload the file"){
             let alert = journalView.app.dialogs.firstMatch
-            XCTAssert(alert.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssert(alert.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             let open = alert.buttons["Open"].firstMatch
 
             journalView.app.typeKey("g", modifierFlags: [.command, .shift])
 
             let sheet = alert.sheets.firstMatch
-            XCTAssert(sheet.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssert(sheet.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
 
             let goButton = alert.buttons["Go"]
             let input = sheet.comboBoxes.firstMatch
@@ -123,11 +123,11 @@ class JavascriptNativeInteractionsTests: BaseTest {
             
             if goButton.exists {
                 goButton.tap()
-                WaitHelper().waitForDoesntExist(goButton)
+                waitForDoesntExist(goButton)
             }
             journalView.typeKeyboardKey(.downArrow)
             open.clickOnEnabled()
-            XCTAssertTrue(WaitHelper().waitForDoesntExist(webView!.staticTexts[fileExistanceLabel]))
+            XCTAssertTrue(waitForDoesntExist(webView!.staticTexts[fileExistanceLabel]))
         }
 
     }

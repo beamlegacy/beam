@@ -34,15 +34,6 @@ class OmniBoxUITestsHelper : BeamUITestsHelper {
         self.searchField.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
     }
 
-    func typeInSearchAndWait(_ text: String) {
-        self.searchField.typeText(text)
-        waitForSearchResults()
-    }
-
-    func waitForSearchResults() {
-        usleep(500000) // 0.5s
-    }
-
     func inputHasFocus(_ input: XCUIElement) -> Bool {
         return input.value(forKey: "hasKeyboardFocus") as? Bool ?? false
     }

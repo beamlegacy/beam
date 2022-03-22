@@ -11,7 +11,6 @@ import XCTest
 
 class GoogleSheetsTests: BaseTest {
 
-    let waitHelper = WaitHelper()
     let omniboxView = OmniBoxTestView()
 
     let url = "https://docs.google.com/spreadsheets/d/1bOh2DVaDn9M8ihPDysgpBt0ewVaLsWbJGBRcC8ZqTF8/edit?usp=sharing"
@@ -26,9 +25,9 @@ class GoogleSheetsTests: BaseTest {
             webView = omniboxView.searchInOmniBox(url, true)
         }
         step("Then browser tab bar appears"){
-            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             let textElement = XCUIApplication().windows.staticTexts["Unable to load file"].firstMatch
-            XCTAssertTrue(waitHelper.waitForDoesntExist(textElement), "No alert should be shown")
+            XCTAssertTrue(waitForDoesntExist(textElement), "No alert should be shown")
         }
     }
 

@@ -74,7 +74,7 @@ class NoteEditorTests: BaseTest {
         let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
         
         step("Then Context menu is displayed"){
-            XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
         
         step("Then Context menu items exist, enabled and hittable"){
@@ -91,14 +91,14 @@ class NoteEditorTests: BaseTest {
         }
         
         step("Then Context menu is NOT displayed"){
-            XCTAssertTrue(WaitHelper().waitForDoesntExist(contextMenuView.menuElement()))
+            XCTAssertTrue(waitForDoesntExist(contextMenuView.menuElement()))
         }
         
         journalView.app.typeText(contextMenuTriggerKey + "bol")
         let boldMenuItem = contextMenuView.staticText(NoteViewLocators.SlashContextMenuItems.boldItem.accessibilityIdentifier)
         
         step("Then Bold context menu item is displayed"){
-            XCTAssertTrue(boldMenuItem.waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(boldMenuItem.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
         
         step("When I press return button"){
@@ -106,7 +106,7 @@ class NoteEditorTests: BaseTest {
         }
         
         step("Then Bold context menu item is NOT displayed"){
-            XCTAssertTrue(WaitHelper().waitForDoesntExist(boldMenuItem))
+            XCTAssertTrue(waitForDoesntExist(boldMenuItem))
         }
     }
 }

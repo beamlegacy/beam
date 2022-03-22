@@ -12,7 +12,6 @@ class OnboardingTests: BaseTest {
     
     let onboardingView = OnboardingLandingTestView()
     let onboardingUsernameView = OnboardingUsernameTestView()
-    let waitHelper = WaitHelper()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -56,7 +55,7 @@ class OnboardingTests: BaseTest {
         }
         
         step("Then Google auth window is closed"){
-            XCTAssertTrue(waitHelper.waitForDoesntExist(onboardingView.getGoogleAuthWindow()))
+            XCTAssertTrue(waitForDoesntExist(onboardingView.getGoogleAuthWindow()))
         }
         
         step("And user is still on Onboarding landing page"){

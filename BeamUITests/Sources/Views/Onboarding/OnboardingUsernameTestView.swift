@@ -41,11 +41,11 @@ class OnboardingUsernameTestView: BaseView {
     
     @discardableResult
     func waitForUsernameViewOpened() -> Bool {
-        return staticText(OnboardingUsernameViewLocators.StaticTexts.usernameViewTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        return staticText(OnboardingUsernameViewLocators.StaticTexts.usernameViewTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func isPasswordRequirementsLabelDisplayed() -> Bool {
-        return staticText(OnboardingUsernameViewLocators.StaticTexts.passwordRequirementsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        return staticText(OnboardingUsernameViewLocators.StaticTexts.passwordRequirementsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
 }
