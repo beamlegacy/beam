@@ -48,10 +48,9 @@
 		032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325626A26051D3A006513E4 /* RBSQLiteTests.m */; };
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
-		0507201227DBF51A0023705C /* ZippyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 0507201127DBF51A0023705C /* ZippyJSON */; };
-		0507201427DBF98E0023705C /* ZippyJSON in Frameworks */ = {isa = PBXBuildFile; productRef = 0507201327DBF98E0023705C /* ZippyJSON */; };
 		0507201527DBFC6B0023705C /* BeamJSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83727DB51E20075533D /* BeamJSONDecoder.swift */; };
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
+		0564F51327E8BC6600F969CA /* JJLISO8601DateFormatter in Frameworks */ = {isa = PBXBuildFile; productRef = 0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */; };
 		05A3D59E27DF970A004CC7F1 /* account_exists.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05A3D59D27DF970A004CC7F1 /* account_exists.graphql */; };
 		05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
@@ -2746,7 +2745,6 @@
 				9624A65727431B4200B8D012 /* Atomics in Frameworks */,
 				96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */,
 				9684F26F270F8DDA006BF53E /* Sentry in Frameworks */,
-				0507201227DBF51A0023705C /* ZippyJSON in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2766,6 +2764,7 @@
 			files = (
 				33F64F1227283201004EB0CD /* Macaw in Frameworks */,
 				333E61842707094000847A0C /* Swime in Frameworks */,
+				0564F51327E8BC6600F969CA /* JJLISO8601DateFormatter in Frameworks */,
 				33B27467264C0F7100A318CD /* AutoUpdate.framework in Frameworks */,
 				525C233C25BAF8EF001B9625 /* libgit2.a in Frameworks */,
 				33F0F1C826DE87E000FF8B48 /* Vinyl in Frameworks */,
@@ -2814,7 +2813,6 @@
 				A0A84FC52636FA9A008F0326 /* CocoaLumberjackSwift in Frameworks */,
 				9684F273270F9C25006BF53E /* Sentry in Frameworks */,
 				9624A6592743212500B8D012 /* Atomics in Frameworks */,
-				0507201427DBF98E0023705C /* ZippyJSON in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -6173,7 +6171,6 @@
 				96C0F72C26FCAE6100385449 /* UUIDKit */,
 				9684F26E270F8DDA006BF53E /* Sentry */,
 				9624A65627431B4200B8D012 /* Atomics */,
-				0507201127DBF51A0023705C /* ZippyJSON */,
 			);
 			productName = BeamCore;
 			productReference = 96319D0F2616232600D1CF31 /* BeamCore.framework */;
@@ -6256,6 +6253,7 @@
 				8A0DFAD4275664090044515B /* FaviconFinder */,
 				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
 				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
+				0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -6306,7 +6304,6 @@
 				96C0F73326FCBC0D00385449 /* UUIDKit */,
 				9684F272270F9C25006BF53E /* Sentry */,
 				9624A6582743212500B8D012 /* Atomics */,
-				0507201327DBF98E0023705C /* ZippyJSON */,
 			);
 			productName = BeamUITests;
 			productReference = 965A78482514F149009980D4 /* BeamUITests.xctest */;
@@ -6401,7 +6398,7 @@
 				33B2FF2B274C3F8500518F12 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
-				0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */,
+				0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -10169,12 +10166,12 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */ = {
+		0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/michaeleisel/ZippyJSON";
+			repositoryURL = "https://github.com/michaeleisel/JJLISO8601DateFormatter";
 			requirement = {
-				branch = master;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.1.4;
 			};
 		};
 		33088D6126B06677004FAE99 /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
@@ -10396,15 +10393,10 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		0507201127DBF51A0023705C /* ZippyJSON */ = {
+		0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */;
-			productName = ZippyJSON;
-		};
-		0507201327DBF98E0023705C /* ZippyJSON */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 0548EAD927DB989600B559FE /* XCRemoteSwiftPackageReference "ZippyJSON" */;
-			productName = ZippyJSON;
+			package = 0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */;
+			productName = JJLISO8601DateFormatter;
 		};
 		33088D6226B06677004FAE99 /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
