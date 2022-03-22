@@ -151,6 +151,8 @@ extension BrowserTab: WebPage {
         let pageTitle = self.title.isEmpty ? url.absoluteString : self.title
 
         let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { [weak self] _ in
+            // Skip full page collect when the page has been collected previously
+            guard pns.hasCollectedFullPage == false else { return }
             DispatchQueue.main.async {
                 let target = PointAndShoot.Target.init(
                     id: UUID().uuidString,
@@ -167,7 +169,7 @@ extension BrowserTab: WebPage {
                     href: "",
                     shapeCache: nil,
                     showRect: false,
-                    directShoot: true
+                    fullPageCollect: true
                 )
 
                 if let note = self?.noteController.note {
