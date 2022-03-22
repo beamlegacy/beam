@@ -79,6 +79,14 @@ Run UI tests Thread3
 
 Run UI tests Thread4
 
+### mac uitestsThread5
+
+```sh
+[bundle exec] fastlane mac uitestsThread5
+```
+
+Run UI tests Thread5
+
 ### mac delete_s3_derived_data
 
 ```sh
