@@ -73,10 +73,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                     do {
                         let remoteObject = try beamObjectHelper.fetchOnAPI(object)
                         expect(object) == remoteObject
-
-                        if object != remoteObject {
-                            dump("ok")
-                        }
                     } catch {
                         dump(error)
                         fail(error.localizedDescription)

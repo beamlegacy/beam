@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import Atomics
 
 // swiftlint:disable file_length
 
@@ -9,8 +10,16 @@ extension BeamObjectManager {
             throw BeamObjectManagerError.notAuthenticated
         }
 
+        guard Self.fullSyncRunning.load(ordering: .relaxed) == false else {
+            throw BeamObjectManagerError.fullSyncAlreadyRunning
+        }
+
+        assert(Self.fullSyncRunning.load(ordering: .relaxed) == false)
+
         // swiftlint:disable:next date_init
         var localTimer = Date()
+
+        Self.fullSyncRunning.store(true, ordering: .relaxed)
 
         try fetchAllByChecksumsFromAPI(force: force) { result in
             switch result {
@@ -44,10 +53,12 @@ extension BeamObjectManager {
                 } catch {
                     completion?(.failure(error))
                 }
-
-                // Reactivate sending object
-                Self.disableSendingObjects = false
             }
+
+            // Reactivate sending object
+            Self.disableSendingObjects = false
+
+            Self.fullSyncRunning.store(false, ordering: .relaxed)
         }
     }
 
@@ -179,6 +190,11 @@ extension BeamObjectManager {
                                        category: .beamObjectNetwork)
                 completion(.failure(error))
             case .success(let beamObjects):
+                // To make sure we fetch `receivedAt` as it's needed for properly skipping those already fetched objects later
+                if !beamObjects.isEmpty {
+                    assert(beamObjects.first?.receivedAt != nil)
+                }
+
                 // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
                 // If not doing a delta sync, we don't as we want to update local document as `deleted`
                 guard lastReceivedAt == nil || !beamObjects.isEmpty else {
@@ -218,7 +234,9 @@ extension BeamObjectManager {
                         return
                     }
 
-                    try self.fetchAllFromAPI(ids: ids, completion)
+                    try self.fetchAllFromAPI(ids: ids) {
+                        completion($0)
+                    }
                 } catch {
                     let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
                     Logger.shared.logError(message, category: .beamObject)
@@ -333,6 +351,7 @@ extension BeamObjectManager {
     // swiftlint:disable function_body_length cyclomatic_complexity
     func saveToAPIClassic<T: BeamObjectProtocol>(_ objects: [T],
                                                  force: Bool = false,
+                                                 maxChunk: Int = 1000,
                                                  _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
@@ -342,6 +361,60 @@ extension BeamObjectManager {
             completion(.success([]))
             return nil
         }
+
+        // No need to split objects
+        guard objects.count > maxChunk else {
+            return try saveToAPIClassicChunk(objects, force: force, completion)
+        }
+
+        // swiftlint:disable:next date_init
+        var errorCompletionCalled = false
+
+        var index = maxChunk
+
+        // API can't handle too many objects at once. If it fails we return early
+        for objectsToSaveChunked in objects.chunked(into: maxChunk) {
+            let semaphore = DispatchSemaphore(value: 0)
+
+            Logger.shared.logDebug("Saving \(index)/\(objects.count)", category: .beamObjectNetwork)
+
+            do {
+                try self.saveToAPIClassicChunk(objectsToSaveChunked, force: force) { result in
+                    switch result {
+                    case .failure(let error):
+                        errorCompletionCalled = true
+                        completion(.failure(error))
+                    case .success:
+                        break
+                    }
+                    semaphore.signal()
+                }
+            } catch {
+                errorCompletionCalled = true
+                completion(.failure(error))
+                semaphore.signal()
+            }
+
+            semaphore.wait()
+
+            index += maxChunk
+
+            if errorCompletionCalled { break }
+        }
+
+        if errorCompletionCalled == false {
+            completion(.success(objects))
+        }
+
+        return nil
+    }
+
+    // swiftlint:disable function_body_length cyclomatic_complexity
+    @discardableResult
+    private func saveToAPIClassicChunk<T: BeamObjectProtocol>(_ objects: [T],
+                                                              force: Bool = false,
+                                                              _ completion: @escaping ((Result<[T], Error>) -> Void)) throws -> APIRequest? {
+        assert(objects.count <= 1000)
 
         // swiftlint:disable:next date_init
         var localTimer = Date()
@@ -399,49 +472,21 @@ extension BeamObjectManager {
         }
         #endif
 
-        var errorCompletionCalled = false
+        let request = BeamObjectRequest()
 
-        // API can't handle too many objects at once. If it fails we return early
-        for beamObjectsToSaveChunked in beamObjectsToSave.chunked(into: 1000) {
-            let request = BeamObjectRequest()
-
-            if beamObjectsToSave.count > 1000 {
-                Logger.shared.logDebug("About to save \(beamObjectsToSaveChunked.count) objects",
-                                       category: .beamObjectNetwork)
-            }
-
-            let semaphore = DispatchSemaphore(value: 0)
-
-            try request.save(beamObjectsToSaveChunked) { result in
-                switch result {
-                case .failure(let error):
-                    // Note: we only pass to saveToAPIFailure the objects we tried saving
-                    let beamObjectsToSaveChunkedIds = beamObjectsToSaveChunked.map { $0.id }
-                    let objectsToSaveChunked = objects.filter {
-                        beamObjectsToSaveChunkedIds.contains($0.beamObjectId)
-                    }
-                    self.saveToAPIFailure(objectsToSaveChunked, error, completion)
-                    errorCompletionCalled = true
-                case .success:
-                    do {
-                        try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjectsToSaveChunked)
-                        try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjectsToSaveChunked)
-                    } catch {
-                        completion(.failure(error))
-                        errorCompletionCalled = true
-                    }
+        try request.save(beamObjectsToSave) { result in
+            switch result {
+            case .failure(let error):
+                self.saveToAPIFailure(objects, error, completion)
+            case .success:
+                do {
+                    try BeamObjectChecksum.savePreviousChecksums(beamObjects: beamObjectsToSave)
+                    try BeamObjectChecksum.savePreviousObjects(beamObjects: beamObjectsToSave)
+                    completion(.success(objects))
+                } catch {
+                    completion(.failure(error))
                 }
-
-                semaphore.signal()
             }
-
-            semaphore.wait()
-
-            if errorCompletionCalled { break }
-        }
-
-        if errorCompletionCalled == false {
-            completion(.success(objects))
         }
 
         return nil
