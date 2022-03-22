@@ -91,6 +91,11 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     @discardableResult
+    func getNumberOfEntries() -> Int {
+        return passwordTables.children(matching: .tableRow).count
+    }
+    
+    @discardableResult
     func sortPasswords() -> PasswordPreferencesTestView {
         passwordTables.buttons[sitesColumnTitle].clickOnExistence()
         return self
