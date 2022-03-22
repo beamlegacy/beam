@@ -10,7 +10,9 @@ class EmbedNode: ResizableNode {
 
     override var frontmostHover: Bool {
         didSet {
-            toggleButtonBeamLayer?.layer.opacity = frontmostHover ? 1 : 0
+            performLayerChanges {
+                self.toggleButtonBeamLayer?.layer.opacity = self.frontmostHover ? 1 : 0
+            }
         }
     }
 
@@ -182,7 +184,9 @@ class EmbedNode: ResizableNode {
     override func updateColors() {
         super.updateColors()
 
-        focusBeamLayer?.layer.backgroundColor = focusColor
+        performLayerChanges {
+            self.focusBeamLayer?.layer.backgroundColor = self.focusColor
+        }
     }
 
     override func setBottomPaddings(withDefault: CGFloat) {
@@ -228,7 +232,9 @@ class EmbedNode: ResizableNode {
     override func updateLayersVisibility() {
         super.updateLayersVisibility()
 
-        expandedContent?.isHidden = layer.isHidden
+        performLayerChanges {
+            self.expandedContent?.isHidden = self.layer.isHidden
+        }
     }
 
     override func willBeRemovedFromNote() {
@@ -287,8 +293,10 @@ extension EmbedNode {
                 self?.removeCollapsedContentFromView()
             })
 
-            expandedContent?.layer?.add(presentationAnimation, forKey: expandedContentAnimationKey)
-            collapsedContent?.layer.add(dismissalAnimation, forKey: collapseContentAnimationKey)
+            performLayerChanges {
+                self.expandedContent?.layer?.add(presentationAnimation, forKey: self.expandedContentAnimationKey)
+                self.collapsedContent?.layer.add(dismissalAnimation, forKey: self.collapseContentAnimationKey)
+            }
 
         } else {
             removeCollapsedContentFromView()
@@ -317,8 +325,10 @@ extension EmbedNode {
                 self?.removeExpandedContentFromView()
             })
 
-            collapsedContent?.layer.add(presentationAnimation, forKey: collapseContentAnimationKey)
-            expandedContent?.layer?.add(dismissalAnimation, forKey: expandedContentAnimationKey)
+            performLayerChanges {
+                self.collapsedContent?.layer.add(presentationAnimation, forKey: self.collapseContentAnimationKey)
+                self.expandedContent?.layer?.add(dismissalAnimation, forKey: self.expandedContentAnimationKey)
+            }
 
         } else {
             removeExpandedContentFromView()
@@ -397,23 +407,28 @@ extension EmbedNode {
     private func layoutExpandedContent() {
         guard !isCollapsed else { return }
 
-        let frame = expandedContentFrameInEditorCoordinates
-
-        if !isResizing {
-            // Prevent UI jerkiness by disabling layer animations while the node is being resized
-            expandedContent?.layer?.frame = frame
+        let frame = self.expandedContentFrameInEditorCoordinates
+        performLayerChanges {
+            if !self.isResizing {
+                // Prevent UI jerkiness by disabling layer animations while the node is being resized
+                self.expandedContent?.layer?.frame = frame
+            }
         }
 
         // `BeamTextEdit` delayed initialization runs layout from a `.userInteractive` background queue.
-        DispatchQueue.main.async { [weak expandedContent, weak self] in
+        DispatchQueue.main.async { [weak self] in
             // Wait until the first layout passed, after which we know for sure the node has been added to the editor's
             // layer tree, until we make the expanded content visible.
             // We need to wait until the node is added to the editor's layer tree, to get its origin in this coordinate
             // space, and then place the expanded content at the same position.
-            self?.addExpandedContentToViewIfNeeded()
 
-            expandedContent?.frame = frame
+            guard let self = self else { return }
+            self.addExpandedContentToViewIfNeeded()
+            self.performLayerChanges {
+                self.expandedContent?.frame = self.expandedContentFrameInEditorCoordinates
+            }
         }
+
     }
 
     private func layoutCollapsedContent() {
@@ -442,12 +457,16 @@ extension EmbedNode {
 
     private func addExpandedContentToViewIfNeeded() {
         guard let expandedContent = expandedContent, expandedContent.superview == nil else { return }
-        expandedContent.layer?.zPosition = 1
+        performLayerChanges {
+            expandedContent.layer?.zPosition = 1
+        }
         editor?.addSubview(expandedContent)
     }
 
     private func removeExpandedContentFromView() {
-        expandedContent?.removeFromSuperview()
+        performLayerChanges {
+            self.expandedContent?.removeFromSuperview()
+        }
         expandedContent = nil
     }
 
