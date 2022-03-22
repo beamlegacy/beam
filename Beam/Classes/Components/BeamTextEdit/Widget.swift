@@ -466,21 +466,12 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             disableAnimationsForNextLayout = false
         }
 
-        let disableActions = shouldDisableActions
-        if disableActions {
-            CATransaction.begin()
-            CATransaction.setDisableActions(true)
-        }
-
-        let _contentsFrame = contentsFrame
-        let _frameInDocument = frameInDocument
-        DispatchQueue.mainSync {
-            self.layer.bounds = _contentsFrame
-            self.layer.position = CGPoint(x: _frameInDocument.origin.x + _contentsFrame.origin.x, y: _frameInDocument.origin.y + _contentsFrame.origin.y)
-        }
-
-        if disableActions {
-            CATransaction.commit()
+        self.performLayerChanges {
+            self.layer.bounds = self.contentsFrame
+            self.layer.position = CGPoint(x: self.frameInDocument.origin.x + self.contentsFrame.origin.x, y: self.frameInDocument.origin.y + self.contentsFrame.origin.y)
+            if let elem = self as? ElementNode {
+                elem.updateElementLayers()
+            }
         }
 
         #if DEBUG
@@ -498,6 +489,21 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             invalidate() // invalidate before change
             currentFrameInDocument = frame
             invalidate()  // invalidate after the change
+        }
+    }
+
+    /// performLayerChanges must used whenever you are changing the layout and / or properties of a layer outside the layout function. will run the given block of code inside a CATransaction and automatically enable or disable implicite animations for you depending on the current state of the Widget/Editor. You can force enabling or disabling animations/actions by passing a flag. If no flag is given, the default behaviour will be used (disable animations when the editor is doing its initial layout, when it is resizing, or moved to another window). Using updateCALayers will also ensure than CALayer updates will be run synchrounously on the correct thread (using DispatchQueue.mainSync).
+    final func performLayerChanges(_ disableActions: Bool? = nil, _ block: @escaping () -> Void) {
+        DispatchQueue.mainSync {
+            let disable = disableActions ?? self.shouldDisableActions
+            if disable {
+                CATransaction.begin()
+                CATransaction.setDisableActions(true)
+            }
+            block()
+            if disable {
+                CATransaction.commit()
+            }
         }
     }
 
@@ -810,7 +816,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     func removeLayer(_ name: String) {
         guard let l = layers[name] else { return }
-        l.layer.removeFromSuperlayer()
+        performLayerChanges {
+            l.layer.removeFromSuperlayer()
+        }
         layers.removeValue(forKey: name)
     }
 
