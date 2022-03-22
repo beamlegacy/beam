@@ -96,9 +96,10 @@ extension ElementNode {
         }
         bulletLayer.layer.opacity = Float((showDisclosureButton || !PreferencesManager.alwaysShowBullets) ? 0 : 1)
         bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty && element.kind.isText
-        if let placeHolder = (self as? TextNode)?.placeholder, !placeHolder.isEmpty {
+        if let placeHolder = (self as? TextNode)?.placeholder, !placeHolder.isEmpty, !(editor?.hasFocus ?? false) {
             bulletLayer.layer.isHidden = false
         }
+
         bulletLayer.layer.backgroundColor = BeamColor.Editor.bullet.cgColor
     }
 
