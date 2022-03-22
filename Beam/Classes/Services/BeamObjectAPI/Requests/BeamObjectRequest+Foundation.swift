@@ -47,11 +47,7 @@ extension BeamObjectRequest {
             switch result {
             case .failure(let error):
                 completion(.failure(error))
-            case .success(let updateBeamObject):
-                guard let beamObject = updateBeamObject.beamObject else {
-                    completion(.failure(APIRequestError.parserError))
-                    return
-                }
+            case .success:
                 beamObject.previousChecksum = beamObject.dataChecksum
                 completion(.success(beamObject))
             }
@@ -513,7 +509,7 @@ extension BeamObjectRequest {
                                    skipDeleted: Bool? = false,
                                    raisePrivateKeyError: Bool = false,
                                    _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-         try fetchAllWithRest(fields: "id,type,checksum",
+         try fetchAllWithRest(fields: "id,type,checksum,receivedAt",
                               receivedAtAfter: receivedAtAfter,
                               ids: ids,
                               beamObjectType: beamObjectType,
@@ -590,6 +586,10 @@ extension BeamObjectRequest {
              */
             do {
                 var invalidObjects = [BeamObject]()
+
+                if beamObjects.count > 1000 {
+                    Logger.shared.logDebug("Decrypting \(beamObjects.count) objects", category: .beamObject)
+                }
 
                 // swiftlint:disable:next date_init
                 let localTimer = Date()
