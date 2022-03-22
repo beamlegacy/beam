@@ -16,13 +16,13 @@ class CardTestView: BaseView {
     @discardableResult
     func waitForCardViewToLoad() -> Bool {
         return scrollView(CardViewLocators.ScrollViews.noteView.accessibilityIdentifier)
-            .waitForExistence(timeout: implicitWaitTimeout)
+            .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 
     @discardableResult
     func waitForCardTitleToBeVisible() -> Bool {
         return scrollView(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)
-            .waitForExistence(timeout: implicitWaitTimeout)
+            .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     /*Deprecated 
@@ -60,7 +60,7 @@ class CardTestView: BaseView {
     @discardableResult
     func unpublishCard() -> CardTestView {
         image(CardViewLocators.Buttons.editorButton.accessibilityIdentifier).click()
-        _ = staticText(CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        _ = staticText(CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         staticText(CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier).click()
         return self
     }
@@ -167,7 +167,7 @@ class CardTestView: BaseView {
     func getFirstLinksContentElement() -> XCUIElement {
         let firstLink = app.windows.textViews.matching(identifier: CardViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier)
             .element
-        XCTAssertTrue(firstLink.waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(firstLink.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         return firstLink
     }
     
@@ -217,7 +217,7 @@ class CardTestView: BaseView {
     func createBiDiLink(_ cardName: String, _ noteNumber: Int = 0) -> CardTestView {
         let noteToBeTypedIn = getCardNotesForVisiblePart()[noteNumber]
         app.typeText("@" + cardName)
-        WaitHelper().waitForStringValueEqual("@" + cardName, noteToBeTypedIn)
+        waitForStringValueEqual("@" + cardName, noteToBeTypedIn)
         typeKeyboardKey(.enter)
         return self
     }
@@ -226,7 +226,7 @@ class CardTestView: BaseView {
     func createReference(_ cardName: String, _ noteNumber: Int = 0) -> CardTestView {
         let noteToBeTypedIn = getCardNotesForVisiblePart()[noteNumber]
         app.typeText(cardName)
-        WaitHelper().waitForStringValueEqual(cardName, noteToBeTypedIn)
+        waitForStringValueEqual(cardName, noteToBeTypedIn)
         typeKeyboardKey(.enter)
         return self
     }
@@ -242,12 +242,12 @@ class CardTestView: BaseView {
     }
     
     func getReferencesCounterElement() -> XCUIElement {
-        _ = otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: minimumWaitTimeout)
+        _ = otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
     }
     
     func getLinksCounterElement() -> XCUIElement {
-        _ = otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: minimumWaitTimeout)
+        _ = otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
     }
     
@@ -261,7 +261,7 @@ class CardTestView: BaseView {
     func getDisclosureTriangles() -> XCUIElementQuery {
         return app.disclosureTriangles
             .matching(identifier: AllCardsViewLocators.Others.disclosureTriangle.accessibilityIdentifier)
-            .matching(NSPredicate(format: WaitHelper.PredicateFormat.isHittable.rawValue))
+            .matching(NSPredicate(format: PredicateFormat.isHittable.rawValue))
     }
     
     func getCountOfDisclosureTriangles() -> Int {
@@ -281,7 +281,7 @@ class CardTestView: BaseView {
     }
     
     func doesReferenceSectionExist() -> Bool {
-        return self.getRefereceSectionCounterElement().waitForExistence(timeout: minimumWaitTimeout)
+        return self.getRefereceSectionCounterElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getRefereceSectionCounterElement() -> XCUIElement {
@@ -289,7 +289,7 @@ class CardTestView: BaseView {
     }
     
     func getBlockRefs() -> XCUIElementQuery {
-        _ = textView(CardViewLocators.TextViews.blockReference.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        _ = textView(CardViewLocators.TextViews.blockReference.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return app.textViews.matching(identifier: CardViewLocators.TextViews.blockReference.accessibilityIdentifier)
     }
     
@@ -326,7 +326,7 @@ class CardTestView: BaseView {
     }
     
     func isImageNodeCollapsed(nodeIndex: Int) -> Bool {
-        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: minimumWaitTimeout)
+        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getImageNodeCollapsedTitle(nodeIndex: Int) -> String {
@@ -334,7 +334,7 @@ class CardTestView: BaseView {
     }
     
     func waitForCardToOpen(cardTitle: String) -> Bool {
-        return WaitHelper().waitForStringValueEqual(cardTitle, self.cardTitle, implicitWaitTimeout)
+        return waitForStringValueEqual(cardTitle, self.cardTitle, BaseTest.implicitWaitTimeout)
     }
     
     func getBreadCrumbElements() -> [XCUIElement] {
@@ -342,7 +342,7 @@ class CardTestView: BaseView {
     }
     
     func waitForBreadcrumbs() -> Bool {
-        return otherElement(CardViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: minimumWaitTimeout)
+        return otherElement(CardViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getBreadCrumbElementsNumber() -> Int {

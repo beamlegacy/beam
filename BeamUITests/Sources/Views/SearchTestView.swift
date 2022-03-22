@@ -57,6 +57,6 @@ class SearchTestView: BaseView {
     }
     
     func assertResultsCounterNumber(_ expectedValue: String) -> Bool {
-        return self.staticText(expectedValue).waitForExistence(timeout: implicitWaitTimeout)
+        return self.staticText(expectedValue).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 }

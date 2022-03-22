@@ -17,7 +17,7 @@ class JournalTest: BaseTest {
         let journalScrollView = journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)
 
         step("Then Journal scroll view exists"){
-            XCTAssertTrue(journalScrollView.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(journalScrollView.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("When I open All notes and restart the app"){
@@ -26,7 +26,7 @@ class JournalTest: BaseTest {
         }
 
         step("Then I still have Journal opened on the app start"){
-            XCTAssertTrue(journalScrollView.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(journalScrollView.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
 
         }
     }

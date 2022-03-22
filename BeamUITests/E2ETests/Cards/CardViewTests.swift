@@ -40,7 +40,7 @@ class CardViewTests: BaseTest {
             cardView!.waitForCardViewToLoad()
             let cardTitle = cardView!.getCardTitle()
             XCTAssertTrue(cardTitle == todayCardNameTitleViewFormat || cardTitle == todayCardNameCreationViewFormat || cardTitle == todayCardNameCreationViewFormatWithout0InDays)
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertTrue(cardView!.staticText(todaysDateInCardCreationDateFormat).exists)
             XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).exists)
             XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).exists)

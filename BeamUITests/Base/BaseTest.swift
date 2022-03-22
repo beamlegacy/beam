@@ -13,9 +13,9 @@ import XCTest
 class BaseTest: XCTestCase {
 
     /// Default timeout of 20s
-    let implicitWaitTimeout = TimeInterval(10)
+    static let implicitWaitTimeout = TimeInterval(10)
     /// Default minimum timeout of 2s
-    let minimumWaitTimeout = TimeInterval(2)
+    static let minimumWaitTimeout = TimeInterval(2)
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
@@ -36,10 +36,9 @@ class BaseTest: XCTestCase {
     }
     
     func waitUntiAppIsNotRunningFor(timeout: TimeInterval = TimeInterval(5)) -> Bool {
-        var count: TimeInterval = 0
-        while isAppRunning() && count < timeout {
-            sleep(1)
-            count += 1
+        let now = NSTimeIntervalSince1970
+        while isAppRunning() && NSTimeIntervalSince1970 < now + timeout {
+            usleep(1000)
         }
         return isAppRunning()
     }

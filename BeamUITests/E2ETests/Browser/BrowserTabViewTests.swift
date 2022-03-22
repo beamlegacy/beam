@@ -52,7 +52,7 @@ class BrowserTabViewTests: BaseTest {
         }
 
         step("Then I'm redirected to Journal"){
-            XCTAssertTrue(WaitHelper().waitFor( WaitHelper.PredicateFormat.exists.rawValue, journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)))
+            XCTAssertTrue(waitFor( PredicateFormat.exists.rawValue, journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)))
 
         }
     }
