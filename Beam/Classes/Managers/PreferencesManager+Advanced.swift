@@ -39,7 +39,7 @@ extension PreferencesManager {
     private static let showsCollectFeedbackAlertDefault = true
     private static let showTabsColoringDefault = false
     private static let showWebOnLaunchIfTabsDefault = true
-    private static let createJournalOncePerWindowDefault = false
+    private static let createJournalOncePerWindowDefault = true
     static let includeHistoryContentsInOmniBoxDefault = false
 }
 
