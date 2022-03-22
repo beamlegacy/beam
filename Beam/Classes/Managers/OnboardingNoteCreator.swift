@@ -83,8 +83,6 @@ class OnboardingNoteCreator {
             note.creationDate = BeamDate.now
             note.updateDate = BeamDate.now
             note.save()
-            // We do this to force Onboarding default notes to be available in the recentsManager
-            AppDelegate.main.window?.state.recentsManager.currentNoteChanged(note)
         }
     }
 
