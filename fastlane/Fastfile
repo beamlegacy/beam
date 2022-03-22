@@ -722,7 +722,7 @@ platform :mac do
 
     slack(
       message: message,
-      channel: "#webhooks",
+      channel: (publish_channel_internal? ? "#builds-mac" : "#builds-mac-beta"),
       success: true,
       default_payloads: [:git_branch, :last_git_commit], # :test_result
       payload: {
@@ -731,7 +731,7 @@ platform :mac do
       attachment_properties: {
         fields: attachments,
       },
-      slack_url: ENV["SLACK_WEBHOOK_URL"]
+      slack_url: (publish_channel_internal? ? ENV["SLACK_WEBHOOK_BUILDS_MAC_URL"] : ENV["SLACK_WEBHOOK_BUILDS_MAC_BETA_URL"])
     )
   end
 
