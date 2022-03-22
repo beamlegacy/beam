@@ -12,27 +12,20 @@ class LoginTest: BaseTest {
     
     let testPage = UITestPagePasswordManager()
     let alert = AlertTestView()
-    
-    func testloginFormPasswordSave() {
-        preparartion().savePassword(waitForAlertToDisappear: false)
+    let shortcutsHelper = ShortcutsHelper()
+    let passwordsWindow = PasswordPreferencesTestView()
 
-        XCTAssertTrue(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-        //to be added - assertion in password preferences - it exists there. Password cleaning required
-    }
-    
-    func testloginFormPasswordSaveCancellation() {
-        preparartion().notNowClick()
-
-        XCTAssertFalse(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-        //to be added - assertion in password preferences - it exists there. Password cleaning required
-    }
-    
-    func preparartion() -> AlertTestView {
+    var email: String = ""
+    var password: String = ""
+    let testUrl = "UITests-Password.html"
+        
+    func preparation() -> AlertTestView {
         let helper = BeamUITestsHelper(launchApp().app)
-
+        email = helper.randomEmail()
+        password = helper.randomPassword()
         helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)
-        testPage.enterInput(helper.randomPassword(), .password) //password first to avoid Other Passwords cover over the Submit button
-        testPage.enterInput(helper.randomEmail(), .username)
+        testPage.enterInput(password, .password) //password first to avoid Other Passwords cover over the Submit button
+        testPage.enterInput(email, .username)
         // close Other Passwords if it still covers Submit button
         if PasswordManagerHelper().getOtherPasswordsOptionElement().exists {
             testPage.typeKeyboardKey(.escape)
@@ -41,11 +34,40 @@ class LoginTest: BaseTest {
         return AlertTestView()
     }
     
-    func handleCredentialsPopUp(_ buttonOption: String) {
-        let button = testPage.button(buttonOption)
-        XCTAssertTrue(button.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-        waitForIsEnabled(button)
-        button.tapInTheMiddle()
+    func testloginFormPasswordSave() {
+        step ("WHEN I save password during my navigation"){
+            preparation().savePassword(waitForAlertToDisappear: false)
+        }
+        
+        step ("THEN toast is displayed to confirm"){
+            XCTAssertTrue(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        }
+
+        step ("AND it is saved in password preferences"){
+            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            PreferencesBaseView().navigateTo(menu: .passwords)
+            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testUrl))
+            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(email))
+            XCTAssertEqual(passwordsWindow.getNumberOfEntries(),1)
+            passwordsWindow.selectPassword(testUrl)
+            passwordsWindow.clickDetails()
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.site)), testUrl)
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.username)), email)
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.password)), password)
+        }
     }
     
+    func testloginFormPasswordSaveCancellation() {
+        preparation().notNowClick()
+
+        step ("THEN no toast is displayed"){
+            XCTAssertFalse(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+
+        step ("AND it is not saved in password preferences"){
+            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            PreferencesBaseView().navigateTo(menu: .passwords)
+            XCTAssertFalse(passwordsWindow.isPasswordDisplayed())
+        }
+    }
 }
