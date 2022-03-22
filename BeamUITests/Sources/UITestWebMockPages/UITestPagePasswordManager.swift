@@ -23,7 +23,7 @@ class UITestPagePasswordManager: BaseView {
     func clickInputField(_ formLabel: FormInputs) -> XCUIElement {
         let parent = app.webViews.containing(.staticText, identifier: formLabel.rawValue).element
         let input = parent.staticTexts[formLabel.rawValue].firstMatch
-        XCTAssert(input.waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssert(input.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         input.tapInTheMiddle()
         return input
     }
@@ -32,7 +32,7 @@ class UITestPagePasswordManager: BaseView {
         let target = "Submit"
         let parent = app.webViews.containing(.button, identifier: target).element
         let button = parent.buttons[target].firstMatch
-        XCTAssert(button.waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssert(button.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         button.tapInTheMiddle()
     }
     
@@ -43,7 +43,7 @@ class UITestPagePasswordManager: BaseView {
     }
     
     func isPasswordPageOpened() -> Bool {
-        return self.button("Submit").waitForExistence(timeout: minimumWaitTimeout)
+        return self.button("Submit").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
 }

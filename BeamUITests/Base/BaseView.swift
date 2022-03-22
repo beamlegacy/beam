@@ -111,7 +111,7 @@ class BaseView {
         populateOmniboxWith(searchText)
         if typeReturnButton {
             typeKeyboardKey(.enter)
-            _ = button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+            _ = button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         }
         return WebTestView()
     }
@@ -127,7 +127,7 @@ class BaseView {
             shortcutsHelper.shortcutActionInvoke(action: .openLocation)
         }
         omniSearchField.clickClearAndType(text)
-        WaitHelper().waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), minimumWaitTimeout)
+        BaseTest.waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), BaseTest.minimumWaitTimeout)
         return OmniBoxTestView()
     }
     

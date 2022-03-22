@@ -17,46 +17,46 @@ class AlertTestView: BaseView {
     @discardableResult
     func confirmDeletion() -> BaseView {
         let deleteButton = button(AlertViewLocators.Buttons.alertDeleteButton.accessibilityIdentifier).clickOnHittable()
-        WaitHelper().waitForDoesntExist(deleteButton)
+        waitForDoesntExist(deleteButton)
         return self
     }
     
     @discardableResult
     func cancelDeletion() -> BaseView {
         let cancelButton = button(AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier).clickOnHittable()
-        WaitHelper().waitForDoesntExist(cancelButton)
+        waitForDoesntExist(cancelButton)
         return self
     }
     
     @discardableResult
     func confirmRemoveFromDialogSheets() -> Bool {
         let deleteButton = getAlertDialogFromSheets().buttons[AlertViewLocators.Buttons.alertRemoveButton.accessibilityIdentifier].clickOnExistence()
-        return WaitHelper().waitForDoesntExist(deleteButton)
+        return waitForDoesntExist(deleteButton)
     }
     
     @discardableResult
     func cancelDeletionFromDialogSheets() -> Bool {
         let cancelButton = getAlertDialogFromSheets().buttons[AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier].clickOnExistence()
-        return WaitHelper().waitForDoesntExist(cancelButton)
+        return waitForDoesntExist(cancelButton)
     }
     
     @discardableResult
     func confirmRemoveFromSheets() -> Bool {
         let deleteButton = getAlertFromSheets().buttons[AlertViewLocators.Buttons.alertRemoveButton.accessibilityIdentifier].clickOnExistence()
-        return WaitHelper().waitForDoesntExist(deleteButton)
+        return waitForDoesntExist(deleteButton)
     }
     
     @discardableResult
     func cancelDeletionFromSheets() -> Bool {
         let cancelButton = getAlertFromSheets().buttons[AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier].clickOnExistence()
-        return WaitHelper().waitForDoesntExist(cancelButton)
+        return waitForDoesntExist(cancelButton)
     }
     
     @discardableResult
     func savePassword(waitForAlertToDisappear: Bool) -> BaseView {
         let savePassButton = button(AlertViewLocators.Buttons.alertSavePasswordButton.accessibilityIdentifier).clickOnExistence()
         if waitForAlertToDisappear {
-            WaitHelper().waitForDoesntExist(savePassButton)
+            waitForDoesntExist(savePassButton)
         }
         return self
     }
@@ -64,7 +64,7 @@ class AlertTestView: BaseView {
     @discardableResult
     func notNowClick() -> BaseView {
         let notNowButton = button(AlertViewLocators.Buttons.alertNotNowButton.accessibilityIdentifier).clickOnExistence()
-        WaitHelper().waitForDoesntExist(notNowButton)
+        waitForDoesntExist(notNowButton)
         return self
     }
     

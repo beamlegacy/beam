@@ -104,7 +104,7 @@ class CardViewEmbedsTests: BaseTest {
         
         let youtubeButtons = cardView!.app.webViews.buttons
         step("Then the video loads"){
-            XCTAssertTrue(youtubeButtons.firstMatch.waitForExistence(timeout: implicitWaitTimeout), "Embed video couldn't load")
+            XCTAssertTrue(youtubeButtons.firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout), "Embed video couldn't load")
         }
        
         let embedNode = cardView!.getEmbedNodeByIndex(nodeIndex: 0)
@@ -117,7 +117,7 @@ class CardViewEmbedsTests: BaseTest {
         let mediaPlayingButton = cardView!.image(CardViewLocators.Buttons.noteMediaPlaying.accessibilityIdentifier)
         let mediaMutedButton = cardView!.image(CardViewLocators.Buttons.noteMediaMuted.accessibilityIdentifier)
         step("Then the note media mute button is shown"){
-            XCTAssertTrue(mediaPlayingButton.waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(mediaPlayingButton.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             embedNode.hoverInTheMiddle()
         }
         
@@ -154,7 +154,7 @@ class CardViewEmbedsTests: BaseTest {
         }
         
         step("Then media button comes back"){
-            XCTAssertTrue(mediaPlayingButton.waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(mediaPlayingButton.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("When I delete the embed node"){

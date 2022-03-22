@@ -11,11 +11,11 @@ import XCTest
 class PasswordSuggestionPopupTestView: BaseView {
     
     func doesTitleExist() -> Bool {
-        return app.staticTexts["Suggested Password"].waitForExistence(timeout: minimumWaitTimeout)
+        return app.staticTexts["Suggested Password"].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func doesDescriptionExist() -> Bool {
-        return app.staticTexts["Beam created a strong password for this website.\nLook up your saved passwords in Beam Passwords preferences."].waitForExistence(timeout: minimumWaitTimeout)
+        return app.staticTexts["Beam created a strong password for this website.\nLook up your saved passwords in Beam Passwords preferences."].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getDontUseButton() -> XCUIElement {

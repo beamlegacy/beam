@@ -11,7 +11,6 @@ import XCTest
 class EditorShortcutsTests: BaseTest {
     
     let helper = ShortcutsHelper()
-    let wait = WaitHelper()
     let webView = WebTestView()
     var cardView: CardTestView?
     
@@ -26,7 +25,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Then I see 1 tab opened"){
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: implicitWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
             webView.openDestinationCard()
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
         }
@@ -69,34 +68,34 @@ class EditorShortcutsTests: BaseTest {
         helper.shortcutActionInvoke(action: .selectAll)
         cardView!.typeKeyboardKey(.delete)
         step ("Then deleted 1st note successfully"){
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), firstNoteValue)
         }
         
         step ("Then deleted all notes successfully"){
             helper.shortcutActionInvokeRepeatedly(action: .selectAll, numberOfTimes: 3)
             cardView!.typeKeyboardKey(.delete)
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), emptyString)
             
         }
         
         step ("Then undo deletion successfully"){
             helper.shortcutActionInvoke(action: .undo)
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), firstNoteValue)
             
         }
         
         step ("Then redo deletion successfully"){
             helper.shortcutActionInvoke(action: .redo)
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), "")
         }
         
         step ("Then undo redone successfully"){
             helper.shortcutActionInvoke(action: .undo)
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), firstNoteValue)
         }
         
@@ -104,7 +103,7 @@ class EditorShortcutsTests: BaseTest {
             cardView!.getCardNoteElementByIndex(0).tapInTheMiddle()
             helper.shortcutActionInvokeRepeatedly(action: .selectAll, numberOfTimes: 3)
             cardView!.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), textToType)
             
         }
@@ -115,7 +114,7 @@ class EditorShortcutsTests: BaseTest {
             cardView!.typeKeyboardKey(.rightArrow)
             cardView!.typeKeyboardKey(.return)
             cardView!.pasteText(textToPaste: textToType)
-            XCTAssertTrue(wait.waitForCountValueEqual(timeout: minimumWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), textToType)
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(1), textToType)
         }
@@ -125,7 +124,6 @@ class EditorShortcutsTests: BaseTest {
         try XCTSkipIf(true, "WIP")
         let card1 = "Destination One"
         let card2 = "Destination Two"
-        let wait = WaitHelper()
         let testHelper = BeamUITestsHelper(webView.app)
         let journalView = launchApp()
         step ("Given I create \(card1) note"){
@@ -163,17 +161,17 @@ class EditorShortcutsTests: BaseTest {
         
         step ("Then \(card1) is a destination note in web mode when switching tabs"){
             helper.shortcutActionInvoke(action: .jumpToPreviousTab)
-            XCTAssertTrue(wait.waitForStringValueEqual(card1, webView.getDestinationCardElement(), minimumWaitTimeout))
+            XCTAssertTrue(waitForStringValueEqual(card1, webView.getDestinationCardElement(), BaseTest.minimumWaitTimeout))
         }
         
         step ("Then \(card2) is a destination note in web mode when switching tabs"){
             helper.shortcutActionInvoke(action: .jumpToNextTab)
-            XCTAssertTrue(wait.waitForStringValueEqual(card2, webView.getDestinationCardElement(), minimumWaitTimeout))
+            XCTAssertTrue(waitForStringValueEqual(card2, webView.getDestinationCardElement(), BaseTest.minimumWaitTimeout))
         }
        
     }
     
     func assertDestinationCard(_ cardName: String) {
-        XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName, webView.getDestinationCardElement()), "Destination note is not \(cardName), but \(String(describing: webView.getDestinationCardElement().value))")
+        XCTAssertTrue(waitForStringValueEqual(cardName, webView.getDestinationCardElement()), "Destination note is not \(cardName), but \(String(describing: webView.getDestinationCardElement().value))")
     }
 }

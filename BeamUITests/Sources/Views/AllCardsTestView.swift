@@ -13,12 +13,12 @@ class AllCardsTestView: BaseView {
     @discardableResult
     func waitForAllCardsViewToLoad() -> Bool {
         return app.tables.firstMatch.staticTexts.matching(identifier: AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).firstMatch
-            .waitForExistence(timeout: implicitWaitTimeout)
+            .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     @discardableResult
     func waitForCardTitlesToAppear() -> Bool {
-        return staticText(AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        return staticText(AllCardsViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 
     @discardableResult

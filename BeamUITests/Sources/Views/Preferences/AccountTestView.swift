@@ -14,7 +14,7 @@ import BeamCore
 class AccountTestView: PreferencesBaseView {
     
     func getLoginFieldElement() -> XCUIElement {
-        _ = textField(AccountViewLocators.TextFields.login.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        _ = textField(AccountViewLocators.TextFields.login.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return textField(AccountViewLocators.TextFields.login.accessibilityIdentifier)
     }
     
@@ -23,7 +23,7 @@ class AccountTestView: PreferencesBaseView {
     }
     
     func getPasswordFieldElement() -> XCUIElement {
-        _ = secureTextField(AccountViewLocators.TextFields.password.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        _ = secureTextField(AccountViewLocators.TextFields.password.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return secureTextField(AccountViewLocators.TextFields.password.accessibilityIdentifier)
     }
     
