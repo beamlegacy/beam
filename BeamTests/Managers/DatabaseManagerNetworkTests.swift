@@ -95,7 +95,10 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         promise.done { success in
                             expect(success) == true
                             done()
-                        }.catch { fail("Should not be called: \($0)"); done() }
+                        }.catch {
+                            fail("Should not be called: \($0)");
+                            done()
+                        }
                     }
 
                     expect(APIRequest.callsCount - networkCalls) == 1
