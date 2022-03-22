@@ -90,7 +90,7 @@ struct CalendarView: View {
                     isHoveringConnect = isHovering
                 }
             }
-        } else if viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView <= 3 && !viewModel.isConnected {
+        } else if viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView < 3 && !viewModel.isConnected {
             isNotConnectedView
                 .padding(.leading, 14)
                 .onHover { isHoveringNotConnect = $0 }
