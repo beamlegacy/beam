@@ -67,7 +67,7 @@ class CardEditTests: BaseTest {
         }
         
         step("Then the following error appears \(expectedErrorMessage)"){
-            XCTAssertTrue(cardView!.staticText(expectedErrorMessage).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.staticText(expectedErrorMessage).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
     }
     
@@ -115,7 +115,7 @@ class CardEditTests: BaseTest {
             cardView = webView.openDestinationCard()
             let imageNote = cardView!.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
-            XCTAssertTrue(cardView!.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(cardView!.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("Then I'm redirected to the source page when clicking on the icon"){

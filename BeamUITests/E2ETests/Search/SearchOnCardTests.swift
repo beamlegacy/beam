@@ -14,7 +14,7 @@ class SearchOnCardTests: BaseTest {
         let searchView = prepareTest(populateCardTimes: 2)
         
         step("Then by default search field is unavailable"){
-            XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("When I use CMD+F"){
@@ -22,8 +22,8 @@ class SearchOnCardTests: BaseTest {
         }
         
         step("Then search field appears. Search result options do not exist"){
-            XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: implicitWaitTimeout))
-            XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         }
        
@@ -32,18 +32,18 @@ class SearchOnCardTests: BaseTest {
         }
         
         step("Then search result options appear"){
-            XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertTrue(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         }
         
         step("Then can I close search field via x icon"){
             searchView.closeSearchField()
-            XCTAssertFalse(searchView.getSearchFieldElement().waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(searchView.getSearchFieldElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("Then I can reopen search field again"){
             searchView.triggerSearchField()
-            XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(searchView.getSearchFieldElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
         
     }
@@ -104,9 +104,9 @@ class SearchOnCardTests: BaseTest {
         }
         
         step("Then search result elements are not visible"){
-            XCTAssertFalse(searchView.staticText("1/20").waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertFalse(searchView.staticText(SearchViewLocators.StaticTexts.emptySearchResult.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(searchView.staticText("1/20").waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertFalse(searchView.staticText(SearchViewLocators.StaticTexts.emptySearchResult.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertFalse(searchView.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).exists)
         }
     }

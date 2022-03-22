@@ -39,12 +39,12 @@ class OmniboxDestinationTests: BaseTest {
         step("When I search in omnibox and click on destination note"){
             omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
             omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
-            _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
+            _ = destinationCardTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             destinationCardTitle.click()
         }
 
         step("Then destination note has a focus, empty search field and a note name"){
-            _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
+            _ = destinationCardSearchField.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             XCTAssertTrue(omniboxView.inputHasFocus(destinationCardSearchField))
             XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
             XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormatWithout0InDays,
@@ -112,12 +112,12 @@ class OmniboxDestinationTests: BaseTest {
 
         step("When I search in omnibox change note using shortcut"){
             omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
-            _ = destinationCardTitle.waitForExistence(timeout: implicitWaitTimeout)
+            _ = destinationCardTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             ShortcutsHelper().shortcutActionInvoke(action: .changeDestinationCard)
         }
 
         step("Then destination note has a focus, empty search field and a note name"){
-            _ = destinationCardSearchField.waitForExistence(timeout: implicitWaitTimeout)
+            _ = destinationCardSearchField.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             XCTAssertTrue(omniboxView.inputHasFocus(destinationCardSearchField))
             XCTAssertEqual(journalView.getElementStringValue(element: destinationCardSearchField), emptyString)
             XCTAssertTrue(destinationCardSearchField.placeholderValue == todayCardNameTitleViewFormat || destinationCardSearchField.placeholderValue == todayCardNameCreationViewFormat ||

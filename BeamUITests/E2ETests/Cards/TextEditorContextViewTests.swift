@@ -73,7 +73,7 @@ class TextEditorContextViewTests: BaseTest {
         
         step("When I create a BiDi link for: \(cardName)"){
             textEditorContext.selectFormatterOption(.bidi)
-            XCTAssertFalse(textEditorContext.getLinkTitleTextFieldElement().waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(textEditorContext.getLinkTitleTextFieldElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("Then BiDi link appears for: \(cardName)"){
@@ -117,7 +117,7 @@ class TextEditorContextViewTests: BaseTest {
         }
        
         step("Then the pop-up is closed and the note value is still: \(linkURL)"){
-            WaitHelper().waitForDoesntExist(textEditorContext.getLinkTitleTextFieldElement())
+            waitForDoesntExist(textEditorContext.getLinkTitleTextFieldElement())
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), linkTitle)
         }
 
@@ -160,14 +160,14 @@ class TextEditorContextViewTests: BaseTest {
         step("Then I can dismiss text editor context menu by ESC"){
             shortcutsHelper.shortcutActionInvoke(action: .selectAll)
             cardView!.typeKeyboardKey(.escape)
-            WaitHelper().waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
+            waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
             self.assertFormatterOptionsDontExist()
         }
         
         step("Then I can dismiss text editor context menu by clicking outside"){
             shortcutsHelper.shortcutActionInvoke(action: .selectAll)
             cardView!.getCardNoteElementByIndex(0).tapInTheMiddle()
-            WaitHelper().waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
+            waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
             self.assertFormatterOptionsDontExist()
         }
        

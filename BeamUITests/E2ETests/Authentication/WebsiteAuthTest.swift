@@ -24,7 +24,7 @@ class WebsiteAuthTest: BaseTest {
         }
         
         step("Then I see Website Auth Popup with the following elements on it:"){
-            XCTAssertTrue(websiteAuthPopupTestView.staticText(WebsiteAuthPopupViewLocators.Labels.titleLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(websiteAuthPopupTestView.staticText(WebsiteAuthPopupViewLocators.Labels.titleLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertTrue(websiteAuthPopupTestView.staticText(WebsiteAuthPopupViewLocators.Labels.descriptionLabel.accessibilityIdentifier).exists)
             XCTAssertTrue(websiteAuthPopupTestView.checkBox(WebsiteAuthPopupViewLocators.Checkboxes.savePasswordCheckbox.accessibilityIdentifier).exists)
             XCTAssertTrue(websiteAuthPopupTestView.staticText(WebsiteAuthPopupViewLocators.Buttons.connectButton.accessibilityIdentifier).exists)
@@ -38,7 +38,7 @@ class WebsiteAuthTest: BaseTest {
         }
         
         step("Then I see access denied message"){
-            XCTAssertTrue(appWebsiteView!.staticText(AppWebsiteViewLocators.Labels.accessDeniedLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(appWebsiteView!.staticText(AppWebsiteViewLocators.Labels.accessDeniedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
     }
     
@@ -54,7 +54,7 @@ class WebsiteAuthTest: BaseTest {
         }
         
         step("Then I'm successfully redirected to the website and pop-up is closed"){
-            XCTAssertTrue(appWebsiteView!.staticText("Beam Objects").waitForExistence(timeout: implicitWaitTimeout) || appWebsiteView!.staticText("Beam is where ideas take shape").waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(appWebsiteView!.staticText("Beam Objects").waitForExistence(timeout: BaseTest.implicitWaitTimeout) || appWebsiteView!.staticText("Beam is where ideas take shape").waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
     }
@@ -72,7 +72,7 @@ class WebsiteAuthTest: BaseTest {
         }
         
         step("Then I see access denied message"){
-            XCTAssertTrue(appWebsiteView!.staticText(AppWebsiteViewLocators.Labels.accessDeniedLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(appWebsiteView!.staticText(AppWebsiteViewLocators.Labels.accessDeniedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
     }
     

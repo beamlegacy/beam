@@ -19,13 +19,13 @@ class CardPublishTests: BaseTest {
         }
         
         step("Then by default there is no copy link button"){
-            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             cardView!.publishCard()
         }
 
         step("Then I get the error message and link button doesn't appear"){
-            XCTAssertTrue(cardView!.staticText("You need to be logged in").waitForExistence(timeout: minimumWaitTimeout))
-            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(cardView!.staticText("You need to be logged in").waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
     
@@ -43,7 +43,7 @@ class CardPublishTests: BaseTest {
         }
 
         step("Then the note is private by default"){
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
                         
         step("When I publish the note"){
@@ -51,8 +51,8 @@ class CardPublishTests: BaseTest {
         }
         
         step("Then published label and link icon are displayed"){
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishedLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("Then I can open the link in web browser"){
@@ -80,8 +80,8 @@ class CardPublishTests: BaseTest {
         }
 
         step("Then private label and lock icon are displayed"){
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
-            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.privateLock.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.privateLock.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
     }    

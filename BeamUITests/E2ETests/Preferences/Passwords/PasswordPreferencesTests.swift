@@ -43,7 +43,7 @@ class PasswordPreferencesTests: BaseTest {
         passwordsWindow.getPasswordFieldToFill(.username).clickAndType(usernameValue)
         passwordsWindow.getPasswordFieldToFill(.password).clickAndType(passwordValue)
         passwordsWindow.clickAddPassword()
-        WaitHelper().waitForDoesntExist(passwordsWindow.getPasswordFieldToFill(.site))
+        waitForDoesntExist(passwordsWindow.getPasswordFieldToFill(.site))
     }
     
     func testAddPasswordItem() throws {
