@@ -211,9 +211,12 @@ extension BeamObjectChecksum {
                                category: .beamObjectChecksum,
                                localTimer: localTimer)
 
+        // swiftlint:disable:next date_init
         localTimer = Date()
 
         try context.performAndWait {
+            var idx = 0
+
             for beamObject in beamObjects {
                 let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
 
@@ -221,9 +224,33 @@ extension BeamObjectChecksum {
                 checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
                 checksum.previous_checksum = beamObject.dataChecksum
                 checksum.updated_at = BeamDate.now
+
+                idx += 1
+
+                /*
+                 I had non-expected blocking when calling `CoreDataManager.save(context)` after changing 250k checksums.
+                 I don't understand why, but looping and saving every 10k objects fixes that issue...
+                 */
+                if idx >= 10000 {
+                    // swiftlint:disable:next date_init
+                    let localTimer = Date()
+                    try CoreDataManager.save(context)
+
+                    Logger.shared.logDebug("Saved context with \(idx) checksums",
+                                           category: .beamObjectChecksum,
+                                           localTimer: localTimer)
+
+                    idx = 0
+                }
             }
 
+            Logger.shared.logDebug("About to save context \(beamObjects.count) checksums",
+                                   category: .beamObjectChecksum)
+
             try CoreDataManager.save(context)
+
+            Logger.shared.logDebug("Saved context with \(beamObjects.count) checksums",
+                                   category: .beamObjectChecksum)
 
             let objectTypes = Array(Set(beamObjects.map { $0.beamObjectType }))
             Logger.shared.logDebug("Saved previous checksums for \(beamObjects.count) \(objectTypes) beamObjects",

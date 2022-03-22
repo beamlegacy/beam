@@ -1,5 +1,6 @@
 import Foundation
 import BeamCore
+import Atomics
 
 /// How do you want to resolve checksum conflicts
 enum BeamObjectConflictResolution {
@@ -39,6 +40,7 @@ class BeamObjectManager {
     static var translators: [BeamObjectObjectType: (BeamObjectManagerDelegateProtocol, [BeamObject]) throws -> Void] = [:]
     static var uploadTypeForTests: BeamObjectRequestUploadType = .multipartUpload
     internal static var disableSendingObjects = true
+    internal static var fullSyncRunning = ManagedAtomic<Bool>(false)
 
     #if DEBUG
     static var networkRequests: [APIRequest] = []
@@ -83,6 +85,11 @@ class BeamObjectManager {
             localTimer = Date()
 
             var totalSize: Int64 = 0
+
+            if toSaveObjects.count > 1000 {
+                Logger.shared.logDebug("Decoding \(toSaveObjects.count) BeamObject",
+                                       category: .beamObjectNetwork)
+            }
 
             let encapsulatedObjects: [O] = try toSaveObjects.map {
                 do {
