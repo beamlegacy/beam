@@ -35,7 +35,7 @@ class OnboardingLandingTestView: BaseView {
     }
     
     func isTermsAndConditionsWindowOpened() -> Bool {
-        return self.getTermsAndConditionWindow().waitForExistence(timeout: minimumWaitTimeout)
+        return self.getTermsAndConditionWindow().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     @discardableResult
@@ -51,7 +51,7 @@ class OnboardingLandingTestView: BaseView {
     }
     
     func isPrivacyPolicyWindowOpened() -> Bool {
-        return self.getPrivacyPolicyWindow().waitForExistence(timeout: minimumWaitTimeout)
+        return self.getPrivacyPolicyWindow().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     @discardableResult
@@ -67,7 +67,7 @@ class OnboardingLandingTestView: BaseView {
     }
     
     func isGoogleAuthWindowOpened() -> Bool {
-        return self.getGoogleAuthWindow().waitForExistence(timeout: minimumWaitTimeout)
+        return self.getGoogleAuthWindow().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     @discardableResult
@@ -77,7 +77,7 @@ class OnboardingLandingTestView: BaseView {
     }
     
     func isOnboardingPageOpened() -> Bool {
-        return staticText(OnboardingLandingViewLocators.StaticTexts.onboardingTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        return staticText(OnboardingLandingViewLocators.StaticTexts.onboardingTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     @discardableResult

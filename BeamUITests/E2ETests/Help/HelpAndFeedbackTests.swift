@@ -28,7 +28,7 @@ class HelpAndFeedbackTests: BaseTest {
         }
 
         step("Then \(menuTitle!) is opened"){
-            XCTAssertTrue(menuTitle!.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(menuTitle!.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("When I close it"){
@@ -36,7 +36,7 @@ class HelpAndFeedbackTests: BaseTest {
         }
         
         step("Then \(menuTitle!) is closed"){
-            XCTAssertTrue(WaitHelper().waitForDoesntExist(menuTitle!))
+            XCTAssertTrue(waitForDoesntExist(menuTitle!))
         }
         
         step("When I open Bug report"){
@@ -74,7 +74,7 @@ class HelpAndFeedbackTests: BaseTest {
 
         step("Then I am on Shortcusts menu"){
             let cmdLabel = helpView!.image(HelpViewLocators.Images.cmdLabel.accessibilityIdentifier)
-            XCTAssertTrue(cmdLabel.waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(cmdLabel.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertEqual(helpView!.getNumberOfCMDLabels(), 25)
         }
 
@@ -83,7 +83,7 @@ class HelpAndFeedbackTests: BaseTest {
         }
         
         step("Then I broght back to a note view"){
-            XCTAssertTrue(journalView.getHelpButton().waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(journalView.getHelpButton().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
     

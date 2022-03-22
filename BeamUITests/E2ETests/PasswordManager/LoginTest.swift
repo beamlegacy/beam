@@ -16,14 +16,14 @@ class LoginTest: BaseTest {
     func testloginFormPasswordSave() {
         preparartion().savePassword(waitForAlertToDisappear: false)
 
-        XCTAssertTrue(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: implicitWaitTimeout))
+        XCTAssertTrue(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         //to be added - assertion in password preferences - it exists there. Password cleaning required
     }
     
     func testloginFormPasswordSaveCancellation() {
         preparartion().notNowClick()
 
-        XCTAssertFalse(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: minimumWaitTimeout))
+        XCTAssertFalse(testPage.staticText("CredentialsConfirmationToast").waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         //to be added - assertion in password preferences - it exists there. Password cleaning required
     }
     
@@ -43,8 +43,8 @@ class LoginTest: BaseTest {
     
     func handleCredentialsPopUp(_ buttonOption: String) {
         let button = testPage.button(buttonOption)
-        XCTAssertTrue(button.waitForExistence(timeout: implicitWaitTimeout))
-        WaitHelper().waitForIsEnabled(button)
+        XCTAssertTrue(button.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        waitForIsEnabled(button)
         button.tapInTheMiddle()
     }
     

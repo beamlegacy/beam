@@ -76,7 +76,7 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     func isPasswordDisplayed() -> Bool {
-        return passwordTables.children(matching: .tableRow).element(boundBy: 0).staticTexts[usernameColumnTitle].waitForExistence(timeout: minimumWaitTimeout)
+        return passwordTables.children(matching: .tableRow).element(boundBy: 0).staticTexts[usernameColumnTitle].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     @discardableResult
@@ -97,11 +97,11 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     func isPasswordDisplayedBy(_ text: String) -> Bool {
-        return staticText(text).waitForExistence(timeout: minimumWaitTimeout)
+        return staticText(text).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func isErrorDisplayed() -> Bool {
-        return staticText(PasswordPreferencesViewLocators.StaticTexts.siteError.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        return staticText(PasswordPreferencesViewLocators.StaticTexts.siteError.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func isAddPasswordButtonEnabled() -> Bool {
@@ -109,18 +109,18 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     func isFormToFillPasswordDisplayed( _ update: Bool = false) -> Bool {
-        let mainButton = (update) ? button(PasswordPreferencesViewLocators.Buttons.doneButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) : button(PasswordPreferencesViewLocators.Buttons.addPasswordButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+        let mainButton = (update) ? button(PasswordPreferencesViewLocators.Buttons.doneButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) : button(PasswordPreferencesViewLocators.Buttons.addPasswordButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return (
-                button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
-                && getPasswordFieldToFill(PasswordFieldToFill.site).waitForExistence(timeout: minimumWaitTimeout)
-                && getPasswordFieldToFill(PasswordFieldToFill.username).waitForExistence(timeout: minimumWaitTimeout)
-                && getPasswordFieldToFill(PasswordFieldToFill.password).waitForExistence(timeout: minimumWaitTimeout)
+                button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+                && getPasswordFieldToFill(PasswordFieldToFill.site).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+                && getPasswordFieldToFill(PasswordFieldToFill.username).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+                && getPasswordFieldToFill(PasswordFieldToFill.password).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
                 && mainButton
         )
     }
     
     func waitForFormToFillPasswordToClose() -> Bool {
-        return WaitHelper().waitForDoesntExist(button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier))
+        return waitForDoesntExist(button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier))
     }
     
     func getPasswordFieldToFill(_ field: PasswordFieldToFill) -> XCUIElement {

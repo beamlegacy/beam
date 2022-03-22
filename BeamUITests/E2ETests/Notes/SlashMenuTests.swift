@@ -26,7 +26,7 @@ class SlashMenuTests: BaseTest {
         let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
 
         step("Given I trigger context menu appearance"){
-            XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("When I select \(dayToSelect) \(monthToSelect) \(yearToSelect) date in Date picker"){
@@ -67,7 +67,7 @@ class SlashMenuTests: BaseTest {
         }
 
         step("Then divider appears in the note area"){
-            XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout))
+            XCTAssertTrue(cardTestView.splitter(CardViewLocators.Splitters.noteDivider.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertEqual(cardTestView.getNumberOfVisibleNotes(), 3)
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), row1Text + " ")
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), emptyString)

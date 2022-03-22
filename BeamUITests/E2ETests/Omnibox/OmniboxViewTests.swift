@@ -74,7 +74,7 @@ class OmniboxViewTests: BaseTest {
         }
 
         step("Then Webview is opened and browser tab bar is visible"){
-            XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, 0)
             XCTAssertTrue(omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
             let pivotButton = omniboxView.button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier)
@@ -87,7 +87,7 @@ class OmniboxViewTests: BaseTest {
         }
         
         step("Then journal view is opened"){
-            XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("Then pivot button shows the number of tabs"){
@@ -101,7 +101,7 @@ class OmniboxViewTests: BaseTest {
         }
         
         step("Then Webview is opened and Journal is closed"){
-            XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertFalse(journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).exists)
         }
 
@@ -323,7 +323,7 @@ class OmniboxViewTests: BaseTest {
         
         step("Then the note is created"){
             XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertTrue(cardView.textField(secondNoteTitle).waitForExistence(timeout: implicitWaitTimeout))
+            XCTAssertTrue(cardView.textField(secondNoteTitle).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
         
     }

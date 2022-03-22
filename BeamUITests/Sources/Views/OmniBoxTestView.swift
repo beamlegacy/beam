@@ -28,7 +28,7 @@ class OmniBoxTestView: BaseView {
     @discardableResult
     func enterCreateCardMode() -> OmniBoxTestView {
         getOmniBoxSearchField().typeKey(.enter, modifierFlags: .option)
-        _ = getOmniBoxSearchField().waitForExistence(timeout: minimumWaitTimeout)
+        _ = getOmniBoxSearchField().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return OmniBoxTestView()
     }
     
@@ -41,7 +41,7 @@ class OmniBoxTestView: BaseView {
     }
     
     func waitForSearchFieldValueToEqual(expectedValue: String) -> Bool {
-        return WaitHelper().waitForStringValueEqual(expectedValue, getOmniBoxSearchField())
+        return BaseTest.waitForStringValueEqual(expectedValue, getOmniBoxSearchField())
     }
     
     @discardableResult
@@ -83,21 +83,20 @@ class OmniBoxTestView: BaseView {
     @discardableResult
     func openDownloadsView() -> DownloadTestView {
         let downloadViewButton = button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier)
-        _ = downloadViewButton.waitForExistence(timeout: minimumWaitTimeout)
-        WaitHelper().waitFor(WaitHelper.PredicateFormat.isHittable.rawValue, downloadViewButton, minimumWaitTimeout)
+        _ = downloadViewButton.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        waitFor(PredicateFormat.isHittable.rawValue, downloadViewButton, BaseTest.minimumWaitTimeout)
         downloadViewButton.tapInTheMiddle()
-        if !staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout) {
+        if !staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) {
             downloadViewButton.tapInTheMiddle()
         }
         return DownloadTestView()
     }
     
     func waitForAutocompleteResultsLoad(timeout: TimeInterval, expectedNumber: Int) -> Bool {
-        var count: TimeInterval = 0
-        while getAutocompleteResults().count != expectedNumber && count < timeout {
-            sleep(1)
-            count += 1
+        let now = NSTimeIntervalSince1970
+        while getAutocompleteResults().count != expectedNumber && NSTimeIntervalSince1970 < now + timeout {
+            usleep(1000)
         }
-        return count < timeout
+        return getAutocompleteResults().count == expectedNumber
     }
 }

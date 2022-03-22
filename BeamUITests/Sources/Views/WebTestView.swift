@@ -16,7 +16,7 @@ class WebTestView: BaseView {
     
     func getDestinationCardElement() -> XCUIElement {
         let element = staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)
-        _ = element.waitForExistence(timeout: minimumWaitTimeout)
+        _ = element.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return element
     }
     
@@ -66,7 +66,7 @@ class WebTestView: BaseView {
         )
         let cardCreationElement = app.otherElements.matching(predicate).firstMatch
         //Try out to replace additional waiting
-        //XCTAssertTrue(cardCreationElement.waitForExistence(timeout: minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
+        //XCTAssertTrue(cardCreationElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
         cardCreationElement.clickOnExistence()
         return CardTestView()
         }
@@ -101,7 +101,7 @@ class WebTestView: BaseView {
     
     func focusTabByIndex(index: Int) -> XCUIElement {
         let tab = getTabByIndex(index: index)
-        WaitHelper().waitForIsHittable(tab)
+        waitForIsHittable(tab)
         getCenterOfElement(element: tab).hover()
         return tab
     }
@@ -109,9 +109,9 @@ class WebTestView: BaseView {
     @discardableResult
     func activateSearchFieldFromTab(index: Int) -> OmniBoxTestView {
         let tab = getTabByIndex(index: index)
-        if !WaitHelper().waitForIsHittable(tab) {
+        if !waitForIsHittable(tab) {
             //button(WebViewLocators.Buttons.goToJournalButton.accessibilityIdentifier).hover()
-            //XCTAssertTrue(WaitHelper().waitForIsHittable(tab), "Timeout waiting for tab to be hittable")
+            //XCTAssertTrue(waitForIsHittable(tab), "Timeout waiting for tab to be hittable")
             shortcutsHelper.shortcutActionInvoke(action: .openLocation)
             sleep(1000)
             shortcutsHelper.shortcutActionInvoke(action: .openLocation)
@@ -130,11 +130,11 @@ class WebTestView: BaseView {
     }
     
     func waitForTabUrlAtIndexToEqual(index: Int, expectedString: String) -> Bool {
-        return WaitHelper().waitForStringValueEqual(expectedString, getTabURLElementByIndex(index: index))
+        return waitForStringValueEqual(expectedString, getTabURLElementByIndex(index: index))
     }
     
     func waitForTabTitleToEqual(index: Int, expectedString: String) -> Bool {
-        return WaitHelper().waitForStringValueEqual(expectedString, getBrowserTabTitleElements()[index])
+        return waitForStringValueEqual(expectedString, getBrowserTabTitleElements()[index])
     }
 
     private let tabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")
@@ -144,7 +144,7 @@ class WebTestView: BaseView {
     
     func getTabs(wait: Bool = true) -> XCUIElementQuery {
         if wait {
-            _ = getAnyTab().waitForExistence(timeout: implicitWaitTimeout)
+            _ = getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         }
         return app.groups.matching(tabPredicate)
     }
@@ -175,7 +175,7 @@ class WebTestView: BaseView {
     }
     
     func isGoogleSearchTabOpened() -> Bool {
-        return image("Google").waitForExistence(timeout: minimumWaitTimeout)
+        return image("Google").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
 
 }

@@ -42,7 +42,7 @@ class BlockReferenceTests: BaseTest {
         step("Then the block reference is locked by default"){
             blockRef.tapInTheMiddle()
             blockRef.doubleClick() //Double click is just for sure the field is not editable
-            XCTAssertTrue(WaitHelper().waitForKeyboardUnfocus(blockRef))
+            XCTAssertTrue(waitForKeyboardUnfocus(blockRef))
         }
 
         step("When I unlock the block reference"){
@@ -51,7 +51,7 @@ class BlockReferenceTests: BaseTest {
         
         step("Then it can be changed"){
             blockRef.tapInTheMiddle()
-            XCTAssertTrue(WaitHelper().waitForKeyboardFocus(blockRef))
+            XCTAssertTrue(waitForKeyboardFocus(blockRef))
             blockRef.typeText("\(textToAdd)\r")
             XCTAssertEqual(cardView.getElementStringValue(element: blockRef), noteForReference! + textToAdd)
             cardView.typeKeyboardKey(.delete, textToAdd.count)
@@ -69,7 +69,7 @@ class BlockReferenceTests: BaseTest {
 
         step("Then I can see correct origin of the reference"){
             cardView.blockReferenceMenuActionTrigger(.blockRefOrigin, blockRefNumber: 1)
-            XCTAssertTrue(WaitHelper().waitForStringValueEqual(cardName1, cardView.cardTitle), "Actual note name is \(cardView.cardTitle)")
+            XCTAssertTrue(waitForStringValueEqual(cardName1, cardView.cardTitle), "Actual note name is \(cardView.cardTitle)")
         }
 
     }
@@ -84,7 +84,7 @@ class BlockReferenceTests: BaseTest {
 
         step("Then I can successfully remove it"){
             cardView.blockReferenceMenuActionTrigger(.blockRefRemove, blockRefNumber: 1)
-            XCTAssertTrue(WaitHelper().waitForDoesntExist( cardView.textView(CardViewLocators.TextViews.blockReference.accessibilityIdentifier)))
+            XCTAssertTrue(waitForDoesntExist( cardView.textView(CardViewLocators.TextViews.blockReference.accessibilityIdentifier)))
         }
 
         step("Then removing block reference doesn't remove the source text"){

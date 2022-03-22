@@ -16,7 +16,6 @@ class LinksTests: BaseTest {
     let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
     let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
     let shortcutsHelper = ShortcutsHelper()
-    let waitHelper = WaitHelper()
     
     var cardView: CardTestView?
     
@@ -132,7 +131,7 @@ class LinksTests: BaseTest {
             XCTAssertEqual(cardView!.getLinksNamesNumber(), 1)
             XCTAssertEqual(cardView!.getLinksContentNumber(), 1)
             XCTAssertEqual(cardView!.getLinkNameByIndex(0), cardName2)
-            XCTAssertTrue(waitHelper.waitForStringValueEqual(expectedEditedName1, cardView!.getLinkContentElementByIndex(0), minimumWaitTimeout), "\(cardView!.getLinkContentByIndex(0)) is not equal to \(expectedEditedName1)")
+            XCTAssertTrue(waitForStringValueEqual(expectedEditedName1, cardView!.getLinkContentElementByIndex(0), BaseTest.minimumWaitTimeout), "\(cardView!.getLinkContentByIndex(0)) is not equal to \(expectedEditedName1)")
         }
        
         step("And note name changes are applied for note 2 note"){
