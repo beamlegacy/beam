@@ -16,14 +16,14 @@ extension PointAndShoot {
 
     struct ShootGroup {
         init(id: String, targets: [Target] = [], text: String = "", href: String,
-             noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache? = nil, showRect: Bool = true, directShoot: Bool = false) {
+             noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache? = nil, showRect: Bool = true, fullPageCollect: Bool = false) {
             self.id = id
             self.href = href
             self.targets = targets
             self.text = text
             self.noteInfo = noteInfo
             self.showRect = showRect
-            self.directShoot = directShoot
+            self.fullPageCollect = fullPageCollect
             self.shapeCache = shapeCache
             self.updateSelectionPath()
         }
@@ -36,7 +36,8 @@ extension PointAndShoot {
         var numberOfElements: Int = 0
         var confirmation: ShootConfirmation?
         var showRect: Bool
-        var directShoot: Bool
+        /// ShootGroup is used for a full page collect, defaults to false
+        var fullPageCollect: Bool
         func html() -> String {
             targets.reduce("", {
                 $1.html.count > $0.count ? $1.html : $0
