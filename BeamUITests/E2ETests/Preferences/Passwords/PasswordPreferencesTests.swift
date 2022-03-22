@@ -25,7 +25,6 @@ class PasswordPreferencesTests: BaseTest {
     func setup() {
         step ("GIVEN I open password preferences"){
             launchApp()
-            uiMenu.clearPasswordsDB()
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(menu: .passwords)
         }
@@ -267,7 +266,6 @@ class PasswordPreferencesTests: BaseTest {
         let helper = BeamUITestsHelper(launchApp().app)
         
         step ("GIVEN I open password preferences"){
-            uiMenu.clearPasswordsDB()
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(menu: .passwords)
             uiMenu.populatePasswordsDB()
