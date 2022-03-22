@@ -40,7 +40,7 @@ struct PointAndShootCardPicker: View {
     @State private var shootCompleted: Bool = false
 
     var completed: Bool {
-        shootCompleted || completedGroup?.directShoot == true
+        shootCompleted || completedGroup?.fullPageCollect == true
     }
 
     private var isTodaysNote: String? {
