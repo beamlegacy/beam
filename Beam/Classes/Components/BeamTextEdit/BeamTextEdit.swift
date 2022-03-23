@@ -175,9 +175,13 @@ public extension CALayer {
     internal var formatterTargetNode: TextNode?
     internal var isInlineFormatterHidden = true
 
-    func addToMainLayer(_ layer: CALayer) {
+    func addToMainLayer(_ layer: CALayer, at index: UInt32? = nil) {
         //Logger.shared.logDebug("addToMainLayer: \(layer.name)")
-        self.layer?.addSublayer(layer)
+        if let index = index {
+            self.layer?.insertSublayer(layer, at: index)
+        } else {
+            self.layer?.addSublayer(layer)
+        }
     }
 
     let cardHeaderLayer = CALayer()
@@ -369,7 +373,7 @@ public extension CALayer {
 
     var searchResults: [SearchResult]?
 
-    private let mouseCursorManager = MouseCursorManager()
+    let mouseCursorManager = MouseCursorManager()
 
     public var config = TextConfig()
 
@@ -890,8 +894,7 @@ public extension CALayer {
                     return
                 }
             case KeyCode.up.rawValue:
-                if command, rootNode.state.nodeSelection == nil, inlineFormatter == nil,
-                   let node = rootNode.focusedWidget as? ElementNode, node.children.count > 0, node.open {
+                if rootNode.state.nodeSelection == nil, inlineFormatter == nil, let node = rootNode.focusedWidget as? ElementNode, node.children.count > 0, command, node.open {
                     toggleOpen(node)
                     return
                 }
@@ -1234,14 +1237,23 @@ public extension CALayer {
         let point = convert(event.locationInWindow)
 
         let widget = rootNode.dispatchMouseDragged(mouseInfo: MouseInfo(rootNode, point, event))
-        if let resizable = widget as? ResizableNode, resizable.isResizing {
 
-        } else {
-            startSelectionDrag()
-            mouseDraggedUpdate(with: event)
+        defer {
+            cursorUpdate(with: event)
+            autoscroll(with: event)
         }
-        cursorUpdate(with: event)
-        autoscroll(with: event)
+
+        //Prevent selection drag when resizing or moving a node
+        if let resizable = widget as? ResizableNode, resizable.isResizing {
+            return
+        }
+
+        if let elementNode = widget as? ElementNode, elementNode.isDraggedForMove {
+            return
+        }
+
+        startSelectionDrag()
+        mouseDraggedUpdate(with: event)
     }
 
     func convert(_ point: NSPoint) -> NSPoint {
@@ -1555,16 +1567,44 @@ public extension CALayer {
     }
 
     override public func moveUp(_ sender: Any?) {
-        if inlineFormatter?.formatterHandlesCursorMovement(direction: .up) != true {
-            rootNode?.moveUp()
-            hideInlineFormatter()
+        if control, option, command {
+            guard let rootNode = rootNode else { return }
+            if rootNode.state.nodeSelection == nil,
+               inlineFormatter == nil,
+               let node = rootNode.focusedWidget as? ElementNode,
+               let previous = node.previousVisibleNode(ElementNode.self),
+               let newParent = previous.parent as? ElementNode,
+               let newIndex = previous.indexInParent {
+                // move node up
+                node.cmdManager.reparentElement(node, to: newParent, atIndex: newIndex)
+                return
+            }
+        } else {
+            if inlineFormatter?.formatterHandlesCursorMovement(direction: .up) != true {
+                rootNode?.moveUp()
+                hideInlineFormatter()
+            }
         }
     }
 
     override public func moveDown(_ sender: Any?) {
-        if inlineFormatter?.formatterHandlesCursorMovement(direction: .down) != true {
-            rootNode?.moveDown()
-            hideInlineFormatter()
+        if control, option, command {
+            guard let rootNode = rootNode else { return }
+            if rootNode.state.nodeSelection == nil,
+               inlineFormatter == nil,
+               let node = rootNode.focusedWidget as? ElementNode,
+               let next = node.nextVisibleNode(ElementNode.self, includingChildren: false),
+               let newParent = next.parent as? ElementNode,
+               let newIndex = next.indexInParent {
+                // move node up
+                node.cmdManager.reparentElement(node, to: newParent, atIndex: newIndex)
+                return
+            }
+        } else {
+            if inlineFormatter?.formatterHandlesCursorMovement(direction: .down) != true {
+                rootNode?.moveDown()
+                hideInlineFormatter()
+            }
         }
     }
 
@@ -1794,14 +1834,27 @@ public extension CALayer {
 //    override public func quickLookPreviewItems(_ sender: Any?) {
 //    }
 
-    // Drag and drop:
+    // MARK: Drag and drop:
+
+    private struct DragResult {
+        let element: ElementNode
+        let shouldBeAfter: Bool
+        let shouldBeChild: Bool
+    }
+
     var dragIndicator = CALayer()
-//    weak var lastDragNode: ElementNode?
-    @discardableResult private func updateDragIndicator(at point: CGPoint?) -> (ElementNode, Bool)? {
+
+    /// Updates the drag indicator for the desired cursor position
+    /// - Parameter point: The position of the cursor
+    /// - Returns: A DragResult with the hovered ElementNode, a bool if we should add the dragged element after this node and
+    /// another bool if we should make the element a child or a sibbling
+    @discardableResult private func updateDragIndicator(at point: CGPoint?) -> DragResult? {
         guard let rootNode = rootNode else { return nil }
-        guard let point = point,
-              let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode
-        else {
+        guard let point = point else {
+            dragIndicator.isHidden = true
+            return nil
+        }
+        guard let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode else {
             dragIndicator.isHidden = true
             return nil
         }
@@ -1809,19 +1862,43 @@ public extension CALayer {
         if dragIndicator.superlayer == nil {
             layer?.addSublayer(dragIndicator)
         }
+
         dragIndicator.backgroundColor = BeamColor.Bluetiful.cgColor
         dragIndicator.borderWidth = 0
         dragIndicator.isHidden = false
         dragIndicator.zPosition = 10
         dragIndicator.cornerRadius = 1
 
-        dragIndicator.frame = CGRect(x: node.offsetInDocument.x + node.contentsLead, y: node.offsetInDocument.y + node.contentsFrame.maxY, width: node.frame.width - node.contentsLead, height: 2)
-
+        // Should the dragged element be after or before the hovered widget?
+        let shouldBeAfter: Bool
         if point.y < (node.offsetInDocument.y + node.contentsFrame.height / 2) {
-            return (node, false)
+            shouldBeAfter = false
         } else {
-            return (node, true)
+            shouldBeAfter = true
         }
+
+        let yPos = shouldBeAfter ? node.offsetInDocument.y + node.contentsFrame.maxY : node.offsetInDocument.y + node.contentsFrame.minY
+        var initialFrame = CGRect(x: node.offsetInDocument.x + node.contentsLead, y: yPos, width: node.frame.width - node.contentsLead, height: 2)
+
+        // Should the dragged element be a child or a sibbling?
+        let beginningOfContentInNode = node.contentsFrame.minX + node.offsetInDocument.x
+        let makeChildOffset = beginningOfContentInNode + node.childInset
+        let shouldBeChild: Bool
+        if (point.x - beginningOfContentInNode) > node.childInset && shouldBeAfter {
+            shouldBeChild = true
+            CATransaction.disableAnimations {
+                initialFrame.origin.x = makeChildOffset
+                initialFrame.size.width -= node.childInset
+                dragIndicator.frame = initialFrame
+            }
+        } else {
+            shouldBeChild = false
+            CATransaction.disableAnimations {
+                dragIndicator.frame = initialFrame
+            }
+        }
+
+        return DragResult(element: node, shouldBeAfter: shouldBeAfter, shouldBeChild: shouldBeChild)
     }
 
     public override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
@@ -1854,7 +1931,7 @@ public extension CALayer {
         defer {
             updateDragIndicator(at: nil)
         }
-        guard let (element, after) = updateDragIndicator(at: convert(sender.draggingLocation)) else {
+        guard let dragResult = updateDragIndicator(at: convert(sender.draggingLocation)) else {
             return false
         }
 
@@ -1864,8 +1941,8 @@ public extension CALayer {
             return false
         }
 
-        let newParent: ElementNode = after ? element : element.previousVisibleNode(ElementNode.self) ?? rootNode
-        let afterNode: ElementNode? = after ? nil : element.previousSibbling() as? ElementNode
+        let newParent: ElementNode = dragResult.shouldBeAfter ? dragResult.element : dragResult.element.previousVisibleNode(ElementNode.self) ?? rootNode
+        let afterNode: ElementNode? = dragResult.shouldBeAfter ? nil : dragResult.element.previousSibbling() as? ElementNode
         for url in files.reversed() {
             guard let url = url as? URL,
                   let data = try? Data(contentsOf: url)
@@ -1892,6 +1969,78 @@ public extension CALayer {
             }
         }
 
+        return true
+    }
+
+    // MARK: Reordering bullet
+
+    private var mouseMoveOrigin: CGPoint?
+
+    func widgetDidStartMoving(_ widget: Widget, at point: CGPoint) -> Bool {
+        guard canMove(widget) else { return false }
+        focusedWidget = nil
+        mouseMoveOrigin = point
+        widget.isDraggedForMove = true
+        return true
+    }
+
+    func widgetDidStopMoving(_ widget: Widget, at point: CGPoint) {
+
+        defer {
+            widget.isDraggedForMove = false
+            mouseMoveOrigin = nil
+            updateDragIndicator(at: nil)
+        }
+
+        guard let rootNode = rootNode, let dragResult = updateDragIndicator(at: point) else { return }
+        guard let movedNode = widget as? ElementNode else { return }
+
+        let newParent: ElementNode
+        let index: Int
+        let currentElementIndex = dragResult.element.indexInParent ?? 0
+
+        if dragResult.shouldBeAfter && dragResult.shouldBeChild {
+            newParent = dragResult.element
+            index = 0
+        } else {
+            var previousNodeMovingOffset = 0
+            // If the moving node is a sibbling of the destination, and is located before, we need to offet by one
+            if movedNode.isSibblingWith(dragResult.element),
+               let destinationIndex = dragResult.element.indexInParent,
+                let movedElementIndex = movedNode.indexInParent,
+                destinationIndex > movedElementIndex {
+                previousNodeMovingOffset = 1
+            }
+            index = currentElementIndex + (dragResult.shouldBeAfter ? 1 : 0) - previousNodeMovingOffset
+            newParent = dragResult.element.parent as? ElementNode ?? rootNode
+        }
+
+        guard newParent !== movedNode else { return }
+        guard !widget.allChildren.contains(movedNode) else { return }
+        guard movedNode != dragResult.element else { return }
+
+        rootNode.cmdManager.reparentElement(movedNode, to: newParent, atIndex: index)
+    }
+
+    func widgetMoved(_ widget: Widget, at point: CGPoint) {
+        guard let rootNode = rootNode else { return }
+        guard let mouseMoveOrigin = self.mouseMoveOrigin else { return }
+
+        let offset = CGPoint(x: point.x - mouseMoveOrigin.x, y: point.y -  mouseMoveOrigin.y)
+        widget.translateForMove(offset)
+
+        if let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode,
+           node !== widget,
+           node.parent !== widget,
+           !widget.allChildren.contains(node) {
+            updateDragIndicator(at: point)
+        } else {
+            updateDragIndicator(at: nil)
+        }
+    }
+
+    private func canMove(_ widget: Widget) -> Bool {
+        guard widget as? ProxyNode == nil else { return false }
         return true
     }
 

@@ -245,6 +245,8 @@ extension Collapsable where Self: ElementNode {
             textLayer.string = title
             let size = textLayer.preferredFrameSize()
             textLayer.frame.size = size
+
+            expandButtonLayer.isHidden = isDraggedForMove
         }
     }
 
