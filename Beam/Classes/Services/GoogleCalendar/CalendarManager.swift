@@ -29,11 +29,12 @@ enum CalendarServices: String {
 protocol CalendarService {
     var id: UUID { get }
     var name: String { get }
+    var account: AccountCalendar? { get set }
     var scope: String? { get }
     var inNeedOfPermission: Bool { get }
 
     func requestAccess(completionHandler: @escaping (Bool) -> Void)
-    func getMeetings(for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void)
+    func getMeetings(of calendar: String?, for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void)
     func getCalendars(completionHandler: @escaping (Result<[MeetingCalendar]?, CalendarError>) -> Void)
     func getUserEmail(completionHandler: @escaping (Result<String, CalendarError>) -> Void)
 }
@@ -54,35 +55,47 @@ class CalendarManager: ObservableObject {
 
     private var didLazyInitConnectedSources = false
 
-    func lazyInitConnectedSources() {
-        guard !didLazyInitConnectedSources else { return }
+    func lazyInitConnectedSources(completionHandler: @escaping () -> Void) {
+        guard !didLazyInitConnectedSources else {
+            completionHandler()
+            return
+        }
         didLazyInitConnectedSources = true
 
         if let googleTokens = Persistence.Authentication.googleCalendarTokens {
             for (googleAccessToken, googleRefreshToken) in googleTokens {
                 let googleCalendar = GoogleCalendarService(accessToken: googleAccessToken, refreshToken: googleRefreshToken)
-                self.connectedSources.append(googleCalendar)
+                self.getInformation(for: googleCalendar) { accountCalendar in
+                    googleCalendar.account = accountCalendar
+                    self.connectedSources.append(googleCalendar)
+                    completionHandler()
+                }
             }
         }
     }
 
-    func isConnected(calendarService: CalendarServices) -> Bool {
-        lazyInitConnectedSources()
-        guard !connectedSources.isEmpty else {
-            return false
+    func isConnected(calendarService: CalendarServices, completionHandler: @escaping (Bool) -> Void) {
+        lazyInitConnectedSources { [weak self] in
+            guard let self = self, !self.connectedSources.isEmpty else {
+                completionHandler(false)
+                return
+            }
+            completionHandler(true)
         }
-        return true
     }
 
     func requestAccess(from calendarService: CalendarServices, completionHandler: @escaping (Bool) -> Void) {
-        lazyInitConnectedSources()
         switch calendarService {
         case .googleCalendar:
             let googleCalendar = GoogleCalendarService(accessToken: nil, refreshToken: nil)
             googleCalendar.requestAccess { [weak self] connected in
                 guard let self = self else { return }
                 if connected {
-                    self.connectedSources.append(googleCalendar)
+                    self.getInformation(for: googleCalendar) { accountCalendar in
+                        googleCalendar.account = accountCalendar
+                        self.connectedSources.append(googleCalendar)
+                        completionHandler(connected)
+                    }
                 }
                 completionHandler(connected)
             }
@@ -90,7 +103,6 @@ class CalendarManager: ObservableObject {
     }
 
     func getInformation(for source: CalendarService, completionHandler: @escaping (AccountCalendar) -> Void) {
-        lazyInitConnectedSources()
         source.getUserEmail { result in
             switch result {
             case .success(let email):
@@ -114,11 +126,11 @@ class CalendarManager: ObservableObject {
         case .googleCalendar:
             guard let googleCalendarService = self.connectedSources.first(where: { $0.id == sourceId }) as? GoogleCalendarService,
                   let accessToken = googleCalendarService.accessToken,
-                  var googleCalendarTokens = Persistence.Authentication.googleCalendarTokens else { return }
+                  var googleCalendarTokens = googleCalendarService.googleTokens else { return }
 
             if let idx = connectedSources.firstIndex(where: { $0.id == sourceId }) {
                 googleCalendarTokens.removeValue(forKey: accessToken)
-                Persistence.Authentication.googleCalendarTokens = googleCalendarTokens
+                googleCalendarService.googleTokens = googleCalendarTokens
                 connectedSources.remove(at: idx)
                 updated = true
             }
@@ -128,22 +140,27 @@ class CalendarManager: ObservableObject {
     func requestMeetings(for dateMin: Date, and dateMax: Date? = nil, onlyToday: Bool, query: String? = nil, completionHandler: @escaping ([Meeting]) -> Void) {
         var allMeetings: [Meeting] = []
         let dispatchGroup = DispatchGroup()
-        lazyInitConnectedSources()
-        calendarQueue.async {
-            for source in self.connectedSources {
-                dispatchGroup.enter()
-                source.getMeetings(for: dateMin, and: dateMax, onlyToday: onlyToday, query: query) { result in
-                    defer { dispatchGroup.leave() }
-                    switch result {
-                    case .success(let meetings):
-                        guard let sourceMeetings = meetings else { return }
-                        allMeetings.append(contentsOf: sourceMeetings)
-                    case .failure: break
+        lazyInitConnectedSources { [weak self] in
+            guard let self = self else { return }
+            self.calendarQueue.sync {
+                for source in self.connectedSources {
+                    guard let calendars = source.account?.meetingCalendar else { return }
+                    for calendar in calendars {
+                        dispatchGroup.enter()
+                        source.getMeetings(of: calendar.id, for: dateMin, and: dateMax, onlyToday: onlyToday, query: query) { result in
+                            defer { dispatchGroup.leave() }
+                            switch result {
+                            case .success(let meetings):
+                                guard let sourceMeetings = meetings, !sourceMeetings.isEmpty else { return }
+                                allMeetings.append(contentsOf: sourceMeetings)
+                            case .failure: break
+                            }
+                        }
                     }
                 }
-            }
-            dispatchGroup.notify(queue: .main) {
-                completionHandler(allMeetings)
+                dispatchGroup.notify(queue: .main) {
+                    completionHandler(allMeetings)
+                }
             }
         }
     }

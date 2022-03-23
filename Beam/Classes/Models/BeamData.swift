@@ -385,20 +385,28 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func reloadAllEvents() {
-        if calendarManager.isConnected(calendarService: .googleCalendar) {
-            for journal in journal {
-                if let journalDate = journal.type.journalDate, !journal.isEntireNoteEmpty() || journal.isTodaysNote {
-                    loadEvents(for: journal.id, for: journalDate)
+        calendarManager.isConnected(calendarService: .googleCalendar) { [weak self] isConnected in
+            guard let self = self else { return }
+
+            if isConnected {
+                for journal in self.journal {
+                    if let journalDate = journal.type.journalDate, !journal.isEntireNoteEmpty() || journal.isTodaysNote {
+                        self.loadEvents(for: journal.id, for: journalDate)
+                    }
                 }
             }
         }
     }
 
     private func loadEvents(for noteUuid: UUID, for journalDate: Date) {
-        if calendarManager.isConnected(calendarService: .googleCalendar) {
+        calendarManager.isConnected(calendarService: .googleCalendar) { [weak self] _ in
+            guard let self = self else { return }
             self.calendarManager.requestMeetings(for: journalDate, onlyToday: true) { meetings in
                 guard let oldMeetings = self.calendarManager.meetingsForNote[noteUuid], oldMeetings == meetings else {
-                    self.calendarManager.meetingsForNote[noteUuid] = meetings
+                    let sortedMeetings = meetings.sorted { lhs, rhs in
+                        lhs.startTime < rhs.startTime
+                    }
+                    self.calendarManager.meetingsForNote[noteUuid] = sortedMeetings
                     return
                 }
             }
