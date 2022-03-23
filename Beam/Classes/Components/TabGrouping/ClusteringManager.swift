@@ -492,7 +492,7 @@ class ClusteringManager: ObservableObject {
         orphanedUrlManager.save()
     }
 
-    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL) {
+    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL, correctedPages: [ClusteringManager.PageID: UUID]?) {
         for group in self.clusteredPagesId.enumerated() {
             let notesInGroup = self.clusteredNotesId[group.offset]
             for noteId in notesInGroup {
@@ -504,9 +504,10 @@ class ClusteringManager: ObservableObject {
                 let url = LinkStore.linkFor(urlId)?.url
                 let informationForId = self.cluster.getExportInformationForId(id: urlId)
                 let isOpenAtExport = self.allOpenPages?.map { $0.pageId }.contains(urlId)
+                let correctionGroupId = correctedPages?[urlId]
+
                 let tabColouringGroupId = self.tabGroupingUpdater.builtPagesGroups[urlId]?.id
-                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), tabColouringGroupId: tabColouringGroupId, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, id: urlId, parentId: informationForId.parentId))
-                //TODO: Add userCorrectionGroup when UI is ready
+                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), tabColouringGroupId: tabColouringGroupId, userCorrectionGroupId: correctionGroupId ?? nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, id: urlId, parentId: informationForId.parentId))
             }
         }
         sessionExporter.export(to: to, sessionId: self.sessionId)

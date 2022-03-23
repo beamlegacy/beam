@@ -453,12 +453,25 @@ extension TabsListView {
                 state.closeTabsToTheRight(of: index)
             }.disabled(index + 1 >= tabs.count || tabs.allSatisfy({ $0.isPinned }))
         }
+
+        let debugGroup = Group {
+            if PreferencesManager.showTabsColoring {
+                Button("Tab Grouping Feedback") {
+                    AppDelegate.main.showTabGroupingFeedbackWindow(self)
+                }
+            }
+        }
+
         return Group {
             firstGroup
             Divider()
             secondGroup
             Divider()
             thirdGroup
+            if Configuration.branchType == .develop {
+                Divider()
+                debugGroup
+            }
         }
     }
 }
