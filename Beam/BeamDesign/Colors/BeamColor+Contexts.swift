@@ -51,6 +51,7 @@ extension BeamColor {
         static let indentBackground = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.5, darkColor: .Mercury)
         static let underlineAndStrikethrough = BeamColor.Niobium
         static let reference = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.75, darkColor: .Niobium, darkAlpha: 0.65)
+        static let moveHandleHover = BeamColor.Niobium
 
         //Like Nero, but always in light mode
         static let sourceButtonBackground = BeamColor.Custom(named: "EditorSourceButtonBackground")

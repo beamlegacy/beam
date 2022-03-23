@@ -131,7 +131,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             }
 
             // Remove layers for previous children that haven't been reattached to the editor:
-            for c in set where c.parent === self || c.parent == nil {
+            for c in set where c.parent == self || c.parent == nil {
                 c.removeFromSuperlayer(recursive: true)
                 c.parent = nil
             }
@@ -170,7 +170,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     func attachChildrenLayers() {
         // Then make sure everything is correctly on screen
         for c in children {
-            c.parent = self
+            if c.parent != self {
+                c.parent = self
+            }
             c.availableWidth = childAvailableWidth
             editor?.addToMainLayer(c.layer)
             for l in c.layers where l.value.layer.superlayer == nil {
@@ -787,7 +789,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             lock.write { self._layers = newValue }
         }
     }
-    func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false) {
+    func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false, at index: UInt32? = nil) {
         CATransaction.disableAnimations {
             layer.widget = self
             layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
@@ -797,10 +799,14 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             layer.updateColorsIfNeeded()
 
             if global {
-                editor?.addToMainLayer(layer.layer)
+                editor?.addToMainLayer(layer.layer, at: index)
                 layer.layer.isHidden = !inVisibleBranch
             } else if layer.layer.superlayer == nil {
-                self.layer.addSublayer(layer.layer)
+                if let index = index {
+                    self.layer.insertSublayer(layer.layer, at: index)
+                } else {
+                    self.layer.addSublayer(layer.layer)
+                }
                 assert(layer.layer.superlayer == self.layer)
 
                 layer.setAccessibilityParent(self)
@@ -1041,9 +1047,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return self
     }
 
-    public func nextWidget() -> Widget? {
+    public func nextWidget(includingChildren: Bool = true) -> Widget? {
         // if we have children, take the first one
-        if children.count > 0 {
+        if includingChildren, children.count > 0 {
             return children.first
         }
 
@@ -1102,9 +1108,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return nil
     }
 
+    func isSibblingWith(_ otherWidget: Widget) -> Bool {
+        self.parent === otherWidget.parent
+    }
+
     // Focus
-    public func nextVisible() -> Widget? {
-        var n = nextWidget()
+    public func nextVisible(includingChildren: Bool = true) -> Widget? {
+        var n = nextWidget(includingChildren: includingChildren)
         while !(n?.inVisibleBranch ?? true) {
             n = n?.nextWidget()
         }
@@ -1131,6 +1141,41 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 //                    result + child.printTree(level: level + 1)
 //                })
 //                : "")
+    }
+
+    // MARK: - Move
+    var isDraggedForMove = false {
+        didSet {
+            updateForMove(isDragging: isDraggedForMove)
+            invalidate()
+        }
+    }
+
+    let moveScaleFactor = 1.05
+
+    func updateForMove(isDragging: Bool) {
+        let scaleFactor = isDragging ? moveScaleFactor : 1.0
+        let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+
+        self.layer.setAffineTransform(transform)
+        self.layer.zPosition = isDragging ? 100.0 : 0.0
+        for c in children {
+            c.updateForMove(isDragging: isDragging)
+        }
+    }
+
+    func translateForMove(_ offset: CGPoint) {
+
+        let scale = CGAffineTransform(scaleX: moveScaleFactor, y: moveScaleFactor)
+        let translate = CGAffineTransform(translationX: offset.x, y: offset.y)
+        let final = scale.concatenating(translate)
+
+        CATransaction.disableAnimations {
+            self.layer.setAffineTransform(final)
+        }
+        for c in children {
+            c.translateForMove(offset)
+        }
     }
 
     // MARK: - Private Methods
@@ -1237,6 +1282,19 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         return widgets
     }
 
+    var allChildren: [Widget] {
+        var widgets: [Widget] = []
+
+        for child in children {
+            if !child.frame.isEmpty {
+                widgets.append(child)
+            }
+            widgets += child.allChildren
+        }
+
+        return widgets
+    }
+
     var hasCmdManager: Bool {
         guard let root = root, root.note != nil else { return false }
         return true
@@ -1245,6 +1303,10 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var cmdManager: CommandManager<Widget> {
         guard let root = root else { fatalError("Trying to access the command manager on an unconnected Widget is a programming error.") }
         return root.cmdManager
+    }
+
+    public override var debugDescription: String {
+        return "\(Self.self) - \(self) - frame \(frame)"
     }
 
     func didMoveToWindow(_ window: NSWindow?) {

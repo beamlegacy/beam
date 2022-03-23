@@ -85,7 +85,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // We do what we want when there is an exception, in this case saving the tabs then we pass it back to Sentry
         NSSetUncaughtExceptionHandler { _ in
             guard let prevHandler = NSGetUncaughtExceptionHandler() else { return }
-            AppDelegate.main.saveCloseTabsCmd(onExit: true)
+            DispatchQueue.mainSync {
+                AppDelegate.main.saveCloseTabsCmd(onExit: true)
+            }
             NSSetUncaughtExceptionHandler(prevHandler)
         }
 
