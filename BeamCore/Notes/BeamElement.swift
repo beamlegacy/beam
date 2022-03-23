@@ -608,9 +608,19 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
 
     open func insert(_ child: BeamElement, at pos: Int) {
         // The order is important here, we first add the child then remove it from the previous parent so that any event resulting from both elements' children change will not generate a temporary loss of the child anywhere else in the app.
+
         let previousParent = child.parent
-        defer { previousParent?.removeChild(child) }
+        guard previousParent != self else {
+            // This is the special case where we are moving a child inside the parent
+            guard let index = child.indexInParent else { return }
+            var newChildren = children
+            newChildren.remove(at: index)
+            newChildren.insert(child, at: min(children.count, pos))
+            children = newChildren
+            return
+        }
         child.parent = self
+        previousParent?.removeChild(child)
         children.insert(child, at: min(children.count, pos))
     }
 

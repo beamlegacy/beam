@@ -123,6 +123,11 @@ public class ElementNode: Widget {
         !children.isEmpty
     }
 
+    /// Mouse cursor is hover the bullet point
+    var cursorHoverBulletPoint = false
+    /// Mouse cursor is hover the move handle
+    var cursorHoverMoveHandle = false
+
     var showIdentationLine: Bool {
         return depth == 1
     }
@@ -385,8 +390,8 @@ public class ElementNode: Widget {
         editor?.openURL(link, element)
     }
 
-    func nextVisibleNode<NodeType: Widget>(_ type: NodeType.Type) -> NodeType? {
-        var node = nextVisible()
+    func nextVisibleNode<NodeType: Widget>(_ type: NodeType.Type, includingChildren: Bool = true) -> NodeType? {
+        var node = nextVisible(includingChildren: includingChildren)
         while node != nil {
             if let elementNode = node as? NodeType {
                 return elementNode
@@ -703,4 +708,7 @@ public class ElementNode: Widget {
         max(0, range.lowerBound)..<min(textCount, range.upperBound)
     }
 
+    public override var debugDescription: String {
+        return "\(super.debugDescription) -> \(element)"
+    }
 }

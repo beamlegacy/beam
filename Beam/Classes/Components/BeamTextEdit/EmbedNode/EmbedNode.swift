@@ -256,6 +256,35 @@ class EmbedNode: ResizableNode {
         expandedContent?.removeFromSuperview()
     }
 
+    override func updateForMove(isDragging: Bool) {
+        super.updateForMove(isDragging: isDragging)
+
+        //Hide the collapse/expand button
+        toggleButtonBeamLayer.layer.isHidden = isDragging
+
+        //Move expandedContent on top of moving layer (at zPosition 100)
+        expandedContent?.layer?.zPosition = isDragging ? 101 : 1
+
+        //Make sure to reset the transform
+        expandedContent?.layer?.setAffineTransform(CGAffineTransform.identity)
+
+        //Make the initial zoom transform
+        let scaleFactor = isDragging ? moveScaleFactor : 1.0
+        let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
+        expandedContent?.layer?.setAffineTransform(transform)
+    }
+
+    override func translateForMove(_ offset: CGPoint) {
+        super.translateForMove(offset)
+
+        //Create the transform for the expandedContent and apply it without animations to avoid lag
+        let scale = CGAffineTransform(scaleX: moveScaleFactor, y: moveScaleFactor)
+        let translate = CGAffineTransform(translationX: offset.x, y: offset.y)
+        let final = scale.concatenating(translate)
+        CATransaction.disableAnimations {
+            self.expandedContent?.layer?.setAffineTransform(final)
+        }
+    }
 }
 
 extension EmbedNode {
@@ -406,6 +435,7 @@ extension EmbedNode {
 
     private func layoutExpandedContent() {
         guard !isCollapsed else { return }
+        guard !isDraggedForMove else { return }
 
         let frame = self.expandedContentFrameInEditorCoordinates
         performLayerChanges {
