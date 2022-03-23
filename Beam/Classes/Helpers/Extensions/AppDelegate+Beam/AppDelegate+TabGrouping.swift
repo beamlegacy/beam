@@ -22,9 +22,19 @@ extension AppDelegate {
         let titlebarAccessory = NSTitlebarAccessoryViewController()
         titlebarAccessory.view = accessoryHostingView
 
-        tabGroupingWindow = TabGroupingWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 350), clusteringManager: self.data.clusteringManager)
+        tabGroupingWindow = TabGroupingWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: self.data.clusteringManager)
         tabGroupingWindow?.addTitlebarAccessoryViewController(titlebarAccessory)
         tabGroupingWindow?.center()
         tabGroupingWindow?.makeKeyAndOrderFront(window)
+    }
+
+    @IBAction func showTabGroupingFeedbackWindow(_ sender: Any) {
+        if let tabGroupingFeedbackWindow = tabGroupingFeedbackWindow {
+            tabGroupingFeedbackWindow.makeKeyAndOrderFront(window)
+            return
+        }
+        tabGroupingFeedbackWindow = TabGroupingFeedbackWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: self.data.clusteringManager)
+        tabGroupingFeedbackWindow?.center()
+        tabGroupingFeedbackWindow?.makeKeyAndOrderFront(window)
     }
 }
