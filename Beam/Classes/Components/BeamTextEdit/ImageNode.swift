@@ -24,7 +24,10 @@ class ImageNode: ResizableNode {
     }
 
     override var selectionLayerHeight: CGFloat {
-        selectedAlone && isCollapsed ? super.selectionLayerHeight - 2 : super.selectionLayerHeight
+        if let height = layers["focus"]?.layer.frame.height, selectedAlone {
+            return isCollapsed ? height + 1 : height + 6
+        }
+        return super.selectionLayerHeight
     }
 
     private var sourceImageLayer: CALayer?
@@ -92,7 +95,7 @@ class ImageNode: ResizableNode {
         imageName = imageRecord.name
         imageSourceURL = URL(string: self.element.text.text)
 
-        contentsPadding = NSEdgeInsets(top: 0, left: contentsPadding.left + 4, bottom: 14, right: 4)
+        contentsPadding = NSEdgeInsets(top: 0, left: contentsPadding.left + 4, bottom: isCollapsed ? 2 : 14, right: 4)
 
         setAccessibilityLabel("ImageNode")
         setAccessibilityRole(.textArea)
