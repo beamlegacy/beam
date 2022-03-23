@@ -18,6 +18,7 @@ class TabGroupingWindow: NSWindow, NSWindowDelegate {
                    backing: .buffered,
                    defer: false)
         title = "Tab Grouping"
+
         let tabGroupingContentView = TabGroupingContentView(clusteringManager: clusteringManager)
 
         contentView = BeamHostingView(rootView: tabGroupingContentView)

@@ -1,6 +1,6 @@
 import Foundation
 
-class TabClusteringGroup: Identifiable, Equatable {
+class TabClusteringGroup: Identifiable, Equatable, Codable {
     static func == (lhs: TabClusteringGroup, rhs: TabClusteringGroup) -> Bool {
         lhs.id == rhs.id
     }
@@ -14,6 +14,14 @@ class TabClusteringGroup: Identifiable, Equatable {
     init(pageIDs: [ClusteringManager.PageID], hueTint: Double) {
         self.pageIDs = pageIDs
         self.hueTint = hueTint
+    }
+
+    func copy() -> TabClusteringGroup? {
+        let encoder = JSONEncoder()
+        guard let data = try? encoder.encode(self) else { return nil }
+
+        let decoder = JSONDecoder()
+        return try? decoder.decode(TabClusteringGroup.self, from: data)
     }
 }
 
@@ -68,6 +76,7 @@ class TabGroupingUpdater {
         urlGroups.forEach({ group in
             let groupHue = hueGenerator.generate()
             hueGenerator.taken.append(groupHue)
+
             let pageGroup = TabClusteringGroup(pageIDs: [], hueTint: groupHue)
             var previousGroupsFound = [TabClusteringGroup]()
             group.forEach { pageId in

@@ -379,7 +379,7 @@
 				<string>Private Key</string>
 			</dict>
 			<key>UTTypeIdentifier</key>
-			<string>co.beamapp.beameky</string>
+			<string>co.beamapp.beamkey</string>
 			<key>UTTypeTagSpecification</key>
 			<dict>
 				<key>public.filename-extension</key>
@@ -387,6 +387,21 @@
 					<string>beamkey</string>
 				</array>
 			</dict>
+		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.content</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Beam Clustering Tab Item</string>
+			<key>UTTypeIcons</key>
+			<dict/>
+			<key>UTTypeIdentifier</key>
+			<string>co.beamapp.clustering.tabitem</string>
+			<key>UTTypeTagSpecification</key>
+			<dict/>
 		</dict>
 	</array>
 </dict>
