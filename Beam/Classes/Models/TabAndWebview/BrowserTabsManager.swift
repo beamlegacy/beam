@@ -40,6 +40,7 @@ class BrowserTabsManager: ObservableObject {
             self.updateClusteringOpenPages()
         }
     }
+    private var tabPinSuggester = TabPinSuggester(storage: DomainPath0TreeStatsStorage())
 
     /// Dictionary of `key`: BrowserTab.id, `value`: Group to which this tab belongs
     @Published private(set) var tabsClusteringGroups = [UUID: TabClusteringGroup]()
@@ -117,6 +118,12 @@ class BrowserTabsManager: ObservableObject {
 
             tab.appendToIndexer = { [unowned self, weak tab] url, title, read in
                 guard let tab = tab else { return }
+                if self.tabPinSuggester.isEligible(url: url) && tabs.allSatisfy({ !$0.isPinned }) {
+                    Logger.shared.logInfo("Suggested url to pin \(url)", category: .tabPinSuggestion)
+                    //TODO: uncomment when pin tab call to action is implemented
+                    //tab.pinSuggest()
+                    //self.tabPinSuggester.hasSuggested(url: url)
+                }
                 var textForClustering = [""]
                 let tabTree = tab.browsingTree.deepCopy()
                 let currentTabTree = currentTab?.browsingTree.deepCopy()
@@ -281,11 +288,14 @@ extension BrowserTabsManager {
     }
 
     func pinTab(_ tabToPin: BrowserTab) {
+        tabPinSuggester.hasPinned()
+        tabToPin.pin()
         updateIsPinned(for: tabToPin, isPinned: true)
         removeFromTabGroup(tabId: tabToPin.id)
     }
 
     func unpinTab(_ tabToUnpin: BrowserTab) {
+        tabToUnpin.unPin()
         updateIsPinned(for: tabToUnpin, isPinned: false)
         createNewGroup(for: tabToUnpin.id)
     }
