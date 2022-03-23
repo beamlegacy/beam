@@ -24,6 +24,14 @@ class EmbedNode: ResizableNode {
         }
     }
 
+    override var selectionLayerPosY: CGFloat {
+        selectedAlone ? -5 : super.selectionLayerPosY
+    }
+
+    override var selectionLayerHeight: CGFloat {
+        selectedAlone ? focusFrame.height + 1 : super.selectionLayerHeight
+    }
+
     override var indentLayerPositionY: CGFloat { 28 }
     override var resizableContentBounds: CGRect { expandedContentFrame }
 
@@ -190,7 +198,7 @@ class EmbedNode: ResizableNode {
     }
 
     override func setBottomPaddings(withDefault: CGFloat) {
-        super.setBottomPaddings(withDefault: isCollapsed ? 6 : 14)
+        super.setBottomPaddings(withDefault: isCollapsed ? 10 : 14)
     }
 
     override func updateElementCursor() {
@@ -476,6 +484,7 @@ extension EmbedNode {
         CATransaction.disableAnimations {
             focusBeamLayer?.layer.frame = focusFrame
             focusBeamLayer?.layer.opacity = isFocused ? 1 : 0
+            focusBeamLayer?.layer.backgroundColor = focusColor
         }
     }
 
