@@ -117,6 +117,9 @@ public enum ReadingEventType: String, Codable {
     case searchBarNavigation
     case closeApp
     case destinationNoteChange
+    case tabPin
+    case tabUnpin
+    case tabPinSuggestion
 }
 
 let ExitForegroundEventTypes: Set = [
@@ -249,9 +252,11 @@ public class BrowsingNode: ObservableObject, Codable {
                         Logger.shared.logWarning("⚠️ Negative reading time encountered for url: \(url) - start time: \(lastStartReading) - end time: \(date)", category: .web)
                     }
                 }
+                tree.domainPath0TreeStatsStore?.update(treeId: tree.root.id, url: url, readTime: Double(readingTime), date: lastStartReading)
                 self.lastStartReading = nil
             }
         }
+        tree.domainPath0TreeStatsStore?.update(treeId: tree.root.id, lifeTime: tree.lifeTime(to: date))
         score.isForeground = isForeground
     }
     public var visitType: FrecencyEventType {
@@ -427,11 +432,14 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     public let origin: BrowsingTreeOrigin
     var frecencyScorer: FrecencyScorer?
     var longTermScoreStore: LongTermUrlScoreStoreProtocol?
+    var domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
 
-    public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil) {
+    public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
+                domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil) {
         self.origin = origin ?? defaultOrigin
         self.frecencyScorer = frecencyScorer
         self.longTermScoreStore = longTermScoreStore
+        self.domainPath0TreeStatsStore = domainPath0TreeStatsStore
         self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
     }
@@ -440,6 +448,10 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         self.current = current
         self.scores = scores
         self.origin = origin
+    }
+    func lifeTime(to date: Date = BeamDate.now) -> Double {
+        guard let birthDate = root.events.first?.date else { return 0 }
+        return date.timeIntervalSince(birthDate)
     }
     public var anonymized: BrowsingTree {
         BrowsingTree(root: root, current: current, scores: scores, origin: origin.anonymized)
@@ -594,6 +606,15 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public func destinationNoteChange() {
         current.addEvent(.destinationNoteChange)
+    }
+    public func tabPin() {
+        current.addEvent(.tabPin)
+    }
+    public func tabUnpin() {
+        current.addEvent(.tabUnpin)
+    }
+    public func tabPinSuggest() {
+        current.addEvent(.tabPinSuggestion)
     }
 
     public var links: Set<UUID> {
