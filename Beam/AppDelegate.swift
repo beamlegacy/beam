@@ -554,6 +554,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
+    var tabGroupingFeedbackWindow: TabGroupingFeedbackWindow?
 
     ///Should only be used to say that the full sync on quit is done
     ///Set to true to directly return .terminateNow in shouldTerminate
