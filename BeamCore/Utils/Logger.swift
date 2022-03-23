@@ -64,6 +64,7 @@ public enum LogCategory: String, CaseIterable {
     case autoUpdate
     case accountManager
     case privateKeySignature
+    case tabPinSuggestion
 }
 
 public final class Logger {

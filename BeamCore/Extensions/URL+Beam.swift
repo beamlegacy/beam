@@ -155,4 +155,24 @@ public extension URL {
         return urlComponents.url ?? self
     }
 
+    /// url with query, fragment removed and path truncated to optional first component
+    var domainPath0: URL? {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
+        components.query = nil
+        components.fragment = nil
+        let pathParts = components.path.split(separator: "/")
+        components.path = pathParts.count == 0 ? "/" : "/\(pathParts[0])"
+        return components.url
+    }
+    var isSearchEngineResultPage: Bool {
+        guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
+              let host = components.host,
+              let query = components.query else { return false }
+        let path = components.path
+        if host.contains("google"), path == "/search" { return true }
+        if host.contains("bing"), path == "/search" { return true }
+        if host.contains("ecosia"), path == "/search" { return true }
+        if host.contains("duckduckgo"), path == "/", query.starts(with: "q=") { return true }
+        return false
+    }
 }
