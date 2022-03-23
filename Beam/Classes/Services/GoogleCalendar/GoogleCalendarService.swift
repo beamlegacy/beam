@@ -32,6 +32,7 @@ enum GoogleCalendarEndPoints {
 class GoogleCalendarService {
     var id: UUID = UUID()
     var name: String = CalendarServices.googleCalendar.rawValue
+    var account: AccountCalendar?
     var scope: String? = CalendarServices.googleCalendar.scope
     var inNeedOfPermission: Bool = false
 
@@ -39,6 +40,20 @@ class GoogleCalendarService {
     var refreshToken: String?
 
     var calendarList: GoogleCalendarList?
+
+    private var lock = RWLock()
+    var googleTokens: [String: String]? {
+        get {
+            lock.read {
+                return Persistence.Authentication.googleCalendarTokens
+            }
+        }
+        set {
+            lock.write {
+                Persistence.Authentication.googleCalendarTokens = newValue
+            }
+        }
+    }
 
     let authClient = OAuth2Swift(
         consumerKey: EnvironmentVariables.Oauth.Google.consumerKey,
@@ -207,8 +222,13 @@ class GoogleCalendarService {
             return
         }
 
+        guard let encodedPath = path.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
+            completionHandler(.failure(OAuthSwiftError.encodingError(urlString: path)))
+            return
+        }
+
         let headers = ["Authorization": "Bearer \(accessToken)"]
-        authClient.client.get(path, parameters: parameters, headers: headers) { result in
+        authClient.client.get(encodedPath, parameters: parameters, headers: headers) { result in
             switch result {
             case .success(let response):
 //                Logger.shared.logDebug("JSON String: \(String(describing: try? response.jsonObject())))", category: .googleCalendar)
@@ -225,12 +245,13 @@ class GoogleCalendarService {
             Logger.shared.logError("The refreshToken operation couldn’t be completed since googleRefreshToken is nil", category: .eventCalendar)
             return
         }
+        Logger.shared.logInfo("Refresh token operation starts", category: .eventCalendar)
 
         authClient.renewAccessToken(withRefreshToken: refreshToken, parameters: .none, headers: .none) { result in
             switch result {
             case .success(let response):
 
-                guard var googleTokens = Persistence.Authentication.googleCalendarTokens,
+                guard var googleTokens = self.googleTokens,
                         let accessToken = self.accessToken else {
                           completionHandler(.failure(CalendarError.unknownError(message: "Can't save renewed google access token")))
                           return
@@ -239,7 +260,7 @@ class GoogleCalendarService {
                 googleTokens.updateValue(refreshToken, forKey: response.credential.oauthToken)
 
                 self.accessToken = response.credential.oauthToken
-                Persistence.Authentication.googleCalendarTokens = googleTokens
+                self.googleTokens = googleTokens
                 completionHandler(.success(true))
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .eventCalendar)
@@ -267,11 +288,11 @@ class GoogleCalendarService {
             case .success(let (credential, _, _)):
                 self.accessToken = credential.oauthToken
                 self.refreshToken = credential.oauthRefreshToken
-                if var googleCalendarTokens = Persistence.Authentication.googleCalendarTokens {
+                if var googleCalendarTokens = self.googleTokens {
                     googleCalendarTokens.updateValue(credential.oauthRefreshToken, forKey: credential.oauthToken)
-                    Persistence.Authentication.googleCalendarTokens = googleCalendarTokens
+                    self.googleTokens = googleCalendarTokens
                 } else {
-                    Persistence.Authentication.googleCalendarTokens = [credential.oauthToken: credential.oauthRefreshToken]
+                    self.googleTokens = [credential.oauthToken: credential.oauthRefreshToken]
                 }
                 self.inNeedOfPermission = false
                 completionHandler(.success(()))
@@ -355,9 +376,9 @@ extension GoogleCalendarService: CalendarService {
         })
     }
 
-    func getMeetings(for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void) {
+    func getMeetings(of calendarId: String?, for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void) {
         let parameters = buildRequestParameters(for: dateMin, and: dateMax, onlyToday: onlyToday, query: query)
-        getCalendarEvents(with: nil, for: parameters) { [weak self] result in
+        getCalendarEvents(with: calendarId, for: parameters) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let eventList):
