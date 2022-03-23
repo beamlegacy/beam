@@ -65,7 +65,9 @@ class NodeProviderImpl: NodeProvider {
         }
 
         if let node = mapping[element]?.ref {
-            node.parent = withParent
+            if node.parent != withParent {
+                node.parent = withParent
+            }
             return node
         }
 

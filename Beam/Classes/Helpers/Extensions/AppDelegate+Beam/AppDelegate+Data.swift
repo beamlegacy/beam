@@ -80,13 +80,15 @@ extension AppDelegate {
                         UserAlert.showError(message: "Could not delete databases",
                                             error: error)
                     case .success:
-                        for window in self.windows {
-                            window.close()
+                        DispatchQueue.main.async {
+                            for window in self.windows {
+                                window.close()
+                            }
+                            AppDelegate.main.closePreferencesWindow()
+                            self.data.onboardingManager.forceDisplayOnboarding()
+                            self.data.onboardingManager.delegate = self
+                            self.data.onboardingManager.presentOnboardingWindow()
                         }
-                        AppDelegate.main.closePreferencesWindow()
-                        self.data.onboardingManager.forceDisplayOnboarding()
-                        self.data.onboardingManager.delegate = self
-                        self.data.onboardingManager.presentOnboardingWindow()
                     }
                 }
             }

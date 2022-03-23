@@ -20,19 +20,33 @@ extension ElementNode {
         firstLineBaseline - 14
     }
 
+    var showMoveHandle: Bool {
+        cursorHoverBulletPoint || cursorHoverMoveHandle
+    }
+
+    private var moveHandlePosition: CGPoint {
+        CGPoint(x: Self.bulletLayerPositionX - childInset * CGFloat(depth), y: bulletLayerPositionY)
+    }
+
     private enum LayerName: String {
         case indentLayer
         case bullet
         case disclosure
         case checkbox
+        case moveHandle
+        case moveShadow
     }
 
     // MARK: - Create Layers
     func createElementLayers() {
         createIndentLayer()
-        let bulletPoint = NSPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
+        let bulletPoint = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         createDisclosureLayer(at: bulletPoint)
         createBulletPointLayer(at: bulletPoint)
+
+        createMoveHandleLayer(at: moveHandlePosition)
+        let shadowOrigin = CGPoint(x: moveHandlePosition.x, y: moveHandlePosition.y - 6)
+        createMoveShadowLayer(at: shadowOrigin)
     }
 
     private func createIndentLayer() {
@@ -42,7 +56,7 @@ extension ElementNode {
         updateIndentLayer()
     }
 
-    private func createDisclosureLayer(at point: NSPoint) {
+    private func createDisclosureLayer(at point: CGPoint) {
         guard self as? TextRoot == nil else { return } // no disclosure layer for the root
         let disclosureLayer = ChevronButton(LayerName.disclosure.rawValue, open: open, changed: { [unowned self] value in
             self.open = value
@@ -53,15 +67,79 @@ extension ElementNode {
         updateDisclosureLayer()
     }
 
-    private func createBulletPointLayer(at point: NSPoint) {
+    private func createBulletPointLayer(at point: CGPoint) {
         guard shouldDisplayBullet else { return }
         let bulletLayer = Layer(name: LayerName.bullet.rawValue, layer: Layer.icon(named: "editor-bullet"))
         bulletLayer.layer.actions = [
             "opacity": opacityAnimation
         ]
 
+        bulletLayer.hovered = { [weak self] hover in
+            self?.cursorHoverBulletPoint = hover
+        }
+
         addLayer(bulletLayer, origin: point)
         updateBulletLayer()
+    }
+
+    private func createMoveHandleLayer(at point: CGPoint) {
+        guard self as? TextRoot == nil, self as? ProxyNode == nil else { return } // no move handle layer for the root or proxies
+        let moveLayer = Layer(name: LayerName.moveHandle.rawValue, layer: Layer.icon(named: "editor-handle"))
+        moveLayer.layer.actions = [
+            "opacity": opacityAnimation
+        ]
+        moveLayer.cursor = .openHand
+        moveLayer.layer.masksToBounds = false
+
+        moveLayer.layer.backgroundColor = BeamColor.Editor.bullet.cgColor
+
+        moveLayer.mouseDown = { [weak self] mouseInfo in
+            guard let self = self else { return false }
+            guard let moveLayer = self.layers[LayerName.moveHandle.rawValue] else { return false }
+            guard let editor = self.editor, editor.widgetDidStartMoving(self, at: mouseInfo.globalPosition) else { return false }
+            moveLayer.cursor = .closedHand
+            return true
+        }
+
+        moveLayer.mouseUp = { [weak self] mouseInfo in
+            guard let self = self else { return false }
+            guard let moveLayer = self.layers[LayerName.moveHandle.rawValue] else { return false }
+
+            self.editor?.widgetDidStopMoving(self, at: mouseInfo.globalPosition)
+
+            let cursor = NSCursor.openHand
+            moveLayer.cursor = cursor
+            self.editor?.mouseCursorManager.setMouseCursor(cursor: cursor)
+            return true
+        }
+
+        moveLayer.hovered = { [weak self] hover in
+            self?.cursorHoverMoveHandle = hover
+        }
+
+        moveLayer.mouseDragged = { [weak self] mouseInfo in
+            guard let self = self else { return false }
+            self.editor?.widgetMoved(self, at: mouseInfo.globalPosition)
+            return true
+        }
+
+        addLayer(moveLayer, origin: point)
+        updateMoveHandleLayer()
+    }
+
+    private func createMoveShadowLayer(at point: CGPoint) {
+        let shadow = CALayer()
+        shadow.frame = CGRect(origin: point, size: .zero)
+        shadow.backgroundColor = .clear
+
+        shadow.shadowOpacity = 1
+        shadow.shadowOffset = CGSize(width: 0, height: 6)
+        shadow.shadowRadius = 16.0
+        shadow.shadowColor = CGColor(red: 0, green: 0, blue: 0, alpha: 0.1)
+
+        let shadowLayer = Layer(name: LayerName.moveShadow.rawValue, layer: shadow)
+        addLayer(shadowLayer, origin: point, at: 0)
+        updateMoveShadowLayer()
     }
 
     var opacityAnimation: CABasicAnimation {
@@ -71,7 +149,7 @@ extension ElementNode {
     }
 
     @discardableResult
-    private func createCheckboxLayer(at point: NSPoint) -> CheckboxLayer? {
+    private func createCheckboxLayer(at point: CGPoint) -> CheckboxLayer? {
         let checkboxLayer = CheckboxLayer(name: LayerName.checkbox.rawValue) { [weak self] checked in
             guard let textNode = self as? TextNode else { return }
             self?.cmdManager.formatText(in: textNode, for: .check(checked), with: nil, for: nil, isActive: false)
@@ -87,6 +165,8 @@ extension ElementNode {
         updateDisclosureLayer()
         updateIndentLayer()
         updateCheckboxLayer()
+        updateMoveHandleLayer()
+        updateMoveShadowLayer()
     }
 
     private func updateBulletLayer() {
@@ -101,6 +181,24 @@ extension ElementNode {
         }
 
         bulletLayer.layer.backgroundColor = BeamColor.Editor.bullet.cgColor
+    }
+
+    private func updateMoveHandleLayer() {
+        guard let moveLayer = self.layers[LayerName.moveHandle.rawValue] else { return }
+        moveLayer.layer.opacity = showMoveHandle ? 1 : 0
+        moveLayer.layer.isHidden = self.elementText.isEmpty && element.kind.isText
+        moveLayer.layer.backgroundColor = cursorHoverMoveHandle ? BeamColor.Editor.moveHandleHover.cgColor : BeamColor.Editor.bullet.cgColor
+        moveLayer.layer.frame.origin = moveHandlePosition
+    }
+
+    private func updateMoveShadowLayer() {
+        guard let shadowLayer = self.layers[LayerName.moveShadow.rawValue] else { return }
+        let shadowSize = CGSize(width: self.frame.size.width + childInset * CGFloat(depth) + 20, height: self.frame.size.height)
+        let frame = CGRect(origin: shadowLayer.frame.origin, size: shadowSize)
+        shadowLayer.layer.frame = frame
+        shadowLayer.layer.cornerRadius = isDraggedForMove ? 6.0 : 0.0
+        shadowLayer.layer.shadowRadius = isDraggedForMove ? 16.0 : 0.0
+        shadowLayer.layer.backgroundColor = isDraggedForMove ? BeamColor.Generic.background.cgColor : .clear
     }
 
     private func updateDisclosureLayer() {
