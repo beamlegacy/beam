@@ -275,9 +275,9 @@ public class ElementNode: Widget {
         // Be extra carefull when changing values
         //
         // Padding bottom of Node depending of the nextElement with higher or smaller depth
-        if let nextElement = element.nextElement() {
-            var newPadding: CGFloat = withDefault
+        var newPadding: CGFloat = withDefault
 
+        if let nextElement = element.nextElement() {
             if self.open {
                 if nextElement.depth > depth, parent !== root?.element {
                     newPadding += nextElement.isHeader ? 2 : 1
@@ -293,10 +293,10 @@ public class ElementNode: Widget {
                     newPadding = 4
                 }
             }
+        }
 
-            if contentsPadding.bottom != newPadding {
-                contentsPadding.bottom = newPadding
-            }
+        if contentsPadding.bottom != newPadding {
+            contentsPadding.bottom = newPadding
         }
 
         for child in children {
