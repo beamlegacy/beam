@@ -82,7 +82,7 @@ struct CreditCardsTableView: View {
 
     var body: some View {
         TableView(customRowHeight: 48, hasSeparator: true, hasHeader: false, allowsMultipleSelection: false,
-                  items: allCreditCardsItem, columns: creditCardsColumns, creationRowTitle: nil, shouldReloadData: .constant(nil)) { (_, _) in
+                  items: allCreditCardsItem, columns: creditCardsColumns, creationRowTitle: nil) { (_, _) in
 
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
