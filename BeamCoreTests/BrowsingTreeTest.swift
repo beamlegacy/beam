@@ -367,4 +367,41 @@ class BrowsingTreeTest: XCTestCase {
             XCTFail("Tree origin anonymization issue")
         }
     }
+
+    func testDomainPath0TreeStats() {
+        class FakeDomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
+            var calls0 = [(treeId: UUID, url: String, readTime: Double, date: Date)]()
+            var calls1 = [(treeId: UUID, lifeTime: Double)]()
+
+            func update(treeId: UUID, url: String, readTime: Double, date: Date) {
+                calls0.append((treeId: treeId, url: url, readTime: readTime, date: date))
+            }
+            func update(treeId: UUID, lifeTime: Double) {
+                calls1.append((treeId: treeId, lifeTime: lifeTime))
+            }
+            func cleanUp(olderThan days: Int, maxRows: Int) {}
+            func getPinTabSuggestionCandidates(minDayCount: Int, minTabReadingTimeShare: Float, minAverageTabLifetime: Float,
+                                               dayRange: Int, maxRows: Int) -> [ScoredDomainPath0] {
+                return []
+            }
+            var domainPath0MinReadDay: Date?
+        }
+        BeamDate.freeze("2001-01-01T00:00:00+000")
+        let date = BeamDate.now
+        let storage = FakeDomainPath0TreeStatsStorage()
+        let tree = BrowsingTree(nil, domainPath0TreeStatsStore: storage)
+        tree.navigateTo(url: "abc.com/path/to", title: "nil", startReading: true, isLinkActivation: false, readCount: 0)
+        BeamDate.travel(1)
+        tree.closeTab()
+
+        XCTAssertEqual(storage.calls0.count, 1)
+        XCTAssertEqual(storage.calls0[0].treeId, tree.root.id)
+        XCTAssertEqual(storage.calls0[0].url, "abc.com/path/to")
+        XCTAssertEqual(storage.calls0[0].readTime, 1)
+        XCTAssertEqual(storage.calls0[0].date, date)
+
+        XCTAssertEqual(storage.calls1.count, 3)
+        XCTAssertEqual(storage.calls1[2].treeId, tree.root.id)
+        XCTAssertEqual(storage.calls1[2].lifeTime, 1)
+    }
 }

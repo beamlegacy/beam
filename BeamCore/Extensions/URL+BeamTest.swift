@@ -120,4 +120,20 @@ class URLBeamTest: XCTestCase {
         )
     }
 
+    func testDomainPath0() {
+        XCTAssertEqual(URL(string: "http://www.website.com?q=blah#anchor")!.domainPath0?.absoluteString, "http://www.website.com/")
+        XCTAssertEqual(URL(string: "http://www.website.com/part1?q=blah#anchor")!.domainPath0?.absoluteString, "http://www.website.com/part1")
+        XCTAssertEqual(URL(string: "http://www.website.com/part1/part2?q=blah#anchor")!.domainPath0?.absoluteString, "http://www.website.com/part1")
+    }
+
+    func testIsSearchEngineResultPage() {
+        XCTAssertTrue(URL(string: "https://www.google.de/search?q=berlin&source=hp&ei=gNApYvHrN4Hear_Fq9gD&")!.isSearchEngineResultPage)
+        XCTAssertFalse(URL(string: "https://www.google.com/maps/@48.8457835,2.3827251,14z")!.isSearchEngineResultPage)
+        XCTAssertTrue(URL(string: "https://www.bing.com/search?q=cheval&search=&form=QBLH&sp=-1&pq=cheval&sc=8-6&qs=n&sk=")!.isSearchEngineResultPage)
+        XCTAssertFalse(URL(string: "https://www.bing.com/shop?FORM=Z9LHS4")!.isSearchEngineResultPage)
+        XCTAssertTrue(URL(string: "https://www.ecosia.org/search?method=index&q=donald+duck")!.isSearchEngineResultPage)
+        XCTAssertFalse(URL(string: "https://info.ecosia.org/what")!.isSearchEngineResultPage)
+        XCTAssertTrue(URL(string: "https://duckduckgo.com/?q=sevilla")!.isSearchEngineResultPage)
+        XCTAssertFalse(URL(string: "https://duckduckgo.com/")!.isSearchEngineResultPage)
+    }
 }

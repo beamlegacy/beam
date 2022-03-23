@@ -56,6 +56,9 @@ enum Persistence {
     enum Database {
         @StandardStorable("currentDatabaseId") static var currentDatabaseId: UUID?
     }
+    enum TabPinSuggestion {
+        @StandardStorable("tabPinSuggestion.hasPinned") static var hasPinned: Bool?
+    }
 
     // swiftlint:disable nesting
     enum Sync {

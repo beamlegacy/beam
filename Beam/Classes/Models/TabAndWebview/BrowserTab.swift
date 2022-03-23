@@ -229,7 +229,8 @@ import Promises
         BrowsingTree(
             origin,
             frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
-            longTermScoreStore: LongTermUrlScoreStore()
+            longTermScoreStore: LongTermUrlScoreStore(),
+            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(db: GRDBDatabase.shared)
         )
     }
 
@@ -587,6 +588,15 @@ import Promises
         browsingTree.closeApp()
         saveTree(grouped: true)
         sendTree(grouped: true)
+    }
+    func pin() {
+        browsingTree.tabPin()
+    }
+    func unPin() {
+        browsingTree.tabUnpin()
+    }
+    func pinSuggest() {
+        browsingTree.tabPinSuggest()
     }
 
     private func resetDestinationNote() {
