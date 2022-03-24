@@ -112,9 +112,12 @@ extension BeamWindow {
 
     @IBAction func openLocation(_ sender: Any?) {
         if state.omniboxInfo.isFocused &&
-            (state.mode != .web || state.omniboxInfo.isFocusedFromTab) &&
+            (state.mode != .web || state.omniboxInfo.wasFocusedFromTab) &&
             (!state.omniboxInfo.isShownInJournal || !state.autocompleteManager.autocompleteResults.isEmpty) {
             state.stopFocusOmnibox()
+            if state.omniboxInfo.isShownInJournal {
+                state.autocompleteManager.clearAutocompleteResults()
+            }
         } else {
             state.startFocusOmnibox(fromTab: true)
         }
