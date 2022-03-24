@@ -109,13 +109,30 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
     }
     /// *Potential* embed, doesn't mean it's 100% sure we will be able to build a embed
     func canBuildEmbeddableContent(for url: URL) -> Bool {
+        textMatchesForEmbeddableContent(for: url)?.isEmpty == false
+    }
+
+    /// *Potential* embed, doesn't mean it's 100% sure we will be able to build a embed
+    private func textMatchesForEmbeddableContent(for url: URL) -> [NSTextCheckingResult]? {
         let pattern = SupportedEmbedDomains.shared.nativePattern
         guard let regex = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
-            return false
+            return nil
         }
         let range = NSRange(location: 0, length: url.absoluteString.count)
-        let matches = regex.matches(in: url.absoluteString, options: [], range: range)
-        return !matches.isEmpty
+        return regex.matches(in: url.absoluteString, options: [], range: range)
+    }
+
+    /// Uses the Embed strategy to parse the input URL and return the matching output URL.
+    /// - Parameter url: Input URL to find matches for. e.g.: `https://twitter.com/myhistorytales/status/1500423493829074945/likes`
+    /// - Returns: Output URL match e.g.: `https://twitter.com/myhistorytales/status/1500423493829074945`
+    func embedMatchURL(for url: URL) -> URL? {
+        guard let match: NSTextCheckingResult = textMatchesForEmbeddableContent(for: url)?.first,
+              let range = Range.init(match.range) else {
+            return nil
+        }
+
+        let matchUrl = url.absoluteString.substring(range: range)
+        return URL(string: matchUrl)
     }
 
     func embeddableContent(for url: URL, completion: @escaping (EmbedContent?, EmbedContentError?) -> Void) {

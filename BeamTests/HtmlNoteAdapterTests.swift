@@ -173,7 +173,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(firstChild.text.ranges[0], expectedRange)
                 XCTAssertEqual(firstChild.text.ranges.count, 1)
             } else {
-                XCTFail("expect atleast one child")
+                XCTFail("expect at least one child")
             }
             expectation.fulfill()
         })
@@ -196,7 +196,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(firstChild.text.ranges[0], expectedRange)
                 XCTAssertEqual(firstChild.text.ranges.count, 1)
             } else {
-                XCTFail("expect atleast one child")
+                XCTFail("expect at least one child")
             }
             expectation.fulfill()
         })
@@ -218,7 +218,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(firstChild.text.ranges[0], expectedRange)
                 XCTAssertEqual(firstChild.text.ranges.count, 1)
             } else {
-                XCTFail("expect atleast one child")
+                XCTFail("expect at least one child")
             }
             expectation.fulfill()
         })
@@ -237,7 +237,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(firstChild.text.ranges[0], expectedRange)
                 XCTAssertEqual(firstChild.text.ranges.count, 1)
             } else {
-                XCTFail("expect atleast one child")
+                XCTFail("expect at least one child")
             }
             expectation.fulfill()
         })
@@ -312,7 +312,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let headers = ["Referer": url]
                 XCTAssertEqual(downloadEvent, "downloaded \(imageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -337,7 +337,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let headers = ["Referer": url]
                 XCTAssertEqual(downloadEvent, "downloaded \(imageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -362,7 +362,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let headers = ["Referer": url]
                 XCTAssertEqual(downloadEvent, "downloaded \(imageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -389,7 +389,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let headers = ["Referer": url]
                 XCTAssertEqual(downloadEvent, "downloaded \(imageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -418,7 +418,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let escapedMarkdownImageUrl = "https://cdn.vox-cdn.com/thumbor/lf-bcEeXrJtxojlBOxneFrJItKQ=/0x0:2040x1360/1200x800/filters:focal%28857x517:1183x843%29/cdn.vox-cdn.com/uploads/chorus_image/image/69769623/acastro_201210_1777_gmail_0001.0.jpg"
                 XCTAssertNotEqual(downloadEvent, "downloaded \(escapedMarkdownImageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -443,7 +443,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let headers = ["Referer": url]
                 XCTAssertEqual(downloadEvent, "downloaded \(imageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
 
             expectation.fulfill()
@@ -469,7 +469,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 let headers = ["Referer": url]
                 XCTAssertEqual(downloadEvent, "downloaded \(imageUrl) with headers \(headers)")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
 
             expectation.fulfill()
@@ -504,7 +504,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 // Expect no file download for base64 images
                 XCTAssertEqual(testDownloadManager.events.count, 0)
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -522,7 +522,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(testDownloadManager.events.count, 0)
                 XCTAssertEqual(testFileStorage.events.count, 0)
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         })
@@ -541,7 +541,7 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(testDownloadManager.events.count, 0)
                 XCTAssertEqual(testFileStorage.events.count, 0)
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         }
@@ -564,10 +564,60 @@ class HtmlNoteAdapterTests: XCTestCase {
 
                 XCTAssertEqual(firstEl.text.text, "If you can wait and not be tired by waiting, Or, being lied about, don’t deal in lies, Or, being hated, don’t give way to hating, And yet don’t look too good, nor talk too wise;")
             } else {
-                XCTFail("expected atleast one element")
+                XCTFail("expected at least one element")
             }
             expectation.fulfill()
         }
         wait(for: [expectation], timeout: 10.0)
     }
+
+    func testLimitDuplicateEmbedElements() {
+        let html = """
+            <a href="/myhistorytales/status/1500423493829074945/retweets">retweets</a>
+            <a href="/myhistorytales/status/1500423493829074945/likes">likes</a>
+            <a href="/myhistorytales/status/1500423493829074945">open tweet</a>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://twitter.com/myhistorytales/status/1500423493829074945")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+                XCTAssertTrue(firstEl.kind.isEmbed)
+            } else {
+                XCTFail("expected at least one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
+    func testLimitDuplicateEmbedElementsMixedContent() {
+        let html = """
+            <a href="/myhistorytales/status/1500423493829074945/retweets">retweets</a>
+            <a href="/myhistorytales/status/1500423493829074945/likes">likes</a>
+            <b>bold text</b>
+            <a href="/myhistorytales/status/1500423493829074945">open tweet</a>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://twitter.com/myhistorytales/status/1500423493829074945")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertEqual(results.count, 2)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+                XCTAssertTrue(firstEl.kind.isEmbed)
+            } else {
+                XCTFail("expected at least one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
 }
