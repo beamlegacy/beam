@@ -481,6 +481,14 @@ extension EmbedNode {
     }
 
     private func addExpandedContentToViewIfNeeded() {
+        guard layer.frame.origin != .zero else {
+            // Assume that for some reason the embed node CALayer has not been placed at its correct location within
+            // the editor layer yet. Therefore, skip adding the embed node NSView to the editor view tree for now,
+            // until we know for sure the correct origin of the embed node layer within the editor, which we need to
+            // position the embed node NSView. Yes it's a hack.
+            return
+        }
+
         guard let expandedContent = expandedContent, expandedContent.superview == nil else { return }
         performLayerChanges {
             expandedContent.layer?.zPosition = 1
