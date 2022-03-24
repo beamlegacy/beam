@@ -1177,13 +1177,15 @@
 		B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */; };
 		B5FAE2DB270C842700EAC8A3 /* CardPublishTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2DA270C842700EAC8A3 /* CardPublishTests.swift */; };
 		B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */; };
-		B5FAE2F9270ECF0100EAC8A3 /* SignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */; };
 		B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */; };
 		B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */; };
 		B5FAE300270ED94300EAC8A3 /* GeneralPreferenceTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE2FF270ED94300EAC8A3 /* GeneralPreferenceTestView.swift */; };
 		B5FAE302270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE301270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift */; };
 		B5FAE304270EE16800EAC8A3 /* AccountTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE303270EE16800EAC8A3 /* AccountTestView.swift */; };
 		B5FAE306270EE17800EAC8A3 /* AccountViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FAE305270EE17800EAC8A3 /* AccountViewLocators.swift */; };
+		B5FB3A1E27E8C18400037FD5 /* SignInTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB3A1D27E8C18400037FD5 /* SignInTests.swift */; };
+		B5FB3A2027E8C32800037FD5 /* OnboardingImportDataViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB3A1F27E8C32800037FD5 /* OnboardingImportDataViewLocators.swift */; };
+		B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5FB3A2127E8D30C00037FD5 /* OnboardingImportDataTestView.swift */; };
 		BAA6703B2414F077ED3A09D8 /* PasswordMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */; };
 		BAA670C2CFE33BC83DF12343 /* PointAndShootCardPickerPositioning.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA6719DA7B5A8574E64AE71 /* PointAndShootCardPickerPositioning.swift */; };
 		BAA67192B5EB78981741C311 /* WebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = BAA67CEFFAFA38F29CF1C84F /* WebPage.swift */; };
@@ -2617,13 +2619,15 @@
 		B5F845E426F8CCB500B15209 /* BlockReferenceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockReferenceTests.swift; sourceTree = "<group>"; };
 		B5FAE2DA270C842700EAC8A3 /* CardPublishTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardPublishTests.swift; sourceTree = "<group>"; };
 		B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlertTestView.swift; sourceTree = "<group>"; };
-		B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInTests.swift; sourceTree = "<group>"; };
 		B5FAE2FB270ECFA600EAC8A3 /* ShortcutsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsHelper.swift; sourceTree = "<group>"; };
 		B5FAE2FD270ED71700EAC8A3 /* PreferencesBaseView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesBaseView.swift; sourceTree = "<group>"; };
 		B5FAE2FF270ED94300EAC8A3 /* GeneralPreferenceTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GeneralPreferenceTestView.swift; sourceTree = "<group>"; };
 		B5FAE301270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesToolbarViewLocators.swift; sourceTree = "<group>"; };
 		B5FAE303270EE16800EAC8A3 /* AccountTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountTestView.swift; sourceTree = "<group>"; };
 		B5FAE305270EE17800EAC8A3 /* AccountViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountViewLocators.swift; sourceTree = "<group>"; };
+		B5FB3A1D27E8C18400037FD5 /* SignInTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInTests.swift; sourceTree = "<group>"; };
+		B5FB3A1F27E8C32800037FD5 /* OnboardingImportDataViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingImportDataViewLocators.swift; sourceTree = "<group>"; };
+		B5FB3A2127E8D30C00037FD5 /* OnboardingImportDataTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingImportDataTestView.swift; sourceTree = "<group>"; };
 		BAA67049CF331492BFE5A89E /* Navigation.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = Navigation.js; sourceTree = "<group>"; };
 		BAA6708A02AD3D294ECC08DF /* BeamCharacterDataMock.ts */ = {isa = PBXFileReference; lastKnownFileType = file.ts; path = BeamCharacterDataMock.ts; sourceTree = "<group>"; };
 		BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordOverlayController.swift; sourceTree = "<group>"; };
@@ -5869,6 +5873,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				B5FB3A1727E8C16400037FD5 /* SignInOut */,
 				8AA5F0BF27ABE50900D25A13 /* BrokenSites */,
 				B5792588275E46F50093B32B /* ImportExport */,
 				B5CDFF26274E38E800742CC9 /* Onboarding */,
@@ -5970,6 +5975,7 @@
 			children = (
 				B5CDFF2E274E3FD600742CC9 /* OnboardingLandingTestView.swift */,
 				B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */,
+				B5FB3A2127E8D30C00037FD5 /* OnboardingImportDataTestView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -5979,6 +5985,7 @@
 			children = (
 				B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */,
 				B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */,
+				B5FB3A1F27E8C32800037FD5 /* OnboardingImportDataViewLocators.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -6027,17 +6034,8 @@
 			isa = PBXGroup;
 			children = (
 				A3E7B4BE27AC45FD0074C9BB /* Passwords */,
-				B5FAE2F7270ECEE800EAC8A3 /* Account */,
 			);
 			path = Preferences;
-			sourceTree = "<group>";
-		};
-		B5FAE2F7270ECEE800EAC8A3 /* Account */ = {
-			isa = PBXGroup;
-			children = (
-				B5FAE2F8270ECF0100EAC8A3 /* SignInTests.swift */,
-			);
-			path = Account;
 			sourceTree = "<group>";
 		};
 		B5FAE2FA270ECF7100EAC8A3 /* Shortcuts */ = {
@@ -6047,6 +6045,14 @@
 				B5625CBC271480590074A080 /* EditorShortcutsTests.swift */,
 			);
 			path = Shortcuts;
+			sourceTree = "<group>";
+		};
+		B5FB3A1727E8C16400037FD5 /* SignInOut */ = {
+			isa = PBXGroup;
+			children = (
+				B5FB3A1D27E8C18400037FD5 /* SignInTests.swift */,
+			);
+			path = SignInOut;
 			sourceTree = "<group>";
 		};
 		BAA67051B37A3398BDF678AB /* Navigation */ = {
@@ -8069,7 +8075,7 @@
 				A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */,
 				B58A175027514E0100A588C4 /* CardViewEmbedsTests.swift in Sources */,
 				B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */,
-				B5FAE2F9270ECF0100EAC8A3 /* SignInTests.swift in Sources */,
+				B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */,
 				B575361126C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift in Sources */,
 				B5625CB6271480490074A080 /* BrowserShortcutsTests.swift in Sources */,
 				B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */,
@@ -8118,6 +8124,7 @@
 				B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */,
 				B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */,
 				B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */,
+				B5FB3A2027E8C32800037FD5 /* OnboardingImportDataViewLocators.swift in Sources */,
 				375D83CB278D6AE80064C246 /* BrowserStatusBarTests.swift in Sources */,
 				B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */,
 				B575360526BDA6260053CE2D /* LoginTest.swift in Sources */,
@@ -8146,6 +8153,7 @@
 				B5BA078B26AF3EDF00D31FED /* BaseMenuBar.swift in Sources */,
 				B5E8011026AEA64E00C8BD61 /* WebViewLocators.swift in Sources */,
 				A3E7B4C027AC462E0074C9BB /* PasswordPreferencesTests.swift in Sources */,
+				B5FB3A1E27E8C18400037FD5 /* SignInTests.swift in Sources */,
 				B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */,
 				B5FAE304270EE16800EAC8A3 /* AccountTestView.swift in Sources */,
 				B5984C9227031D7A00192B5F /* SignUpAutocompleteTests.swift in Sources */,

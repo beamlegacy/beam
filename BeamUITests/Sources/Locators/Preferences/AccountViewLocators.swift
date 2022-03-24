@@ -15,6 +15,7 @@ enum AccountViewLocators {
         case logoutButton = "Logout"
         case forgotPassButton = "Forgot Password"
         case refreshTokenButton = "Refresh Token"
+        case connectBeamButton = "Connect to Beam..."
     }
     
     enum TextFields: String, CaseIterable, UIElement {
