@@ -538,6 +538,7 @@
 		87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
 		87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */; };
+		87DB0CD527EC5F5D0071A410 /* WebFieldLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */; };
 		87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */; };
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
@@ -1977,6 +1978,7 @@
 		87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
 		87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSettingsCell.swift; sourceTree = "<group>"; };
+		87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldLocator.swift; sourceTree = "<group>"; };
 		87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteProtocols.swift; sourceTree = "<group>"; };
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAutocompleteStores.swift; sourceTree = "<group>"; };
@@ -5650,6 +5652,7 @@
 				8A9309FB27A04E2C00064133 /* yarn.lock */,
 				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
 				87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */,
+				87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */,
 				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
 				BAA678E2B362F5D8A1A801D4 /* PasswordManagerElements.swift */,
 				8726448E26199B8F0070E83D /* OptionSelector.swift */,
@@ -7677,6 +7680,7 @@
 				96319C8626160E4A00D1CF31 /* BeamNote+LinkDetection.swift in Sources */,
 				A0E7D98726139FCA00D70676 /* JournalStackView.swift in Sources */,
 				5284894E26C54C460064878B /* String+TitleConflict.swift in Sources */,
+				87DB0CD527EC5F5D0071A410 /* WebFieldLocator.swift in Sources */,
 				8AA2431826E63C0D002A553A /* HtmlVisitor.swift in Sources */,
 				524299E725A480A300F4DBF5 /* AccountsView.swift in Sources */,
 				8AD2631526F3A8730074D673 /* Throttle.swift in Sources */,

@@ -11,6 +11,7 @@ import BeamCore
 enum WebPositionsMessages: String, CaseIterable {
     case WebPositions_frameBounds
     case WebPositions_scroll
+    case WebPositions_resize
 }
 
 struct WebPositionsError: LocalizedError {
@@ -49,7 +50,7 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
             }
 
             switch messageKey {
-            case WebPositionsMessages.WebPositions_scroll:
+            case .WebPositions_scroll:
                 guard let x = dict["x"] as? CGFloat,
                       let y = dict["y"] as? CGFloat,
                       let href = dict["href"] as? String else {
@@ -59,7 +60,17 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
 
                 webPositions.setFrameInfoScroll(href: href, scrollX: x, scrollY: y)
 
-            case WebPositionsMessages.WebPositions_frameBounds:
+            case .WebPositions_resize:
+                guard let width = dict["width"] as? CGFloat,
+                      let height = dict["height"] as? CGFloat,
+                      let href = dict["href"] as? String else {
+                          Logger.shared.logError("Ignored resize event: \(String(describing: dict))", category: .web)
+                          return
+                      }
+
+                webPositions.setFrameInfoResize(href: href, width: width, height: height)
+
+            case .WebPositions_frameBounds:
                 onFramesInfoMessage(dict: dict, frames: webFrames, positions: webPositions, href: href, isMain: frameInfo?.isMainFrame ?? false)
             }
 
