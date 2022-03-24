@@ -11,7 +11,7 @@ extension AutocompleteManager {
     private static let resultsLimit = 8
 
     func mergeAndSortPublishersResults(publishersResults: [AutocompletePublisherSourceResults],
-                                       for searchText: String) -> (results: [AutocompleteResult], canCreateNote: Bool) {
+                                       for searchText: String, expectSearchEngineResultsLater: Bool = true, limit: Int? = nil) -> (results: [AutocompleteResult], canCreateNote: Bool) {
         var autocompleteResults = [AutocompleteResult.Source: [AutocompleteResult]]()
         var additionalSearchEngineResults = [AutocompleteResult]()
         publishersResults.forEach { someResults in
@@ -39,9 +39,10 @@ extension AutocompleteManager {
                                        topDomainResults: autocompleteResults[.topDomain] ?? [],
                                        mnemonicResults: autocompleteResults[.mnemonic] ?? [],
                                        searchEngineResults: autocompleteResults[.searchEngine] ?? [],
-                                       expectSearchEngineResultsLater: mode == .general && !searchText.isEmpty,
+                                       expectSearchEngineResultsLater: expectSearchEngineResultsLater,
                                        actionsResults: autocompleteResults[.action] ?? [],
-                                       createCardResults: autocompleteResults[.createNote] ?? [])
+                                       createCardResults: autocompleteResults[.createNote] ?? [],
+                                       limit: limit ?? Self.resultsLimit)
 
         let canCreateNote = autocompleteResults[.createNote]?.isEmpty == false
         return (results: finalResults, canCreateNote: canCreateNote)
@@ -56,7 +57,8 @@ extension AutocompleteManager {
                              searchEngineResults: [AutocompleteResult],
                              expectSearchEngineResultsLater: Bool,
                              actionsResults: [AutocompleteResult],
-                             createCardResults: [AutocompleteResult]) -> [AutocompleteResult] {
+                             createCardResults: [AutocompleteResult],
+                             limit: Int) -> [AutocompleteResult] {
         let start = DispatchTime.now()
         let historyResultsTruncated = Array(historyResults.prefix(6))
 
@@ -83,7 +85,7 @@ extension AutocompleteManager {
                             searchEngineResults: filteredSearchEngineResults,
                             actionsResults: actionsResults,
                             createCardResults: createCardResults,
-                            limit: Self.resultsLimit,
+                            limit: limit,
                             expectSearchEngineResultsLater: expectSearchEngineResultsLater)
         return results
     }
@@ -114,7 +116,9 @@ extension AutocompleteManager {
             searchEngineSpace = searchEngineResults.count > 0 ? min(2, searchEngineResults.count) : 2
         }
         let truncateLength = limit - searchEngineSpace - (hasCreateCard ? 1 : 0) - actionsResults.count
-        var results = Array(sortableResults.prefix(truncateLength))
+
+        var results = truncateSortablesKeepingImportantNotes(sortableResults, limit: truncateLength)
+
         let searchEngineMax = truncateLength - results.count + searchEngineSpace
         results.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: sortableResults.isEmpty ? 0 : 1)
         results.append(contentsOf: actionsResults)
@@ -124,6 +128,31 @@ extension AutocompleteManager {
             results.append(contentsOf: createCardResults)
         }
         return results
+    }
+
+    /// We need to make sure notes with matching are not discarded even though their score is low
+    private func truncateSortablesKeepingImportantNotes(_ results: [AutocompleteResult], limit: Int) -> [AutocompleteResult] {
+
+        var truncated = Array(results.prefix(limit))
+        guard results.count > limit else { return truncated }
+
+        let containsNotes = truncated.contains { result in
+            guard case .note = result.source else { return false }
+            return true
+        }
+        guard !containsNotes else { return truncated }
+
+        let leftovers = Array(results.suffix(from: limit))
+        let leftOverNotes = leftovers.filter { r in
+            guard case .note = r.source else { return false }
+            return r.prefixScore > 1.0
+        }
+        guard !leftOverNotes.isEmpty else { return truncated }
+        let minimumNumberOfNotes = Int(Double(limit) * 0.4) // 40% ex: 2 out of 6 results should be notes
+        let notesToAdd = leftovers.prefix(minimumNumberOfNotes)
+        truncated.removeLast(notesToAdd.count)
+        truncated.append(contentsOf: notesToAdd)
+        return truncated
     }
 
     func insertSearchEngineResults(_ searchEngineResults: [AutocompleteResult],
