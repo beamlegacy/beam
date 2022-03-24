@@ -67,7 +67,8 @@ extension BeamTextEdit {
     }
 
     func updateLeadingGutterLayout(textRect: NSRect) {
-        guard leadingGutter?.frame.height != leadingGutterSize.height else { return }
+        guard leadingGutter?.frame.height != leadingGutterSize.height ||
+                leadingGutter?.frame.width != textRect.minX else { return }
         var gutterFrame = CGRect.zero
         gutterFrame.origin = CGPoint(x: 0, y: textRect.minY)
         gutterFrame.size = CGSize(width: textRect.minX, height: leadingGutterSize.height)
