@@ -409,8 +409,9 @@ final class WebAutocompleteContext {
         }
     }
 
-    func update(with rawFields: [DOMInputElement], on host: String?) -> [String] {
+    func update(with allRawFields: [DOMInputElement], on host: String?) -> [String] {
         autocompleteRules = autocompleteRules(for: host)
+        let rawFields = allRawFields.filter(includedInEvaluation)
         let pageContainsPasswordField = rawFields.contains { $0.type == .password }
         let pageContainsNonPasswordField = rawFields.contains { $0.type != .password }
         let fields = rawFields.compactMap { autocompleteRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField, nonPasswordField: pageContainsNonPasswordField) }
@@ -428,6 +429,16 @@ final class WebAutocompleteContext {
         }
         Logger.shared.logDebug("Merged autocomplete groups: \(autocompleteGroups)", category: .passwordManagerInternal)
         return fieldIds
+    }
+
+    private func includedInEvaluation(_ inputElement: DOMInputElement) -> Bool {
+        guard let inputMode = inputElement.inputmode else { return true }
+        switch inputMode {
+        case .text, .tel, .email:
+            return true
+        default:
+            return false
+        }
     }
 
     private func update(withUntagged fields: [DOMInputElement]) -> [String] {
