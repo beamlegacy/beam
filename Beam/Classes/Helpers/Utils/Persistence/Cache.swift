@@ -149,4 +149,14 @@ extension Cache: Codable where Key: Codable, Value: Codable {
         let cache = try BeamJSONDecoder().decode(self, from: data)
         return cache
     }
+
+    /// Creates a cache on disk or recovers an existing one with the same name.
+    static func diskCache(filename: String, countLimit: Int) -> Cache<Key, Value> {
+        if let cache = try? Cache<Key, Value>.recoverFromDisk(withName: filename) {
+            return cache
+        } else {
+            return Cache<Key, Value>(countLimit: countLimit)
+        }
+    }
+
 }
