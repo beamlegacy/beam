@@ -7,44 +7,37 @@
 
 import Foundation
 import Combine
+import BeamCore
 
 final class WebAutofillPopoverContainer {
     private let window: PopoverWindow
     private weak var page: WebPage?
     private let topEdgeHeight: CGFloat?
-    private var parentFrames: [String: WebPositions.FrameInfo]
-    private var subscription: AnyCancellable?
+    private let fieldLocator: WebFieldLocator
+    private let originCalculator: (CGRect) -> CGPoint
+    private var scope = Set<AnyCancellable>()
 
-    init(window: PopoverWindow, page: WebPage, frameURL: String?, scrollUpdater: PassthroughSubject<WebPositions.FrameInfo, Never>, topEdgeHeight: CGFloat? = nil) {
+    init(window: PopoverWindow, page: WebPage, topEdgeHeight: CGFloat? = nil, fieldLocator: WebFieldLocator, originCalculator: @escaping (CGRect) -> CGPoint) {
         self.window = window
         self.page = page
         self.topEdgeHeight = topEdgeHeight
-        if let frameURL = frameURL {
-            parentFrames = page.webPositions?.framesInPath(href: frameURL) ?? [:]
-        } else {
-            parentFrames = [:]
-        }
-        if !parentFrames.isEmpty {
-            subscription = scrollUpdater
-                .receive(on: DispatchQueue.main)
-                .sink(receiveValue: updateScrollPosition)
-        }
+        self.fieldLocator = fieldLocator
+        self.originCalculator = originCalculator
+        fieldLocator.fieldFramePublisher
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: { [weak self] rect in
+                guard let self = self else { return }
+                self.updateWindowOrigin(self.originCalculator(rect))
+            })
+            .store(in: &scope)
     }
 
-    private func updateScrollPosition(_ frame: WebPositions.FrameInfo) {
-        guard let movedFrame = parentFrames[frame.href] else {
-            return
-        }
-        let dx = frame.scrollX - movedFrame.scrollX
-        let dy = frame.scrollY - movedFrame.scrollY
-        guard dx != 0 || dy != 0 else {
-            return
-        }
-        let scale = page?.webView.zoomLevel() ?? 1
-        let x = window.frame.origin.x - dx * scale
-        let y = window.frame.origin.y + dy * scale
-        window.setFrameOrigin(CGPoint(x: x, y: y))
-        parentFrames[frame.href] = frame
+    var currentOrigin: CGPoint {
+        originCalculator(fieldLocator.currentValue)
+    }
+
+    private func updateWindowOrigin(_ origin: CGPoint) {
+        window.setOrigin(origin, fromTopLeft: true)
         window.alphaValue = isWindowWithinParent() ? 1.0 : 0.0 // window.setIsVisible(false) causes the window to lose its parent
     }
 
