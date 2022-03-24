@@ -29,6 +29,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
     private let scrollUpdater = PassthroughSubject<WebPositions.FrameInfo, Never>()
+    private weak var currentFieldLocator: WebFieldLocator?
     private var passwordMenuPopover: WebAutofillPopoverContainer?
     private let encoder: JSONEncoder
     private let decoder: BeamJSONDecoder
@@ -200,38 +201,39 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         scrollUpdater.send(frame)
     }
 
+    private func fieldLocator(forField elementId: String, frameInfo: WKFrameInfo?) -> WebFieldLocator {
+        if let fieldLocator = currentFieldLocator, fieldLocator.elementId == elementId {
+            return fieldLocator
+        }
+        let fieldLocator = WebFieldLocator(page: page, elementId: elementId, frameInfo: frameInfo, scrollUpdater: scrollUpdater)
+        currentFieldLocator = fieldLocator
+        return fieldLocator
+    }
+
     private func showIcon(onField elementId: String, frameInfo: WKFrameInfo?) {
-        guard fieldWithIcon != elementId else { return }
+        guard let page = page,
+              fieldWithIcon != elementId
+        else { return }
         if fieldWithIcon != nil {
             clearIcon()
         }
-        requestWebFieldFrame(elementId: elementId, frameInfo: frameInfo) { rect in
-            if let rect = rect {
-                DispatchQueue.main.async {
-                    let location = CGRect(x: rect.origin.x + rect.width - 24 - 16, y: rect.origin.y - rect.height / 2 - 24 - 12, width: 24, height: 24)
-                    guard let page = self.page,
-                          let webView = (page as? BrowserTab)?.webView,
-                          let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true)
-                    else { return }
-                    if self.fieldWithIcon != nil { // field gained focus while waiting for frame for another field
-                        self.clearIcon() // TODO: can be made simpler when MR 2417 (BE-3195) is merged
-                    }
-                    buttonWindow.isMovableByWindowBackground = false
-                    let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, frameURL: frameInfo?.request.url?.absoluteString, scrollUpdater: self.scrollUpdater)
-                    self.passwordMenuPopover?.orderFront()
-                    let buttonView = WebFieldAutofillButton { [weak self] in
-                        if let self = self, self.passwordMenuPopover == nil, let autocompleteGroup = self.fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo) {
-                            self.checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
-                                self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
-                            }
-                        }
-                    }
-                    buttonWindow.setView(with: buttonView, at: self.convertRect(location, relativeTo: webView).origin, fromTopLeft: true)
-                    self.buttonPopover = buttonPopover
-                    self.fieldWithIcon = elementId
+        let fieldLocator = fieldLocator(forField: elementId, frameInfo: frameInfo)
+        guard let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true) else { return }
+        buttonWindow.isMovableByWindowBackground = false
+        let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, fieldLocator: fieldLocator) { rect in
+            CGPoint(x: rect.maxX - 24 - 16, y: rect.midY + 12)
+        }
+        self.passwordMenuPopover?.orderFront()
+        let buttonView = WebFieldAutofillButton { [weak self] in
+            if let self = self, self.passwordMenuPopover == nil, let autocompleteGroup = self.fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo) {
+                self.checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
+                    self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
                 }
             }
         }
+        buttonWindow.setView(with: buttonView, at: buttonPopover.currentOrigin, fromTopLeft: true)
+        self.buttonPopover = buttonPopover
+        self.fieldWithIcon = elementId
     }
 
     private func clearIcon() {
@@ -256,37 +258,24 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func showPasswordManagerMenu(for elementId: String, frameInfo: WKFrameInfo?, options: PasswordManagerMenuOptions) {
-        requestWebFieldFrame(elementId: elementId, frameInfo: frameInfo) { frame in
-            if let frame = frame {
-                DispatchQueue.main.async {
-                    guard self.currentlyFocusedElementId == elementId else {
-                        return
-                    }
-                    self.showPasswordManagerMenu(at: frame, frameInfo: frameInfo, options: options)
-                }
-            } else {
-                Logger.shared.logError("Could not get frame for element \(elementId)", category: .passwordManager)
-            }
-        }
-    }
-
-    private func showPasswordManagerMenu(at location: CGRect, frameInfo: WKFrameInfo?, options: PasswordManagerMenuOptions) {
-        guard let host = self.page?.url else { return }
+        guard self.currentlyFocusedElementId == elementId,
+              let page = self.page,
+              let host = page.url
+        else { return }
         if passwordMenuPopover != nil {
             dismissPasswordManagerMenu()
         }
         currentInputFrame = frameInfo
+        let fieldLocator = fieldLocator(forField: elementId, frameInfo: frameInfo)
         let viewModel = passwordManagerViewModel(for: host, options: options)
         let passwordManagerMenu = PasswordManagerMenu(viewModel: viewModel)
-        guard let page = page,
-              let webView = (page as? BrowserTab)?.webView,
-              let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true)
-        else { return }
-        var updatedRect = convertRect(location, relativeTo: webView)
-        updatedRect.origin.y += location.height
-        passwordWindow.setView(with: passwordManagerMenu, at: updatedRect.origin, fromTopLeft: true)
+        guard let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
+        let passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, fieldLocator: fieldLocator) { rect in
+            CGPoint(x: rect.minX, y: rect.minY)
+        }
+        passwordWindow.setView(with: passwordManagerMenu, at: passwordMenuPopover.currentOrigin, fromTopLeft: true)
         passwordWindow.delegate = viewModel.passwordGeneratorViewModel
-        passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, frameURL: frameInfo?.request.url?.absoluteString, scrollUpdater: scrollUpdater, topEdgeHeight: 24)
+        self.passwordMenuPopover = passwordMenuPopover
     }
 
     private func passwordManagerViewModel(for host: URL, options: PasswordManagerMenuOptions) -> PasswordManagerMenuViewModel {
@@ -314,12 +303,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private func clearInputFocus() {
         currentInputFrame = nil
         currentlyFocusedElementId = nil
-    }
-
-    private func convertRect(_ rect: CGRect, relativeTo webView: WKWebView) -> CGRect {
-        var rect = webView.convert(rect, to: nil)
-        rect.origin.y -= webView.topContentInset
-        return rect
+        currentFieldLocator = nil
     }
 
     func updateViewSize(width: CGFloat, height: CGFloat) {
@@ -332,25 +316,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                 self.clearInputFocus()
             }
             self.clearIcon()
-        }
-    }
-
-    private func requestWebFieldFrame(elementId: String, frameInfo: WKFrameInfo?, completion: @escaping (CGRect?) -> Void) {
-        let script = "passwordHelper.getElementRects('[\"\(elementId)\"]')"
-        self.page?.executeJS(script, objectName: JSObjectName, frameInfo: frameInfo).then { [weak self] jsResult in
-            guard let self = self, let jsonString = jsResult as? String, let jsonData = jsonString.data(using: .utf8), let rects = try? self.decoder.decode([DOMRect?].self, from: jsonData), let rect = rects.first??.rect else {
-                return completion(nil)
-            }
-            let offset: CGPoint
-            if let href = frameInfo?.request.url?.absoluteString, let webPositions = self.page?.webPositions {
-                offset = webPositions.viewportOffset(href: href)
-            } else {
-                offset = .zero
-            }
-            let scale = self.page?.webView.zoomLevel() ?? 1
-            Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .passwordManagerInternal)
-            let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y + rect.height) * scale, width: rect.width * scale, height: rect.height * scale)
-            completion(frame)
         }
     }
 
