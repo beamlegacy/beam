@@ -11,6 +11,10 @@ import XCTest
 class EmbedContentBuilderTests: XCTestCase {
 
     class MockStrategy: EmbedContentStrategy {
+        func embedMatchURL(for url: URL) -> URL? {
+            return url
+        }
+
         var canEmbed = true
         var returnContent: EmbedContent?
         private(set) var numberOfCallsToBuild = 0

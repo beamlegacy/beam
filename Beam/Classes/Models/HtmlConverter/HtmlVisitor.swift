@@ -34,6 +34,8 @@ class HtmlVisitor {
             PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id
     }
 
+    private var embedURLs: Set<URL> = []
+
     var delayedClosures: [DelayedClosure] = []
 
     init(_ urlBase: URL, _ downloadManager: DownloadManager?, _ fileStorage: BeamFileStorage?) {
@@ -73,10 +75,7 @@ class HtmlVisitor {
                     }
                     let url: String = getUrl(href)
                     child.text.addAttributes([.link(url)], to: child.text.wholeRange)
-                    if HtmlVisitor.allowConvertToEmbed {
-                        convertElementToEmbed(child) // if possible converts url to embed
-                    }
-                    return child
+                    return convertElementToEmbed(child)
                 })
 
                 text.append(contentsOf: children)
@@ -173,10 +172,7 @@ class HtmlVisitor {
                       let mdUrl = url.absoluteString.markdownizedURL else { break }
                 let iframeElement = BeamElement(mdUrl)
                 iframeElement.text.addAttributes([.link(mdUrl)], to: iframeElement.text.wholeRange)
-                if HtmlVisitor.allowConvertToEmbed {
-                    convertElementToEmbed(iframeElement) // if possible converts url to embed
-                }
-                text.append(iframeElement)
+                text.append(convertElementToEmbed(iframeElement))
 
             case "video":
                 guard let src = getVideoSrc(element),
@@ -184,10 +180,7 @@ class HtmlVisitor {
                       let mdUrl = url.absoluteString.markdownizedURL else { break }
                 let embedElement = BeamElement(mdUrl)
                 embedElement.text.addAttributes([.link(mdUrl)], to: embedElement.text.wholeRange)
-                if HtmlVisitor.allowConvertToEmbed {
-                    convertElementToEmbed(embedElement) // if possible converts url to embed
-                }
-                text.append(embedElement)
+                text.append(convertElementToEmbed(embedElement))
 
             case "br":
                 text.append(BeamElement(" "))
@@ -225,13 +218,32 @@ class HtmlVisitor {
     }
 
     /// Utility to convert BeamElement containing a single embedable url to embed kind
-    private func convertElementToEmbed(_ element: BeamElement) {
+    private func convertElementToEmbed(_ element: BeamElement) -> BeamElement {
         let links = element.text.links
-        if links.count == 1,
-           let link = links.first,
-           let url = URL(string: link),
-           EmbedContentBuilder().canBuildEmbed(for: url) {
-            element.kind = .embed(url, origin: SourceMetadata(origin: .remote(self.urlBase)), displayInfos: MediaDisplayInfos())
+        guard HtmlVisitor.allowConvertToEmbed,
+              links.count == 1,
+              let link = links.first,
+              let url = URL(string: link),
+              EmbedContentBuilder().canBuildEmbed(for: url),
+              // Use the Embed Provider matcher to cleanup the embed url
+              let embedUrl = EmbedContentBuilder().embedMatchURL(for: url) else {
+            return element
         }
+        // If the embed was already created earlier, return early
+        let embedWasPreviouslyAdded = embedURLs.contains(embedUrl)
+        guard !embedWasPreviouslyAdded else { return BeamElement() }
+        // Add cleaned up embed url to the set to avoid duplicated embed elements
+        embedURLs.insert(embedUrl)
+        // Convert to embed
+        element.kind = .embed(
+            embedUrl,
+            origin: SourceMetadata(origin: .remote(self.urlBase)),
+            displayInfos: MediaDisplayInfos()
+        )
+
+        // Embed elements should not have children
+        element.children.removeAll()
+
+        return element
     }
 }
