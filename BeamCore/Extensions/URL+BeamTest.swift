@@ -63,8 +63,8 @@ class URLBeamTest: XCTestCase {
     }
 
     func testDomain() {
-        XCTAssertEqual(URL(string: "https://www.wikipedia.org/wiki")?.domain, URL(string: "https://wikipedia.org/"))
-        XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://wikipedia.org/"))
+        XCTAssertEqual(URL(string: "https://www.wikipedia.org/wiki")?.domain, URL(string: "https://www.wikipedia.org/"))
+        XCTAssertEqual(URL(string: "https://www.wikipedia.org")?.domain, URL(string: "https://www.wikipedia.org/"))
         XCTAssertNil(URL(string: "www.wikipedia.org/wiki")?.domain)
     }
 
