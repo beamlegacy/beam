@@ -10,14 +10,17 @@ import Foundation
 enum PasswordPreferencesViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case detailsButton = "Details..."
+        case detailsButton = "Details…"
         case fillButton = "basicAdd"
         case removeButton = "basicRemove"
-        case importButton = "Import..."
-        case exportButton = "Export..."
+        case exportButton = "Export…"
         case cancelButton = "Cancel"
         case addPasswordButton = "Add Password"
         case doneButton = "Done"
+    }
+
+    enum Pickers: String, CaseIterable, UIElement {
+        case importPicker = "Import…" // not a button anymore
     }
 
     enum CheckboxTexts: String, CaseIterable, UIElement {
