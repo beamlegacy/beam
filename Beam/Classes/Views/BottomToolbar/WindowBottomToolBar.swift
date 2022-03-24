@@ -82,6 +82,20 @@ struct WindowBottomToolBar: View {
         .frame(height: barHeight)
         .frame(maxWidth: .infinity)
     }
+
+    fileprivate static let buttonStyle: ButtonLabelStyle = {
+        ButtonLabelStyle(
+            font: BeamFont.medium(size: 12).swiftUI,
+            spacing: 1,
+            foregroundColor: BeamColor.LightStoneGray.swiftUI,
+            activeForegroundColor: BeamColor.Niobium.swiftUI,
+            backgroundColor: Color.clear,
+            hoveredBackgroundColor: Color.clear,
+            activeBackgroundColor: BeamColor.Mercury.swiftUI,
+            leadingPaddingAdjustment: 4
+        )
+    }()
+
 }
 
 private struct BottomToolBarLeadingIconView: View {
@@ -99,7 +113,7 @@ private struct BottomToolBarLeadingIconView: View {
 
     private var helpButton: some View {
         GeometryReader { proxy in
-            ButtonLabel("Help", icon: "help-question", customStyle: buttonStyle) {
+            ButtonLabel("Help", icon: "help-question", customStyle: WindowBottomToolBar.buttonStyle) {
                 showHelpAndFeedbackMenuView(proxy: proxy)
             }
             .onReceive(state.$showHelpAndFeedback, perform: { showHelp in
@@ -118,19 +132,6 @@ private struct BottomToolBarLeadingIconView: View {
         default: return true
         }
     }
-
-    private let buttonStyle: ButtonLabelStyle = {
-        ButtonLabelStyle(
-            font: BeamFont.medium(size: 12).swiftUI,
-            spacing: 1,
-            foregroundColor: BeamColor.LightStoneGray.swiftUI,
-            activeForegroundColor: BeamColor.Niobium.swiftUI,
-            backgroundColor: BeamColor.Generic.background.swiftUI,
-            hoveredBackgroundColor: BeamColor.Generic.background.swiftUI,
-            activeBackgroundColor: BeamColor.Mercury.swiftUI,
-            leadingPaddingAdjustment: 4
-        )
-    }()
 
     private func showHelpAndFeedbackMenuView(proxy: GeometryProxy) {
         let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
@@ -154,25 +155,46 @@ private struct BottomToolBarLeadingIconView: View {
 }
 
 private struct BottomToolBarTrailingIconView: View {
+
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var noteMediaPlayerManager: NoteMediaPlayerManager
 
     var body: some View {
-        Group {
-            if noteMediaPlayerManager.playings.count > 0 {
-                NoteMediaPlayingButton(playerManager: noteMediaPlayerManager, onOpenNote: { notePlaying in
-                    state.navigateToNote(notePlaying.note, elementId: notePlaying.elementId)
-                }, onMuteNote: { notePlaying in
-                    if let n = notePlaying {
-                        noteMediaPlayerManager.toggleMuteNotePlaying(note: n.note)
-                    } else {
-                        noteMediaPlayerManager.toggleMuteAll()
-                    }
-                })
-                .padding(.trailing, BeamSpacing._50)
+        HStack(spacing: 12) {
+            if shouldShowMediaButton {
+                mediaButton
+                Separator(color: BeamColor.Mercury)
+                    .blendModeLightMultiplyDarkScreen()
+                    .frame(height: 16)
             }
+
+            newNoteButton
         }
     }
+
+    private var newNoteButton: some View {
+        ButtonLabel("New Note", icon: "tool-new", customStyle: WindowBottomToolBar.buttonStyle) {
+            state.startNewNote()
+        }
+        .accessibility(identifier: "NewNoteButton")
+    }
+
+    private var mediaButton: some View {
+        NoteMediaPlayingButton(playerManager: noteMediaPlayerManager, onOpenNote: { notePlaying in
+            state.navigateToNote(notePlaying.note, elementId: notePlaying.elementId)
+        }, onMuteNote: { notePlaying in
+            if let n = notePlaying {
+                noteMediaPlayerManager.toggleMuteNotePlaying(note: n.note)
+            } else {
+                noteMediaPlayerManager.toggleMuteAll()
+            }
+        })
+    }
+
+    private var shouldShowMediaButton: Bool {
+        !noteMediaPlayerManager.playings.isEmpty
+    }
+
 }
 
 struct WindowBottomToolBar_Previews: PreviewProvider {

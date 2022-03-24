@@ -651,6 +651,10 @@ import Sentry
         }
     }
 
+    func startNewNote() {
+        startFocusOmnibox(fromTab: false, autocompleteMode: .noteCreation)
+    }
+
     func resetDestinationCard() {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         destinationCardName = currentTab?.noteController.noteOrDefault.title ?? data.todaysName
