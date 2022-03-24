@@ -26,7 +26,7 @@ class PasswordPreferencesTests: BaseTest {
         step ("GIVEN I open password preferences"){
             launchApp()
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(menu: .passwords)
+            PreferencesBaseView().navigateTo(preferenceView: .passwords)
         }
     }
     
@@ -267,7 +267,7 @@ class PasswordPreferencesTests: BaseTest {
         
         step ("GIVEN I open password preferences"){
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(menu: .passwords)
+            PreferencesBaseView().navigateTo(preferenceView: .passwords)
             uiMenu.populatePasswordsDB()
         }
         
@@ -302,7 +302,7 @@ class PasswordPreferencesTests: BaseTest {
 
         step ("WHEN I deactivate Autofill password setting"){
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(menu: .passwords)
+            PreferencesBaseView().navigateTo(preferenceView: .passwords)
             passwordsWindow.clickAutofillPassword()
         }
         
