@@ -74,37 +74,19 @@ class PreferencesBaseView: BaseView {
         return app.dialogs.sheets.tables.buttons[element]
     }
     
-    enum PreferenceMenus {
-        case general
-        case browser
-        case notes
-        case privacy
-        case passwords
-        case account
-        case about
-        case advanced
+    enum PreferenceMenus: String {
+        case general = "General"
+        case browser = "Browser"
+        case notes = "Notes"
+        case privacy = "Privacy"
+        case passwords = "Passwords"
+        case account = "Account"
+        case about = "About"
+        case beta = "Beta"
+        case advanced = "Advanced"
     }
-    
-    @discardableResult
-    func navigateTo(menu: PreferenceMenus) -> PreferencesBaseView {
-        switch menu {
-        case .general:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.generalButton.accessibilityIdentifier].click()
-        case .browser:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.browserButton.accessibilityIdentifier].click()
-        case .notes:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.notesButton.accessibilityIdentifier].click()
-        case .privacy:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.privacyButton.accessibilityIdentifier].click()
-        case .passwords:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.passwordsButton.accessibilityIdentifier].click()
-        case .account:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.accountButton.accessibilityIdentifier].click()
-        case .about:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.aboutButton.accessibilityIdentifier].click()
-        case .advanced:
-            app.toolbars.buttons[PreferencesToolbarViewLocators.Buttons.advancedButton.accessibilityIdentifier].click()
-        }
-        return self
+        
+    func navigateTo(preferenceView: PreferenceMenus) {
+        self.app.toolbars.buttons.matching(identifier: preferenceView.rawValue).firstMatch.clickOnHittable()
     }
 }
