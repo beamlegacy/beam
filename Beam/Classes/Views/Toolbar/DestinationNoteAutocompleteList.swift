@@ -38,11 +38,6 @@ struct DestinationNoteAutocompleteList: View {
         return leadingPadding
     }
 
-    private var alwaysHighlightCompletingText: Bool {
-        if case .TextEditor = variation { return false }
-        return true
-    }
-
     var body: some View {
         Group {
             if allowScroll {
@@ -68,7 +63,6 @@ struct DestinationNoteAutocompleteList: View {
                         .padding(.vertical, BeamSpacing._80)
                 }
                 AutocompleteItemView(item: item, selected: model.isSelected(item), disabled: item.disabled, displayIcon: false,
-                                     alwaysHighlightCompletingText: alwaysHighlightCompletingText,
                                      allowsShortcut: item.source != .createNote || model.allowNewCardShortcut, colorPalette: colorPalette,
                                      height: itemHeight, fontSize: 13, additionalLeadingPadding: additionLeadingPadding)
                     .padding(.horizontal, BeamSpacing._80)

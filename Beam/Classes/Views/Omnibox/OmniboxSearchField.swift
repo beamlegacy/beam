@@ -59,7 +59,7 @@ struct OmniboxSearchField: View {
                     }
                 }
             }
-        } else if state.omniboxInfo.isFocusedFromTab,
+        } else if state.omniboxInfo.wasFocusedFromTab,
                   let tab = browserTabsManager.currentTab, textFieldText.wrappedValue == tab.url?.absoluteString,
                   let favicon = tab.favIcon {
             icon = favicon
@@ -203,7 +203,8 @@ struct OmniboxSearchField: View {
 
     private func onEscapePressed() {
         let query = autocompleteManager.searchQuery
-        if (query.isEmpty && autocompleteManager.mode == .general) || (state.mode == .web && query == state.browserTabsManager.currentTab?.url?.absoluteString) {
+        if (query.isEmpty && autocompleteManager.mode == state.omniboxInfo.wasFocusedDirectlyFromMode) ||
+            (state.mode == .web && query == state.browserTabsManager.currentTab?.url?.absoluteString) {
             unfocusField()
             if state.omniboxInfo.isShownInJournal {
                 autocompleteManager.clearAutocompleteResults()
@@ -215,7 +216,7 @@ struct OmniboxSearchField: View {
     }
 
     private func onBackspacePressed() {
-        if autocompleteManager.searchQuery.isEmpty && autocompleteManager.mode != .general {
+        if autocompleteManager.searchQuery.isEmpty && (autocompleteManager.mode != state.omniboxInfo.wasFocusedDirectlyFromMode) {
             autocompleteManager.mode = .general
             autocompleteManager.setQuery("", updateAutocompleteResults: true)
         }
