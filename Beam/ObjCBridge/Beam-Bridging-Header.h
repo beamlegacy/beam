@@ -13,6 +13,7 @@
 @interface WKPreferences ()
 -(void)_setFullScreenEnabled:(BOOL)fullScreenEnabled;
 -(void)_setAllowsPictureInPictureMediaPlayback:(BOOL)allowed;
+-(void)_setBackspaceKeyNavigationEnabled:(BOOL)enabled;
 @end
 
 @interface WKWebView ()
