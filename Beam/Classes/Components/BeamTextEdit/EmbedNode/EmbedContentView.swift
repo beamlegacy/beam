@@ -75,6 +75,8 @@ final class EmbedContentView: NSView {
         loadingView?.removeFromSuperview()
         webView.frame = bounds
         addSubview(webView)
+
+        delegate?.embedContentViewDidBecomeReady(self)
     }
 
     private func makeMaskLayer(rect: CGRect) -> CAShapeLayer {

@@ -8,6 +8,7 @@
 import Foundation
 
 enum ResponsiveType: String {
+    case none
     case horizontal
     case vertical
     case both
@@ -22,6 +23,7 @@ enum ResponsiveType: String {
 }
 
 struct EmbedContent: Equatable {
+
     /// oEmbed compliant media type
     enum MediaType: String {
         @available(*, deprecated, message: "Use link instead")
@@ -63,4 +65,7 @@ struct EmbedContent: Equatable {
     var maxHeight: CGFloat?
     var keepAspectRatio: Bool = true
     var responsive: ResponsiveType?
+
+    var hasHTMLContent: Bool { html != nil }
+
 }
