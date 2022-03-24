@@ -212,7 +212,7 @@ struct AutocompleteItemView: View {
     }
 
     private func debugString(score: Float?) -> String {
-        var debugString = "\(item.source)"
+        var debugString = "\(item.source.shortDescription)"
         if let score = score {
             debugString += " - Score: \(score)"
         }

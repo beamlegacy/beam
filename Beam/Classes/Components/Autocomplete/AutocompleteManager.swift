@@ -125,7 +125,8 @@ class AutocompleteManager: ObservableObject {
                 }
                 guard let self = self else { return }
                 self.rawAutocompleteResults = publishersResults.compactMap({ $0.results.isEmpty ? nil : $0 })
-                let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText)
+                let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText,
+                                                                           expectSearchEngineResultsLater: self.mode == .general && !searchText.isEmpty)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
 
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
