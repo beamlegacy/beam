@@ -40,33 +40,18 @@ class EmbedNode: ResizableNode {
     private var toggleButtonBeamLayer: CollapseButtonLayer!
     private var focusBeamLayer: Layer!
 
-    static let initialExpandedContentSize = CGSize(width: 170, height: 128)
     private let focusLayerBorderRadius: CGFloat = 3
-    private let expandedContentSizeUpdateDebounceDelay = 0.5
+    private let expandedContentSizeUpdateDebounceDelay = 1
     private let expandedContentAnimationKey = "expandedContent"
     private let collapseContentAnimationKey = "collapsedContent"
 
+    /// Whether the element was initially sized from its last known display size retrieved from cache.
+    private let didInitiallyUseCachedDisplaySize: Bool
+
     private var embedContent: EmbedContent? {
         didSet {
-            minWidth = embedContent?.minWidth ?? minWidth
-            minHeight = embedContent?.minHeight ?? minHeight
-            maxWidth = embedContent?.maxWidth ?? maxWidth
-            maxHeight = embedContent?.maxHeight ?? maxHeight
-            keepAspectRatio = embedContent?.keepAspectRatio ?? keepAspectRatio
-            responsiveStrategy = embedContent?.responsive ?? responsiveStrategy
-
-            let width = embedContent?.width ?? resizableElementContentSize.width
-            let height: CGFloat
-
-            if let embedHeight = embedContent?.height {
-                height = embedHeight
-            } else {
-                // If the embed doesn't have a default height, we compute it by applying the same initial aspect ratio
-                // from the loading state onto the width
-                height = width * Self.initialExpandedContentSize.aspectRatio
-            }
-
-            resizableElementContentSize = CGSize(width: width, height: height)
+            guard let embedContent = embedContent else { return }
+            contentGeometry.setGeometryDescription(.embed(embedContent))
         }
     }
 
@@ -103,18 +88,7 @@ class EmbedNode: ResizableNode {
     }
 
     private var expandedContentSize: CGSize {
-        if visibleSize != .zero {
-            return visibleSize
-
-        } else if let widthRatio = displayInfos?.displayRatio, let height = displayInfos?.height {
-            // Restore size previously set by user and stored in element
-            let width = Int(contentsWidth * widthRatio)
-            return CGSize(width: width, height: height)
-
-        } else {
-            // Embed is displayed for the first time
-            return Self.initialExpandedContentSize
-        }
+        contentGeometry.displaySize
     }
 
     private var collapsedContentOrigin: CGPoint {
@@ -160,7 +134,19 @@ class EmbedNode: ResizableNode {
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         isUserCollapsed = element.collapsed
 
-        super.init(parent: parent, element: element, availableWidth: availableWidth)
+        let displaySizeCache = ElementNodeDisplaySizeCache(elementID: element.id)
+        didInitiallyUseCachedDisplaySize = displaySizeCache.containsCachedDisplaySize
+
+        var contentGeometry = MediaContentGeometry(
+            sizePreferencesStorage: element,
+            sizePreferencesPersistenceStrategy: .displayHeight,
+            displaySizeCache: displaySizeCache
+        )
+
+        /// Lock the display size on the cache value, until the embed content is loaded and ready to be displayed.
+        contentGeometry.isLocked = true
+
+        super.init(parent: parent, element: element, availableWidth: availableWidth, contentGeometry: contentGeometry)
 
         addFocusLayer()
 
@@ -528,11 +514,8 @@ extension EmbedNode {
 
     /// Observes the size updates from the embed content's script message handler.
     ///
-    /// Size updates are debounced for the following reasons:
-    /// - While an embed is loading, multiple temporary size updates can be received in a short amount of time,
-    /// resulting in unnecessary resizes and UI stuttering.
-    /// - When an embed is first displayed, we want to give it its previously known size first, and protect it from the
-    /// temporary size updates happening during loading.
+    /// Size updates are debounced because while an embed is loading, multiple temporary size updates can be received
+    /// in a short amount of time, resulting in unnecessary resizes and UI stuttering.
     private func observeExpandedContentSizeUpdates() {
         expandedContentSizeSubject
             .debounce(for: .seconds(expandedContentSizeUpdateDebounceDelay), scheduler: RunLoop.main)
@@ -543,15 +526,8 @@ extension EmbedNode {
     }
 
     private func updateExpandedContentSize(_ size: CGSize) {
-        if embedContent?.height == nil {
-            setVisibleHeight(size.height)
-        }
-
-        if embedContent?.width == nil {
-            setVisibleWidth(size.width)
-        }
-
-        invalidateLayout()
+        contentGeometry.isLocked = false
+        contentGeometry.setDisplaySizeOverride(size)
     }
 
     private func saveElementTitleIfNeeded() {
@@ -577,13 +553,25 @@ extension EmbedNode {
 
 extension EmbedNode: EmbedContentViewDelegate {
 
+    func embedContentViewDidBecomeReady(_ embedContentView: EmbedContentView) {
+        if let embedContent = embedContent, !embedContent.hasHTMLContent {
+            // If the embed is not HTML based, we won't receive size updates from the script message handler. Therefore
+            // we can start computing display size immediately.
+            contentGeometry.isLocked = false
+        }
+    }
+
     func embedContentView(_ embedContentView: EmbedContentView, contentSizeDidChange size: CGSize) {
-        if isResizing {
-            // Apply the new size immediately if the node is being resized, or if we don't have any preferred height yet
-            updateExpandedContentSize(size)
-        } else {
-            // Wait until the embed content size stabilizes itself
+        if didInitiallyUseCachedDisplaySize, !isResizing {
+            // If the embed is not loaded from the first time, it was initially displayed from the its last known
+            // size retrived from cache. Therefore, to prevent unnecessary size updates and UI stuttering, we debounce
+            // the size updates received from the script message handler, since it's very likely the final one will
+            // actually be identical to the initial display size.
             expandedContentSizeSubject.send(size)
+        } else {
+            // If the embed is loaded for the first time, we apply immediately the size updates received from the
+            // script message handler.
+            updateExpandedContentSize(size)
         }
     }
 

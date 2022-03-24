@@ -156,6 +156,14 @@
 		3719854927C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3719854827C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift */; };
 		3719855027C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3719854F27C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift */; };
 		3719855227C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */; };
+		37520B0927EAA40000A1C20B /* MediaContentGeometryDescription.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520AFF27EAA40000A1C20B /* MediaContentGeometryDescription.swift */; };
+		37520B0A27EAA40000A1C20B /* SizeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B0527EAA40000A1C20B /* SizeCache.swift */; };
+		37520B0B27EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B0627EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift */; };
+		37520B0D27EAA40000A1C20B /* MediaContentGeometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B0827EAA40000A1C20B /* MediaContentGeometry.swift */; };
+		37520B0F27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B0E27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift */; };
+		37520B1E27EAA50800A1C20B /* BeamElement+DisplaySizePreferencesStorageTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B1D27EAA50800A1C20B /* BeamElement+DisplaySizePreferencesStorageTests.swift */; };
+		37520B2227EABF2300A1C20B /* MediaContentGeometryDescriptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B2027EABF2300A1C20B /* MediaContentGeometryDescriptionTests.swift */; };
+		37520B2327EABF2300A1C20B /* MediaContentGeometryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37520B2127EABF2300A1C20B /* MediaContentGeometryTests.swift */; };
 		375D83B6278D63260064C246 /* MouseHoveringLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83B0278D63260064C246 /* MouseHoveringLocation.swift */; };
 		375D83B8278D634C0064C246 /* LinkMouseOver.js in Resources */ = {isa = PBXBuildFile; fileRef = 375D83B7278D634C0064C246 /* LinkMouseOver.js */; };
 		375D83BB278D636D0064C246 /* LinkMouseOverMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 375D83B9278D636C0064C246 /* LinkMouseOverMessageHandler.swift */; };
@@ -1555,6 +1563,14 @@
 		3719854827C7337000CAEA5E /* HTTPURLResponse+RequestsHTTPDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPURLResponse+RequestsHTTPDownload.swift"; sourceTree = "<group>"; };
 		3719854F27C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HTTPURLResponse+RequestsHTTPDownloadTests.swift"; sourceTree = "<group>"; };
 		3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKNavigationResponse+ShouldPerformDownload.swift"; sourceTree = "<group>"; };
+		37520AFF27EAA40000A1C20B /* MediaContentGeometryDescription.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaContentGeometryDescription.swift; sourceTree = "<group>"; };
+		37520B0527EAA40000A1C20B /* SizeCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SizeCache.swift; sourceTree = "<group>"; };
+		37520B0627EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ElementNodeDisplaySizeCache.swift; sourceTree = "<group>"; };
+		37520B0827EAA40000A1C20B /* MediaContentGeometry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaContentGeometry.swift; sourceTree = "<group>"; };
+		37520B0E27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BeamElement+DisplaySizePreferencesStorage.swift"; sourceTree = "<group>"; };
+		37520B1D27EAA50800A1C20B /* BeamElement+DisplaySizePreferencesStorageTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BeamElement+DisplaySizePreferencesStorageTests.swift"; sourceTree = "<group>"; };
+		37520B2027EABF2300A1C20B /* MediaContentGeometryDescriptionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaContentGeometryDescriptionTests.swift; sourceTree = "<group>"; };
+		37520B2127EABF2300A1C20B /* MediaContentGeometryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaContentGeometryTests.swift; sourceTree = "<group>"; };
 		375D83B0278D63260064C246 /* MouseHoveringLocation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseHoveringLocation.swift; sourceTree = "<group>"; };
 		375D83B7278D634C0064C246 /* LinkMouseOver.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = LinkMouseOver.js; sourceTree = "<group>"; };
 		375D83B9278D636C0064C246 /* LinkMouseOverMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinkMouseOverMessageHandler.swift; sourceTree = "<group>"; };
@@ -3131,6 +3147,26 @@
 			path = PDFDocumentView;
 			sourceTree = "<group>";
 		};
+		37520B1F27EABF1C00A1C20B /* MediaContent */ = {
+			isa = PBXGroup;
+			children = (
+				37520B2127EABF2300A1C20B /* MediaContentGeometryTests.swift */,
+				37520B2027EABF2300A1C20B /* MediaContentGeometryDescriptionTests.swift */,
+			);
+			path = MediaContent;
+			sourceTree = "<group>";
+		};
+		375BF51727EC1074006A7545 /* MediaContent */ = {
+			isa = PBXGroup;
+			children = (
+				37520B0827EAA40000A1C20B /* MediaContentGeometry.swift */,
+				37520AFF27EAA40000A1C20B /* MediaContentGeometryDescription.swift */,
+				37520B0627EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift */,
+				37520B0527EAA40000A1C20B /* SizeCache.swift */,
+			);
+			path = MediaContent;
+			sourceTree = "<group>";
+		};
 		375D83C0278D6ACE0064C246 /* WebViewStatusBar */ = {
 			isa = PBXGroup;
 			children = (
@@ -3539,6 +3575,7 @@
 				8AD2631626F3A8C50074D673 /* TimeInterval+Beam.swift */,
 				378751F027AA9B5000DDDC9E /* NSUserInterfaceItemIdentifier+Beam.swift */,
 				8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */,
+				37520B0E27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -3621,6 +3658,7 @@
 				33AA4EDE270DF5D200B74868 /* ResizableNode.swift */,
 				33DE802B273A481F00B7FCAF /* CollapsableNode.swift */,
 				335CBA9027CF617A005FE658 /* MouseCursorManager.swift */,
+				375BF51727EC1074006A7545 /* MediaContent */,
 			);
 			path = BeamTextEdit;
 			sourceTree = "<group>";
@@ -4347,6 +4385,7 @@
 				A5316A182667B9110039ED9C /* Range+BeamTests.swift */,
 				A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */,
 				0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */,
+				37520B1D27EAA50800A1C20B /* BeamElement+DisplaySizePreferencesStorageTests.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -4525,6 +4564,7 @@
 				A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */,
 				37B85B4C27A2C629003871F9 /* Download */,
 				A5297F3027ABE905006B3E1F /* AutocompleteManagerSortingTests.swift */,
+				37520B1F27EABF1C00A1C20B /* MediaContent */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -4843,7 +4883,8 @@
 				3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */,
 				370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */,
 				CE304C3C27DB566D005AE274 /* String+base64url.swift */,
-				DAF063F027D122D1000406DE /* Date+DayTruncated.swift */,			);
+				DAF063F027D122D1000406DE /* Date+DayTruncated.swift */,
+			);
 			path = Extensions;
 			sourceTree = "<group>";
 		};
@@ -7215,6 +7256,7 @@
 				03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */,
 				96120D12260C91C600592546 /* TextFrame.swift in Sources */,
 				9634DD8F264AF7940065383E /* TextLineLayer.swift in Sources */,
+				37520B0A27EAA40000A1C20B /* SizeCache.swift in Sources */,
 				525F932726E239B600A5C7BD /* DatabaseManager+BeamObjectManagerDelegate.swift in Sources */,
 				A06EF0AB26984400007B3BB3 /* CreditCardsModalView.swift in Sources */,
 				4181733725811F6300317ED8 /* Mode.swift in Sources */,
@@ -7264,6 +7306,7 @@
 				CE304C3927DB54EC005AE274 /* GCSObjectManager.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				33353ED626F3675000063078 /* ShortcutKey.swift in Sources */,
+				37520B0927EAA40000A1C20B /* MediaContentGeometryDescription.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
 				52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */,
 				521EEDDD25937E9200BA2485 /* DocumentsWindow.swift in Sources */,
@@ -7304,6 +7347,7 @@
 				A5B268A426845549001797ED /* BeamTextAttributedStringBuilder.swift in Sources */,
 				52FC002325E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
 				370794C327D7A90B00D2768B /* Incrementor.swift in Sources */,
+				37520B0F27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift in Sources */,
 				DAA0A50A270CA8ED00F952E5 /* BrowsingTreeStore.swift in Sources */,
 				522BC3F526A872740018B51E /* BeamObjectManagerError.swift in Sources */,
 				5224CD822686043600D4179E /* BeamObjectRequest.swift in Sources */,
@@ -7500,6 +7544,7 @@
 				52B17AC3262446B200CB4728 /* AppDelegate+Database.swift in Sources */,
 				A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */,
 				418172AB25811A3A00317ED8 /* BeamTextFieldView.swift in Sources */,
+				37520B0B27EAA40000A1C20B /* ElementNodeDisplaySizeCache.swift in Sources */,
 				965A78292514F147009980D4 /* AppDelegate.swift in Sources */,
 				A54A45422768A72400B9AE1B /* ImportsManager.swift in Sources */,
 				37B85B7E27A2C81B003871F9 /* WebKitDownloadProxy.swift in Sources */,
@@ -7641,6 +7686,7 @@
 				37DB5A1427BB515700534760 /* CollapsedContentLayer.swift in Sources */,
 				A5BD34DE27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift in Sources */,
 				9661A58B266A70DA00CB56B3 /* NodeProvider.swift in Sources */,
+				37520B0D27EAA40000A1C20B /* MediaContentGeometry.swift in Sources */,
 				9661A589266A289200CB56B3 /* BlockReferenceNode.swift in Sources */,
 				A0A026772696614E00B94227 /* UserInformationsEditModalView.swift in Sources */,
 				41A969FF2581394300E6594B /* Configuration.swift in Sources */,
@@ -7857,6 +7903,7 @@
 				37B85B8D27A2C83B003871F9 /* DownloadItemTests.swift in Sources */,
 				032562D926051D55006513E4 /* RBClientTests.m in Sources */,
 				8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */,
+				37520B1E27EAA50800A1C20B /* BeamElement+DisplaySizePreferencesStorageTests.swift in Sources */,
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
 				A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */,
@@ -7940,6 +7987,7 @@
 				A5E9D38F27293A260064E255 /* FaviconProviderTests.swift in Sources */,
 				8AC2EFDD266F8A1400049005 /* PointAndShootShootingTest.swift in Sources */,
 				0D700435269764BD00C7B243 /* TopDomainDatabaseTests.swift in Sources */,
+				37520B2327EABF2300A1C20B /* MediaContentGeometryTests.swift in Sources */,
 				DA52E96E276B57BD008D4990 /* BrowserImportManagerTest.swift in Sources */,
 				8AD2632326F485190074D673 /* HtmlVisitorTests.swift in Sources */,
 				A5EA892826A9C08100AB5A16 /* CalendarPickerViewModelTests.swift in Sources */,
@@ -7949,6 +7997,7 @@
 				37B85B9127A2C83B003871F9 /* DownloadArtifactTests.swift in Sources */,
 				522AFB2825CBFAB100F60647 /* DocumentManagerTestsHelper.swift in Sources */,
 				969084CC25365AAE009D3C96 /* ParserTests.swift in Sources */,
+				37520B2227EABF2300A1C20B /* MediaContentGeometryDescriptionTests.swift in Sources */,
 				DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */,
 				A5EE8C5A27B8B67800800661 /* BeamNote+DocumentManagerTests.swift in Sources */,
 				52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */,
