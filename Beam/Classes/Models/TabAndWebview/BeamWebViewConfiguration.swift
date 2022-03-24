@@ -70,6 +70,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
         preferences._setAllowsPicture(inPictureMediaPlayback: true)
         preferences._setFullScreenEnabled(true)
+        preferences._setBackspaceKeyNavigationEnabled(false)
         #endif
     }
 
