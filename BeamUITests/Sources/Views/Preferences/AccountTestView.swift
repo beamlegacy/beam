@@ -7,9 +7,7 @@
 
 import Foundation
 import XCTest
-//import Fakery
 import BeamCore
-//import AutoUpdate
 
 class AccountTestView: PreferencesBaseView {
     
@@ -53,5 +51,9 @@ class AccountTestView: PreferencesBaseView {
         self.typeKeyboardKey(.escape)
         button(AccountViewLocators.Buttons.signinButton.accessibilityIdentifier).clickOnEnabled()
         return false
+    }
+    
+    func getConnectToBeamButtonElement() -> XCUIElement {
+        return button(AccountViewLocators.Buttons.connectBeamButton.accessibilityIdentifier)
     }
 }

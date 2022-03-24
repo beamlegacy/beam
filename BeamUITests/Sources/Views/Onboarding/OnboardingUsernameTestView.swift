@@ -23,7 +23,7 @@ class OnboardingUsernameTestView: BaseView {
     }
     
     func goToPreviousPage() -> OnboardingLandingTestView {
-        let backButton = image(OnboardingUsernameViewLocators.Buttons.goBackButton.accessibilityIdentifier)
+        let backButton = staticText(OnboardingUsernameViewLocators.Buttons.goBackButton.accessibilityIdentifier)
         backButton.hover()
         backButton.clickOnExistence()
         return OnboardingLandingTestView()
@@ -36,7 +36,7 @@ class OnboardingUsernameTestView: BaseView {
     }
     
     func isConnectButtonEnabled() -> Bool {
-        return button(OnboardingUsernameViewLocators.Buttons.connectButton.accessibilityIdentifier).isEnabled
+        return getConnectButtonElement().isEnabled
     }
     
     @discardableResult
@@ -46,6 +46,30 @@ class OnboardingUsernameTestView: BaseView {
     
     func isPasswordRequirementsLabelDisplayed() -> Bool {
         return staticText(OnboardingUsernameViewLocators.StaticTexts.passwordRequirementsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+    
+    func getConnectButtonElement() -> XCUIElement {
+        return button(OnboardingUsernameViewLocators.Buttons.connectButton.accessibilityIdentifier)
+    }
+    
+    func clickConnectButton() -> OnboardingImportDataTestView {
+        getConnectButtonElement().clickOnHittable()
+        return OnboardingImportDataTestView()
+    }
+    
+    func clickBackButton() -> OnboardingLandingTestView {
+        staticText(OnboardingUsernameViewLocators.Buttons.goBackButton.accessibilityIdentifier).clickOnExistence()
+        return OnboardingLandingTestView()
+    }
+    
+    @discardableResult
+    func populateCredentialFields(email: String, password: String) -> OnboardingUsernameTestView {
+        self.typeKeyboardKey(.escape) //required to get rid of apple keychain pop-up
+        self.getEmailTextField().clickAndType(email)
+        self.getPasswordTextField().tapInTheMiddle()
+        self.pasteText(textToPaste: email)
+        self.typeKeyboardKey(.escape) //required to get rid of apple keychain pop-up
+        return self
     }
     
 }
