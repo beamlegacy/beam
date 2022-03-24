@@ -73,7 +73,7 @@ struct AnyUrl: CsvRow {
     let parentId: UUID?
 
     static var columnNames: [String] {
-        ["noteName", "url", "groupId", "navigationGroupId", "tabColouringGroupId", "userCorrectionGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "pageId", "parentId"]
+        ["noteName", "url", "groupId", "navigationGroupId", "tabColouringGroupId", "userCorrectionGroupId", "title", "cleanedContent", "entities", "entitiesInTitle", "language", "isOpenAtExport", "id", "parentId"]
     }
 
     var columns: [String] {
