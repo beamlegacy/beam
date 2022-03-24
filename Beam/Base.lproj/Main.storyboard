@@ -396,6 +396,12 @@
                                                 <action selector="reOpenClosedTab:" target="Ady-hI-5gd" id="f8F-r4-bRg"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="New Note..." keyEquivalent="n" id="S9U-W9-dgb" userLabel="New Note...">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="newNote:" target="Ady-hI-5gd" id="X01-xF-Kli"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="New Search..." tag="-15" keyEquivalent="F" id="7bQ-0P-W15" userLabel="New Search...">
                                             <connections>
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="AAg-12-xc0"/>
@@ -1384,13 +1390,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="683"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="681"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="681"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="679"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="681"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="679"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1552,7 +1558,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="666" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="664" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">
@@ -1578,11 +1584,11 @@
         </scene>
     </scenes>
     <resources>
-        <image name="bookmark" catalog="system" width="13" height="16"/>
+        <image name="bookmark" catalog="system" width="14" height="16"/>
         <image name="livephoto" catalog="system" width="17" height="17"/>
-        <image name="sidebar.leading" catalog="system" width="19" height="14"/>
-        <image name="square.and.arrow.down" catalog="system" width="16" height="16"/>
-        <image name="square.and.arrow.up" catalog="system" width="16" height="17"/>
+        <image name="sidebar.leading" catalog="system" width="18" height="14"/>
+        <image name="square.and.arrow.down" catalog="system" width="15" height="16"/>
+        <image name="square.and.arrow.up" catalog="system" width="15" height="17"/>
         <image name="trash" catalog="system" width="15" height="17"/>
     </resources>
 </document>
