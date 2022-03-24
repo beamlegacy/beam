@@ -47,6 +47,10 @@ extension BeamWindow {
         state.startNewSearch()
     }
 
+    @IBAction func newNote(_ sender: Any?) {
+        state.startNewNote()
+    }
+
     @IBAction func createEmptyTabWithCurrentNote(_ sender: Any?) {
         state.startNewSearchWithCurrentDestinationCard()
     }
