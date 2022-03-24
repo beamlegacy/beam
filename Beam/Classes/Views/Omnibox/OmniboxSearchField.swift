@@ -210,7 +210,9 @@ struct OmniboxSearchField: View {
                 autocompleteManager.clearAutocompleteResults()
             }
         } else {
-            autocompleteManager.mode = .general
+            if query.isEmpty {
+                autocompleteManager.mode = .general
+            }
             autocompleteManager.setQuery("", updateAutocompleteResults: true)
         }
     }
