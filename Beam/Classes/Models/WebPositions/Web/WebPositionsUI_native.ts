@@ -43,7 +43,7 @@ export class WebPositionsUI_native implements WebPositionsUI {
   }
 
   setResizeInfo(resizeInfo): void {
-    // Nothing to do here
+      this.native.sendMessage("resize", resizeInfo)
   }
 
   setOnLoadInfo(framesInfo: FrameInfo[]): void {
