@@ -81,6 +81,15 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
+    public var isEmbed: Bool {
+        switch self {
+        case .embed:
+            return true
+        default:
+            return false
+        }
+    }
+
     enum CodingKeys: String, CodingKey {
         case type
         case level
