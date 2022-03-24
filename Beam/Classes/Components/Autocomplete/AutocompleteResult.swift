@@ -79,6 +79,15 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return 5
             }
         }
+
+        var shortDescription: String {
+            switch self {
+            case .note:
+                return "note"
+            default:
+                return String(describing: self)
+            }
+        }
     }
 
     var id: String {
@@ -153,7 +162,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         var takeOverCandidate = false
     }
 
-    private static func simpleBoosterScore(prefix: String?, base: String?, isURL: Bool) -> BoosterResult {
+    private static func simpleBoosterScore(prefix: String?, base: String?, isURL: Bool, isNote: Bool) -> BoosterResult {
         guard let lcbase = base?.lowercased(),
               !lcbase.isEmpty,
               let comp = prefix?.lowercased()
@@ -161,7 +170,14 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             return BoosterResult(base: base, score: 0.0, boostedScore: 0.0)
         }
 
-        let booster: Float = isURL ? 0.2 : 0.1
+        let booster: Float
+        if isNote {
+            booster = 0.25 // notes will not have information booster, so they need a slightly better boost.
+        } else if isURL {
+            booster = 0.2
+        } else {
+            booster = 0.1
+        }
         let hsr = lcbase.commonPrefix(with: comp)
         let score = Float(hsr.count) / Float(comp.count)
         return BoosterResult(base: base, score: score, boostedScore: booster * score, takeOverCandidate: score >= 1.0)
@@ -170,16 +186,18 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private static func boosterScore(prefix: String?, base: String?, isURL: Bool, source: Source) -> BoosterResult {
         var canMatchInside = !isURL
         var canReplaceBase = true
+        var isNote = false
         switch source {
         case .note, .createNote:
             canMatchInside = false
+            isNote = true
         case .searchEngine, .action:
             canReplaceBase = false
         default:
             break
         }
 
-        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base, isURL: isURL) }
+        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base, isURL: isURL, isNote: isNote) }
 
         guard let base = base,
               !base.isEmpty,
