@@ -95,17 +95,15 @@ struct ModeView: View {
 
         CustomPopoverPresenter.shared.dismissPopovers()
         guard !transitionModel.isTransitioning else { return }
-        if state.omniboxInfo.isShownInJournal &&
-            state.autocompleteManager.searchQuery.isEmpty {
-            if state.omniboxInfo.isShownInJournal, scrollOffset >= omniboxEndFadeOffset {
+        if state.omniboxInfo.isShownInJournal && (!state.omniboxInfo.isFocused || state.omniboxInfo.wasFocusedFromJournalTop) {
+            if scrollOffset >= omniboxEndFadeOffset {
                 state.stopFocusOmnibox()
                 state.stopShowingOmniboxInJournal()
+                state.autocompleteManager.resetQuery()
+                state.autocompleteManager.clearAutocompleteResults()
             }
         } else if scrollOffset < omniboxEndFadeOffset {
             state.startShowingOmniboxInJournal()
-        } else if scrollOffset > omniboxEndFadeOffset {
-            state.autocompleteManager.resetQuery()
-            state.autocompleteManager.clearAutocompleteResults()
         }
     }
 

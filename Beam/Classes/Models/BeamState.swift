@@ -435,7 +435,7 @@ import Sentry
                 break
             }
 
-            if mode == .web && currentTab != nil && omniboxInfo.isFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
@@ -456,7 +456,7 @@ import Sentry
                 _ = try? GRDBDatabase.shared.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateIdFor(url: url.absoluteString, title: nil))
             }
 
-            if  mode == .web && currentTab != nil && omniboxInfo.isFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
+            if  mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
@@ -494,7 +494,7 @@ import Sentry
 
         // Logger.shared.logDebug("Start query: \(url)")
 
-        if mode == .web && currentTab != nil && omniboxInfo.isFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
+        if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURL: url)
         } else {
             _ = createTab(withURL: url, originalQuery: queryString, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
@@ -586,8 +586,9 @@ import Sentry
     struct OmniboxLayoutInformation {
         fileprivate(set) var isFocused: Bool = true
         fileprivate(set) var isShownInJournal = true
-        fileprivate(set) var wasShownFromJournalTop = false
-        var isFocusedFromTab = false
+        fileprivate(set) var wasFocusedFromJournalTop = true
+        var wasFocusedFromTab = false
+        fileprivate(set)var wasFocusedDirectlyFromMode = AutocompleteManager.Mode.general
     }
 
     func startShowingOmniboxInJournal() {
@@ -602,13 +603,14 @@ import Sentry
 
     func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true, autocompleteMode: AutocompleteManager.Mode = .general) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        omniboxInfo.isFocusedFromTab = fromTab && mode == .web
-        omniboxInfo.wasShownFromJournalTop = mode == .today && omniboxInfo.isShownInJournal
-        autocompleteManager.mode = autocompleteMode
+        omniboxInfo.wasFocusedFromTab = fromTab && mode == .web
+        omniboxInfo.wasFocusedFromJournalTop = mode == .today && omniboxInfo.isShownInJournal
         guard updateResults else {
             omniboxInfo.isFocused = true
             return
         }
+        autocompleteManager.mode = autocompleteMode
+        omniboxInfo.wasFocusedDirectlyFromMode = autocompleteMode
         var selectedRange: Range<Int>?
         if mode == .web {
             if fromTab, let url = browserTabsManager.currentTab?.url?.absoluteString {
@@ -641,6 +643,9 @@ import Sentry
             // disabling shake from users feedback - https://linear.app/beamapp/issue/BE-2546/cmd-t-on-already-summoned-omnibox-makes-it-bounce
             // autocompleteManager.shakeOmniBox()
             stopFocusOmnibox()
+            if omniboxInfo.isShownInJournal {
+                autocompleteManager.clearAutocompleteResults()
+            }
         } else {
             startFocusOmnibox(fromTab: false)
         }
