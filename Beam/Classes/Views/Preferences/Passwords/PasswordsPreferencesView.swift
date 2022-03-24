@@ -55,6 +55,9 @@ struct Passwords: View {
 
     @State private var autofillUsernamePasswords = PreferencesManager.autofillUsernamePasswords
 
+    @State private var availableImportSources: [OnboardingImportsView.ImportSource] = [.passwordsCSV]
+    @State private var importPasswordsChoice = -1
+
     var body: some View {
         HStack {
             Spacer()
@@ -119,7 +122,7 @@ struct Passwords: View {
                     Button {
                         showingEditPasswordSheet = true
                     } label: {
-                        Text("Details...")
+                        Text("Details…")
                     }.buttonStyle(BorderedButtonStyle())
                         .sheet(isPresented: $showingEditPasswordSheet) {
                             if let entry = passwordsViewModel.selectedEntries.first,
@@ -130,16 +133,26 @@ struct Passwords: View {
                         .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
                     Spacer()
                     HStack {
-                        Button {
-                            importPasswordAction()
-                        } label: {
-                            Text("Import...")
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
+                        Picker("", selection: $importPasswordsChoice) {
+                            Text("Import…").tag(-1)
+                            ForEach(Array(availableImportSources.enumerated()), id: \.self.0) { (idx, src) in
+                                Text(src.rawValue).tag(idx)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .frame(width: 96)
+                        .onChange(of: importPasswordsChoice) { index in
+                            if index >= 0 {
+                                let importSource = availableImportSources[index]
+                                importPasswordsChoice = -1
+                                importPasswordsAction(source: importSource)
+                            }
+                        }
                         Button {
                             exportPasswordAction()
                         } label: {
-                            Text("Export...")
+                            Text("Export…")
                                 .font(BeamFont.regular(size: 13).swiftUI)
                         }.buttonStyle(BorderedButtonStyle())
                     }
@@ -147,6 +160,15 @@ struct Passwords: View {
             }.frame(width: 682, alignment: .center)
             Spacer()
         }
+        .onAppear {
+            updateAvailableSources()
+        }
+    }
+
+    private func updateAvailableSources() {
+        availableImportSources = OnboardingImportsView.ImportSource.allCases
+            .filter { $0 == .passwordsCSV || $0.supportsAutomaticPasswordImport }
+            .filter { $0.isAvailable }
     }
 
     private func promptDeletePasswordsAlert() {
@@ -172,25 +194,30 @@ struct Passwords: View {
         }
     }
 
-    private func importPasswordAction(completion: (() -> Void)? = nil) {
+    private func importPasswordsAction(source: OnboardingImportsView.ImportSource) {
+        let importsManager = AppDelegate.main.data.importsManager
+        if source.supportsAutomaticPasswordImport, let passwordImporter = source.passwordImporter {
+            importsManager.startBrowserPasswordImport(from: passwordImporter)
+        } else {
+            chooseCSVFile { url in
+                guard let url = url else { return }
+                importsManager.startBrowserPasswordImport(from: url)
+            }
+        }
+    }
+
+    private func chooseCSVFile(completion: @escaping (URL?) -> Void) {
         let openPanel = NSOpenPanel()
         openPanel.canChooseFiles = true
         openPanel.canChooseDirectories = false
         openPanel.canDownloadUbiquitousContents = false
         openPanel.allowsMultipleSelection = false
         openPanel.allowedFileTypes = ["csv", "txt"]
-        openPanel.title = "Select a csv file exported from Chrome, Firefox or Safari"
+        openPanel.message = "Select a csv file exported from Beam, Chrome, Firefox or Safari"
         openPanel.begin { result in
-            guard result == .OK, let url = openPanel.url else {
-                openPanel.close()
-                return
-            }
-            do {
-                try PasswordImporter.importPasswords(fromCSV: url)
-                completion?()
-            } catch {
-                Logger.shared.logError(String(describing: error), category: .general)
-            }
+            let url = result == .OK ? openPanel.url : nil
+            openPanel.close()
+            completion(url)
         }
     }
 
