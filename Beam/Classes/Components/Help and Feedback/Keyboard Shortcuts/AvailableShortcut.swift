@@ -16,6 +16,7 @@ extension Shortcut {
         case goForward
         case goForwardEditor
         case newSearch
+        case newNote
         case showAllNotes
         case showJournal
         case toggleNoteWeb
@@ -35,6 +36,8 @@ extension Shortcut.AvailableShortcut {
             return Shortcut(modifiers: [.command], keys: [.bracketReversed])
         case .newSearch:
             return Shortcut(modifiers: [.command], keys: [.string("T")])
+        case .newNote:
+            return Shortcut(modifiers: [.option, .command], keys: [.string("N")])
         case .showAllNotes:
             return Shortcut(modifiers: [.shift, .command], keys: [.string("H")])
         case .showJournal:
@@ -52,6 +55,8 @@ extension Shortcut.AvailableShortcut {
             return loc("Forward")
         case .newSearch:
             return loc("Search")
+        case .newNote:
+            return loc("New Note")
         case .showAllNotes:
             return loc("All Notes")
         case .showJournal:
