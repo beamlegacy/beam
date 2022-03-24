@@ -48,7 +48,7 @@ class ResizableNode: ElementNode {
 
         super.init(parent: parent, element: element, availableWidth: availableWidth)
 
-        self.contentGeometry.setContainerWidth(contentsWidth)
+        self.contentGeometry.setContainerWidth(availableWidth)
     }
 
     /// The reference area to position the resizing handles around.
