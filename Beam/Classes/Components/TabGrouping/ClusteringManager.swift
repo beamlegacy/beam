@@ -497,7 +497,7 @@ class ClusteringManager: ObservableObject {
             let notesInGroup = self.clusteredNotesId[group.offset]
             for noteId in notesInGroup {
                 let informationForId = self.cluster.getExportInformationForId(id: noteId)
-                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: nil, parentId: nil))
+                sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: noteId, parentId: nil))
             }
             self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
             for urlId in group.element {
