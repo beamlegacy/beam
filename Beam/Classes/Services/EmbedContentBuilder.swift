@@ -51,6 +51,15 @@ struct EmbedContentBuilder {
         return false
     }
 
+    func embedMatchURL(for url: URL) -> URL? {
+        for strategy in strategies {
+            if let url = strategy.embedMatchURL(for: url) {
+                return url
+            }
+        }
+        return nil
+    }
+
     func embeddableContent(for url: URL) -> EmbedContent? {
         var result = cachedEmbed(for: url)
         if result == nil, let strategy = syncStrategy {

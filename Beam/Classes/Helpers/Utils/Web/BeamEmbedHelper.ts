@@ -20,9 +20,10 @@ export class BeamEmbedHelper {
    * @memberof BeamElementHelper
    */
    isEmbeddableElement(element: BeamElement): boolean {
+     const isInsideIframe = this.isInsideIframe();
      // Check if current window location is matching embed url and is inside an iframe context
-     if (this.urlMatchesEmbedProvider([this.win.location.href])) {
-       return this.isInsideIframe()
+     if (this.urlMatchesEmbedProvider([this.win.location.href]), isInsideIframe) {
+       return isInsideIframe
      }
      
     // check the element if it's embeddable
