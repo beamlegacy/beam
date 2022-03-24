@@ -62,9 +62,9 @@ class BeamWebNavigationController: BaseWebNavigationController, WebPageRelated, 
         // handle the case where a redirection happened and we never get a title for the original url:
         if let requestedUrl = page.requestedURL, requestedUrl != url {
             Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedUrl) - \(String(describing: webView.title))")
-            // Should be improved with https://linear.app/beamapp/issue/BE-3437/increase-alias-domain-frecency-instead-of-resolved-url-domain-frecency
-            let urlToIndex = (requestedUrl.isDomain ? requestedUrl.domain ?? requestedUrl : requestedUrl).absoluteString
-            let link = GRDBDatabase.shared.visit(url: urlToIndex, title: webView.title, content: nil, destination: url.absoluteString)
+            let urlToIndex = requestedUrl.absoluteString
+            let destinationUrl = requestedUrl.isDomain ? url.domain ?? url : url //helps in notion case, when domain alias redirects to a sub page and we want domain alias frecency to be the same as domain frecency
+            let link = LinkStore.shared.visit(urlToIndex, title: webView.title, content: nil, destination: destinationUrl.absoluteString)
             ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()).update(id: link.id, value: 1.0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
         }
 
