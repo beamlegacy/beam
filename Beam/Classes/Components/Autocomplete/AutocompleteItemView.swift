@@ -17,7 +17,6 @@ struct AutocompleteItemView: View {
     var disabled: Bool = false
     var displayIcon: Bool = true
     var displaySubtitle: Bool = true
-    var alwaysHighlightCompletingText: Bool = false
     var allowsShortcut: Bool = true
 
     var colorPalette: AutocompleteItemColorPalette = Self.defaultColorPalette
@@ -82,13 +81,7 @@ struct AutocompleteItemView: View {
             else {
                 return []
             }
-            if alwaysHighlightCompletingText || [.searchEngine, .history, .url, .topDomain, .mnemonic, .action].contains(item.source) {
-                return text.ranges(of: completingText, options: .caseInsensitive)
-            }
-            if let firstRange = text.range(of: completingText, options: .caseInsensitive), firstRange.lowerBound == text.startIndex {
-                return [firstRange.upperBound..<text.endIndex]
-            }
-            return []
+            return text.ranges(of: completingText, options: .caseInsensitive)
         }
     }
 
