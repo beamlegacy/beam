@@ -213,6 +213,9 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                           let webView = (page as? BrowserTab)?.webView,
                           let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true)
                     else { return }
+                    if self.fieldWithIcon != nil { // field gained focus while waiting for frame for another field
+                        self.clearIcon() // TODO: can be made simpler when MR 2417 (BE-3195) is merged
+                    }
                     buttonWindow.isMovableByWindowBackground = false
                     let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, frameURL: frameInfo?.request.url?.absoluteString, scrollUpdater: self.scrollUpdater)
                     self.passwordMenuPopover?.orderFront()
