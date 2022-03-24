@@ -3,6 +3,7 @@ import Combine
 
 protocol WebPositionsDelegate: AnyObject {
     func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo)
+    func webPositionsDidUpdateSize(with frame: WebPositions.FrameInfo)
 }
 /**
  Computes blocks positions on the native web view
@@ -184,6 +185,19 @@ class WebPositions: ObservableObject {
         frame.scrollY = scrollY
         framesInfo[href] = frame
         delegate?.webPositionsDidUpdateScroll(with: frame)
+    }
+
+    /// Sets size on an already registered frame
+    /// - Parameters:
+    ///   - href: url of frame to update
+    ///   - width
+    ///   - height
+    func setFrameInfoResize(href: HREF, width: CGFloat, height: CGFloat) {
+        guard var frame = framesInfo[href] else { return }
+        frame.width = width
+        frame.height = height
+        framesInfo[href] = frame
+        delegate?.webPositionsDidUpdateSize(with: frame)
     }
 
     /// Utility to remove items from framesInfo
