@@ -91,7 +91,7 @@ public extension URL {
         else {
             return nil
         }
-        return URL(string: "\(scheme)://\(removeWWWPrefix(in: host))/")
+        return URL(string: "\(scheme)://\(host)/")
     }
 
     /// Returns a string containing only the scheme and host.
