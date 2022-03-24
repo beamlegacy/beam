@@ -55,13 +55,14 @@ class ImageNode: ResizableNode {
 
     init(parent: Widget, element: BeamElement, availableWidth: CGFloat) {
         self.isCollapsed = element.isProxy || element.collapsed
-        super.init(parent: parent, element: element, availableWidth: availableWidth)
-        setupImage(width: availableWidth)
-    }
 
-    init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
-        self.isCollapsed = element.isProxy || element.collapsed
-        super.init(editor: editor, element: element, availableWidth: availableWidth)
+        let contentGeometry = MediaContentGeometry(
+            sizePreferencesStorage: element,
+            sizePreferencesPersistenceStrategy: .contentSize
+        )
+
+        super.init(parent: parent, element: element, availableWidth: availableWidth, contentGeometry: contentGeometry)
+
         setupImage(width: availableWidth)
     }
 
@@ -72,15 +73,8 @@ class ImageNode: ResizableNode {
     private func setupImage(width: CGFloat) {
         var uid = UUID.null
         switch element.kind {
-        case .image(let id, _, let displayInfos):
+        case .image(let id, _, _):
             uid = id
-            desiredWidthRatio = displayInfos.displayRatio
-            if let width = displayInfos.width {
-                maxWidth = CGFloat(width)
-            }
-            if let height = displayInfos.height {
-                maxHeight = CGFloat(height)
-            }
         default:
             Logger.shared.logError("ImageNode can only handle image elements, not \(element.kind)", category: .noteEditor)
             return
@@ -89,8 +83,6 @@ class ImageNode: ResizableNode {
             Logger.shared.logError("ImageNode unable to fetch image '\(uid)' from FileDB", category: .noteEditor)
             return
         }
-
-        responsiveStrategy = .horizontal
 
         imageName = imageRecord.name
         imageSourceURL = URL(string: self.element.text.text)
@@ -125,32 +117,36 @@ class ImageNode: ResizableNode {
     }
 
     private func setupImageLayer(using imageRecord: BeamFileRecord, uid: UUID, width: CGFloat) {
-        var imageLayer: Layer
+        let imageLayer: Layer
+
         if let animatedImageLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
             animatedImageLayer.layer.position = .zero
             imageLayer = animatedImageLayer
-            resizableElementContentSize = animatedImageLayer.bounds.size
+            contentGeometry.setGeometryDescription(.image(sized: animatedImageLayer.bounds.size))
         } else {
             guard let image = createImage(from: imageRecord) else {
                 Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
                 return
             }
 
+            let imageSize: CGSize
+
             let imgRect = NSRect(x: 0, y: 0, width: width, height: 0)
             if let imageRep = image.bestRepresentation(for: imgRect, context: nil, hints: nil) {
-                resizableElementContentSize = CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh)
+                imageSize = CGSize(width: imageRep.pixelsWide, height: imageRep.pixelsHigh)
             } else {
-                resizableElementContentSize = image.size
+                imageSize = image.size
             }
 
-            guard resizableElementContentSize.width > 0, resizableElementContentSize.width.isFinite,
-                  resizableElementContentSize.height > 0, resizableElementContentSize.height.isFinite else {
-                Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(resizableElementContentSize)", category: .noteEditor)
-                return
-            }
+            guard imageSize.width > 0, imageSize.width.isFinite,
+                  imageSize.height > 0, imageSize.height.isFinite else {
+                      Logger.shared.logError("Loaded Image '\(uid)' has invalid size \(imageSize)", category: .noteEditor)
+                      return
+                  }
 
-            let height = (width / resizableElementContentSize.width) * resizableElementContentSize.height
-            imageLayer = Layer.image(named: "image", image: image, size: CGSize(width: width, height: height))
+            contentGeometry.setGeometryDescription(.image(sized: imageSize))
+
+            imageLayer = Layer.image(named: "image", image: image, size: contentGeometry.displaySize)
         }
 
         imageLayer.mouseDown = { [weak self] mouseInfo -> Bool in

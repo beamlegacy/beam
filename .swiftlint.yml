@@ -32,6 +32,9 @@ identifier_name:
   allowed_symbols: [_]
   validates_start_with_lowercase: false
 
+large_tuple:
+  warning: 3
+
 # paths to ignore during linting. Takes precedence over `included`.
 excluded:
   - Pods

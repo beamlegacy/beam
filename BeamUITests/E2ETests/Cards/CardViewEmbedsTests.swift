@@ -158,7 +158,7 @@ class CardViewEmbedsTests: BaseTest {
         }
 
         step("When I delete the embed node"){
-            embedNode.coordinate(withNormalizedOffset: .init(dx: 1, dy: 0.5)).tap()
+            embedNode.coordinate(withNormalizedOffset: .init(dx: 1.05, dy: 0.5)).tap()
             cardView!.typeKeyboardKey(.delete, 1)
         }
        
