@@ -14,6 +14,17 @@ enum DOMInputElementType: String, Codable {
     case password
 }
 
+enum DOMInputMode: String, Codable {
+    case none
+    case text
+    case decimal
+    case numeric
+    case tel
+    case search
+    case email
+    case url
+}
+
 struct DOMInputElement: Codable, Equatable, Hashable {
     var type: DOMInputElementType?
     var beamId: String
@@ -23,6 +34,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
     var name: String?
     var required: String?
     var value: String?
+    var inputmode: DOMInputMode?
 
     private enum CodingKeys: String, CodingKey {
         case type
@@ -33,6 +45,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
         case name
         case required
         case value
+        case inputmode
     }
 }
 
