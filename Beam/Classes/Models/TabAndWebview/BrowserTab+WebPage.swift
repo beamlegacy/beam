@@ -230,6 +230,6 @@ extension BrowserTab: WebPage {
 
     // MARK: Mouse Interactions
     func allowsMouseMoved(with event: NSEvent) -> Bool {
-        state?.omniboxInfo.isFocused == false || (state?.omniboxInfo.isFocusedFromTab == true && state?.autocompleteManager.autocompleteResults.isEmpty == true)
+        state?.omniboxInfo.isFocused == false || (state?.omniboxInfo.wasFocusedFromTab == true && state?.autocompleteManager.autocompleteResults.isEmpty == true)
     }
 }

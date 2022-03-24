@@ -138,7 +138,7 @@ class AutocompleteManager: ObservableObject {
 
     private func shouldDisplayDefaultSuggestions(for searchText: String) -> Bool {
         searchText.isEmpty ||
-        (beamState?.omniboxInfo.isFocusedFromTab == true && searchText == beamState?.browserTabsManager.currentTab?.url?.absoluteString)
+        (beamState?.omniboxInfo.wasFocusedFromTab == true && searchText == beamState?.browserTabsManager.currentTab?.url?.absoluteString)
     }
 
     private func logAutocompleteResultFinished(for searchText: String, finalResults: [AutocompleteResult], startedAt: DispatchTime) {
@@ -237,7 +237,11 @@ class AutocompleteManager: ObservableObject {
             setQuery(previousResult.completingText ?? "", updateAutocompleteResults: false)
         }
         searchQuerySelectedRange = nil
-        autocompleteSelectedIndex = nil
+        autocompleteSelectedIndex = canHaveNoSelection ? nil : 0
+    }
+
+    private var canHaveNoSelection: Bool {
+        mode != .noteCreation
     }
 
     private func stopCurrentCompletionWork() {
