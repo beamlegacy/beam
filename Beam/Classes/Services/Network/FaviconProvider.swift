@@ -28,11 +28,7 @@ class FaviconProvider {
     }()
 
     init() {
-        if let recoveredCache = try? Cache<String, Favicon>.recoverFromDisk(withName: Self.cacheFileName) {
-            cache = recoveredCache
-        } else {
-            cache = Cache<String, Favicon>(countLimit: 200)
-        }
+        cache = Cache.diskCache(filename: Self.cacheFileName, countLimit: 200)
     }
 
     private var screenScale: CGFloat {
