@@ -45,7 +45,7 @@ class LoginTest: BaseTest {
 
         step ("AND it is saved in password preferences"){
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(menu: .passwords)
+            PreferencesBaseView().navigateTo(preferenceView: .passwords)
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testUrl))
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(email))
             XCTAssertEqual(passwordsWindow.getNumberOfEntries(),1)
@@ -66,7 +66,7 @@ class LoginTest: BaseTest {
 
         step ("AND it is not saved in password preferences"){
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
-            PreferencesBaseView().navigateTo(menu: .passwords)
+            PreferencesBaseView().navigateTo(preferenceView: .passwords)
             XCTAssertFalse(passwordsWindow.isPasswordDisplayed())
         }
     }

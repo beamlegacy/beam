@@ -47,6 +47,7 @@
         "SignInSucessfullyTests",
         "SignInTests",
         "SignUpAutocompleteTests",
+        "SigninTests",
         "SlashMenuTests",
         "TextEditorContextViewTests",
         "UpdateViewTests",
