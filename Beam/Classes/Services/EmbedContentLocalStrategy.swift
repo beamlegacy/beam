@@ -9,6 +9,16 @@ import Foundation
 
 /// Can build embed content from local synchronous parsing
 struct EmbedContentLocalStrategy: EmbedContentStrategy {
+    func embedMatchURL(for url: URL) -> URL? {
+        var embedUrl: URL?
+        embeddableContent(for: url) { embedContent, _ in
+            if let url = embedContent?.embedURL {
+                embedUrl = url
+            }
+        }
+        return embedUrl
+    }
+
     func canBuildEmbeddableContent(for url: URL) -> Bool {
         var canEmbed = false
         embeddableContent(for: url) { embedContent, _ in
