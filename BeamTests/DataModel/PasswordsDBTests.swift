@@ -267,6 +267,7 @@ class PasswordsDBTests: XCTestCase {
         }
         semaphore.wait()
         beamHelper.endNetworkRecording()
+        BeamDate.reset()
     }
 
     private func cleanupPasswordsAfterTest() {

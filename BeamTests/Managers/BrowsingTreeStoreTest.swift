@@ -93,5 +93,6 @@ class BrowsingTreeStoreTest: XCTestCase {
         XCTAssertNil(savedFlattenedRecord.data)
         XCTAssertNotNil(savedFlattenedRecord.flattened)
         XCTAssertEqual(savedFlattenedRecord.createdAt, savedFlattenedRecord.updatedAt)
+        BeamDate.reset()
     }
 }
