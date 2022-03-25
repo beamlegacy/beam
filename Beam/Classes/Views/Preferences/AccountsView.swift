@@ -23,9 +23,10 @@ class AccountsViewModel: ObservableObject {
                 return
             }
             for source in sources {
-                guard let account = source.account else { continue }
-                if !self.accountsCalendar.contains(where: { $0.sourceId == source.id }) {
-                    self.accountsCalendar.append(account)
+                AppDelegate.main.data.calendarManager.getInformation(for: source) { accountCalendar in
+                    if !self.accountsCalendar.contains(where: { $0.sourceId == source.id }) {
+                        self.accountsCalendar.append(accountCalendar)
+                    }
                 }
             }
         }.store(in: &scope)

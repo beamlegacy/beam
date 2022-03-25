@@ -110,11 +110,9 @@ extension BeamTextEdit {
             ContextMenuItem(title: "Text", subtitle: "-", action: { action(.text) }),
             ContextMenuItem(title: "Divider", subtitle: "---", action: { action(.divider) })
         ]
-        data?.calendarManager.isConnected(calendarService: .googleCalendar, completionHandler: { isConnected in
-            if isConnected {
-                items.insert(ContextMenuItem(title: "Meeting", subtitle: "", icon: "editor-calendar", action: { action(.meeting) }), at: 3)
-            }
-        })
+        if data?.calendarManager.isConnected(calendarService: .googleCalendar) == true {
+            items.insert(ContextMenuItem(title: "Meeting", subtitle: "", icon: "editor-calendar", action: { action(.meeting) }), at: 3)
+        }
         return items
     }
 
