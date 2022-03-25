@@ -10,6 +10,8 @@ import XCTest
 
 class AutocompleteResultTests: XCTestCase {
 
+    // MARK: - Score and Comparison tests
+
     func testComparison() throws {
         let results = [
             AutocompleteResult(text: "Pierre", source: .searchEngine, score: 1.0),
@@ -43,7 +45,7 @@ class AutocompleteResultTests: XCTestCase {
     }
 
     func testNoteScores() {
-        let result = AutocompleteResult(text: "note1", source: .note(noteId: nil, elementId: nil), disabled: false, url: nil, information: nil, completingText: "note", uuid: UUID(), score: 1.0, urlFields: [])
+        let result = AutocompleteResult(text: "note1", source: .note, disabled: false, url: nil, information: nil, completingText: "note", uuid: UUID(), score: 1.0, urlFields: [])
         XCTAssertGreaterThan(result.textPrefixScore, 0)
         XCTAssertGreaterThan(result.weightedScore, 1)
         XCTAssertGreaterThanOrEqual(result.weightedScore, (result.score ?? 0))
@@ -96,10 +98,39 @@ class AutocompleteResultTests: XCTestCase {
     }
 
     func testNoteMatchInTheMiddle() {
-        let result = AutocompleteResult(text: "Hello world", source: .note(noteId: nil, elementId: nil), disabled: false, url: nil, information: nil, completingText: "wor", uuid: UUID(), score: 1.0, urlFields: [])
+        let result = AutocompleteResult(text: "Hello world", source: .note, disabled: false, url: nil, information: nil, completingText: "wor", uuid: UUID(), score: 1.0, urlFields: [])
         // Check that the matcher doesn't cut the test to "world"
         XCTAssertEqual(result.displayText, "Hello world")
         XCTAssertNil(result.displayInformation)
         XCTAssertFalse(result.takeOverCandidate)
+    }
+
+    func testSearchEngineMatchInTheMiddle() {
+        let result = AutocompleteResult(text: "Hello world", source: .searchEngine, completingText: "wor", score: 1.0, urlFields: [])
+        // Check that the matcher doesn't cut the test to "world"
+        XCTAssertEqual(result.displayText, "Hello world")
+        XCTAssertNil(result.displayInformation)
+        XCTAssertTrue(result.takeOverCandidate)
+    }
+
+    func testURLResultsWithoutInformationAreBoostedToo() {
+        let urlText = "helloworld.com"
+        let url = URL(string: "https://\(urlText)")
+        let resultWithGoodInfo = AutocompleteResult(text: urlText, source: .history, url: url, information: "Hello world",
+                                                    completingText: "hello", score: 1.0, urlFields: .text)
+        let resultWithLessGoodInfo = AutocompleteResult(text: urlText, source: .history, url: url, information: "say hello",
+                                                        completingText: "hello", score: 1.0, urlFields: .text)
+        let resultWithURLAsInfo = AutocompleteResult(text: urlText, source: .history, url: url, information: urlText,
+                                                        completingText: "hello", score: 1.0, urlFields: .text)
+        let resultWithoutInfo = AutocompleteResult(text: urlText, source: .history, url: url, information: nil,
+                                                   completingText: "hello", score: 1.0, urlFields: .text)
+
+        XCTAssertEqual(resultWithGoodInfo.weightedScore, resultWithoutInfo.weightedScore,
+                       "url result without info should be equivalent to one with matching info")
+        XCTAssertEqual(resultWithoutInfo.weightedScore, resultWithURLAsInfo.weightedScore,
+                       "url result without info should be equivalent to one with the url as info text")
+        XCTAssertGreaterThan(resultWithGoodInfo, resultWithLessGoodInfo) // prefix match is better than in the middle
+        XCTAssertGreaterThan(resultWithoutInfo, resultWithLessGoodInfo,
+                      "url result without info should be better than less good info")
     }
 }

@@ -228,7 +228,7 @@ extension AutocompleteManager {
                     let text = url.absoluteString
                     var information: String?
                     if let link = LinkStore.shared.getLinks(matchingUrl: url.urlWithScheme.absoluteString).values.first,
-                       let title = link.title {
+                       let title = link.title, !title.isEmpty {
                         information = title
                     }
                     let ac = AutocompleteResult(text: text, source: .topDomain, url: url, information: information, completingText: query, urlFields: .text)
