@@ -40,6 +40,11 @@ class CustomPopoverPresenter {
         }
     }
 
+    func dismissPopoverWindow(_ window: PopoverWindow) {
+        presentedUnknownWindows.removeAll(where: { $0 === window })
+        dismissWindow(window)
+    }
+
     private func dismissWindow(_ w: NSWindow?) {
         guard let w = w, w.isVisible else { return }
         w.close()

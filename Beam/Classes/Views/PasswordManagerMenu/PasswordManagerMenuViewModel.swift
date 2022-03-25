@@ -14,6 +14,7 @@ protocol PasswordManagerMenuDelegate: AnyObject {
     func fillNewPassword(_ password: String, dismiss: Bool)
     func deleteCredentials(_ entries: [PasswordManagerEntry])
     func emptyPasswordField()
+    func dismissMenu()
     func dismiss()
 }
 
@@ -61,6 +62,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
     private var revealFullList = false
     private var revealMoreItemsInList = false
     private var showPasswordGenerator = false
+    private var otherPasswordsDialog: PopoverWindow?
     private var subscribers = Set<AnyCancellable>()
 
     init(host: URL, credentialsBuilder: PasswordManagerCredentialsBuilder, userInfoStore: UserInformationsStore, options: PasswordManagerMenuOptions) {
@@ -108,10 +110,37 @@ class PasswordManagerMenuViewModel: ObservableObject {
         updateDisplay()
     }
 
+    func showOtherPasswords() {
+        delegate?.dismissMenu()
+        guard let mainWindow = AppDelegate.main.window else { return }
+        guard let childWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true, useBeamShadow: false, movable: true) else { return }
+        otherPasswordsDialog = childWindow
+        let otherPasswords = OtherPasswordsSheet(viewModel: otherPasswordsViewModel) { [weak self] entry in
+            self?.closeOtherPasswordsDialog()
+            self?.fillCredentials(entry)
+        } onRemove: { [weak self] entry in
+            self?.deleteCredentials(entry)
+        } onDismiss: { [weak self] in
+            self?.closeOtherPasswordsDialog()
+            self?.resetItems()
+        }
+        let position = CGPoint(x: (mainWindow.frame.size.width - otherPasswords.width) / 2, y: (mainWindow.frame.size.height + otherPasswords.height) / 2)
+        childWindow.setView(with: otherPasswords, at: position, fromTopLeft: true)
+    }
+
     func onSuggestNewPassword(state: PasswordManagerMenuCellState) {
         guard state == .clicked else { return }
         showPasswordGenerator = true
         updateDisplay()
+    }
+
+    func close() {
+        closeOtherPasswordsDialog()
+    }
+
+    private func closeOtherPasswordsDialog() {
+        otherPasswordsDialog?.close()
+        otherPasswordsDialog = nil
     }
 
     private func loadEntries() {
@@ -148,6 +177,10 @@ extension PasswordManagerMenuViewModel: PasswordManagerMenuDelegate {
     func fillCredentials(_ entry: PasswordManagerEntry) {
         Logger.shared.logDebug("Clicked on entry: \(entry.username) @ \(entry.minimizedHost)")
         delegate?.fillCredentials(entry)
+    }
+
+    func dismissMenu() {
+        delegate?.dismissMenu()
     }
 
     func dismiss() {

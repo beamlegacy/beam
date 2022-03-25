@@ -16,7 +16,11 @@ class PasswordManagerHelper: BaseView {
     func doesAutofillPopupExist(login: String) -> Bool {
         return getAutofillPopupElement(login: login).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
-    
+
+    func clickKeyIcon() {
+        app.dialogs.buttons["autofill-password"].clickOnExistence()
+    }
+
     func clickPopupLoginText(login: String) {
         app.dialogs.staticTexts[login].clickOnExistence()
     }
