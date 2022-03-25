@@ -77,11 +77,13 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
         return subject.eraseToAnyPublisher()
     }
 
-    func historyDatabaseURL() throws -> URL? {
-        guard let browserDirectory = try chromiumDirectory() else {
-            return nil
-        }
-        return try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent("History"))
+    func historyDatabaseURL() throws -> URLProvider? {
+        guard let browserDirectory = try chromiumDirectory() else { return nil }
+        let historyDatabase = browserDirectory.appendingPathComponent("History")
+        let historyDatabaseGroup = SandboxEscape.FileGroup(mainFile: historyDatabase, dependentFiles: ["History-journal"])
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup),
+              let historyDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
+        return historyDatabaseCopy
     }
 
     func importHistory(from databaseURL: URL) throws {
