@@ -44,6 +44,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
             helper.deleteAllDocuments()
 
             Configuration.beamObjectDirectCall = false
+            Configuration.beamObjectOnRest = false
 
             try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
         }
