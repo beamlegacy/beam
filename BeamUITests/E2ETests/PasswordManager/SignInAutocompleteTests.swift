@@ -59,16 +59,16 @@ class SignInAutocompleteTests: BaseTest {
             passwordPage.clickInputField(.password)
         }
         let passPrefView = helper.openPasswordPreferences()
-        
-        step("Then Password preferences window is opened"){
+
+        step("Then Password preferences window is opened, and menu isn't visible anymore"){
             XCTAssertTrue(passPrefView.isPasswordPreferencesOpened())
-            XCTAssertTrue(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
         }
 
         step("Then Password preferences window is closed on cancel click"){
             passPrefView.clickCancel()
             XCTAssertTrue(passPrefView.waitForPreferenceToClose())
-            XCTAssertTrue(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
         }
 
         step("Then authentication fields are NOT auto-populated"){
@@ -76,11 +76,19 @@ class SignInAutocompleteTests: BaseTest {
             XCTAssertEqual(passwordPage.getInputValue(.password), emptyString)
         }
 
+        step("When I click key icon") {
+            helper.clickKeyIcon()
+        }
+
+        step("Then passwords menu is visible again") {
+            XCTAssertTrue(helper.getOtherPasswordsOptionElement().exists)
+        }
+
         step("When I open Other passwords option and cancel password remove"){
             helper.openPasswordPreferences()
             passPrefView.staticTextTables("apple.com").clickOnExistence()
         }
-        
+
         let alertView = passPrefView.clickRemove()
 
         step("Then it is not removed from the list of passwords"){

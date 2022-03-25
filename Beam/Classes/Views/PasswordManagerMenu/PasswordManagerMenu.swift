@@ -20,7 +20,6 @@ struct PasswordManagerMenu: View {
 
     @State private var searchString = ""
     @State private var suggestedPassword = ""
-    @State private var showingOtherPasswordsSheet = false
     @State private var height: CGFloat?
 
     var body: some View {
@@ -48,7 +47,7 @@ struct PasswordManagerMenu: View {
                         if viewModel.display.entriesForHost.count <= 1 || viewModel.display.entryDisplayLimit > 1 {
                             OtherPasswordsCell { newState in
                                 if newState == .clicked {
-                                    showingOtherPasswordsSheet.toggle()
+                                    viewModel.showOtherPasswords()
                                 }
                             }
                         } else {
@@ -79,16 +78,6 @@ struct PasswordManagerMenu: View {
         }
         .frame(width: width, height: height, alignment: .top)
         .animation(nil)
-        .sheet(isPresented: $showingOtherPasswordsSheet, content: {
-            OtherPasswordModal(viewModel: viewModel.otherPasswordsViewModel, onFill: { entry in
-                viewModel.fillCredentials(entry)
-            }, onRemove: { entry in
-                viewModel.deleteCredentials(entry)
-            }, onDismiss: {
-                showingOtherPasswordsSheet.toggle()
-                viewModel.resetItems()
-            }).frame(width: 568, height: 361, alignment: .center)
-        })
     }
 
     var width: CGFloat {
