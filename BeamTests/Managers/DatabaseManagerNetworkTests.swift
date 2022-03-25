@@ -680,6 +680,7 @@ class DatabaseManagerNetworkTests: QuickSpec {
                 afterEach {
                     helper.deleteDatabaseStruct(dbStruct, includedRemote: true)
                     helper.deleteDatabaseStruct(dbStruct2, includedRemote: true)
+                    BeamDate.reset()
                 }
 
                 context("without any locally saved databases") {
