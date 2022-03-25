@@ -43,7 +43,7 @@ struct Configuration {
     static private(set) var apiHostnameDefault = "https://api.beamapp.co" // "http://api.beam.lvh.me"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
-    static private(set) var beamObjectDataOnSeparateCallDefault = false
+    static private(set) var beamObjectDataOnSeparateCallDefault = true
 
     static var beamObjectDirectCall: Bool {
         get { fatalError("Don't use this") }
@@ -71,7 +71,7 @@ struct Configuration {
     }
 
     //swiftlint:disable:next identifier_name
-    static private(set) var beamObjectDataUploadOnSeparateCallDefault = false
+    static private(set) var beamObjectDataUploadOnSeparateCallDefault = true
 
     static private var beamObjectDataUploadOnSeparateCallKey = "beamObjectDataUploadOnSeparateCall"
     static var beamObjectDataUploadOnSeparateCall: Bool {
@@ -89,7 +89,7 @@ struct Configuration {
         }
     }
 
-    static private(set) var beamObjectOnRestDefault = false
+    static private(set) var beamObjectOnRestDefault = true
 
     static private var beamObjectOnRestKey = "beamObjectOnRestKey"
     static var beamObjectOnRest: Bool {
