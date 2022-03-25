@@ -253,16 +253,19 @@ class EmbedNode: ResizableNode {
     override func updateForMove(isDragging: Bool) {
         super.updateForMove(isDragging: isDragging)
 
-        //Hide the collapse/expand button
+        // Make sure to remove all existing animations or weird stuff will happen
+        self.expandedContent?.layer?.removeAllAnimations()
+
+        // Hide the collapse/expand button
         toggleButtonBeamLayer.layer.isHidden = isDragging
 
-        //Move expandedContent on top of moving layer (at zPosition 100)
+        // Move expandedContent on top of moving layer (at zPosition 100)
         expandedContent?.layer?.zPosition = isDragging ? 101 : 1
 
-        //Make sure to reset the transform
+        // Make sure to reset the transform
         expandedContent?.layer?.setAffineTransform(CGAffineTransform.identity)
 
-        //Make the initial zoom transform
+        // Make the initial zoom transform
         let scaleFactor = isDragging ? moveScaleFactor : 1.0
         let transform = CGAffineTransform(scaleX: scaleFactor, y: scaleFactor)
         expandedContent?.layer?.setAffineTransform(transform)
@@ -271,7 +274,7 @@ class EmbedNode: ResizableNode {
     override func translateForMove(_ offset: CGPoint) {
         super.translateForMove(offset)
 
-        //Create the transform for the expandedContent and apply it without animations to avoid lag
+        // Create the transform for the expandedContent and apply it without animations to avoid lag
         let scale = CGAffineTransform(scaleX: moveScaleFactor, y: moveScaleFactor)
         let translate = CGAffineTransform(translationX: offset.x, y: offset.y)
         let final = scale.concatenating(translate)
