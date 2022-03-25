@@ -20,6 +20,43 @@ enum SandboxEscape {
         }
     }
 
+    struct FileGroup {
+        var mainFile: URL
+        var dependentFiles: [String]
+    }
+
+    final class TemporaryCopy: URLProvider {
+        private let tempDir = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+
+        let wrappedURL: URL
+
+        init?(group: FileGroup) {
+            let mainFileName = group.mainFile.lastPathComponent
+            wrappedURL = tempDir.appendingPathComponent(mainFileName)
+            do {
+                try FileManager.default.createDirectory(at: tempDir, withIntermediateDirectories: true)
+                let sourceDir = group.mainFile.deletingLastPathComponent()
+                let fileNames = [mainFileName] + group.dependentFiles
+                for fileName in fileNames {
+                    try FileManager.default.copyItem(at: sourceDir.appendingPathComponent(fileName), to: tempDir.appendingPathComponent(fileName))
+                }
+            } catch {
+                try? FileManager.default.removeItem(at: tempDir)
+                return nil
+            }
+        }
+
+        deinit {
+            try? FileManager.default.removeItem(at: tempDir)
+        }
+    }
+
+    private enum FileEndorsement {
+        case endorsed
+        case denied
+        case nonexistent
+    }
+
     // Return actual home directory, regardless of whether current app is sandboxed or not
     static func actualHomeDirectory() -> URL {
         let pw = getpwuid(getuid())
@@ -69,12 +106,33 @@ enum SandboxEscape {
         return nil
     }
 
-    static func endorsedIfExists(url: URL) -> Bool {
+    private static func endorsementStatus(url: URL) -> FileEndorsement {
         do {
-            return try endorsedURL(for: url) != nil
+            return try endorsedURL(for: url) == nil ? .denied : .endorsed
         } catch {
             let decodedError = error as NSError
-            return decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError
+            return decodedError.domain == NSCocoaErrorDomain && decodedError.code == NSFileNoSuchFileError ? .nonexistent : .denied
         }
+    }
+
+    static func endorsedIfExists(url: URL) -> Bool {
+        endorsementStatus(url: url) != .denied
+    }
+
+    static func endorsedGroup(for group: FileGroup) throws -> FileGroup? {
+        guard let endorsedMainFile = try endorsedURL(for: group.mainFile) else { return nil }
+        let parentURL = endorsedMainFile.deletingLastPathComponent()
+        var endorsedDependentFiles = [String]()
+        for fileName in group.dependentFiles {
+            switch endorsementStatus(url: parentURL.appendingPathComponent(fileName)) {
+            case .endorsed:
+                endorsedDependentFiles.append(fileName)
+            case .denied:
+                return nil
+            case .nonexistent:
+                break
+            }
+        }
+        return FileGroup(mainFile: endorsedMainFile, dependentFiles: endorsedDependentFiles)
     }
 }

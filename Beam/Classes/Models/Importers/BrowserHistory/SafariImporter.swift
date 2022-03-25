@@ -55,13 +55,13 @@ final class SafariImporter: BrowserHistoryImporter {
         return subject.eraseToAnyPublisher()
     }
 
-    func historyDatabaseURL() throws -> URL? {
+    func historyDatabaseURL() throws -> URLProvider? {
         let safariDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Safari")
         let historyDatabase = safariDirectory.appendingPathComponent("History.db")
-        let databaseURL = try SandboxEscape.endorsedURL(for: historyDatabase)
-        guard SandboxEscape.endorsedIfExists(url: safariDirectory.appendingPathComponent("History.db-shm")) else { return nil }
-        guard SandboxEscape.endorsedIfExists(url: safariDirectory.appendingPathComponent("History.db-wal")) else { return nil }
-        return databaseURL
+        let historyDatabaseGroup = SandboxEscape.FileGroup(mainFile: historyDatabase, dependentFiles: ["History.db-shm", "History.db-wal"])
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup),
+              let historyDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
+        return historyDatabaseCopy
     }
 
     func importHistory(from databaseURL: URL) throws {
