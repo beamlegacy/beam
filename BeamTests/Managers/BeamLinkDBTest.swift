@@ -280,6 +280,7 @@ class BeamLinkDBTests: XCTestCase {
         BeamTestsHelper.logout()
         beamHelper.beginNetworkRecording(test: self)
         BeamTestsHelper.login()
+        Configuration.beamObjectOnRest = false
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
     }
 

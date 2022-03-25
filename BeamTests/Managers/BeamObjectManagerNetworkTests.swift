@@ -39,6 +39,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             MyRemoteObjectManager.store.removeAll()
 
             Configuration.beamObjectDirectCall = false
+            Configuration.beamObjectOnRest = false
 
             try? BeamObjectChecksum.deleteAll()
             try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
@@ -203,6 +204,8 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             let uuid2 = "995d94e1-e0df-4eca-93e6-8778984bcd39".uuid!
 
             beforeEach {
+                Configuration.beamObjectOnRest = false
+
                 object = MyRemoteObject(beamObjectId: uuid,
                                         createdAt: BeamDate.now,
                                         updatedAt: BeamDate.now,
@@ -361,6 +364,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                             try? BeamObjectChecksum.deletePreviousChecksum(object: object)
                             try? BeamObjectChecksum.deletePreviousChecksum(object: object2)
                         }
+
                         context("with automatic conflict management") {
                             beforeEach {
                                 BeamDate.travel(2)
