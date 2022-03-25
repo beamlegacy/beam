@@ -78,7 +78,7 @@ extension AutocompleteManager {
         sortableResults = boostResult(topDomainResults, results: sortableResults)
         sortableResults = boostResult(mnemonicResults, results: sortableResults)
 
-        var filteredSearchEngineResults = filterOutSearchEngineURLResults(from: searchEngineResults, forURLAlreadyIn: uniqueURLs)
+        var filteredSearchEngineResults = filterOutSearchEngineURLResults(from: searchEngineResults, forURLAlreadyIn: sortableResults)
         filteredSearchEngineResults = autocompleteResultsUniqueSearchEngine(sequence: filteredSearchEngineResults)
 
         let results = merge(sortableResults: sortableResults,
@@ -90,12 +90,13 @@ extension AutocompleteManager {
         return results
     }
 
+    /// Promote top domain result to the top if the current first result is not satisfying.
     private func boostResult(_ partialResults: [AutocompleteResult], results: [AutocompleteResult]) -> [AutocompleteResult] {
         guard let partialResult = partialResults.first else { return results }
 
-        // Push top domain suggestion only when the first result is not satisfying.
         guard let firstResult = results.first,
-           isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "")
+              isResultCandidateForAutoselection(firstResult, forSearch: firstResult.completingText ?? "") ||
+                results.contains(where: { $0.text == partialResult.text })
         else {
             return [partialResult] + results
         }
