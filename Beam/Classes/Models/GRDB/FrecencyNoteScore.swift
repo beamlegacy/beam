@@ -135,6 +135,7 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
     private static let apiSaveLimiter = NoteFrecencyApiSaveLimiter()
 
     private(set) var batchSaveOnApiCompleted = false
+    private(set) var softDeleteCompleted = false
 
     init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
@@ -232,6 +233,24 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
             }
         )
         return Array(deduplicatedDict.values)
+    }
+    func remoteSoftDelete(noteId: UUID) {
+        softDeleteCompleted = false
+        let frecencies = db.fetchNoteFrecencies(noteId: noteId)
+        let now = BeamDate.now
+        let softDeleted = frecencies.map { (frecency) -> FrecencyNoteRecord in
+            var softDeleted = frecency
+            softDeleted.deletedAt = now
+            return softDeleted
+        }
+        do {
+            try db.save(noteFrecencies: softDeleted)
+            try saveAllOnNetwork(softDeleted) { _ in
+                self.softDeleteCompleted = true
+            }
+        } catch {
+            Logger.shared.logError("Couldn't soft delete \(noteId) note frecencies \(error)", category: .frecencyNetwork)
+        }
     }
 
     func receivedObjects(_ objects: [FrecencyNoteRecord]) throws {

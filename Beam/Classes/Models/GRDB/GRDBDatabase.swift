@@ -1183,7 +1183,6 @@ extension GRDBDatabase {
             try frecencyNote.save(db)
         }
     }
-
     func save(noteFrecencies: [FrecencyNoteRecord]) throws {
         try dbWriter.write { db in
             for frecency in noteFrecencies {
@@ -1198,6 +1197,18 @@ extension GRDBDatabase {
                 .filter(FrecencyNoteRecord.Columns.noteId == noteId.uuidString)
                 .filter(FrecencyNoteRecord.Columns.frecencyKey == paramKey)
                 .fetchOne(db)
+        }
+    }
+    func fetchNoteFrecencies(noteId: UUID) -> [FrecencyNoteRecord] {
+        do {
+            return try dbReader.read { db in
+                try FrecencyNoteRecord
+                    .filter(FrecencyNoteRecord.Columns.noteId == noteId.uuidString)
+                    .fetchAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't fetch frecency for note \(noteId): \(error)", category: .database)
+            return []
         }
     }
 

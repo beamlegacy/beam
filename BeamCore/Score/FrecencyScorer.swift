@@ -110,7 +110,7 @@ public protocol FrecencyScorer {
 }
 
 public class ExponentialFrecencyScorer: FrecencyScorer {
-    var storage: FrecencyStorage
+    public var storage: FrecencyStorage
     var params: [FrecencyParamKey: FrecencyParam]
 
     public init(storage: FrecencyStorage, params: [FrecencyParamKey: FrecencyParam] = FrecencyParameters) {
