@@ -6,6 +6,7 @@ import { BeamUIEvent } from "../../../Helpers/Utils/Web/BeamUIEvent"
 import { BeamLogger } from "../../../Helpers/Utils/Web/BeamLogger"
 import { PasswordManagerUI } from "./PasswordManagerUI"
 import { PasswordManagerHelper } from "./PasswordManagerHelper"
+import {dequal as isDeepEqual} from "dequal"
 
 export class PasswordManager<UI extends PasswordManagerUI> {
   win: BeamWindow
@@ -29,6 +30,8 @@ export class PasswordManager<UI extends PasswordManagerUI> {
     this.passwordHelper = new PasswordManagerHelper()
     this.win.addEventListener("load", this.onLoad.bind(this))
   }
+
+  textFields = []
 
   onLoad(): void {
     this.ui.load(document.URL)
@@ -109,8 +112,11 @@ export class PasswordManager<UI extends PasswordManagerUI> {
 
   handleTextFields() {
     const textFields = this.passwordHelper.getTextFieldsInDocument()
-    const textFieldsString = JSON.stringify(textFields)
-    this.ui.sendTextFields(textFieldsString)
+    if (!isDeepEqual(textFields, this.textFields)) {
+      this.textFields = textFields
+      const textFieldsString = JSON.stringify(textFields)
+      this.ui.sendTextFields(textFieldsString)
+    }
   }
 
   toString(): string {
