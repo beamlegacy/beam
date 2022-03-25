@@ -1868,6 +1868,7 @@ public extension CALayer {
         dragIndicator.isHidden = false
         dragIndicator.zPosition = 10
         dragIndicator.cornerRadius = 1
+        dragIndicator.opacity = 0.5
 
         // Should the dragged element be after or before the hovered widget?
         let shouldBeAfter: Bool
