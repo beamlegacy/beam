@@ -509,6 +509,7 @@
 		873528BE2735335F005E7CBC /* FirefoxImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528BD2735335F005E7CBC /* FirefoxImporter.swift */; };
 		873528C127354295005E7CBC /* INI in Frameworks */ = {isa = PBXBuildFile; productRef = 873528C027354295005E7CBC /* INI */; };
 		873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */; };
+		873A9FFC27E3B4A20092A834 /* URLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A9FFB27E3B4A20092A834 /* URLProvider.swift */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
@@ -543,6 +544,7 @@
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
 		87F11BDB26655170003BE98E /* MockAutocompleteStores.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */; };
 		87F47CC92669415800D01960 /* WebAutocompleteContext.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F47CC82669415800D01960 /* WebAutocompleteContext.swift */; };
+		87FCAE9127E474AA001D8D18 /* SandboxEscapeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87FCAE9027E474AA001D8D18 /* SandboxEscapeTests.swift */; };
 		8A0DFABB27551E3D0044515B /* EmbedNode_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAA927551E3D0044515B /* EmbedNode_prod.js */; };
 		8A0DFABF27551E3D0044515B /* EmbedNode.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A0DFAAD27551E3D0044515B /* EmbedNode.js */; };
 		8A0DFAC127551E950044515B /* EmbedNodeMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A0DFAC027551E950044515B /* EmbedNodeMessageHandler.swift */; };
@@ -1948,6 +1950,7 @@
 		873528BB27343871005E7CBC /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
 		873528BD2735335F005E7CBC /* FirefoxImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirefoxImporter.swift; sourceTree = "<group>"; };
 		873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumHistoryImporter.swift; sourceTree = "<group>"; };
+		873A9FFB27E3B4A20092A834 /* URLProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLProvider.swift; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumImporter.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
@@ -1982,6 +1985,7 @@
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
 		87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAutocompleteStores.swift; sourceTree = "<group>"; };
 		87F47CC82669415800D01960 /* WebAutocompleteContext.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContext.swift; sourceTree = "<group>"; };
+		87FCAE9027E474AA001D8D18 /* SandboxEscapeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxEscapeTests.swift; sourceTree = "<group>"; };
 		8A0DFAA027551E3D0044515B /* EmbedNodeUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNodeUIMock.ts; sourceTree = "<group>"; };
 		8A0DFAA127551E3D0044515B /* EmbedNode_prod.js.map */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = "sourcecode.module-map"; path = EmbedNode_prod.js.map; sourceTree = "<group>"; };
 		8A0DFAA227551E3D0044515B /* EmbedNode.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = EmbedNode.ts; sourceTree = "<group>"; };
@@ -3049,6 +3053,7 @@
 				8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */,
 				A5EE8C5927B8B67800800661 /* BeamNote+DocumentManagerTests.swift */,
 				A53F8A6127C4AC38000D168D /* NoteBackForwardListTests.swift */,
+				87FCAE9027E474AA001D8D18 /* SandboxEscapeTests.swift */,
 				DAAF40C327D79BEB00083AA0 /* TabPinSuggesterTests.swift */,
 			);
 			path = Models;
@@ -3525,6 +3530,7 @@
 				A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */,
 				A5BD34DD27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift */,
 				370794C227D7A90B00D2768B /* Incrementor.swift */,
+				873A9FFB27E3B4A20092A834 /* URLProvider.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -7538,6 +7544,7 @@
 				0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */,
 				A043B7FE26593A5300E267E5 /* TabGroupingWindow.swift in Sources */,
 				418173C32581276F00317ED8 /* String+NSMutableAttributedString.swift in Sources */,
+				873A9FFC27E3B4A20092A834 /* URLProvider.swift in Sources */,
 				523060A827426D1400A03844 /* BeamObjectManagerCall.swift in Sources */,
 				A5DE86A42692AEEC00E05C20 /* BeamWindow+NSMenu.swift in Sources */,
 				A570D2E827581A14003B239D /* TabView.swift in Sources */,
@@ -7977,6 +7984,7 @@
 				967B2685255465C5003F40E3 /* HtmlNoteAdapterTests.swift in Sources */,
 				032562D426051D52006513E4 /* RBDatabaseTests.m in Sources */,
 				A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */,
+				87FCAE9127E474AA001D8D18 /* SandboxEscapeTests.swift in Sources */,
 				A5E00B5527EB65E000474360 /* AutocompleteResultTests.swift in Sources */,
 				DAB8DB05269C502C00453867 /* UrlScoresCollectionTest.swift in Sources */,
 				8784956127C62D7500195C62 /* WebFramesTest.swift in Sources */,

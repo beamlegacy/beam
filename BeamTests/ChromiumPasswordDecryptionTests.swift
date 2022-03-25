@@ -52,4 +52,33 @@ class ChromiumPasswordDecryptionTests: XCTestCase {
         XCTAssertEqual(results[0].item.dateCreated?.description, "2021-12-17 18:09:00 +0000")
         XCTAssertEqual(results[0].item.dateLastUsed?.description, "2021-12-17 18:08:31 +0000")
     }
+
+    func testImportingChromiumPasswordDatabaseGroup() throws {
+        let bundle = Bundle(for: type(of: self))
+        var subscriptions = Set<AnyCancellable>()
+        let passwordsURL = try XCTUnwrap(bundle.url(forResource: "ChromiumLoginData", withExtension: "db"))
+        let importer = ChromiumPasswordImporter(browser: .brave)
+        let expectation = XCTestExpectation(description: "Chromium password import finished")
+        var results = [BrowserPasswordResult]()
+        importer.passwordsPublisher.sink(
+            receiveCompletion: { completion in
+                switch completion {
+                case .finished: expectation.fulfill()
+                case .failure(let error): XCTFail("Chromium password import failed: \(error)")
+                }
+            },
+            receiveValue: { result in
+                results.append(result)
+            })
+        .store(in: &subscriptions)
+        try importer.importPasswords(from: [passwordsURL, passwordsURL, passwordsURL], keychainSecret: keychainSecret)
+        wait(for: [expectation], timeout: 2.0)
+        XCTAssertEqual(results.count, 3)
+        XCTAssertEqual(results[0].itemCount, 1)
+        XCTAssertEqual(results[0].item.url, URL(string: "https://ssl.imoof.com/menu_test.html"))
+        XCTAssertEqual(results[0].item.username, "testlogin")
+        XCTAssertEqual(String(data: results[0].item.password, encoding: .utf8), "testpassword")
+        XCTAssertEqual(results[0].item.dateCreated?.description, "2021-12-17 18:09:00 +0000")
+        XCTAssertEqual(results[0].item.dateLastUsed?.description, "2021-12-17 18:08:31 +0000")
+    }
 }

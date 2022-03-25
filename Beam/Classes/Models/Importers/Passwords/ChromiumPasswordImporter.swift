@@ -145,13 +145,13 @@ final class ChromiumPasswordImporter: ChromiumImporter {
 
     private var currentSubject: PassthroughSubject<BrowserPasswordResult, Swift.Error>?
 
-    private func passwordsDatabaseURL(fileName: String) throws -> URL? {
-        guard let browserDirectory = try chromiumDirectory() else {
-            return nil
-        }
-        let endorsedURL = try SandboxEscape.endorsedURL(for: browserDirectory.appendingPathComponent(fileName))
-        guard SandboxEscape.endorsedIfExists(url: browserDirectory.appendingPathComponent("\(fileName)-journal")) else { return nil }
-        return endorsedURL
+    private func passwordsDatabaseURL(fileName: String) throws -> URLProvider? {
+        guard let browserDirectory = try chromiumDirectory() else { return nil }
+        let passwordsDatabase = browserDirectory.appendingPathComponent(fileName)
+        let passwordsDatabaseGroup = SandboxEscape.FileGroup(mainFile: passwordsDatabase, dependentFiles: ["\(fileName)-journal"])
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: passwordsDatabaseGroup),
+              let passwordsDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
+        return passwordsDatabaseCopy
     }
 }
 
@@ -175,7 +175,7 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
         try importPasswords(from: databaseURLs, keychainSecret: keychainSecret)
     }
 
-    private func endorsedDatabaseURL(fileName: String) throws -> URL? {
+    private func endorsedDatabaseURL(fileName: String) throws -> URLProvider? {
         do {
             return try passwordsDatabaseURL(fileName: fileName)
         } catch {
@@ -188,11 +188,13 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
     }
 
     // can't be made private (used in unit tests)
-    internal func importPasswords(from databaseURLs: [URL], keychainSecret: String) throws {
+    internal func importPasswords(from databaseURLs: [URLProvider], keychainSecret: String) throws {
         var importError: Swift.Error?
         for databaseURL in databaseURLs {
             do {
-                try importPasswords(from: databaseURL, keychainSecret: keychainSecret)
+                try withExtendedLifetime(databaseURL) {
+                    try importPasswords(from: databaseURL.wrappedURL, keychainSecret: keychainSecret)
+                }
             } catch {
                 importError = error
             }
