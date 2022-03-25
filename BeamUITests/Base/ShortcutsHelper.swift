@@ -42,6 +42,10 @@ class ShortcutsHelper {
         XCUIApplication().typeKey(key, modifierFlags:.shift)
     }
     
+    private func invokeCntrlOptionCmdFunctionKey(_ key: XCUIKeyboardKey) {
+        XCUIApplication().typeKey(key, modifierFlags:[.command, .option, .control, .function])
+    }
+    
     enum ShortcutCommand {
         case selectAll
         case undo
@@ -77,6 +81,8 @@ class ShortcutsHelper {
         case beginOfNote
         case selectOnLeft
         case selectOnRight
+        case moveBulletDown
+        case moveBulletUp
     }
     
     @discardableResult
@@ -124,6 +130,8 @@ class ShortcutsHelper {
         case .selectOnRight: invokeShiftKey(.rightArrow)
         case .selectOnLeft: invokeShiftKey(.leftArrow)
         case .beginOfNote: invokeCMDKey(.upArrow)
+        case .moveBulletDown: invokeCntrlOptionCmdFunctionKey(.downArrow)
+        case .moveBulletUp: invokeCntrlOptionCmdFunctionKey(.upArrow)
         }
         return BaseView()
     }

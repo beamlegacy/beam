@@ -73,6 +73,15 @@ class CardTestView: BaseView {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
     
+    func getCardNotesTextForVisiblePart() -> [String] {
+        let notesElements = getCardNotesForVisiblePart()
+        var names = [String]()
+        for elem in notesElements {
+            names.append(getElementStringValue(element: elem))
+        }
+        return names
+    }
+    
     func getNumberOfVisibleNotes() -> Int {
         return self.getCardNotesForVisiblePart().count
     }
