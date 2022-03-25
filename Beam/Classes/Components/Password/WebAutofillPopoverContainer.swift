@@ -45,12 +45,7 @@ final class WebAutofillPopoverContainer {
         guard let parent = window.parent else {
             return true
         }
-        let parentFrame: CGRect
-        if let contentFrame = page?.frame {
-            parentFrame = parent.convertToScreen(contentFrame)
-        } else {
-            parentFrame = parent.frame
-        }
+        let parentFrame = parent.convertToScreen(parent.contentLayoutRect)
         let windowFrame: CGRect
         if let topEdgeHeight = topEdgeHeight {
             windowFrame = CGRect(x: window.frame.origin.x, y: window.frame.origin.y + window.frame.size.height - topEdgeHeight, width: window.frame.size.width, height: topEdgeHeight)

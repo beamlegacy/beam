@@ -270,7 +270,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         let viewModel = passwordManagerViewModel(for: host, options: options)
         let passwordManagerMenu = PasswordManagerMenu(viewModel: viewModel)
         guard let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
-        let passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, fieldLocator: fieldLocator) { rect in
+        let passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, topEdgeHeight: 24, fieldLocator: fieldLocator) { rect in
             CGPoint(x: rect.minX, y: rect.minY)
         }
         passwordWindow.setView(with: passwordManagerMenu, at: passwordMenuPopover.currentOrigin, fromTopLeft: true)
