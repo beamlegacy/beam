@@ -55,6 +55,10 @@ class BaseView {
     func button(_ element: String) -> XCUIElement {
         return app.windows.buttons[element]
     }
+
+    func handle(_ element: String) -> XCUIElement {
+        return app.windows.handles[element]
+    }
     
     func group(_ element: String) -> XCUIElement {
         return app.windows.groups[element]

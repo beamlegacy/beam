@@ -1159,6 +1159,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         self.layer.setAffineTransform(transform)
         self.layer.zPosition = isDragging ? 100.0 : 0.0
+        self.layer.opacity = isDragging ? 0.7 : 1.0
         for c in children {
             c.updateForMove(isDragging: isDragging)
         }
