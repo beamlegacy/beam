@@ -19,8 +19,6 @@
         "BaseTest",
         "BrowserFancyUrlTests",
         "CardEditTests",
-        "CardViewEmbedsTests\/testEmbedVideoMediaControlNew()",
-        "CardViewEmbedsTests\/testEmbedVideoMediaControlOld()",
         "EditorShortcutsTests",
         "HelpAndFeedbackTests",
         "JavascriptNativeInteractionsTests",

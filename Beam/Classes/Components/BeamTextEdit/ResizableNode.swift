@@ -49,6 +49,11 @@ class ResizableNode: ElementNode {
         super.init(parent: parent, element: element, availableWidth: availableWidth)
 
         self.contentGeometry.setContainerWidth(availableWidth)
+
+        // Ugly hack to workaround BE-3611 until it's fixed.
+        DispatchQueue.main.async { [weak self] in
+            self?.invalidateRendering()
+        }
     }
 
     /// The reference area to position the resizing handles around.
