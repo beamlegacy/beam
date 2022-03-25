@@ -70,8 +70,9 @@ class OmniboxAutocompleteTests: BaseTest {
 
     func testAutoCompleteURLSelection() {
         launchApp()
-        let searchText = "fr.wikipedia.org/wiki/Hello_world"
-        let expectedIdentifier = "autocompleteResult-selected-" + searchText
+        let domainURL = "fr.wikipedia.org"
+        let urlToOpen = "fr.wikipedia.org/wiki/Hello_world"
+        let expectedIdentifier = "autocompleteResult-selected-" + domainURL
         let expectedFirstResultURLIdentifier = expectedIdentifier + "-url"
         let partiallyTypedSearchText = "fr.wiki"
         let oneLetterToAdd = "p"
@@ -79,8 +80,8 @@ class OmniboxAutocompleteTests: BaseTest {
         let helper = OmniBoxUITestsHelper(omniboxView.app)
             var webView: WebTestView?
 
-        step("Given I open website: \(searchText)"){
-            webView = omniboxView.searchInOmniBox(searchText, true)
+        step("Given I open website: \(urlToOpen)"){
+            webView = omniboxView.searchInOmniBox(urlToOpen, true)
         }
 
         step("Then browser tab bar appears"){
@@ -96,9 +97,9 @@ class OmniboxAutocompleteTests: BaseTest {
         let firstResult = results.firstMatch
         let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
         
-        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(searchText) search text available"){
+        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(domainURL) search text available"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
-            XCTAssertTrue(waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
             XCTAssertTrue(results.count > 1)
         }
 
@@ -109,7 +110,7 @@ class OmniboxAutocompleteTests: BaseTest {
 
         step("Then I see selection persists"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
-            XCTAssertTrue(waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
         }
 
 
@@ -137,7 +138,7 @@ class OmniboxAutocompleteTests: BaseTest {
         }
         
         step("Then I see selection available"){
-            XCTAssertTrue(waitForStringValueEqual(searchText, omniboxView.getOmniBoxSearchField()))
+            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
             XCTAssertEqual(autocompleteSelectedResultQuery.count, 1)
         }
 
@@ -154,8 +155,8 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.getOmniBoxSearchField().typeText("s")
         }
         
-        step("Then I see search text: \(searchText + "s")"){
-            XCTAssertTrue(waitForStringValueEqual(searchText + "s", omniboxView.getOmniBoxSearchField()))
+        step("Then I see search text: \(domainURL + "s")"){
+            XCTAssertTrue(waitForStringValueEqual(domainURL + "s", omniboxView.getOmniBoxSearchField()))
         }
     }
 

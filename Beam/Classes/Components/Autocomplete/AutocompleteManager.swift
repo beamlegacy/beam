@@ -283,8 +283,8 @@ extension AutocompleteManager {
     func handleLeftRightCursorMovement(_ cursorMovement: CursorMovement) -> Bool {
         switch cursorMovement {
         case .right:
-            if let url = autocompleteResult(at: autocompleteSelectedIndex)?.url, searchQuery != url.urlStringWithoutScheme {
-                let newQuery = url.scheme?.contains("http") == true ? url.urlStringWithoutScheme : url.absoluteString
+            if let url = autocompleteResult(at: autocompleteSelectedIndex)?.url, searchQuery != url.urlStringByRemovingUnnecessaryCharacters {
+                let newQuery = url.scheme?.contains("http") == true ? url.urlStringByRemovingUnnecessaryCharacters : url.absoluteString
                 setQuery(newQuery, updateAutocompleteResults: false)
             }
             resetAutocompleteSelection()
