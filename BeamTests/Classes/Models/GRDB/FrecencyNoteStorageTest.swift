@@ -120,6 +120,37 @@ class FrecencyNoteStorageTest: XCTestCase {
         XCTAssertEqual(score1.lastScore, 3)
     }
 
+    func testSoftDelete() throws {
+        beforeNetworkTests()
+        let noteIds = [UUID(), UUID()]
+        let db = GRDBDatabase.empty()
+        let storage = GRDBNoteFrecencyStorage(db: db)
+        let now = BeamDate.now
+        let records = [
+            FrecencyNoteRecord(noteId: noteIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0),
+            FrecencyNoteRecord(noteId: noteIds[0], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d1),
+            FrecencyNoteRecord(noteId: noteIds[1], lastAccessAt: BeamDate.now, frecencyScore: 0, frecencySortScore: 0, frecencyKey: .note30d0),
+        ]
+        try db.save(noteFrecencies: records)
+        storage.remoteSoftDelete(noteId: noteIds[0])
+        //it soft deletes locally and remotelly
+        expect(storage.softDeleteCompleted).toEventually(beTrue())
+        var localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d0))
+        XCTAssertEqual(localRecord.deletedAt, now)
+        var fetchedRecord = try self.beamObjectHelper.fetchOnAPI(localRecord)
+        XCTAssertEqual(fetchedRecord?.deletedAt, localRecord.deletedAt)
+
+        localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[0], paramKey: .note30d1))
+        XCTAssertEqual(localRecord.deletedAt, now)
+        fetchedRecord = try self.beamObjectHelper.fetchOnAPI(localRecord)
+        XCTAssertEqual(fetchedRecord?.deletedAt, localRecord.deletedAt)
+
+        localRecord = try XCTUnwrap(try db.fetchOneFrecencyNote(noteId: noteIds[1], paramKey: .note30d0))
+        XCTAssertNil(localRecord.deletedAt)
+        XCTAssertNil(try self.beamObjectHelper.fetchOnAPI(localRecord))
+        stopNetworkTests()
+    }
+
     private func beforeNetworkTests() {
         // Need to freeze date to compare objects, as `createdAt` would be different from the network stubs we get
         // back from Vinyl.
@@ -134,5 +165,6 @@ class FrecencyNoteStorageTest: XCTestCase {
     private func stopNetworkTests() {
         BeamObjectTestsHelper().deleteAll()
         beamHelper.endNetworkRecording()
+        BeamDate.reset()
     }
 }

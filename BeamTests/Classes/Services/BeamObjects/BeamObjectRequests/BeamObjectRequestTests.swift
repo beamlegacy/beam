@@ -36,6 +36,7 @@ class BeamObjectsRequests: QuickSpec {
             Configuration.reset()
             beamHelper.endNetworkRecording()
             Beam.Configuration.reset()
+            BeamDate.reset()
         }
 
         context("with Foundation") {

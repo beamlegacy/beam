@@ -403,5 +403,6 @@ class BrowsingTreeTest: XCTestCase {
         XCTAssertEqual(storage.calls1.count, 3)
         XCTAssertEqual(storage.calls1[2].treeId, tree.root.id)
         XCTAssertEqual(storage.calls1[2].lifeTime, 1)
+        BeamDate.reset()
     }
 }
