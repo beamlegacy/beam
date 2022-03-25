@@ -10,7 +10,7 @@ import Combine
 import BeamCore
 
 final class WebAutofillPopoverContainer {
-    private let window: PopoverWindow
+    let window: PopoverWindow
     private weak var page: WebPage?
     private let topEdgeHeight: CGFloat?
     private let fieldLocator: WebFieldLocator

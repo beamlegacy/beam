@@ -39,7 +39,7 @@ class AlertTestView: BaseView {
         let cancelButton = getAlertDialogFromSheets().buttons[AlertViewLocators.Buttons.alertCancelButton.accessibilityIdentifier].clickOnExistence()
         return waitForDoesntExist(cancelButton)
     }
-    
+
     @discardableResult
     func confirmRemoveFromSheets() -> Bool {
         let deleteButton = getAlertFromSheets().buttons[AlertViewLocators.Buttons.alertRemoveButton.accessibilityIdentifier].clickOnExistence()
@@ -87,7 +87,7 @@ class AlertTestView: BaseView {
     private func getAlertDialogFromSheets() -> XCUIElement {
         return app.dialogs.sheets[alert]
     }
-    
+
     func getAlertDialog() -> XCUIElement {
         return app.dialogs[alert]
     }
