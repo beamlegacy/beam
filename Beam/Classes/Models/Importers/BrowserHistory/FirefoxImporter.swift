@@ -90,17 +90,18 @@ final class FirefoxImporter: BrowserHistoryImporter {
         return path
     }
 
-    private func defaultHistoryDatabase(firefoxDirectory: URL) throws -> URL? {
+    private func defaultHistoryDatabase(firefoxDirectory: URL) throws -> URLProvider? {
         guard let firefoxProfile = try SandboxEscape.endorsedURL(for: firefoxDirectory.appendingPathComponent("profiles.ini")) else { return nil }
         let directoryPath = try defaultDirectoryPath(profilesFile: firefoxProfile)
         let defaultDirectory = firefoxDirectory.appendingPathComponent(directoryPath, isDirectory: true)
-        guard let databaseURL = try SandboxEscape.endorsedURL(for: defaultDirectory.appendingPathComponent("places.sqlite")) else { return nil }
-        guard SandboxEscape.endorsedIfExists(url: defaultDirectory.appendingPathComponent("places.sqlite-shm")) else { return nil }
-        guard SandboxEscape.endorsedIfExists(url: defaultDirectory.appendingPathComponent("places.sqlite-wal")) else { return nil }
-        return databaseURL
+        let historyDatabase = defaultDirectory.appendingPathComponent("places.sqlite")
+        let historyDatabaseGroup = SandboxEscape.FileGroup(mainFile: historyDatabase, dependentFiles: ["places.sqlite-shm", "places.sqlite-wal"])
+        guard let endorsedGroup = try SandboxEscape.endorsedGroup(for: historyDatabaseGroup),
+              let historyDatabaseCopy = SandboxEscape.TemporaryCopy(group: endorsedGroup) else { return nil }
+        return historyDatabaseCopy
     }
 
-    func historyDatabaseURL() throws -> URL? {
+    func historyDatabaseURL() throws -> URLProvider? {
         let applicationSupportDirectory = SandboxEscape.actualHomeDirectory().appendingPathComponent("Library").appendingPathComponent("Application Support")
         let firefoxDirectory = applicationSupportDirectory.appendingPathComponent("Firefox")
         return try defaultHistoryDatabase(firefoxDirectory: firefoxDirectory)

@@ -23,7 +23,7 @@ struct BrowserHistoryResult {
 protocol BrowserHistoryImporter: BrowserImporter {
     var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>? { get set }
     var publisher: AnyPublisher<BrowserHistoryResult, Error> { get }
-    func historyDatabaseURL() throws -> URL?
+    func historyDatabaseURL() throws -> URLProvider?
     func importHistory(from databaseURL: URL) throws
     func importHistory(from dbPath: String) throws
 }
@@ -35,12 +35,14 @@ enum BrowserHistoryImporterError: Error {
 extension BrowserHistoryImporter {
 
     func importHistory() throws {
-        guard let url = try historyDatabaseURL() else {
+        guard let provider = try historyDatabaseURL() else {
             throw BrowserHistoryImporterError.noDatabaseURL
         }
         DispatchQueue.global().async {
             do {
-                try importHistory(from: url)
+                try withExtendedLifetime(provider) {
+                    try importHistory(from: provider.wrappedURL)
+                }
             } catch {
                 Logger.shared.logError("Import failed with error: \(error)", category: .browserImport)
                 currentSubject?.send(completion: .failure(error))

@@ -31,8 +31,8 @@ class BrowserImportManagerTest: XCTestCase {
         ]
 
         var sourceBrowser: BrowserType = .firefox
-                
-        func historyDatabaseURL() throws -> URL? {
+
+        func historyDatabaseURL() throws -> URLProvider? {
             URL(string: "/myDbUrl")
         }
         var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
