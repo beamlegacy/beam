@@ -133,8 +133,8 @@ extension ElementNode {
         shadow.backgroundColor = .clear
 
         shadow.shadowOpacity = 1
-        shadow.shadowOffset = CGSize(width: 0, height: 6)
-        shadow.shadowRadius = 16.0
+        shadow.shadowOffset = CGSize(width: 0, height: 3)
+        shadow.shadowRadius = 8.0
         shadow.shadowColor = CGColor(red: 0, green: 0, blue: 0, alpha: 0.1)
 
         let shadowLayer = Layer(name: LayerName.moveShadow.rawValue, layer: shadow)
@@ -185,10 +185,13 @@ extension ElementNode {
 
     private func updateMoveHandleLayer() {
         guard let moveLayer = self.layers[LayerName.moveHandle.rawValue] else { return }
-        moveLayer.layer.opacity = showMoveHandle ? 1 : 0
+        moveLayer.layer.opacity = frontmostHover ? 1 : 0
         moveLayer.layer.isHidden = self.elementText.isEmpty && element.kind.isText
         moveLayer.layer.backgroundColor = cursorHoverMoveHandle ? BeamColor.Editor.moveHandleHover.cgColor : BeamColor.Editor.bullet.cgColor
         moveLayer.layer.frame.origin = moveHandlePosition
+
+        moveLayer.setAccessibilityLabel("moveHandle")
+        moveLayer.setAccessibilityRole(NSAccessibility.Role.handle)
     }
 
     private func updateMoveShadowLayer() {
@@ -197,7 +200,7 @@ extension ElementNode {
         let frame = CGRect(origin: shadowLayer.frame.origin, size: shadowSize)
         shadowLayer.layer.frame = frame
         shadowLayer.layer.cornerRadius = isDraggedForMove ? 6.0 : 0.0
-        shadowLayer.layer.shadowRadius = isDraggedForMove ? 16.0 : 0.0
+        shadowLayer.layer.shadowRadius = isDraggedForMove ? 8.0 : 0.0
         shadowLayer.layer.backgroundColor = isDraggedForMove ? BeamColor.Generic.background.cgColor : .clear
     }
 

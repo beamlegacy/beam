@@ -33,6 +33,7 @@ enum CardViewLocators {
         case breadcrumbTitle = "breadcrumb0"
         case noteMediaPlaying = "note-media-playing"
         case noteMediaMuted = "note-media-muted"
+        case moveHandle = "moveHandle"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
