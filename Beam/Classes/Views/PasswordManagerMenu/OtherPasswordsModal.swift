@@ -77,6 +77,7 @@ struct OtherPasswordModal: View {
                         onFill(selectedEntry)
                         dismiss()
                     }
+                    .keyboardShortcut(.defaultAction)
                 }
             }
         }
@@ -95,6 +96,25 @@ struct OtherPasswordModal: View {
     private func dismiss() {
         onDismiss()
         presentationMode.wrappedValue.dismiss()
+    }
+}
+
+struct OtherPasswordsSheet: View {
+    @ObservedObject var viewModel: PasswordListViewModel
+
+    var onFill: ((PasswordManagerEntry) -> Void)
+    var onRemove: (([PasswordManagerEntry]) -> Void)
+    var onDismiss: (() -> Void)
+
+    let width = 568.0
+    let height = 361.0
+
+    var body: some View {
+        FormatterViewBackground(boxCornerRadius: 10, shadowOpacity: 0) {
+            OtherPasswordModal(viewModel: viewModel, onFill: onFill, onRemove: onRemove, onDismiss: onDismiss)
+                .background(Color.clear)
+                .frame(width: width, height: height, alignment: .center)
+        }
     }
 }
 

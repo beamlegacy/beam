@@ -11,67 +11,67 @@ import XCTest
 class PreferencesBaseView: BaseView {
     
     func labelSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.staticTexts[element]
+        return app.dialogs.staticTexts[element]
     }
-    
+
     func textFieldSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.textFields[element]
+        return app.dialogs.textFields[element]
     }
-    
+
     func textViewSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.textViews[element]
+        return app.dialogs.textViews[element]
     }
-    
+
     func staticTextSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.staticTexts[element]
+        return app.dialogs.staticTexts[element]
     }
-    
+
     func searchFieldSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.searchFields[element]
+        return app.dialogs.searchFields[element]
     }
-    
+
     func secureTextFieldSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.secureTextFields[element]
+        return app.dialogs.secureTextFields[element]
     }
-    
+
     func checkBoxSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.checkBoxes[element]
+        return app.dialogs.checkBoxes[element]
     }
-    
+
     func buttonSheets(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.buttons[element]
+        return app.dialogs.buttons[element]
     }
-    
+
     func labelTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.staticTexts[element]
+        return app.dialogs.tables.staticTexts[element]
     }
     
     func textFieldTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.textFields[element]
+        return app.dialogs.tables.textFields[element]
     }
     
     func textViewTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.textViews[element]
+        return app.dialogs.tables.textViews[element]
     }
     
     func staticTextTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.staticTexts[element]
+        return app.dialogs.tables.staticTexts[element]
     }
     
     func searchFieldTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.searchFields[element]
+        return app.dialogs.tables.searchFields[element]
     }
     
     func secureTextFieldTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.secureTextFields[element]
+        return app.dialogs.tables.secureTextFields[element]
     }
     
     func checkBoxTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.checkBoxes[element]
+        return app.dialogs.tables.checkBoxes[element]
     }
     
     func buttonTables(_ element: String) -> XCUIElement {
-        return app.dialogs.sheets.tables.buttons[element]
+        return app.dialogs.tables.buttons[element]
     }
     
     enum PreferenceMenus: String {

@@ -67,7 +67,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     func prepareForLoading() {
         credentialsBuilder.enterPage(url: self.page?.url)
         fieldClassifiers?.clear()
-        dismissPasswordManagerMenu()
+        dismissPasswordManager()
         clearInputFocus()
         currentFrameIdentifier = 0
     }
@@ -102,7 +102,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             Logger.shared.logDebug("Detected fields: \(elements.map { $0.debugDescription })", category: .passwordManagerInternal)
         } catch {
             Logger.shared.logError(String(describing: error), category: .passwordManager)
-            dismissPasswordManagerMenu()
+            dismissPasswordManager()
             clearInputFocus()
             return
         }
@@ -113,7 +113,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
         if let elementId = currentlyFocusedElementId ?? previouslyFocusedElementId, !elements.map(\.beamId).contains(elementId) {
             Logger.shared.logDebug("Focused field just disappeared", category: .passwordManagerInternal)
-            dismissPasswordManagerMenu()
+            dismissPasswordManager()
             saveCredentialsIfChanged(allowEmptyUsername: false)
             clearInputFocus()
         }
@@ -161,7 +161,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             return
         }
         guard let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo) else {
-            dismissPasswordManagerMenu()
+            dismissPasswordManager()
             clearInputFocus()
             return
         }
@@ -176,7 +176,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                 self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
             }
         } else {
-            dismissPasswordManagerMenu()
+            dismissPasswordManager()
         }
         if autocompleteGroup.action.isPasswordRelated {
             showIcon(onField: elementId, frameInfo: frameInfo)
@@ -191,7 +191,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
                 self.updateStoredValues(with: dict, userInput: true, frameInfo: frameInfo)
             }
         }
-        dismissPasswordManagerMenu()
+        dismissPasswordManager()
         lastFocusOutTimestamp = BeamDate.now
         previouslyFocusedElementId = elementId
         clearInputFocus()
@@ -238,7 +238,10 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     private func clearIcon() {
         guard fieldWithIcon != nil else { return }
-        CustomPopoverPresenter.shared.dismissPopovers(animated: false)
+        if let buttonPopoverWindow = buttonPopover?.window {
+            CustomPopoverPresenter.shared.dismissPopoverWindow(buttonPopoverWindow)
+            buttonPopover = nil
+        }
         fieldWithIcon = nil
     }
 
@@ -262,9 +265,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
               let page = self.page,
               let host = page.url
         else { return }
-        if passwordMenuPopover != nil {
-            dismissPasswordManagerMenu()
-        }
+        dismissPasswordManagerMenu()
         currentInputFrame = frameInfo
         let fieldLocator = fieldLocator(forField: elementId, frameInfo: frameInfo)
         let viewModel = passwordManagerViewModel(for: host, options: options)
@@ -294,10 +295,16 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func dismissPasswordManagerMenu() {
-        CustomPopoverPresenter.shared.dismissPopovers()
+        guard let popoverWindow = passwordMenuPopover?.window else { return }
+        CustomPopoverPresenter.shared.dismissPopoverWindow(popoverWindow)
         passwordMenuPopover = nil
+    }
+
+    private func dismissPasswordManager() {
+        dismissPasswordManagerMenu()
+        currentPasswordManagerViewModel?.close()
         currentPasswordManagerViewModel = nil
-        clearIcon() // required: the child window containing the icon is not visible anymore, but fieldWithIcon has not been reset
+        clearIcon()
     }
 
     private func clearInputFocus() {
@@ -322,7 +329,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     func handleWebFormSubmit(with elementId: String, frameInfo: WKFrameInfo?) {
         Logger.shared.logDebug("Submit: \(elementId)", category: .passwordManagerInternal)
         disabledForSubmit = true // disable focus handler temporarily, to prevent the password manager menu from reappearing if the JS code triggers a selection in a text field
-        dismissPasswordManagerMenu()
+        dismissPasswordManager()
         requestValuesFromTextFields(frameInfo: frameInfo) { [weak self] dict in
             guard let self = self else { return }
             if let values = dict ?? self.valuesOnFocusOut {
@@ -485,7 +492,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func fillCredentials(_ entry: PasswordManagerEntry) {
         guard let elementId = currentlyFocusedElementId, let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: currentInputFrame), autocompleteGroup.action == .login || autocompleteGroup.isAmbiguous else {
             Logger.shared.logError("AutocompleteContext (login) mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
-            dismissPasswordManagerMenu()
+            dismissPasswordManager()
             return
         }
         guard let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) else {
@@ -512,14 +519,14 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         }
         self.fillWebTextFields(autofill)
         DispatchQueue.main.async {
-            self.dismissPasswordManagerMenu()
+            self.dismissPasswordManager()
         }
     }
 
     func fillNewPassword(_ password: String, dismiss: Bool = true) {
         guard let elementId = currentlyFocusedElementId, let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: currentInputFrame), autocompleteGroup.action == .createAccount || autocompleteGroup.isAmbiguous else {
             Logger.shared.logError("AutocompleteContext (createAccount) mismatch for id \(String(describing: currentlyFocusedElementId))", category: .passwordManager)
-            dismissPasswordManagerMenu()
+            dismissPasswordManager()
             return
         }
         credentialsBuilder.storeGeneratedPassword(password)
@@ -538,7 +545,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         self.togglePasswordField(visibility: true)
         if dismiss {
             DispatchQueue.main.async {
-                self.dismissPasswordManagerMenu()
+                self.dismissPasswordManager()
             }
         }
     }
@@ -550,6 +557,13 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
         self.togglePasswordField(visibility: false)
         self.fillWebTextFields(emptyParams)
         DispatchQueue.main.async {
+            self.dismissPasswordManager()
+        }
+    }
+
+    func dismissMenu() {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
             self.dismissPasswordManagerMenu()
         }
     }
@@ -557,7 +571,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func dismiss() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-            self.dismissPasswordManagerMenu()
+            self.dismissPasswordManager()
             self.togglePasswordField(visibility: false)
         }
     }
