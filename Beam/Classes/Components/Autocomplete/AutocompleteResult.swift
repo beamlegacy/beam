@@ -104,23 +104,25 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     private(set) var completingText: String?
     private(set) var additionalSearchTerms: [String]?
     private(set) var uuid: UUID
+    /// Base score of the result. For actual sorting score including text completion, use `weightedScore`
     private(set) var score: Float?
     private(set) var handler: ((BeamState) -> Void)?
 
-    /// [0..1] depending on the comparison of the query vs the content of the text field. Can be compared to rawInfoPrefixScore
-    private(set) var rawTextPrefixScore: Float
-    /// [0..1] depending on the comparison of the query vs the content of the info field. Can be compared to rawTextPrefixScore
-    private(set) var rawInfoPrefixScore: Float
-
-    /// rawTextPrefixScore boosted by the type of the field (source kind + is it an url?)
-    private(set) var textPrefixScore: Float
-    /// rawInfoPrefixScore boosted by the type of the field (source kind + is it an url?)
-    private(set) var infoPrefixScore: Float
-    /// textPrefixScore and infoPrefixScore Combined
-    private(set) var prefixScore: Float
     /// This option set tell us which of the String fields of this struct contains an URL. Right now only the "text" and "information" field can be a textual url. We use this to match the query with the start of the url (ignoring the scheme).
     private(set) var urlFields: URLFields
+    /// Whether or not the result can be automatically selected and add a suffix to the autocomplete
     private(set) var takeOverCandidate = false
+
+    /// [0..1] depending on the comparison of the query vs the content of the text field. Can be compared to rawInfoPrefixScore
+    private(set) var rawTextPrefixScore: Float = 0
+    /// [0..1] depending on the comparison of the query vs the content of the info field. Can be compared to rawTextPrefixScore
+    private(set) var rawInfoPrefixScore: Float = 0
+    /// rawTextPrefixScore boosted by the type of the field (source kind + is it an url?)
+    private(set) var textPrefixScore: Float = 0
+    /// rawInfoPrefixScore boosted by the type of the field (source kind + is it an url?)
+    private(set) var infoPrefixScore: Float = 0
+    /// textPrefixScore and infoPrefixScore Combined
+    private(set) var prefixScore: Float = 0
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
          information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil, additionalSearchTerms: [String]? = nil,
@@ -140,17 +142,23 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         self.handler = handler
         self.urlFields = urlFields
 
-        let textResult = Self.boosterScore(prefix: completingText, base: text, isURL: urlFields.contains(.text), source: source)
-        self.text = textResult.base ?? text
-        rawTextPrefixScore = textResult.score
-        textPrefixScore = textResult.boostedScore
-        takeOverCandidate = takeOverCandidate || textResult.takeOverCandidate
+        computePrefixScores()
+    }
 
-        let infoResult = Self.boosterScore(prefix: completingText, base: information, isURL: urlFields.contains(.info), source: source)
+    mutating private func computePrefixScores() {
+        let infoResult = Self.boosterScore(prefix: completingText, base: information, source: source,
+                                           isURL: urlFields.contains(.info), hasBothTextAndInfo: true)
         self.information = infoResult.base
         rawInfoPrefixScore = infoResult.score
         infoPrefixScore = infoResult.boostedScore
         takeOverCandidate = takeOverCandidate || infoResult.takeOverCandidate
+
+        let textResult = Self.boosterScore(prefix: completingText, base: text, source: source,
+                                           isURL: urlFields.contains(.text), hasBothTextAndInfo: infoPrefixScore > 0)
+        self.text = textResult.base ?? text
+        rawTextPrefixScore = textResult.score
+        textPrefixScore = textResult.boostedScore
+        takeOverCandidate = takeOverCandidate || textResult.takeOverCandidate
 
         prefixScore = 1.0 + textPrefixScore + infoPrefixScore
     }
@@ -162,7 +170,28 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         var takeOverCandidate = false
     }
 
-    private static func simpleBoosterScore(prefix: String?, base: String?, isURL: Bool, isNote: Bool) -> BoosterResult {
+    private static func scoreWeight(canMatchInside: Bool, isURL: Bool, isNote: Bool, hasBothTextAndInfo: Bool) -> Float {
+        var booster: Float
+        if isURL || isNote {
+            booster = 0.1
+        } else {
+            booster = 0.05
+        }
+
+        // some results will only boost the prefix match. And they deserve a better score
+        if !canMatchInside {
+            booster *= 2
+        }
+
+        // some results only have text (no information).
+        // This additional boost compensate the score they could have with an info score
+        if !hasBothTextAndInfo && (isNote || isURL) {
+            booster *= 1.25
+        }
+        return booster
+    }
+
+    private static func simpleBoosterScore(prefix: String?, base: String?, isURL: Bool, isNote: Bool, hasBothTextAndInfo: Bool) -> BoosterResult {
         guard let lcbase = base?.lowercased(),
               !lcbase.isEmpty,
               let comp = prefix?.lowercased()
@@ -170,25 +199,19 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             return BoosterResult(base: base, score: 0.0, boostedScore: 0.0)
         }
 
-        let booster: Float
-        if isNote {
-            booster = 0.25 // notes will not have information booster, so they need a slightly better boost.
-        } else if isURL {
-            booster = 0.2
-        } else {
-            booster = 0.1
-        }
+        let weight = scoreWeight(canMatchInside: false, isURL: isURL, isNote: isNote, hasBothTextAndInfo: hasBothTextAndInfo)
         let hsr = lcbase.commonPrefix(with: comp)
         let score = Float(hsr.count) / Float(comp.count)
-        return BoosterResult(base: base, score: score, boostedScore: booster * score, takeOverCandidate: score >= 1.0)
+        return BoosterResult(base: base, score: score, boostedScore: weight * score, takeOverCandidate: score >= 1.0)
     }
 
-    private static func boosterScore(prefix: String?, base: String?, isURL: Bool, source: Source) -> BoosterResult {
+    private static func boosterScore(prefix: String?, base: String?, source: Source, isURL: Bool, hasBothTextAndInfo: Bool) -> BoosterResult {
         var canMatchInside = !isURL
         var canReplaceBase = true
         var isNote = false
         switch source {
         case .note, .createNote:
+            canReplaceBase = false
             canMatchInside = false
             isNote = true
         case .searchEngine, .action:
@@ -197,7 +220,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
             break
         }
 
-        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base, isURL: isURL, isNote: isNote) }
+        guard canMatchInside else { return simpleBoosterScore(prefix: prefix, base: base, isURL: isURL, isNote: isNote,
+                                                              hasBothTextAndInfo: hasBothTextAndInfo) }
 
         guard let base = base,
               !base.isEmpty,
@@ -211,7 +235,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         let maxSubstringIndex = 10
 
         let skipScoreWeight = Float(canMatchInside ? 0.1 : 0)
-        let typeWeight = Float(isURL ? 0.1 : 0.05)
+        let typeWeight = scoreWeight(canMatchInside: canMatchInside, isURL: isURL, isNote: isNote, hasBothTextAndInfo: hasBothTextAndInfo)
         // Skip score, [0-1] is a penalty computed on the position of the substring in the main string.
         let fullMatch = hsr?.count == comp.count
         let matchInRange = (hsr?.lowerBound ?? maxSubstringIndex + 1) <= maxSubstringIndex
@@ -228,7 +252,9 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         let boosterWeight = typeWeight * (commonPrefixScore)
 
         // Only take over if we have a full match of the query and if the match is in the start of the string
-        return BoosterResult(base: newBase, score: score, boostedScore: boosterWeight * score, takeOverCandidate: fullMatch && matchInRange)
+        let takeOver = fullMatch && matchInRange
+
+        return BoosterResult(base: newBase, score: score, boostedScore: boosterWeight * score, takeOverCandidate: takeOver)
     }
 
     /// The weighted score is used to sort AutocompleResults. It combines all subscore, higher is better.
