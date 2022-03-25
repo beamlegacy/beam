@@ -120,6 +120,7 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertNil(link1.frecencyVisitLastAccessAt)
         XCTAssertNil(link1.frecencyVisitScore)
         XCTAssertNil(link1.frecencyVisitSortScore)
+        BeamDate.reset()
     }
 
     func testReceivedLinkFrecencyOverwrite() throws {
@@ -285,5 +286,6 @@ class BeamLinkDBTests: XCTestCase {
     private func stopNetworkTests() {
         BeamObjectTestsHelper().deleteAll()
         beamHelper.endNetworkRecording()
+        BeamDate.reset()
     }
 }

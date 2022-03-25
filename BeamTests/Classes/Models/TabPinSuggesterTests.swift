@@ -56,7 +56,7 @@ class TabPinSuggesterTests: XCTestCase {
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].domainPath0, "https://site.a/path")
         XCTAssertEqual(results[0].score, 2 * (3 + 8) / 20 * (8 + 13) / 2)
-        //BeamDate.reset()
+        BeamDate.reset()
     }
 
     func testSuggester() {
@@ -114,7 +114,7 @@ class TabPinSuggesterTests: XCTestCase {
         XCTAssert(suggester.isEligible(url: URL(string: "https://abc.com/path/page.html")!))
         suggester.hasPinned()
         XCTAssertFalse(suggester.isEligible(url: URL(string: "https://abc.com/path/page.html")!))
-        //BeamDate.reset()
+        BeamDate.reset()
     }
 
     func testTabPinSuggestionMemory() {

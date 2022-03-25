@@ -251,6 +251,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                     self.journal.remove(at: index)
                 }
                 BeamNote.purgeDeletedNode(id)
+                let scorer = self.noteFrecencyScorer as? ExponentialFrecencyScorer
+                let storage = scorer?.storage as? GRDBNoteFrecencyStorage
+                storage?.remoteSoftDelete(noteId: id)
             }.store(in: &scope)
 
         NotificationCenter.default.addObserver(self,
