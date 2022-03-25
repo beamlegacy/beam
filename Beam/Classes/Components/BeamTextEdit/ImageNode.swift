@@ -410,6 +410,14 @@ class ImageNode: ResizableNode {
             self.imageLayer?.layer.borderWidth = 0
         }
     }
+
+    override func didMoveToWindow(_ window: NSWindow?) {
+        super.didMoveToWindow(window)
+
+        if imageLayer == nil {
+            setupImage(width: availableWidth)
+        }
+    }
 }
 
 // MARK: - ImageNode + Layer
