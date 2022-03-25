@@ -85,6 +85,8 @@ public final class Logger {
 
     private let hideLumberCategories: [LogCategory] = [.documentDebug, .passwordManagerInternal]
 
+    private let hideLocalCategories: [LogCategory] = [.passwordManagerInternal]
+
     private var ddFileLogger = DDFileLogger()
 
     private func configure() {
@@ -183,7 +185,9 @@ public final class Logger {
         pthread_threadid_np(nil, &tid)
         let threadName = Thread.isMainThread ? "main" : "\(tid)"
 
-        callback?(message, level, category, threadName, timeDiff)
+        if !hideLocalCategories.contains(category) {
+            callback?(message, level, category, threadName, timeDiff)
+        }
 
         #if DEBUG
         if hideCategories.contains(category) { return }
