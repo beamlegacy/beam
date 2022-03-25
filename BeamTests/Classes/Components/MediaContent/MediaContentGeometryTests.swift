@@ -40,7 +40,19 @@ class MediaContentGeometryInitialStateTests: XCTestCase {
         XCTAssertEqual(geometry.displaySize, CGSize(width: 300, height: 225))
     }
 
-    func testContentGeometryZeroDimensions() {
+    func testContentGeometryZeroWidth() {
+        let contentDescription = MediaContentGeometryDescription(
+            idealWidth: 0,
+            idealHeight: 200,
+            preservesAspectRatio: false
+        )
+        geometry.setGeometryDescription(contentDescription)
+
+        // Minimum allowed dimensions are 48x48
+        XCTAssertEqual(geometry.displaySize, CGSize(width: 48, height: 200))
+    }
+
+    func testContentGeometryZeroWidthAndHeight() {
         let contentDescription = MediaContentGeometryDescription(
             idealWidth: 0,
             idealHeight: 0,
@@ -48,7 +60,7 @@ class MediaContentGeometryInitialStateTests: XCTestCase {
         )
         geometry.setGeometryDescription(contentDescription)
 
-        // Minimum allowed size is 170x128
+        // Minimum allowed dimensions are 48x48
         XCTAssertEqual(geometry.displaySize, CGSize(width: 48, height: 48))
     }
 
