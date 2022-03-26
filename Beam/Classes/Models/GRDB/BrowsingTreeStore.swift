@@ -233,6 +233,14 @@ class BrowsingTreeStoreManager: BrowsingTreeStoreProtocol {
     func delete(ids: [UUID]) throws {
         try db.deleteBrowsingTrees(ids: ids)
     }
+    func softDelete(olderThan days: Int = 60, maxRows: Int = 20 * 1000) {
+        do {
+            try db.softDeleteBrowsingTrees(olderThan: days, maxRows: maxRows)
+
+        } catch {
+            Logger.shared.logError("Couldn't soft delete browsing trees: \(error)", category: .database)
+        }
+    }
 
     func remoteDeleteAll(_ completion: ((Result<Bool, Error>) -> Void)? = nil) {
         Logger.shared.logInfo("Deleting browsing trees from API", category: .browsingTreeNetwork)
