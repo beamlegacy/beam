@@ -94,14 +94,15 @@ extension TextRoot {
 
         cancelNodeSelection()
 
-        focusedCmdManager.beginGroup(with: "Delete selected nodes")
-        defer { focusedCmdManager.endGroup() }
+        let cmdManager = focusedCmdManager
+        cmdManager.beginGroup(with: "Delete selected nodes")
+        defer { cmdManager.endGroup() }
 
         if let prevWidget = sortedNodes.first?.previousVisibleNode(ElementNode.self) {
-            focusedCmdManager.focusElement(prevWidget, cursorPosition: prevWidget.textCount)
+            cmdManager.focusElement(prevWidget, cursorPosition: prevWidget.textCount)
         } else if let nextVisibleNode = sortedNodes.last?.nextVisibleNode(ElementNode.self) {
             if (nextVisibleNode as? ProxyTextNode) == nil {
-                focusedCmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
+                cmdManager.focusElement(nextVisibleNode, cursorPosition: 0)
             }
         }
 
@@ -113,12 +114,12 @@ extension TextRoot {
             if node.open, let oldIndexInParent = unproxied.indexInParent,
                let newParent = unproxied.previousSibbling() ?? unproxied.parent {
                 for child in node.unproxyElement.children {
-                    focusedCmdManager.reparentElement(child, to: newParent, atIndex: oldIndexInParent)
+                    cmdManager.reparentElement(child, to: newParent, atIndex: oldIndexInParent)
                 }
             }
 
             // Delete Selected Element:
-            focusedCmdManager.deleteElement(for: node.unproxyElement)
+            cmdManager.deleteElement(for: node.unproxyElement)
 
             // Yeah, this sucks, I know
             if let ref = node as? ProxyTextNode,
@@ -132,11 +133,11 @@ extension TextRoot {
         }
 
         if createEmptyNodeInPlace || (createNodeInEmptyParent && root?.element.children.isEmpty == true) {
-            focusedCmdManager.beginGroup(with: "Insert empty element")
+            cmdManager.beginGroup(with: "Insert empty element")
             let newElement = BeamElement()
-            focusedCmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
-            focusedCmdManager.focus(newElement, in: firstParent)
-            focusedCmdManager.endGroup()
+            cmdManager.insertElement(newElement, inNode: firstParent, afterElement: nil)
+            cmdManager.focus(newElement, in: firstParent)
+            cmdManager.endGroup()
             if !(editor?.journalMode ?? false) {
                 editor?.scroll(.zero)
             }
@@ -259,9 +260,10 @@ extension TextRoot {
               let nodeParent = node.parent
         else { return }
 
-        focusedCmdManager.beginGroup(with: "Delete backward")
+        let cmdManager = focusedCmdManager
+        cmdManager.beginGroup(with: "Delete backward")
         defer {
-            focusedCmdManager.endGroup()
+            cmdManager.endGroup()
         }
 
         // We can't remove the root of a link & ref proxy node:
@@ -294,13 +296,13 @@ extension TextRoot {
                 // Simple case: the previous node contains text:
                 if let prevTextNode = prevNode as? TextNode {
                     let pos = prevTextNode.textCount
-                    focusedCmdManager.insertText(textNode.elementText, in: prevTextNode, at: pos)
+                    cmdManager.insertText(textNode.elementText, in: prevTextNode, at: pos)
                     if prevTextNode.displayedElement.children.isEmpty {
                         prevTextNode.open = textNode.open
                     }
                     moveChildrenOf(textNode, to: prevTextNode)
-                    focusedCmdManager.focusElement(prevTextNode, cursorPosition: pos)
-                    focusedCmdManager.deleteElement(for: textNode)
+                    cmdManager.focusElement(prevTextNode, cursorPosition: pos)
+                    cmdManager.deleteElement(for: textNode)
                     return
                 }
 
@@ -312,11 +314,11 @@ extension TextRoot {
                 }
 
                 // Complex case: the previous node contains an embed or an image
-                focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                 deleteBackward()
             } else {
                 // Standard text deletion
-                focusedCmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
+                cmdManager.deleteText(in: textNode, for: rangeToDeleteText(in: textNode, cursorAt: cursorPosition, forward: false))
             }
         } else {
             // we are not in an editable text node
@@ -326,19 +328,19 @@ extension TextRoot {
 
                 // If prev node's a text node then we must remove the last character from the text node and leave the cursor there
                 if let prevTextNode = prevNode as? TextNode, prevTextNode.textCount > 0 {
-                    focusedCmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
+                    cmdManager.focusElement(prevTextNode, cursorPosition: prevTextNode.textCount)
                     deleteBackward()
                 } else {
                     // If the previous node is not a text node with text
                     // then we must remove the node altogether and leave the cursor where it is
                     if prevNode.parent as? TextRoot != nil {
                         moveChildrenOf(prevNode, to: self, atOffset: prevNode.displayedElement.indexInParent)
-                        focusedCmdManager.deleteElement(for: prevNode)
-                        focusedCmdManager.focusElement(node, cursorPosition: 0)
+                        cmdManager.deleteElement(for: prevNode)
+                        cmdManager.focusElement(node, cursorPosition: 0)
                     } else {
-                        focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                        cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                         deleteBackward()
-                        focusedCmdManager.focusElement(node, cursorPosition: 0)
+                        cmdManager.focusElement(node, cursorPosition: 0)
                     }
                 }
             } else {
@@ -346,15 +348,15 @@ extension TextRoot {
                 // but if the node is the first node then we must replace it with an empty text node
                 let prevNode = node.previousVisibleNode(ElementNode.self) ?? {
                     let newPrevElement = BeamElement()
-                    focusedCmdManager.insertElement(newPrevElement, inElement: parentElement, afterElement: node.displayedElement)
+                    cmdManager.insertElement(newPrevElement, inElement: parentElement, afterElement: node.displayedElement)
                     return nodeFor(newPrevElement, withParent: nodeParent)
                 }()
                 if prevNode.displayedElement.children.isEmpty {
                     prevNode.open = node.open
                 }
                 moveChildrenOf(node, to: prevNode)
-                focusedCmdManager.deleteElement(for: node.element)
-                focusedCmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
+                cmdManager.deleteElement(for: node.element)
+                cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
             }
         }
     }
