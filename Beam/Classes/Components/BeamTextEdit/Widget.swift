@@ -288,7 +288,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         didSet {
             guard parent != oldValue else { return }
             if parent == nil && oldValue?.root?.focusedWidget === self {
-                oldValue?.root?.focusedWidget = nil
+                // don't unfocus the widget if the element still has a parent, because it will be reparented soon
+                if let elementNode = self as? ElementNode, elementNode.displayedElement.parent != nil {
+                } else {
+                    oldValue?.root?.focusedWidget = nil
+                }
             }
 
             if parent != nil {
