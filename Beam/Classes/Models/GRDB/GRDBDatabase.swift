@@ -463,6 +463,25 @@ struct GRDBDatabase {
                 t.uniqueKey(["domainPath0"], onConflict: .ignore)
             }
         }
+        migrator.registerMigration("dropBrowsingTreeRecordNonNullContraint") { db in
+            try db.create(table: "newBrowsingTreeRecord", ifNotExists: true) { t in
+                t.column("rootId", .text).primaryKey()
+                t.column("rootCreatedAt", .date).indexed().notNull()
+                t.column("appSessionId", .text)
+                t.column("flattenedData", .blob) //not null constraint dropped
+                t.column("createdAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("updatedAt", .datetime).notNull().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("deletedAt", .datetime)
+                t.column("previousChecksum", .text)
+                t.column("processingStatus", .integer).notNull().indexed().defaults(to: 2)
+            }
+            try db.execute(sql: """
+                INSERT INTO newBrowsingTreeRecord
+                SELECT * FROM BrowsingTreeRecord
+                """)
+            try db.drop(table: "BrowsingTreeRecord")
+            try db.rename(table: "newBrowsingTreeRecord", to: "BrowsingTreeRecord")
+        }
 
         #if DEBUG
         // Speed up development by nuking the database when migrations change
@@ -1351,6 +1370,23 @@ extension GRDBDatabase {
             Logger.shared.logInfo("Couldn't update tree record id: \(record.rootId) \(error)", category: .browsingTreeNetwork)
         }
 
+    }
+    func softDeleteBrowsingTrees(olderThan days: Int, maxRows: Int) throws {
+        let now = BeamDate.now
+        let timeCond = BrowsingTreeRecord.Columns.rootCreatedAt <= now - Double(days * 24 * 60 * 60)
+        let rankSubQuery = BrowsingTreeRecord.select(BrowsingTreeRecord.Columns.rootId)
+            .order(BrowsingTreeRecord.Columns.rootCreatedAt.desc)
+            .limit(maxRows)
+
+        try _ = dbWriter.write { db in
+            try BrowsingTreeRecord
+                .filter(timeCond || !rankSubQuery.contains(BrowsingTreeRecord.Columns.rootId))
+                .updateAll(db,
+                           BrowsingTreeRecord.Columns.deletedAt.set(to: now),
+                           BrowsingTreeRecord.Columns.updatedAt.set(to: now),
+                           BrowsingTreeRecord.Columns.flattenedData.set(to: nil)
+                )
+        }
     }
     // MARK: - LinkStore
     func getLinks(matchingUrl url: String) -> [UUID: Link] {
