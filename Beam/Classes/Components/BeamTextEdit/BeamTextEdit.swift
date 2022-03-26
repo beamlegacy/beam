@@ -125,6 +125,8 @@ public extension CALayer {
                 }.store(in: &self.noteCancellables)
             self.delayedInit = false
             self.rootNode = root
+            let newSize = self.computeIntrinsicContentSize()
+            self.frame = CGRect(origin: self.frame.origin, size: newSize)
             self.sign.end(Signs.updateRoot)
         }
 
@@ -520,8 +522,7 @@ public extension CALayer {
     // This is the root node of what we are editing:
     var rootNode: TextRoot? {
         didSet {
-            guard oldValue != rootNode else { return }
-            invalidateLayout()
+            actualInvalidateLayout()
         }
     }
 
@@ -596,7 +597,8 @@ public extension CALayer {
     static let minimumEmptyEditorWidth = CGFloat(670)
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
-    override public var intrinsicContentSize: NSSize {
+
+    func computeIntrinsicContentSize() -> NSSize {
         guard !delayedInit, !frame.isEmpty, let rootNode = rootNode else {
             if let root = unpreparedRoot, journalMode {
                 let fontSize = Int(TextNode.fontSizeFor(kind: .bullet)) * 3
@@ -605,6 +607,7 @@ public extension CALayer {
                 }
                 return NSSize(width: Self.minimumEmptyEditorWidth, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
             }
+
             return NSSize(width: Self.minimumEmptyEditorWidth, height: Self.minimumEmptyEditorHeight)
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
@@ -619,6 +622,10 @@ public extension CALayer {
         return safeContentSize
     }
 
+    override public var intrinsicContentSize: NSSize {
+        return computeIntrinsicContentSize()
+    }
+
     private var dragging = false
     func startSelectionDrag() { dragging = true }
     func stopSelectionDrag() { dragging = false }
@@ -631,17 +638,22 @@ public extension CALayer {
         _ = scrollToVisible(centeredSpot)
     }
 
-    var layoutInvalidated = true
+    var layoutInvalidated = false
     public func invalidateLayout() {
         guard !inRelayout, !layoutInvalidated else { return }
         layoutInvalidated = true
         invalidateIntrinsicContentSize()
         if journalMode || realContentSize.height <= safeContentSize.height {
             // then we are identical, so the system will not call for a relayout
-            superview?.invalidateIntrinsicContentSize()
-            DispatchQueue.main.async { [weak self] in
-                self?.relayoutRoot()
-            }
+            actualInvalidateLayout()
+        }
+    }
+
+    private func actualInvalidateLayout() {
+        layoutInvalidated = true
+        superview?.invalidateIntrinsicContentSize()
+        DispatchQueue.main.async { [weak self] in
+            self?.relayoutRoot()
         }
     }
 
@@ -1642,12 +1654,14 @@ public extension CALayer {
         enclosingScrollView?.pageDown(sender)
     }
 
-//    override public func scrollLineUp(_ sender: Any?) {
-//    }
-//
-//    override public func scrollLineDown(_ sender: Any?) {
-//    }
-//
+    override public func scrollLineUp(_ sender: Any?) {
+        enclosingScrollView?.scrollLineUp(sender)
+    }
+
+    override public func scrollLineDown(_ sender: Any?) {
+        enclosingScrollView?.scrollLineDown(sender)
+    }
+
     override public func scrollToBeginningOfDocument(_ sender: Any?) {
         scroll(.zero)
     }
