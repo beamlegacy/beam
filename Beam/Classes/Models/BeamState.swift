@@ -282,7 +282,7 @@ import Sentry
     /// - Parameters:
     ///   - url: the URL to open.
     ///   - originalQuery: optional search query to configure the browsing tree with.
-    ///   - setCurrent: optional flag to set created tab as the new focussed tab. Defaults to true.
+    ///   - setCurrent: optional flag to set created tab as the new focused tab. Defaults to true.
     ///   - note: optional BeamNote to set as destination.
     ///   - rootElement: optional root BeamElement where collected content with be added to.
     ///   - webView: optional webview to create a new tab with
