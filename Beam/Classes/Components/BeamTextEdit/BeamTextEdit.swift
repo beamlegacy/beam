@@ -1291,25 +1291,25 @@ public extension CALayer {
         let eventPoint = convert(event.locationInWindow)
         let widgets = rootNode.getWidgetsBetween(startPos, eventPoint)
 
-        if let selection = rootNode.state.nodeSelection, let focussedNode = focusedWidget as? ElementNode {
+        if let selection = rootNode.state.nodeSelection, let focusedNode = focusedWidget as? ElementNode {
             var textNodes = widgets.compactMap { $0 as? ElementNode }
             if eventPoint.y < startPos.y {
                 textNodes = textNodes.reversed()
             }
-            selection.start = focussedNode
-            selection.append(focussedNode)
+            selection.start = focusedNode
+            selection.append(focusedNode)
             for textNode in textNodes {
                 if !selection.nodes.contains(textNode) {
                     selection.append(textNode)
                 }
             }
             for selectedNode in selection.nodes {
-                if !textNodes.contains(selectedNode) && selectedNode != focussedNode && !selectedNode.parentIsSelectedAndClosed {
+                if !textNodes.contains(selectedNode) && selectedNode != focusedNode && !selectedNode.parentIsSelectedAndClosed {
                     selection.remove(selectedNode)
                 }
             }
             if textNodes.isEmpty {
-                selection.end = focussedNode
+                selection.end = focusedNode
             } else {
                 guard let lastNode = textNodes.last else { return }
                 selection.end = lastNode
