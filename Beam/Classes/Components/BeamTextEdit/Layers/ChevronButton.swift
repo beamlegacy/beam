@@ -27,19 +27,23 @@ class ChevronButton: ButtonLayer {
             self.changed(self.open)
         }
 
-        self.layer.bounds = chevron.bounds
-        self.layer.addSublayer(chevron)
-        self.layer.actions = [
-            "opacity": NSNull()
-        ]
-        updateChevron()
+        DispatchQueue.mainSync {
+            self.layer.bounds = self.chevron.bounds
+            self.layer.addSublayer(self.chevron)
+            self.layer.actions = [
+                "opacity": NSNull()
+            ]
+            self.updateChevron()
+        }
 
         setAccessibilityRole(.disclosureTriangle)
     }
 
     func updateChevron() {
-        chevron.setAffineTransform(CGAffineTransform(rotationAngle: open ? CGFloat.pi / 2 : 0))
-        setAccessibilityLabel("disclosure triangle \(open ? "opened" : "closed")")
+        DispatchQueue.mainSync {
+            self.chevron.setAffineTransform(CGAffineTransform(rotationAngle: self.open ? CGFloat.pi / 2 : 0))
+            self.setAccessibilityLabel("disclosure triangle \(self.open ? "opened" : "closed")")
+        }
     }
 
     override func updateColors() {
