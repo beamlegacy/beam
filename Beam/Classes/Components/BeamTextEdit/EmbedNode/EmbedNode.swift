@@ -158,6 +158,23 @@ class EmbedNode: ResizableNode {
 
         setAccessibilityLabel("EmbedNode")
         setAccessibilityRole(.textArea)
+
+        element.changed.sink { [weak self] change in
+            let updatedElement = change.0
+            let contentGeometry = MediaContentGeometry(
+                sizePreferencesStorage: updatedElement,
+                sizePreferencesPersistenceStrategy: .displayHeight
+            )
+            self?.contentGeometry = contentGeometry
+
+            if let embedContent = self?.embedContent {
+                self?.contentGeometry.setGeometryDescription(.embed(embedContent))
+            }
+
+            if updatedElement.collapsed != self?.isCollapsed {
+                self?.isUserCollapsed = updatedElement.collapsed
+            }
+        }.store(in: &scope)
     }
 
     override func updateRendering() -> CGFloat {
