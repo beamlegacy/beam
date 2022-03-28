@@ -308,6 +308,7 @@ extension TextRoot {
 
                 if node.textCount == 0 {
                     // we are in an empty text node: delete it
+                    moveChildrenOf(node, to: prevNode, atOffset: node.displayedElement.indexInParent)
                     cmdManager.focusElement(prevNode, cursorPosition: prevNode.textCount)
                     cmdManager.deleteElement(for: textNode)
                     return
