@@ -1941,6 +1941,8 @@ public extension CALayer {
         updateDragIndicator(at: nil)
     }
 
+    static let maximumImageSize = 40*1024*1024
+
     public override func performDragOperation(_ sender: NSDraggingInfo) -> Bool {
         guard let rootNode = rootNode else { return false }
         defer {
@@ -1960,7 +1962,7 @@ public extension CALayer {
         let afterNode: ElementNode? = dragResult.shouldBeAfter ? nil : dragResult.element.previousSibbling() as? ElementNode
         for url in files.reversed() {
             guard let url = url as? URL,
-                  let data = try? Data(contentsOf: url)
+                  var data = try? Data(contentsOf: url)
             else { continue }
             //Logger.shared.logInfo("File dropped: \(url) - \(data) - \(data.SHA256)")
 
@@ -1968,6 +1970,14 @@ public extension CALayer {
             else {
                 Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
                 return false
+            }
+
+            if data.count > Self.maximumImageSize {
+                data = image.jpegRepresentation
+                if data.count > Self.maximumImageSize {
+                    UserAlert.showError(message: "This image is too large for beam.", informativeText: "Please use images that are smaller than 40MB.", buttonTitle: "Cancel")
+                    return false
+                }
             }
 
             let fileManager = BeamFileDBManager.shared
