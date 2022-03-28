@@ -266,6 +266,11 @@ extension BeamTextEdit {
 
         let jpegImageData = image.jpegRepresentation
 
+        if jpegImageData.count > Self.maximumImageSize {
+            UserAlert.showError(message: "This image is too large for beam.", informativeText: "Please use images that are smaller than 40MB.", buttonTitle: "Cancel")
+            return
+        }
+
         let fileManager = BeamFileDBManager.shared
         do {
             let cmdManager = node.cmdManager
