@@ -481,7 +481,9 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
 
         #if DEBUG
-        layer.backgroundColor = debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
+        self.performLayerChanges {
+            self.layer.backgroundColor = self.debug ? NSColor.systemPink.withAlphaComponent(0.1).cgColor : nil
+        }
         #endif
 
         updateSubLayersLayout()
@@ -794,7 +796,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
     func addLayer(_ layer: Layer, origin: CGPoint? = nil, global: Bool = false, at index: UInt32? = nil) {
-        CATransaction.disableAnimations {
+        performLayerChanges(true) {
             layer.widget = self
             layer.frame = CGRect(origin: origin ?? layer.frame.origin, size: layer.frame.size).rounded()
 
@@ -803,8 +805,8 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             layer.updateColorsIfNeeded()
 
             if global {
-                editor?.addToMainLayer(layer.layer, at: index)
-                layer.layer.isHidden = !inVisibleBranch
+                self.editor?.addToMainLayer(layer.layer, at: index)
+                layer.layer.isHidden = !self.inVisibleBranch
             } else if layer.layer.superlayer == nil {
                 if let index = index {
                     self.layer.insertSublayer(layer.layer, at: index)
@@ -815,7 +817,6 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
                 layer.setAccessibilityParent(self)
             }
-
             self.layers[layer.name] = layer
         }
     }
@@ -825,11 +826,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     func removeLayer(_ name: String) {
-        guard let l = layers[name] else { return }
         performLayerChanges {
+            guard let l = self.layers[name] else { return }
             l.layer.removeFromSuperlayer()
+            self.layers.removeValue(forKey: name)
         }
-        layers.removeValue(forKey: name)
     }
 
     func dispatchHover(_ widgets: Set<Widget>, last: Widget?) {
