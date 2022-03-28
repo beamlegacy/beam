@@ -36,6 +36,8 @@ class ImageNode: ResizableNode {
     private var imageName: String?
     private var imageSourceURL: URL?
 
+    private var geometryDescription: MediaContentGeometryDescription
+
     var lottieView: AnimationView?
 
     var isCollapsed: Bool {
@@ -61,9 +63,25 @@ class ImageNode: ResizableNode {
             sizePreferencesPersistenceStrategy: .contentSize
         )
 
+        geometryDescription = .image(sized: .zero)
         super.init(parent: parent, element: element, availableWidth: availableWidth, contentGeometry: contentGeometry)
 
         setupImage(width: availableWidth)
+
+        element.changed.sink { [weak self] change in
+            guard let self = self else { return }
+            let updatedElement = change.0
+            let contentGeometry = MediaContentGeometry(
+                sizePreferencesStorage: updatedElement,
+                sizePreferencesPersistenceStrategy: .contentSize
+            )
+            self.contentGeometry = contentGeometry
+            self.contentGeometry.setGeometryDescription(self.geometryDescription)
+
+            if updatedElement.collapsed != self.isCollapsed {
+                self.isCollapsed = updatedElement.collapsed
+            }
+        }.store(in: &scope)
     }
 
     override func setBottomPaddings(withDefault: CGFloat = 0) {
@@ -122,7 +140,8 @@ class ImageNode: ResizableNode {
         if let animatedImageLayer = Layer.animatedImage(named: "image", imageData: imageRecord.data) {
             animatedImageLayer.layer.position = .zero
             imageLayer = animatedImageLayer
-            contentGeometry.setGeometryDescription(.image(sized: animatedImageLayer.bounds.size))
+            geometryDescription = .image(sized: animatedImageLayer.bounds.size)
+            contentGeometry.setGeometryDescription(geometryDescription)
         } else {
             guard let image = createImage(from: imageRecord) else {
                 Logger.shared.logError("ImageNode unable to decode image '\(uid)' from FileDB", category: .noteEditor)
@@ -144,8 +163,8 @@ class ImageNode: ResizableNode {
                       return
                   }
 
-            contentGeometry.setGeometryDescription(.image(sized: imageSize))
-
+            geometryDescription = .image(sized: imageSize)
+            contentGeometry.setGeometryDescription(geometryDescription)
             imageLayer = Layer.image(named: "image", image: image, size: contentGeometry.displaySize)
         }
 
