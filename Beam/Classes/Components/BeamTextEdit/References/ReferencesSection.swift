@@ -17,12 +17,13 @@ class ReferencesSection: LinksSection {
 
     override func setupUI(openChildren: Bool) {
         super.setupUI(openChildren: openChildren)
-
-        linkActionLayer.font = BeamFont.medium(size: 0).nsFont
-        linkActionLayer.fontSize = 12
-        linkActionLayer.contentsScale = contentsScale
-        linkActionLayer.alignmentMode = .center
-        linkActionLayer.string = "Link All"
+        performLayerChanges {
+            self.linkActionLayer.font = BeamFont.medium(size: 0).nsFont
+            self.linkActionLayer.fontSize = 12
+            self.linkActionLayer.contentsScale = self.contentsScale
+            self.linkActionLayer.alignmentMode = .center
+            self.linkActionLayer.string = "Link All"
+        }
     }
 
     override var links: [BeamNoteReference] { note.fastReferences }
@@ -98,19 +99,19 @@ class ReferencesSection: LinksSection {
     }
 
     override func updateSubLayersLayout() {
-        CATransaction.disableAnimations {
-            setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: availableWidth, height: 1)
+        performLayerChanges(true) {
+            self.setupLayerFrame()
+            self.separatorLayer.frame = CGRect(x: 0, y: self.sectionTitleLayer.frame.maxY + 4, width: self.availableWidth, height: 1)
 
-            guard let linkAllLayer = linkLayer else { return }
+            guard let linkAllLayer = self.linkLayer else { return }
             linkAllLayer.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
-            let linkActionLayerFrameSize = linkActionLayer.preferredFrameSize()
+            let linkActionLayerFrameSize = self.linkActionLayer.preferredFrameSize()
 
-            linkAllLayer.frame = CGRect(origin: CGPoint(x: availableWidth - linkActionLayerFrameSize.width - 10, y: -3), size: NSSize(width: 54, height: 21))
+            linkAllLayer.frame = CGRect(origin: CGPoint(x: self.availableWidth - linkActionLayerFrameSize.width - 10, y: -3), size: NSSize(width: 54, height: 21))
 
             let linkActionLayerXPosition = linkAllLayer.bounds.width / 2 - linkActionLayerFrameSize.width / 2
             let linkActionLayerYPosition = linkAllLayer.bounds.height / 2 - linkActionLayerFrameSize.height / 2
-            linkActionLayer.frame = CGRect(x: linkActionLayerXPosition, y: linkActionLayerYPosition,
+            self.linkActionLayer.frame = CGRect(x: linkActionLayerXPosition, y: linkActionLayerYPosition,
                                            width: linkActionLayerFrameSize.width, height: linkActionLayerFrameSize.height)
         }
     }
