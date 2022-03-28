@@ -109,14 +109,6 @@ class WebTestView: BaseView {
     @discardableResult
     func activateSearchFieldFromTab(index: Int) -> OmniBoxTestView {
         let tab = getTabByIndex(index: index)
-        if !waitForIsHittable(tab) {
-            //button(WebViewLocators.Buttons.goToJournalButton.accessibilityIdentifier).hover()
-            //XCTAssertTrue(waitForIsHittable(tab), "Timeout waiting for tab to be hittable")
-            shortcutsHelper.shortcutActionInvoke(action: .openLocation)
-            sleep(1000)
-            shortcutsHelper.shortcutActionInvoke(action: .openLocation)
-        }
-        tab.hover()
         tab.tapInTheMiddle()
         return OmniBoxTestView()
     }
