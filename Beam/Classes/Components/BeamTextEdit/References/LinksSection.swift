@@ -62,32 +62,34 @@ class LinksSection: Widget {
     }
 
     func setupUI(openChildren: Bool) {
-        sign.begin(Signs.setupUI)
-        defer { sign.end(Signs.setupUI) }
+        performLayerChanges {
+            self.sign.begin(Signs.setupUI)
+            defer { self.sign.end(Signs.setupUI) }
 
-        let chevron = ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
-            self.open = value
-            guard let root = self.parent as? TextRoot else { return }
-            root.editor?.hideInlineFormatter()
-            root.cancelSelection(.current)
-        })
-        chevron.setAccessibilityIdentifier("linksSection_arrow")
-        addLayer(chevron)
+            let chevron = ChevronButton("disclosure", open: openChildren, changed: { [unowned self] value in
+                self.open = value
+                guard let root = self.parent as? TextRoot else { return }
+                root.editor?.hideInlineFormatter()
+                root.cancelSelection(.current)
+            })
+            chevron.setAccessibilityIdentifier("linksSection_arrow")
+            self.addLayer(chevron)
 
-        sectionTitleLayer.font = BeamFont.semibold(size: 0).nsFont
-        sectionTitleLayer.fontSize = 12
+            self.sectionTitleLayer.font = BeamFont.semibold(size: 0).nsFont
+            self.sectionTitleLayer.fontSize = 12
 
-        addLayer(ButtonLayer("sectionTitle", sectionTitleLayer, activated: { [weak self] in
-            guard let self = self else { return }
-            guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
+            self.addLayer(ButtonLayer("sectionTitle", self.sectionTitleLayer, activated: { [weak self] in
+                guard let self = self else { return }
+                guard let chevron = self.layers["disclosure"] as? ChevronButton else { return }
 
-            self.open.toggle()
-            chevron.open = self.open
-        }))
-        self.layer.addSublayer(separatorLayer)
-        childInset = 9
+                self.open.toggle()
+                chevron.open = self.open
+            }))
+            self.layer.addSublayer(self.separatorLayer)
+            self.childInset = 9
 
-        self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: open ? 7 : 0, right: 0)
+            self.contentsPadding = NSEdgeInsets(top: 0, left: 0, bottom: self.open ? 7 : 0, right: 0)
+        }
     }
 
     var links: [BeamNoteReference] { note.links }
@@ -238,15 +240,20 @@ class LinksSection: Widget {
 //    }
 
     func updateHeading(_ count: Int) {
-        sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
+        performLayerChanges {
+            self.sectionTitleLayer.string = "link".localizedStringWith(comment: "link section title", count)
+        }
     }
 
     override var children: [Widget] {
         didSet {
             selfVisible = !children.isEmpty
             visible = selfVisible
-            sectionTitleLayer.isHidden = !selfVisible
-            separatorLayer.isHidden = !selfVisible
+            let _selfVisible = selfVisible
+            performLayerChanges {
+                self.sectionTitleLayer.isHidden = !_selfVisible
+                self.separatorLayer.isHidden = !_selfVisible
+            }
         }
     }
 
@@ -264,16 +271,16 @@ class LinksSection: Widget {
     }
 
     func setupLayerFrame() {
-        let linkAllLayer = layers["linkAllLayer"]
-        sectionTitleLayer.frame = CGRect(
+        let linkAllLayer = self.layers["linkAllLayer"]
+        self.sectionTitleLayer.frame = CGRect(
             origin: CGPoint(x: 26, y: 1),
             size: CGSize(
-                width: linkAllLayer?.frame.minX ?? availableWidth,
-                height: sectionTitleLayer.preferredFrameSize().height
+                width: linkAllLayer?.frame.minX ?? self.availableWidth,
+                height: self.sectionTitleLayer.preferredFrameSize().height
             )
         )
 
-        layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: sectionTitleLayer.preferredFrameSize().height / 2 - 8.5), size: CGSize(width: 20, height: 20))
+        self.layers["disclosure"]?.frame = CGRect(origin: CGPoint(x: 0, y: self.sectionTitleLayer.preferredFrameSize().height / 2 - 8.5), size: CGSize(width: 20, height: 20))
     }
 
     override func updateRendering() -> CGFloat {
@@ -281,17 +288,19 @@ class LinksSection: Widget {
     }
 
     override func updateSubLayersLayout() {
-        CATransaction.disableAnimations {
-            setupLayerFrame()
-            separatorLayer.frame = CGRect(x: 0, y: sectionTitleLayer.frame.maxY + 4, width: availableWidth, height: 1)
+        performLayerChanges {
+            self.setupLayerFrame()
+            self.separatorLayer.frame = CGRect(x: 0, y: self.sectionTitleLayer.frame.maxY + 4, width: self.availableWidth, height: 1)
         }
     }
 
     override func updateColors() {
         super.updateColors()
 
-        sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
-        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
+        performLayerChanges {
+            self.sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
+            self.separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
+        }
     }
 
     override var mainLayerName: String {
