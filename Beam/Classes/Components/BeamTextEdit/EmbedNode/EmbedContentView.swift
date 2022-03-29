@@ -16,10 +16,9 @@ final class EmbedContentView: NSView {
 
     private let borderRadius: CGFloat = 3
 
-    init(frame frameRect: NSRect, webViewProvider: BeamWebViewProviding) {
+    init(frame frameRect: NSRect, webViewProvider: BeamWebViewProviding, loadingView: NSView) {
         self.webViewProvider = webViewProvider
 
-        let loadingView = EmbedLoadingView()
         loadingView.autoresizingMask = [.width, .height]
         self.loadingView = loadingView
 
@@ -73,6 +72,7 @@ final class EmbedContentView: NSView {
         guard let webView = webView, webView.superview == nil else { return }
 
         loadingView?.removeFromSuperview()
+        loadingView = nil
         webView.frame = bounds
         addSubview(webView)
 

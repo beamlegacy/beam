@@ -1,0 +1,15 @@
+{
+  "images" : [
+    {
+      "filename" : "embed-logo_twitter.pdf",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  },
+  "properties" : {
+    "preserves-vector-representation" : true
+  }
+}
