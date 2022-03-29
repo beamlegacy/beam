@@ -250,9 +250,14 @@ extension BeamTextEdit {
         guard let type = UTType(tag: url.pathExtension.lowercased(), tagClass: .filenameExtension, conformingTo: nil),
               type.isSubtype(of: .image),
               let image = NSImage(contentsOf: url) else {
-            Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
-            return
-        }
+                  Logger.shared.logError("Unable to load image from url \(url)", category: .noteEditor)
+
+                  // paste the URL as text
+                  let attributedStr = NSAttributedString(string: url.absoluteString, attributes: [.link: url])
+                  paste(attributedStrings: [attributedStr])
+
+                  return
+              }
 
         paste(image: image, with: url.lastPathComponent)
     }
