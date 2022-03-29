@@ -97,7 +97,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
-    var invalidateOnHover = true
+    var invalidateOnHover = false
 
     /// Returns true if the mouse cursor is over this widget or one of its children.
     var hover: Bool = false
