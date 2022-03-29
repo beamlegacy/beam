@@ -16,7 +16,7 @@ class DomainPath0TreeStatsStorage: DomainPath0TreeStatsStorageProtocol {
     init(db: GRDBDatabase = GRDBDatabase.shared) {
         self.db = db
     }
-    func update(treeId: UUID, url: String, readTime: Double,  date: Date) {
+    func update(treeId: UUID, url: String, readTime: Double, date: Date) {
         guard let url = URL(string: url),
               !url.isSearchEngineResultPage,
               let domainPath0 = url.domainPath0?.absoluteString else { return }
