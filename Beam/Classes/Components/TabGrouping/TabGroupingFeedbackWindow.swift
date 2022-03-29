@@ -26,22 +26,22 @@ class TabGroupingFeedbackViewModel: ObservableObject {
             }
         }
 
-        guard let pages = self.clusteringManager.allOpenPages else { return }
+        let pages = self.clusteringManager.openBrowsing.allOpenBrowsingPages
         let pagesGrouped = self.groups.flatMap({ $0.pageIDs })
-        for page in pages where !pagesGrouped.contains(where: { $0 == page.pageId }) {
-            guard let pageId = page.pageId, let hueTint = getNewhueTint() else { continue }
+        for page in pages where !pagesGrouped.contains(where: { $0 == page }) {
+            guard let pageId = page, let hueTint = getNewhueTint() else { continue }
             self.groups.append(TabClusteringGroup(pageIDs: [pageId], hueTint: hueTint))
         }
     }
 
     func urlFor(pageId: UUID) -> URL? {
-        guard let tree = self.clusteringManager.allOpenBrowsingTrees?.first(where: {$0.browsingTree?.current.link == pageId}),
+        guard let tree = self.clusteringManager.openBrowsing.allOpenBrowsingTrees.first(where: {$0.browsingTree?.current.link == pageId}),
                 let urlStr = tree.browsingTree?.current.url else { return nil }
         return URL(string: urlStr)
     }
 
     func titleFor(pageId: UUID) -> String? {
-        guard let tree = self.clusteringManager.allOpenBrowsingTrees?.first(where: {$0.browsingTree?.current.link == pageId}) else { return nil }
+        guard let tree = self.clusteringManager.openBrowsing.allOpenBrowsingTrees.first(where: {$0.browsingTree?.current.link == pageId}) else { return nil }
         return tree.browsingTree?.current.title
     }
 

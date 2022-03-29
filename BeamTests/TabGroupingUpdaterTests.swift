@@ -9,7 +9,7 @@ import Foundation
 class TabGroupingUpdaterTests: XCTestCase {
     private var updater: TabGroupingUpdater!
     private var urlGroups: [[ClusteringManager.PageID]]!
-    private var openPages: [ClusteringManager.PageOpenInTab]!
+    private var openPages: [ClusteringManager.PageID]!
     private var pageIDs: [ClusteringManager.PageID] = []
 
     override func setUp() {
@@ -23,8 +23,8 @@ class TabGroupingUpdaterTests: XCTestCase {
             [pageIDs[2]],
             [pageIDs[3], pageIDs[4], pageIDs[5], pageIDs[6]]
         ]
-        openPages = [.init(pageId: pageIDs[0]), .init(pageId: pageIDs[1]), .init(pageId: pageIDs[2]),
-                     .init(pageId: pageIDs[4]), .init(pageId: pageIDs[5])
+        openPages = [pageIDs[0], pageIDs[1], pageIDs[2],
+                     pageIDs[4], pageIDs[5]
         ]
     }
 
