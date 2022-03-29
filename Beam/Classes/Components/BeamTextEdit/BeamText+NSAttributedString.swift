@@ -87,7 +87,7 @@ extension BeamText {
 
         //If current node contains the current search result, block invalidate on hover during the bump animation
         //If not, the layer is redrawn before animation is over.
-        if node.currentSearchHightlight != nil {
+        if node.currentSearchHightlight != nil, node.invalidateOnHover {
             node.invalidateOnHover = false
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
                 node.invalidateOnHover = true
