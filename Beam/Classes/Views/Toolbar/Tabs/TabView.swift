@@ -178,11 +178,8 @@ struct TabView: View {
                 let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
                 let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
                 HStack(spacing: iconSpacing) {
-                    if shouldShowClose && !hasEnoughSpaceForClose {
-                        closeIcon
-                    } else {
-                        iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
-                    }
+                    iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
+                        .opacity(shouldShowClose && !hasEnoughSpaceForClose ? 0 : 1)
                     Text(tab.title)
                         .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
                         .allowsHitTesting(false)
@@ -296,13 +293,10 @@ struct TabView: View {
                 Spacer(minLength: BeamSpacing._40)
             } else {
                 Rectangle().fill(Color.clear).frame(minWidth: hPadding)
-                    .overlay(GeometryReader { geometryProxy in
-                        ZStack(alignment: .leading) {
-                            if geometryProxy.size.width >= estimatedLeadingViewsWidth {
-                                leadingViews.transition(sideViewsTransition)
-                            }
-                        }.padding(.leading, hPadding).frame(maxHeight: .infinity)
-                    }, alignment: .leading)
+                    .overlay(
+                        leadingViews.transition(sideViewsTransition).padding(.leading, hPadding),
+                        alignment: .leading
+                    )
             }
 
             // Center Content
