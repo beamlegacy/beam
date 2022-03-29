@@ -61,7 +61,7 @@ final class WebFieldLocator {
             return
         }
         parentFrames[frame.href] = frame
-        guard let frameInfo = frameInfo else {
+        guard frameInfo != nil else {
             return
         }
         updateFieldPosition()
