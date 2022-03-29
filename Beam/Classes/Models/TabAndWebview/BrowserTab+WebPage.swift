@@ -34,6 +34,7 @@ extension BrowserTab: WebPage {
     func setDestinationNote(_ note: BeamNote, rootElement: BeamElement? = nil) {
         noteController.setDestination(note: note, rootElement: rootElement)
         state?.destinationCardName = note.title
+        state?.recentsManager.currentNoteChanged(note)
         browsingTree.destinationNoteChange()
     }
 
