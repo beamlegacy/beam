@@ -369,11 +369,10 @@ import Promises
             guard let webviewUrl = webviewUrl else {
                 return // webview probably failed to load
             }
-
-            // For security reason, we shoud only update the URL from JS when the new one is from same origin
-            // If the page is loading, we are not navigating through JS, so URL will be updated in webView(_, didCommit) in BeamWebNavigationController
+            // For security reason, we shoud only update the URL from JS when the new one is from same origin.
+            // Otherwise we can wait and URL will be updated in webView(_, didCommit) in BeamWebNavigationController
             // https://github.com/mozilla-mobile/firefox-ios/wiki/WKWebView-navigation-and-security-considerations#single-page-js-apps-spas
-            if !webView.isLoading, let url = url, webviewUrl.isSameOrigin(as: url) {
+            if let url = url, webviewUrl.isSameOrigin(as: url) {
                 self.url = webviewUrl
             }
         }.store(in: &webViewCancellables)
