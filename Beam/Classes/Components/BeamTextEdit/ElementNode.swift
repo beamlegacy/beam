@@ -245,20 +245,22 @@ public class ElementNode: Widget {
 
         let selectionLayerPos = CGPoint(x: Self.indentLayerPositionX - childInset, y: selectionLayerPosY)
 
-        if selectedAlone {
-            selectionLayer.position = selectionLayerPos
-            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth,
-                                                height: selectionLayerHeight)
-        } else {
-            guard let parent = self.parent else { return }
+        performLayerChanges {
+            if self.selectedAlone {
+                self.selectionLayer.position = selectionLayerPos
+                self.selectionLayer.bounds.size = CGSize(width: self.selectionLayerWidth,
+                                                         height: self.selectionLayerHeight)
+            } else {
+                guard let parent = self.parent else { return }
 
-            selectionLayer.position = selectionLayerPos
-            selectionLayer.position.x += selectionLayerPosX
-            selectionLayer.position.y -= parent.childrenSpacing
-            selectionLayer.bounds.size = CGSize(width: selectionLayerWidth - selectionLayerPosX,
-                                                height: selectionLayerHeight + parent.childrenSpacing)
-            if !self.children.isEmpty && self.open {
-                selectionLayer.bounds.size.height -= childrenSpacing
+                self.selectionLayer.position = selectionLayerPos
+                self.selectionLayer.position.x += self.selectionLayerPosX
+                self.selectionLayer.position.y -= parent.childrenSpacing
+                self.selectionLayer.bounds.size = CGSize(width: self.selectionLayerWidth - self.selectionLayerPosX,
+                                                         height: self.selectionLayerHeight + parent.childrenSpacing)
+                if !self.children.isEmpty && self.open {
+                    self.selectionLayer.bounds.size.height -= self.childrenSpacing
+                }
             }
         }
     }
@@ -586,9 +588,11 @@ public class ElementNode: Widget {
 
         let layer = self.cursorLayer
 
-        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
-        layer.layer.isHidden = !on
-        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        performLayerChanges {
+            layer.shapeLayer.fillColor = self.enabled ? self.cursorColor.cgColor : self.disabledColor.cgColor
+            layer.layer.isHidden = !on
+            layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        }
     }
 
     public func updateElementCursor() {
@@ -597,9 +601,11 @@ public class ElementNode: Widget {
         let cursorRect = NSRect(x: caretIndex == 0 ? (contentsLead - 5) : (availableWidth - contentsLead + 3), y: 0, width: 2, height: frame.height )//rectAt(caretIndex: caretIndex)
         let layer = self.cursorLayer
 
-        layer.shapeLayer.fillColor = enabled ? cursorColor.cgColor : disabledColor.cgColor
-        layer.layer.isHidden = !on
-        layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        performLayerChanges {
+            layer.shapeLayer.fillColor = self.enabled ? self.cursorColor.cgColor : self.disabledColor.cgColor
+            layer.layer.isHidden = !on
+            layer.shapeLayer.path = CGPath(rect: cursorRect, transform: nil)
+        }
     }
 
     func updateFocus() {}

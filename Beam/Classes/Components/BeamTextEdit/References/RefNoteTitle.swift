@@ -76,8 +76,10 @@ class RefNoteTitle: Widget {
     override func updateColors() {
         super.updateColors()
 
-        updateText()
-        updateTitleForHover(hover)
+        performLayerChanges {
+            self.updateText()
+            self.updateTitleForHover(self.hover)
+        }
     }
 
     private func updateTitleForHover(_ hover: Bool) {

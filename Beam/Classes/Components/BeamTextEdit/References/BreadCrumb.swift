@@ -88,23 +88,24 @@ class BreadCrumb: Widget {
     }
 
     func setupLayers(with note: BeamNote) {
-        containerLayer.cornerRadius = 3
-        container = Layer(name: "containerLayer", layer: containerLayer, hovered: { _ in })
+        performLayerChanges {
+            self.containerLayer.cornerRadius = 3
+            self.container = Layer(name: "containerLayer", layer: self.containerLayer, hovered: { _ in })
 
-        linkLayer.string = "Link"
-        linkLayer.font = BeamFont.medium(size: 0).nsFont
-        linkLayer.fontSize = 12
-        linkLayer.alignmentMode = .center
+            self.linkLayer.string = "Link"
+            self.linkLayer.font = BeamFont.medium(size: 0).nsFont
+            self.linkLayer.fontSize = 12
+            self.linkLayer.alignmentMode = .center
 
-        let linkContentLayer = CALayer()
-        linkContentLayer.frame = CGRect(
-                origin: CGPoint(x: availableWidth, y: actionLinkLayerheight),
+            let linkContentLayer = CALayer()
+            linkContentLayer.frame = CGRect(
+                origin: CGPoint(x: self.availableWidth, y: self.actionLinkLayerheight),
                 size: NSSize(width: 36, height: 21))
-        linkContentLayer.addSublayer(linkLayer)
+            linkContentLayer.addSublayer(self.linkLayer)
 
-        actionLayer = LinkButtonLayer(
+            self.actionLayer = LinkButtonLayer(
                 "actionLinkLayer",
-            linkContentLayer,
+                linkContentLayer,
                 activated: {[weak self] in
                     guard let self = self else { return }
                     self.convertReferenceToLink()
@@ -114,14 +115,15 @@ class BreadCrumb: Widget {
                     self.linkLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
                 }
             )
-        updateLinkLayerState()
-        guard let actionLayer = actionLayer else { return }
-        actionLayer.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
-        actionLayer.setAccessibilityIdentifier("link-reference-button")
-        addLayer(actionLayer)
+            self.updateLinkLayerState()
+            guard let actionLayer = self.actionLayer else { return }
+            actionLayer.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
+            actionLayer.setAccessibilityIdentifier("link-reference-button")
+            self.addLayer(actionLayer)
 
-        createCrumbLayers()
-        guard let container = container else { return }
+            self.createCrumbLayers()
+        }
+        guard let container = self.container else { return }
         addLayer(container)
     }
 
@@ -330,32 +332,32 @@ class BreadCrumb: Widget {
     override func updateColors() {
         super.updateColors()
 
-        containerLayer.backgroundColor = BeamColor.LinkedSection.container.cgColor
-        linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
+        performLayerChanges {
+            self.containerLayer.backgroundColor = BeamColor.LinkedSection.container.cgColor
+            self.linkLayer.foregroundColor = BeamColor.LinkedSection.actionButton.cgColor
+        }
     }
 
     var actionLinkLayerheight: CGFloat { crumbsHeight + contentsPadding.bottom - 1 }
     override func updateLayout() {
         super.updateLayout()
-        CATransaction.disableAnimations {
-            let linkLayerFrameSize = linkLayer.preferredFrameSize()
-            if let actionLinkLayer = actionLinkLayer {
+        performLayerChanges {
+            let linkLayerFrameSize = self.linkLayer.preferredFrameSize()
+            if let actionLinkLayer = self.actionLinkLayer {
                 actionLinkLayer.frame = CGRect(
-                    origin: CGPoint(x: availableWidth + containerPadding - 36 - 4, y: actionLinkLayerheight),
+                    origin: CGPoint(x: self.availableWidth + self.containerPadding - 36 - 4, y: self.actionLinkLayerheight),
                     size: NSSize(width: 36, height: 21)
                 )
                 let linkLayerXPosition = actionLinkLayer.bounds.width / 2 - linkLayerFrameSize.width / 2
                 let linkLayerYPosition = actionLinkLayer.bounds.height / 2 - linkLayerFrameSize.height / 2
-                linkLayer.frame = CGRect(x: linkLayerXPosition, y: linkLayerYPosition,
+                self.linkLayer.frame = CGRect(x: linkLayerXPosition, y: linkLayerYPosition,
                                          width: linkLayerFrameSize.width, height: linkLayerFrameSize.height)
             }
-        }
 
-        if open {
-            let childrenHeight = idealChildrenSize.height + crumbsHeight - childrenPadding.bottom - childrenPadding.top - contentsPadding.bottom - contentsPadding.top
-            CATransaction.disableAnimations {
-                guard let container = container else { return }
-                container.frame = NSRect(x: 0, y: -2, width: availableWidth + containerPadding, height: childrenHeight + containerPadding)
+            if self.open {
+                let childrenHeight = self.idealChildrenSize.height + self.crumbsHeight - self.childrenPadding.bottom - self.childrenPadding.top - self.contentsPadding.bottom - self.contentsPadding.top
+                guard let container = self.container else { return }
+                container.frame = NSRect(x: 0, y: -2, width: self.availableWidth + self.containerPadding, height: childrenHeight + self.containerPadding)
             }
         }
     }
