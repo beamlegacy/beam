@@ -522,7 +522,9 @@ public class TextNode: ElementNode {
         let actionLayer = ShortcutLayer(name: Self.cmdEnterLayer, text: "Search", icons: ["shortcut-cmd+return"]) { [unowned self] _ in
             self.editor?.startQuery(self, true)
         }
-        actionLayer.layer.isHidden = true
+        performLayerChanges {
+            actionLayer.layer.isHidden = true
+        }
         addLayer(actionLayer, origin: CGPoint(x: availableWidth + childInset + actionLayerPadding, y: firstLineBaseline), global: false)
         return actionLayer
     }
@@ -530,11 +532,14 @@ public class TextNode: ElementNode {
     func updateActionLayer(animate: Bool) {
         guard let actionLayer = createActionLayerIfNeeded() else { return }
         let actionLayerYPosition = isHeader ? (contentsFrame.height / 2) - actionLayer.frame.height : 0
+
         if animate {
-            actionLayer.frame = CGRect(x: availableWidth + childInset + actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height).rounded()
+            performLayerChanges {
+                actionLayer.frame = CGRect(x: self.availableWidth + self.childInset + self.actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height).rounded()
+            }
         } else {
-            CATransaction.disableAnimations {
-                actionLayer.frame = CGRect(x: availableWidth + childInset + actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height).rounded()
+            performLayerChanges(true) {
+                actionLayer.frame = CGRect(x: self.availableWidth + self.childInset + self.actionLayerPadding, y: actionLayerYPosition, width: actionLayer.frame.width, height: actionLayer.frame.height).rounded()
             }
         }
     }
@@ -601,7 +606,9 @@ public class TextNode: ElementNode {
 
     func updateActionLayerVisibility(hidden: Bool) {
         guard let actionLayer = createActionLayerIfNeeded() else { return }
-        actionLayer.layer.isHidden = hidden
+        performLayerChanges {
+            actionLayer.layer.isHidden = hidden
+        }
     }
 
     private func isHoveringText() -> Bool {

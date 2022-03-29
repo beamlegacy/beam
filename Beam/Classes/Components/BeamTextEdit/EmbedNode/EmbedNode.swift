@@ -195,9 +195,7 @@ class EmbedNode: ResizableNode {
     override func updateColors() {
         super.updateColors()
 
-        performLayerChanges {
-            self.focusBeamLayer?.layer.backgroundColor = self.focusColor
-        }
+        focusBeamLayer?.layer.backgroundColor = self.focusColor
     }
 
     override func setBottomPaddings(withDefault: CGFloat) {
