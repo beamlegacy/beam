@@ -28,8 +28,11 @@ class ClusteringManager: ObservableObject {
         let browserTabManagerId: UUID
     }
 
-    public struct PageOpenInTab {
-        let pageId: PageID?
+    public struct AllBrowsingTreesOpenInTabs {
+        var allOpenBrowsingTrees = [BrowsingTreeOpenInTab]()
+        var allOpenBrowsingPages: [PageID?] {
+            allOpenBrowsingTrees.map { $0.browsingTree?.current?.link }
+        }
     }
 
     enum InitialiseNotes {
@@ -78,12 +81,7 @@ class ClusteringManager: ObservableObject {
     let LongTermUrlScoreStoreProtocol = LongTermUrlScoreStore.shared
     let frecencyFetcher = LinkStoreFrecencyUrlStorage()
     var summary: SummaryForNewDay
-    var allOpenBrowsingTrees: [BrowsingTreeOpenInTab]? {
-        didSet {
-            self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
-        }
-    }
-    var allOpenPages: [PageOpenInTab]?
+    var openBrowsing = AllBrowsingTreesOpenInTabs()
     public var continueToNotes = [UUID]()
     public var continueToPage: PageID?
 
@@ -442,8 +440,7 @@ class ClusteringManager: ObservableObject {
     }
 
     private func updateTabColors() {
-        self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
-        self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.allOpenPages)
+        self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.openBrowsing.allOpenBrowsingPages)
     }
 
     private func updateNoteSources() {
@@ -499,11 +496,10 @@ class ClusteringManager: ObservableObject {
                 let informationForId = self.cluster.getExportInformationForId(id: noteId)
                 sessionExporter.add(anyUrl: AnyUrl(noteName: BeamNote.fetch(id: noteId, includeDeleted: false)?.title, url: nil, groupId: group.offset, navigationGroupId: nil, tabColouringGroupId: nil, userCorrectionGroupId: nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: nil, id: noteId, parentId: nil))
             }
-            self.allOpenPages = self.allOpenBrowsingTrees?.map { PageOpenInTab(pageId: $0.browsingTree?.current?.link) }
             for urlId in group.element {
                 let url = LinkStore.linkFor(urlId)?.url
                 let informationForId = self.cluster.getExportInformationForId(id: urlId)
-                let isOpenAtExport = self.allOpenPages?.map { $0.pageId }.contains(urlId)
+                let isOpenAtExport = self.openBrowsing.allOpenBrowsingPages.contains(urlId)
                 let correctionGroupId = correctedPages?[urlId]
 
                 let tabColouringGroupId = self.tabGroupingUpdater.builtPagesGroups[urlId]?.id
