@@ -17,7 +17,11 @@ extension NSImage {
     }
 
     func fill(color: NSColor) -> NSImage {
-        guard let image = self.copy() as? NSImage else { return self }
+        guard
+            size != .zero,
+            let image = self.copy() as? NSImage else {
+            return self
+        }
 
         image.isTemplate = true
         image.lockFocus()
