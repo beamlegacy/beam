@@ -566,9 +566,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
     final func updateColorsIfNeeded() {
         // Stop if appearance has not changed since last pass
-        guard currentAppearance == nil || (currentAppearance != NSApp.effectiveAppearance) else { return }
-        updateColors()
-        currentAppearance = NSApp.effectiveAppearance
+        performLayerChanges {
+            guard self.currentAppearance == nil || (self.currentAppearance != NSApp.effectiveAppearance) else { return }
+            self.updateColors()
+            self.currentAppearance = NSApp.effectiveAppearance
+        }
     }
 
     var selectionLayerWidth: CGFloat {
@@ -584,14 +586,16 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     private func configureSelectionLayer() {
-        selectionLayer.anchorPoint = CGPoint()
-        selectionLayer.cornerRadius = 2
-        selectionLayer.frame = NSRect(x: 0, y: 0, width: layer.frame.width, height: layer.frame.height).rounded()
-        selectionLayer.setNeedsDisplay()
-        selectionLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
-        selectionLayer.name = "SelectionLayer"
-        selectionLayer.zPosition = -1
-        layer.addSublayer(selectionLayer)
+        performLayerChanges {
+            self.selectionLayer.anchorPoint = CGPoint()
+            self.selectionLayer.cornerRadius = 2
+            self.selectionLayer.frame = NSRect(x: 0, y: 0, width: self.layer.frame.width, height: self.layer.frame.height).rounded()
+            self.selectionLayer.setNeedsDisplay()
+            self.selectionLayer.backgroundColor = NSColor(white: 1, alpha: 0).cgColor
+            self.selectionLayer.name = "SelectionLayer"
+            self.selectionLayer.zPosition = -1
+            self.layer.addSublayer(self.selectionLayer)
+        }
     }
 
     func configureLayer() {
