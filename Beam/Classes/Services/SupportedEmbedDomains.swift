@@ -1,11 +1,5 @@
-//
-//  SupportedEmbedDomains.swift
-//  Beam
-//
-//  Created by Stef Kors on 03/12/2021.
-//
-
 import Foundation
+import Combine
 import BeamCore
 
 class SupportedEmbedDomains {
@@ -17,31 +11,100 @@ class SupportedEmbedDomains {
     /// Pattern with the right character escaping for JavaScript
     private(set) var javaScriptPattern: String = initialJavaScriptPattern
 
+    private var providersRequestFuture: Future<EmbedProvidersAPIResult, Error>?
     private var lastUpdate: Date?
+    private var cancellables = Set<AnyCancellable>()
 
     init () { updateDomainsSupportedByAPI() }
 
     func updateDomainsSupportedByAPI() {
-        // Only query the API if the dictionary is empty or if the last update was more than a day ago.
-        // The dictonary gets cleared when Beam is restarted.
-        guard providers.isEmpty || moreThanADayAgo(date: lastUpdate) else { return }
+        cancellables = []
 
-        RestAPIServer().request(serverRequest: RestAPIServer.Request.providers) { (result: Result<EmbedProvidersAPIResult, Error>) in
-            switch result {
-                // swiftlint:disable:next empty_enum_arguments
-            case .failure(let error):
-                Logger.shared.logDebug("Failed to update supported Embed API domains: \(error.localizedDescription)", category: .embed)
-            case .success(let successResult):
-                self.providers = successResult.providers
-                self.javaScriptPattern = successResult.pattern
-                self.nativePattern = successResult.pattern.replacingOccurrences(of: "\\\\", with: "\\")
-                self.lastUpdate = BeamDate.now
+        providersPublisher()
+            .sink { completion in
+                if case let .failure(error) = completion {
+                    Logger.shared.logDebug(
+                        "Failed to update supported Embed API domains: \(error.localizedDescription)",
+                        category: .embed
+                    )
+                }
+            } receiveValue: { [weak self] result in
+                self?.providers = result.providers
+                self?.javaScriptPattern = result.pattern
+                self?.nativePattern = result.pattern.replacingOccurrences(of: "\\\\", with: "\\")
+                self?.lastUpdate = BeamDate.now
+            }
+            .store(in: &cancellables)
+    }
+
+    /// Returns a publisher that eventually resolves with the embed provider for a URL.
+    func provider(for url: URL) -> AnyPublisher<EmbedProvider, Error> {
+        let range = NSRange(location: 0, length: url.absoluteString.count)
+
+        return providersPublisher()
+            .tryMap { [url] result -> EmbedProvider in
+                let provider = result.providers
+                    .first { _, pattern in
+                        guard let regexp = try? NSRegularExpression(pattern: pattern, options: [.caseInsensitive]) else {
+                            return false
+                        }
+                        let matches = regexp.numberOfMatches(in: url.absoluteString, options: [], range: range)
+                        return matches != 0
+                    }
+                    .map { EmbedProvider(rawValue: $0.key) ?? EmbedProvider.unknown }
+
+                if let provider = provider {
+                    return provider
+                } else {
+                    throw EmbedProviderError.unknownProvider
+                }
+            }
+            .eraseToAnyPublisher()
+    }
+
+    /// Returns a publisher that eventually resolves with the API response when received, or resolves immediately
+    /// if a response has been previously received.
+    private func providersPublisher() -> AnyPublisher<EmbedProvidersAPIResult, Error> {
+        // Only query the API if the last update was more than a day ago.
+        // The dictonary gets cleared when Beam is restarted.
+        if let lastUpdate = lastUpdate, moreThanADayAgo(since: lastUpdate) {
+            // Clear cached API result
+            providersRequestFuture = nil
+        }
+
+        if let future = providersRequestFuture {
+            return future.eraseToAnyPublisher()
+        }
+
+        let future = Future<EmbedProvidersAPIResult, Error> { promise in
+            RestAPIServer().request(serverRequest: RestAPIServer.Request.providers) { (result: Result<EmbedProvidersAPIResult, Error>) in
+                switch result {
+                case let .failure(error): promise(.failure(error))
+                case let .success(result): promise(.success(result))
+                }
             }
         }
+
+        providersRequestFuture = future
+        return future.eraseToAnyPublisher()
     }
+
+    private func moreThanADayAgo(since date: Date) -> Bool {
+        let minute: Double = 60.0
+        let hour: Double = 60.0 * minute
+        let day: Double = 24 * hour
+
+        return DateInterval(start: date, end: BeamDate.now) > DateInterval(start: BeamDate.now, duration: day)
+    }
+
+    // MARK: -
 
     enum EmbedContentAPIStrategyError: Error {
         case parsingCachedItem
+    }
+
+    enum EmbedProviderError: Error {
+        case unknownProvider
     }
 
     private struct EmbedProvidersAPIResult: Codable {
@@ -49,14 +112,6 @@ class SupportedEmbedDomains {
         var providers: [String: String]
     }
 
-    private func moreThanADayAgo(date: Date? = nil) -> Bool {
-        guard let lastUpdate = date else { return false }
-        let minute: Double = 60.0
-        let hour: Double = 60.0 * minute
-        let day: Double = 24 * hour
-
-        return DateInterval(start: lastUpdate, end: BeamDate.now) > DateInterval(start: BeamDate.now, duration: day)
-    }
 }
 
 extension SupportedEmbedDomains {
