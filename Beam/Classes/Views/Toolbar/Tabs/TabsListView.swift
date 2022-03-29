@@ -24,6 +24,7 @@ struct TabsListView: View {
     private let dropAnimationDuration = 0.2
 
     @State private var hoveredIndex: Int?
+    @State private var isChangingTabsCountWhileHovering: Bool = false
     @State private var scrollOffset: CGFloat = 0
     @State private var scrollContentSize: CGFloat = 0
     @State private var draggableTabsAreas: [CGRect] = [] {
@@ -38,6 +39,13 @@ struct TabsListView: View {
         var lastTouchWasOnUnselectedTab: Bool = false
         var singleTabCenteringAdjustment: CGFloat = 0
         var singleTabCurrentFrame: CGRect?
+        var mouseMoveMonitor: Any?
+
+        deinit {
+            if let monitor = mouseMoveMonitor {
+                NSEvent.removeMonitor(monitor)
+            }
+        }
     }
 
     private var isDraggingATab: Bool {
@@ -137,8 +145,8 @@ struct TabsListView: View {
                 emptyDragSpacer
                 separator.opacity(hideSeparator ? 0 : 1)
             }
-            TabView(tab: tab, isSelected: selected, isPinned: tab.isPinned, isSingleTab: isSingle,
-                    isDragging: isTheDraggedTab, disableAnimations: isAnimatingDrop, hueTint: hueTint,
+            TabView(tab: tab, isSelected: selected, isPinned: tab.isPinned, isSingleTab: isSingle, isDragging: isTheDraggedTab,
+                    disableAnimations: isAnimatingDrop, disableHovering: isChangingTabsCountWhileHovering, hueTint: hueTint,
                     onTouchDown: { onTabTouched(at: index) },
                     onTap: { onTabTapped(at: index) },
                     onClose: { onTabClose(at: index) },
@@ -285,6 +293,11 @@ struct TabsListView: View {
                 guard let newValue = newValue else { return }
                 updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: newValue)
             }
+            .onChange(of: tabs.count) { _ in
+                guard hoveredIndex != nil else { return }
+                isChangingTabsCountWhileHovering = true
+                startTrackingMouseMove()
+            }
         }
     }
 
@@ -339,6 +352,18 @@ struct TabsListView: View {
     private func onTabTapped(at index: Int) {
         guard !isDraggingATab, selectedIndex == index, !viewModel.lastTouchWasOnUnselectedTab else { return }
         state.startFocusOmnibox(fromTab: true)
+    }
+
+    private func startTrackingMouseMove() {
+        guard viewModel.mouseMoveMonitor == nil else { return }
+        viewModel.mouseMoveMonitor = NSEvent.addLocalMonitorForEvents(matching: [.mouseMoved]) {
+            isChangingTabsCountWhileHovering = false
+            if let monitor = viewModel.mouseMoveMonitor {
+                NSEvent.removeMonitor(monitor)
+                viewModel.mouseMoveMonitor = nil
+            }
+            return $0
+        }
     }
 
     private func onTabClose(at index: Int, fromContextMenu: Bool = false) {
@@ -442,7 +467,22 @@ extension TabsListView {
                 pasteAndGo(on: tab)
             }
         }
-        let thirdGroup = Group {
+
+        return Group {
+            firstGroup
+            Divider()
+            secondGroup
+            Divider()
+            contextMenuItemCloseGroup(forTabAtIndex: index)
+            if Configuration.branchType == .develop {
+                Divider()
+                contextMenuItemDebugGroup()
+            }
+        }
+    }
+
+    private func contextMenuItemCloseGroup(forTabAtIndex index: Int) -> some View {
+        Group {
             Button("Close Tab") {
                 onTabClose(at: index, fromContextMenu: true)
             }
@@ -453,24 +493,14 @@ extension TabsListView {
                 state.closeTabsToTheRight(of: index)
             }.disabled(index + 1 >= tabs.count || tabs.allSatisfy({ $0.isPinned }))
         }
+    }
 
-        let debugGroup = Group {
+    private func contextMenuItemDebugGroup() -> some View {
+        Group {
             if PreferencesManager.showTabsColoring {
                 Button("Tab Grouping Feedback") {
                     AppDelegate.main.showTabGroupingFeedbackWindow(self)
                 }
-            }
-        }
-
-        return Group {
-            firstGroup
-            Divider()
-            secondGroup
-            Divider()
-            thirdGroup
-            if Configuration.branchType == .develop {
-                Divider()
-                debugGroup
             }
         }
     }
