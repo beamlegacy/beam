@@ -11,7 +11,10 @@ class ReferencesSection: LinksSection {
 
     override var open: Bool {
         didSet {
-            linkLayer?.layer.isHidden = !open
+            let o = open
+            performLayerChanges {
+                self.linkLayer?.layer.isHidden = !o
+            }
         }
     }
 
@@ -51,11 +54,13 @@ class ReferencesSection: LinksSection {
     }
 
     override func updateHeading(_ count: Int) {
-        sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", count)
-        selfVisible = count != 0
-        visible = selfVisible
-        sectionTitleLayer.isHidden = !selfVisible
-        separatorLayer.isHidden = !selfVisible
+        performLayerChanges {
+            self.sectionTitleLayer.string = "reference".localizedStringWith(comment: "reference section title", count)
+            self.selfVisible = count != 0
+            self.visible = self.selfVisible
+            self.sectionTitleLayer.isHidden = !self.selfVisible
+            self.separatorLayer.isHidden = !self.selfVisible
+        }
     }
 
     override func shouldHandleReference(rootNote: String, rootNoteId: UUID, text: BeamText, proxy: ProxyTextNode?) -> Bool {
@@ -71,28 +76,30 @@ class ReferencesSection: LinksSection {
     }
 
     func createLinkAllLayer() {
-        let linkContentLayer = CALayer()
-        linkContentLayer.addSublayer(linkActionLayer)
+        performLayerChanges {
+            let linkContentLayer = CALayer()
+            linkContentLayer.addSublayer(self.linkActionLayer)
 
-        linkLayer = LinkButtonLayer(
-            "linkAllLayer",
-            linkContentLayer,
-            activated: { [weak self] in
-                guard let self = self else { return }
+            self.linkLayer = LinkButtonLayer(
+                "linkAllLayer",
+                linkContentLayer,
+                activated: { [weak self] in
+                    guard let self = self else { return }
 
-                if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
+                    if let linkLayer = self.linkLayer, linkLayer.layer.isHidden { return }
 
-                for child in self.children {
-                    for crumb in child.children {
-                        guard let breadCrumb = crumb as? BreadCrumb else { continue }
-                        breadCrumb.convertReferenceToLink()
+                    for child in self.children {
+                        for crumb in child.children {
+                            guard let breadCrumb = crumb as? BreadCrumb else { continue }
+                            breadCrumb.convertReferenceToLink()
+                        }
                     }
-                }
-            }, hovered: {[weak self] isHover in
-                guard let self = self else { return }
+                }, hovered: {[weak self] isHover in
+                    guard let self = self else { return }
 
-                self.linkActionLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
-            })
+                    self.linkActionLayer.foregroundColor = isHover ? BeamColor.LinkedSection.actionButtonHover.cgColor : BeamColor.LinkedSection.actionButton.cgColor
+                })
+        }
         guard let linkLayer = linkLayer else { return }
         linkLayer.setAccessibilityIdentifier("link-all-references-button")
         addLayer(linkLayer)

@@ -58,13 +58,17 @@ class BrowsingNodeWidget: Widget {
         let score = linkScore.score
         textLayer.string = "\(score) - \(linkText)"
 
-        layer.addSublayer(textLayer)
-        textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: textLayer.preferredFrameSize())
+        performLayerChanges {
+            self.layer.addSublayer(self.textLayer)
+            self.textLayer.frame = CGRect(origin: CGPoint(x: 25, y: 0), size: self.textLayer.preferredFrameSize())
+        }
     }
 
     override var contentsScale: CGFloat {
         didSet {
-            textLayer.contentsScale = contentsScale
+            performLayerChanges {
+                self.textLayer.contentsScale = self.contentsScale
+            }
         }
     }
 
