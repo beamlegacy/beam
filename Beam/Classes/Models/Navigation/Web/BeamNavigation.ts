@@ -74,5 +74,6 @@ export class BeamNavigation {
 
     this.win.addEventListener("replaceState", this.locationChanged.bind(this))
     this.win.addEventListener("pushState", this.locationChanged.bind(this))
+    this.win.addEventListener("popstate", this.locationChanged.bind(this))
   }
 }
