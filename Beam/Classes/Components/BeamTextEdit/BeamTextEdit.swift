@@ -127,6 +127,10 @@ public extension CALayer {
             self.rootNode = root
             let newSize = self.computeIntrinsicContentSize()
             self.frame = CGRect(origin: self.frame.origin, size: newSize)
+            DispatchQueue.mainSync {
+                self.invalidateIntrinsicContentSize()
+                self.superview?.invalidateIntrinsicContentSize()
+            }
             self.sign.end(Signs.updateRoot)
         }
 
@@ -179,10 +183,12 @@ public extension CALayer {
 
     func addToMainLayer(_ layer: CALayer, at index: UInt32? = nil) {
         //Logger.shared.logDebug("addToMainLayer: \(layer.name)")
-        if let index = index {
-            self.layer?.insertSublayer(layer, at: index)
-        } else {
-            self.layer?.addSublayer(layer)
+        DispatchQueue.mainSync {
+            if let index = index {
+                self.layer?.insertSublayer(layer, at: index)
+            } else {
+                self.layer?.addSublayer(layer)
+            }
         }
     }
 
@@ -642,7 +648,10 @@ public extension CALayer {
     public func invalidateLayout() {
         guard !inRelayout, !layoutInvalidated else { return }
         layoutInvalidated = true
-        invalidateIntrinsicContentSize()
+        DispatchQueue.mainSync {
+            self.invalidateIntrinsicContentSize()
+        }
+
         if journalMode || realContentSize.height <= safeContentSize.height {
             // then we are identical, so the system will not call for a relayout
             actualInvalidateLayout()
@@ -651,7 +660,9 @@ public extension CALayer {
 
     private func actualInvalidateLayout() {
         layoutInvalidated = true
-        superview?.invalidateIntrinsicContentSize()
+        DispatchQueue.mainSync {
+            self.superview?.invalidateIntrinsicContentSize()
+        }
         DispatchQueue.main.async { [weak self] in
             self?.relayoutRoot()
         }

@@ -297,10 +297,8 @@ class LinksSection: Widget {
     override func updateColors() {
         super.updateColors()
 
-        performLayerChanges {
-            self.sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
-            self.separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
-        }
+        sectionTitleLayer.foregroundColor = BeamColor.LinkedSection.sectionTitle.cgColor
+        separatorLayer.backgroundColor = BeamColor.LinkedSection.separator.cgColor
     }
 
     override var mainLayerName: String {
