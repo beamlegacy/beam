@@ -25,6 +25,7 @@ struct TabView: View {
     var isSingleTab: Bool = false
     var isDragging: Bool = false
     var disableAnimations: Bool = false
+    var disableHovering: Bool = false
     var hueTint: Double?
     var onTouchDown: (() -> Void)?
     var onTap: (() -> Void)?
@@ -82,13 +83,6 @@ struct TabView: View {
         let icon = isSecure ? "tabs-security" : "tabs-security_risk"
         let color = isSecure ? BeamColor.AlphaGray : BeamColor.Shiraz
         return Icon(name: icon, color: color.swiftUI).opacity(isSecure ? 1 : 0.4)
-    }
-
-    private var displayedTitle: String {
-        if isHovering && isSelected, let url = tab.url {
-            return url.urlStringWithoutScheme
-        }
-        return tab.title
     }
 
     private func leadingViews(shouldShowClose: Bool) -> some View {
@@ -213,7 +207,7 @@ struct TabView: View {
                 // single tab width should be max(tabTitleWidth, minSingleTabWidth).
                 // Using overlay over unhover content to produce this layout.
                 centerViewDefaultContent(shouldShowSecurity: false, shouldShowClose: false,
-                                            leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
                     .frame(minWidth: Self.minSingleTabWidth)
                     .opacity(0)
                     .overlay(GeometryReader { proxy in
@@ -243,7 +237,7 @@ struct TabView: View {
 
     private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
         ZStack {
-            let isHovering = isEnabled && (isHovering || isDragging)
+            let isHovering = isEnabled && !disableHovering && (isHovering || isDragging)
             let showForegroundHoverStyle = isHovering && isSelected
             let shouldShowClose = isHovering
             if let copyMessage = copyMessage {
@@ -255,7 +249,7 @@ struct TabView: View {
                     .transition(centerViewTransition(foregroundHoverStyle: true))
             } else {
                 centerViewDefaultContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
-                                            leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
                     .transition(centerViewTransition(foregroundHoverStyle: false))
             }
         }
@@ -269,7 +263,7 @@ struct TabView: View {
     ///  and have no jumps between different hover and animation states,
     ///  we often need to display a hidden version of leading or trailing views.
     private func content(isHovering: Bool, containerGeometry: GeometryProxy) -> some View {
-        let isHovering = isEnabled && (isHovering || isDragging)
+        let isHovering = isEnabled && !disableHovering && (isHovering || isDragging)
         let shouldShowTitle = shouldShowTitle(geometry: containerGeometry)
         let shouldShowSecurity = isHovering && tab.url != nil && isSelected
         let shouldShowCopy = isHovering && shouldShowTitle && tab.url != nil
