@@ -31,10 +31,10 @@ class TabGroupingUpdater {
 
     @Published private(set) var builtPagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
 
-    func removeClosedPages(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageOpenInTab]) -> [[ClusteringManager.PageID]] {
+    func removeClosedPages(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]) -> [[ClusteringManager.PageID]] {
         var newUrlGroups = [[ClusteringManager.PageID]]()
         for group in urlGroups where group.count > 0 {
-            newUrlGroups.append(group.filter { Set(openPages.map { $0.pageId }).contains($0) })
+            newUrlGroups.append(group.filter { Set(openPages).contains($0) })
         }
         return newUrlGroups
     }
@@ -52,7 +52,7 @@ class TabGroupingUpdater {
         return newUrlGroups
     }
 
-    func update(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageOpenInTab]? = nil) {
+    func update(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]? = nil) {
         myQueue.async {
             var groupsOfOpen = urlGroups
             if let openPages = openPages {
