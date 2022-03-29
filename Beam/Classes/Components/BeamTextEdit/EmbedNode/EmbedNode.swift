@@ -381,23 +381,41 @@ extension EmbedNode {
 
         let webViewProvider = BeamWebViewProvider(editor: editor, elementId: elementId, url: url)
 
-        let view = EmbedContentView(frame: .zero, webViewProvider: webViewProvider)
-        view.layer?.anchorPoint = .zero
-        view.delegate = self
+        let loadingView = EmbedLoadingView()
+        let contentView = EmbedContentView(
+            frame: .zero,
+            webViewProvider: webViewProvider,
+            loadingView: loadingView
+        )
+        contentView.layer?.anchorPoint = .zero
+        contentView.delegate = self
 
+        // Load embed HTML markup
         Self.fetchEmbedContent(url: url)
             .sink { [url] completion in
                 if case .failure = completion {
+                    loadingView.showError()
                     Logger.shared.logError("Embed Node couldn't load content for \(url.absoluteString)", category: .embed)
                 }
             } receiveValue: { [weak self] embedContent in
                 self?.embedContent = embedContent
                 self?.saveElementTitleIfNeeded()
-                view.startLoadingWebView(embedContent: embedContent)
+                contentView.startLoadingWebView(embedContent: embedContent)
             }
             .store(in: &cancellables)
 
-        return view
+        // Retrieve provider name in order to set the placeholder image
+        Self.fetchProvider(for: url)
+            .sink { completion in
+                if case .failure = completion {
+                    loadingView.showDefaultImage()
+                }
+            } receiveValue: { provider in
+                loadingView.showImage(for: provider)
+            }
+            .store(in: &cancellables)
+
+        return contentView
     }
 
     private func makeCollapsedContent() -> CollapsedContentLayer? {
@@ -569,6 +587,12 @@ extension EmbedNode {
 
     private static func fetchEmbedContent(url: URL) -> AnyPublisher<EmbedContent, EmbedContentError> {
         EmbedContentBuilder().embeddableContentFromAnyStrategy(for: url)
+            .receive(on: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+
+    private static func fetchProvider(for url: URL) -> AnyPublisher<EmbedProvider, Error> {
+        SupportedEmbedDomains.shared.provider(for: url)
             .receive(on: DispatchQueue.main)
             .eraseToAnyPublisher()
     }
