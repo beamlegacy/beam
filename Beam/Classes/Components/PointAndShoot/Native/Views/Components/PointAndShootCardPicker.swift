@@ -118,7 +118,7 @@ struct PointAndShootCardPicker: View {
                         .padding(BeamSpacing._40)
                         .background(
                             Token(text: cardSearchField, currentCardName: currentCardName, tokenize: cursorIsOnCardName,
-                                  selectedResult: lastInputWasBackspace ? nil : autocompleteModel.selectedResult?.text, completed: completed)
+                                  selectedResult: lastInputWasBackspace ? nil : autocompleteModel.selectedResult, completed: completed)
                         )
                     } else if completedGroup?.confirmation == .success {
                         Text(destinationCardName ?? getFinalCardName())
@@ -224,9 +224,16 @@ extension PointAndShootCardPicker {
         var text: String
         var currentCardName: String?
         var tokenize: Bool = false
-        var selectedResult: String?
+        var selectedResult: AutocompleteResult?
         var completed: Bool = false
 
+        private var autocompleteText: String? {
+            guard let result = selectedResult else { return nil }
+            guard case .note = selectedResult?.source else { return nil }
+            let autocompleteText = result.text.replacingOccurrences(of: text, with: "", options: [.anchored, .caseInsensitive])
+            guard autocompleteText.lowercased() != result.text.lowercased() && !autocompleteText.isEmpty else { return nil }
+            return autocompleteText
+        }
         var body: some View {
             Group {
                 let color = tokenize ? BeamColor.NotePicker.active.swiftUI : BeamColor.NotePicker.selected.swiftUI
@@ -238,29 +245,25 @@ extension PointAndShootCardPicker {
                             .overlay(color.cornerRadius(4.0))
                         Spacer()
                     }
-                } else if let result = selectedResult {
+                } else if let autocompleteText = autocompleteText {
                     // MARK: - Autocomplete Token
-                    let autocompleteText = result.replacingOccurrences(of: text, with: "", options: [.anchored, .caseInsensitive])
                     // only show auto complete inline if we replaced an Occurence the result
-                    if autocompleteText.lowercased() != selectedResult?.lowercased(), autocompleteText.count > 0 {
-                        HStack(spacing: 4) {
-                            Text(text).font(BeamFont.regular(size: 13).swiftUI)
-                                .hidden()
-                                .padding(0)
-                            Text(autocompleteText)
-                                .padding(EdgeInsets(top: BeamSpacing._40, leading: 0, bottom: BeamSpacing._40, trailing: BeamSpacing._40))
-                                .font(BeamFont.regular(size: 13).swiftUI)
-                                .foregroundColor(BeamColor.Beam.swiftUI)
-                                .overlay(
-                                    BeamColor.NotePicker.selected.swiftUI
-                                        .cornerRadius(4.0)
-                                        .animation(.easeInOut(duration: 0.1))
-                                )
-                                .animation(nil)
-
-                            Spacer()
-                        }.animation(nil)
-                    }
+                    HStack(spacing: 4) {
+                        Text(text).font(BeamFont.regular(size: 13).swiftUI)
+                            .hidden()
+                            .padding(0)
+                        Text(autocompleteText)
+                            .padding(EdgeInsets(top: BeamSpacing._40, leading: 0, bottom: BeamSpacing._40, trailing: BeamSpacing._40))
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.Beam.swiftUI)
+                            .overlay(
+                                BeamColor.NotePicker.selected.swiftUI
+                                    .cornerRadius(4.0)
+                                    .animation(.easeInOut(duration: 0.1))
+                            )
+                            .animation(nil)
+                        Spacer()
+                    }.animation(nil)
                 }
             }.opacity(!completed ? 1 : 0)
             .animation(.easeInOut(duration: 0.05), value: completed)
