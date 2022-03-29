@@ -73,7 +73,7 @@ class UserSessionRequest: APIRequest {
         let refreshToken: String?
         let errors: [UserErrorData]?
     }
-    
+
     struct AccountExistsParameters: Encodable {
         let email: String
     }
