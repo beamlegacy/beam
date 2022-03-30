@@ -89,7 +89,7 @@ public extension CALayer {
     }
 
     public var enableDelayedInit: Bool
-    private var delayedInit: Bool
+    public private(set) var delayedInit: Bool
     func updateRoot(with note: BeamElement) {
         sign.begin(Signs.updateRoot)
 
@@ -126,7 +126,7 @@ public extension CALayer {
             self.delayedInit = false
             self.rootNode = root
             let newSize = self.computeIntrinsicContentSize()
-            self.frame = CGRect(origin: self.frame.origin, size: newSize)
+            self.frame = CGRect(origin: self.frame.origin, size: CGSize(width: self.frame.width, height: newSize.height))
             DispatchQueue.mainSync {
                 self.invalidateIntrinsicContentSize()
                 self.superview?.invalidateIntrinsicContentSize()
@@ -473,7 +473,7 @@ public extension CALayer {
     }
 
     internal var nodesRect: NSRect {
-        let r = bounds
+        let r = frame
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         var rect = NSRect()
 
@@ -522,7 +522,8 @@ public extension CALayer {
 
     static func textNodeWidth(for containerSize: CGSize) -> CGFloat {
         let ratio = Self.bigThreshold / min(max(containerSize.width, Self.smallTreshold), Self.bigThreshold)
-        return max(PreferencesManager.editorMaxWidth / ratio, PreferencesManager.editorMinWidth)
+        let result = max(PreferencesManager.editorMaxWidth / ratio, PreferencesManager.editorMinWidth).rounded(.toNearestOrAwayFromZero)
+        return max(result, Self.minimumEmptyEditorWidth)
     }
 
     // This is the root node of what we are editing:
