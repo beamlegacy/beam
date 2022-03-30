@@ -277,6 +277,9 @@ class EmbedNode: ResizableNode {
         // Move expandedContent on top of moving layer (at zPosition 100)
         expandedContent?.layer?.zPosition = isDragging ? 101 : 1
 
+        // Change opacity of the embed content
+        expandedContent?.layer?.opacity = isDragging ? moveOpacityFactor : 1
+
         // Make sure to reset the transform
         expandedContent?.layer?.setAffineTransform(CGAffineTransform.identity)
 
@@ -465,7 +468,7 @@ extension EmbedNode {
 
     private func layoutExpandedContent() {
         guard !isCollapsed else { return }
-        guard !isDraggedForMove else { return }
+        guard !isDraggedForMove && !isDraggedForMoveByParent else { return }
 
         let frame = self.expandedContentFrameInEditorCoordinates
         performLayerChanges {

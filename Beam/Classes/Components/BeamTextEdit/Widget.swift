@@ -1160,7 +1160,20 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         }
     }
 
+    var isDraggedForMoveByParent: Bool {
+        guard let parent = parent else {
+            return false
+        }
+
+        if parent.isDraggedForMove {
+            return parent.isDraggedForMove
+        } else {
+            return parent.isDraggedForMoveByParent
+        }
+    }
+
     let moveScaleFactor = 1.05
+    let moveOpacityFactor: Float = 0.7
 
     func updateForMove(isDragging: Bool) {
         let scaleFactor = isDragging ? moveScaleFactor : 1.0
@@ -1168,7 +1181,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
 
         self.layer.setAffineTransform(transform)
         self.layer.zPosition = isDragging ? 100.0 : 0.0
-        self.layer.opacity = isDragging ? 0.7 : 1.0
+        self.layer.opacity = isDragging ? moveOpacityFactor : 1.0
         for c in children {
             c.updateForMove(isDragging: isDragging)
         }
