@@ -1086,6 +1086,7 @@
 		A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */; };
 		A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */; };
 		A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */; };
+		A5E408C527F4591F00641413 /* AutocompleteManager+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */; };
 		A5E7330827E21263000F3B2D /* AllNotesPageContentViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E7330727E21263000F3B2D /* AllNotesPageContentViewModel.swift */; };
 		A5E9D38F27293A260064E255 /* FaviconProviderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E9D38E27293A260064E255 /* FaviconProviderTests.swift */; };
 		A5EA892826A9C08100AB5A16 /* CalendarPickerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */; };
@@ -2529,6 +2530,7 @@
 		A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabUITests.swift; sourceTree = "<group>"; };
 		A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippedGeometryHelper.swift; sourceTree = "<group>"; };
 		A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RangesTests.swift"; sourceTree = "<group>"; };
+		A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Mocks.swift"; sourceTree = "<group>"; };
 		A5E7330727E21263000F3B2D /* AllNotesPageContentViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPageContentViewModel.swift; sourceTree = "<group>"; };
 		A5E9D38E27293A260064E255 /* FaviconProviderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaviconProviderTests.swift; sourceTree = "<group>"; };
 		A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CalendarPickerViewModelTests.swift; sourceTree = "<group>"; };
@@ -3626,6 +3628,7 @@
 			children = (
 				A5FE96CC2612469C002A2B73 /* AutocompleteManager.swift */,
 				A569EA2F26A196F600B0861B /* AutocompleteManager+Publishers.swift */,
+				A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */,
 				A5EE8C6327BB861D00800661 /* AutocompleteManager+DefaultActions.swift */,
 				A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */,
 				A5141FEF27E3E19F009D2D71 /* AutocompleteManager+Animations.swift */,
@@ -7308,6 +7311,7 @@
 				522D489D2719D1C00038DB81 /* LoggerNSWindow.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */,
+				A5E408C527F4591F00641413 /* AutocompleteManager+Mocks.swift in Sources */,
 				A5DE143226496F250023F753 /* NoteHeaderView.swift in Sources */,
 				418172272581107C00317ED8 /* NSMutableAttributedString+Range.swift in Sources */,
 				8A9B1A9F26DD33EA00B3B5FA /* PointAndShoot+Target.swift in Sources */,
