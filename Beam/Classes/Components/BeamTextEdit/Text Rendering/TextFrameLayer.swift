@@ -16,7 +16,9 @@ class TextFrameLayer: CALayer {
 
         for line in textFrame.lines {
             let lineLayer = line.layer
-            addSublayer(lineLayer)
+            CATransaction.disableAnimations {
+                addSublayer(lineLayer)
+            }
         }
 
         if debug {
