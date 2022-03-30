@@ -9,7 +9,7 @@ import Foundation
 import BeamCore
 import Combine
 
-class JournalSimpleStackView: NSView {
+class JournalSimpleStackView: NSView, BeamTextEditContainer {
     public var verticalSpace: CGFloat
     public var topOffset: CGFloat {
         didSet {
@@ -61,8 +61,11 @@ class JournalSimpleStackView: NSView {
         return true
     }
 
+    private var layoutInvalidated = false
+    private var inLayout = false
     public func invalidateLayout() {
-        guard !needsLayout else { return }
+        guard !layoutInvalidated, !inLayout else { return }
+        layoutInvalidated = true
         invalidateIntrinsicContentSize()
     }
 
@@ -87,7 +90,10 @@ class JournalSimpleStackView: NSView {
     //swiftlint:disable:next function_body_length
     public override func layout() {
         guard enclosingScrollView != nil else { return }
+        layoutInvalidated = false
+        inLayout = true
         defer {
+            inLayout = false
             insertedViews.removeAll()
             removedViews.removeAll()
         }
