@@ -150,7 +150,7 @@ extension AutocompleteManager {
         }
         guard !leftOverNotes.isEmpty else { return truncated }
         let minimumNumberOfNotes = Int(Double(limit) * 0.4) // 40% ex: 2 out of 6 results should be notes
-        let notesToAdd = leftovers.prefix(minimumNumberOfNotes)
+        let notesToAdd = leftOverNotes.prefix(minimumNumberOfNotes)
         truncated.removeLast(notesToAdd.count)
         truncated.append(contentsOf: notesToAdd)
         return truncated
