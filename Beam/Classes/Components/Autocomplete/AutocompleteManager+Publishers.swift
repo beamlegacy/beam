@@ -390,33 +390,3 @@ extension AutocompleteManager {
                                   completingText: result.completingText, score: result.score, urlFields: [])
     }
 }
-
-// MARK: - Quickly mock results for debugging
-#if DEBUG
-extension AutocompleteManager {
-
-    private func mockResultsPublisher(_ results: [AutocompleteResult]) -> Future<[AutocompleteResult], Error> {
-        Future { promise in
-            promise(.success(results))
-        }
-    }
-
-    func getMockAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
-        if searchText.count == 1 {
-            return [
-                futureToPublisher(mockResultsPublisher([
-                    .init(text: "netflix.com", source: .topDomain, url: URL(string: "netflix.com")!, completingText: searchText, urlFields: .text)
-                ]), source: .topDomain)
-            ]
-        } else {
-            return [
-                futureToPublisher(mockResultsPublisher([
-                    .init(text: "eloquentjavascript.net", source: .url, url: URL(string: "https://eloquentjavascript.net")!, information: "Eloquent Javascript", completingText: searchText, score: 190, urlFields: .text),
-                    .init(text: "eloquentjavascript.net/test", source: .url, url: URL(string: "https://eloquentjavascript.net/test")!, information: "Other Javascript", completingText: searchText, score: 110, urlFields: .text)
-                ]), source: .url)
-            ]
-        }
-    }
-}
-
-#endif
