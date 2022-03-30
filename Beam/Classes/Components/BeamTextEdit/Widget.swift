@@ -265,13 +265,13 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var offsetInDocument: NSPoint { // the position in the global document
         let parentOffset = parent?.offsetInDocument ?? NSPoint()
         let origin = frame.origin
-        return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
+        return NSPoint(x: (parentOffset.x + origin.x).rounded(.toNearestOrAwayFromZero), y: (parentOffset.y + origin.y).rounded(.toNearestOrAwayFromZero))
     }
 
     var offsetInRoot: NSPoint { // the position in the global document
         let parentOffset = parent?.offsetInRoot ?? NSPoint()
         let origin = frame.origin
-        return NSPoint(x: parentOffset.x + origin.x, y: parentOffset.y + origin.y)
+        return NSPoint(x: (parentOffset.x + origin.x).rounded(.toNearestOrAwayFromZero), y: (parentOffset.y + origin.y).rounded(.toNearestOrAwayFromZero))
     }
 
     var frameInDocument: NSRect {
@@ -462,7 +462,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var shouldDisableActions: Bool {
-        inInitialLayout || layer.isHidden || layer.frame.isEmpty || disableAnimationsForNextLayout
+        root == nil || (parent == nil && root != self) || (editor?.delayedInit ?? true) || inInitialLayout || layer.isHidden || layer.frame.isEmpty || disableAnimationsForNextLayout
     }
     final func setLayout(_ frame: NSRect) {
         self.frame = frame
@@ -472,9 +472,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             disableAnimationsForNextLayout = false
         }
 
+        let position = CGPoint(x: self.frameInDocument.origin.x + self.contentsFrame.origin.x, y: self.frameInDocument.origin.y + self.contentsFrame.origin.y)
+
         self.performLayerChanges {
             self.layer.bounds = self.contentsFrame
-            self.layer.position = CGPoint(x: self.frameInDocument.origin.x + self.contentsFrame.origin.x, y: self.frameInDocument.origin.y + self.contentsFrame.origin.y)
+            self.layer.position = position
             if let elem = self as? ElementNode {
                 elem.updateElementLayers()
             }
