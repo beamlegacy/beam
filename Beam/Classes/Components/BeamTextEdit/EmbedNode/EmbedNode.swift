@@ -467,8 +467,8 @@ extension EmbedNode {
         guard !isCollapsed else { return }
         guard !isDraggedForMove else { return }
 
-        let frame = self.expandedContentFrameInEditorCoordinates
         performLayerChanges {
+            let frame = self.expandedContentFrameInEditorCoordinates
             if !self.isResizing {
                 // Prevent UI jerkiness by disabling layer animations while the node is being resized
                 self.expandedContent?.layer?.frame = frame
