@@ -85,6 +85,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
                 edit?.hideInlineFormatter()
             }
         }
+        edit.frame = CGRect(origin: CGPoint.zero, size: edit.intrinsicContentSize)
     }
 
     private func updateEditorProperties(_ editor: BeamTextEdit, context: Context) {
@@ -179,5 +180,15 @@ extension BTextEditScrollable {
             parent.state.lastScrollOffset[parent.note.id] = clipView.bounds.origin.y.rounded() + 85
             onScroll?(clipView.bounds.origin)
         }
+    }
+}
+
+extension NSScrollView: BeamTextEditContainer {
+    func invalidateLayout() {
+        guard let view = documentView else {
+            invalidateIntrinsicContentSize()
+            return
+        }
+        view.frame = CGRect(origin: .zero, size: view.intrinsicContentSize)
     }
 }
