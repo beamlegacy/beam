@@ -13,6 +13,10 @@ import Combine
 import BeamCore
 import Swime
 
+protocol BeamTextEditContainer {
+    func invalidateLayout()
+}
+
 public struct SearchResult {
     public init(element: ElementNode, ranges: [NSRange]) {
         self.element = element
@@ -126,10 +130,10 @@ public extension CALayer {
             self.delayedInit = false
             self.rootNode = root
             let newSize = self.computeIntrinsicContentSize()
-            self.frame = CGRect(origin: self.frame.origin, size: CGSize(width: self.frame.width, height: newSize.height))
-            DispatchQueue.mainSync {
-                self.invalidateIntrinsicContentSize()
-                self.superview?.invalidateIntrinsicContentSize()
+            let newFrame = CGRect(origin: self.frame.origin, size: CGSize(width: max(self.frame.width, newSize.width), height: max(newSize.height, self.frame.height)))
+            self.frame = newFrame
+            DispatchQueue.main.async {
+                self.invalidateLayout()
             }
             self.sign.end(Signs.updateRoot)
         }
@@ -222,7 +226,6 @@ public extension CALayer {
         let l = CALayer()
         self.layer = l
         l.backgroundColor = BeamColor.Generic.background.cgColor
-        l.masksToBounds = false
         l.name = Self.mainLayerName
         l.delegate = self
         self.wantsLayer = true
@@ -659,10 +662,18 @@ public extension CALayer {
         }
     }
 
+    private func invalidateSuperViewIntrinsicContentSize() {
+        guard let superStack = superview as? BeamTextEditContainer else {
+            superview?.invalidateIntrinsicContentSize()
+            return
+        }
+        superStack.invalidateLayout()
+    }
+
     private func actualInvalidateLayout() {
         layoutInvalidated = true
         DispatchQueue.mainSync {
-            self.superview?.invalidateIntrinsicContentSize()
+            self.invalidateSuperViewIntrinsicContentSize()
         }
         DispatchQueue.main.async { [weak self] in
             self?.relayoutRoot()
