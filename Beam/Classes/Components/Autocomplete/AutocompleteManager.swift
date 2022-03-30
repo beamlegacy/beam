@@ -111,7 +111,7 @@ class AutocompleteManager: ObservableObject {
             publishers = getAutocompletePublishers(for: searchText)
             #if DEBUG
             // Use this to help you recreate situation producing bugs.
-            //  publishers = getAutocompleteMockPublishers(for: searchText)
+            // publishers = getMockAutocompletePublishers(for: searchText)
             #endif
         }
 
