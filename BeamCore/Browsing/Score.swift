@@ -30,6 +30,17 @@ extension Double {
     }
 }
 
+public protocol UrlScoreProtocol: AnyObject {
+    var urlId: UUID { get }
+    var visitCount: Int { get set }
+    var readingTimeToLastEvent: CFTimeInterval { get set }
+    var textSelections: Int { get set }
+    var scrollRatioX: Float { get set }
+    var scrollRatioY: Float { get set }
+    var textAmount: Int { get set }
+    var area: Float { get set }
+}
+
 public class Score: Codable, Equatable {
     public static func == (lhs: Score, rhs: Score) -> Bool {
         return lhs.readingTimeToLastEvent.almostEqual(rhs.readingTimeToLastEvent)
