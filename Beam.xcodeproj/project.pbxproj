@@ -1244,6 +1244,9 @@
 		DA2253692762426E00041D41 /* firefoxPlaces.db-shm in Resources */ = {isa = PBXBuildFile; fileRef = DA2253662762426E00041D41 /* firefoxPlaces.db-shm */; };
 		DA22536A2762426E00041D41 /* firefoxPlaces.db-wal in Resources */ = {isa = PBXBuildFile; fileRef = DA2253672762426E00041D41 /* firefoxPlaces.db-wal */; };
 		DA22536B2762426E00041D41 /* firefoxPlaces.db in Resources */ = {isa = PBXBuildFile; fileRef = DA2253682762426E00041D41 /* firefoxPlaces.db */; };
+		DA23C74F27F1B316005508EB /* DailyUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA23C74E27F1B316005508EB /* DailyUrlScore.swift */; };
+		DA23C75227F1C09D005508EB /* DailyUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA23C75127F1C09D005508EB /* DailyUrlScore.swift */; };
+		DA23C75427F31816005508EB /* DailyUrlStorageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA23C75327F31816005508EB /* DailyUrlStorageTest.swift */; };
 		DA3239D8269DDE2F00A1F4C3 /* LongTermUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */; };
 		DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
@@ -2746,6 +2749,9 @@
 		DA2253662762426E00041D41 /* firefoxPlaces.db-shm */ = {isa = PBXFileReference; lastKnownFileType = text; path = "firefoxPlaces.db-shm"; sourceTree = "<group>"; };
 		DA2253672762426E00041D41 /* firefoxPlaces.db-wal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = "firefoxPlaces.db-wal"; sourceTree = "<group>"; };
 		DA2253682762426E00041D41 /* firefoxPlaces.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = firefoxPlaces.db; sourceTree = "<group>"; };
+		DA23C74E27F1B316005508EB /* DailyUrlScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUrlScore.swift; sourceTree = "<group>"; };
+		DA23C75127F1C09D005508EB /* DailyUrlScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUrlScore.swift; sourceTree = "<group>"; };
+		DA23C75327F31816005508EB /* DailyUrlStorageTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DailyUrlStorageTest.swift; path = BeamTests/Classes/Models/GRDB/DailyUrlStorageTest.swift; sourceTree = SOURCE_ROOT; };
 		DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LongTermUrlScore.swift; sourceTree = "<group>"; };
 		DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LongTermUrlScore+GRDB.swift"; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
@@ -3026,6 +3032,7 @@
 				DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */,
 				DAF063F627D2532B000406DE /* BrowsingTreeStats.swift */,
 				DAF063FC27D275D0000406DE /* DomainPath0TreeStatsStorage.swift */,
+				DA23C74E27F1B316005508EB /* DailyUrlScore.swift */,
 			);
 			path = GRDB;
 			sourceTree = "<group>";
@@ -4161,6 +4168,7 @@
 		527DF48525710EAE00A0A56D /* Managers */ = {
 			isa = PBXGroup;
 			children = (
+				DA23C75327F31816005508EB /* DailyUrlStorageTest.swift */,
 				DA5D4B892771DF0B00D3E80C /* BrowsingTreeStoreTest.swift */,
 				DA52E96D276B57BD008D4990 /* BrowserImportManagerTest.swift */,
 				DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */,
@@ -6214,6 +6222,7 @@
 				DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */,
 				DA63D512267CF10800D7C756 /* FrecencyScorer.swift */,
 				DAEEA74726A6B96A00AE72DE /* Utilities.swift */,
+				DA23C75127F1C09D005508EB /* DailyUrlScore.swift */,
 			);
 			path = Score;
 			sourceTree = "<group>";
@@ -7145,6 +7154,7 @@
 				96319D452616233E00D1CF31 /* String+Regex.swift in Sources */,
 				DAF063FB27D2737E000406DE /* DomainPath0TreeStatsStorage.swift in Sources */,
 				96319D3C2616233E00D1CF31 /* String+NL.swift in Sources */,
+				DA23C75227F1C09D005508EB /* DailyUrlScore.swift in Sources */,
 				522B17C82684E11E00741F94 /* String+SHA256.swift in Sources */,
 				96319D482616233E00D1CF31 /* BeamText.swift in Sources */,
 				DAEEA74826A6B96A00AE72DE /* Utilities.swift in Sources */,
@@ -7356,6 +7366,7 @@
 				5273C66D25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift in Sources */,
 				A52596E7273EB87F004B27E4 /* OnboardingProfileCreationView.swift in Sources */,
 				DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */,
+				DA23C74F27F1B316005508EB /* DailyUrlScore.swift in Sources */,
 				962AC88C27909C44001B7142 /* AutocompleteResultDebugView.swift in Sources */,
 				4181720A2581107C00317ED8 /* BrowserTab.swift in Sources */,
 				032562A926051D3B006513E4 /* RBDatabase.m in Sources */,
@@ -7974,6 +7985,7 @@
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				5227B2CF26DD12EF0006FA7D /* ZZZTests.swift in Sources */,
 				DAF063F927D25DA4000406DE /* BrowsingTreeStatsTest.swift in Sources */,
+				DA23C75427F31816005508EB /* DailyUrlStorageTest.swift in Sources */,
 				8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */,
 				A51F55612733333D002C5584 /* EmbedContentBuilderTests.swift in Sources */,
 				52B5EF78252F520100914D52 /* CoreDataTests.swift in Sources */,

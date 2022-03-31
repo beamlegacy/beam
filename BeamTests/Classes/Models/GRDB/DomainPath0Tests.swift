@@ -24,7 +24,7 @@ class DomainPath0Test: XCTestCase {
         BeamDate.travel(24 * 60 * 60)
         try db.addDomainPath0ReadingDay(domainPath0: domainPath0s[0], date: BeamDate.now)
         XCTAssertEqual(try db.countDomainPath0ReadingDay(domainPath0: domainPath0s[0]), 2)
-        XCTAssertEqual(db.domainPath0MinReadDay, firstDate.dayTruncated)
+        XCTAssertEqual(db.domainPath0MinReadDay, firstDate.utcDayTruncated)
         try db.cleanDomainPath0ReadingDay(olderThan: 1) //in days
         XCTAssertEqual(try db.countDomainPath0ReadingDay(domainPath0: domainPath0s[0]), 1)
 
