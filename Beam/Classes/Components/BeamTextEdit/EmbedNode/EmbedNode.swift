@@ -161,19 +161,8 @@ class EmbedNode: ResizableNode {
 
         element.changed.sink { [weak self] change in
             let updatedElement = change.0
-            let contentGeometry = MediaContentGeometry(
-                sizePreferencesStorage: updatedElement,
-                sizePreferencesPersistenceStrategy: .displayHeight
-            )
-            self?.contentGeometry = contentGeometry
-
-            if let embedContent = self?.embedContent {
-                self?.contentGeometry.setGeometryDescription(.embed(embedContent))
-            }
-
-            if updatedElement.collapsed != self?.isCollapsed {
-                self?.isUserCollapsed = updatedElement.collapsed
-            }
+            self?.isUserCollapsed = updatedElement.collapsed
+            self?.contentGeometry.applyDisplaySizePreferences()
         }.store(in: &scope)
     }
 
