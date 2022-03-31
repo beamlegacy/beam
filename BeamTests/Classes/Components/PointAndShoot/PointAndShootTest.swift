@@ -170,7 +170,7 @@ class BrowsingScorerMock: NSObject, WebPageRelated, BrowsingScorer {
 
     func addTextSelection() {}
 
-    func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {}
+    func scoreApply(changes: (UrlScoreProtocol) -> Void) {}
     func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
 }
 
