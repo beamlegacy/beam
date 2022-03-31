@@ -1427,7 +1427,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1502,7 +1502,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "prepare_beam_objects",
@@ -1566,7 +1566,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle1": "merged: \(newTitle1)\(title1!)",
                              "expectedTitle2": "merged: \(newTitle2)\(title2!)",
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1653,7 +1653,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "prepare_beam_objects",
@@ -1716,7 +1716,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
                             ["sut": sut as MyRemoteObjectManager,
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1796,7 +1796,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "direct_download",
@@ -1870,7 +1870,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
 
                              "networkCallFiles": ["update_beam_objects",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "paginated_beam_objects_data_url" : "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1885,7 +1885,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
 
                              "networkCallFiles": ["update_beam_objects",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "paginated_beam_objects_data_url" : "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1900,7 +1900,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
 
                              "networkCallFiles": ["update_beam_objects",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_objects_data_url" : "beam_objects",
+                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "paginated_beam_objects_data_url" : "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1971,7 +1971,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "direct_download",
@@ -2599,7 +2599,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "object2": object2 as MyRemoteObject,
                              "object3": object3 as MyRemoteObject,
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -2676,7 +2676,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "prepare_beam_objects",
@@ -2739,7 +2739,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
                              "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -2821,7 +2821,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "prepare_beam_objects",
@@ -2884,7 +2884,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "object2": object2 as MyRemoteObject,
                              "object3": object3 as MyRemoteObject,
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -2964,7 +2964,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "direct_download",
@@ -3033,7 +3033,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
                              "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
                              "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
+                                                  "paginated_beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -3122,7 +3122,7 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                                   "direct_upload",
                                                   "direct_upload",
                                                   "update_beam_objects",
-                                                  "beam_objects_data_url",
+                                                  "paginated_beam_objects_data_url",
                                                   "direct_download",
                                                   "direct_download",
                                                   "direct_download",

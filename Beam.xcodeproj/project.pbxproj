@@ -49,9 +49,16 @@
 		032562FD26051DCB006513E4 /* RBMockClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 0325625D26051D3A006513E4 /* RBMockClient.m */; };
 		03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */; };
 		0507201527DBFC6B0023705C /* BeamJSONDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83727DB51E20075533D /* BeamJSONDecoder.swift */; };
+		051710DE27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 051710DD27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql */; };
+		051710E527EAF93500E3C7A2 /* page_info_fragment.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 051710E427EAF93500E3C7A2 /* page_info_fragment.graphql */; };
+		051710E727EB5C4900E3C7A2 /* PaginatedBeamObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051710E627EB5C4900E3C7A2 /* PaginatedBeamObjects.swift */; };
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
 		0564F51327E8BC6600F969CA /* JJLISO8601DateFormatter in Frameworks */ = {isa = PBXBuildFile; productRef = 0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */; };
+		056F9BD427F3701600302709 /* paginated_beam_objects_with_import_error.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */; };
 		05A3D59E27DF970A004CC7F1 /* account_exists.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05A3D59D27DF970A004CC7F1 /* account_exists.graphql */; };
+		05BE537127F2F9AD00399DA7 /* paginated_beam_objects_with_import_missing.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */; };
+		05C105C527EDE5FA007226CA /* paginated_beam_objects_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */; };
+		05C105C727EDEFC9007226CA /* paginated_beam_object_checksums.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */; };
 		05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
@@ -1482,10 +1489,17 @@
 		0325628C26051D3B006513E4 /* RBClient-Private.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "RBClient-Private.h"; path = "Extern/RadBlock/RBClient-Private.h"; sourceTree = "<group>"; };
 		0325628D26051D3B006513E4 /* RBFilterBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RBFilterBuilder.h; path = Extern/RadBlock/RBFilterBuilder.h; sourceTree = "<group>"; };
 		03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentBlockingManager.swift; sourceTree = "<group>"; };
+		051710DD27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects.graphql; sourceTree = "<group>"; };
+		051710E427EAF93500E3C7A2 /* page_info_fragment.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = page_info_fragment.graphql; sourceTree = "<group>"; };
+		051710E627EB5C4900E3C7A2 /* PaginatedBeamObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginatedBeamObjects.swift; sourceTree = "<group>"; };
 		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
+		056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_error.graphql; sourceTree = "<group>"; };
 		0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+iso8601millisecondsTests.swift"; sourceTree = "<group>"; };
 		0572B83727DB51E20075533D /* BeamJSONDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamJSONDecoder.swift; sourceTree = "<group>"; };
 		05A3D59D27DF970A004CC7F1 /* account_exists.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = account_exists.graphql; sourceTree = "<group>"; };
+		05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_missing.graphql; sourceTree = "<group>"; };
+		05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_data_url.graphql; sourceTree = "<group>"; };
+		05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_object_checksums.graphql; sourceTree = "<group>"; };
 		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
@@ -2995,6 +3009,15 @@
 			path = ..;
 			sourceTree = "<group>";
 		};
+		05BE536C27F2E3CE00399DA7 /* Fixtures */ = {
+			isa = PBXGroup;
+			children = (
+				05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */,
+				056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */,
+			);
+			path = Fixtures;
+			sourceTree = "<group>";
+		};
 		0DC6E2D7269DEB3000BD2E2A /* AppDelegate+Beam */ = {
 			isa = PBXGroup;
 			children = (
@@ -3392,6 +3415,7 @@
 				4181715F2581107C00317ED8 /* Session.swift */,
 				418171602581107C00317ED8 /* GraphqlParametersProtocol.swift */,
 				418171612581107C00317ED8 /* User.swift */,
+				051710E627EB5C4900E3C7A2 /* PaginatedBeamObjects.swift */,
 			);
 			path = GraphqlRequestsTypes;
 			sourceTree = "<group>";
@@ -3401,6 +3425,7 @@
 			children = (
 				52F4E48226417ED90067B017 /* Identities */,
 				418171672581107C00317ED8 /* UserSession */,
+				051710E427EAF93500E3C7A2 /* page_info_fragment.graphql */,
 			);
 			path = GraphqlRequests;
 			sourceTree = "<group>";
@@ -3999,6 +4024,9 @@
 				520BC40D26D7B05F00A82966 /* subscription_beam_object_updated.graphql */,
 				52EA56D8274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql */,
 				965DD94D27B3EB8200648F17 /* all_objects_private_key_signatures.graphql */,
+				051710DD27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql */,
+				05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */,
+				05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */,
 			);
 			path = BeamObject;
 			sourceTree = "<group>";
@@ -4148,6 +4176,7 @@
 		5273C65625DA834600B00EC3 /* API */ = {
 			isa = PBXGroup;
 			children = (
+				05BE536C27F2E3CE00399DA7 /* Fixtures */,
 				5273C65825DA835400B00EC3 /* APIRequestTests.swift */,
 				5273C65925DA835400B00EC3 /* UserSessionRequestTests.swift */,
 				A54A45362767983900B9AE1B /* UserInfoRequestTests.swift */,
@@ -6649,6 +6678,7 @@
 				A58645E626FB12DC00D7FF86 /* WebViewFocusHandling.js in Resources */,
 				33F8832127BD3DE700E7673D /* status-update_restart.json in Resources */,
 				0DC6E2DE26A0527900BD2E2A /* topdomains_test.txt in Resources */,
+				05C105C527EDE5FA007226CA /* paginated_beam_objects_data_url.graphql in Resources */,
 				8AFE8355276B248B00D4B560 /* UITests-1.html in Resources */,
 				032562A826051D3B006513E4 /* blockerList.json in Resources */,
 				418171122581082200317ED8 /* Assets.xcassets in Resources */,
@@ -6671,6 +6701,7 @@
 				418172412581107C00317ED8 /* ScrollableTextView.xib in Resources */,
 				3303E10326FA22D300E175AC /* user_infos.graphql in Resources */,
 				8A9309FD27A04E2C00064133 /* tsconfig.json in Resources */,
+				05C105C727EDEFC9007226CA /* paginated_beam_object_checksums.graphql in Resources */,
 				5224CD702685FFDD00D4179E /* beam_objects.graphql in Resources */,
 				8AFE8353276B248B00D4B560 /* Beam.css in Resources */,
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
@@ -6690,7 +6721,9 @@
 				A03B909827BEA5EA001FBE64 /* htb-2.png in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
 				A03B909327BE9A4E001FBE64 /* htb-1.gif in Resources */,
+				051710E527EAF93500E3C7A2 /* page_info_fragment.graphql in Resources */,
 				8ADD05FD2729657D004C3EC9 /* WebPositions_prod.js in Resources */,
+				051710DE27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql in Resources */,
 				52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */,
 				52EA56D5274F8FA400F092C8 /* beam_objects_data_url.graphql in Resources */,
 				8A930A0727A04E2C00064133 /* package.json in Resources */,
@@ -6736,8 +6769,10 @@
 				5281B09025C99D1C00DF66D9 /* 2_ancestor.json in Resources */,
 				52DD53F125F1122F004F7EC8 /* BeamExport.sqlite in Resources */,
 				5281B09825C99D4B00DF66D9 /* 2_remote.json in Resources */,
+				056F9BD427F3701600302709 /* paginated_beam_objects_with_import_error.graphql in Resources */,
 				5281B07C25C9989300DF66D9 /* 1_local.json in Resources */,
 				DA22536427623C2900041D41 /* safariHistory.db in Resources */,
+				05BE537127F2F9AD00399DA7 /* paginated_beam_objects_with_import_missing.graphql in Resources */,
 				52E04FD6252C7A4600AD9F56 /* writing_space.json in Resources */,
 				DA113A852760FA26006B20AF /* chromeHistory.db in Resources */,
 				DA2253692762426E00041D41 /* firefoxPlaces.db-shm in Resources */,
@@ -7746,6 +7781,7 @@
 				A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */,
 				330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */,
 				3303E0FC26FA221400E175AC /* UserInfoRequest.swift in Sources */,
+				051710E727EB5C4900E3C7A2 /* PaginatedBeamObjects.swift in Sources */,
 				A0CB5AEC268B241400D1EF02 /* PasswordsPreferencesView.swift in Sources */,
 				A0673C43274F933E00A0E365 /* ContactsDB.swift in Sources */,
 				A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */,
