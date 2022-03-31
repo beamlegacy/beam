@@ -202,8 +202,9 @@ public class BrowsingNode: ObservableObject, Codable {
     @Published public var events: [ReadingEvent] = []
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
-    public func longTermScoreApply(changes: (LongTermUrlScore) -> Void) {
+    public func scoreApply(changes: (UrlScoreProtocol) -> Void) {
         tree.longTermScoreStore?.apply(to: link, changes: changes)
+        tree.dailyScoreStore?.apply(to: link, changes: changes)
     }
 
     public var title: String {
@@ -232,7 +233,7 @@ public class BrowsingNode: ObservableObject, Codable {
 
         let incrementalReadingTime = readingTimeSinceLastEvent(date: date)
         score.readingTimeToLastEvent += incrementalReadingTime
-        longTermScoreApply { $0.readingTimeToLastEvent += incrementalReadingTime }
+        scoreApply { $0.readingTimeToLastEvent += incrementalReadingTime }
         let event = ReadingEvent(type: type, date: date, webSessionId: webSessionId, pageLoadId: pageLoadId)
         events.append(event)
         score.lastEvent = event
@@ -289,12 +290,12 @@ public class BrowsingNode: ObservableObject, Codable {
         self.isLinkActivation = isLinkActivation
         self.events = [ReadingEvent(type: .creation, date: date, webSessionId: WebSessionnizer.shared.sessionId, pageLoadId: UUID())]
         score.lastCreationDate = date
-        longTermScoreApply { $0.lastCreationDate = date }
+        tree.longTermScoreStore?.apply(to: link) { $0.lastCreationDate = date }
         if let scorer = tree.frecencyScorer {
             scorer.update(id: link, value: 1, eventType: visitType, date: date, paramKey: .webVisit30d0)
             Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
             }
-        longTermScoreApply { $0.visitCount += 1 }
+        scoreApply { $0.visitCount += 1 }
     }
     init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool) {
         self.id = id
@@ -432,13 +433,15 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     public let origin: BrowsingTreeOrigin
     var frecencyScorer: FrecencyScorer?
     var longTermScoreStore: LongTermUrlScoreStoreProtocol?
+    var dailyScoreStore: DailyUrlScoreStoreProtocol?
     var domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
 
     public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
-                domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil) {
+                domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
         self.origin = origin ?? defaultOrigin
         self.frecencyScorer = frecencyScorer
         self.longTermScoreStore = longTermScoreStore
+        self.dailyScoreStore = dailyScoreStore
         self.domainPath0TreeStatsStore = domainPath0TreeStatsStore
         self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
@@ -560,7 +563,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
             current.addEvent(.startReading)
         }
         current.score.textAmount = readCount
-        current.longTermScoreApply { $0.textAmount = readCount }
+        current.scoreApply { $0.textAmount = readCount }
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
     //to use only in history import (prevent deep nesting then impossible to encode)

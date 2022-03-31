@@ -482,6 +482,23 @@ struct GRDBDatabase {
             try db.drop(table: "BrowsingTreeRecord")
             try db.rename(table: "newBrowsingTreeRecord", to: "BrowsingTreeRecord")
         }
+        migrator.registerMigration("createDailyUrlScoreTable") { db in
+            try db.create(table: "DailyUrlScore", ifNotExists: true) { t in
+                t.column("id", .text).notNull().primaryKey()
+                t.column("createdAt", .datetime).notNull().indexed().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("updatedAt", .datetime).notNull().indexed().defaults(sql: "CURRENT_TIMESTAMP")
+                t.column("urlId", .blob).indexed().notNull()
+                t.column("localDay", .text).indexed().notNull()
+                t.column("visitCount", .integer).notNull()
+                t.column("readingTimeToLastEvent", .double).notNull()
+                t.column("textSelections", .integer).notNull()
+                t.column("scrollRatioX", .double).notNull()
+                t.column("scrollRatioY", .double).notNull()
+                t.column("textAmount", .integer).notNull()
+                t.column("area", .double).notNull()
+                t.uniqueKey(["urlId", "localDay"])
+            }
+        }
 
         #if DEBUG
         // Speed up development by nuking the database when migrations change
@@ -763,6 +780,7 @@ extension GRDBDatabase {
             try DomainPath0ReadingDay.deleteAll(db)
             try BrowsingTreeStats.deleteAll(db)
             try TabPinSuggestion.deleteAll(db)
+            try DailyURLScore.deleteAll(db)
         }
     }
 
@@ -1633,7 +1651,7 @@ extension GRDBDatabase {
     }
     // MARK: - DomainPath0ReadingDay
     func addDomainPath0ReadingDay(domainPath0: String, date: Date) throws {
-        guard let truncatedDate = date.dayTruncated else { return }
+        guard let truncatedDate = date.utcDayTruncated else { return }
         let record = DomainPath0ReadingDay(domainPath0: domainPath0, readingDay: truncatedDate)
         try dbWriter.write { db in
             try record.insert(db)
@@ -1794,8 +1812,50 @@ extension GRDBDatabase {
             try ScoredDomainPath0.fetchAll(db, query)
         }
     }
-}
+// MARK: - DailyUrlScore
+    //day in format "YYYY-MM-DD"
+    func updateDailyUrlScore(urlId: UUID, day: String, changes: (DailyURLScore) -> Void ) {
+        do {
+            try dbWriter.write { db in
+                let fetched = try? DailyURLScore
+                    .filter(DailyURLScore.Columns.urlId == urlId)
+                    .filter(DailyURLScore.Columns.localDay == day)
+                    .fetchOne(db)
+                let score = fetched ?? DailyURLScore(urlId: urlId, localDay: day)
+                changes(score)
+                try score.save(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't update url daily score for \(urlId) at \(day)", category: .database)
+        }
+    }
 
+    //day in format "YYYY-MM-DD"
+    func getDailyUrlScores(day: String) -> [DailyURLScore] {
+        do {
+            return try dbReader.read { db in
+                try DailyURLScore
+                    .filter(DailyURLScore.Columns.localDay == day)
+                    .fetchAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't fetch daily url scores at \(day): \(error)", category: .database)
+            return []
+        }
+    }
+
+    //day in format "YYYY-MM-DD"
+    func clearDailyUrlScores(toDay day: String? = nil) throws {
+        try dbWriter.write { db in
+            if let day = day {
+                let timeCond = DailyURLScore.Columns.localDay <= day
+                try DailyURLScore.filter(timeCond).deleteAll(db)
+            } else {
+                try DailyURLScore.deleteAll(db)
+            }
+        }
+    }
+}
 extension GRDBDatabase {
     func dumpAllLinks() {
         if let links = try? dbWriter.read({ db in
