@@ -67,6 +67,9 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         guard !layoutInvalidated, !inLayout else { return }
         layoutInvalidated = true
         invalidateIntrinsicContentSize()
+        DispatchQueue.main.async { [weak self] in
+            self?.layout()
+        }
     }
 
     override func updateLayer() {
@@ -90,9 +93,9 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     //swiftlint:disable:next function_body_length
     public override func layout() {
         guard enclosingScrollView != nil else { return }
-        layoutInvalidated = false
         inLayout = true
         defer {
+            layoutInvalidated = false
             inLayout = false
             insertedViews.removeAll()
             removedViews.removeAll()
