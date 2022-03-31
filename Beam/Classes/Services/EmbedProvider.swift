@@ -14,5 +14,7 @@ enum EmbedProvider: String, Codable {
     case twitter = "Twitter"
     case vimeo = "Vimeo"
     case youTube = "YouTube"
+    case reddit = "Reddit"
+    case snapchat = "SnapChat"
     case unknown
 }
