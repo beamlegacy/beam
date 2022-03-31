@@ -115,6 +115,7 @@ struct ButtonLabel: View {
                 }
                 if let lottie = lottieName {
                     LottieView(name: lottie, playing: true, color: foregroundNSColor, animationSize: CGSize(width: style.iconSize, height: style.iconSize))
+                        .alignmentGuide(.lastTextBaseline) { dimensions in dimensions[VerticalAlignment.center] }
                 }
                 if let text = text {
                     Text(text)
