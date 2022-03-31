@@ -43,6 +43,8 @@ struct Configuration {
     static private(set) var apiHostnameDefault = "https://api.beamapp.co" // "http://api.beam.lvh.me"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
+    static private(set) var beamObjectsPageSizeDefault = 1000
+
     static private(set) var beamObjectDataOnSeparateCallDefault = true
 
     static var beamObjectDirectCall: Bool {
@@ -195,9 +197,27 @@ struct Configuration {
         }
     }
 
+    static private var beamObjectsPageSizeKey = "beamObjectsPageSize"
+    static var beamObjectsPageSize: Int {
+        get {
+            let value = UserDefaults.standard.integer(forKey: beamObjectsPageSizeKey)
+            if value > 0 {
+                return value
+            } else {
+                return beamObjectsPageSizeDefault
+            }
+        }
+        set {
+            if newValue != beamObjectsPageSize {
+                UserDefaults.standard.set(newValue, forKey: beamObjectsPageSizeKey)
+            }
+        }
+    }
+
     static func reset() {
         UserDefaults.standard.removeObject(forKey: publicHostnameKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
+        UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
         AccountManager.logout()
     }
 
