@@ -188,12 +188,7 @@ struct MediaContentGeometry {
             }
         }
 
-        // Restore display preferences from storage
-        if let ratio = sizePreferencesStorage?.displaySizePreferences?.containerWidthRatio {
-            preferredDisplayWidthDimension = .containerRatio(ratio)
-        }
-
-        preferredDisplayHeight = sizePreferencesStorage?.displaySizePreferences?.displayHeight
+        applyDisplaySizePreferences()
     }
 
     mutating func setContainerWidth(_ width: CGFloat) {
@@ -272,6 +267,16 @@ struct MediaContentGeometry {
         }
 
         displaySizeOverride = size
+    }
+
+    /// Applies the display size preferences from the size preferences storage. Call this method in order to update
+    /// the display size whenever the display size preferences have changed.
+    mutating func applyDisplaySizePreferences() {
+        if let ratio = sizePreferencesStorage?.displaySizePreferences?.containerWidthRatio {
+            preferredDisplayWidthDimension = .containerRatio(ratio)
+        }
+
+        preferredDisplayHeight = sizePreferencesStorage?.displaySizePreferences?.displayHeight
     }
 
     // MARK: - Viewport defaults
