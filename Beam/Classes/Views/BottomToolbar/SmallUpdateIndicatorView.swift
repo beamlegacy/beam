@@ -22,29 +22,28 @@ struct SmallUpdateIndicatorView: View {
     @State private var updateInstalledTimerCancellable: Cancellable?
     @State private var timerExpired = false
 
+    @State private var indicatorFrameInGlobalCoordinates: CGRect?
+
     var body: some View {
         Group {
             switch versionChecker.state {
             case .updateAvailable(let release):
-                GeometryReader { proxy in
-                    ButtonLabel("Update available", icon: "status-publish", customStyle: buttonLabelStyle) {
-                        showReleaseNoteWindow(with: release, geometry: proxy)
-                    }.onAppear {
-                        opacity = 1
-                    }
-                }.frame(maxWidth: 250)
+                ButtonLabel("Update available", icon: "status-publish", customStyle: buttonLabelStyle) {
+                    showReleaseNoteWindow(with: release)
+                }
+                .onAppear {
+                    opacity = 1
+                }
             case .noUpdate where versionChecker.currentRelease != nil :
-                GeometryReader { proxy in
-                    ButtonLabel("Updated", icon: "tool-keep", customStyle: buttonLabelStyle) {
-                        showReleaseNoteWindow(with: versionChecker.currentRelease!, geometry: proxy, hideButtonOnClose: true)
+                ButtonLabel("Updated", icon: "tool-keep", customStyle: buttonLabelStyle) {
+                    showReleaseNoteWindow(with: versionChecker.currentRelease!, hideButtonOnClose: true)
+                }
+                .onReceive(opacityTimer, perform: { _ in
+                    withAnimation {
+                        opacity = 0
                     }
-                    .onReceive(opacityTimer, perform: { _ in
-                        withAnimation {
-                            opacity = 0
-                        }
-                        opacityTimer.upstream.connect().cancel()
-                    })
-                }.frame(maxWidth: 250)
+                    opacityTimer.upstream.connect().cancel()
+                })
             case .noUpdate where versionChecker.lastCheck == nil :
                 EmptyView()
             case .checking:
@@ -53,22 +52,21 @@ struct SmallUpdateIndicatorView: View {
                 ButtonLabel("\(errorDesc)",
                             icon: "status-update_failed",
                             customStyle: buttonLabelStyle)
-                    .onReceive(opacityTimer, perform: { _ in
-                        withAnimation {
-                            opacity = 0
-                        }
-                        opacityTimer.upstream.connect().cancel()
-                    })
+                .onReceive(opacityTimer, perform: { _ in
+                    withAnimation {
+                        opacity = 0
+                    }
+                    opacityTimer.upstream.connect().cancel()
+                })
             case .downloading(progress: _):
                 ButtonLabel("Downloading update…", lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
             case .downloaded(let downloadedRelease):
-                GeometryReader { proxy in
-                    ButtonLabel("Update now", icon: "status-publish", customStyle: buttonLabelStyle) {
-                        showReleaseNoteWindow(with: downloadedRelease.appRelease, geometry: proxy)
-                    }.onAppear {
-                        opacity = 1
-                    }
-                }.frame(maxWidth: 250)
+                ButtonLabel("Update now", icon: "status-publish", customStyle: buttonLabelStyle) {
+                    showReleaseNoteWindow(with: downloadedRelease.appRelease)
+                }
+                .onAppear {
+                    opacity = 1
+                }
             case .installing:
                 ButtonLabel("Installing update…", lottie: "status-update_restart", customStyle: buttonLabelLottieStyle)
             case .updateInstalled:
@@ -78,21 +76,32 @@ struct SmallUpdateIndicatorView: View {
                     updateInstalledTimerCancellable?.cancel()
                     NSApp.terminate(nil)
                 }
-                .onAppear(perform: {
-                    updateInstalledTimerCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
-                        timerExpired = true
-                    })
-                })
-                .onDisappear {
-                    updateInstalledTimerCancellable?.cancel()
-                }
+                            .onAppear(perform: {
+                                updateInstalledTimerCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
+                                    timerExpired = true
+                                })
+                            })
+                            .onDisappear {
+                                updateInstalledTimerCancellable?.cancel()
+                            }
             default:
                 EmptyView()
             }
         }
         .opacity(opacity)
+        .background(geometryReaderView)
+        .onPreferenceChange(FramePreferenceKey.self) { frame in
+            indicatorFrameInGlobalCoordinates = frame
+        }
         .onHover { hover in
             state.shouldDisableLeadingGutterHover = hover
+        }
+    }
+
+    private var geometryReaderView: some View {
+        GeometryReader { proxy in
+            let frame = proxy.frame(in: .global)
+            Color.clear.preference(key: FramePreferenceKey.self, value: frame)
         }
     }
 
@@ -136,8 +145,11 @@ struct SmallUpdateIndicatorView: View {
         return style
     }
 
-    private func showReleaseNoteWindow(with release: AppRelease, geometry: GeometryProxy, hideButtonOnClose: Bool = false) {
+    private func showReleaseNoteWindow(with release: AppRelease, hideButtonOnClose: Bool = false) {
         let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
+
+        guard let frame = indicatorFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
+
         let releaseNoteView = ReleaseNoteView(release: release, closeAction: {
             if hideButtonOnClose {
                 withAnimation {
@@ -155,7 +167,6 @@ struct SmallUpdateIndicatorView: View {
         }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle, autoRelaunchAfterInstall: false)
             .cornerRadius(10)
 
-        let frame = geometry.safeTopLeftGlobalFrame(in: window?.parent)
         var origin = CGPoint(x: frame.minX + 7, y: frame.minY - 6)
         if let parentWindow = window?.parent {
             origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
@@ -163,6 +174,14 @@ struct SmallUpdateIndicatorView: View {
         window?.setView(with: releaseNoteView, at: origin)
         window?.makeKey()
     }
+
+    private struct FramePreferenceKey: PreferenceKey {
+        static var defaultValue: CGRect?
+        static func reduce(value: inout Value, nextValue: () -> Value) {
+            value = value ?? nextValue()
+        }
+    }
+
 }
 
 struct SmallUpdateIndicatorView_Previews: PreviewProvider {
