@@ -11,8 +11,15 @@
       --Beam-Embed-Color: #edededff;
   }
 }
+/* Override Reddit */
+.embedly-card {
+  display: inline-block;
+}
+.embedly-card-hug {
+  margin: 0 !important;
+}
 
-html {
+.twitter-tweet {
   color: var(--Beam-Embed-Color);
   background-color: var(--Beam-Embed-Background);
 }
