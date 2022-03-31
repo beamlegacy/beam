@@ -81,7 +81,7 @@ class APIRequest: NSObject {
                              forHTTPHeaderField: "Authorization")
         }
 
-        var queryStruct = loadQuery(bodyParamsRequest)
+        var queryStruct = try loadQuery(bodyParamsRequest)
 
         // Remove attached files before the encoding of the GraphQL query
         let files = queryStruct.files
@@ -177,7 +177,7 @@ class APIRequest: NSObject {
     }
 
     // If request contains a filename but no query, load the query from fileName
-    func loadQuery<T: GraphqlParametersProtocol>(_ bodyParamsRequest: T) -> T {
+    func loadQuery<T: GraphqlParametersProtocol>(_ bodyParamsRequest: T) throws -> T {
         if bodyParamsRequest.fileName == nil && bodyParamsRequest.query == nil {
             ThirdPartyLibrariesManager.shared.nonFatalError("Missing fileName or query in GraphqlParameters")
         }
@@ -185,7 +185,7 @@ class APIRequest: NSObject {
         var updatedRequest = bodyParamsRequest
         updatedRequest.fileName = nil // Remove fileName from GraphqlParameters
         updatedRequest.fragmentsFileName = nil // Remove fragmentFileName from GraphqlParameters
-        updatedRequest.query = {
+        updatedRequest.query = try {
             var fragment = ""
             // if there is a fragmentsFileName load them.
             if let fragmentsFileName = bodyParamsRequest.fragmentsFileName {
@@ -195,10 +195,13 @@ class APIRequest: NSObject {
             }
 
             // Query already loaded
-            if let query = bodyParamsRequest.query { return query + fragment }
+            if let query = bodyParamsRequest.query {
+                return try importFragments(query: query) + fragment
+            }
+
             // Load query from fileName.
             if let fileName = bodyParamsRequest.fileName, let query = loadFile(fileName: fileName) {
-                return query + fragment
+                return try importFragments(query: query) + fragment
             }
 
             // Missing query
@@ -413,6 +416,33 @@ class APIRequest: NSObject {
             return try? String(contentsOfFile: filepath)
         }
         return nil
+    }
+
+    func importFragments(query: String) throws -> String {
+        let pattern = ##"^#import\s+"([\w]+).graphql""##
+        do {
+            let regex = try NSRegularExpression(pattern: pattern)
+            let results = regex.matches(in: query,
+                                        range: NSRange(query.startIndex..., in: query))
+            let fragmentsToLoad = results.map {
+                String(query[Range($0.range(at: 1), in: query)!])
+            }
+            var fragment = ""
+            for fragmentFileName in fragmentsToLoad {
+                guard let fragmentContent = loadFile(fileName: fragmentFileName) else {
+                    Logger.shared.logError("Cannot load fragment \(fragmentFileName)", category: .network)
+                    throw APIRequestError.parserError
+                }
+
+                fragment.append("\n")
+                fragment.append(contentsOf: fragmentContent)
+            }
+            return query + "\n" + fragment
+        } catch {
+            Logger.shared.logError("Can't parse \(query)", category: .network)
+            Logger.shared.logError(error.localizedDescription, category: .network)
+            throw APIRequestError.parserError
+        }
     }
 
     func cancel() {

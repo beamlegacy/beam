@@ -324,64 +324,108 @@ extension BeamObjectRequest {
         })
     }
 
-    @discardableResult
     func fetchAll(receivedAtAfter: Date? = nil,
                   ids: [UUID]? = nil,
                   beamObjectType: String? = nil,
                   skipDeleted: Bool? = false,
                   raisePrivateKeyError: Bool = false,
-                  _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+                  _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
         if Configuration.beamObjectOnRest {
             if Configuration.beamObjectDataOnSeparateCall {
-                return try fetchAllWithDataUrlWithRest(receivedAtAfter: receivedAtAfter,
+                try fetchAllWithDataUrlWithRest(receivedAtAfter: receivedAtAfter,
                                                        ids: ids,
                                                        beamObjectType: beamObjectType,
                                                        skipDeleted: skipDeleted,
                                                        raisePrivateKeyError: raisePrivateKeyError,
                                                        completion)
+            } else {
+                try fetchAllWithRest(receivedAtAfter: receivedAtAfter,
+                                            ids: ids,
+                                            beamObjectType: beamObjectType,
+                                            skipDeleted: skipDeleted,
+                                            raisePrivateKeyError: raisePrivateKeyError,
+                                            completion)
             }
-
-            return try fetchAllWithRest(receivedAtAfter: receivedAtAfter,
-                                        ids: ids,
-                                        beamObjectType: beamObjectType,
-                                        skipDeleted: skipDeleted,
-                                        raisePrivateKeyError: raisePrivateKeyError,
-                                        completion)
+        } else {
+            if Configuration.beamObjectDataOnSeparateCall {
+                try fetchAllWithDataUrlWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                                          ids: ids,
+                                                          beamObjectType: beamObjectType,
+                                                          skipDeleted: skipDeleted,
+                                                          raisePrivateKeyError: raisePrivateKeyError,
+                                                          completion)
+            } else {
+                try fetchAllWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                           ids: ids,
+                                           beamObjectType: beamObjectType,
+                                           skipDeleted: skipDeleted,
+                                           raisePrivateKeyError: raisePrivateKeyError,
+                                           completion)
+            }
         }
-
-        if Configuration.beamObjectDataOnSeparateCall {
-            return try fetchAllWithDataUrlWithGraphQL(receivedAtAfter: receivedAtAfter,
-                                                      ids: ids,
-                                                      beamObjectType: beamObjectType,
-                                                      skipDeleted: skipDeleted,
-                                                      raisePrivateKeyError: raisePrivateKeyError,
-                                                      completion)
-        }
-
-        return try fetchAllWithGraphQL(receivedAtAfter: receivedAtAfter,
-                                       ids: ids,
-                                       beamObjectType: beamObjectType,
-                                       skipDeleted: skipDeleted,
-                                       raisePrivateKeyError: raisePrivateKeyError,
-                                       completion)
-
     }
 
-    @discardableResult
     func fetchAllWithGraphQL(receivedAtAfter: Date? = nil,
                              ids: [UUID]? = nil,
                              beamObjectType: String? = nil,
                              skipDeleted: Bool? = false,
                              raisePrivateKeyError: Bool = false,
-                             _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
-                                               ids: ids,
-                                               beamObjectType: beamObjectType,
-                                               skipDeleted: skipDeleted)
-
-        return try fetchAllWithFile("beam_objects", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
+                             _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
+        try fetchPaginatedAllWithFile(receivedAtAfter: receivedAtAfter, ids: ids, beamObjectType: beamObjectType, skipDeleted: skipDeleted, raisePrivateKeyError: raisePrivateKeyError, "paginated_beam_objects", completion)
     }
 
+    func fetchPaginatedAllWithFile(receivedAtAfter: Date? = nil,
+                                   ids: [UUID]? = nil,
+                                   beamObjectType: String? = nil,
+                                   skipDeleted: Bool? = false,
+                                   raisePrivateKeyError: Bool = false,
+                                   _ filename: String,
+                                   _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
+
+        Task {
+            var allBeamObjects: [BeamObject] = []
+            var hasNext = true
+            var after = ""
+            let first = Configuration.beamObjectsPageSize
+            var success = true
+            var error: Error?
+            while hasNext && success {
+                let parameters = PaginatedBeamObjectsParameters(receivedAtAfter: receivedAtAfter,
+                                                                ids: ids,
+                                                                beamObjectType: beamObjectType,
+                                                                skipDeleted: skipDeleted,
+                                                                first: first,
+                                                                after: after,
+                                                                last: nil,
+                                                                before: nil)
+                guard let paginatedBeamObjects = try await fetchPageWithFile(filename, parameters, raisePrivateKeyError: raisePrivateKeyError) else {
+                    success = false
+                    error = APIRequestError.parserError
+                    break
+                }
+                allBeamObjects.append(contentsOf: paginatedBeamObjects.beamObjects ?? [])
+                let hasNextPage = paginatedBeamObjects.pageInfo.hasNextPage
+                let endCursor = paginatedBeamObjects.pageInfo.endCursor
+                let startCursor = paginatedBeamObjects.pageInfo.startCursor
+
+                hasNext = endCursor != nil && hasNextPage && (startCursor != endCursor)
+
+                Logger.shared.logDebug("beamObjects received so far: \(allBeamObjects.count), hasNext: \(hasNext), next cursor: \(String(describing: endCursor))", category: .network)
+
+                if hasNext {
+                    after = endCursor!
+                }
+            }
+
+            if success {
+                completion(.success(allBeamObjects))
+            } else {
+                completion(.failure(error!))
+            }
+        }
+    }
+
+    @discardableResult
     func fetchAllWithRest(fields: String = "id,createdAt,updatedAt,deletedAt,receivedAt,data,type,checksum,privateKeySignature",
                           receivedAtAfter: Date? = nil,
                           ids: [UUID]? = nil,
@@ -408,41 +452,34 @@ extension BeamObjectRequest {
         return try fetchAllWithRest(fields, parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
-    @discardableResult
     func fetchAllWithDataUrl(receivedAtAfter: Date? = nil,
                              ids: [UUID]? = nil,
                              beamObjectType: String? = nil,
                              skipDeleted: Bool? = false,
                              raisePrivateKeyError: Bool = false,
-                             _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+                             _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
         if Configuration.beamObjectOnRest {
-            return try fetchAllWithDataUrlWithRest(receivedAtAfter: receivedAtAfter,
-                                                   ids: ids,
-                                                   beamObjectType: beamObjectType,
-                                                   skipDeleted: skipDeleted,
-                                                   raisePrivateKeyError: raisePrivateKeyError, completion)
+            try fetchAllWithDataUrlWithRest(receivedAtAfter: receivedAtAfter,
+                                            ids: ids,
+                                            beamObjectType: beamObjectType,
+                                            skipDeleted: skipDeleted,
+                                            raisePrivateKeyError: raisePrivateKeyError, completion)
+        } else {
+            try fetchAllWithDataUrlWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                               ids: ids,
+                                               beamObjectType: beamObjectType,
+                                               skipDeleted: skipDeleted,
+                                               raisePrivateKeyError: raisePrivateKeyError, completion)
         }
-
-        return try fetchAllWithDataUrlWithGraphQL(receivedAtAfter: receivedAtAfter,
-                                                  ids: ids,
-                                                  beamObjectType: beamObjectType,
-                                                  skipDeleted: skipDeleted,
-                                                  raisePrivateKeyError: raisePrivateKeyError, completion)
     }
 
-    @discardableResult
     func fetchAllWithDataUrlWithGraphQL(receivedAtAfter: Date? = nil,
                                         ids: [UUID]? = nil,
                                         beamObjectType: String? = nil,
                                         skipDeleted: Bool? = false,
                                         raisePrivateKeyError: Bool = false,
-                                        _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
-                                               ids: ids,
-                                               beamObjectType: beamObjectType,
-                                               skipDeleted: skipDeleted)
-
-        return try fetchAllWithFile("beam_objects_data_url", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
+                                        _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
+        try fetchPaginatedAllWithFile(receivedAtAfter: receivedAtAfter, ids: ids, beamObjectType: beamObjectType, skipDeleted: skipDeleted, raisePrivateKeyError: raisePrivateKeyError, "paginated_beam_objects_data_url", completion)
     }
 
     @discardableResult
@@ -462,44 +499,40 @@ extension BeamObjectRequest {
                              completion)
     }
 
-    @discardableResult
     func fetchAllChecksums(receivedAtAfter: Date? = nil,
                            ids: [UUID]? = nil,
                            beamObjectType: String? = nil,
                            skipDeleted: Bool? = false,
                            raisePrivateKeyError: Bool = false,
-                           _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
+                           _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
 
         if Configuration.beamObjectOnRest {
-            return try fetchAllChecksumsWithRest(receivedAtAfter: receivedAtAfter,
+            try fetchAllChecksumsWithRest(receivedAtAfter: receivedAtAfter,
                                                  ids: ids,
                                                  beamObjectType: beamObjectType,
                                                  skipDeleted: skipDeleted,
                                                  raisePrivateKeyError: raisePrivateKeyError,
                                                  completion)
+        } else {
+            try fetchAllChecksumsWithGraphQL(receivedAtAfter: receivedAtAfter,
+                                                    ids: ids,
+                                                    beamObjectType: beamObjectType,
+                                                    skipDeleted: skipDeleted,
+                                                    raisePrivateKeyError: raisePrivateKeyError,
+                                                    completion)
         }
-
-        return try fetchAllChecksumsWithGraphQL(receivedAtAfter: receivedAtAfter,
-                                                ids: ids,
-                                                beamObjectType: beamObjectType,
-                                                skipDeleted: skipDeleted,
-                                                raisePrivateKeyError: raisePrivateKeyError,
-                                                completion)
     }
 
-    @discardableResult
     func fetchAllChecksumsWithGraphQL(receivedAtAfter: Date? = nil,
                                       ids: [UUID]? = nil,
                                       beamObjectType: String? = nil,
                                       skipDeleted: Bool? = false,
                                       raisePrivateKeyError: Bool = false,
-                                      _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws -> URLSessionDataTask {
-        let parameters = BeamObjectsParameters(receivedAtAfter: receivedAtAfter,
-                                               ids: ids,
-                                               beamObjectType: beamObjectType,
-                                               skipDeleted: skipDeleted)
-
-        return try fetchAllWithFile("beam_object_checksums", parameters, raisePrivateKeyError: raisePrivateKeyError, completion)
+                                      _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
+        try fetchPaginatedAllWithFile(receivedAtAfter: receivedAtAfter,
+                                      ids: ids,
+                                      beamObjectType: beamObjectType,
+                                      skipDeleted: skipDeleted, raisePrivateKeyError: raisePrivateKeyError, "paginated_beam_object_checksums", completion)
     }
 
     @discardableResult
@@ -568,6 +601,45 @@ extension BeamObjectRequest {
                                       completion)
             }
         }
+    }
+
+    private func fetchPageWithFile<T: Encodable>(_ filename: String,
+                                                 _ parameters: T,
+                                                 raisePrivateKeyError: Bool) async throws -> PaginatedBeamObjects? {
+        let bodyParamsRequest = GraphqlParameters(fileName: filename, variables: parameters)
+
+        let res = try await withCheckedThrowingContinuation({(continuation: CheckedContinuation<PaginatedBeamObjects, Error>) in
+            do {
+                try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Swift.Result<UserMe, Error>) in
+                    switch result {
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
+                    case .success(let me):
+                        guard let beamObjects = me.paginatedBeamObjects?.beamObjects else {
+                            continuation.resume(throwing: APIRequestError.parserError)
+                            return
+                        }
+
+                        self.parseBeamObjects(beamObjects: beamObjects,
+                                              raisePrivateKeyError: raisePrivateKeyError
+                        ) { (result: Swift.Result<[BeamObject], Error>) in
+                            switch result {
+                            case .failure(let error):
+                                continuation.resume(throwing: error)
+                            case .success(let beamObjects):
+                                me.paginatedBeamObjects?.beamObjects = beamObjects
+                                continuation.resume(returning: me.paginatedBeamObjects!)
+                            }
+                        }
+                    }
+                }
+            } catch {
+                Logger.shared.logError("fetchPageWithFile failed: \(error)", category: .network)
+                continuation.resume(throwing: error)
+            }
+        })
+
+        return res
     }
 
     // swiftlint:disable function_body_length cyclomatic_complexity
