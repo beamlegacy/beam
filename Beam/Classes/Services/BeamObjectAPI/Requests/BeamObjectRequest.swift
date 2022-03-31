@@ -65,6 +65,17 @@ class BeamObjectRequest: APIRequest {
         let skipDeleted: Bool?
     }
 
+    struct PaginatedBeamObjectsParameters: Encodable {
+        let receivedAtAfter: Date?
+        let ids: [UUID]?
+        let beamObjectType: String?
+        let skipDeleted: Bool?
+        let first: Int?
+        let after: String?
+        let last: Int?
+        let before: String?
+    }
+
     internal func saveBeamObjectParameters(_ beamObject: BeamObject) throws -> UpdateBeamObject {
         try beamObject.encrypt()
 

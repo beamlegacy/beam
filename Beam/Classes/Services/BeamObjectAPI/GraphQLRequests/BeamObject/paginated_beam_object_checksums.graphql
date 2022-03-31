@@ -1,0 +1,35 @@
+#import "page_info_fragment.graphql"
+
+query PaginatedBeamObjectsChecksums(
+    $receivedAtAfter: ISO8601DateTime,
+    $ids: [ID!],
+    $beamObjectType: String,
+    $skipDeleted: Boolean,
+    $first: Int,
+    $after: String,
+    $last: Int,
+    $before: String
+  ) {
+    me {
+        paginatedBeamObjects(
+          receivedAtAfter: $receivedAtAfter,
+          ids: $ids,
+          type: $beamObjectType,
+          filterDeleted: $skipDeleted,
+          first: $first,
+          after: $after,
+          last: $last,
+          before: $before
+        ) {
+        pageInfo {
+          ...pageInfo
+        }
+        beamObjects: nodes {
+          id
+          type
+          checksum
+          receivedAt
+        }
+      }
+  }
+}
