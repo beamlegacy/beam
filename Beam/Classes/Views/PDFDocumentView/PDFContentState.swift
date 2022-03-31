@@ -83,7 +83,12 @@ final class PDFContentState: ObservableObject {
             return
         }
 
-        let saveLocationURL = tentativeSaveLocationURL.availableFileURL()
+        var saveLocationURL = tentativeSaveLocationURL.availableFileURL()
+
+        if saveLocationURL.pathExtension.isEmpty {
+            saveLocationURL.appendPathExtension("pdf")
+        }
+
         pdfDocument?.write(to: saveLocationURL)
     }
 
