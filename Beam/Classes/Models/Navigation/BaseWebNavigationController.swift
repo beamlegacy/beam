@@ -110,7 +110,9 @@ extension BaseWebNavigationController {
             return // webview probably failed to load
         }
 
-        page?.contentDescription = NavigationRouter.browserContentDescription(for: webviewUrl, webView: webView)
+        NavigationRouter.browserContentDescription(for: webviewUrl, webView: webView) { [weak page] contentDescription in
+            page?.contentDescription = contentDescription
+        }
 
         if BeamURL(webviewUrl).isErrorPage {
             let beamSchemeUrl = BeamURL(webviewUrl)

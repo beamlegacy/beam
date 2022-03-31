@@ -21,14 +21,25 @@ final class NavigationRouter {
     }
 
     /// Returns the appropriate content description for a given URL.
-    static func browserContentDescription(for url: URL, webView: WKWebView) -> BrowserContentDescription {
-        switch url.scheme {
-        case "beam-pdf", "beam-pdfs":
-            return PDFContentDescription(url: Self.originalURL(internal: url))
+    static func browserContentDescription(for url: URL, webView: WKWebView, completionHandler: @escaping (BrowserContentDescription) -> Void) {
+            switch url.scheme {
+            case "beam-pdf", "beam-pdfs":
+                let urlSession = URLSession.shared
+                let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
+                cookieStore.getAllCookies { cookies in
+                    urlSession.configuration.httpCookieStorage?.setCookies(cookies, for: url, mainDocumentURL: nil)
 
-        default:
-            return WebContentDescription(webView: webView)
-        }
+                    let contentDescription = PDFContentDescription(
+                        url: Self.originalURL(internal: url),
+                        urlSession: urlSession
+                    )
+
+                    completionHandler(contentDescription)
+                }
+
+            default:
+                completionHandler(WebContentDescription(webView: webView))
+            }
     }
 
     /// Returns the original URL that was previously transformed to an internal URL.
