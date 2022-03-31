@@ -7,6 +7,7 @@ class UserMe: Decodable, Errorable, APIResponseCodingKeyProtocol {
     var email: String?
     var unconfirmedEmail: String?
     var beamObjects: [BeamObject]?
+    var paginatedBeamObjects: PaginatedBeamObjects?
     var errors: [UserErrorData]?
     var identities: [IdentityType]?
 }
