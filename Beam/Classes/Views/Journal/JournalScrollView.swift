@@ -93,7 +93,6 @@ struct JournalScrollView: NSViewRepresentable {
 
     func updateNSView(_ nsView: NSScrollView, context: Context) {
         guard let journalStackView = nsView.documentView as? StackView else { return }
-        journalStackView.invalidateLayout()
         if state.data.newDay {
             state.data.reloadJournal()
         }
