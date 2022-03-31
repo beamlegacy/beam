@@ -921,6 +921,36 @@ class MediaContentGeometrySizePreferencesPersistence: XCTestCase {
         XCTAssertEqual(geometry.displaySize, CGSize(width: 300, height: 350))
     }
 
+    func testApplyDisplaySizePreferences() {
+        sizePreferencesStorage.displaySizePreferences = .displayHeight(
+            containerWidthRatio: 0.5,
+            displayHeight: 350
+        )
+
+        var geometry = MediaContentGeometry(
+            sizePreferencesStorage: sizePreferencesStorage,
+            displaySizeCache: SizeCache(CGSize(width: 400, height: 200))
+        )
+        geometry.setContainerWidth(600)
+
+        let contentDescription = MediaContentGeometryDescription(
+            idealWidth: 400,
+            idealHeight: 200,
+            preservesAspectRatio: false,
+            resizableAxes: .both
+        )
+        geometry.setGeometryDescription(contentDescription)
+
+        sizePreferencesStorage.displaySizePreferences = .displayHeight(
+            containerWidthRatio: 0.25,
+            displayHeight: 300
+        )
+
+        geometry.applyDisplaySizePreferences()
+
+        XCTAssertEqual(geometry.displaySize, CGSize(width: 150, height: 300))
+    }
+
 }
 
 // MARK: - Display size override
