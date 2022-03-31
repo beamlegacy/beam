@@ -14,11 +14,12 @@ final class PDFContentDescription: BrowserContentDescription {
 
     private(set) var pdfDocument: PDFDocument?
 
+    private let urlSession: URLSession
     private var cancellables = Set<AnyCancellable>()
-    private let urlSession = URLSession.shared
 
-    init(url: URL) {
+    init(url: URL, urlSession: URLSession) {
         self.url = url
+        self.urlSession = urlSession
 
         titlePublisher = Just(url.lastPathComponent).eraseToAnyPublisher()
         contentState = PDFContentState(filename: url.lastPathComponent)
@@ -30,7 +31,12 @@ final class PDFContentDescription: BrowserContentDescription {
             }
 
             DispatchQueue.main.async { [weak contentState] in
-                contentState?.pdfDocument = PDFDocument(data: data!)
+                guard let document = PDFDocument(data: data!) else {
+                    Logger.shared.logError("Could not decode data to PDF document", category: .network)
+                    return
+                }
+
+                contentState?.pdfDocument = document
             }
         }
 
