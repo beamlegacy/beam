@@ -24,8 +24,8 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
 
     var currentScore: Score { browsingTree.current.score }
 
-    func applyLongTermScore(changes: (LongTermUrlScore) -> Void) {
-        browsingTree.current.longTermScoreApply(changes: changes)
+    func scoreApply(changes: (UrlScoreProtocol) -> Void) {
+        browsingTree.current.scoreApply(changes: changes)
     }
     func updateScore() {
         let score = browsingTree.current.score.score
@@ -34,7 +34,7 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
 
     func addTextSelection() {
         currentScore.textSelections += 1
-        applyLongTermScore {$0.textSelections += 1}
+        scoreApply {$0.textSelections += 1}
         updateScore()
     }
 
@@ -44,15 +44,15 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
         if frame.width > 0, frame.height > 0 {
             let currentScrollRatioX = Float(frame.scrollX / frame.width)
             currentScore.scrollRatioX = max(currentScrollRatioX, currentScore.scrollRatioX)
-            applyLongTermScore {$0.scrollRatioX = max(currentScrollRatioX, $0.scrollRatioX)}
+            scoreApply {$0.scrollRatioX = max(currentScrollRatioX, $0.scrollRatioX)}
 
             let currentScrollRatioY = Float(frame.scrollY / frame.height)
             currentScore.scrollRatioY = max(currentScrollRatioY, currentScore.scrollRatioY)
-            applyLongTermScore {$0.scrollRatioY = max(currentScrollRatioY, $0.scrollRatioY)}
+            scoreApply {$0.scrollRatioY = max(currentScrollRatioY, $0.scrollRatioY)}
 
             let currentArea = Float(frame.width * frame.height)
             currentScore.area = currentArea
-            applyLongTermScore {$0.area = currentArea}
+            scoreApply {$0.area = currentArea}
 
             updateScore()
         }

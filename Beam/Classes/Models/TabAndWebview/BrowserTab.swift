@@ -230,7 +230,8 @@ import Promises
             origin,
             frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
             longTermScoreStore: LongTermUrlScoreStore(),
-            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(db: GRDBDatabase.shared)
+            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(db: GRDBDatabase.shared),
+            dailyScoreStore: GRDBDailyUrlScoreStore()
         )
     }
 

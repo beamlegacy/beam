@@ -9,7 +9,7 @@ import Foundation
 
 private let HALF_LIFE = Float(30.0 * 24.0 * 60.0 * 60.0)
 
-public class LongTermUrlScore: Codable {
+public class LongTermUrlScore: Codable, UrlScoreProtocol {
     public enum CodingKeys: String, CodingKey {
         case urlId
         case visitCount
