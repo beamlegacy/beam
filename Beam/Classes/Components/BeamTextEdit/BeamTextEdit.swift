@@ -604,7 +604,7 @@ public extension CALayer {
     }
 
     static let minimumEmptyEditorHeight = CGFloat(184)
-    static let minimumEmptyEditorWidth = CGFloat(670)
+    static let minimumEmptyEditorWidth = CGFloat(PreferencesManager.editorMinWidth)
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
 
