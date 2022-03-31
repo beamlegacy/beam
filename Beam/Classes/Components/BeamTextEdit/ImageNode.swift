@@ -42,6 +42,8 @@ class ImageNode: ResizableNode {
 
     var isCollapsed: Bool {
         didSet {
+            guard isCollapsed != oldValue else { return }
+
             element.collapsed = isCollapsed
             configureCollapsed(isCollapsed)
             if !element.isProxy {
@@ -69,18 +71,9 @@ class ImageNode: ResizableNode {
         setupImage(width: availableWidth)
 
         element.changed.sink { [weak self] change in
-            guard let self = self else { return }
             let updatedElement = change.0
-            let contentGeometry = MediaContentGeometry(
-                sizePreferencesStorage: updatedElement,
-                sizePreferencesPersistenceStrategy: .contentSize
-            )
-            self.contentGeometry = contentGeometry
-            self.contentGeometry.setGeometryDescription(self.geometryDescription)
-
-            if updatedElement.collapsed != self.isCollapsed {
-                self.isCollapsed = updatedElement.collapsed
-            }
+            self?.isCollapsed = updatedElement.collapsed
+            self?.contentGeometry.applyDisplaySizePreferences()
         }.store(in: &scope)
     }
 
