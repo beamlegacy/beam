@@ -26,8 +26,6 @@ struct WindowBottomToolBar: View {
     }
 
     private let barHeight: CGFloat = 42
-    private let verticalPadding: CGFloat = BeamSpacing._50
-    private var buttonsHeight: CGFloat { barHeight - verticalPadding * 2 }
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(containerGeometry: containerGeometry) {
@@ -56,34 +54,31 @@ struct WindowBottomToolBar: View {
     }
 
     private var journalScrollButton: some View {
-        HStack(spacing: 0) {
-            ButtonLabel(icon: "editor-journal_scroll", customStyle: Self.scrollLabelStyle, action: scrollJournalDown)
-                .cursorOverride(.arrow)
-        }
-        .frame(maxWidth: .infinity)
-        .opacity(state.journalScrollOffset < (state.cachedJournalStackView?.enclosingScrollView?.contentView.bounds.height ?? 0) / 8 ? 1 : 0)
+        ButtonLabel(icon: "editor-journal_scroll", customStyle: Self.scrollLabelStyle, action: scrollJournalDown)
+            .cursorOverride(.arrow)
+            .opacity(state.journalScrollOffset < (state.cachedJournalStackView?.enclosingScrollView?.contentView.bounds.height ?? 0) / 8 ? 1 : 0)
     }
 
     var body: some View {
-        HStack {
-            BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
-            if state.mode == .today {
-                journalScrollButton
-            } else {
-                Spacer(minLength: BeamSpacing._200)
+        VStack {
+            Spacer()
+            ZStack {
+                HStack(alignment: .lastTextBaseline) {
+                    BottomToolBarLeadingIconView(versionChecker: state.data.versionChecker)
+                    Spacer()
+                    BottomToolBarTrailingIconView()
+                        .environmentObject(state.noteMediaPlayerManager)
+                }
+
+                if state.mode == .today {
+                    journalScrollButton
+                }
             }
-            HStack {
-                BottomToolBarTrailingIconView()
-                    .environmentObject(state.noteMediaPlayerManager)
-            }
-            .frame(maxWidth: .infinity, alignment: .trailing)
         }
         .padding(BeamSpacing._100)
-        .frame(height: barHeight)
-        .frame(maxWidth: .infinity)
     }
 
-    fileprivate static let buttonStyle: ButtonLabelStyle = {
+    fileprivate static func buttonStyle(withIcon hasIcon: Bool) -> ButtonLabelStyle {
         ButtonLabelStyle(
             font: BeamFont.medium(size: 12).swiftUI,
             spacing: 1,
@@ -92,53 +87,43 @@ struct WindowBottomToolBar: View {
             backgroundColor: Color.clear,
             hoveredBackgroundColor: Color.clear,
             activeBackgroundColor: BeamColor.Mercury.swiftUI,
-            leadingPaddingAdjustment: 4
+            leadingPaddingAdjustment: hasIcon ? 4 : 0
         )
-    }()
+    }
 
 }
 
-private struct BottomToolBarLeadingIconView: View {
+private struct HelpButtonView: View {
 
-    @ObservedObject var versionChecker: VersionChecker
     @EnvironmentObject var state: BeamState
+    @State private var buttonFrameInGlobalCoordinates: CGRect?
 
     var body: some View {
-        if shouldShowUpdateStatus {
-            SmallUpdateIndicatorView(versionChecker: versionChecker)
-        } else {
-            helpButton
+        ButtonLabel("Help", customStyle: WindowBottomToolBar.buttonStyle(withIcon: false)) {
+            showHelpAndFeedbackMenuView()
+        }
+        .accessibility(identifier: "HelpButton")
+        .background(geometryReaderView)
+        .onPreferenceChange(FramePreferenceKey.self) { frame in
+            buttonFrameInGlobalCoordinates = frame
         }
     }
 
-    private var helpButton: some View {
+    private var geometryReaderView: some View {
         GeometryReader { proxy in
-            ButtonLabel("Help", icon: "help-question", customStyle: WindowBottomToolBar.buttonStyle) {
-                showHelpAndFeedbackMenuView(proxy: proxy)
-            }
-            .onReceive(state.$showHelpAndFeedback, perform: { showHelp in
-                if showHelp {
-                    showHelpAndFeedbackMenuView(proxy: proxy)
-                    state.showHelpAndFeedback = false
-                }
-            })
-            .accessibility(identifier: "HelpButton")
+            let frame = proxy.frame(in: .global)
+            Color.clear.preference(key: FramePreferenceKey.self, value: frame)
         }
     }
 
-    private var shouldShowUpdateStatus: Bool {
-        switch versionChecker.state {
-        case .noUpdate, .checking: return false
-        default: return true
-        }
-    }
-
-    private func showHelpAndFeedbackMenuView(proxy: GeometryProxy) {
+    private func showHelpAndFeedbackMenuView() {
         let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
+
+        guard let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
+
         let view = HelpAndFeedbackMenuView(window: window)
             .environmentObject(state)
 
-        let buttonFrame = proxy.safeTopLeftGlobalFrame(in: window?.parent)
         var origin = CGPoint(
             x: buttonFrame.origin.x,
             y: buttonFrame.minY - 7
@@ -150,6 +135,34 @@ private struct BottomToolBarLeadingIconView: View {
         window?.setView(with: view, at: origin)
         window?.isMovable = false
         window?.makeKey()
+    }
+
+    private struct FramePreferenceKey: PreferenceKey {
+        static var defaultValue: CGRect?
+        static func reduce(value: inout Value, nextValue: () -> Value) {
+            value = value ?? nextValue()
+        }
+    }
+
+}
+
+private struct BottomToolBarLeadingIconView: View {
+
+    @ObservedObject var versionChecker: VersionChecker
+
+    var body: some View {
+        if shouldShowUpdateStatus {
+            SmallUpdateIndicatorView(versionChecker: versionChecker)
+        } else {
+            HelpButtonView()
+        }
+    }
+
+    private var shouldShowUpdateStatus: Bool {
+        switch versionChecker.state {
+        case .noUpdate, .checking: return false
+        default: return true
+        }
     }
 
 }
@@ -173,7 +186,7 @@ private struct BottomToolBarTrailingIconView: View {
     }
 
     private var newNoteButton: some View {
-        ButtonLabel("New Note", icon: "tool-new", customStyle: WindowBottomToolBar.buttonStyle) {
+        ButtonLabel("New Note", icon: "tool-new", customStyle: WindowBottomToolBar.buttonStyle(withIcon: true)) {
             state.startNewNote()
         }
         .accessibility(identifier: "NewNoteButton")
