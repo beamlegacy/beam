@@ -20,7 +20,8 @@ class LoggingMessageHandler: SimpleBeamMessageHandler {
 
     init() {
         let messages = LogMessages.self.allCases.map { $0.rawValue }
-        super.init(messages: messages, jsFileName: "OverrideConsole", jsCodePosition: .atDocumentStart)
+        // The LoggingMessageHandler doesn't have a specific file to add. Instead the logger helper should be included in each script.
+        super.init(messages: messages, jsFileName: "", jsCodePosition: .atDocumentStart)
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from: WebPage, frameInfo: WKFrameInfo?) {
