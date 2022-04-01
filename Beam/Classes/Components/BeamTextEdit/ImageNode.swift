@@ -69,12 +69,6 @@ class ImageNode: ResizableNode {
         super.init(parent: parent, element: element, availableWidth: availableWidth, contentGeometry: contentGeometry)
 
         setupImage(width: availableWidth)
-
-        element.changed.sink { [weak self] change in
-            let updatedElement = change.0
-            self?.isCollapsed = updatedElement.collapsed
-            self?.contentGeometry.applyDisplaySizePreferences()
-        }.store(in: &scope)
     }
 
     override func setBottomPaddings(withDefault: CGFloat = 0) {
@@ -430,6 +424,13 @@ class ImageNode: ResizableNode {
             setupImage(width: availableWidth)
         }
     }
+
+    override func elementDidChange() {
+        super.elementDidChange()
+
+        isCollapsed = element.collapsed
+    }
+
 }
 
 // MARK: - ImageNode + Layer
