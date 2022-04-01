@@ -1,9 +1,7 @@
 import { GeolocationUI } from "./GeolocationUI"
 import {
-  BeamEmbedContentSize,
   BeamLogCategory,
   BeamWindow,
-  MessagePayload,
   Native
 } from "@beam/native-beamtypes"
 import { BeamLogger } from "@beam/native-utils"
