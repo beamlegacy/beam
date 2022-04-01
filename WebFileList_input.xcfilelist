@@ -10,6 +10,10 @@
 ./Beam/Classes/Models/WebPositions/Web/src/WebPositionsUI_web.ts
 ./Beam/Classes/Models/WebPositions/Web/src/WebPositionsUI.ts
 ./Beam/Classes/Models/WebPositions/Web/src/WebPositions.ts
+./Beam/Classes/Models/Geolocation/Web/dist/src/GeolocationUI.d.ts
+./Beam/Classes/Models/Geolocation/Web/dist/src/Geolocation.d.ts
+./Beam/Classes/Models/Geolocation/Web/dist/src/GeolocationUI_native.d.ts
+./Beam/Classes/Models/Geolocation/Web/dist/src/GeolocationUI_web.d.ts
 ./Beam/Classes/Models/Geolocation/Web/tests/GeolocationUIMock.ts
 ./Beam/Classes/Models/Geolocation/Web/src/GeolocationUI_native.ts
 ./Beam/Classes/Models/Geolocation/Web/src/GeolocationUI.ts
@@ -164,7 +168,6 @@
 ./Beam/Classes/Components/PointAndShoot/Web/src/index_web.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/PopupUI_web.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/PointAndShootUI_web.scss
-./Beam/Classes/Models/Geolocation/Web/src/Geolocation.css
 ./Beam/Classes/Components/MediaPlayer/Web/src/MediaPlayer.css
 ./Beam/Classes/Components/BeamTextEdit/EmbedNode/Web/src/EmbedNode.css
 ./Beam/Classes/Components/PointAndShoot/Web/tests/Fixtures/Beam.css

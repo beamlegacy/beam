@@ -26,6 +26,12 @@ echo "develop coverage = " $develop
 develop="${develop%\"}"
 develop="${develop#\"}"
 develop="${develop/.*}"
+# Bash will cast the number 0 to null. 
+# If the coverage is 0, use 1 for the comparison instead
+if [[ "$develop" == null ]] ; then 
+  echo "develop cover is null, using 1 for comparison"
+  develop=1
+fi
 echo "develop coverage value =" $develop
 
 # if latest >= develop exit 0
