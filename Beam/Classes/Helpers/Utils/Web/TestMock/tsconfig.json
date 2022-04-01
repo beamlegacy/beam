@@ -1,0 +1,18 @@
+{
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    "lib": ["ES2017", "dom"],
+    "target": "ES2017",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true,
+    "inlineSources": true,
+    "sourceMap": true
+  },
+  "exclude": ["dist/**", "tests/**"]
+}

@@ -526,7 +526,7 @@ import Promises
         let workItem = DispatchWorkItem { [weak self] in
             guard let webView = self?.webView, self?.isActiveTab() == true, self?.state?.omniboxInfo.isFocused == false else { return }
             webView.window?.makeFirstResponder(webView)
-            webView.page?.executeJS("refocusLastElement()", objectName: "FocusHandling")
+            webView.page?.executeJS("refocusLastElement()", objectName: "WebViewFocus")
             self?.updateFavIcon(fromWebView: true)
         }
         refocusDispatchItem = workItem

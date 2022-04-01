@@ -1,6 +1,6 @@
-import { FrameInfo } from "../../../../Helpers/Utils/Web/BeamTypes"
-import { EventsMock } from "../../../../Helpers/Utils/Web/Test/Mock/EventsMock"
-import { WebPositionsUI } from "../WebPositionsUI"
+import { FrameInfo } from "@beam/native-beamtypes"
+import { EventsMock } from "@beam/native-testmock"
+import { WebPositionsUI } from "../src/WebPositionsUI"
 
 export class WebPositionsUIMock extends EventsMock implements WebPositionsUI {
   setFramesInfo(framesInfo: FrameInfo[]) {
