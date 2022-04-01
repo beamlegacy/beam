@@ -316,7 +316,7 @@ js_test:
     - yarn install
     - yarn run buildpackages
     - yarn workspaces foreach run build
-    - yarn run alltests
+    - yarn run alltests-ci
     - yarn workspace @beam/native-collect run benchmark-show
   coverage: '/All files\s+\|\s+([\d.]+)/'
   artifacts:
