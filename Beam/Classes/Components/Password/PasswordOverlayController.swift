@@ -417,7 +417,14 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             if saveAction != .saveSilently, let browserTab = (self.page as? BrowserTab) {
                 browserTab.passwordManagerToast(saved: saveAction == .save)
             }
-            PasswordManager.shared.save(hostname: hostname, username: credentials.username ?? "", password: credentials.password)
+            let savedHostname: String
+            switch saveAction {
+            case .save, .saveSilently:
+                savedHostname = HostnameCanonicalizer.shared.canonicalHostname(for: hostname) ?? hostname
+            case .update:
+                savedHostname = hostname
+            }
+            PasswordManager.shared.save(hostname: savedHostname, username: credentials.username ?? "", password: credentials.password)
         }
     }
 

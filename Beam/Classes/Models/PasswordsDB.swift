@@ -232,23 +232,24 @@ class PasswordsDB: PasswordStore {
         passwordsRecord.map { Credential(username: $0.username, password: $0.password) }
     }
 
-    // PasswordStore
-    func entries(for host: String, exact: Bool) throws -> [PasswordRecord] {
-        guard !exact else {
-            return try entries(for: host)
+    func entries(for host: String, options: PasswordManagerHostLookupOptions) throws -> [PasswordRecord] {
+        var allEntries: [PasswordRecord]
+        if options.contains(.subdomains) {
+            allEntries = try entriesWithSubdomains(for: host)
+        } else {
+            allEntries = try entries(for: host)
         }
-        var components = host.components(separatedBy: ".")
-        var parentHosts = [String]()
-        while components.count > 2 {
-            components.removeFirst()
-            parentHosts.append(components.joined(separator: "."))
-        }
-        var allEntries = [PasswordRecord]()
-        let entries = try entriesWithSubdomains(for: host)
-        allEntries += entries
-        for parentHost in parentHosts {
-            let entries = try self.entries(for: parentHost)
-            allEntries += entries
+        if options.contains(.parentDomains) {
+            var components = host.components(separatedBy: ".")
+            var parentHosts = [String]()
+            while components.count > 2 {
+                components.removeFirst()
+                parentHosts.append(components.joined(separator: "."))
+            }
+            for parentHost in parentHosts {
+                let entries = try entries(for: parentHost)
+                allEntries += entries
+            }
         }
         return allEntries
     }
