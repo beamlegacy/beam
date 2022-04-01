@@ -85,7 +85,6 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
                 edit?.hideInlineFormatter()
             }
         }
-        edit.frame = CGRect(origin: CGPoint.zero, size: edit.intrinsicContentSize)
     }
 
     private func updateEditorProperties(_ editor: BeamTextEdit, context: Context) {
