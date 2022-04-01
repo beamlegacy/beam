@@ -69,7 +69,7 @@ final class EmbedContentView: NSView {
     }
 
     private func showWebView() {
-        guard let webView = webView, webView.superview == nil else { return }
+        guard let webView = webView else { return }
 
         loadingView?.removeFromSuperview()
         loadingView = nil
