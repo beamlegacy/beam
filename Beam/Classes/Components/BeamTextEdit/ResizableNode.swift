@@ -54,6 +54,14 @@ class ResizableNode: ElementNode {
         DispatchQueue.main.async { [weak self] in
             self?.invalidateRendering()
         }
+
+        element.changed.sink { [weak self] change in
+            let updatedElement = change.0
+            // Ignore changes from parent elements
+            if updatedElement.id == element.id {
+                self?.elementDidChange()
+            }
+        }.store(in: &scope)
     }
 
     /// The reference area to position the resizing handles around.
@@ -210,6 +218,11 @@ class ResizableNode: ElementNode {
         }
         handle.cursor = NSCursor.resizeLeftRight
         addLayer(handle, origin: .zero)
+    }
+
+    /// Called when a property of this node's element has changed. If you override this method, you must call super at some point in your implementation.
+    func elementDidChange() {
+        contentGeometry.applyDisplaySizePreferences()
     }
 
     private func setupVerticalResizeHandleLayer() {

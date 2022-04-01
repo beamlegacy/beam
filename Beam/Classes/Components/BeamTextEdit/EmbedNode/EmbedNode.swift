@@ -158,12 +158,6 @@ class EmbedNode: ResizableNode {
 
         setAccessibilityLabel("EmbedNode")
         setAccessibilityRole(.textArea)
-
-        element.changed.sink { [weak self] change in
-            let updatedElement = change.0
-            self?.isUserCollapsed = updatedElement.collapsed
-            self?.contentGeometry.applyDisplaySizePreferences()
-        }.store(in: &scope)
     }
 
     override func updateRendering() -> CGFloat {
@@ -250,10 +244,6 @@ class EmbedNode: ResizableNode {
         }
     }
 
-    deinit {
-        expandedContent?.removeFromSuperview()
-    }
-
     override func updateForMove(isDragging: Bool) {
         super.updateForMove(isDragging: isDragging)
 
@@ -289,6 +279,17 @@ class EmbedNode: ResizableNode {
             self.expandedContent?.layer?.setAffineTransform(final)
         }
     }
+
+    override func elementDidChange() {
+        super.elementDidChange()
+
+        isUserCollapsed = element.collapsed
+    }
+
+    deinit {
+        expandedContent?.removeFromSuperview()
+    }
+
 }
 
 extension EmbedNode {
