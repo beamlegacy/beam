@@ -148,7 +148,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
             if let bestEntry = credentialsBuilder.suggestedEntry() {
                 self.entriesForHost = [bestEntry]
             } else {
-                self.entriesForHost = PasswordManager.shared.entries(for: minimizedHost, exact: false)
+                self.entriesForHost = PasswordManager.shared.entries(for: minimizedHost, options: .fuzzy)
             }
         }
     }
