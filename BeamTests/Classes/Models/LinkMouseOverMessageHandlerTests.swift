@@ -27,7 +27,12 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
             "target": ""
         ]
 
-        messageHandler.onMessage(messageName: "linkMouseOver", messageBody: body, from: webPage, frameInfo: nil)
+        messageHandler.onMessage(
+            messageName: LinkMouseOverMessage.LinkMouseOver_linkMouseOver.rawValue,
+            messageBody:
+                body, from:
+                webPage, frameInfo: nil
+        )
 
         XCTAssertEqual(
             webPage.mouseHoveringLocation,
@@ -44,7 +49,12 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
             "target": "_blank"
         ]
 
-        messageHandler.onMessage(messageName: "linkMouseOver", messageBody: body, from: webPage, frameInfo: nil)
+        messageHandler.onMessage(
+            messageName: LinkMouseOverMessage.LinkMouseOver_linkMouseOver.rawValue,
+            messageBody:
+                body, from:
+                webPage, frameInfo: nil
+        )
 
         XCTAssertEqual(
             webPage.mouseHoveringLocation,
@@ -56,7 +66,11 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
     }
 
     func testMouseOut() {
-        messageHandler.onMessage(messageName: "linkMouseOver", messageBody: [], from: webPage, frameInfo: nil)
+        messageHandler.onMessage(
+            messageName: LinkMouseOverMessage.LinkMouseOver_linkMouseOver.rawValue,
+            messageBody: [],
+            from: webPage,
+            frameInfo: nil)
 
         XCTAssertEqual(webPage.mouseHoveringLocation, .none)
     }

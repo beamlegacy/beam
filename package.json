@@ -1,0 +1,34 @@
+{
+  "name": "@beam/native-userscripts",
+  "private": true,
+  "packageManager": "yarn@3.2.0",
+  "workspaces": [
+    "Beam/**/*"
+  ],
+  "scripts": {
+    "alltests": "jest --runInBand",
+    "lint": "eslint ./Beam --format gitlab",
+    "lint-fix": "eslint ./Beam --format gitlab --fix",
+    "madge": "madge --circular --extensions ts,js ./",
+    "generate": "node ./generator/generate.js",
+    "buildcomponents": "yarn workspaces foreach run build --color",
+    "buildpackages": "yarn workspace @beam/native-beamtypes run build && yarn workspace @beam/native-utils run build && yarn workspace @beam/native-testmock run build",
+    "builder": "yarn buildpackages && yarn buildcomponents",
+    "doctor": "yarn dlx @yarnpkg/doctor ./"
+  },
+  "devDependencies": {
+    "@types/eslint": "^8",
+    "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "eslint": "^8.12.0",
+    "eslint-formatter-gitlab": "^3.0.0",
+    "eslint-plugin-unused-imports": "^2.0.0",
+    "generate-template-files": "^3.2.0",
+    "jest": "^27.5.1",
+    "jest-junit": "^13.0.0",
+    "madge": "^5.0.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2"
+  }
+}

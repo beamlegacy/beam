@@ -1,13 +1,36 @@
 {
-  "include": ["**/*", ".prettierrc.js"],
+  "include": ["./src/**/*"],
   "compilerOptions": {
-    "target": "ES2018",
-    "types": ["jest", "node"],
-    "sourceMap": true,
-    "typeRoots": ["node_modules/@types"],
+    "lib": [
+      "ES2017",
+      "dom"
+    ],
+    "composite": true,
+    "target": "ES2017",
+    "module": "CommonJS",
     "moduleResolution": "node",
-    "lib": ["ES2019", "DOM"],
-    "esModuleInterop": true
+    "outDir": "./dist",
+    "allowJs": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "strictNullChecks": false, // should be true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "inlineSources": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "isolatedModules": true,
   },
-  "types": ["jest"]
+  "exclude": ["dist/**", "tests/**"],
+  "references": [
+    {
+      "path": "../../../Helpers/Utils/Web/TestMock"
+    },
+    {
+      "path": "../../../Helpers/Utils/Web/Utils"
+    },
+    {
+      "path": "../../../Helpers/Utils/Web/BeamTypes"
+    }
+  ],
 }

@@ -18,7 +18,7 @@ class PointAndShootMessageHandler: SimpleBeamMessageHandler {
 
     init() {
         let messages = PointAndShootMessages.self.allCases.map { $0.rawValue }
-        super.init(messages: messages, jsFileName: "pns_prod")
+        super.init(messages: messages, jsFileName: "PointAndShoot_prod")
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
