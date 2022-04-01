@@ -1,6 +1,5 @@
 import { GeolocationUI } from "./GeolocationUI"
 import {
-  BeamEmbedContentSize,
   BeamLogCategory,
   BeamWindow
 } from "@beam/native-beamtypes"

@@ -1,5 +1,4 @@
 import {
-  BeamEmbedContentSize,
   BeamLogCategory,
   BeamWindow
 } from "@beam/native-beamtypes"
@@ -36,7 +35,7 @@ export class Geolocation<UI extends GeolocationUI> {
       error,
       options
     ) {
-      var id = this.id()
+      const id = this.id()
       this.listeners[id] = {
         onetime: true,
         success: success || this.noop,
@@ -47,7 +46,7 @@ export class Geolocation<UI extends GeolocationUI> {
 
     // @override watchPosition()
     navigator.geolocation.watchPosition = function (success, error, options) {
-      var id = this.id()
+      const id = this.id()
       this.listeners[id] = {
         onetime: false,
         success: success || this.noop,
@@ -59,7 +58,7 @@ export class Geolocation<UI extends GeolocationUI> {
 
     // @override clearWatch()
     navigator.geolocation.clearWatch = function (id) {
-      var idExists = this.listeners[id] ? true : false
+      const idExists = this.listeners[id] ? true : false
       if (idExists) {
         this.listeners[id] = null
         delete this.listeners[id]
@@ -71,13 +70,13 @@ export class Geolocation<UI extends GeolocationUI> {
   noop() {}
 
   id() {
-    var min = 1,
+    const min = 1,
       max = 1000
     return Math.floor(Math.random() * (max - min + 1)) + min
   }
 
   clear(isError) {
-    for (var id in this.listeners) {
+    for (const id in this.listeners) {
       if (isError || this.listeners[id].onetime) {
         navigator.geolocation.clearWatch(Number(id))
       }
@@ -94,7 +93,7 @@ export class Geolocation<UI extends GeolocationUI> {
     heading,
     speed
   ) {
-    var position = {
+    const position = {
       timestamp: new Date(timestamp).getTime() || new Date().getTime(), // safari can not parse date format returned by swift e.g. 2019-12-27 15:46:59 +0000 (fallback used because we trust that safari will learn it in future because chrome knows that format)
       coords: {
         latitude: latitude,
@@ -106,21 +105,21 @@ export class Geolocation<UI extends GeolocationUI> {
         speed: speed > 0 ? speed : null
       }
     }
-    for (var id in this.listeners) {
+    for (const id in this.listeners) {
       this.listeners[id].success(position)
     }
     this.clear(false)
   }
 
   error(code, message) {
-    var error = {
+    const error = {
       PERMISSION_DENIED: 1,
       POSITION_UNAVAILABLE: 2,
       TIMEOUT: 3,
       code: code,
       message: message
     }
-    for (var id in this.listeners) {
+    for (const id in this.listeners) {
       this.listeners[id].error(error)
     }
     this.clear(true)

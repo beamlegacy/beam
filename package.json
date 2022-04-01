@@ -7,8 +7,9 @@
   ],
   "scripts": {
     "alltests": "jest --runInBand",
-    "lint": "eslint ./Beam --format gitlab",
-    "lint-fix": "eslint ./Beam --format gitlab --fix",
+    "alltests-ci": "jest --ci --silent --verbose --reporters=default --reporters=jest-junit --coverage",
+    "lint": "eslint --format gitlab ./Beam",
+    "lint-fix": "eslint --format gitlab --fix ./Beam",
     "madge": "madge --circular --extensions ts,js ./",
     "generate": "node ./generator/generate.js",
     "buildcomponents": "yarn workspaces foreach run build --color",
