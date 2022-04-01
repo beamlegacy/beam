@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "lib": ["ES2017", "dom"],
+    "target": "ES2017",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "strict": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "composite": true,
+    "inlineSources": true,
+    "sourceMap": true
+  },
+  "references": [
+    {"path": "Beam/**"}
+  ],
+  "exclude": [
+    "Extern",
+    "generator",
+    "Beam/**/tests/**",
+    "Beam/**/dist/**"
+  ]
+}

@@ -3,11 +3,6 @@
 # Learn more about .gitignore:
 #     https://www.atlassian.com/git/tutorials/saving-changes/gitignore
 
-## Point and Shoot
-Beam/Classes/Components/PointAndShoot/**/.parcel-cache/
-Beam/**/*.js.map
-Beam/Classes/Components/PointAndShoot/**/*_prod.*
-
 package-lock.json
 ## Pods
 Pods/
@@ -105,6 +100,9 @@ dist/
 # VScode IDE
 .vscode/
 
+# Nova IDE
+.nova
+
 # Unit test reports
 TEST*.xml
 **/coverage/*
@@ -157,3 +155,15 @@ BeamCore/Configuration/EnvironmentVariables_generated.swift
 
 # allure_report
 allure-report/
+
+# Yarn
+.yarn/*
+!.yarn/cache
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+
+# Webpack build cache
+.temp_cache
