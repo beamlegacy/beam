@@ -32,7 +32,7 @@ class PasswordsDBTests: XCTestCase {
         let allEntries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(allEntries.count > 0, "FetchAll has no passwords, it should be > 0")
 
-        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .exact)
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
@@ -97,12 +97,12 @@ class PasswordsDBTests: XCTestCase {
         let allEntries = PasswordManager.shared.fetchAll()
         XCTAssertTrue(allEntries.count >= 2, "FetchAll has no passwords, it should be >= 2")
 
-        let parentEntries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
+        let parentEntries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .exact)
         XCTAssertEqual(parentEntries.count, 1)
         XCTAssertEqual(parentEntries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(parentEntries.last?.username, Self.username)
 
-        let subdomainEntries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, exact: true)
+        let subdomainEntries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, options: .exact)
         XCTAssertEqual(subdomainEntries.count, 1)
         XCTAssertEqual(subdomainEntries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(subdomainEntries.last?.username, Self.username)
@@ -152,7 +152,7 @@ class PasswordsDBTests: XCTestCase {
     func testFindEntriesForHost() {
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .exact)
         XCTAssertEqual(entries.count, 1)
         XCTAssertEqual(entries.last?.minimizedHost, Self.host.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
@@ -163,7 +163,7 @@ class PasswordsDBTests: XCTestCase {
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
         PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, exact: false)
+        let entries = PasswordManager.shared.entries(for: Self.subdomain1.minimizedHost!, options: .fuzzy)
         XCTAssertEqual(entries.count, 2)
         XCTAssertEqual(entries.first?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.first?.username, Self.username)
@@ -176,7 +176,7 @@ class PasswordsDBTests: XCTestCase {
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
         PasswordManager.shared.save(hostname: Self.subdomain1.minimizedHost!, username: Self.username, password: Self.password)
 
-        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: false)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .fuzzy)
         XCTAssertEqual(entries.count, 2)
         XCTAssertEqual(entries.last?.minimizedHost, Self.subdomain1.minimizedHost)
         XCTAssertEqual(entries.last?.username, Self.username)
@@ -240,7 +240,7 @@ class PasswordsDBTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 10.0)
 
-        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, exact: true)
+        let entries = PasswordManager.shared.entries(for: Self.host.minimizedHost!, options: .exact)
         XCTAssertEqual(entries.count, 0)
 
         stopNetworkTests()

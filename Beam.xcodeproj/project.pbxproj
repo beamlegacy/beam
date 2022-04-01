@@ -507,6 +507,10 @@
 		872644772619903B0070E83D /* StepperControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644762619903B0070E83D /* StepperControl.swift */; };
 		8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8726448E26199B8F0070E83D /* OptionSelector.swift */; };
 		872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */; };
+		872F658127F1C0EE005475B8 /* HostnameCanonicalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872F658027F1C0EE005475B8 /* HostnameCanonicalizer.swift */; };
+		872F658927F1C29B005475B8 /* shared-credentials.json in Resources */ = {isa = PBXBuildFile; fileRef = 872F658827F1C29A005475B8 /* shared-credentials.json */; };
+		872F658B27F1C36A005475B8 /* canonical-hostnames.json in Resources */ = {isa = PBXBuildFile; fileRef = 872F658A27F1C36A005475B8 /* canonical-hostnames.json */; };
+		872F658D27F204E4005475B8 /* HostnameCanonicalizerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872F658C27F204E4005475B8 /* HostnameCanonicalizerTests.swift */; };
 		873528B827342E6A005E7CBC /* SandboxEscape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528B727342E6A005E7CBC /* SandboxEscape.swift */; };
 		873528BA27342F85005E7CBC /* BrowserHistoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */; };
 		873528BC27343871005E7CBC /* SafariImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528BB27343871005E7CBC /* SafariImporter.swift */; };
@@ -1939,6 +1943,10 @@
 		872644762619903B0070E83D /* StepperControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperControl.swift; sourceTree = "<group>"; };
 		8726448E26199B8F0070E83D /* OptionSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelector.swift; sourceTree = "<group>"; };
 		872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuViewModel.swift; sourceTree = "<group>"; };
+		872F658027F1C0EE005475B8 /* HostnameCanonicalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostnameCanonicalizer.swift; sourceTree = "<group>"; };
+		872F658827F1C29A005475B8 /* shared-credentials.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "shared-credentials.json"; sourceTree = "<group>"; };
+		872F658A27F1C36A005475B8 /* canonical-hostnames.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "canonical-hostnames.json"; sourceTree = "<group>"; };
+		872F658C27F204E4005475B8 /* HostnameCanonicalizerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostnameCanonicalizerTests.swift; sourceTree = "<group>"; };
 		873528B727342E6A005E7CBC /* SandboxEscape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SandboxEscape.swift; sourceTree = "<group>"; };
 		873528B927342F85005E7CBC /* BrowserHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserHistoryImporter.swift; sourceTree = "<group>"; };
 		873528BB27343871005E7CBC /* SafariImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SafariImporter.swift; sourceTree = "<group>"; };
@@ -3280,6 +3288,7 @@
 				375D83BD278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift */,
 				877888DA269C977C00D703F0 /* PasswordImporterTest.swift */,
 				8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */,
+				872F658C27F204E4005475B8 /* HostnameCanonicalizerTests.swift */,
 				A5EE8C5927B8B67800800661 /* BeamNote+DocumentManagerTests.swift */,
 				A53F8A6127C4AC38000D168D /* NoteBackForwardListTests.swift */,
 				87FCAE9027E474AA001D8D18 /* SandboxEscapeTests.swift */,
@@ -3502,6 +3511,7 @@
 				56A5BD1A25CC590500ED7C50 /* NaturalLanguage */,
 				418171112581082200317ED8 /* Assets.xcassets */,
 				75A1E5AE2719A7AE000824B1 /* TopDomains */,
+				872F658727F1C205005475B8 /* PasswordQuirks */,
 			);
 			path = Assets;
 			sourceTree = "<group>";
@@ -3675,6 +3685,7 @@
 				8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */,
 				87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */,
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
+				872F658027F1C0EE005475B8 /* HostnameCanonicalizer.swift */,
 				BAA67971FD6352F46D77E3BE /* WebNoteController.swift */,
 				DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */,
 				DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */,
@@ -4697,6 +4708,15 @@
 				7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */,
 			);
 			path = Error;
+			sourceTree = "<group>";
+		};
+		872F658727F1C205005475B8 /* PasswordQuirks */ = {
+			isa = PBXGroup;
+			children = (
+				872F658827F1C29A005475B8 /* shared-credentials.json */,
+				872F658A27F1C36A005475B8 /* canonical-hostnames.json */,
+			);
+			path = PasswordQuirks;
 			sourceTree = "<group>";
 		};
 		873528B127342DE5005E7CBC /* BrowserHistory */ = {
@@ -7637,12 +7657,17 @@
 				418171F52581107C00317ED8 /* forgot_password.graphql in Resources */,
 				A52A559027592E9A002D0C99 /* Inter-Regular.otf in Resources */,
 				A5BAD85527BF533900B9AFF3 /* begin_record.caf in Resources */,
+				8A9309FF27A04E2C00064133 /* jest.config.js in Resources */,
+				3355999D26CBF11E00F52C23 /* SearchWebPage.js in Resources */,
+				872F658B27F1C36A005475B8 /* canonical-hostnames.json in Resources */,
 				8AEF14CD27F1D1D200A27C1B /* MediaPlayer_prod.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				A5C661A627A1A57200727ACB /* editor-delete.json in Resources */,
 				A03B908B27BE99AC001FBE64 /* HowToBeam.json in Resources */,
 				8ABFD6A02791D82B001E35DE /* confirm.aiff in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
+				872F658927F1C29B005475B8 /* shared-credentials.json in Resources */,
+				8AFE835A276B248B00D4B560 /* UITests-Media.html in Resources */,
 				8AE3EA9C27F36D5E0010A42C /* beam-logo-test.png in Resources */,
 				A03B909827BEA5EA001FBE64 /* htb-2.png in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
@@ -8522,6 +8547,7 @@
 				37DB5A1427BB515700534760 /* CollapsedContentLayer.swift in Sources */,
 				A5BD34DE27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift in Sources */,
 				9661A58B266A70DA00CB56B3 /* NodeProvider.swift in Sources */,
+				872F658127F1C0EE005475B8 /* HostnameCanonicalizer.swift in Sources */,
 				37520B0D27EAA40000A1C20B /* MediaContentGeometry.swift in Sources */,
 				9661A589266A289200CB56B3 /* BlockReferenceNode.swift in Sources */,
 				A0A026772696614E00B94227 /* UserInformationsEditModalView.swift in Sources */,
@@ -8777,6 +8803,7 @@
 				032562CC26051D4D006513E4 /* RBFilterGroupTests.m in Sources */,
 				520303D9261CAEF10028BC8E /* DatabaseManagerTests.swift in Sources */,
 				A075AB0F268F5C9400FC85B1 /* BeamDataFolderTests.swift in Sources */,
+				872F658D27F204E4005475B8 /* HostnameCanonicalizerTests.swift in Sources */,
 				876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */,
 				37B85B9027A2C83B003871F9 /* DownloadItemDelegateMock.swift in Sources */,
 				5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */,
