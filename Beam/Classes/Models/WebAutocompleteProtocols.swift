@@ -28,8 +28,20 @@ extension PasswordManagerEntry: Identifiable {
     }
 }
 
+struct PasswordManagerHostLookupOptions: OptionSet {
+    let rawValue: Int
+
+    static let parentDomains = PasswordManagerHostLookupOptions(rawValue: 1 << 0)
+    static let subdomains = PasswordManagerHostLookupOptions(rawValue: 1 << 1)
+    static let sharedCredentials = PasswordManagerHostLookupOptions(rawValue: 1 << 2)
+    static let genericHost = PasswordManagerHostLookupOptions(rawValue: 1 << 3)
+
+    static let exact: PasswordManagerHostLookupOptions = []
+    static let fuzzy: PasswordManagerHostLookupOptions = [.parentDomains, .subdomains, .sharedCredentials, .genericHost]
+}
+
 protocol PasswordStore {
-    func entries(for hostname: String, exact: Bool) throws -> [PasswordRecord]
+    func entries(for hostname: String, options: PasswordManagerHostLookupOptions) throws -> [PasswordRecord]
     func find(_ searchString: String) throws -> [PasswordRecord]
     func fetchAll() throws -> [PasswordRecord]
     func allRecords(_ updatedSince: Date?) throws -> [PasswordRecord]

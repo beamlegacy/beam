@@ -19,7 +19,7 @@ final class MockPasswordsDB: PasswordStore {
         passwords = []
     }
 
-    func entries(for hostname: String, exact: Bool) throws -> [PasswordRecord] {
+    func entries(for hostname: String, options: PasswordManagerHostLookupOptions) throws -> [PasswordRecord] {
         passwords.filter { record in
             record.hostname == hostname
         }

@@ -24,31 +24,33 @@ class PasswordManager {
         changeSubject.eraseToAnyPublisher()
     }
 
+    private var hostnameCanonicalizer: HostnameCanonicalizer
     private var passwordsDB: PasswordStore
     private var changeSubject: PassthroughSubject<Void, Never>
 
-    init() {
+    convenience init() {
         do {
-            passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
-            changeSubject = PassthroughSubject<Void, Never>()
+            let passwordsDB = try PasswordsDB(path: Self.passwordsDBPath)
+            self.init(passwordsDB: passwordsDB, hostLookup: .shared)
         } catch {
             fatalError("Error while creating the Passwords Database \(error)")
         }
     }
 
-    init(passwordsDB: PasswordStore) {
+    init(passwordsDB: PasswordStore, hostLookup: HostnameCanonicalizer = .shared) {
+        self.hostnameCanonicalizer = hostLookup
         self.passwordsDB = passwordsDB
         self.changeSubject = PassthroughSubject<Void, Never>()
     }
 
-    private func managerEntries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {
+    private func passwordManagerEntries(for passwordsRecord: [PasswordRecord]) -> [PasswordManagerEntry] {
         passwordsRecord.map { PasswordManagerEntry(minimizedHost: $0.hostname, username: $0.username) }
     }
 
     func fetchAll() -> [PasswordManagerEntry] {
         do {
             let allEntries = try passwordsDB.fetchAll()
-            return self.managerEntries(for: allEntries)
+            return passwordManagerEntries(for: allEntries)
         } catch PasswordDBError.errorFetchingPassword(let errorMsg) {
             Logger.shared.logError("Error while fetching all passwords: \(errorMsg)", category: .passwordsDB)
         } catch {
@@ -57,10 +59,21 @@ class PasswordManager {
         return []
     }
 
-    func entries(for host: String, exact: Bool) -> [PasswordManagerEntry] {
+    func entries(for host: String, options: PasswordManagerHostLookupOptions) -> [PasswordManagerEntry] {
         do {
-            let entries = try passwordsDB.entries(for: host, exact: exact)
-            return self.managerEntries(for: entries)
+            let canonicalHost = options.contains(.genericHost) ? hostnameCanonicalizer.canonicalHostname(for: host) : nil
+            let hostGroup = options.contains(.sharedCredentials) ? hostnameCanonicalizer.hostsSharingCredentials(with: canonicalHost ?? host) : nil
+            let records: [PasswordRecord]
+            if let hostGroup = hostGroup {
+                records = try hostGroup.flatMap {
+                    try passwordsDB.entries(for: $0, options: .exact)
+                }
+            } else if let canonicalHost = canonicalHost {
+                records = try passwordsDB.entries(for: canonicalHost, options: .subdomains)
+            } else {
+                records = try passwordsDB.entries(for: host, options: options)
+            }
+            return passwordManagerEntries(for: records)
         } catch PasswordDBError.errorFetchingPassword(let errorMsg) {
             Logger.shared.logError("Error while fetching password entries for \(host): \(errorMsg)", category: .passwordsDB)
         } catch {
@@ -70,7 +83,7 @@ class PasswordManager {
     }
 
     func bestMatchingEntries(hostname: String, username: String) -> [PasswordManagerEntry] {
-        entries(for: hostname, exact: false)
+        entries(for: hostname, options: .fuzzy)
             .filter { username.hasPrefix($0.username) }
             .sorted(by: { $0.username.count > $1.username.count })
     }
@@ -139,7 +152,7 @@ class PasswordManager {
     func find(_ searchString: String) -> [PasswordManagerEntry] {
         do {
             let entries = try passwordsDB.find(searchString)
-            return managerEntries(for: entries)
+            return passwordManagerEntries(for: entries)
         } catch PasswordDBError.errorSearchingPassword(errorMsg: let errorMsg) {
             Logger.shared.logError("Error while searching password for \(searchString): \(errorMsg)", category: .passwordsDB)
         } catch {
