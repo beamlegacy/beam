@@ -1,0 +1,58 @@
+[
+  {
+    "location": ".",
+    "name": "@beam/native-userscripts"
+  },
+  {
+    "location": "Beam/Classes/Components/BeamTextEdit/EmbedNode/Web",
+    "name": "@beam/native-embednode"
+  },
+  {
+    "location": "Beam/Classes/Components/MediaPlayer/Web",
+    "name": "@beam/native-mediaplayer"
+  },
+  {
+    "location": "Beam/Classes/Components/Password/Web",
+    "name": "@beam/native-passwordmanager"
+  },
+  {
+    "location": "Beam/Classes/Components/PointAndShoot/Web",
+    "name": "@beam/native-collect"
+  },
+  {
+    "location": "Beam/Classes/Helpers/Utils/Web/BeamTypes",
+    "name": "@beam/native-beamtypes"
+  },
+  {
+    "location": "Beam/Classes/Helpers/Utils/Web/TestMock",
+    "name": "@beam/native-testmock"
+  },
+  {
+    "location": "Beam/Classes/Helpers/Utils/Web/Utils",
+    "name": "@beam/native-utils"
+  },
+  {
+    "location": "Beam/Classes/Models/Geolocation/Web",
+    "name": "@beam/native-geolocation"
+  },
+  {
+    "location": "Beam/Classes/Models/Navigation/Web",
+    "name": "@beam/native-navigation"
+  },
+  {
+    "location": "Beam/Classes/Models/TabAndWebview/LinkMouseOver/Web",
+    "name": "@beam/native-linkmouseover"
+  },
+  {
+    "location": "Beam/Classes/Models/TabAndWebview/WebViewFocus/Web",
+    "name": "@beam/native-webviewfocus"
+  },
+  {
+    "location": "Beam/Classes/Models/WebPositions/Web",
+    "name": "@beam/native-webpositions"
+  },
+  {
+    "location": "Beam/Classes/Views/Search/SearchWebPage/Web",
+    "name": "@beam/native-searchwebpage"
+  }
+]

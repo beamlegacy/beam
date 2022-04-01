@@ -304,7 +304,6 @@ js_test:
   cache:
     key: .yarn-cache
     paths:
-    - ./Beam/Classes/Components/PointAndShoot/Web/node_modules/
     - .yarn
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
@@ -314,15 +313,16 @@ js_test:
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
   script:
-    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web install
-    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
-    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
-    - yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run benchmark-show
+    - yarn install
+    - yarn run buildpackages
+    - yarn workspaces foreach run build
+    - yarn run alltests
+    - yarn workspace @beam/native-collect run benchmark-show
   coverage: '/All files\s+\|\s+([\d.]+)/'
   artifacts:
     when: always
     reports:
-      junit: ./Beam/Classes/Components/PointAndShoot/Web/junit.xml
+      junit: ./junit.xml
       codequality: gl-codequality.json
   interruptible: true
 

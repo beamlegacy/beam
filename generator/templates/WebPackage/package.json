@@ -1,0 +1,35 @@
+{
+  "name": "@beam/native-__package_name__(lowerCase)",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Beam JS __package_name__ handler",
+  "packageManager": "yarn@3.2.0",
+  "main": "dist/src/index",
+  "types": "dist/src/index",
+  "author": "frontend@beam.co",
+  "scripts": {
+    "start": "node dist/src/__package_name__.js",
+    "lint": "eslint src/*.ts",
+    "build": "tsc --build --verbose",
+    "test": "jest --runInBand --reporters=default --silent --verbose",
+    "clean": "rm -r dist/*"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.4.1",
+    "@typescript-eslint/eslint-plugin": "^5.16.0",
+    "@typescript-eslint/parser": "^5.16.0",
+    "eslint": "^8.11.0",
+    "jest": "^27.5.1",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.6.2"
+  },
+  "browserslist": [
+    "safari 13"
+  ],
+  "dependencies": {
+    "@beam/native-beamtypes": "1.0.0",
+    "@beam/native-testmock": "1.0.0",
+    "debounce": "^1.2.1",
+    "dequal": "^2.0.2"
+  }
+}

@@ -12,7 +12,7 @@ class WebNavigationMessageHandler: SimpleBeamMessageHandler {
 
     init() {
         let messages = NavigationMessages.self.allCases.map { $0.rawValue }
-        super.init(messages: messages, jsFileName: "navigation_prod")
+        super.init(messages: messages, jsFileName: "Navigation_prod")
     }
 
     override func onMessage(messageName: String, messageBody: Any?, from webPage: WebPage, frameInfo: WKFrameInfo?) {
