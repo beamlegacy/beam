@@ -1,0 +1,15 @@
+./Beam/Classes/Models/Navigation/Web/dist/Navigation_prod.js
+./Beam/Classes/Models/Navigation/Web/navigation_prod.js
+./Beam/Classes/Models/WebPositions/Web/dist/WebPositions_prod.js
+./Beam/Classes/Models/WebPositions/Web/WebPositions_prod.js
+./Beam/Classes/Models/Geolocation/Web/dist/Geolocation_prod.js
+./Beam/Classes/Models/TabAndWebview/LinkMouseOver/Web/dist/LinkMouseOver_prod.js
+./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/WebViewFocus_prod.js
+./Beam/Classes/Components/MediaPlayer/Web/dist/MediaPlayer_prod.js
+./Beam/Classes/Components/Password/Web/dist/PasswordManager_prod.js
+./Beam/Classes/Components/Password/Web/PasswordManager_prod.js
+./Beam/Classes/Components/BeamTextEdit/EmbedNode/Web/dist/EmbedNode_prod.js
+./Beam/Classes/Components/BeamTextEdit/EmbedNode/Web/EmbedNode_prod.js
+./Beam/Classes/Components/PointAndShoot/Web/pns_prod.js
+./Beam/Classes/Components/PointAndShoot/Web/dist/PointAndShoot_prod.js
+./Beam/Classes/Views/Search/SearchWebPage/Web/dist/SearchWebPage_prod.js
