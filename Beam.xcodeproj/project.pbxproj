@@ -767,6 +767,8 @@
 		96C9AAB92593BB67007D3D98 /* Widget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9AAB82593BB67007D3D98 /* Widget.swift */; };
 		96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */; };
 		96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */ = {isa = PBXBuildFile; productRef = 96D5AE84264C01AD003AD516 /* TLDExtract */; };
+		96D71CE627F735400094F54D /* MessagePackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D71CE027F735400094F54D /* MessagePackTests.swift */; };
+		96D71CE927F735D10094F54D /* MessagePack in Frameworks */ = {isa = PBXBuildFile; productRef = 96D71CE827F735D10094F54D /* MessagePack */; };
 		96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
 		96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4505725995CA200BFF36F /* BreadCrumb.swift */; };
@@ -2500,6 +2502,7 @@
 		96C9AAB82593BB67007D3D98 /* Widget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Widget.swift; sourceTree = "<group>"; };
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
 		96D0EF5E26FB75EC00B967B8 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
+		96D71CE027F735400094F54D /* MessagePackTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagePackTests.swift; sourceTree = "<group>"; };
 		96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalLink.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4505725995CA200BFF36F /* BreadCrumb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadCrumb.swift; sourceTree = "<group>"; };
@@ -3057,6 +3060,7 @@
 				52466B22270DA966002D1716 /* Clustering in Frameworks */,
 				33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */,
 				A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
+				96D71CE927F735D10094F54D /* MessagePack in Frameworks */,
 				3315DC932667859A002A47CF /* Promises in Frameworks */,
 				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
 				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
@@ -6113,6 +6117,7 @@
 				DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */,
 				DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */,
 				DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */,
+				96D71CE027F735400094F54D /* MessagePackTests.swift */,
 				4E60970E26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift */,
 				4E15C19127B583A100E3DD0D /* TabGroupingUpdaterTests.swift */,
 				0DC6E2DA26A02B0E00BD2E2A /* Assets */,
@@ -7367,6 +7372,7 @@
 				878417BD276FB1FB005EB5B0 /* MockHttpServer */,
 				A5471C02279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport */,
 				0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */,
+				96D71CE827F735D10094F54D /* MessagePack */,
 			);
 			productName = Beam;
 			productReference = 965A78252514F147009980D4 /* Beam.app */;
@@ -7512,6 +7518,7 @@
 				8A0DFAD3275664090044515B /* XCRemoteSwiftPackageReference "FaviconFinder" */,
 				A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				0564F51127E8BC6600F969CA /* XCRemoteSwiftPackageReference "JJLISO8601DateFormatter" */,
+				96D71CE727F735D00094F54D /* XCRemoteSwiftPackageReference "MessagePack" */,
 			);
 			productRefGroup = 965A78262514F147009980D4 /* Products */;
 			projectDirPath = "";
@@ -8909,6 +8916,7 @@
 				37B85B8C27A2C83B003871F9 /* BeamDownloadDocumentTests.swift in Sources */,
 				BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */,
 				DAF063F527D21492000406DE /* DomainPath0Tests.swift in Sources */,
+				96D71CE627F735400094F54D /* MessagePackTests.swift in Sources */,
 				BAA67A6498E4E69779855E19 /* DownloadManagerTests.swift in Sources */,
 				05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */,
 				A501B4D1273439C500407F3E /* EmbedContentAPIStrategyTests.swift in Sources */,
@@ -11356,6 +11364,14 @@
 				kind = branch;
 			};
 		};
+		96D71CE727F735D00094F54D /* XCRemoteSwiftPackageReference "MessagePack" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/meeloo/MessagePack";
+			requirement = {
+				branch = meeloo/multipleCodingKeys;
+				kind = branch;
+			};
+		};
 		A5471C01279DD6AD00CDED9D /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/firebase/firebase-ios-sdk.git";
@@ -11530,6 +11546,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 96D5AE83264C01AD003AD516 /* XCRemoteSwiftPackageReference "TLDExtractSwift" */;
 			productName = TLDExtract;
+		};
+		96D71CE827F735D10094F54D /* MessagePack */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 96D71CE727F735D00094F54D /* XCRemoteSwiftPackageReference "MessagePack" */;
+			productName = MessagePack;
 		};
 		A0A6F2A425D1B74200EFC4BE /* Quick */ = {
 			isa = XCSwiftPackageProductDependency;
