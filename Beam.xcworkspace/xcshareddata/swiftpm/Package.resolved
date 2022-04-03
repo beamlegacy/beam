@@ -362,6 +362,15 @@
         }
       },
       {
+        "package": "MessagePack",
+        "repositoryURL": "https://github.com/meeloo/MessagePack",
+        "state": {
+          "branch": "meeloo/multipleCodingKeys",
+          "revision": "61dcffe849af0d47aef2fe0fa26e5c7891b8c462",
+          "version": null
+        }
+      },
+      {
         "package": "nanopb",
         "repositoryURL": "https://github.com/firebase/nanopb.git",
         "state": {
