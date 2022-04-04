@@ -115,11 +115,11 @@ final class FirefoxImporter: BrowserHistoryImporter {
         return subject.eraseToAnyPublisher()
     }
 
-    func importHistory(from databaseURL: URL) throws {
-        try importHistory(from: databaseURL.path)
+    func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
+        try importHistory(from: databaseURL.path, startDate: startDate)
     }
 
-    func importHistory(from dbPath: String) throws {
+    func importHistory(from dbPath: String, startDate: Date? = nil) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -129,6 +129,7 @@ final class FirefoxImporter: BrowserHistoryImporter {
                     throw ImportError.countNotAvailable
                 }
                 let rows = try FirefoxHistoryItem.fetchCursor(db, sql: "SELECT v.visit_date, v.visit_type, v.session, p.url, p.title FROM moz_historyvisits v JOIN moz_places p ON v.place_id = p.id ORDER BY v.visit_date ASC")
+                    .filter { $0.timestamp > startDate ?? Date.distantPast }
                 while let row = try rows.next() {
                     if row.url != nil {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
