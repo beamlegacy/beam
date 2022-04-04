@@ -301,6 +301,7 @@ extension EmbedNode {
             expand(animated: animated)
         }
 
+        toggleButtonBeamLayer?.isCollapsed = isUserCollapsed
         invalidateLayout()
     }
 
