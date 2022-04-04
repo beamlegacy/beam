@@ -43,6 +43,7 @@
         "NoteEditorTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
+        "OmniboxViewTests\/testOmniBoxDoesNotBounce()",
         "OmniboxViewTests\/testOmniBoxSearchField()",
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",
         "OmniboxViewTests\/testOmniboxPivotButtonClicking()",
