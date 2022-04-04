@@ -576,7 +576,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     }
 
     var selectionLayerWidth: CGFloat {
-        availableWidth + 20
+        availableWidth + 10
     }
 
     var selectionLayerHeight: CGFloat {
@@ -1184,6 +1184,11 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
         self.layer.setAffineTransform(transform)
         self.layer.zPosition = isDragging ? 100.0 : 0.0
         self.layer.opacity = isDragging ? moveOpacityFactor : 1.0
+
+        selectionLayer.backgroundColor = selected && !(isDragging || isDraggedForMoveByParent) ?
+            BeamColor.Generic.textSelection.cgColor :
+            NSColor(white: 1, alpha: 0).cgColor
+
         for c in children {
             c.updateForMove(isDragging: isDragging)
         }
