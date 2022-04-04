@@ -147,7 +147,7 @@ class UrlScoresCollectionTest: XCTestCase {
         }
 
         //first scroll
-        let scroll1 = WebPositions.FrameInfo(
+        let scroll1 = WebFrames.FrameInfo(
             href: "https://example.com",
             parentHref: "https://example.com",
             x: 0,
@@ -182,7 +182,7 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(dailyScore.area, 100)
 
         //second scroll
-        let scroll2 = WebPositions.FrameInfo(
+        let scroll2 = WebFrames.FrameInfo(
             href: "https://example.com",
             parentHref: "https://example.com",
             x: 0,

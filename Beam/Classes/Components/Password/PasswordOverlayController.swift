@@ -28,7 +28,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private var scope = Set<AnyCancellable>()
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
-    private let scrollUpdater = PassthroughSubject<WebPositions.FrameInfo, Never>()
+    private let scrollUpdater = PassthroughSubject<WebFrames.FrameInfo, Never>()
     private weak var currentFieldLocator: WebFieldLocator?
     private var passwordMenuPopover: WebAutofillPopoverContainer?
     private let encoder: JSONEncoder
@@ -171,6 +171,19 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         currentlyFocusedElementId = elementId
         currentInputFrame = frameInfo
+        if let frameInfo = frameInfo, let href = frameInfo.request.url?.absoluteString, page?.webFrames?.isConnectedToMain(href: href) == false {
+            Logger.shared.logWarning("Disconnected frame for \(href)", category: .passwordManager)
+            page?.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: nil)
+            page?.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+                self.handleInputFieldFocus(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo, contents: contents)
+            }
+        } else {
+            handleInputFieldFocus(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo, contents: contents)
+        }
+    }
+
+    private func handleInputFieldFocus(elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?, contents: String?) {
         if let contents = contents, contents.isEmpty, autocompleteGroup.action.isPasswordRelated, !autocompleteGroup.isAmbiguous {
             checkSimilarFieldsEmpty(elementId: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo) { empty in
                 self.showPasswordManagerMenu(for: elementId, frameInfo: frameInfo, emptyField: empty, inGroup: autocompleteGroup)
@@ -197,7 +210,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         clearInputFocus()
     }
 
-    func updateScrollPosition(for frame: WebPositions.FrameInfo) {
+    func updateScrollPosition(for frame: WebFrames.FrameInfo) {
         scrollUpdater.send(frame)
     }
 
