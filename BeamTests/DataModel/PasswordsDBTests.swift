@@ -255,6 +255,8 @@ class PasswordsDBTests: XCTestCase {
 
         beamHelper.beginNetworkRecording(test: self)
         BeamObjectManager.disableSendingObjects = false
+
+        Configuration.beamObjectDirectCall = false
         BeamTestsHelper.login()
     }
 
