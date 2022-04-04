@@ -86,31 +86,28 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
             return
         }
 
-        var children = Set<String>()
+        var framesInfo = [WebFrames.FrameInfo]()
         for jsFrameInfo in jsFramesInfo {
             let jsFrameInfo = jsFrameInfo as AnyObject
             let bounds = jsFrameInfo["bounds"] as AnyObject
             if let frameHref = jsFrameInfo["href"] as? String {
                 let rectArea = jsToRect(jsArea: bounds)
 
-                let frame = WebPositions.FrameInfo(
+                let frame = WebFrames.FrameInfo(
                     href: frameHref,
                     parentHref: href,
                     x: rectArea.minX,
                     y: rectArea.minY,
                     width: rectArea.width,
-                    height: rectArea.height
+                    height: rectArea.height,
+                    isMain: isMain && frameHref == href
                 )
 
-                positions.setFrameInfo(frame: frame)
-
-                if frameHref != href {
-                    children.insert(frameHref)
-                }
+                framesInfo.append(frame)
             }
         }
 
-        frames.setFrame(href: href, children: children, isMain: isMain)
+        frames.setFrames(framesInfo, isMain: isMain)
     }
 
     /**

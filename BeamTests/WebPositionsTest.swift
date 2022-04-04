@@ -13,7 +13,7 @@ import Nimble
 @testable import BeamCore
 class WebPositionsTest: XCTestCase {
     let TestFramesInfo = [
-        "https://www.windowFrame.com": Beam.WebPositions.FrameInfo(
+        "https://www.windowFrame.com": Beam.WebFrames.FrameInfo(
             href: "https://www.windowFrame.com",
             parentHref: "https://www.windowFrame.com",
             x: 0.0,
@@ -23,7 +23,7 @@ class WebPositionsTest: XCTestCase {
             width: 1211.0,
             height: 1231.0
         ),
-        "https://www.iframe1.com": Beam.WebPositions.FrameInfo(
+        "https://www.iframe1.com": Beam.WebFrames.FrameInfo(
             href: "https://www.iframe1.com",
             parentHref: "https://www.windowFrame.com",
             x: 8.0,
@@ -33,7 +33,7 @@ class WebPositionsTest: XCTestCase {
             width: 1197.0,
             height: 502.0
         ),
-        "https://www.iframe2.com": Beam.WebPositions.FrameInfo(
+        "https://www.iframe2.com": Beam.WebFrames.FrameInfo(
             href: "https://www.iframe2.com",
             parentHref: "https://www.iframe1.com",
             x: 8.0,

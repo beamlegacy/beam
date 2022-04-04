@@ -13,11 +13,11 @@ import Nimble
 @testable import BeamCore
 
 class PointAndShootTargetTest: PointAndShootTest {
-    var iFrame: WebPositions.FrameInfo!
-    var iFrameA: WebPositions.FrameInfo!
-    var iFrameB: WebPositions.FrameInfo!
-    var iFrameC: WebPositions.FrameInfo!
-    var iFrame2: WebPositions.FrameInfo!
+    var iFrame: WebFrames.FrameInfo!
+    var iFrameA: WebFrames.FrameInfo!
+    var iFrameB: WebFrames.FrameInfo!
+    var iFrameC: WebFrames.FrameInfo!
+    var iFrame2: WebFrames.FrameInfo!
     let target: PointAndShoot.Target = PointAndShoot.Target(
         id: UUID().uuidString,
         rect: NSRect(x: 101, y: 102, width: 301, height: 302),
@@ -36,7 +36,7 @@ class PointAndShootTargetTest: PointAndShootTest {
                   return
               }
         // Register window to framesInfo
-        positions.framesInfo[windowHref] = WebPositions.FrameInfo(
+        positions.framesInfo[windowHref] = WebFrames.FrameInfo(
             href: windowHref,
             parentHref: windowHref,
             x: 0,
@@ -47,11 +47,11 @@ class PointAndShootTargetTest: PointAndShootTest {
             height: 1000
         )
 
-        iFrame = WebPositions.FrameInfo(href: "https://www.iframe.online", parentHref: windowHref, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 900)
-        iFrameA = WebPositions.FrameInfo(href: "https://www.iframeA.online", parentHref: windowHref, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 450)
-        iFrameB = WebPositions.FrameInfo(href: "https://www.iframeB.online", parentHref: windowHref, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 450)
-        iFrameC = WebPositions.FrameInfo(href: "https://www.iframeC.online", parentHref: iFrameA.href, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 450)
-        iFrame2 = WebPositions.FrameInfo(href: "https://www.iframe2.online", parentHref: iFrame.href, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 800, height: 800)
+        iFrame = WebFrames.FrameInfo(href: "https://www.iframe.online", parentHref: windowHref, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 900)
+        iFrameA = WebFrames.FrameInfo(href: "https://www.iframeA.online", parentHref: windowHref, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 450)
+        iFrameB = WebFrames.FrameInfo(href: "https://www.iframeB.online", parentHref: windowHref, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 450)
+        iFrameC = WebFrames.FrameInfo(href: "https://www.iframeC.online", parentHref: iFrameA.href, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 900, height: 450)
+        iFrame2 = WebFrames.FrameInfo(href: "https://www.iframe2.online", parentHref: iFrame.href, x: 100, y: 100, scrollX: 0, scrollY: 0, width: 800, height: 800)
     }
 
     /// When only the window frame is registered, translating the target shouldn't change the target.
