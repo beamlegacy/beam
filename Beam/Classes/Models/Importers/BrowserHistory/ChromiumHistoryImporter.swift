@@ -86,11 +86,11 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
         return historyDatabaseCopy
     }
 
-    func importHistory(from databaseURL: URL) throws {
-        try importHistory(from: databaseURL.path)
+    func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
+        try importHistory(from: databaseURL.path, startDate: startDate)
     }
 
-    func importHistory(from dbPath: String) throws {
+    func importHistory(from dbPath: String, startDate: Date? = nil) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -101,6 +101,7 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
                 }
                 // visit_time is number of microseconds since 1601-01-01
                 let rows = try ChromiumHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title FROM visits v JOIN urls u ON v.url = u.id ORDER BY v.visit_time ASC")
+                    .filter { $0.timestamp > startDate ?? Date.distantPast }
                 while let row = try rows.next() {
                     if row.url != nil {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
