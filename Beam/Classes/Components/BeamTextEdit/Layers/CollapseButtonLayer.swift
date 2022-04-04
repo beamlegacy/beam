@@ -15,8 +15,10 @@ final class CollapseButtonLayer: ButtonLayer {
         }
     }
 
-    private var isCollapsed: Bool {
+    var isCollapsed: Bool {
         didSet {
+            guard isCollapsed != oldValue else { return }
+
             updateLabel()
             updateSymbolLayer()
             updateColors()
