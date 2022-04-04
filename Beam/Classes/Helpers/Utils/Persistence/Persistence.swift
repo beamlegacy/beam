@@ -59,6 +59,26 @@ enum Persistence {
     enum TabPinSuggestion {
         @StandardStorable("tabPinSuggestion.hasPinned") static var hasPinned: Bool?
     }
+    enum ImportedBrowserHistory {
+        @StandardStorable("importedBrowserHistory.maxDateByBrowser") static var maxDateByBrowser: Data?
+
+        static func save(maxDate: Date, browserType: BrowserType) {
+            let decoder = JSONDecoder()
+            var importDates = [BrowserType: Date]()
+            if let maxDateByBrowser = maxDateByBrowser {
+                importDates = (try? decoder.decode([BrowserType: Date].self, from: maxDateByBrowser)) ?? [BrowserType: Date]()
+            }
+            importDates[browserType] = max(maxDate, importDates[browserType] ?? Date.distantPast)
+            maxDateByBrowser = try? JSONEncoder().encode(importDates)
+        }
+        static func getMaxDate(for browserType: BrowserType) -> Date? {
+            let decoder = JSONDecoder()
+            guard let maxDateByBrowser = maxDateByBrowser,
+                  let decodedMaxDateByBrowser = (try? decoder.decode([BrowserType: Date].self, from: maxDateByBrowser))
+            else { return nil }
+            return decodedMaxDateByBrowser[browserType]
+        }
+    }
 
     // swiftlint:disable nesting
     enum Sync {
@@ -82,6 +102,7 @@ enum Persistence {
         Persistence.Authentication.username = nil
         Persistence.Authentication.password = nil
         Persistence.Authentication.googleCalendarTokens = nil
+        Persistence.ImportedBrowserHistory.maxDateByBrowser = nil
         Sync.cleanUp()
     }
 
