@@ -97,7 +97,6 @@ final class CollapseButtonLayer: ButtonLayer {
     }
 
     private func prepareLayers() {
-        cursor = .pointingHand
         layer.addSublayer(textLayer)
     }
 
