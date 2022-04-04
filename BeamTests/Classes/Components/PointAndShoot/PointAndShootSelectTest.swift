@@ -164,7 +164,7 @@ class PointAndShootSelectTest: PointAndShootTest {
                   XCTFail("expected test page")
                   return
               }
-        positions.framesInfo[group.href] = WebPositions.FrameInfo(
+        positions.framesInfo[group.href] = WebFrames.FrameInfo(
             href: group.href,
             parentHref: group.href,
             scrollY: 300

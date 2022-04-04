@@ -2,8 +2,8 @@ import BeamCore
 import Combine
 
 protocol WebPositionsDelegate: AnyObject {
-    func webPositionsDidUpdateScroll(with frame: WebPositions.FrameInfo)
-    func webPositionsDidUpdateSize(with frame: WebPositions.FrameInfo)
+    func webPositionsDidUpdateScroll(with frame: WebFrames.FrameInfo)
+    func webPositionsDidUpdateSize(with frame: WebFrames.FrameInfo)
 }
 /**
  Computes blocks positions on the native web view
@@ -13,7 +13,7 @@ class WebPositions: ObservableObject {
     /**
      * Frame info by frame URL
      */
-    @Published var framesInfo = [HREF: FrameInfo]()
+    internal var framesInfo = [HREF: WebFrames.FrameInfo]() // can't be made private for unit tests
 
     typealias HREF = String
     typealias ParentHREF = String
@@ -25,39 +25,18 @@ class WebPositions: ObservableObject {
         case scrollY
     }
 
-    struct FrameInfo {
-        var href: HREF
-        var parentHref: ParentHREF
-        var x: CGFloat = 0
-        var y: CGFloat = 0
-        var scrollX: CGFloat = 0
-        var scrollY: CGFloat = 0
-        var width: CGFloat = -1
-        var height: CGFloat = -1
-    }
-
     weak var delegate: WebPositionsDelegate?
 
     private var cancellables = Set<AnyCancellable>()
 
     init(webFrames: WebFrames) {
-        webFrames.removedFrames.sink { href in
-            self.framesInfo[href] = nil
+        webFrames.$framesInfo.sink { framesInfo in
+            self.framesInfo = framesInfo
         }
         .store(in: &cancellables)
     }
 
     private init() {}
-
-    /// Utility to check if provided frame is a child frame
-    /// - Parameter frame: frame to set
-    /// - Returns: true if frame isn't the root frame
-    fileprivate func isChild(_ frame: WebPositions.FrameInfo) -> Bool {
-        guard !frame.href.isEmpty, !frame.parentHref.isEmpty else {
-            return false
-        }
-        return frame.href != frame.parentHref
-    }
 
     /// Recursively calculate the position of a frame's prop
     /// - Parameters:
@@ -91,35 +70,12 @@ class WebPositions: ObservableObject {
             positions.append(frame.scrollY)
         }
         // If we aren't on the root frame, and we are below the depth recursion limit
-        if isChild(frame), depth < DEPTH_LIMIT {
+        if frame.hasParentFrame, depth < DEPTH_LIMIT {
             // run this function recursively
             return calculateViewportPosition(href: frame.parentHref, prop: prop, allPositions: positions, depth: depth + 1)
         }
         // return full position array
         return positions
-    }
-
-    /// Recursively generate a subset of the framesInfo dictionary with all frames from the requested frame to the root frame
-    /// - Parameters:
-    ///   - href: url of frame
-    /// - Returns: Dictionary, possibly empty if the requested url was not found
-    func framesInPath(href: HREF, childFrames: [HREF: FrameInfo] = [:], depth: Int = 0) -> [HREF: FrameInfo] {
-        // Limit recursion to a depth of 10
-        let DEPTH_LIMIT = 10
-        // by default allPositions starts as empty array []
-        // reassign allPositions to mutable value
-        var frames = childFrames
-        // get full frameInfo from framesInfo dict
-        guard let frame = framesInfo[href] else {
-            return frames
-        }
-        frames[frame.href] = frame
-        // If we aren't on the root frame, and we are below the depth recursion limit
-        if isChild(frame), depth < DEPTH_LIMIT {
-            // run this function recursively
-            return framesInPath(href: frame.parentHref, childFrames: frames, depth: depth + 1)
-        }
-        return frames
     }
 
     /// Calculate value of property taking into account parent frame positions
@@ -159,19 +115,14 @@ class WebPositions: ObservableObject {
         return CGPoint(x: frameOffsetX - frameScrollX, y: frameOffsetY - frameScrollY)
     }
 
-    /// Sets frameInfo to stored dict. Will only set frameInfo when the provided frame is a child frame, or isn't registered yet.
-    /// - Parameter frame: a full FrameInfo object
-    func setFrameInfo(frame: FrameInfo) {
-        guard !frame.href.isEmpty else {
-            return
-        }
-        if isChild(frame) {
-            framesInfo[frame.href] = frame
-        }
-
-        if framesInfo[frame.href] == nil {
-            framesInfo[frame.href] = frame
-        }
+    func viewportOffsetForLocation(_ location: CGPoint) -> CGPoint { // FIXME: use scale
+        let possibleOffsets = framesInfo.keys
+            .map(viewportOffset)
+            .filter { offset in
+                location.x >= offset.x && location.y >= offset.y
+            }
+        guard let offset = possibleOffsets.max(by: { $0.x + $0.y < $1.x + $1.y }) else { return .zero }
+        return offset
     }
 
     /// Sets scrollX and scrollY keys on an already registered frame

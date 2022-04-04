@@ -1,4 +1,5 @@
 import Foundation
+import Combine
 import WebKit
 import BeamCore
 

@@ -38,7 +38,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
     }
 
     class FakeBrowsingScorer: BrowsingScorer {
-        var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
+        var debouncedUpdateScrollingScore = PassthroughSubject<WebFrames.FrameInfo, Never>()
         weak var page: WebPage?
         var currentScore: Score = Score()
 
@@ -48,7 +48,7 @@ class FrecencyNoteTriggerTests: XCTestCase {
         func updateScore() {}
         func addTextSelection() {}
         func scoreApply(changes: (UrlScoreProtocol) -> Void) {}
-        func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
+        func updateScrollingScore(_ frame: WebFrames.FrameInfo) {}
     }
 
     class FakeWebPage: WebPage {

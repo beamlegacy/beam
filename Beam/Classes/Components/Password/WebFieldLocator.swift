@@ -17,7 +17,7 @@ final class WebFieldLocator {
     private weak var page: WebPage?
     let elementId: String
     private weak var frameInfo: WKFrameInfo?
-    private var parentFrames: [String: WebPositions.FrameInfo]
+    private var parentFrames: [String: WebFrames.FrameInfo]
     private var subscription: AnyCancellable?
     private var scope = Set<AnyCancellable>()
 
@@ -31,12 +31,12 @@ final class WebFieldLocator {
         fieldFrameSubject.value
     }
 
-    init(page: WebPage?, elementId: String, frameInfo: WKFrameInfo?, scrollUpdater: PassthroughSubject<WebPositions.FrameInfo, Never>) {
+    init(page: WebPage?, elementId: String, frameInfo: WKFrameInfo?, scrollUpdater: PassthroughSubject<WebFrames.FrameInfo, Never>) {
         self.page = page
         self.elementId = elementId
         self.frameInfo = frameInfo
         if let frameURL = frameInfo?.request.url?.absoluteString {
-            parentFrames = page?.webPositions?.framesInPath(href: frameURL) ?? [:]
+            parentFrames = page?.webFrames?.framesInPath(href: frameURL) ?? [:]
         } else {
             parentFrames = [:]
         }
@@ -51,7 +51,7 @@ final class WebFieldLocator {
         updateFieldPosition()
     }
 
-    private func updateScrollPosition(_ frame: WebPositions.FrameInfo) {
+    private func updateScrollPosition(_ frame: WebFrames.FrameInfo) {
         guard let movedFrame = parentFrames[frame.href] else {
             return
         }
