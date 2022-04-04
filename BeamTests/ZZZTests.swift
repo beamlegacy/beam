@@ -11,6 +11,7 @@ class ZZZTests: QuickSpec {
         let beamHelper = BeamTestsHelper()
 
         beforeEach {
+            Configuration.beamObjectDirectCall = false
             BeamTestsHelper.logout()
             beamHelper.beginNetworkRecording()
             BeamTestsHelper.login()
