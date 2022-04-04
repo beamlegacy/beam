@@ -129,5 +129,9 @@ extension BeamWebkitUIDelegateController: WKUIDelegatePrivate {
         completionHandler(frame)
     }
 
+    func _webView(_ webView: WKWebView!, requestUserMediaAuthorizationFor devices: _WKCaptureDevices, url: URL!, mainFrameURL: URL!, decisionHandler: ((Bool) -> Void)!) {
+        decisionHandler(true)
+    }
+
 }
 #endif
