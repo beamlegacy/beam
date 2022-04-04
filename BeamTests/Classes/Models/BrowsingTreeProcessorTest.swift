@@ -14,11 +14,13 @@ class BrowsingTreeProcessorTest: XCTestCase {
     override func setUpWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try GRDBDatabase.shared.clearUrlFrecencies()
+        Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try GRDBDatabase.shared.clearUrlFrecencies()
+        Persistence.cleanUp()
      }
 
     func testTreeProcess() throws {
@@ -63,6 +65,40 @@ class BrowsingTreeProcessorTest: XCTestCase {
         visitFrecencyRecord = try XCTUnwrap(domainFrecencies[.webVisit30d0])
         XCTAssertEqual(visitFrecencyRecord.frecencyScore, 0.5)
         XCTAssertNil(domainFrecencies[.webReadingTime30d0])
+
+        BeamDate.reset()
+    }
+
+    func testTreeProcessImportDate() throws {
+        BeamDate.freeze("2001-01-01T00:00:00+000")
+
+        //processing an internal browsingTree
+        let processor = BrowsingTreeProcessor()
+        let tree0 = BrowsingTree(.historyImport(sourceBrowser: .chrome))
+        let tree1 = BrowsingTree(.historyImport(sourceBrowser: .chrome))
+
+        tree0.navigateTo(url: "http://www.search.com/ps5", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        let link0 = tree0.current.link
+        BeamDate.travel(2)
+        tree1.navigateTo(url: "http://www.search.com/switch", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        let t1 = BeamDate.now
+        BeamDate.travel(2)
+        tree0.navigateTo(url: "http://www.search.com/xbox", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        let link2 = tree0.current.link
+        let t2 = BeamDate.now
+
+        //first tree import: a max import date is stored
+        XCTAssertNil(Persistence.ImportedBrowserHistory.getMaxDate(for: .chrome))
+        processor.process(tree: tree1)
+        XCTAssertEqual(Persistence.ImportedBrowserHistory.getMaxDate(for: .chrome), t1)
+
+        //second tree import: previously stored max import date filters newly imported nodes
+        processor.process(tree: tree0)
+        XCTAssertEqual(Persistence.ImportedBrowserHistory.getMaxDate(for: .chrome), t2)
+        //node whose date is > t1
+        XCTAssert(try GRDBDatabase.shared.fetchOneFrecency(fromUrl: link2).count > 0)
+        //node whose date is < t1
+        XCTAssertEqual(try GRDBDatabase.shared.fetchOneFrecency(fromUrl: link0).count, 0)
 
         BeamDate.reset()
     }

@@ -53,6 +53,7 @@ public class ImportsManager: NSObject, ObservableObject {
     func startBrowserHistoryImport(from importer: BrowserHistoryImporter) {
         let id = UUID()
         let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser))
+        var maxDate = Date.distantPast
         do {
             let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage())
             let cancellable = importer.publisher.sink(receiveCompletion: { completion in
@@ -65,6 +66,7 @@ public class ImportsManager: NSObject, ObservableObject {
                         Logger.shared.logError("Couldn't save tree: \(error)", category: .browserImport)
                         self.sendError(ErrorType.saveError, action: .history, importer: importer)
                     }
+                    Persistence.ImportedBrowserHistory.save(maxDate: maxDate, browserType: importer.sourceBrowser)
                     Logger.shared.logInfo("Import finished successfully", category: .browserImport)
                 case .failure(let error):
                     Logger.shared.logError("Import History failed with error: \(error)", category: .browserImport)
@@ -79,9 +81,10 @@ public class ImportsManager: NSObject, ObservableObject {
                 let urlId = browsingTree.current.link
                 frecencyUpdater.add(urlId: urlId, date: result.item.timestamp, eventType: .webLinkActivation)
                 Logger.shared.logDebug("\(result.item.timestamp): \(result.item.title ?? "---") [\(url)] (total count: \(result.itemCount))")
+                if result.item.timestamp > maxDate { maxDate = result.item.timestamp }
             })
             cancellableScope[id] = cancellable
-            try importer.importHistory()
+            try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser))
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
             sendError(error, action: .history, importer: importer)
