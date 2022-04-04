@@ -64,11 +64,11 @@ final class SafariImporter: BrowserHistoryImporter {
         return historyDatabaseCopy
     }
 
-    func importHistory(from databaseURL: URL) throws {
-        try importHistory(from: databaseURL.path)
+    func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
+        try importHistory(from: databaseURL.path, startDate: startDate)
     }
 
-    func importHistory(from dbPath: String) throws {
+    func importHistory(from dbPath: String, startDate: Date? = nil) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -78,6 +78,8 @@ final class SafariImporter: BrowserHistoryImporter {
                     throw ImportError.countNotAvailable
                 }
                 let rows = try SafariHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time, v.title, v.load_successful, i.url, i.domain_expansion, i.status_code, v.origin, v.generation, v.attributes FROM history_visits v JOIN history_items i ON v.history_item = i.id ORDER BY v.visit_time ASC")
+                    .filter { $0.timestamp > startDate ?? Date.distantPast }
+
                 while let row = try rows.next() {
                     if row.url != nil {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
