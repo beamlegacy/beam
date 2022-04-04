@@ -99,4 +99,16 @@ class OmniBoxTestView: BaseView {
         }
         return getAutocompleteResults().count == expectedNumber
     }
+    
+    func isOmniboxFocused() -> Bool {
+        return inputHasFocus(getOmniBoxSearchField())
+    }
+    
+    func doesOmniboxCreateNoteExist() -> Bool {
+        return otherElement(OmniboxLocators.Labels.createNote.accessibilityIdentifier).exists
+    }
+    
+    func doesOmniboxAllNotesExist() -> Bool {
+        return otherElement(OmniboxLocators.Labels.allNotes.accessibilityIdentifier).exists
+    }
 }
