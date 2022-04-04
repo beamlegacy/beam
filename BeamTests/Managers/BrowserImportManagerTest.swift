@@ -25,6 +25,7 @@ class BrowserImportManagerTest: XCTestCase {
     }
 
     class FakeImporter: BrowserHistoryImporter {
+        var startDate: Date?
         private var items: [BrowserHistoryItem?] = [
             FakeHistoryItem(secondsFromReference: 1, title: "abc", urlString: "http://abc.com"),
             FakeHistoryItem(secondsFromReference: 0, title: "def", urlString: "http://def.com"),
@@ -42,7 +43,8 @@ class BrowserImportManagerTest: XCTestCase {
             currentSubject = subject
             return subject.eraseToAnyPublisher()
         }
-        func importHistory(from databaseURL: URL) throws {
+        func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
+            self.startDate = startDate
             let itemCount = items.count
             while let popedItem = items.popLast() {
                 if let item = popedItem {
@@ -51,7 +53,7 @@ class BrowserImportManagerTest: XCTestCase {
             }
             currentSubject?.send(completion: .finished)
         }
-        func importHistory(from dbPath: String) throws {}
+        func importHistory(from dbPath: String, startDate: Date? = nil) throws {}
 
     }
 
@@ -59,17 +61,20 @@ class BrowserImportManagerTest: XCTestCase {
         try BrowsingTreeStoreManager.shared.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try GRDBDatabase.shared.clearUrlFrecencies()
+        Persistence.cleanUp()
     }
 
     override func tearDownWithError() throws {
         try BrowsingTreeStoreManager.shared.clearBrowsingTrees()
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         try GRDBDatabase.shared.clearUrlFrecencies()
+        Persistence.cleanUp()
     }
 
     func testImport() throws {
         let manager = ImportsManager()
-        manager.startBrowserHistoryImport(from: FakeImporter())
+        var importer = FakeImporter()
+        manager.startBrowserHistoryImport(from: importer)
         //wait for import completion
         expect(manager.isImporting).toEventually(beFalse())
         //expects one tree to be saved
@@ -95,5 +100,15 @@ class BrowserImportManagerTest: XCTestCase {
         XCTAssertNotNil(links[node1.link]?.frecencyVisitScore)
         XCTAssertNotNil(links[node1.link]?.frecencyVisitSortScore)
         XCTAssertNotNil(links[node1.link]?.frecencyVisitLastAccessAt)
+        //max imported date is stored for the right browser
+        XCTAssertNil(importer.startDate)
+        let maxDate = try XCTUnwrap(Persistence.ImportedBrowserHistory.getMaxDate(for:.firefox))
+        XCTAssertNil(Persistence.ImportedBrowserHistory.getMaxDate(for:.chrome))
+        XCTAssertEqual(maxDate, Date(timeIntervalSinceReferenceDate: Double(1)))
+        //and is used in subsequent call
+        importer = FakeImporter()
+        manager.startBrowserHistoryImport(from: importer)
+        expect(manager.isImporting).toEventually(beFalse())
+        XCTAssertEqual(importer.startDate, maxDate)
     }
 }
