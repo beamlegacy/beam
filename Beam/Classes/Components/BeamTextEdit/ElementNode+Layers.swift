@@ -85,9 +85,6 @@ extension ElementNode {
     private func createMoveHandleLayer(at point: CGPoint) {
         guard self as? TextRoot == nil, self as? ProxyNode == nil else { return } // no move handle layer for the root or proxies
         let moveLayer = Layer(name: LayerName.moveHandle.rawValue, layer: Layer.icon(named: "editor-handle"))
-        moveLayer.layer.actions = [
-            "opacity": opacityAnimation
-        ]
         moveLayer.cursor = .openHand
         moveLayer.layer.masksToBounds = false
 

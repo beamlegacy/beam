@@ -1219,13 +1219,15 @@ public extension CALayer {
         guard let rootNode = rootNode, shouldAllowMouseEvents() else { return }
         guard !(inputContext?.handleEvent(event) ?? false) else { return }
         reBlink()
-        rootNode.cancelNodeSelection() // TODO: change this to handle manipulating the node selection with the mouse
         mouseDownPos = nil
         if event.clickCount == 1 { hideInlineFormatter() }
         self.mouseDownPos = convert(event.locationInWindow)
         let info = MouseInfo(rootNode, mouseDownPos ?? .zero, event)
         mouseHandler = rootNode.dispatchMouseDown(mouseInfo: info)
-        if mouseHandler != nil { cursorUpdate(with: event) }
+        if let mouseHandler = mouseHandler {
+            cursorUpdate(with: event)
+            mouseHandler.isDraggedForMove ? () : rootNode.cancelNodeSelection()
+        }
     }
 
     public override func rightMouseDown(with event: NSEvent) {
@@ -1871,15 +1873,20 @@ public extension CALayer {
 //    override public func quickLookPreviewItems(_ sender: Any?) {
 //    }
 
-    // MARK: Drag and drop:
+    // MARK: - Drag and drop:
 
-    private struct DragResult {
+    private struct DragResult: Equatable {
         let element: ElementNode
         let shouldBeAfter: Bool
         let shouldBeChild: Bool
+
+        func onlyDiffersByIndentation(from otherResult: DragResult) -> Bool {
+            return self.element == otherResult.element && self.shouldBeAfter == otherResult.shouldBeAfter && self.shouldBeChild != otherResult.shouldBeChild
+        }
     }
 
     var dragIndicator = CALayer()
+    private var previousDragResult: DragResult?
 
     /// Updates the drag indicator for the desired cursor position
     /// - Parameter point: The position of the cursor
@@ -1887,12 +1894,10 @@ public extension CALayer {
     /// another bool if we should make the element a child or a sibbling
     @discardableResult private func updateDragIndicator(at point: CGPoint?) -> DragResult? {
         guard let rootNode = rootNode else { return nil }
-        guard let point = point else {
+        guard let point = point,
+              let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode else {
             dragIndicator.isHidden = true
-            return nil
-        }
-        guard let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode else {
-            dragIndicator.isHidden = true
+            previousDragResult = nil
             return nil
         }
 
@@ -1936,7 +1941,20 @@ public extension CALayer {
             }
         }
 
-        return DragResult(element: node, shouldBeAfter: shouldBeAfter, shouldBeChild: shouldBeChild)
+        let result = DragResult(element: node, shouldBeAfter: shouldBeAfter, shouldBeChild: shouldBeChild)
+        performHapticFeedback(for: result)
+        previousDragResult = result
+        return result
+    }
+
+    private func performHapticFeedback(for dragResult: DragResult) {
+        guard dragResult != previousDragResult else { return }
+        let performer = NSHapticFeedbackManager.defaultPerformer
+        if let previousDragResult = previousDragResult, previousDragResult.onlyDiffersByIndentation(from: dragResult) {
+            performer.perform(.levelChange, performanceTime: .drawCompleted)
+        } else {
+            performer.perform(.alignment, performanceTime: .drawCompleted)
+        }
     }
 
     public override func draggingEntered(_ sender: NSDraggingInfo) -> NSDragOperation {
@@ -2020,12 +2038,18 @@ public extension CALayer {
         return true
     }
 
-    // MARK: Reordering bullet
+    // MARK: - Reordering bullet
 
     private var mouseMoveOrigin: CGPoint?
 
     func widgetDidStartMoving(_ widget: Widget, at point: CGPoint) -> Bool {
         guard canMove(widget) else { return false }
+        guard let movedNode = widget as? ElementNode else { return false }
+
+        let selectedNodesToMove = selectedNodesToMoveAlong(for: movedNode)
+        for node in selectedNodesToMove {
+            node.isDraggedForMove = true
+        }
         focusedWidget = nil
         mouseMoveOrigin = point
         widget.isDraggedForMove = true
@@ -2035,12 +2059,21 @@ public extension CALayer {
     func widgetDidStopMoving(_ widget: Widget, at point: CGPoint) {
 
         defer {
-            widget.isDraggedForMove = false
-            mouseMoveOrigin = nil
-            updateDragIndicator(at: nil)
+            cleanupAfterDraggingWidget(widget)
         }
 
-        guard let rootNode = rootNode, let dragResult = updateDragIndicator(at: point) else { return }
+        let dragResult: DragResult?
+
+        let canDrop = canDrop(widget, at: point)
+        if !canDrop, let previous = previousDragResult {
+            dragResult = previous
+        } else if canDrop {
+            dragResult = updateDragIndicator(at: point)
+        } else {
+            return
+        }
+
+        guard let dragResult = dragResult, let rootNode = rootNode else { return }
         guard let movedNode = widget as? ElementNode else { return }
 
         let newParent: ElementNode
@@ -2063,27 +2096,32 @@ public extension CALayer {
             newParent = dragResult.element.parent as? ElementNode ?? rootNode
         }
 
-        guard newParent !== movedNode else { return }
-        guard !widget.allChildren.contains(movedNode) else { return }
-        guard movedNode != dragResult.element else { return }
-
-        rootNode.cmdManager.reparentElement(movedNode, to: newParent, atIndex: index)
+        if let selectedNodes = rootNode.state.nodeSelection?.sortedRoots {
+            var offset = 0
+            rootNode.cmdManager.beginGroup(with: "Multiple node move")
+            for node in selectedNodes {
+                rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)
+                offset += 1
+            }
+            rootNode.cmdManager.endGroup()
+        } else {
+            rootNode.cmdManager.reparentElement(movedNode, to: newParent, atIndex: index)
+        }
     }
 
     func widgetMoved(_ widget: Widget, at point: CGPoint) {
-        guard let rootNode = rootNode else { return }
         guard let mouseMoveOrigin = self.mouseMoveOrigin else { return }
+        guard let movedNode = widget as? ElementNode else { return }
 
         let offset = CGPoint(x: point.x - mouseMoveOrigin.x, y: point.y -  mouseMoveOrigin.y)
         widget.translateForMove(offset)
+        let selectedNodesToMove = selectedNodesToMoveAlong(for: movedNode)
+        for node in selectedNodesToMove {
+            node.translateForMove(offset)
+        }
 
-        if let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode,
-           node !== widget,
-           node.parent !== widget,
-           !widget.allChildren.contains(node) {
+        if canDrop(widget, at: point) {
             updateDragIndicator(at: point)
-        } else {
-            updateDragIndicator(at: nil)
         }
     }
 
@@ -2091,6 +2129,42 @@ public extension CALayer {
         guard widget as? ProxyNode == nil else { return false }
         return true
     }
+
+    private func canDrop(_ widget: Widget, at point: NSPoint) -> Bool {
+        guard let rootNode = rootNode else { return false }
+        guard let movedNode = widget as? ElementNode else { return false }
+
+        if let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode,
+           node !== widget,
+           node.parent !== widget,
+           !widget.allChildren.contains(node),
+           !selectedNodesToMoveAlong(for: movedNode).contains(node) {
+            return true
+        }
+        return false
+    }
+
+    private func cleanupAfterDraggingWidget(_ widget: Widget) {
+        widget.isDraggedForMove = false
+        mouseMoveOrigin = nil
+        updateDragIndicator(at: nil)
+
+        if let selectedNodes = rootNode?.state.nodeSelection?.sortedNodes {
+            for node in selectedNodes {
+                node.isDraggedForMove = false
+            }
+        }
+    }
+
+    private func selectedNodesToMoveAlong(for initialNode: ElementNode) -> Set<ElementNode> {
+        if let nodes = rootNode?.state.nodeSelection?.nodes, nodes.contains(initialNode) {
+            return nodes
+        } else {
+            return []
+        }
+    }
+
+    // MARK: - Note sources
 
     static public let mainLayerName = "beamTextEditMainLayer"
 
@@ -2104,6 +2178,8 @@ public extension CALayer {
             addNoteSourceFrom(url: range.string)
         }
     }
+
+    // MARK: - SignPost
 
     public static var signPost = SignPost("BeamTextEdit")
     public var sign: SignPostId!
