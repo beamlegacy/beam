@@ -159,7 +159,7 @@ class MockUserInformationsStore: UserInformationsStore {
 
 class BrowsingScorerMock: NSObject, WebPageRelated, BrowsingScorer {
     weak var page: WebPage?
-    var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
+    var debouncedUpdateScrollingScore = PassthroughSubject<WebFrames.FrameInfo, Never>()
     private(set) var currentScore: BeamCore.Score = Score()
 
     override init() {
@@ -171,7 +171,7 @@ class BrowsingScorerMock: NSObject, WebPageRelated, BrowsingScorer {
     func addTextSelection() {}
 
     func scoreApply(changes: (UrlScoreProtocol) -> Void) {}
-    func updateScrollingScore(_ frame: WebPositions.FrameInfo) {}
+    func updateScrollingScore(_ frame: WebFrames.FrameInfo) {}
 }
 
 class FileStorageMock: BeamFileStorage {

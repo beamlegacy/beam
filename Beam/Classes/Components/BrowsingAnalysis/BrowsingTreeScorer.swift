@@ -7,7 +7,7 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
 
     let browsingTree: BrowsingTree
 
-    var debouncedUpdateScrollingScore = PassthroughSubject<WebPositions.FrameInfo, Never>()
+    var debouncedUpdateScrollingScore = PassthroughSubject<WebFrames.FrameInfo, Never>()
     private var cancellables = Set<AnyCancellable>()
 
     init(browsingTree: BrowsingTree) {
@@ -40,7 +40,7 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
 
     /// Update the score with scroll information of the current webpage frame
     /// - Parameter frame: Frame infomation
-    func updateScrollingScore(_ frame: WebPositions.FrameInfo) {
+    func updateScrollingScore(_ frame: WebFrames.FrameInfo) {
         if frame.width > 0, frame.height > 0 {
             let currentScrollRatioX = Float(frame.scrollX / frame.width)
             currentScore.scrollRatioX = max(currentScrollRatioX, currentScore.scrollRatioX)
