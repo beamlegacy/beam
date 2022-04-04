@@ -328,4 +328,32 @@ class OmniboxViewTests: BaseTest {
         
     }
     
+    // BE-2546
+    func testOmniboxIsDismissedWhenSummonedTwice() {
+        
+        step("Given I launch the app") {
+            launchApp()
+        }
+
+        step("When I open omnibox with shortcut") {
+            omniboxView.focusOmniBoxSearchField()
+        }
+        
+        step("Then omnibox menu is displayed") {
+            XCTAssertTrue(omniboxView.doesOmniboxCreateNoteExist())
+            XCTAssertTrue(omniboxView.doesOmniboxAllNotesExist())
+            XCTAssertTrue(omniboxView.isOmniboxFocused())
+        }
+        
+        step("When I reinvoke omnibox with shortcut") {
+            omniboxView.focusOmniBoxSearchField()
+        }
+        
+        step("Then omnibox menu is closed") {
+            XCTAssertFalse(omniboxView.doesOmniboxCreateNoteExist())
+            XCTAssertFalse(omniboxView.doesOmniboxAllNotesExist())
+            XCTAssertFalse(omniboxView.isOmniboxFocused())
+        }
+    }
+    
 }
