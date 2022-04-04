@@ -102,31 +102,14 @@ class JavascriptNativeInteractionsTests: BaseTest {
         step("Then I can successfully upload the file"){
             let alert = journalView.app.dialogs.firstMatch
             XCTAssert(alert.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            let open = alert.buttons["Open"].firstMatch
 
-            journalView.app.typeKey("g", modifierFlags: [.command, .shift])
-
-            let sheet = alert.sheets.firstMatch
-            XCTAssert(sheet.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-
-            let goButton = alert.buttons["Go"]
-            let input = sheet.comboBoxes.firstMatch
-            
-            let textField = journalView.app.dialogs.sheets.textFields.matching(identifier: "PathTextField").element //workaround for Monterrey diff from Big Sur
-            if textField.exists {
-                ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
-                textField.typeText("/Applications")
-                journalView.typeKeyboardKey(.enter)
-            } else {
-                input.typeText("/Applications")
-            }
-            
-            if goButton.exists {
-                goButton.tap()
-                waitForDoesntExist(goButton)
-            }
+            // Go to application folder
+            journalView.app.typeKey("a", modifierFlags: [.command, .shift])
+            // Group by none to avoid flaky issue
+            journalView.app.typeKey("1", modifierFlags: [.command, .control])
             journalView.typeKeyboardKey(.downArrow)
-            open.clickOnEnabled()
+            journalView.typeKeyboardKey(.enter)
+
             XCTAssertTrue(waitForDoesntExist(webView!.staticTexts[fileExistanceLabel]))
         }
 
