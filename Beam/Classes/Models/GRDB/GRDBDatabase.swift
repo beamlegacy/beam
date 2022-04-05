@@ -500,6 +500,33 @@ struct GRDBDatabase {
             }
         }
 
+        migrator.registerMigration("addNonNullConstraintsToLongTermUrlScores") { db in
+            try db.create(table: "newLongTermUrlScore", ifNotExists: true) { t in
+                t.column("urlId", .text).primaryKey()
+                t.column("visitCount", .integer).notNull()
+                t.column("readingTimeToLastEvent", .double).notNull()
+                t.column("textSelections", .integer).notNull()
+                t.column("scrollRatioX", .double).notNull()
+                t.column("scrollRatioY", .double).notNull()
+                t.column("textAmount", .integer).notNull()
+                t.column("area", .double).notNull()
+                t.column("lastCreationDate", .datetime)
+            }
+            try db.execute(sql: """
+                INSERT INTO newLongTermUrlScore
+                SELECT * FROM LongTermUrlScore
+                WHERE
+                    visitCount IS NOT NULL
+                    AND readingTimeToLastEvent IS NOT NULL
+                    AND textSelections IS NOT NULL
+                    AND scrollRatioX IS NOT NULL
+                    AND scrollRatioY IS NOT NULL
+                    AND textAmount IS NOT NULL
+                    AND area IS NOT NULL
+                """)
+            try db.drop(table: "LongTermUrlScore")
+            try db.rename(table: "newLongTermUrlScore", to: "LongTermUrlScore")
+        }
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false

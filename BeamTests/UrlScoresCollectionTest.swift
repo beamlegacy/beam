@@ -214,5 +214,21 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(dailyScore.scrollRatioY, 0.5) //max of current and previous score
         XCTAssertEqual(dailyScore.textAmount, 0)
         XCTAssertEqual(dailyScore.area, 400) // gets overwritten
+
+        //doesn't create nan score with nan scrolls
+        let scroll3 = WebFrames.FrameInfo(
+            href: "https://example.com",
+            parentHref: "https://example.com",
+            x: 0,
+            y: 0,
+            scrollX: CGFloat.nan,
+            scrollY: CGFloat.nan,
+            width: 20,
+            height: 20
+        )
+        scorer.updateScrollingScore(scroll3)
+        score = try XCTUnwrap(store.data[link])
+        XCTAssertEqual(score.scrollRatioX, 0.4) //doesn't get replaced by nan
+        XCTAssertEqual(score.scrollRatioY, 0.5) //doesn't get replaced by nan
     }
 }
