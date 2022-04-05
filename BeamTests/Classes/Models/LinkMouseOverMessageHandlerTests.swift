@@ -14,7 +14,7 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
             pns: nil,
             fileStorage: nil,
             downloadManager: nil,
-            navigationController: nil
+            navigationHandler: nil
         )
 
         messageHandler = LinkMouseOverMessageHandler()

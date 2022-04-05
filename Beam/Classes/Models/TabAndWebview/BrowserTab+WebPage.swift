@@ -59,10 +59,10 @@ extension BrowserTab: WebPage {
             rootId: browsingTree.rootId
         )
         let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
-                                     note: noteController.note, element: beamNavigationController?.isNavigatingFromNote == true ? noteController.element : nil,
+                                     note: noteController.note, element: isFromNoteSearch ? noteController.element : nil,
                                      url: targetURL, webView: newWebView)
-        newTab.browsingTree.current.score.openIndex = navigationCount
-        navigationCount += 1
+        newTab.browsingTree.current.score.openIndex = numberOfLinksOpenedInANewTab
+        numberOfLinksOpenedInANewTab += 1
         browsingTree.openLinkInNewTab()
         return newTab
     }
@@ -102,7 +102,7 @@ extension BrowserTab: WebPage {
             let transientWebViewWindow = TransientWebViewWindow(originPage: self, configuration: configuration, windowFeatures: windowFeatures)
             transientWebViewWindow.makeKeyAndOrderFront(nil)
             newWindow = transientWebViewWindow
-            newWebView = transientWebViewWindow.controller.webView
+            newWebView = transientWebViewWindow.webView
             newWebView.load(URLRequest(url: targetURL))
             state?.setup(webView: newWebView)
         }
@@ -114,7 +114,6 @@ extension BrowserTab: WebPage {
 
     func closeTab() {
         isFromNoteSearch = false
-        beamNavigationController?.isNavigatingFromNote = false
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
@@ -192,25 +191,8 @@ extension BrowserTab: WebPage {
     }
 
     // MARK: Navigation handling
-    func leave() {
-        pointAndShoot?.leavePage()
-        mouseHoveringLocation = .none
-        cancelSearch()
-    }
-
     func shouldNavigateInANewTab(url: URL) -> Bool {
         return isPinned && self.url != nil && url.mainHost != self.url?.mainHost
-    }
-
-    func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) {
-        if case .searchFromNode = browsingTreeOrigin {
-            logInNote(url: url, title: title, reason: reason)
-        }
-        updateScore()
-        updateFavIcon(fromWebView: true)
-        if reason == .navigation {
-            pointAndShoot?.leavePage()
-        }
     }
 
     /// When using Point and Shoot to capture text in a webpage, notify the

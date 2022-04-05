@@ -102,7 +102,7 @@ struct ClusterContentView: View {
 }
 
 struct TabRowView: View {
-    var tabInfo: TabInformation
+    var tabInfo: TabIndexingInfo
 
     var body: some View {
         HStack {
