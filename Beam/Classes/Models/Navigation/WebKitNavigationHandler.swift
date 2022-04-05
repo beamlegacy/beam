@@ -1,5 +1,5 @@
 //
-//  BaseWebNavigationController.swift
+//  WebKitNavigationHandler.swift
 //  Beam
 //
 //  Created by Stef Kors on 24/02/2022.
@@ -9,21 +9,24 @@ import Foundation
 import BeamCore
 import WebKit
 
-class BaseWebNavigationController: NSObject, WKNavigationDelegate {
+class WebKitNavigationHandler: NSObject, WKNavigationDelegate {
     /// The target WebPage. Used as a target for where new Tabs will be created
     weak var page: WebPage?
+
+    fileprivate var webViewController: WebViewNavigationHandler? {
+        page?.webViewNavigationHandler
+    }
 }
 
 // MARK: - Allowing or Denying Navigation Requests
-extension BaseWebNavigationController {
-
+extension WebKitNavigationHandler {
     /// Asks the delegate for permission to navigate to new content based on the specified action information.
     func webView(
         _ webView: WKWebView,
         decidePolicyFor navigationAction: WKNavigationAction,
         decisionHandler: @escaping (WKNavigationActionPolicy) -> Void
     ) {
-        handleNavigationAction(navigationAction)
+        webViewController?.webView(webView, willPerformNavigationAction: navigationAction)
         decisionHandler(.allow)
     }
 
@@ -40,7 +43,7 @@ extension BaseWebNavigationController {
             return
         }
 
-        self.handleNavigationAction(navigationAction)
+        webViewController?.webView(webView, willPerformNavigationAction: navigationAction)
 
         // Handle Deep Linking to External Applications
         let deeplinkHandler = ExternalDeeplinkHandler(request: navigationAction.request)
@@ -96,7 +99,7 @@ extension BaseWebNavigationController {
 }
 
 // MARK: - Tracking the Load Progress of a Request
-extension BaseWebNavigationController {
+extension WebKitNavigationHandler {
 
     /// Tells the delegate that navigation from the main frame has started.
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) { }
@@ -109,38 +112,19 @@ extension BaseWebNavigationController {
         guard let webviewUrl = webView.url else {
             return // webview probably failed to load
         }
-
-        NavigationRouter.browserContentDescription(for: webviewUrl, webView: webView) { [weak page] contentDescription in
-            page?.contentDescription = contentDescription
-        }
-
-        if BeamURL(webviewUrl).isErrorPage {
-            let beamSchemeUrl = BeamURL(webviewUrl)
-            self.page?.url = beamSchemeUrl.originalURLFromErrorPage
-
-            if let extractedCode = BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "code"),
-               let errorCode = Int(extractedCode),
-               let errorUrl = self.page?.url {
-                self.page?.errorPageManager = .init(errorCode, webView: webView,
-                                                    errorUrl: errorUrl,
-                                                    defaultLocalizedDescription: BeamURL.getQueryStringParameter(url: beamSchemeUrl.url.absoluteString, param: "localizedDescription"))
-            }
-
-        } else {
-            // Present the original, non-internal URL
-            page?.url = NavigationRouter.originalURL(internal: webviewUrl)
-        }
-        self.page?.leave()
-        (page as? BrowserTab)?.updateFavIcon(fromWebView: false, cacheOnly: true, clearIfNotFound: true)
+        webViewController?.webView(webView, didReachURL: webviewUrl)
     }
 
     /// Tells the delegate that navigation is complete.
-    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) { }
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        guard let url = webView.url else { return }
+        webViewController?.webView(webView, didFinishNavigationToURL: url, source: .webKit)
+    }
 
 }
 
 // MARK: - Responding to Authentication Challenges
-extension BaseWebNavigationController {
+extension WebKitNavigationHandler {
 
     /// Asks the delegate to respond to an authentication challenge.
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
@@ -191,16 +175,16 @@ extension BaseWebNavigationController {
 }
 
 // MARK: - Responding to Navigation Errors
-extension BaseWebNavigationController {
+extension WebKitNavigationHandler {
 
     /// Tells the delegate that an error occurred during navigation.
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-        Logger.shared.logError("Webview failed: \(error)", category: .javascript)
+        Logger.shared.logError("Webview failed: \(error)", category: .web)
     }
 
     /// Tells the delegate that an error occurred during the early navigation process.
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
-        Logger.shared.logError("didFail: \(error)", category: .javascript)
+        Logger.shared.logError("didFail: \(error)", category: .web)
         page?.errorPageManager = nil
         let error = error as NSError
 
@@ -231,7 +215,7 @@ extension BaseWebNavigationController {
 }
 
 // MARK: - Handling Download Progress
-extension BaseWebNavigationController {
+extension WebKitNavigationHandler {
 
     ///Tells the delegate that a navigation response became a download.
     func webView(_ webView: WKWebView, navigationAction: WKNavigationAction, didBecome download: WKDownload) {
@@ -246,30 +230,7 @@ extension BaseWebNavigationController {
 }
 
 // MARK: - Helpers
-extension BaseWebNavigationController {
-
-    private func handleNavigationAction(_ action: WKNavigationAction) {
-        switch action.navigationType {
-        case .other:
-            // this is a redirect, we keep the requested url as is to update its title once the actual destination is reached
-            break
-        case .formSubmitted, .formResubmitted:
-            // We found at that `action.sourceFrame` can be null for `.formResubmitted` even if it's not an optional
-            // Assigning it to an optional to check if we have a value
-            // see https://linear.app/beamapp/issue/BE-3180/exc-breakpoint-exception-6-code-3431810664-subcode-8
-            let sourceFrame: WKFrameInfo? = action.sourceFrame
-            if let sourceFrame = sourceFrame {
-                Logger.shared.logDebug("Form submitted for \(sourceFrame.request.url?.absoluteString ?? "(no source frame URL)")", category: .web)
-                page?.handleFormSubmit(frameInfo: sourceFrame)
-            }
-            fallthrough
-        default:
-            // update the requested url as it is not from a redirection but from a user action:
-            if let url = action.request.url {
-                self.page?.requestedURL = url
-            }
-        }
-    }
+extension WebKitNavigationHandler {
 
     /// Utility to determine if the Command Key was used during a navigation action
     /// - Parameter action: The Navigation Action

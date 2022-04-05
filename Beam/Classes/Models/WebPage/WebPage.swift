@@ -15,8 +15,6 @@ protocol WebPage: AnyObject, Scorable {
 
     var title: String { get }
     var url: URL? { get set }
-    /// The URL before any website implicit redirection. (ex: gmail.com redirects to mail.google.com)
-    var requestedURL: URL? { get set }
 
     /// An object publishing updates about the content currently displayed.
     var contentDescription: BrowserContentDescription? { get set }
@@ -29,7 +27,7 @@ protocol WebPage: AnyObject, Scorable {
     var errorPageManager: ErrorPageManager? { get set }
     var fileStorage: BeamFileStorage? { get }
     var downloadManager: DownloadManager? { get }
-    var navigationController: WebNavigationController? { get }
+    var webViewNavigationHandler: WebViewNavigationHandler? { get }
     var browsingScorer: BrowsingScorer? { get }
     var passwordOverlayController: PasswordOverlayController? { get }
     var mediaPlayerController: MediaPlayerController? { get set }
@@ -64,11 +62,7 @@ protocol WebPage: AnyObject, Scorable {
     func isActiveTab() -> Bool
 
     // MARK: Navigation handling
-    /// Leave the page, either by back or forward.
-    func leave()
-    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)? { get }
     func shouldNavigateInANewTab(url: URL) -> Bool
-    func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason)
     func addTextToClusteringManager(_ text: String, url: URL)
 
     // MARK: Mouse Interactions
@@ -137,13 +131,11 @@ extension WebPage {
     func collectTab() {}
 
     func isActiveTab() -> Bool { false }
-    func leave() { }
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         self
     }
 
     func shouldNavigateInANewTab(url: URL) -> Bool { false }
-    func navigatedTo(url: URL, title: String?, reason: NoteElementAddReason) { }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
         return webView

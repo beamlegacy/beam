@@ -79,11 +79,10 @@ class FrecencyNoteTriggerTests: XCTestCase {
         var webFrames: WebFrames?
         var webPositions: WebPositions?
         var pointAndShoot: PointAndShoot?
-        var navigationController: WebNavigationController?
         var browsingScorer: BrowsingScorer?
+        var webViewNavigationHandler: WebViewNavigationHandler?
         var passwordOverlayController: PasswordOverlayController?
         var mediaPlayerController: MediaPlayerController?
-        var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
         var score: Float = 0
         var contentDescription: BrowserContentDescription?
         var authenticationViewModel: AuthenticationViewModel?
