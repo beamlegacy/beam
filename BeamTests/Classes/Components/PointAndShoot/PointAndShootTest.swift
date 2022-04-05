@@ -28,11 +28,10 @@ class TestWebPage: WebPage {
     private(set) var frame: NSRect = NSRect(x: 0, y: 0, width: 600, height: 800)
     private(set) var mouseLocation: NSPoint!
     private(set) var downloadManager: DownloadManager?
-    private(set) var navigationController: WebNavigationController?
+    private(set) var webViewNavigationHandler: WebViewNavigationHandler?
     var hasError: Bool = false
     var responseStatusCode: Int = 200
     var mediaPlayerController: MediaPlayerController?
-    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var webView: BeamWebView
     var activeNote: BeamNote {
         if let note = testNotes.values.first {
@@ -51,13 +50,13 @@ class TestWebPage: WebPage {
     var mouseHoveringLocation: MouseHoveringLocation = .none
 
     init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
-         fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationController: WebNavigationController?) {
+         fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationHandler: WebViewNavigationHandler?) {
         self.browsingScorer = browsingScorer
         self.passwordOverlayController = passwordOverlayController
         pointAndShoot = pns
         storage = fileStorage
         self.downloadManager = downloadManager
-        self.navigationController = navigationController
+        self.webViewNavigationHandler = navigationHandler
         self.webView = BeamWebView()
         let webFrames = WebFrames()
         self.webFrames = webFrames
@@ -76,13 +75,13 @@ class TestWebPage: WebPage {
     func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
         events.append("createNewTab \(targetURL) \(setCurrent))")
         return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
-                           fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+                           fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
     }
 
     func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
         events.append("createNewWindow \(targetURL) \(setCurrent))")
         let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
-                                  fileStorage: storage, downloadManager: downloadManager, navigationController: navigationController)
+                                  fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
 
         return webPage.webView
     }
@@ -96,13 +95,6 @@ class TestWebPage: WebPage {
     }
 
     func shouldNavigateInANewTab(url: URL) -> Bool { false }
-
-    func navigatedTo(url: URL, title: String, isNavigation: Bool) {
-        events.append("navigatedTo \(url) \(title)")
-        self.url = url
-        self.title = title
-        self.logInNote(url: url, title: title, reason: .pointandshoot)
-    }
 
     func executeJS(_ jsCode: String, objectName: String?) -> Promise<Any?> {
         if objectName == "PointAndShoot" {
@@ -236,17 +228,22 @@ class DownloadManagerMock: DownloadManager {
     func waitForDownloadURL(_ url: URL, headers: [String: String]) -> DownloadManagerResult? { fatalError("waitForDownloadURL(_:headers:) has not been implemented") }
 }
 
-class NavigationControllerMock: WebNavigationController {
+class NavigationHandlerMock: WebViewNavigationHandler {
     var events: [String] = []
 
-    func navigatedTo(url: URL, webView: WKWebView, replace: Bool, fromJS: Bool = false) {
+    func webViewIsInstructedToLoadURLFromUI(_ url: URL) { }
+
+    func webView(_ webView: WKWebView, willPerformNavigationAction action: WKNavigationAction) { }
+
+    func webView(_ webView: WKWebView, didReachURL url: URL) { }
+
+    func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {
+        var replace = false
+        if case .javascript(let replacing) = source {
+            replace = replacing
+        }
         events.append("navigatedTo \(url) \(replace)")
     }
-
-    func setLoading() {
-        events.append("setLoading")
-    }
-
 }
 
 class PointAndShootTest: XCTestCase {
@@ -260,12 +257,12 @@ class PointAndShootTest: XCTestCase {
 
         let testFileStorage = FileStorageMock()
         let testDownloadManager = DownloadManagerMock()
-        let navigationController = NavigationControllerMock()
+        let navigationHandler = NavigationHandlerMock()
         pns = PointAndShoot()
         let page = TestWebPage(browsingScorer: testBrowsingScorer,
                                passwordOverlayController: testPasswordOverlayController, pns: pns,
                                fileStorage: testFileStorage, downloadManager: testDownloadManager,
-                               navigationController: navigationController)
+                               navigationHandler: navigationHandler)
         testPage = page
         page.browsingScorer?.page = page
         page.passwordOverlayController?.page = page

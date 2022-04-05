@@ -39,12 +39,11 @@ class WebPageBaseImpl: WebPage {
     var pointAndShoot: PointAndShoot?
     var webFrames: WebFrames?
     var webPositions: WebPositions?
-    var navigationController: WebNavigationController?
+    var webViewNavigationHandler: WebViewNavigationHandler?
     var errorPageManager: ErrorPageManager?
     var browsingScorer: BrowsingScorer?
     var passwordOverlayController: PasswordOverlayController?
     var mediaPlayerController: MediaPlayerController?
-    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
     var score: Float = 0
 
     var authenticationViewModel: AuthenticationViewModel?
