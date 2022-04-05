@@ -2078,7 +2078,8 @@ public extension CALayer {
 
         let newParent: ElementNode
         let index: Int
-        let currentElementIndex = dragResult.element.indexInParent ?? 0
+        let destinationElementIndex = dragResult.element.indexInParent ?? 0
+        let selectedNodes = sortedSelectedRootsToMoveAlong(for: movedNode)
 
         if dragResult.shouldBeAfter && dragResult.shouldBeChild {
             newParent = dragResult.element
@@ -2086,22 +2087,22 @@ public extension CALayer {
         } else {
             var previousNodeMovingOffset = 0
             // If the moving node is a sibbling of the destination, and is located before, we need to offet by one
-            if movedNode.isSibblingWith(dragResult.element),
-               let destinationIndex = dragResult.element.indexInParent,
-                let movedElementIndex = movedNode.indexInParent,
-                destinationIndex > movedElementIndex {
+            if isMovedNodeSibbling(movedNode, andBeforeDestinationNode: dragResult.element) {
                 previousNodeMovingOffset = 1
             }
-            index = currentElementIndex + (dragResult.shouldBeAfter ? 1 : 0) - previousNodeMovingOffset
+            index = destinationElementIndex + (dragResult.shouldBeAfter ? 1 : 0) - previousNodeMovingOffset
             newParent = dragResult.element.parent as? ElementNode ?? rootNode
         }
 
-        if let selectedNodes = rootNode.state.nodeSelection?.sortedRoots {
+        if !selectedNodes.isEmpty {
             var offset = 0
             rootNode.cmdManager.beginGroup(with: "Multiple node move")
+            let shouldIncreaseIndex = !isMovedNodeSibbling(selectedNodes.first ?? movedNode, andBeforeDestinationNode: dragResult.element) || dragResult.shouldBeChild
             for node in selectedNodes {
                 rootNode.cmdManager.reparentElement(node, to: newParent, atIndex: index + offset)
-                offset += 1
+                if shouldIncreaseIndex {
+                    offset += 1
+                }
             }
             rootNode.cmdManager.endGroup()
         } else {
@@ -2145,14 +2146,13 @@ public extension CALayer {
     }
 
     private func cleanupAfterDraggingWidget(_ widget: Widget) {
+        guard let movedNode = widget as? ElementNode else { return }
         widget.isDraggedForMove = false
         mouseMoveOrigin = nil
         updateDragIndicator(at: nil)
 
-        if let selectedNodes = rootNode?.state.nodeSelection?.sortedNodes {
-            for node in selectedNodes {
-                node.isDraggedForMove = false
-            }
+        for node in selectedNodesToMoveAlong(for: movedNode) {
+            node.isDraggedForMove = false
         }
     }
 
@@ -2162,6 +2162,24 @@ public extension CALayer {
         } else {
             return []
         }
+    }
+
+    private func sortedSelectedRootsToMoveAlong(for initialNode: ElementNode) -> [ElementNode] {
+        if let nodes = rootNode?.state.nodeSelection?.sortedRoots, nodes.contains(initialNode) {
+            return nodes
+        } else {
+            return []
+        }
+    }
+
+    private func isMovedNodeSibbling(_ movedNode: ElementNode, andBeforeDestinationNode: ElementNode) -> Bool {
+        if movedNode.isSibblingWith(andBeforeDestinationNode),
+           let destinationIndex = andBeforeDestinationNode.indexInParent,
+            let movedElementIndex = movedNode.indexInParent,
+            destinationIndex > movedElementIndex {
+            return true
+        }
+        return false
     }
 
     // MARK: - Note sources
