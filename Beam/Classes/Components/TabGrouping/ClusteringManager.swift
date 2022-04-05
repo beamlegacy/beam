@@ -62,14 +62,14 @@ class ClusteringManager: ObservableObject {
     var ranker: SessionLinkRanker
     var activeSources: ActiveSources
     let noteToAdd = PassthroughSubject<BeamNote, Never>()
-    @Published var clusteredTabs: [[TabInformation?]] = [[]]
+    @Published var clusteredTabs: [[TabIndexingInfo?]] = [[]]
     @Published var clusteredNotes: [[String?]] = [[]]
     @Published var isClustering: Bool = false
     @Published var selectedTabGroupingCandidate: Int
     @Published var weightNavigation: Double
     @Published var weightText: Double
     @Published var weightEntities: Double
-    private var tabsInfo: [TabInformation] = []
+    private var tabsInfo: [TabIndexingInfo] = []
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
@@ -185,7 +185,7 @@ class ClusteringManager: ObservableObject {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func getIdAndParent(tabToIndex: TabInformation) -> (UUID?, UUID?) {
+    func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?) {
         guard tabToIndex.isPinnedTab == false else {
             return (nil, nil)
         }
@@ -256,7 +256,7 @@ class ClusteringManager: ObservableObject {
     }
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func addPage(id: UUID, parentId: UUID?, value: TabInformation? = nil, newContent: String? = nil) {
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo? = nil, newContent: String? = nil) {
         var pageToAdd: Page?
         if let value = value {
             pageToAdd = Page(id: id, parentId: parentId, url: value.url, title: value.document.title, originalContent: value.cleanedTextContentForClustering)

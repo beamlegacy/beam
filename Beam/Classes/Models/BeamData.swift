@@ -27,7 +27,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var showTabStats = false
     @Published var isFetching = false
     @Published var newDay: Bool = false
-    @Published var tabToIndex: TabInformation?
     @Published private(set) var pinnedTabs: [BrowserTab] = []
     //swiftlint:disable:next large_tuple
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
@@ -166,34 +165,6 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
                     }
                 }
             }
-        }.store(in: &scope)
-
-        $tabToIndex.sink { [weak self] tabToIndex in
-            guard let self = self,
-                  let tabToIndex = tabToIndex else { return }
-            self.signpost.begin("indexTab")
-            defer { self.signpost.end("indexTab") }
-            var currentId: UUID?
-            var parentId: UUID?
-            (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: tabToIndex)
-            guard let id = currentId else { return }
-            if tabToIndex.shouldBeIndexed {
-                self.clusteringManager.addPage(id: id, parentId: parentId, value: tabToIndex)
-                _ = LinkStore.shared.visit(tabToIndex.url.string, title: tabToIndex.document.title, content: tabToIndex.textContent)
-            }
-
-            // Update history record
-//            do {
-//                if tabToIndex.shouldBeIndexed {
-//                    try GRDBDatabase.shared.insertHistoryUrl(urlId: id,
-//                                                             url: tabToIndex.url.string,
-//                                                             aliasDomain: tabToIndex.requestedURL?.absoluteString,
-//                                                             title: tabToIndex.document.title,
-//                                                             content: nil)
-//                }
-//            } catch {
-//                Logger.shared.logError("unable to save history url \(tabToIndex.url.string)", category: .search)
-//            }
         }.store(in: &scope)
 
         $newDay.sink { [weak self] newDay in
