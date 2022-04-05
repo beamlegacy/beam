@@ -15,7 +15,7 @@ protocol BrowserTabsManagerDelegate: AnyObject {
     func areTabsVisible(for manager: BrowserTabsManager) -> Bool
 
     func tabsManagerDidUpdateTabs(_ tabs: [BrowserTab])
-    func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?)
+    func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?, previousTab: BrowserTab?)
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool)
 }
 
@@ -34,7 +34,6 @@ class BrowserTabsManager: ObservableObject {
     private weak var state: BeamState?
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
-            self.updateTabsHandlers()
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
             self.autoSave()
             self.updateClusteringOpenPages()
@@ -53,13 +52,12 @@ class BrowserTabsManager: ObservableObject {
     @Published var currentTab: BrowserTab? {
         didSet {
             if tabsAreVisible {
-                latestCurrentTab = oldValue?.browsingTree
                 oldValue?.switchToOtherTab()
                 currentTab?.tabDidAppear(withState: state)
             }
 
             self.updateCurrentTabObservers()
-            self.delegate?.tabsManagerDidChangeCurrentTab(currentTab)
+            self.delegate?.tabsManagerDidChangeCurrentTab(currentTab, previousTab: oldValue)
             self.autoSave()
         }
     }
@@ -106,64 +104,10 @@ class BrowserTabsManager: ObservableObject {
         }.store(in: &tabScope)
     }
 
-    private var indexingQueue = DispatchQueue(label: "indexing")
-
     private func updateClusteringOpenPages() {
         self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + tabs.map { ClusteringManager.BrowsingTreeOpenInTab(browsingTree: $0.browsingTree, browserTabManagerId: self.browserTabManagerId) }
     }
 
-    private func updateTabsHandlers() {
-        for tab in tabs {
-            guard tab.appendToIndexer == nil else { continue }
-
-            tab.appendToIndexer = { [unowned self, weak tab] url, title, read in
-                guard let tab = tab else { return }
-                if self.tabPinSuggester.isEligible(url: url) && tabs.allSatisfy({ !$0.isPinned }) {
-                    Logger.shared.logInfo("Suggested url to pin \(url)", category: .tabPinSuggestion)
-                    //TODO: uncomment when pin tab call to action is implemented
-                    //tab.pinSuggest()
-                    //self.tabPinSuggester.hasSuggested(url: url)
-                }
-                var textForClustering = [""]
-                let tabTree = tab.browsingTree.deepCopy()
-                let currentTabTree = currentTab?.browsingTree.deepCopy()
-
-                self.indexingQueue.async { [unowned self] in
-                    let htmlNoteAdapter = HtmlNoteAdapter(url)
-                    textForClustering = htmlNoteAdapter.convertForClustering(html: read.content)
-
-                    DispatchQueue.main.async { [weak self] in
-                        guard let self = self else { return }
-
-                        let indexDocument = IndexDocument(source: url.absoluteString, title: title, contents: read.textContent)
-                        var shouldIndexUserTypedUrl = tab.requestedURL != nil && tab.requestedURL != tab.url
-
-                        // this check in case last url redirected just contains a /
-                        if let url = tab.url, let userTypedUrl = tab.requestedURL {
-                            if url.absoluteString.prefix(url.absoluteString.count - 1) == userTypedUrl.absoluteString {
-                                shouldIndexUserTypedUrl = false
-                            }
-                        }
-
-                        let tabInformation: TabInformation? = TabInformation(url: url,
-                                                                             requestedURL: shouldIndexUserTypedUrl ? tab.requestedURL : nil,
-                                                                             shouldBeIndexed: tab.responseStatusCode == 200,
-                                                                             tabTree: tabTree,
-                                                                             currentTabTree: currentTabTree,
-                                                                             parentBrowsingNode: tabTree?.current.parent,
-                                                                             previousTabTree: self.latestCurrentTab,
-                                                                             document: indexDocument,
-                                                                             textContent: read.textContent,
-                                                                             cleanedTextContentForClustering: textForClustering,
-                                                                             isPinnedTab: tab.isPinned)
-                        self.data.tabToIndex = tabInformation
-                        tab.requestedURL = nil
-                        self.latestCurrentTab = nil
-                    }
-                }
-            }
-        }
-    }
 }
 
 // MARK: - Public methods
@@ -310,20 +254,6 @@ extension BrowserTabsManager {
     }
 }
 
-struct TabInformation {
-    var url: URL
-    var requestedURL: URL?
-    var shouldBeIndexed: Bool = true
-    weak var tabTree: BrowsingTree?
-    weak var currentTabTree: BrowsingTree?
-    weak var parentBrowsingNode: BrowsingNode?
-    weak var previousTabTree: BrowsingTree?
-    var document: IndexDocument
-    var textContent: String
-    var cleanedTextContentForClustering: [String]
-    var isPinnedTab: Bool = false
-}
-
 // MARK: - Tabs Interactions Groups
 extension BrowserTabsManager {
 
@@ -379,6 +309,25 @@ extension BrowserTabsManager {
         }
     }
 
+}
+
+// MARK: - Tab events
+extension BrowserTabsManager {
+
+    func tabDidFinishNavigating(_ tab: BrowserTab, url: URL, originalRequestedURL: URL?,
+                                shouldWaitForBetterContent: Bool, isLinkActivation: Bool) {
+
+        if data.pinnedTabs.isEmpty && tabPinSuggester.isEligible(url: url) {
+            Logger.shared.logInfo("Suggested url to pin \(url)", category: .tabPinSuggestion)
+            // TODO: uncomment when pin tab call to action is implemented
+            // tab.pinSuggest()
+            // self.tabPinSuggester.hasSuggested(url: url)
+        }
+        state?.webIndexingController.tabDidNavigate(tab, toURL: url, inWebView: tab.webView, originalRequestedURL: originalRequestedURL,
+                                                    shouldWaitForBetterContent: shouldWaitForBetterContent,
+                                                    isLinkActivation: isLinkActivation,
+                                                    currentTab: currentTab)
+    }
 }
 
 // MARK: - Tabs Clustering

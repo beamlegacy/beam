@@ -1,14 +1,14 @@
 import Foundation
 import BeamCore
 
-enum NavigationMessages: String, CaseIterable {
+private enum NavigationMessages: String, CaseIterable {
     /**
-     Either a history.pushState or a history.replaceState has been issued.
+     Either a history.pushState, history.popState or a history.replaceState has been issued.
      */
     case nav_locationChanged
 }
 
-class WebNavigationMessageHandler: SimpleBeamMessageHandler {
+class JSNavigationMessageHandler: SimpleBeamMessageHandler {
 
     init() {
         let messages = NavigationMessages.self.allCases.map { $0.rawValue }
@@ -35,9 +35,9 @@ class WebNavigationMessageHandler: SimpleBeamMessageHandler {
                 Logger.shared.logError("\(href) is not a valid URL in navigation message", category: .web)
                 return
             }
-            guard let navigationController = webPage.navigationController else { return }
+            guard let navigationHandler = webPage.webViewNavigationHandler else { return }
             let replace: Bool = type == "replaceState" ? true : false
-            navigationController.navigatedTo(url: url, webView: webPage.webView, replace: replace, fromJS: true)
+            navigationHandler.webView(webPage.webView, didFinishNavigationToURL: url, source: .javascript(replacing: replace))
             webPage.executeJS("dispatchEvent(new Event('beam_historyLoad'))", objectName: nil, frameInfo: frameInfo)
         }
     }

@@ -10,9 +10,11 @@ import BeamCore
 import Combine
 
 class TransientWebViewWindow: NSWindow, NSWindowDelegate {
-    let controller: TransientWebViewController
+    private let controller: TransientWebViewController
 
-    private var scope = Set<AnyCancellable>()
+    var webView: BeamWebView {
+        controller.wv
+    }
 
     init(originPage: WebPage?, configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures? = nil) {
         let contentRect: CGRect = windowFeatures?.toRect() ?? .zero
@@ -30,44 +32,62 @@ class TransientWebViewWindow: NSWindow, NSWindowDelegate {
         )
         title = "Beam"
 
-        self.setFrameAutosaveName("Beam")
+        self.setFrameAutosaveName("BeamTransientWebViewWindow")
         self.isReleasedWhenClosed = false
-        self.contentView = self.controller.webView
-        self.controller.webView.publisher(for: \.title)
-            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
-            .sink { [unowned self] newTitle in
-                self.title = newTitle ?? "Beam"
-            }.store(in: &scope)
+        self.contentView = self.controller.wv
+        self.controller.delegate = self
     }
-
 }
 
-class TransientWebViewController: BaseWebNavigationController {
+extension TransientWebViewWindow: WebViewControllerDelegate {
+    func webViewController<Value>(_ controller: WebViewController, observedValueChangedFor keyPath: KeyPath<WKWebView, Value>, value: Value) {
+        guard keyPath == \.title, let title = value as? String else {
+            return
+        }
+        self.title = title
+    }
 
-    let uiDelegateController = TransientWebViewUIDelegateController()
-    let webView: BeamWebView
-    var url: URL?
+    func webViewController(_ controller: WebViewController, didChangeDisplayURL url: URL) { }
+    func webViewController(_ controller: WebViewController, willMoveInHistory forward: Bool) { }
+    func webViewControllerIsNavigatingToANewPage(_ controller: WebViewController) { }
+    func webViewController(_ controller: WebViewController, didFinishNavigatingToPage navigationDescription: WebViewNavigationDescription) { }
+    func webViewController(_ controller: WebViewController, didChangeLoadedContentType contentDescription: BrowserContentDescription?) { }
+}
 
+private class TransientWebViewController: WebViewController {
+
+    private let uiDelegateController = TransientWebViewUIDelegateController()
+    fileprivate let wv: BeamWebView
+
+    override var page: WebPage? {
+        // Don't setup the page to avoid the transient webview to trigger changes in the tab itself
+        // Ideally the WebViewController wouldn't need a page anyway. so to be removed soonish.
+        get { nil }
+        set {
+            _ = newValue
+            fatalError("Don't set page property on the TransientWebViewController")
+        }
+    }
     /// Creates a basic temporary WebView window.
     /// - Parameters:
     ///   - originPage: The WebPage that spawed this transient webview. Since we don't want to keep the TransientWebView around for long any tabs or windows created by this webview should not be created in the TransientWebView but instead be created from the originPage.
     ///   - configuration: WebView Configuration.
     ///   - contentRect: Size of the webview to be created.
     init(originPage: WebPage?, configuration: WKWebViewConfiguration?, contentRect: NSRect) {
-        self.webView = BeamWebView(frame: contentRect, configuration: configuration ?? WKWebViewConfiguration())
-        self.webView.enableAutoCloseWindow = true
-        self.webView.wantsLayer = true
-        self.webView.allowsMagnification = true
-        super.init()
-        self.page = originPage
+        let webView = BeamWebView(frame: contentRect, configuration: configuration ?? WKWebViewConfiguration())
+        webView.enableAutoCloseWindow = true
+        webView.wantsLayer = true
+        webView.allowsMagnification = true
+        wv = webView
+        super.init(with: webView)
         uiDelegateController.page = originPage
-        self.webView.navigationDelegate = self
-        self.webView.uiDelegate = uiDelegateController
+        webkitNavigationHandler.page = originPage
+        webView.uiDelegate = uiDelegateController
     }
 
 }
 
-class TransientWebViewUIDelegateController: BeamWebkitUIDelegateController {
+private class TransientWebViewUIDelegateController: BeamWebkitUIDelegateController {
     override func webViewDidClose(_ webView: WKWebView) {
         webView.window?.close()
     }

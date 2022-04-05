@@ -10,7 +10,14 @@ import Promises
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, Scorable {
 
     var id: UUID = UUID()
-    @Published var isLoading: Bool = false
+    @Published var isLoading: Bool = false {
+        didSet {
+            if !isLoading, let url = url {
+                Logger.shared.logDebug("BrowserTab finished loading \(url.absoluteString)", category: .passwordManagerInternal)
+                passwordOverlayController?.webViewFinishedLoading()
+            }
+        }
+    }
     @Published var estimatedLoadingProgress: Double = 0
     @Published var hasOnlySecureContent: Bool = false
 
@@ -36,6 +43,7 @@ import Promises
     var backForwardUrlList: [URL]?
     var originMode: Mode
     let uiDelegateController = BeamWebkitUIDelegateController()
+    var webViewController: WebViewController?
     let noteController: WebNoteController
     internal var isFromNoteSearch: Bool = false
     var allowsPictureInPicture: Bool {
@@ -50,13 +58,12 @@ import Promises
     var creationDate: Date = BeamDate.now
     var lastViewDate: Date = BeamDate.now
 
-    private var webViewCancellables = Set<AnyCancellable>()
-    private var contentDescriptionCancellables = Set<AnyCancellable>()
+    private var observersCancellables = Set<AnyCancellable>()
 
     static var webViewConfiguration = BeamWebViewConfigurationBase(handlers: [
         WebPositionsMessageHandler(),
         PointAndShootMessageHandler(),
-        WebNavigationMessageHandler(),
+        JSNavigationMessageHandler(),
         LoggingMessageHandler(),
         MediaPlayerMessageHandler(),
         GeolocationMessageHandler(),
@@ -86,14 +93,8 @@ import Promises
     @Published var title: String = ""
     @Published var originalQuery: String?
     @Published var url: URL?
-    @Published var requestedURL: URL?
 
-    @Published var contentDescription: BrowserContentDescription? {
-        didSet {
-            observeContentDescription()
-        }
-    }
-
+    @Published var contentDescription: BrowserContentDescription?
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
     @Published var mouseHoveringLocation: MouseHoveringLocation = .none
@@ -117,17 +118,9 @@ import Promises
     var downloadManager: DownloadManager? {
         state?.data.downloadManager
     }
-    private var _navigationController: BeamWebNavigationController?
-    var navigationController: WebNavigationController? {
-        beamNavigationController
-    }
 
-    internal var beamNavigationController: BeamWebNavigationController? {
-        guard _navigationController == nil else { return _navigationController }
-        let navController = BeamWebNavigationController(browsingTree: browsingTree, noteController: noteController, webView: webView)
-        navController.page = self
-        _navigationController = navController
-        return navController
+    var webViewNavigationHandler: WebViewNavigationHandler? {
+        webViewController
     }
 
     lazy var passwordOverlayController: PasswordOverlayController? = {
@@ -161,8 +154,7 @@ import Promises
         webPositions.delegate = self
         return webPositions
     }()
-    var appendToIndexer: ((URL, _ title: String, Readability) -> Void)?
-    var navigationCount: Int = 0
+    var numberOfLinksOpenedInANewTab: Int = 0
     // End WebPage Properties
 
     // MARK: - Init
@@ -207,7 +199,6 @@ import Promises
         mediaPlayerController = MediaPlayerController(page: self)
         addTreeToNote()
         observeWebView()
-        beamNavigationController?.isNavigatingFromNote = isFromNoteSearch
     }
 
     init(pinnedTabWithId id: UUID, url: URL, title: String) {
@@ -315,7 +306,7 @@ import Promises
             isFromNoteSearch = false
             elementToFocus = noteController.element
         } else {
-            elementToFocus = noteController.add(url: url, text: title, reason: reason, isNavigatingFromNote: beamNavigationController?.isNavigatingFromNote == true, browsingOrigin: self.browsingTree.origin)
+            elementToFocus = noteController.add(url: url, text: title, reason: reason, isNavigatingFromNote: isFromNoteSearch, browsingOrigin: self.browsingTree.origin)
         }
         if let elementToFocus = elementToFocus {
             updateFocusedStateToElement(elementToFocus)
@@ -360,32 +351,20 @@ import Promises
         noteController.score = score
     }
 
+    private func setupWebViewController() {
+        webViewController = WebViewController(with: webView)
+        webViewController?.delegate = self
+        webViewController?.page = self
+    }
+
     private func observeWebView() {
-        if !webViewCancellables.isEmpty {
+        if !observersCancellables.isEmpty {
             cancelObservers()
         }
-        Logger.shared.logDebug("setupObservers", category: .web)
+        Logger.shared.logDebug("observeWebView", category: .web)
 
-        webView.publisher(for: \.url).sink { [unowned self] webviewUrl in
-            guard let webviewUrl = webviewUrl else {
-                return // webview probably failed to load
-            }
-            // For security reason, we shoud only update the URL from JS when the new one is from same origin.
-            // Otherwise we can wait and URL will be updated in webView(_, didCommit) in BeamWebNavigationController
-            // https://github.com/mozilla-mobile/firefox-ios/wiki/WKWebView-navigation-and-security-considerations#single-page-js-apps-spas
-            if let url = url, webviewUrl.isSameOrigin(as: url) {
-                self.url = webviewUrl
-            }
-        }.store(in: &webViewCancellables)
+        setupWebViewController()
 
-        webView.publisher(for: \.hasOnlySecureContent)
-            .sink { [unowned self] value in hasOnlySecureContent = value }.store(in: &webViewCancellables)
-        webView.publisher(for: \.serverTrust).sink { [unowned self] value in serverTrust = value }.store(in: &webViewCancellables)
-        webView.publisher(for: \.canGoBack).sink { [unowned self] value in canGoBack = value }.store(in: &webViewCancellables)
-        webView.publisher(for: \.canGoForward).sink { [unowned self] value in canGoForward = value }.store(in: &webViewCancellables)
-        webView.publisher(for: \.backForwardList).sink { [unowned self] value in backForwardList = value }.store(in: &webViewCancellables)
-
-        webView.navigationDelegate = beamNavigationController
         webView.uiDelegate = uiDelegateController
 
         state?.$omniboxInfo.sink { [weak self] value in
@@ -393,37 +372,14 @@ import Promises
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) {
                 self?.pointAndShoot?.dismissActiveShootGroup()
             }
-        }.store(in: &webViewCancellables)
-    }
-
-    private func observeContentDescription() {
-        contentDescriptionCancellables = []
-
-        contentDescription?.titlePublisher
-            .sink { [weak self] title in
-                self?.title = title ?? ""
-            }.store(in: &contentDescriptionCancellables)
-
-        contentDescription?.isLoadingPublisher
-            .sink { [weak self] value in
-                self?.isLoading = value
-            }
-            .store(in: &contentDescriptionCancellables)
-
-        contentDescription?.estimatedProgressPublisher
-            .sink { [weak self] value in
-                self?.estimatedLoadingProgress = value
-            }
-            .store(in: &contentDescriptionCancellables)
+        }.store(in: &observersCancellables)
     }
 
     func cancelObservers() {
-        Logger.shared.logDebug("cancelObservers", category: .javascript)
+        Logger.shared.logDebug("cancelObservers", category: .web)
 
-        webViewCancellables = []
-        contentDescriptionCancellables = []
-
-        webView.navigationDelegate = nil
+        observersCancellables.removeAll()
+        webViewController = nil
         webView.uiDelegate = nil
     }
 
@@ -436,26 +392,19 @@ import Promises
         hasError = false
         screenshotCapture = nil
         if !isFromNoteSearch {
-            navigationController?.setLoading()
+            webViewController?.webViewIsInstructedToLoadURLFromUI(url)
         }
         self.url = url
-        requestedURL = url
 
-        navigationCount = 0
+        numberOfLinksOpenedInANewTab = 0
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
             webView.load(URLRequest(url: url))
         }
+
         Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .passwordManagerInternal)
         passwordOverlayController?.prepareForLoading()
-        $isLoading.sink { [unowned passwordOverlayController] loading in
-            if !loading {
-                Logger.shared.logDebug("BrowserTab finished loading \(url.absoluteString)", category: .passwordManagerInternal)
-                passwordOverlayController?.webViewFinishedLoading()
-            }
-        }.store(in: &webViewCancellables)
-
     }
 
     /// Called when doing CMD+Shift+T to create a tab that has been closed and when
@@ -490,9 +439,16 @@ import Promises
         }
     }
 
+    fileprivate func tabWillLeaveCurrentPage() {
+        pointAndShoot?.leavePage()
+        mouseHoveringLocation = .none
+        cancelSearch()
+        updateFavIcon(fromWebView: false, cacheOnly: true, clearIfNotFound: true)
+    }
+
     func reload() {
         hasError = false
-        leave()
+        tabWillLeaveCurrentPage()
         ContentBlockingManager.shared.configure(webView: webView)
         if let webviewUrl = webView.url, BeamURL(webviewUrl).isErrorPage, let originalUrl = BeamURL(webviewUrl).originalURLFromErrorPage {
             webView.replaceLocation(with: originalUrl)
@@ -550,7 +506,6 @@ import Promises
 
     func willSwitchToNewUrl(url: URL) {
         isFromNoteSearch = false
-        beamNavigationController?.isNavigatingFromNote = false
         if self.url != nil && url.mainHost != self.url?.mainHost {
             resetDestinationNote()
         }
@@ -665,5 +620,78 @@ extension BrowserTab: WebPositionsDelegate {
     /// - Parameter frame: WebPage frame coordinates and positions
     func webPositionsDidUpdateSize(with frame: WebFrames.FrameInfo) {
         passwordOverlayController?.updateScrollPosition(for: frame)
+    }
+}
+
+// MARK: - WebViewController Delegate
+extension BrowserTab: WebViewControllerDelegate {
+
+    func webViewController(_ controller: WebViewController, didChangeDisplayURL url: URL) {
+        self.url = url
+    }
+
+    func webViewController(_ controller: WebViewController, willMoveInHistory forward: Bool) {
+        if forward {
+            browsingTree.goForward()
+        } else {
+            browsingTree.goBack()
+        }
+    }
+
+    func webViewControllerIsNavigatingToANewPage(_ controller: WebViewController) {
+        tabWillLeaveCurrentPage()
+    }
+
+    func webViewController(_ controller: WebViewController, didFinishNavigatingToPage navigationDescription: WebViewNavigationDescription) {
+        let url = navigationDescription.url
+        let isLinkActivation = navigationDescription.isLinkActivation
+
+        updateScore()
+        updateFavIcon(fromWebView: true)
+        if isLinkActivation {
+            pointAndShoot?.leavePage()
+        }
+
+        if case .searchFromNode = browsingTreeOrigin {
+            logInNote(url: url, title: webView.title, reason: isLinkActivation ? .navigation : .loading)
+        }
+
+        var shouldWaitForBetterContent = false
+        if case .javascript = navigationDescription.source {
+            shouldWaitForBetterContent = true
+        }
+        state?.browserTabsManager.tabDidFinishNavigating(self, url: url, originalRequestedURL: navigationDescription.requestedURL,
+                                                         shouldWaitForBetterContent: shouldWaitForBetterContent,
+                                                         isLinkActivation: isLinkActivation)
+    }
+
+    func webViewController(_ controller: WebViewController, didChangeLoadedContentType contentDescription: BrowserContentDescription?) {
+        self.contentDescription = contentDescription
+    }
+
+    func webViewController<Value>(_ controller: WebViewController, observedValueChangedFor keyPath: KeyPath<WKWebView, Value>, value: Value) {
+        switch keyPath {
+        case \.title:
+            self.title = value as? String ?? self.title
+        case \.hasOnlySecureContent:
+            self.hasOnlySecureContent = value as? Bool ?? self.hasOnlySecureContent
+        case \.serverTrust:
+            // swiftlint:disable:next force_cast
+            self.serverTrust = (value as! SecTrust?)
+        case \.canGoBack:
+            self.canGoBack = value as? Bool ?? self.canGoBack
+        case \.canGoForward:
+            self.canGoForward = value as? Bool ?? self.canGoForward
+        case \.backForwardList:
+            self.backForwardList = value as? WKBackForwardList ?? self.backForwardList
+        case \.isLoading:
+            self.isLoading = value as? Bool ?? self.isLoading
+        case \.estimatedProgress:
+            self.estimatedLoadingProgress = value as? Double ?? self.estimatedLoadingProgress
+        case \.url:
+            break // no-op. see webViewController:didChangeDisplayURL:
+        default:
+            break
+        }
     }
 }

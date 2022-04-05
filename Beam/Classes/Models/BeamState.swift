@@ -52,6 +52,10 @@ import Sentry
         NoteMediaPlayerManager()
     }()
 
+    private(set) lazy var webIndexingController: WebIndexingController = {
+        WebIndexingController(clusteringManager: data.clusteringManager)
+    }()
+
     @Published var backForwardList = NoteBackForwardList()
     @Published var notesFocusedStates = NoteEditFocusedStateStorage()
     @Published var canGoBack: Bool = false
@@ -714,7 +718,8 @@ extension BeamState: BrowserTabsManagerDelegate {
             }
         }
     }
-    func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?) {
+    func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?, previousTab: BrowserTab?) {
+        webIndexingController.currentTabDidChange(currentTab, previousCurrentTab: previousTab)
         resetDestinationCard()
         stopFocusOmnibox()
     }

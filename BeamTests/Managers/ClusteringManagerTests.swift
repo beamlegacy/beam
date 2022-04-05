@@ -14,7 +14,7 @@ class ClusteringManagerTests: XCTestCase {
 
     var pageIDs: [UUID] = []
     var documents: [IndexDocument]!
-    var informations: [TabInformation]!
+    var informations: [TabIndexingInfo]!
     var notes: [BeamNote]!
 
     override func setUp() {
@@ -33,10 +33,10 @@ class ClusteringManagerTests: XCTestCase {
             IndexDocument(id: self.pageIDs[3], title: "Richard Gasquet")
         ]
         informations = [
-            TabInformation(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: ["Roger Federer is the best tennis player ever"]),
-            TabInformation(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: ["Rafael Nadal is also pretty good"]),
-            TabInformation(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
-            TabInformation(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
+            TabIndexingInfo(url: URL(string: "http://www.rogerfederer.com")!, document: documents[0], textContent: "Roger Federer is the best tennis player ever", cleanedTextContentForClustering: ["Roger Federer is the best tennis player ever"]),
+            TabIndexingInfo(url: URL(string: "https://rafaelnadal.com/en/")!, document: documents[1], textContent: "Rafael Nadal is also pretty good", cleanedTextContentForClustering: ["Rafael Nadal is also pretty good"]),
+            TabIndexingInfo(url: URL(string: "https://novakdjokovic.com/en/")!, document: documents[2], textContent: "Not you", cleanedTextContentForClustering: ["Not you"]),
+            TabIndexingInfo(url: URL(string: "http://www.richardgasquet.net")!, document: documents[3], textContent: "Richard Gasquet has a wonderful one-handed backhand", cleanedTextContentForClustering: ["Richard Gasquet has a wonderful one-handed backhand"])
         ]
         notes = [
             BeamNote(title: "Tennis"),
