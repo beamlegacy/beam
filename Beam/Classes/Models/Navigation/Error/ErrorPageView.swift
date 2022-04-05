@@ -66,5 +66,8 @@ struct ErrorPageView: View {
             }
             Spacer()
         }
+        .frame(maxWidth: .infinity)
+        .background(BeamColor.Nero.swiftUI)
+        .animation(nil)
     }
 }
