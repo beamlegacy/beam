@@ -34,14 +34,17 @@ struct CircledButton: View {
 
     var body: some View {
         Button(action: action, label: {
-            Image(image)
-                .renderingMode(.template)
-                .foregroundColor(.white)
-                .colorMultiply(isHovering ? style.activeForegroundColor : style.foregroundColor)
-                .padding(3)
-                .overlay(Circle()
-                            .stroke(style.activeBackgroundColor, lineWidth: 1)
-                            .frame(width: 16, height: 16)
+            Circle()
+                .stroke(style.activeBackgroundColor, lineWidth: 1)
+                .frame(width: 16, height: 16)
+                // Not using Circle() as content shape because onHover ignores it, resulting in some hit areas showing
+                // the hover state without being clickable.
+                .contentShape(Rectangle())
+                .overlay(
+                    Image(image)
+                        .renderingMode(.template)
+                        .foregroundColor(.white)
+                        .colorMultiply(isHovering ? style.activeForegroundColor : style.foregroundColor)
                 )
         })
         .buttonStyle(PlainButtonStyle())
