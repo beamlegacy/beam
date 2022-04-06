@@ -10,6 +10,12 @@ build for testing:
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    - key: build-product-$CI_COMMIT_SHA
+      paths:
+          - derived_data/SourcePackages/
+          - derived_data/Build/Products
+      policy: push
   script:
     - time bundle exec fastlane build_for_testing
   after_script:
@@ -124,6 +130,12 @@ UITestThread1:
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    - key: build-product-$CI_COMMIT_SHA
+      paths:
+          - derived_data/SourcePackages/
+          - derived_data/Build/Products
+      policy: pull
   script:
     - time bundle exec fastlane uitestsThread1
   after_script:
@@ -163,6 +175,12 @@ UITestThread2:
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    - key: build-product-$CI_COMMIT_SHA
+      paths:
+          - derived_data/SourcePackages/
+          - derived_data/Build/Products
+      policy: pull
   script:
     - time bundle exec fastlane uitestsThread2
   after_script:
@@ -202,6 +220,12 @@ UITestThread3:
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    - key: build-product-$CI_COMMIT_SHA
+      paths:
+          - derived_data/SourcePackages/
+          - derived_data/Build/Products
+      policy: pull
   script:
     - time bundle exec fastlane uitestsThread3
   after_script:
@@ -241,6 +265,12 @@ UITestThread4:
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    - key: build-product-$CI_COMMIT_SHA
+      paths:
+          - derived_data/SourcePackages/
+          - derived_data/Build/Products
+      policy: pull
   script:
     - time bundle exec fastlane uitestsThread4
   after_script:
@@ -280,6 +310,12 @@ UITestThread5:
     - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
     - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
     - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
+  cache:
+    - key: build-product-$CI_COMMIT_SHA
+      paths:
+          - derived_data/SourcePackages/
+          - derived_data/Build/Products
+      policy: pull
   script:
     - time bundle exec fastlane uitestsThread5
   after_script:

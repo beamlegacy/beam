@@ -9,6 +9,8 @@ build:macos:
   rules:
     - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
       when: never
+    - if: '$CI_PIPELINE_SOURCE == "schedule"'
+      when: never
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH == "master"'
     - if: '$CI_COMMIT_BRANCH == "develop"'
@@ -18,10 +20,13 @@ build:macos:
   script:
     - |-
         time bundle exec fastlane build
-        if [[ ! ${BUILD_DMG_DISABLED} ]] && [[ ${CI_PIPELINE_SOURCE} != "schedule" ]]
+        if [[ ! ${BUILD_DMG_DISABLED} ]]
         then
           bundle exec fastlane notarize_build
           ./scripts/build_dmg.sh
+        fi
+        if [[ ! ${BUILD_ZIP_DISABLED} ]]
+        then
           ./scripts/build_zip.sh
         fi
   tags:
