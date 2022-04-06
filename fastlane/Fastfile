@@ -117,33 +117,7 @@ platform :mac do
         fail_build: true,
         build_for_testing: true,
         derived_data_path: "derived_data",
-        should_zip_build_products: true
       )
-
-      zip(
-        path: "derived_data/SourcePackages",
-        output_path: "sourcepackages.zip",
-        verbose: false
-      )
-
-      files = [
-        "fastlane/test_output/build_products.zip",
-        "sourcepackages.zip"
-      ]
-
-      aws_s3(
-        access_key: ENV["AWS_ACCESS_KEY_ID"],
-        secret_access_key: ENV["AWS_SECRET_ACCESS_KEY"],
-        bucket: s3_bucket_for_channel(publish: false),
-        region: ENV["AWS_DEFAULT_REGION"],
-        upload_metadata: true,
-        files: files,
-        path: s3_path_for_build()
-      )
-
-      lane_context[SharedValues::S3_FILES_OUTPUT_PATHS].each do |file|
-        UI.success "S3: #{file}"
-      end
   end
 
   def generate_allure_report
@@ -175,14 +149,14 @@ platform :mac do
 
     begin
       run_tests(
-      scheme: "Beam",
-      testplan: "BeamTests",
-      workspace: "Beam.xcworkspace",
-      output_files: "tests.xml",
-      use_system_scm: true,
-      result_bundle: true,
-      fail_build: true,
-    )
+        scheme: "Beam",
+        testplan: "BeamTests",
+        workspace: "Beam.xcworkspace",
+        output_files: "tests.xml",
+        use_system_scm: true,
+        result_bundle: true,
+        fail_build: true,
+      )
     ensure
       generate_allure_report
    end
@@ -212,22 +186,6 @@ platform :mac do
         build_configurations: ["Test"]
       )
 
-      Dir.chdir("..") do
-        sh "mkdir -p builds"
-      end
-
-      download_previous_file(filename: "build_products.zip", channel:s3_path_for_build(), publish: false)
-      download_previous_file(filename: "sourcepackages.zip", channel:s3_path_for_build(), publish: false)
-
-      unzip(file: "builds/build_products.zip",destination_path: "build_products")
-      unzip(file: "builds/sourcepackages.zip",destination_path: "sourcepackages")
-
-      Dir.chdir("..") do
-        sh "mkdir -p derived_data/Build/Products"
-        sh "mv build_products/* derived_data/Build/Products"
-        sh "mv sourcepackages/* derived_data"
-      end
-
       begin
         run_tests(
         scheme: "Beam",
@@ -242,6 +200,7 @@ platform :mac do
         test_without_building: true,
         derived_data_path: "derived_data",
         skip_package_dependencies_resolution: true,
+        cloned_source_packages_path: "derived_data/SourcePackages",
         clean: false
       )
       ensure
@@ -249,19 +208,6 @@ platform :mac do
       end
     end
   end
-
-    lane :delete_s3_derived_data do
-      s3 = Aws::S3::Resource.new(region: ENV["AWS_DEFAULT_REGION"],
-                                 credentials: Aws::Credentials.new(ENV["AWS_ACCESS_KEY_ID"],
-                                                                   ENV["AWS_SECRET_ACCESS_KEY"]))
-
-      s3_bucket = s3_bucket_for_channel(publish: false)
-      directory = s3_path_for_build()
-      bucket = s3.bucket(s3_bucket)
-      UI.message "S3: deleting #{s3_bucket}/#{directory}"
-      bucket.objects(prefix: directory).batch_delete!
-      UI.success "S3: Removed #{s3_bucket}/#{directory}"
-    end
 
   def unique_build_number
     UI.message "Get build number for branch #{Actions.git_branch}"
