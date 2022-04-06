@@ -36,12 +36,16 @@ class OnboardingUsernameTestView: BaseView {
     }
     
     func isConnectButtonEnabled() -> Bool {
-        return getConnectButtonElement().isEnabled
+        return waitFor(PredicateFormat.isEnabled.rawValue, getConnectButtonElement())
     }
     
     @discardableResult
     func waitForUsernameViewOpened() -> Bool {
-        return staticText(OnboardingUsernameViewLocators.StaticTexts.usernameViewTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return staticText(OnboardingUsernameViewLocators.TextFields.passwordFieldSignup .accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+    
+    func isCredentialsErrorDisplayed() -> Bool {
+        return staticText(OnboardingUsernameViewLocators.StaticTexts.invalidCredentialsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func isPasswordRequirementsLabelDisplayed() -> Bool {
@@ -52,6 +56,7 @@ class OnboardingUsernameTestView: BaseView {
         return button(OnboardingUsernameViewLocators.Buttons.connectButton.accessibilityIdentifier)
     }
     
+    @discardableResult
     func clickConnectButton() -> OnboardingImportDataTestView {
         getConnectButtonElement().clickOnHittable()
         return OnboardingImportDataTestView()

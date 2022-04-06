@@ -15,10 +15,16 @@ struct OnboardingWelcomeView: View {
     @EnvironmentObject private var onboardingManager: OnboardingManager
     @State private var isLoadingDataStartTime: Date?
 
+    @State private var email: String = ""
+    @State private var isEditingEmail: Bool = false
+    @State private var isCheckingForEmail: Bool = false
+
     private enum SigninError: Error {
         case googleFailed
+        case checkEmailFailed
     }
     @State private var error: SigninError?
+    private let userSessionRequest = UserSessionRequest()
 
     private var secondaryCenteredVariant: ActionableButtonVariant {
         var style = ActionableButtonVariant.secondary.style
@@ -41,12 +47,11 @@ struct OnboardingWelcomeView: View {
                     .transition(.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)))
             } else {
                 VStack(spacing: BeamSpacing._140) {
-                    Image("preferences-about-beam-beta")
-                        .resizable()
+                    AppIcon()
                         .frame(width: 64, height: 64)
                     OnboardingView.TitleText(title: welcoming ? "Welcome to Beam" : "Connect to Beam")
                 }
-                VStack(spacing: BeamSpacing._120) {
+                VStack(spacing: BeamSpacing._200) {
                     GoogleButton(buttonType: .signin, onClick: nil, onConnect: onSigninDone, onDataSync: nil, onFailure: onGoogleSigninError, label: { _ in
                         ActionableButton(text: "Continue with Google", defaultState: .normal, variant: googleVariant, minWidth: 280, height: 34)
                     })
@@ -55,20 +60,74 @@ struct OnboardingWelcomeView: View {
                                 .fixedSize().offset(x: 0, y: -30).transition(.opacity.combined(with: .move(edge: .bottom))),
                              alignment: .top)
                     .animation(BeamAnimation.easeInOut(duration: 0.3), value: error)
-                    ActionableButton(text: "Continue with Email", defaultState: .normal, variant: secondaryCenteredVariant, minWidth: 280, height: 34) {
-                        finish(OnboardingStep(type: .emailConnect))
+                    Text("or")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                    VStack(spacing: 14) {
+                        BeamTextField(text: $email, isEditing: $isEditingEmail, placeholder: "Sign Up/In with email address", font: BeamFont.regular(size: 14).nsFont,
+                                      textColor: BeamColor.Generic.text.nsColor, placeholderColor: BeamColor.Generic.placeholder.nsColor, onCommit: { _ in
+                            checkAccountExistence()
+                        }).accessibilityIdentifier("emailField")
+                            .frame(width: 280, height: 40)
+                            .overlay(checkAccountProgressView, alignment: .trailing)
+                        .overlay(Separator(horizontal: true), alignment: .bottom)
+                        ActionableButton(text: "Continue with Email", defaultState: continueWithEmailButtonEnabled ? .normal : .disabled, variant: secondaryCenteredVariant, minWidth: 280, height: 34) {
+                            self.checkAccountExistence()
+                        }
+                        .opacity(email.isEmpty ? 0.0 : 1.0)
+                        .animation(BeamAnimation.easeInOut(duration: 0.4), value: email.isEmpty)
+                        .accessibilityHidden(email.isEmpty)
+                        .accessibility(identifier: continueWithEmailButtonEnabled ? "continue-with-email" : "continue-with-email-disabled")
+                        .overlay(error != .checkEmailFailed ? nil : Tooltip(title: "Couldn't check email")
+                                    .fixedSize().offset(x: 0, y: -30).transition(.opacity.combined(with: .move(edge: .bottom))),
+                                 alignment: .top)
+                        .animation(BeamAnimation.easeInOut(duration: 0.3), value: error)
                     }
                 }
                 if welcoming {
-                    Separator(horizontal: true)
-                        .padding(.vertical, BeamSpacing._40)
-                    ButtonLabel("Sign up later, alligator!", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
+                    ButtonLabel("Sign Up/In Later", customStyle: .init(font: BeamFont.regular(size: 13).swiftUI, activeBackgroundColor: .clear, disableAnimations: false)) {
                         OnboardingNoteCreator.shared.createOnboardingNotes()
                         finish(nil)
                     }
                 }
             }
         }
+        .onAppear {
+            email = onboardingManager.checkedEmail.email
+        }
+    }
+
+    private var continueWithEmailButtonEnabled: Bool {
+        email.mayBeEmail && !isCheckingForEmail
+    }
+
+    private func checkAccountExistence() {
+        guard !email.isEmpty, email.mayBeEmail else { return }
+        isCheckingForEmail = true
+        _ = try? userSessionRequest.accountExists(email: email) { result in
+            DispatchQueue.main.async {
+                isCheckingForEmail = false
+                switch result {
+                case .success(let response):
+                    onboardingManager.checkedEmail = (email, response.exists)
+                    finish(OnboardingStep(type: .emailConnect))
+                case .failure:
+                    guard error == nil else { return }
+                    error = .checkEmailFailed
+                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
+                        error = nil
+                    }
+                }
+            }
+        }
+    }
+
+    private var checkAccountProgressView: some View {
+        ProgressView()
+            .progressViewStyle(CircularProgressViewStyle(tint: BeamColor.LightStoneGray.swiftUI))
+            .scaleEffect(0.5, anchor: .center)
+            .frame(width: 16, height: 16)
+            .opacity(isCheckingForEmail ? 1.0 : 0.0)
     }
 
     private func onGoogleSigninError() {
