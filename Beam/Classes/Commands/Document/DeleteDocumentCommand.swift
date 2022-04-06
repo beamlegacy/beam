@@ -79,14 +79,12 @@ class DeleteDocument: DocumentCommand {
                 case .failure(let error):
                     Logger.shared.logError("Error while softDeleting \(self.documentIds): \(error)", category: .document)
                     completion?(false)
-                case .success(let res):
-                    if res {
-                        removeNotesFromIndex(self.documentIds)
-                        for note in notes {
-                            note.recursiveChangePropagationEnabled = true
-                        }
+                case .success:
+                    removeNotesFromIndex(self.documentIds)
+                    for note in notes {
+                        note.recursiveChangePropagationEnabled = true
                     }
-                    completion?(res)
+                    completion?(true)
                 }
             }
         }
@@ -122,14 +120,14 @@ class DeleteDocument: DocumentCommand {
             case .failure(let error):
                 Logger.shared.logError("Error while softUndeleting \(ids): \(error)", category: .document)
                 completion?(false)
-            case .success(let done):
+            case .success:
                 for id in ids {
                     guard let note = BeamNote.getFetchedNote(id) else { continue }
                     note.recursiveChangePropagationEnabled = true
                     note.deleted = false
                 }
                 self?.restoreNoteReferences()
-                completion?(done)
+                completion?(true)
             }
         }
     }
