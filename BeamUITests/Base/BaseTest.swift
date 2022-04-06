@@ -19,7 +19,11 @@ class BaseTest: XCTestCase {
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
-    
+    let correctEmail = "qa+autotestsignin@beamapp.co"
+    let incorrectEmail = "qa+autotestsignin@beamappa.co"
+    let correctPassword = "JKRZ6#ykhm_6KR!"
+    let incorrectPassword = "Incorrect1"
+    let username = "AutomationTestSignin"
 
     override func tearDownWithError() throws {
         super.tearDown()
@@ -56,10 +60,11 @@ class BaseTest: XCTestCase {
         return JournalTestView()
     }
     
-    func launchAppWithArgument(_ argument: String) {
+    func launchAppWithArgument(_ argument: String) -> JournalTestView {
         let app = XCUIApplication()
         app.launchArguments = [argument]
         app.launch()
+        return JournalTestView()
     }
     
     @discardableResult
