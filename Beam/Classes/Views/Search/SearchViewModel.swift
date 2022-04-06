@@ -20,18 +20,18 @@ class SearchViewModel: ObservableObject {
             typing = true
         }
     }
-    @Published var foundOccurences: UInt {
+    @Published var foundOccurences: Int {
         didSet {
             typing = false
         }
     }
-    @Published var currentOccurence: UInt {
+    @Published var currentOccurence: Int {
         didSet {
             guard foundOccurences > 0 else { return }
-            if currentOccurence > foundOccurences {
-                currentOccurence = 1
-            } else if currentOccurence <= 0 {
-                currentOccurence = foundOccurences
+            if currentOccurence >= foundOccurences {
+                currentOccurence = 0
+            } else if currentOccurence < 0 {
+                currentOccurence = foundOccurences - 1
             }
         }
     }
@@ -56,12 +56,12 @@ class SearchViewModel: ObservableObject {
 
     private var scope: Set<AnyCancellable>
 
-    init(context: PresentationContext, terms: String = "", found: UInt = 0, onChange: ((String) -> Void)? = nil, onLocationIndicatorTap: ((Double) -> Void)? = nil, next: ((String) -> Void)? = nil, previous: ((String) -> Void)? = nil, done:(() -> Void)? = nil) {
+    init(context: PresentationContext, terms: String = "", found: Int = 0, onChange: ((String) -> Void)? = nil, onLocationIndicatorTap: ((Double) -> Void)? = nil, next: ((String) -> Void)? = nil, previous: ((String) -> Void)? = nil, done:(() -> Void)? = nil) {
         self.context = context
 
         self.searchTerms = terms
         self.foundOccurences = found
-        self.currentOccurence = 1
+        self.currentOccurence = 0
 
         self.findNext = next
         self.findPrevious = previous
