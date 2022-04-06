@@ -12,6 +12,7 @@ import Promises
 class DeleteDocument: DocumentCommand {
     static let name: String = "DeleteDocument"
 
+    private let shouldClearData = true
     private var allDocuments = false
     private var savedReferences: [UUID: Set<UUID>]?
 
@@ -58,7 +59,7 @@ class DeleteDocument: DocumentCommand {
             }
             removeNotesFromIndex(ids)
 
-            context?.softDelete(ids: ids) { _ in
+            context?.softDelete(ids: ids, clearData: shouldClearData) { _ in
                 completion?(true)
             }
         } else {
@@ -73,7 +74,7 @@ class DeleteDocument: DocumentCommand {
                 notes.insert(note)
             }
 
-            context?.softDelete(ids: documentIds) { result in
+            context?.softDelete(ids: documentIds, clearData: shouldClearData) { result in
                 switch result {
                 case .failure(let error):
                     Logger.shared.logError("Error while softDeleting \(self.documentIds): \(error)", category: .document)
@@ -108,11 +109,28 @@ class DeleteDocument: DocumentCommand {
             completion?(false)
             return
         }
-        let promises: [Promises.Promise<Bool>] = documents.compactMap { context?.save($0) }
-        Promises.all(promises).then { [weak self] dones in
-            self?.restoreNoteReferences()
-            let done = dones.reduce(into: false) { $0 = $0 || $1 }
-            completion?(done)
+        var ids: [UUID] = []
+        var restoreData: [UUID: Data] = [:]
+        documents.forEach {
+            ids.append($0.id)
+            if shouldClearData {
+                restoreData[$0.id] = $0.data
+            }
+        }
+        context?.softUndelete(ids: ids, restoreData: restoreData) { [weak self] result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Error while softUndeleting \(ids): \(error)", category: .document)
+                completion?(false)
+            case .success(let done):
+                for id in ids {
+                    guard let note = BeamNote.getFetchedNote(id) else { continue }
+                    note.recursiveChangePropagationEnabled = true
+                    note.deleted = false
+                }
+                self?.restoreNoteReferences()
+                completion?(done)
+            }
         }
     }
 

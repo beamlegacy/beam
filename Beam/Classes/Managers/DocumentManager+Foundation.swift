@@ -425,6 +425,71 @@ extension DocumentManager {
         self.softDelete(ids: [id], completion: completion)
     }
 
+    func softUndelete(ids: [UUID], restoreData: [UUID: Data]? = nil, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        var errors: [Error] = []
+        var goodObjects: [DocumentStruct] = []
+        saveDocumentQueue.async {
+            let documentManager = DocumentManager()
+            for id in ids {
+                guard let document = try? documentManager.fetchWithId(id, includeDeleted: true) else {
+                    errors.append(DocumentManagerError.idNotFound)
+                    continue
+                }
+
+                if let database = try? Database.fetchWithId(documentManager.context, document.database_id) {
+                    database.updated_at = BeamDate.now
+                } else {
+                    // We should always have a connected database
+                    Logger.shared.logError("No connected database", category: .document)
+                }
+
+                var documentStruct = DocumentStruct(document: document)
+                documentStruct.deletedAt = nil
+                document.deleted_at = nil
+                if let data = restoreData?[id] {
+                    documentStruct.data = data
+                    document.data = data
+                }
+                goodObjects.append(documentStruct)
+            }
+
+            do {
+                try documentManager.saveContext()
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .document)
+                completion(.failure(error))
+                return
+            }
+
+            // If not authenticated
+            guard AuthenticationManager.shared.isAuthenticated,
+                  Configuration.networkEnabled else {
+                      completion(.success(false))
+                      return
+                  }
+
+            do {
+                try self.saveOnBeamObjectsAPI(goodObjects) { result in
+                    guard errors.isEmpty else {
+                        completion(.failure(DocumentManagerError.multipleErrors(errors)))
+                        return
+                    }
+
+                    switch result {
+                    case .failure(let error): completion(.failure(error))
+                    case .success: completion(.success(true))
+                    }
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
+    func softUndelete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        self.softUndelete(ids: [id], completion: completion)
+    }
+
     /**
      You should *not* use this unless you know what you're doing, deleting objects prevent the deletion to be propagated
      to other devices through the API. Use `softDelete` instead.

@@ -10,6 +10,7 @@ import BeamCore
 import Promises
 
 protocol AllNotesPageContextualMenuDelegate: AnyObject {
+    func contextualMenuWillUndoRedDeleteDocuments()
     func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool)
 }
 
@@ -239,12 +240,38 @@ class AllNotesPageContextualMenu {
     }
 
     private func registerUndo(redo: Bool = false, actionName: String) {
+        guard let undoManager = undoManager else {
+            return
+        }
+        AllNotesMenuUndoRegisterer(undoManager: undoManager, cmdManager: cmdManager, menuDelegate: delegate)
+            .registerUndo(redo: redo, actionName: actionName)
+    }
+}
+
+/// Using a separate struct that can be kept in memory by the UndoManager instead of the whole ContextualMenu class
+private class AllNotesMenuUndoRegisterer {
+    let undoManager: UndoManager?
+    let cmdManager: CommandManagerAsync<DocumentManager>
+    weak var menuDelegate: AllNotesPageContextualMenuDelegate?
+
+    init(undoManager: UndoManager,
+         cmdManager: CommandManagerAsync<DocumentManager>,
+         menuDelegate: AllNotesPageContextualMenuDelegate?) {
+        self.undoManager = undoManager
+        self.cmdManager = cmdManager
+        self.menuDelegate = menuDelegate
+    }
+
+    func registerUndo(redo: Bool = false, actionName: String) {
         undoManager?.registerUndo(withTarget: self, handler: { _ in
             self.registerUndo(redo: !redo, actionName: actionName)
+            let completion: (Bool) -> Void = { _ in
+                self.menuDelegate?.contextualMenuWillUndoRedDeleteDocuments()
+            }
             if redo {
-                self.cmdManager.redoAsync(context: DocumentManager()) { _ in }
+                self.cmdManager.redoAsync(context: DocumentManager(), completion: completion)
             } else {
-                self.cmdManager.undoAsync(context: DocumentManager()) { _ in }
+                self.cmdManager.undoAsync(context: DocumentManager(), completion: completion)
             }
         })
         undoManager?.setActionName(actionName)
