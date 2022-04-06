@@ -94,24 +94,6 @@ build:cleanup:
   retry:
     max: 2
 
-build:cleanup:derived_data:
-  timeout: 10 minutes
-  dependencies: []
-  stage: deploy
-  rules:
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
-    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  script:
-    - bundle exec fastlane delete_s3_derived_data
-  tags:
-    - macos-mono
-  interruptible: true
-  allow_failure: true
-
 cherry_pick_to_develop:
   timeout: 2 minutes
   image: registry.gitlab.com/beamgroup/beam/curl-jq
