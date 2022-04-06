@@ -599,6 +599,8 @@
 		8AA2431826E63C0D002A553A /* HtmlVisitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2431726E63C0D002A553A /* HtmlVisitor.swift */; };
 		8AA2BC59270339DD00B99B71 /* ScrollCaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA2BC58270339DD00B99B71 /* ScrollCaptureView.swift */; };
 		8AA5F0C627ABE53100D25A13 /* GoogleSheetsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA5F0C527ABE53100D25A13 /* GoogleSheetsTests.swift */; };
+		8AA6D91D27FAF9AB00F42FAB /* BrowserOpenModalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6D91C27FAF9AB00F42FAB /* BrowserOpenModalTests.swift */; };
+		8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6D92327FB4E3400F42FAB /* UITestPageBrowserWindow.swift */; };
 		8AA9EEB72678ACF6009D6B31 /* WebAutocompleteContextTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */; };
 		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
 		8AB7DFA526AAEDB30033C747 /* PointAndShootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB7DFA426AAEDB30033C747 /* PointAndShootView.swift */; };
@@ -2265,6 +2267,8 @@
 		8AA2431726E63C0D002A553A /* HtmlVisitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HtmlVisitor.swift; sourceTree = "<group>"; };
 		8AA2BC58270339DD00B99B71 /* ScrollCaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScrollCaptureView.swift; sourceTree = "<group>"; };
 		8AA5F0C527ABE53100D25A13 /* GoogleSheetsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleSheetsTests.swift; sourceTree = "<group>"; };
+		8AA6D91C27FAF9AB00F42FAB /* BrowserOpenModalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserOpenModalTests.swift; sourceTree = "<group>"; };
+		8AA6D92327FB4E3400F42FAB /* UITestPageBrowserWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestPageBrowserWindow.swift; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebAutocompleteContextTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteContextTest.swift; sourceTree = "<group>"; };
 		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
 		8AB7DFA426AAEDB30033C747 /* PointAndShootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootView.swift; sourceTree = "<group>"; };
@@ -6805,6 +6809,7 @@
 				B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */,
 				375D83CA278D6AE70064C246 /* BrowserStatusBarTests.swift */,
 				D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */,
+				8AA6D91C27FAF9AB00F42FAB /* BrowserOpenModalTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -7053,6 +7058,7 @@
 			children = (
 				B5C71D522716F4280028D495 /* UITestPagePasswordManager.swift */,
 				A3E7B4BA27AC1A0C0074C9BB /* MockHTTPWebPages.swift */,
+				8AA6D92327FB4E3400F42FAB /* UITestPageBrowserWindow.swift */,
 			);
 			path = UITestWebMockPages;
 			sourceTree = "<group>";
@@ -8989,6 +8995,7 @@
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
 				B551F3C726BD10C300B72D27 /* AppWebsiteViewLocators.swift in Sources */,
 				B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */,
+				8AA6D91D27FAF9AB00F42FAB /* BrowserOpenModalTests.swift in Sources */,
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				A3E7B4BB27AC1A0C0074C9BB /* MockHTTPWebPages.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
@@ -9046,6 +9053,7 @@
 				B557155726FA257700F6C9D4 /* UpdateTestView.swift in Sources */,
 				B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */,
 				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
+				8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* CardEditTests.swift in Sources */,
 				B5BA078626AF3B4400D31FED /* CardViewLocators.swift in Sources */,
 				B57A9B3126AB06AD002C954D /* BaseTest.swift in Sources */,

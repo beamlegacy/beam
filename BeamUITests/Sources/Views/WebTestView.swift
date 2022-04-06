@@ -140,6 +140,10 @@ class WebTestView: BaseView {
         }
         return app.groups.matching(tabPredicate)
     }
+
+    func getNumberOfWindows() -> Int {
+        self.app.windows.count
+    }
     
     @discardableResult
     func closeTab() -> WebTestView {
