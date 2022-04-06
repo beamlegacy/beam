@@ -47,14 +47,20 @@ struct SearchInContentView: View {
         switch viewModel.context {
         case .card:
             return "Find on \(state.currentNote?.title ?? "Note")"
+
         case .web:
-            return "Find on \(state.browserTabsManager.currentTab?.title ?? "Page")"
+            if let title = state.browserTabsManager.currentTab?.title,
+               !title.isEmpty {
+                return "Find on \(title)"
+            } else {
+                return "Find on Page"
+            }
         }
     }
 
     private var results: String {
         if viewModel.foundOccurences > 0 && !viewModel.incompleteSearch {
-            return "\(viewModel.currentOccurence)/\(viewModel.foundOccurences)"
+            return "\(viewModel.currentOccurence + 1)/\(viewModel.foundOccurences)"
         } else if viewModel.incompleteSearch {
             return "More than \(viewModel.foundOccurences)"
         } else {

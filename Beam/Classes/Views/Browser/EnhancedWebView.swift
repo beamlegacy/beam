@@ -30,6 +30,7 @@ struct EnhancedWebView: View {
                     case let pdfContentDescription as PDFContentDescription:
                         PDFContentView(
                             contentState: pdfContentDescription.contentState,
+                            searchState: tab.searchViewModel,
                             onClickLink: { url in
                                 tab.load(url: url)
                             }

@@ -8,8 +8,18 @@ final class PDFDocumentViewCoordinator: NSObject {
     private var pdfDocument: PDFDocument?
     private var nsView: CustomPDFView?
     private var swiftUIView: PDFDocumentView?
-    private var cancellables = Set<AnyCancellable>()
+    private var findString = PassthroughSubject<String?, Never>()
+    private var findMatches = [PDFSelection]()
+    private var findMatchIndex = PassthroughSubject<Int, Never>()
+    private var miscCancellables = Set<AnyCancellable>()
+    private var pdfNotificationCancellables = Set<AnyCancellable>()
     private let notificationCenter = NotificationCenter.default
+
+    override init() {
+        super.init()
+
+        observeFindSubjects()
+    }
 
     func setNSView(_ nsView: CustomPDFView) {
         self.nsView = nsView
@@ -52,11 +62,15 @@ final class PDFDocumentViewCoordinator: NSObject {
 
         observeNSView()
         observeScrollView()
+        observePDFDocument()
     }
 
     /// Synchronizes `PDFView` state with the SwiftUI view's bindings.
     private func update() {
         updateDisplay()
+
+        updateFindString()
+        updateFindMatch()
     }
 
     private func updateDisplay() {
@@ -135,20 +149,34 @@ final class PDFDocumentViewCoordinator: NSObject {
             .sink { [weak self] _ in
                 self?.updateScaleBindingsFromNSViewState()
             }
-            .store(in: &cancellables)
+            .store(in: &miscCancellables)
 
         notificationCenter.publisher(for: .PDFViewDisplayModeChanged, object: nsView)
             .sink { [weak self] _ in
                 self?.updateDisplayModeBindingFromNSViewState()
             }
-            .store(in: &cancellables)
+            .store(in: &miscCancellables)
 
         // Paginating the document with keys can update the pagination
         notificationCenter.publisher(for: .PDFViewPageChanged, object: nsView)
             .sink { [weak self] _ in
                 self?.updateDestinationBindingFromNSViewState()
             }
-            .store(in: &cancellables)
+            .store(in: &miscCancellables)
+
+        notificationCenter.publisher(for: .PDFViewSelectionChanged, object: nsView)
+            .debounce(for: .milliseconds(200), scheduler: DispatchQueue.main)
+            .compactMap { note in
+                note.object as? PDFView
+            }
+            .compactMap { pdfView in
+                pdfView.currentSelection?.string
+            }
+            .removeDuplicates()
+            .sink { [weak self] selection in
+                self?.swiftUIView?.onSelectionChanged?(selection)
+            }
+            .store(in: &miscCancellables)
     }
 
     private func observeScrollView() {
@@ -162,7 +190,7 @@ final class PDFDocumentViewCoordinator: NSObject {
             .sink { [weak self] _ in
                 self?.updateDestinationBindingFromNSViewState()
             }
-            .store(in: &cancellables)
+            .store(in: &miscCancellables)
 
         // In order to get up-to-date scale values during pinch gestures, assume such gestures trigger bounds changes
         notificationCenter.publisher(for: NSView.boundsDidChangeNotification, object: scrollContentView)
@@ -174,7 +202,123 @@ final class PDFDocumentViewCoordinator: NSObject {
             .sink { [weak self] _ in
                 self?.updateScaleBindingsFromNSViewState()
             }
-            .store(in: &cancellables)
+            .store(in: &miscCancellables)
+    }
+
+    // MARK: - Search
+
+    private func updateFindString() {
+        guard let string = swiftUIView?.findString else { return }
+        findString.send(string)
+    }
+
+    private func updateFindMatch() {
+        guard let index = swiftUIView?.findMatchIndex?.wrappedValue else { return }
+        findMatchIndex.send(index)
+    }
+
+    private func clearFindMatches() {
+        findMatches = []
+        findMatchIndex.send(0)
+
+        nsView?.highlightedSelections = []
+        nsView?.currentSelection = nil
+    }
+
+    private func beginFindString(_ string: String) {
+        pdfDocument?.beginFindString(string, withOptions: .caseInsensitive)
+    }
+
+    private func highlightFindMatches() {
+        nsView?.highlightedSelections = []
+
+        findMatches.forEach { selection in
+            selection.color = NSColor.systemYellow
+        }
+        nsView?.highlightedSelections = findMatches
+    }
+
+    private func selectFirstFindMatch() {
+        guard !findMatches.isEmpty else { return }
+        selectFindMatch(at: 0)
+    }
+
+    private func selectFindMatch(at index: Int) {
+        if !findMatches.isEmpty {
+            let selection = findMatches[index]
+            nsView?.setCurrentSelection(selection, animate: true)
+            nsView?.scrollSelectionToVisible(nil)
+        }
+
+        DispatchQueue.main.async { [weak self] in
+            self?.swiftUIView?.findMatchIndex?.wrappedValue = index
+        }
+    }
+
+    private func observeFindSubjects() {
+        findString
+            .removeDuplicates()
+            .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
+            .sink { [weak self] string in
+                self?.clearFindMatches()
+
+                if let string = string, !string.isEmpty {
+                    self?.beginFindString(string)
+                } else {
+                    self?.swiftUIView?.onFindMatches?([])
+                    self?.swiftUIView?.onSelectionChanged?(nil)
+                }
+            }
+            .store(in: &miscCancellables)
+
+        findMatchIndex
+            .removeDuplicates()
+            .map { [weak self] index -> Int in
+                guard
+                    let matchCount = self?.findMatches.count,
+                    matchCount > 0
+                else {
+                    return 0
+                }
+
+                if index >= matchCount {
+                    return 0
+                }
+
+                if index < 0 {
+                    return matchCount - 1
+                }
+
+                return index
+            }
+            .sink { [weak self] index in
+                self?.selectFindMatch(at: index)
+            }
+            .store(in: &miscCancellables)
+    }
+
+    private func observePDFDocument() {
+        pdfNotificationCancellables = []
+
+        notificationCenter.publisher(for: .PDFDocumentDidFindMatch, object: pdfDocument)
+            .compactMap { note in
+                note.userInfo?["PDFDocumentFoundSelection"] as? PDFSelection
+            }
+            .sink { [weak self] selection in
+                self?.findMatches.append(selection)
+            }
+            .store(in: &pdfNotificationCancellables)
+
+        notificationCenter.publisher(for: .PDFDocumentDidEndFind, object: pdfDocument)
+            .sink { [weak self] _ in
+                self?.highlightFindMatches()
+                self?.selectFirstFindMatch()
+
+                if let selections = self?.findMatches {
+                    self?.swiftUIView?.onFindMatches?(selections)
+                }
+            }
+            .store(in: &pdfNotificationCancellables)
     }
 
 }
