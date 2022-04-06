@@ -11,11 +11,13 @@ import WebKit
 
 class WebKitNavigationHandler: NSObject, WKNavigationDelegate {
     /// The target WebPage. Used as a target for where new Tabs will be created
-    weak var page: WebPage?
-
-    fileprivate var webViewController: WebViewNavigationHandler? {
-        page?.webViewNavigationHandler
+    weak var page: WebPage? {
+        didSet {
+            webViewController = page?.webViewNavigationHandler
+        }
     }
+
+    weak var webViewController: WebViewNavigationHandler?
 }
 
 // MARK: - Allowing or Denying Navigation Requests
@@ -58,12 +60,8 @@ extension WebKitNavigationHandler {
         }
 
         // Handle opening the targetURL in a newTab if all conditions are met
-        if let page = page, let targetURL = navigationAction.request.url,
-           navigationAction.navigationType == .linkActivated,
-           isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) {
-            _ = page.createNewTab(targetURL, nil, setCurrent: !isNavigationWithCommandKey(navigationAction))
+        if openNewTab(navigationAction) {
             decisionHandler(.cancel, preferences)
-            return
         }
 
         decisionHandler(.allow, preferences)
@@ -129,8 +127,10 @@ extension WebKitNavigationHandler {
     /// Asks the delegate to respond to an authentication challenge.
     func webView(_ webView: WKWebView, didReceive challenge: URLAuthenticationChallenge, completionHandler: @escaping (URLSession.AuthChallengeDisposition, URLCredential?) -> Void) {
         let authenticationMethod = challenge.protectionSpace.authenticationMethod
-        if authenticationMethod == NSURLAuthenticationMethodDefault || authenticationMethod == NSURLAuthenticationMethodHTTPBasic || authenticationMethod == NSURLAuthenticationMethodHTTPDigest {
-
+        switch authenticationMethod {
+        case NSURLAuthenticationMethodDefault,
+            NSURLAuthenticationMethodHTTPBasic,
+            NSURLAuthenticationMethodHTTPDigest:
             let viewModel  = AuthenticationViewModel(challenge: challenge, onValidate: { [weak self] username, password, savePassword in
                 NSApp.mainWindow?.makeFirstResponder(nil)
                 let credential = URLCredential(user: username, password: password, persistence: .forSession)
@@ -159,10 +159,10 @@ extension WebKitNavigationHandler {
             } else {
                 self.page?.authenticationViewModel = viewModel
             }
-        } else if authenticationMethod == NSURLAuthenticationMethodServerTrust {
+        case NSURLAuthenticationMethodServerTrust:
             let cred = URLCredential(trust: challenge.protectionSpace.serverTrust!)
             completionHandler(.useCredential, cred)
-        } else {
+        default:
             completionHandler(.performDefaultHandling, nil)
         }
     }
@@ -239,4 +239,17 @@ extension WebKitNavigationHandler {
         return action.modifierFlags.contains(.command) || NSEvent.modifierFlags.contains(.command)
     }
 
+    /// Handles opening the page in a new tab
+    /// - Parameter navigationAction: The NavigationAction to decide if a new tab should be opened
+    /// - Returns: True if a new tab is created, false if not
+    func openNewTab(_ navigationAction: WKNavigationAction) -> Bool {
+        if let page = page, let targetURL = navigationAction.request.url,
+           navigationAction.navigationType == .linkActivated,
+           isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) {
+            _ = page.createNewTab(targetURL, nil, setCurrent: !isNavigationWithCommandKey(navigationAction))
+            return true
+        } else {
+            return false
+        }
+    }
 }
