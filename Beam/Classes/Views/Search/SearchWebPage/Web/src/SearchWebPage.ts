@@ -247,7 +247,7 @@ export class SearchWebPage<UI extends SearchWebPageUI> {
 
       activeHighlight.classList.add(this.constants.HIGHLIGHT_CLASS_NAME, this.constants.HIGHLIGHT_CLASS_NAME_ACTIVE)
 
-      this.ui.webPageSearch({ currentResult: this.activeHighlightIndex + 1, currentSelected: selected, height: this.height })
+      this.ui.webPageSearch({ currentResult: this.activeHighlightIndex, currentSelected: selected, height: this.height })
     } else {
       this.ui.webPageSearch({ currentResult: 0 })
     }
