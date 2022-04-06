@@ -149,12 +149,7 @@ extension Collapsable where Self: ElementNode {
     }
 
     func setLottieViewColor(color: NSColor) {
-        NSAppearance.withAppAppearance {
-            guard let color = color.usingColorSpace(NSScreen.main?.colorSpace ?? .sRGB) else { return }
-            let colorProvider = ColorValueProvider(Color(r: color.redComponent, g: color.greenComponent, b: color.blueComponent, a: 1))
-            let fillKeypath = AnimationKeypath(keypath: "**.Fill 1.Color")
-            lottieView?.setValueProvider(colorProvider, keypath: fillKeypath)
-        }
+        lottieView?.setColor(color)
     }
 
     private func buildCollapseExpandTextLayer(color: BeamColor) -> CATextLayer {
