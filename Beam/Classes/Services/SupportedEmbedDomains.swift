@@ -90,11 +90,10 @@ class SupportedEmbedDomains {
     }
 
     private func moreThanADayAgo(since date: Date) -> Bool {
-        let minute: Double = 60.0
-        let hour: Double = 60.0 * minute
-        let day: Double = 24 * hour
-
-        return DateInterval(start: date, end: BeamDate.now) > DateInterval(start: BeamDate.now, duration: day)
+        let calendar = Calendar.current
+        let components = calendar.dateComponents([.day], from: date, to: BeamDate.now)
+        guard let days = components.day else { return false }
+        return days >= 1
     }
 
     // MARK: -
