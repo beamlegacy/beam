@@ -45,6 +45,8 @@ final class PDFContentState: ObservableObject {
         pdfDocument != nil
     }
 
+    private(set) var currentSelection: String?
+
     private let filename: String
 
     private var scaleFactorIncrementor: Incrementor<CGFloat>
@@ -90,6 +92,10 @@ final class PDFContentState: ObservableObject {
         }
 
         pdfDocument?.write(to: saveLocationURL)
+    }
+
+    func setCurrentSelection(_ selection: String?) {
+        currentSelection = selection
     }
 
     private func destinationDirectoryURL() -> URL? {

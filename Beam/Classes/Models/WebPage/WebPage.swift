@@ -180,8 +180,27 @@ extension WebPage {
                 self.executeJS("getSelection()", objectName: "SearchWebPage")
             }
 
-        default:
-            searchViewModel = nil
+        case .pdf:
+            searchViewModel = SearchViewModel(
+                context: .web,
+                onLocationIndicatorTap: { _ in },
+                next: { [weak self] _ in
+                    self?.searchViewModel?.currentOccurence += 1
+                },
+                previous: { [weak self] _ in
+                    self?.searchViewModel?.currentOccurence -= 1
+                },
+                done: { [weak self] in
+                    self?.searchViewModel?.searchTerms = ""
+                    self?.searchViewModel = nil
+                }
+            )
+
+            if fromSelection,
+               let pdfContentDescription = contentDescription as? PDFContentDescription,
+               let selection = pdfContentDescription.contentState.currentSelection {
+                searchViewModel?.searchTerms = selection
+            }
         }
     }
 
@@ -191,8 +210,9 @@ extension WebPage {
         NSApp.mainWindow?.makeFirstResponder(webView)
     }
 
-    func find(_ search: String, using function: String) {
+    private func find(_ search: String, using function: String) {
         let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
         self.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
     }
+
 }
