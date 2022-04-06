@@ -10,6 +10,14 @@ import XCTest
 
 class OnboardingLandingTestView: BaseView {
     
+    func getConnectWithEmailButton() -> XCUIElement {
+        return button(OnboardingLandingViewLocators.Buttons.continueWithEmailButton.accessibilityIdentifier)
+    }
+    
+    func getEmailTextField() -> XCUIElement {
+        return textField(OnboardingLandingViewLocators.TextFields.emailTextField.accessibilityIdentifier)
+    }
+    
     func getPrivacyPolicyWindow() -> XCUIElement {
         return app.windows[OnboardingLandingViewLocators.Buttons.privacyPolicyButton.accessibilityIdentifier]
     }
@@ -82,7 +90,11 @@ class OnboardingLandingTestView: BaseView {
     
     @discardableResult
     func clickContinueWithEmailButton() -> OnboardingUsernameTestView {
-        button(OnboardingLandingViewLocators.Buttons.continueWithEmailButton.accessibilityIdentifier).clickOnExistence()
+        getConnectWithEmailButton().clickOnHittable()
         return OnboardingUsernameTestView()
+    }
+    
+    func isContinueWithEmailButtonActivated() -> Bool {
+        return waitFor(PredicateFormat.isHittable.rawValue, getConnectWithEmailButton(), minimumWaitTimeout)  
     }
 }

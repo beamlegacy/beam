@@ -19,6 +19,7 @@ enum OnboardingUsernameViewLocators {
     enum StaticTexts: String, CaseIterable, UIElement {
         case usernameViewTitle = "Connect with Email"
         case passwordRequirementsLabel = "Use at least 8 characters, 1 symbol and 1 number"
+        case invalidCredentialsLabel = "You have entered invalid credentials"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
@@ -26,5 +27,6 @@ enum OnboardingUsernameViewLocators {
         case emailFieldEditing = "emailField-editing"
         case passwordField = "passwordField"
         case passwordFieldEditing = "passwordField-editing"
+        case passwordFieldSignup = "Password"
     }
 }
