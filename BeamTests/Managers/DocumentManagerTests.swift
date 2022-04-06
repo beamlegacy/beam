@@ -491,6 +491,43 @@ class DocumentManagerTests: QuickSpec {
             }
         }
 
+        describe(".softUndelete(ids:)") {
+            context("with Foundation") {
+                it("brings back soft-deleted documents") {
+                    var docStruct = helper.createDocumentStruct()
+                    docStruct = helper.saveLocally(docStruct)
+
+                    var docStruct2 = helper.createDocumentStruct()
+                    docStruct2 = helper.saveLocally(docStruct2)
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.softDelete(ids: [docStruct.id, docStruct2.id], clearData: false) { _ in
+                            done()
+                        }
+                    }
+
+                    var document = try? sut.fetchWithId(docStruct.id, includeDeleted: true)
+                    expect(document?.deleted_at).toNot(beNil())
+
+                    waitUntil(timeout: .seconds(10)) { done in
+                        sut.softUndelete(ids: [docStruct.id, docStruct2.id]) { _ in
+                            done()
+                        }
+                    }
+
+                    var count = sut.count(filters: [.id(docStruct.id)])
+                    expect(count).to(equal(1))
+                    count = sut.count(filters: [.id(docStruct2.id)])
+                    expect(count).to(equal(1))
+
+                    document = try? sut.fetchWithId(docStruct.id, includeDeleted: false)
+                    expect(document?.deleted_at).to(beNil())
+
+                    document = try? sut.fetchWithId(docStruct2.id, includeDeleted: false)
+                    expect(document?.deleted_at).to(beNil())
+                }
+            }
+        }
+
         describe(".create()") {
             it("creates document") {
                 let title = String.randomTitle()
