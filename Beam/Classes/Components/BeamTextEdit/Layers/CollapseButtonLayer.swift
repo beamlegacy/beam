@@ -95,7 +95,7 @@ final class CollapseButtonLayer: ButtonLayer {
 
         let beamColor = state.beamColor
         textLayer.foregroundColor = beamColor.cgColor
-        setSymbolColor(beamColor)
+        symbolAnimationView.setColor(beamColor)
     }
 
     private func prepareLayers() {
@@ -139,18 +139,6 @@ final class CollapseButtonLayer: ButtonLayer {
     private func makeSymbolAnimationView() -> AnimationView {
         let animationName = isCollapsed ? "editor-embed_expand" : "editor-embed_collapse"
         return AnimationView(name: animationName)
-    }
-
-    private func setSymbolColor(_ beamColor: BeamColor) {
-        NSAppearance.withAppAppearance {
-            guard let nsColor = beamColor.nsColor.usingColorSpace(NSScreen.main?.colorSpace ?? .sRGB) else { return }
-
-            let lottieColor = Color(r: nsColor.redComponent, g: nsColor.greenComponent, b: nsColor.blueComponent, a: 1)
-            let colorProvider = ColorValueProvider(lottieColor)
-            let fillKeypath = AnimationKeypath(keypath: "**.Fill 1.Color")
-
-            symbolAnimationView.setValueProvider(colorProvider, keypath: fillKeypath)
-        }
     }
 
     private func preferredFrameSize() -> CGSize {
