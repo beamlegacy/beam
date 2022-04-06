@@ -207,8 +207,7 @@ struct OnboardingView: View {
 
         var body: some View {
             VStack(spacing: BeamSpacing._140) {
-                Image("preferences-about-beam-beta")
-                    .resizable()
+                AppIcon()
                     .frame(width: 64, height: 64)
                 VStack(spacing: BeamSpacing._100) {
                     Text(message)

@@ -1143,6 +1143,9 @@
 		B5984C9227031D7A00192B5F /* SignUpAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9127031D7A00192B5F /* SignUpAutocompleteTests.swift */; };
 		B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9927031F3B00192B5F /* AutoFillPasswordsTestView.swift */; };
 		B5984C9D27031F7E00192B5F /* AutofillPasswordViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5984C9C27031F7E00192B5F /* AutofillPasswordViewLocators.swift */; };
+		B5A76EB227FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A76EB127FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift */; };
+		B5A76EB927FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A76EB827FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift */; };
+		B5A76EBB27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5A76EBA27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift */; };
 		B5AD2A812760A76700A6A3C5 /* DatePickerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5AD2A802760A76700A6A3C5 /* DatePickerViewLocators.swift */; };
 		B5BA077D26AF3AE400D31FED /* CardTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA077C26AF3AE400D31FED /* CardTestView.swift */; };
 		B5BA078626AF3B4400D31FED /* CardViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5BA078526AF3B4400D31FED /* CardViewLocators.swift */; };
@@ -2869,6 +2872,9 @@
 		B5984C9127031D7A00192B5F /* SignUpAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpAutocompleteTests.swift; sourceTree = "<group>"; };
 		B5984C9927031F3B00192B5F /* AutoFillPasswordsTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillPasswordsTestView.swift; sourceTree = "<group>"; };
 		B5984C9C27031F7E00192B5F /* AutofillPasswordViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutofillPasswordViewLocators.swift; sourceTree = "<group>"; };
+		B5A76EB127FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSignupWithEmailTestView.swift; sourceTree = "<group>"; };
+		B5A76EB827FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingSignupWithEmailViewLocators.swift; sourceTree = "<group>"; };
+		B5A76EBA27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingAccountConfirmationTestView.swift; sourceTree = "<group>"; };
 		B5AD2A802760A76700A6A3C5 /* DatePickerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DatePickerViewLocators.swift; sourceTree = "<group>"; };
 		B5BA077C26AF3AE400D31FED /* CardTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardTestView.swift; sourceTree = "<group>"; };
 		B5BA078526AF3B4400D31FED /* CardViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CardViewLocators.swift; sourceTree = "<group>"; };
@@ -7065,6 +7071,8 @@
 				B5CDFF2E274E3FD600742CC9 /* OnboardingLandingTestView.swift */,
 				B5CDFF39274EC83800742CC9 /* OnboardingUsernameTestView.swift */,
 				B5FB3A2127E8D30C00037FD5 /* OnboardingImportDataTestView.swift */,
+				B5A76EB127FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift */,
+				B5A76EBA27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -7075,6 +7083,7 @@
 				B5CDFF30274E400F00742CC9 /* OnboardingLandingViewLocators.swift */,
 				B5CDFF3C274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift */,
 				B5FB3A1F27E8C32800037FD5 /* OnboardingImportDataViewLocators.swift */,
+				B5A76EB827FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift */,
 			);
 			path = Onboarding;
 			sourceTree = "<group>";
@@ -8946,6 +8955,7 @@
 				A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */,
 				B58A175027514E0100A588C4 /* CardViewEmbedsTests.swift in Sources */,
 				B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */,
+				B5A76EB927FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift in Sources */,
 				B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */,
 				B575361126C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift in Sources */,
 				B5625CB6271480490074A080 /* BrowserShortcutsTests.swift in Sources */,
@@ -8970,6 +8980,7 @@
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */,
 				B557155A26FA259000F6C9D4 /* UpdateViewLocators.swift in Sources */,
+				B5A76EB227FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift in Sources */,
 				A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */,
 				B5FAE2DB270C842700EAC8A3 /* CardPublishTests.swift in Sources */,
 				B5FAE300270ED94300EAC8A3 /* GeneralPreferenceTestView.swift in Sources */,
@@ -9008,6 +9019,7 @@
 				B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */,
 				B57535F026BD5F690053CE2D /* NoteEditorTests.swift in Sources */,
 				B5CDFF2F274E3FD600742CC9 /* OnboardingLandingTestView.swift in Sources */,
+				B5A76EBB27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift in Sources */,
 				A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */,
 				B5CDFF2D274E390500742CC9 /* OnboardingTests.swift in Sources */,
 				B5CDFF3A274EC83800742CC9 /* OnboardingUsernameTestView.swift in Sources */,
