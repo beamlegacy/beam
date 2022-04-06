@@ -31,7 +31,6 @@ class TransientWebViewWindow: NSWindow, NSWindowDelegate {
             defer: false
         )
         title = "Beam"
-
         self.setFrameAutosaveName("BeamTransientWebViewWindow")
         self.isReleasedWhenClosed = false
         self.contentView = self.controller.wv
@@ -82,6 +81,7 @@ private class TransientWebViewController: WebViewController {
         super.init(with: webView)
         uiDelegateController.page = originPage
         webkitNavigationHandler.page = originPage
+        webkitNavigationHandler.webViewController = self // <- this here
         webView.uiDelegate = uiDelegateController
     }
 
