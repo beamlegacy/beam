@@ -31,74 +31,108 @@ struct LottieView: NSViewRepresentable {
 
     var animationSize: CGSize?
 
-    public func makeCoordinator() -> Coordinator {
-        return Coordinator()
+    func makeNSView(context: NSViewRepresentableContext<LottieView>) -> AnimationContainerView {
+        AnimationContainerView(animationSize: animationSize)
     }
 
-    func makeNSView(context: NSViewRepresentableContext<LottieView>) -> NSView {
-        let view = NSView(frame: .zero)
-        context.coordinator.animationName = name
-        let animationView = AnimationView()
-        let animation = Animation.named(name)
-        animationView.animation = animation
-        animationView.contentMode = .scaleAspectFit
-        animationView.loopMode = loopMode
-        animationView.animationSpeed = speed
+    func updateNSView(_ animationContainerView: AnimationContainerView, context: NSViewRepresentableContext<LottieView>) {
+        animationContainerView.animationName = name
+        animationContainerView.color = color
+        animationContainerView.isPlaying = playing
+        animationContainerView.speed = speed
+        animationContainerView.loopMode = loopMode
+    }
 
-        if playing {
-            animationView.play()
-        }
-        if let color = color {
-            setColorForAllAnimationView(animationView: animationView, color: color)
-            context.coordinator.color = color
-        }
-        animationView.translatesAutoresizingMaskIntoConstraints = false
-        view.addSubview(animationView)
-        NSLayoutConstraint.activate([
-            animationView.heightAnchor.constraint(equalTo: view.heightAnchor),
-            animationView.widthAnchor.constraint(equalTo: view.widthAnchor)
-        ])
+    final class AnimationContainerView: NSView {
 
-        if let animationSize = animationSize {
+        var animationName: String? {
+            didSet {
+                guard
+                    animationName != oldValue,
+                    let animationName = animationName
+                else {
+                    return
+                }
+
+                animationView.animation = Animation.named(animationName)
+            }
+        }
+
+        var color: NSColor? {
+            didSet {
+                guard
+                    color != oldValue,
+                    let color = color else {
+                    return
+                }
+
+                animationView.setColor(color)
+            }
+        }
+
+        var isPlaying = false {
+            didSet {
+                guard isPlaying != oldValue else { return }
+
+                if isPlaying {
+                    animationView.play()
+                } else {
+                    animationView.stop()
+                }
+            }
+        }
+
+        var speed: CGFloat = 1 {
+            didSet {
+                guard speed != oldValue else { return }
+                animationView.animationSpeed = speed
+            }
+        }
+
+        var loopMode: LottieLoopMode = .loop {
+            didSet {
+                guard loopMode != oldValue else { return }
+                animationView.loopMode = loopMode
+            }
+        }
+
+        private let animationView: AnimationView
+
+        init(animationSize: CGSize?) {
+            animationView = AnimationView()
+            animationView.contentMode = .scaleAspectFit
+
+            super.init(frame: .zero)
+
+            addSubview(animationView)
+
+            animationView.translatesAutoresizingMaskIntoConstraints = false
+
             NSLayoutConstraint.activate([
-                view.heightAnchor.constraint(equalToConstant: animationSize.height),
-                view.widthAnchor.constraint(equalToConstant: animationSize.width)
+                animationView.widthAnchor.constraint(equalTo: widthAnchor),
+                animationView.heightAnchor.constraint(equalTo: heightAnchor)
             ])
+
+            if let animationSize = animationSize {
+                NSLayoutConstraint.activate([
+                    widthAnchor.constraint(equalToConstant: animationSize.width),
+                    heightAnchor.constraint(equalToConstant: animationSize.height)
+                ])
+            }
         }
-        return view
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        override func viewDidChangeEffectiveAppearance() {
+            super.viewDidChangeEffectiveAppearance()
+
+            if let color = color {
+                animationView.setColor(color)
+            }
+        }
+
     }
 
-    func updateNSView(_ nsView: NSView, context: NSViewRepresentableContext<LottieView>) {
-        guard let animationView = nsView.subviews.first(where: { $0 is AnimationView }) as? AnimationView
-        else { return }
-        if name != context.coordinator.animationName {
-            let animation = Animation.named(name)
-            animationView.animation = animation
-            context.coordinator.animationName = name
-        }
-        if let color = color, color != context.coordinator.color {
-            setColorForAllAnimationView(animationView: animationView, color: color)
-            context.coordinator.color = color
-        }
-        if playing && !animationView.isAnimationPlaying {
-            animationView.play()
-        } else if !playing && animationView.isAnimationPlaying {
-            animationView.stop()
-        }
-        animationView.animationSpeed = speed
-    }
-
-    private func setColorForAllAnimationView(animationView: AnimationView, color: NSColor) {
-
-        let colorProvider = ColorValueProvider(Lottie.Color(color: color))
-        animationView.setValueProvider(colorProvider, keypath: AnimationKeypath(keypath: "**.Color"))
-    }
-
-    class Coordinator: NSObject {
-        var animationName: String?
-        var color: NSColor?
-        override init() {
-            super.init()
-        }
-    }
 }
