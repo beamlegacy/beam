@@ -11,15 +11,20 @@ enum OnboardingLandingViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case continueWithGoogleButton = "Continue with Google"
-        case continueWithEmailButton = "Continue with Email"
+        case continueWithEmailButton = "continue-with-email"
+        case continueWithEmailButtonDisabled = "continue-with-email-disabled"
         case termsAndConditionsButton = "Terms and Conditions"
         case privacyPolicyButton = "Privacy Policy"
-        case signUpLaterButton = "Sign up later, alligator!"
+        case signUpLaterButton = "Sign Up/In Later"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {
         case googleAuthWindowText = "Google"
         case onboardingTitle = "Welcome to Beam"
+    }
+    
+    enum TextFields: String, CaseIterable, UIElement {
+        case emailTextField = "emailField"
     }
 
 }

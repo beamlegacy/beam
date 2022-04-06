@@ -87,6 +87,13 @@ extension XCUIElement: WaitHelper {
     }
     
     @discardableResult
+    public func hoverAndTapInTheMiddle() -> XCUIElement {
+        self.hover()
+        self.tapInTheMiddle()
+        return self
+    }
+    
+    @discardableResult
     public func focusAndTypeTextOnExistence(_ text: String) -> XCUIElement {
         _ = self.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         self.tapInTheMiddle()

@@ -59,6 +59,8 @@ class OnboardingManager: ObservableObject {
     var userDidSignUp: Bool = false
     var temporaryCredentials: (email: String, password: String)?
 
+    var checkedEmail: (email: String, exists: Bool) = ("", false)
+
     private weak var window: NSWindow?
     private var cancellables = Set<AnyCancellable>()
 

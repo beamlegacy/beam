@@ -15,13 +15,6 @@ class SigninTests: BaseTest {
     let onboardingImportView = OnboardingImportDataTestView()
     let shortcuts = ShortcutsHelper()
     
-    let correctEmail = "qa+autotestsignin@beamapp.co"
-    let incorrectEmail = "qa+autotestsignin@beamappa.co"
-    let correctPassword = "JKRZ6#ykhm_6KR!"
-    let incorrectPassword = "Incorrect1"
-    let username = "AutomationTestSignin"
-    
-    
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding") {
@@ -76,7 +69,7 @@ class SigninTests: BaseTest {
     }
         
     func testSignInUsingInvalidCredentials() throws {
-        
+        try XCTSkipIf(true, "Is duplicated by testConnectWithEmailUsernameSignInRequirements. To be refactored/removed")
         step("GIVEN Username view is opened"){
         XCTAssertTrue(onboardingView
                         .clickContinueWithEmailButton()
