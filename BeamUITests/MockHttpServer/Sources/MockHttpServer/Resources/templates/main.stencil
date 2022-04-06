@@ -7,6 +7,16 @@
 <body>
 <h1>Mock Form Server</h1>
 
+
+<h2>Browser:</h2>
+<ul>
+{% for browser in params.browser %}
+<li>
+<a href="http://{{ browser }}.browser.lvh.me:{{ params.port }}">http://{{ browser }}.browser.lvh.me:{{ params.port }}</a>
+</li>
+{% endfor %}
+</ul>
+
 <h2>Forms:</h2>
 <ul>
 {% for form in params.forms %}

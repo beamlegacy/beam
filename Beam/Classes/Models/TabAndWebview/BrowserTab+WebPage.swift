@@ -99,11 +99,13 @@ extension BrowserTab: WebPage {
             newWebView = tab.webView
         } else {
             // this is more likely a login window or something that should disappear at some point so let's create something transient:
+            // IMPORTANT!!: WebKit will perform the `URLRequest` automatically!! Attempting to do
+            // the request here manually leads to incorrect results!!
+            // source: https://github.com/ghostery/user-agent-ios/blob/61126a96930553d9d9ac5eae3503d17fe586fafe/Client/Frontend/Browser/BrowserViewController/BrowserViewController+WebViewDelegates.swift#L30-L33
             let transientWebViewWindow = TransientWebViewWindow(originPage: self, configuration: configuration, windowFeatures: windowFeatures)
             transientWebViewWindow.makeKeyAndOrderFront(nil)
             newWindow = transientWebViewWindow
             newWebView = transientWebViewWindow.webView
-            newWebView.load(URLRequest(url: targetURL))
             state?.setup(webView: newWebView)
         }
         if windowFeatures.x == nil || windowFeatures.y == nil {

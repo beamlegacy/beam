@@ -59,7 +59,7 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
     override init() {
         super.init()
 
-        preferences.javaScriptCanOpenWindowsAutomatically = false
+        preferences.javaScriptCanOpenWindowsAutomatically = true
         preferences.tabFocusesLinks = true
         //        preferences.plugInsEnabled = true
 
