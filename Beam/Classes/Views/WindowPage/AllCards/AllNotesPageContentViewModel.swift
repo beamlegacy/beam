@@ -159,6 +159,10 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
 }
 
 extension AllNotesPageViewModel: AllNotesPageContextualMenuDelegate {
+    func contextualMenuWillUndoRedDeleteDocuments() {
+        self.refreshAllNotes()
+    }
+
     func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool) {
         if all {
             allNotes.removeAll()
