@@ -46,8 +46,7 @@ class BeamTableCellLottieView: NSTableCellView {
         guard animationName != named else { return }
         let animation = Animation.named(named)
         lottieView.animation = animation
-        let colorProvider = ColorValueProvider(Lottie.Color(color: BeamColor.LightStoneGray.nsColor))
-        lottieView.setValueProvider(colorProvider, keypath: AnimationKeypath(keypath: "**.Color"))
+        lottieView.setColor(BeamColor.LightStoneGray)
         lottieView.play()
     }
 }
