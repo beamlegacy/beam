@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Browser: window.open</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <script>
+      window.addEventListener("load", () => {
+        document.querySelector(
+          "#location"
+        ).innerHTML = `location: ${window.location.href}`
+
+        document.querySelector("#openAsTab").addEventListener("click", () => {
+          window.open(
+            "http://windowopenresult.browser.lvh.me:8080",
+            "BeamNewTabName"
+          )
+        })
+
+        document
+          .querySelector("#openAsWindow")
+          .addEventListener("click", () => {
+            const options =
+              "toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=300, height=200, top=0, left=0"
+            window.open(
+              "http://windowopen.browser.lvh.me:8080",
+              "BeamNewWindowName",
+              options
+            )
+          })
+      })
+    </script>
+    <h1>window.open()</h1>
+    <p id="location">location:</p>
+    <button id="openAsTab">Open window.open as Tab</button>
+    <button id="openAsWindow">Open window.open as Window</button>
+  </body>
+</html>

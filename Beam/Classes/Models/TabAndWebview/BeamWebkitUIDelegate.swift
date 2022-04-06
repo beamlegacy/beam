@@ -12,7 +12,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
             let statusBar = windowFeatures.statusBarVisibility?.boolValue ?? defaultValue
             let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
             let isNewWindow = !toolBars
-            if isNewWindow {
+            if isNewWindow, let page = page {
                 let numberOrNil: (NSNumber?) -> String = { $0?.stringValue ?? "nil" }
                 Logger.shared.logInfo("""
                                       Redirecting toward a new window x=\(numberOrNil(windowFeatures.x)), y=\(numberOrNil(windowFeatures.y)),
@@ -23,7 +23,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
                                       toolBars=\(toolBars),
                                       containing \(url.absoluteString)
                                       """, category: .web)
-                return self.page?.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
+                return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
             } else {
                 Logger.shared.logInfo("Redirecting toward new tab containing \(url.absoluteString)", category: .web)
             }
