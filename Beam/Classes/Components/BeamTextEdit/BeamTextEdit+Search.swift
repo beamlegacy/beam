@@ -96,12 +96,12 @@ extension BeamTextEdit {
                 positions.formUnion($0.getPositions())
             })
 
-            let foundOccurences = UInt(results.reduce(0, { previous, searchResult in
+            let foundOccurences = results.reduce(0, { previous, searchResult in
                 previous + searchResult.ranges.count
-            }))
+            })
 
             DispatchQueue.main.async {
-                vm.currentOccurence = 1
+                vm.currentOccurence = 0
                 vm.foundOccurences = foundOccurences
                 self.highlightCurrentSearchResult(for: vm.currentOccurence, scrollingToHighlight: false)
 
@@ -122,10 +122,10 @@ extension BeamTextEdit {
         self.searchResults = nil
     }
 
-    private func highlightCurrentSearchResult(for position: UInt, scrollingToHighlight: Bool = true) {
+    private func highlightCurrentSearchResult(for position: Int, scrollingToHighlight: Bool = true) {
         guard let searchResults = searchResults else { return }
 
-        var offset = Int(position)
+        var offset = position + 1
         var nodeIndex = 0
         while offset != 0 {
             guard nodeIndex < searchResults.count else { return }

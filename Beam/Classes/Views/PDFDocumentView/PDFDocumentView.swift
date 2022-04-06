@@ -13,6 +13,10 @@ struct PDFDocumentView {
     let maxScaleFactor: CGFloat
     var destination: Binding<PDFDocumentViewDestination>?
     var onClickLink: ((URL) -> Void)?
+    var onSelectionChanged: ((String?) -> Void)?
+    var findString: String?
+    var findMatchIndex: Binding<Int>?
+    var onFindMatches: (([PDFSelection]) -> Void)?
 
     init(
         pdfDocument: PDFDocument,
@@ -22,7 +26,11 @@ struct PDFDocumentView {
         minScaleFactor: CGFloat = 0.5,
         maxScaleFactor: CGFloat = 3,
         destination: Binding<PDFDocumentViewDestination>? = nil,
-        onClickLink: ((URL) -> Void)? = nil
+        onClickLink: ((URL) -> Void)? = nil,
+        onSelectionChanged: ((String?) -> Void)? = nil,
+        findString: String?,
+        findMatchIndex: Binding<Int>?,
+        onFindMatches: (([PDFSelection]) -> Void)?
     ) {
         self.pdfDocument = pdfDocument
         self.displayMode = displayMode
@@ -32,6 +40,10 @@ struct PDFDocumentView {
         self.maxScaleFactor = maxScaleFactor
         self.destination = destination
         self.onClickLink = onClickLink
+        self.onSelectionChanged = onSelectionChanged
+        self.findString = findString
+        self.findMatchIndex = findMatchIndex
+        self.onFindMatches = onFindMatches
     }
 
 }

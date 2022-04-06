@@ -35,13 +35,13 @@ class WebSearchMessageHandler: SimpleBeamMessageHandler {
 
         switch receivedMessage {
         case .SearchWebPage_webPageSearch:
-            if let found = body["totalResults"] as? UInt {
+            if let found = body["totalResults"] as? Int {
                 searchViewModel.foundOccurences = found
             }
             if let incompleteSearch = body["incompleteSearch"] as? Bool {
                 searchViewModel.incompleteSearch = incompleteSearch
             }
-            if let current = body["currentResult"] as? UInt {
+            if let current = body["currentResult"] as? Int {
                 searchViewModel.currentOccurence = current
             }
             if let positions = body["positions"] as? [Double] {
