@@ -68,9 +68,7 @@
 ./Beam/Classes/Components/BeamTextEdit/EmbedNode/Web/src/EmbedNodeUI_web.ts
 ./Beam/Classes/Components/PointAndShoot/Web/dist/src/PointAndShootUI_web.d.ts
 ./Beam/Classes/Components/PointAndShoot/Web/dist/src/PointAndShoot.d.ts
-./Beam/Classes/Components/PointAndShoot/Web/dist/src/PointAndShootUI_debug.d.ts
 ./Beam/Classes/Components/PointAndShoot/Web/dist/src/PointAndShootUI.d.ts
-./Beam/Classes/Components/PointAndShoot/Web/dist/src/index_native.d.ts
 ./Beam/Classes/Components/PointAndShoot/Web/dist/src/PointAndShootUI_native.d.ts
 ./Beam/Classes/Components/PointAndShoot/Web/tests/Native.test.ts
 ./Beam/Classes/Components/PointAndShoot/Web/tests/BeamNode.test.ts

@@ -18,7 +18,7 @@ cat ./WebFileList_input.xcfilelist
 > ./WebFileList_output.xcfilelist
 
 # 2. Add all ts and scss component files to xcfilelist
-find ./Beam -path "**/node_modules" -prune -false -o -name "*_prod.js" >> ./WebFileList_output.xcfilelist
+find ./Beam -path "**/dist/**" -path "**/node_modules" -prune -false -o -name "*_prod.js" >> ./WebFileList_output.xcfilelist
 
 # 3. Print the list of watched files
 echo "-------- WebFileList_output.xcfilelist files --------"
