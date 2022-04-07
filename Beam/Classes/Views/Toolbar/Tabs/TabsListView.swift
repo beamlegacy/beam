@@ -487,7 +487,7 @@ extension TabsListView {
                 onTabClose(at: index, fromContextMenu: true)
             }
             Button("Close Other Tabs") {
-                state.closeAllTabsButTab(at: index)
+                state.closeAllTabs(exceptedTabAt: index)
             }.disabled(tabs.allSatisfy({ $0.isPinned }) || tabs.count <= 1)
             Button("Close Tabs to the Right") {
                 state.closeTabsToTheRight(of: index)

@@ -358,6 +358,11 @@ struct AccountsView: View {
         guard let window = AccountsPreferenceViewController.view.window else { return }
         alert.beginSheetModal(for: window) { response in
             guard response == .alertFirstButtonReturn else { return }
+            if self.checkboxHelper.isOn {
+                for window in AppDelegate.main.windows {
+                    window.state.closeAllTabs(closePinnedTabs: true)
+                }
+            }
             AccountManager.logout()
             if self.checkboxHelper.isOn {
                 AppDelegate.main.deleteAllLocalData()
