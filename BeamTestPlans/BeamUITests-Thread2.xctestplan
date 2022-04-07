@@ -45,6 +45,7 @@
         "PnSAddToCardTests",
         "ReferencesTests",
         "SearchOnCardTests",
+        "SearchOnPdfTests",
         "SearchOnWebTests",
         "SignInAutocompleteTests",
         "SignInSucessfullyTests",
