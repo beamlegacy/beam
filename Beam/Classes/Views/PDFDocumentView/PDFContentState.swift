@@ -87,7 +87,7 @@ final class PDFContentState: ObservableObject {
 
         var saveLocationURL = tentativeSaveLocationURL.availableFileURL()
 
-        if saveLocationURL.pathExtension.isEmpty {
+        if saveLocationURL.pathExtension.lowercased() != "pdf" {
             saveLocationURL.appendPathExtension("pdf")
         }
 
