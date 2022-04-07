@@ -104,7 +104,8 @@ class ClusteringManager: ObservableObject {
             self.summary = unwrappedSummary
         }
         if let notesWithActivity = summary.notes {
-            let allNotesWithFrequency = NSCountedSet(array: notesWithActivity.compactMap({ $0.value }))
+            let flattenedNoteIds = Array(notesWithActivity.compactMap({ $0.value }).joined())
+            let allNotesWithFrequency = NSCountedSet(array: flattenedNoteIds)
             if let mostFrequentNote = allNotesWithFrequency.max(by: { allNotesWithFrequency.count(for: $0) < allNotesWithFrequency.count(for: $1) }) as? UUID {
                 self.continueToNotes.append(mostFrequentNote)
             }
@@ -112,6 +113,7 @@ class ClusteringManager: ObservableObject {
 //                if Calendar.current.isDate(BeamDate.now, equalTo: noteDate, toGranularity: .day) {
 //                    continue
 //                }
+
                 if let notesFromDate = notesWithActivity[noteDate] {
                     if notesFromDate.indices.contains(0) {
                         self.continueToNotes.append(notesFromDate[0]) // TODO: Try also random element
