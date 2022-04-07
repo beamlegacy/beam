@@ -136,6 +136,7 @@ install_libsodium:
 install_js:
 	brew install node
 	brew install yarn
+	brew install jq
 
 install_codeclimate:
 	brew tap codeclimate/formulae
@@ -163,10 +164,8 @@ extract_vinyl_files:
 	tar -xf BeamTests/Vinyl.tar.bz2 -C ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/
 
 js_test:
-	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run build
-	RUN_BENCHMARK=true yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run test-ci
-	yarn --cwd ./Beam/Classes/Components/PointAndShoot/Web run benchmark-show
-	yarn --cwd ./Beam/Classes/Models/Navigation/Web run test-ci
+	./scripts/build_js.sh
+	yarn run alltests
 
 clean_app_files:
 	rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/"*
