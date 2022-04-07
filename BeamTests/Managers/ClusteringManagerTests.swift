@@ -193,7 +193,7 @@ class ClusteringManagerTests: XCTestCase {
                              Calendar.current.date(byAdding: .day, value: -5, to: BeamDate.now)!: [notes[0].id, notes[1].id],
                              Calendar.current.date(byAdding: .day, value: -4, to: BeamDate.now)!: [notes[0].id, notes[3].id],
                              Calendar.current.date(byAdding: .day, value: -3, to: BeamDate.now)!: [notes[0].id, notes[1].id],
-                             Calendar.current.date(byAdding: .day, value: -2, to: BeamDate.now)!: [notes[0].id, notes[3].id],
+                             Calendar.current.date(byAdding: .day, value: -2, to: BeamDate.now)!: [notes[1].id, notes[3].id],
                              Calendar.current.date(byAdding: .day, value: -1, to: BeamDate.now)!: [notes[2].id]]
         
         testSummary.pageId = pageIDs[0]
