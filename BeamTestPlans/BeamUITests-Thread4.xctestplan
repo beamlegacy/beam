@@ -51,6 +51,7 @@
         "PasswordPreferencesTests",
         "PnSAddToCardTests",
         "ReferencesTests",
+        "SearchOnPdfTests",
         "SearchOnWebTests",
         "SignInTests",
         "WaitHelper",
