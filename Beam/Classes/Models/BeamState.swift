@@ -345,12 +345,15 @@ import Sentry
         return closeTabIfPossible(currentTab, allowClosingPinned: allowClosingPinned)
     }
 
-    func closeAllTabsButTab(at index: Int) {
-        let tabIdToKeep = browserTabsManager.tabs[index].id
-        cmdManager.beginGroup(with: "CloseAllTabsButTabCmdGrp")
-        for tab in browserTabsManager.tabs where tab.id != tabIdToKeep && !tab.isPinned {
+    func closeAllTabs(exceptedTabAt index: Int? = nil, closePinnedTabs: Bool = false) {
+        var tabIdToKeep: UUID?
+        if let index = index {
+            tabIdToKeep = browserTabsManager.tabs[index].id
+        }
+        cmdManager.beginGroup(with: "CloseAllTabs")
+        for tab in browserTabsManager.tabs where tab.id != tabIdToKeep && (closePinnedTabs || !tab.isPinned) {
             guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
-            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: false), on: self)
+            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self)
         }
         cmdManager.endGroup(forceGroup: true)
     }
