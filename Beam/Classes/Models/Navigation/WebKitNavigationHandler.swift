@@ -62,6 +62,7 @@ extension WebKitNavigationHandler {
         // Handle opening the targetURL in a newTab if all conditions are met
         if openNewTab(navigationAction) {
             decisionHandler(.cancel, preferences)
+            return
         }
 
         decisionHandler(.allow, preferences)
