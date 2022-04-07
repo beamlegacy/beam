@@ -247,7 +247,17 @@ final class PDFDocumentViewCoordinator: NSObject {
         if !findMatches.isEmpty {
             let selection = findMatches[index]
             nsView?.setCurrentSelection(selection, animate: true)
-            nsView?.scrollSelectionToVisible(nil)
+
+            if let selectionPage = selection.pages.first {
+                // Get the bounds of the match in the page space and extend its dimensions, so that when
+                // programmatically navigating to the match, it is located at a position away from the window bounds
+                // and doesn't overlap with the toolbar.
+                let selectionBoundsInPageSpace = selection.bounds(for: selectionPage)
+                let extendedBounds = selectionBoundsInPageSpace.insetBy(dx: -50, dy: -120)
+                nsView?.go(to: extendedBounds, on: selectionPage)
+            } else {
+                nsView?.scrollSelectionToVisible(nil)
+            }
         }
 
         DispatchQueue.main.async { [weak self] in
