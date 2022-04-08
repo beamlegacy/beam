@@ -772,6 +772,9 @@
 		96D5AE85264C01AD003AD516 /* TLDExtract in Frameworks */ = {isa = PBXBuildFile; productRef = 96D5AE84264C01AD003AD516 /* TLDExtract */; };
 		96D71CE627F735400094F54D /* MessagePackTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D71CE027F735400094F54D /* MessagePackTests.swift */; };
 		96D71CE927F735D10094F54D /* MessagePack in Frameworks */ = {isa = PBXBuildFile; productRef = 96D71CE827F735D10094F54D /* MessagePack */; };
+		96D71CEF27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D71CEE27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift */; };
+		96D71CFD27FEFED90094F54D /* BeamNoteCollectionWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D71CFC27FEFED90094F54D /* BeamNoteCollectionWrapper.swift */; };
+		96D71D0527FF575F0094F54D /* BeamNoteDocumentWrapperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96D71D0427FF575F0094F54D /* BeamNoteDocumentWrapperTests.swift */; };
 		96DDF54B26823A4200FF8CCE /* BidirectionalLink.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */; };
 		96E1356F2546F03900133A24 /* TextNodeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E1356E2546F03900133A24 /* TextNodeTests.swift */; };
 		96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96E4505725995CA200BFF36F /* BreadCrumb.swift */; };
@@ -2512,6 +2515,9 @@
 		96C9CC3D2535CE2C00D70AA6 /* LexerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LexerTests.swift; sourceTree = "<group>"; };
 		96D0EF5E26FB75EC00B967B8 /* CryptoKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CryptoKit.framework; path = System/Library/Frameworks/CryptoKit.framework; sourceTree = SDKROOT; };
 		96D71CE027F735400094F54D /* MessagePackTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MessagePackTests.swift; sourceTree = "<group>"; };
+		96D71CEE27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteDocumentWrapper.swift; sourceTree = "<group>"; };
+		96D71CFC27FEFED90094F54D /* BeamNoteCollectionWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteCollectionWrapper.swift; sourceTree = "<group>"; };
+		96D71D0427FF575F0094F54D /* BeamNoteDocumentWrapperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteDocumentWrapperTests.swift; sourceTree = "<group>"; };
 		96DDF54A26823A4200FF8CCE /* BidirectionalLink.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BidirectionalLink.swift; sourceTree = "<group>"; };
 		96E1356E2546F03900133A24 /* TextNodeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextNodeTests.swift; sourceTree = "<group>"; };
 		96E4505725995CA200BFF36F /* BreadCrumb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BreadCrumb.swift; sourceTree = "<group>"; };
@@ -3309,6 +3315,7 @@
 				A53F8A6127C4AC38000D168D /* NoteBackForwardListTests.swift */,
 				87FCAE9027E474AA001D8D18 /* SandboxEscapeTests.swift */,
 				DAAF40C327D79BEB00083AA0 /* TabPinSuggesterTests.swift */,
+				96D71D0427FF575F0094F54D /* BeamNoteDocumentWrapperTests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3709,6 +3716,8 @@
 				DA52E97F276CE026008D4990 /* BrowsingTreeProcessor.swift */,
 				375D83B0278D63260064C246 /* MouseHoveringLocation.swift */,
 				DAAF40CA27D8BB4F00083AA0 /* TabPinSuggester.swift */,
+				96D71CEE27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift */,
+				96D71CFC27FEFED90094F54D /* BeamNoteCollectionWrapper.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -8598,6 +8607,7 @@
 				52019A6F26DE470A005E8278 /* DocumentManager+Foundation.swift in Sources */,
 				A00AE82B265EAE9A00156220 /* BeamSearchField.swift in Sources */,
 				A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */,
+				96D71CEF27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift in Sources */,
 				418172202581107C00317ED8 /* Information.swift in Sources */,
 				37DB5A1627BB518400534760 /* AnimationHandler.swift in Sources */,
 				4181727E258110D100317ED8 /* AppDelegate+URL.swift in Sources */,
@@ -8736,6 +8746,7 @@
 				370794D627D7AAF900D2768B /* EmptyContentSchemeHandler.swift in Sources */,
 				A5A2314526FB355B00D01D08 /* DividerNode.swift in Sources */,
 				A05FCDB127E8DB3D007FD449 /* TabGroupingFeedbackWindow.swift in Sources */,
+				96D71CFD27FEFED90094F54D /* BeamNoteCollectionWrapper.swift in Sources */,
 				52DB02662716DCE800F3881D /* LoggerRecorder.swift in Sources */,
 				370794BF27D7A21A00D2768B /* FloatingToolbar.swift in Sources */,
 				A0F462352668D79E0003EAD6 /* RadBlockPreferencesManager.swift in Sources */,
@@ -8815,6 +8826,7 @@
 				DA5D4B8A2771DF0B00D3E80C /* BrowsingTreeStoreTest.swift in Sources */,
 				37C41331278554AE00954FD7 /* EcosiaTests.swift in Sources */,
 				032562DC26051D57006513E4 /* RBContentBlockerTests.m in Sources */,
+				96D71D0527FF575F0094F54D /* BeamNoteDocumentWrapperTests.swift in Sources */,
 				37C4131C278552A400954FD7 /* DuckDuckGoTests.swift in Sources */,
 				8AD2632A26F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift in Sources */,
 				37B85B9227A2C83B003871F9 /* DownloadProxyMock.swift in Sources */,
