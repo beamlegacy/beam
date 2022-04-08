@@ -127,11 +127,11 @@ struct TabGroupingFeedbackContentView: View {
                                     }
                             }
                         }
-                    }.onDrop(of: [TabItem.typeIdentifier],
+                        Separator(horizontal: true, hairline: false, rounded: true, color: BeamColor.Generic.separator)
+                                            .padding(.top, 16)
+                    }.padding(.top, 16)
+                    .onDrop(of: [TabItem.typeIdentifier],
                              delegate: TabDropDelegate(newGrpId: tabGroup.id, viewModel: viewModel))
-
-                    Separator(horizontal: true, hairline: false, rounded: true, color: BeamColor.Generic.separator)
-                                        .padding(.vertical, 16)
                 }
             }
             .padding(.bottom, 16)
