@@ -45,9 +45,20 @@ public class LongTermUrlScore: Codable, UrlScoreProtocol {
             + log(1 + Float(textSelections))
             + logTimeDecay(duration: timeSinceLastCreation, halfLife: HALF_LIFE)
     }
+    public func update(treeScore: Score) {
+        visitCount += treeScore.visitCount
+        readingTimeToLastEvent += treeScore.readingTimeToLastEvent
+        textSelections += treeScore.textSelections
+        scrollRatioX = max(scrollRatioX, treeScore.scrollRatioX)
+        scrollRatioY = max(scrollRatioY, treeScore.scrollRatioY)
+        textAmount = max(textAmount, treeScore.textAmount)
+        area = max(area, treeScore.area)
+        lastCreationDate = nilMax(date: lastCreationDate, otherDate: treeScore.lastCreationDate)
+    }
 }
 
 public protocol LongTermUrlScoreStoreProtocol {
     func apply(to urlId: UUID, changes: (LongTermUrlScore) -> Void)
     func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore]
+    func save(scores: [LongTermUrlScore])
 }
