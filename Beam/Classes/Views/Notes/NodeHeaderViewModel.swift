@@ -211,10 +211,14 @@ extension NoteHeaderView {
                 self.publishState = .unpublishing
                 BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false) { [weak self] result in
                     defer {
-                        completion(result)
+                        DispatchQueue.main.async {
+                            completion(result)
+                        }
                     }
                     guard case .success(let published) = result, published == false else {
-                        self?.noteBecamePublic(true)
+                        DispatchQueue.main.async {
+                            self?.noteBecamePublic(note.publicationStatus.isPublic)
+                        }
                         return
                     }
                     DispatchQueue.main.async {
