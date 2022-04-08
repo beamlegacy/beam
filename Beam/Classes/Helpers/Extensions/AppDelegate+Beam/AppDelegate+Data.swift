@@ -105,7 +105,7 @@ extension AppDelegate {
 
         // TODO: i18n
         savePanel.title = "Export all notes"
-        savePanel.message = "Choose the file to export all notes, please note this is used for development mode only."
+        savePanel.message = "Choose the file to export all notes."
         savePanel.showsHiddenFiles = false
         savePanel.showsTagField = false
         savePanel.canCreateDirectories = true
@@ -115,7 +115,7 @@ extension AppDelegate {
         let dateFormatter = ISO8601DateFormatter()
         dateFormatter.formatOptions = [.withYear, .withMonth, .withDay, .withTime]
         let dateString = dateFormatter.string(from: BeamDate.now)
-        savePanel.nameFieldStringValue = "BeamExport-\(dateString).sqlite"
+        savePanel.nameFieldStringValue = "BeamExport-\(dateString).beamCollection"
 
         if savePanel.runModal() == .OK, let url = savePanel.url {
             if !url.startAccessingSecurityScopedResource() {
@@ -124,9 +124,11 @@ extension AppDelegate {
             }
 
             do {
-                try CoreDataManager.shared.backup(url)
+//                try CoreDataManager.shared.backup(url)
+                let collection = BeamNoteCollectionWrapper()
+                try collection.write(to: url, ofType: BeamNoteCollectionWrapper.documentTypeName)
             } catch {
-                UserAlert.showError(message: "Could not import backup: \(error.localizedDescription)",
+                UserAlert.showError(message: "Could not export backup note collection: \(error.localizedDescription)",
                                     error: error)
             }
             url.stopAccessingSecurityScopedResource()
@@ -139,26 +141,20 @@ extension AppDelegate {
         openPanel.canChooseDirectories = false
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
-        openPanel.allowedFileTypes = ["sqlite"]
+        openPanel.allowedFileTypes = ["beamCollection"]
 
         // TODO: i18n
-        openPanel.title = "Select the backup sqlite file"
-        openPanel.message = "We will delete all notes and import this backup"
+        openPanel.title = "Select the note collection"
+        openPanel.message = "Beam will import this backup, existing notes will be updated or renamed with the content on disk."
 
         openPanel.begin { [weak openPanel] result in
             guard result == .OK, let url = openPanel?.url else { openPanel?.close(); return }
 
             do {
-                try CoreDataManager.shared.importBackup(url)
-
-                let documentManager = DocumentManager()
-                let documentsCount = documentManager.count()
-
-                // TODO: i18n
-                UserAlert.showError(message: "Backup file has been imported",
-                                    informativeText: "\(documentsCount) notes have been imported")
+                let noteCollection = try BeamNoteCollectionWrapper(fileWrapper: FileWrapper(url: url, options: .immediate))
+                try noteCollection.importNotes()
             } catch {
-                UserAlert.showError(message: "Could not import backup",
+                UserAlert.showError(message: "Could not import collection",
                                     error: error)
             }
 
