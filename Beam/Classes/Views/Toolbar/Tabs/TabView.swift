@@ -161,6 +161,20 @@ struct TabView: View {
         }
     }
 
+    private func centerViewContent(foregroundHoverStyle: Bool,
+                                   shouldShowSecurity: Bool, shouldShowClose: Bool,
+                                   leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
+        Group {
+            if foregroundHoverStyle {
+                centerViewForegroundHoverContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
+                                                        leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+            } else {
+                centerViewDefaultContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+            }
+        }
+    }
+
     private func centerViewDefaultContent(shouldShowSecurity: Bool, shouldShowClose: Bool,
                                           leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
         let iconSpacing = iconTitleSpacing(shouldShowSecurity: shouldShowSecurity)
@@ -237,16 +251,19 @@ struct TabView: View {
             let isHovering = isEnabled && !disableHovering && (isHovering || isDragging)
             let showForegroundHoverStyle = isHovering && isSelected
             let shouldShowClose = isHovering
+            let base = centerViewContent(foregroundHoverStyle: showForegroundHoverStyle,
+                                         shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
             if let copyMessage = copyMessage {
-                copyMessageView(message: copyMessage)
+                base
+                    .opacity(0)
+                    .overlay(copyMessageView(message: copyMessage))
                     .transition(centerViewTransition(foregroundHoverStyle: true))
             } else if showForegroundHoverStyle {
-                centerViewForegroundHoverContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
-                                                 leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                base
                     .transition(centerViewTransition(foregroundHoverStyle: true))
             } else {
-                centerViewDefaultContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
-                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                base
                     .transition(centerViewTransition(foregroundHoverStyle: false))
             }
         }
