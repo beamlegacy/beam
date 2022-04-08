@@ -103,15 +103,17 @@ class AllNotesPageContextualMenu {
     private func setupExportMenu(in menu: NSMenu, countSuffix: String) {
         let exportMenu = NSMenu()
         exportMenu.addItem(NSMenuItem(
-            title: "JSON...",
-            action: #selector(exportNotesToJSON),
+            title: "beamNote...",
+            action: #selector(exportNotesToBeamNote),
             keyEquivalent: ""
         ))
-        exportMenu.addItem(NSMenuItem(
-            title: "Markdown...",
-            action: nil,
-            keyEquivalent: ""
-        ))
+        if false {
+            exportMenu.addItem(NSMenuItem(
+                title: "Markdown...",
+                action: nil,
+                keyEquivalent: ""
+            ))
+        }
         if selectedNotes.count <= 0 {
             exportMenu.addItem(NSMenuItem(
                 title: "Entire database...",
@@ -154,15 +156,15 @@ class AllNotesPageContextualMenu {
         AppDelegate.main.importJSONFiles(self)
     }
 
-    @objc private func exportNotesToJSON() {
+    @objc private func exportNotesToBeamNote() {
         let documentManager = DocumentManager()
         if selectedNotes.count == 1 {
             guard let note = selectedNotes.first else { return }
-            AppDelegate.main.exportOneNoteToJSON(note: note)
+            AppDelegate.main.exportOneNoteToBeamNote(note: note)
         } else if selectedNotes.count != documentManager.allDocumentsIds(includeDeletedNotes: false).count {
-            AppDelegate.main.exportNotesToJSON(selectedNotes)
+            AppDelegate.main.exportNotesToBeamNote(selectedNotes)
         } else {
-            AppDelegate.main.exportAllNotesToJSON(self)
+            AppDelegate.main.exportAllNotesToBeamNote(self)
         }
     }
 

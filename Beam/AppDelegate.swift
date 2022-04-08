@@ -760,6 +760,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
                 return true
             }
+        } else if url.pathExtension == BeamNoteDocumentWrapper.fileExtension {
+            let documentURL = URL(fileURLWithPath: filename)
+            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
+                do {
+                    let doc = try BeamNoteDocumentWrapper(fileWrapper: wrapper)
+                    doc.fileURL = documentURL
+                    try doc.importNote()
+                } catch {
+                    Logger.shared.logError("Can't import note document \(documentURL) from disk", category: .downloader)
+                    return false
+                }
+                return true
+            }
+
+        } else if url.pathExtension == BeamNoteCollectionWrapper.fileExtension {
+            let documentURL = URL(fileURLWithPath: filename)
+            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
+                do {
+                    let doc = try BeamNoteCollectionWrapper(fileWrapper: wrapper)
+                    doc.fileURL = documentURL
+                    try doc.importNotes()
+                } catch {
+                    Logger.shared.logError("Can't import note collection from disk \(documentURL)", category: .downloader)
+                    return false
+                }
+                return true
+            }
         } else if ["html", "htm"].contains(url.pathExtension) {
             return handleURL(URL(fileURLWithPath: filename))
         }
