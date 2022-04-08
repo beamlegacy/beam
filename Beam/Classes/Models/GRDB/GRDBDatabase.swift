@@ -1336,6 +1336,19 @@ extension GRDBDatabase {
         return (try? dbReader.read { db in try LongTermUrlScore.fetchAll(db, ids: urlIds) }) ?? []
     }
 
+    func save(scores: [LongTermUrlScore]) throws {
+        try dbWriter.write { db in
+            for score in scores {
+                try score.save(db)
+            }
+        }
+    }
+    func clearLongTermScores() throws {
+        _ = try dbWriter.write { db in
+            try LongTermUrlScore.deleteAll(db)
+        }
+
+    }
     // MARK: - BrowsingTree
     func save(browsingTreeRecord: BrowsingTreeRecord) throws {
         do {
