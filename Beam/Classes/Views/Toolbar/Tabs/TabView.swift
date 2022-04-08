@@ -331,7 +331,7 @@ struct TabView: View {
             }.padding(.trailing, hPadding), alignment: .trailing)
 
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: isSingleTab ? containerGeometry.size.width : .infinity, maxHeight: .infinity)
         .fixedSize(horizontal: isSingleTab && !isPinned, vertical: false)
         .coordinateSpace(name: localCoordinateSpaceName)
     }
