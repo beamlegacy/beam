@@ -163,6 +163,8 @@ struct NoteHeaderView: View {
             switch error {
             case .noUsername:
                 showPublicationError(error: .noUsername)
+            case .notFound:
+                break
             case .serverError(error: let error):
                 showPublicationError(error: .custom(error ?? "An error occurred…"))
             default:
