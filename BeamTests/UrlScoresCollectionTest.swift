@@ -22,6 +22,7 @@ class UrlScoresCollectionTest: XCTestCase {
         func getMany(urlIds: [UUID]) -> [UUID: LongTermUrlScore] {
             return [:]
         }
+        func save(scores: [LongTermUrlScore]) {}
     }
     class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
         fileprivate var data = [UUID: DailyURLScore]()

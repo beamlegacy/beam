@@ -296,6 +296,7 @@ public class BrowsingNode: ObservableObject, Codable {
             Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
             }
         scoreApply { $0.visitCount += 1 }
+        score.visitCount += 1
     }
     init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool) {
         self.id = id
