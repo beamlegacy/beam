@@ -3,75 +3,66 @@ import Cocoa
 import BeamCore
 
 extension AppDelegate {
-    // MARK: - JSON Export / Import
-    @IBAction func exportAllNotesToJSON(_ sender: Any) {
-        let openPanel = NSOpenPanel()
-        openPanel.allowsMultipleSelection = false
-        openPanel.canChooseDirectories = true
-        openPanel.canCreateDirectories = true
-        openPanel.canChooseFiles = false
-        // TODO: i18n
-        openPanel.title = "Choose the directory to export json files"
-        openPanel.begin { [weak openPanel] result in
-            guard result == .OK, let selectedPath = openPanel?.url?.path
-            else { openPanel?.close(); return }
-
-            let baseURL = URL(fileURLWithPath: selectedPath)
-
-            for id in self.documentManager.allDocumentsIds(includeDeletedNotes: false) {
-                self.exportNote(id: id, baseURL: baseURL)
-            }
-            openPanel?.close()
-        }
-    }
-
-    func exportNotesToJSON(_ notes: [BeamNote]) {
-        let openPanel = NSOpenPanel()
-        openPanel.allowsMultipleSelection = false
-        openPanel.canChooseDirectories = true
-        openPanel.canCreateDirectories = true
-        openPanel.canChooseFiles = false
-        // TODO: i18n
-        openPanel.title = "Choose the directory to export json files to"
-        openPanel.begin { [weak openPanel] result in
-            guard result == .OK, let selectedPath = openPanel?.url?.path
-            else { openPanel?.close(); return }
-
-            let baseURL = URL(fileURLWithPath: selectedPath)
-
-            for note in notes {
-                self.exportNote(id: note.id, baseURL: baseURL)
-            }
-            openPanel?.close()
-        }
-    }
-
-    func exportOneNoteToJSON(note: BeamNote) {
+    @IBAction func exportAllNotesToBeamNote(_ sender: Any) {
         let savePanel = NSSavePanel()
-        // TODO: i18n
-        savePanel.allowedFileTypes = ["json"]
-        savePanel.allowsOtherFileTypes = true
-        savePanel.title = "Choose the file to export \(note.title)"
-        savePanel.nameFieldStringValue = "\(note.type.journalDateString ?? note.title) \(note.id).json"
+        savePanel.canCreateDirectories = true
+
+        savePanel.title = loc("Choose the directory to export beamNote files")
         savePanel.begin { [weak savePanel] result in
             guard result == .OK, let selectedPath = savePanel?.url?.path
             else { savePanel?.close(); return }
 
-            self.exportNote(id: note.id, toFile: URL(fileURLWithPath: selectedPath))
+            let baseURL = URL(fileURLWithPath: selectedPath)
+
+            for id in self.documentManager.allDocumentsIds(includeDeletedNotes: false) {
+                self.exportNoteToBeamNote(id: id, baseURL: baseURL)
+            }
+            savePanel?.close()
+        }
+    }
+
+    func exportOneNoteToBeamNote(note: BeamNote) {
+        let savePanel = NSSavePanel()
+        // TODO: i18n
+        savePanel.allowedFileTypes = ["beamNote"]
+        savePanel.allowsOtherFileTypes = true
+        savePanel.title = loc("Choose the file to export \(note.title)")
+        savePanel.nameFieldStringValue = "\(note.type.journalDateString ?? note.title) \(note.id).beamNote"
+        savePanel.begin { [weak savePanel] result in
+            guard result == .OK, let selectedPath = savePanel?.url?.path
+            else { savePanel?.close(); return }
+
+            let url = URL(fileURLWithPath: selectedPath)
+            self.exportNoteToBeamNote(id: note.id, baseURL: url.deletingLastPathComponent(), toFile: url)
 
             savePanel?.close()
         }
     }
 
-    func exportNote(id: UUID, baseURL: URL? = nil, toFile fileUrl: URL? = nil) {
-        assert((baseURL == nil) != (fileUrl == nil))
-        if let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: true) {
-            guard let doc = note.documentStruct else {
-                return
+    func exportNotesToBeamNote(_ notes: [BeamNote]) {
+        let savePanel = NSSavePanel()
+        savePanel.canCreateDirectories = true
+        // TODO: i18n
+        savePanel.title = loc("Choose the directory to export json files to")
+        savePanel.begin { [weak savePanel] result in
+            guard result == .OK, let selectedPath = savePanel?.url?.path
+            else { savePanel?.close(); return }
+
+            let baseURL = URL(fileURLWithPath: selectedPath)
+
+            for note in notes {
+                self.exportNoteToBeamNote(id: note.id, baseURL: baseURL)
             }
-            let url = fileUrl ?? URL(fileURLWithPath: "\(note.type.journalDateString ?? note.title) \(id).json", relativeTo: baseURL)
+            savePanel?.close()
+        }
+    }
+
+    func exportNoteToBeamNote(id: UUID, baseURL: URL, toFile fileUrl: URL? = nil) {
+        if let note = BeamNote.fetch(id: id, includeDeleted: false, keepInMemory: false, decodeChildren: true) {
+            let url = fileUrl ?? URL(fileURLWithPath: "\(note.type.journalDateString ?? note.title) \(id).beamNote", relativeTo: baseURL)
             do {
-                try doc.data.write(to: url)
+                let document = BeamNoteDocumentWrapper(note: note)
+                try document.write(to: url, ofType: "beamNote")
             } catch {
                 UserAlert.showError(message: error.localizedDescription)
 
@@ -97,12 +88,13 @@ extension AppDelegate {
                 Logger.shared.logError("Unable to import data from \(url)", category: .general)
                 return
             }
-            let decoder = BeamJSONDecoder()
-            guard let note = try? decoder.decode(BeamNote.self, from: data) else {
-                Logger.shared.logError("Unable to decode beam note from \(url)", category: .general)
-                return
+
+            do {
+                let noteDocument = try BeamNoteDocumentWrapper(fileWrapper: FileWrapper(url: url, options: .immediate))
+                try noteDocument.importNote()
+            } catch {
+                UserAlert.showError(message: "Unable to import \(url)", error: error)
             }
-            note.save()
         }
     }
 
@@ -113,7 +105,7 @@ extension AppDelegate {
         openPanel.canCreateDirectories = false
         openPanel.canChooseFiles = true
         // TODO: i18n
-        openPanel.title = "Choose the json files or directories to import"
+        openPanel.title = loc("Choose the files import")
         openPanel.begin { [weak openPanel] result in
             guard result == .OK
             else { openPanel?.close(); return }
