@@ -234,6 +234,7 @@ class RestAPIServer {
             urlRequest.setValue("Bearer \(accessToken)", forHTTPHeaderField: "Authorization")
         }
         urlRequest.setValue("native.beamapp.co", forHTTPHeaderField: "Origin")
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Accept")
 
         urlRequest.httpMethod = request.httpMethod
         if let (body, contentType) = try request.bodyParameters() {

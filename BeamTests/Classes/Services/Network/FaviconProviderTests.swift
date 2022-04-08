@@ -10,9 +10,13 @@ import XCTest
 import WebKit
 
 class FaviconProviderTests: XCTestCase {
-
+    
+    override class func tearDown() {
+        FaviconProvider().clearCache()
+    }
+    
     func testPickBestFaviconWithBestSizePNG() {
-
+        
         let icons = [
             Favicon(url: URL(string: "f.co/icon.png?s=16")!, width: 16, height: 16, origin: .webView),
             Favicon(url: URL(string: "f.co/icon.png?s=32")!, width: 32, height: 32, origin: .webView),
