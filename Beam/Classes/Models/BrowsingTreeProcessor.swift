@@ -11,6 +11,7 @@ import BeamCore
 class BrowsingTreeProcessor {
     let visitFrecencyUpdater = BatchFrecencyUpdater(frencencyStore: GRDBUrlFrecencyStorage())
     let readingTimeFrecencyUpdater = BatchFrecencyUpdater(frencencyStore: GRDBUrlFrecencyStorage(), frecencyKey: .webReadingTime30d0)
+    let longTermScoreUpdater = LongTermScoreUpdater(scoreStore: LongTermUrlScoreStore())
 
     private func updateDomainFrecency(updater: BatchFrecencyUpdater, id: UUID, value: Float, date: Date) {
         let isDomain = LinkStore.shared.isDomain(id: id)
@@ -60,6 +61,28 @@ class BrowsingTreeProcessor {
         visitFrecencyUpdater.saveAll()
         readingTimeFrecencyUpdater.saveAll()
         saveMaxImportDate(date: maxImportDate, tree: tree)
+        switch tree.origin {
+        case .historyImport: break
+        default: longTermScoreUpdater.update(using: tree)
+        }
         Logger.shared.logInfo("Completed post sync tree processing: rootId \(tree.root.id)", category: .browsingTreeNetwork, localTimer: startedAt)
+    }
+}
+
+class LongTermScoreUpdater {
+    let scoreStore: LongTermUrlScoreStoreProtocol
+    init(scoreStore: LongTermUrlScoreStoreProtocol) {
+        self.scoreStore = scoreStore
+    }
+
+    func update(using tree: BrowsingTree) {
+        let existing = scoreStore.getMany(urlIds: Array(tree.links))
+        var createdOrUpdated = [LongTermUrlScore]()
+        for scoredLink in tree.scoredLinks {
+            let scoreToUpdate = existing[scoredLink.link] ?? LongTermUrlScore(urlId: scoredLink.link)
+            scoreToUpdate.update(treeScore: scoredLink.score)
+            createdOrUpdated.append(scoreToUpdate)
+        }
+        scoreStore.save(scores: createdOrUpdated)
     }
 }

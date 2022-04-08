@@ -45,4 +45,11 @@ class LongTermUrlScoreStore: LongTermUrlScoreStoreProtocol {
         let scores = db.getManyLongTermUrlScore(urlIds: urlIds)
         return Dictionary(uniqueKeysWithValues: scores.map { ($0.urlId, $0) })
     }
+    func save(scores: [LongTermUrlScore]) {
+        do {
+            try db.save(scores: scores)
+        } catch {
+            Logger.shared.logError("Couldn't save long term url scores: \(error)", category: .database)
+        }
+    }
 }

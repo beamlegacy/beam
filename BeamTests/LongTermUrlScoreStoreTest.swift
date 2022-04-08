@@ -76,4 +76,24 @@ class LongTermUrlScoreStoreTests: XCTestCase {
         let fetchedScores = db.getManyLongTermUrlScore(urlIds: idsToFetch)
         XCTAssertEqual(fetchedScores.count, 2)
     }
+
+    func testSaveMany() {
+        let db = GRDBDatabase.empty()
+        let store = LongTermUrlScoreStore(db: db)
+        let ids = (0...2).map { _ in UUID() }
+        let records = ids.map { LongTermUrlScore(urlId: $0) }
+        records[0].area = 100
+        records[1].textAmount = 2
+        store.save(scores: [records[0], records[1]])
+        records[1].scrollRatioY = 0.5
+        records[2].scrollRatioX = 0.2
+        store.save(scores: [records[1], records[2]])
+
+        let fetched = store.getMany(urlIds: ids)
+        XCTAssertEqual(fetched.count, 3)
+        XCTAssertEqual(fetched[ids[0]]?.area, 100)
+        XCTAssertEqual(fetched[ids[1]]?.textAmount, 2)
+        XCTAssertEqual(fetched[ids[1]]?.scrollRatioY, 0.5)
+        XCTAssertEqual(fetched[ids[2]]?.scrollRatioX, 0.2)
+    }
 }
