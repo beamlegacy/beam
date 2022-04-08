@@ -107,6 +107,8 @@ class PublishNoteAPITests: XCTestCase {
 
         BeamTestsHelper.logout()
 
+        XCTAssertFalse(AuthenticationManager.shared.isAuthenticated)
+
         let publish = expectation(description: "note publish")
         BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, completion: { result in
             assertIsFailure(result)
