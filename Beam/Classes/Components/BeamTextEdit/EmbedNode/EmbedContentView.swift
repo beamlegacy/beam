@@ -58,6 +58,7 @@ final class EmbedContentView: NSView {
 
         webView.autoresizingMask = [.width, .height]
         webView.navigationDelegate = self
+        webView.uiDelegate = self
 
         webPage?.delegate = self
 
@@ -211,6 +212,18 @@ extension EmbedContentView: WKNavigationDelegate {
 
     public func webView(_ webView: WKWebView, authenticationChallenge challenge: URLAuthenticationChallenge, shouldAllowDeprecatedTLS decisionHandler: @escaping (Bool) -> Void) {
         decisionHandler(true)
+    }
+
+}
+
+// MARK: - WKUIDelegate
+
+extension EmbedContentView: WKUIDelegate {
+
+    func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
+        guard let url = navigationAction.request.url else { return nil }
+        delegate?.embedContentView(self, didRequestNewTab: url)
+        return nil
     }
 
 }
