@@ -60,7 +60,7 @@
         "repositoryURL": "https://gitlab+deploy-token-596840:s63rWYma33o3RCwsbebz@gitlab.com/beamgroup/clustering.git",
         "state": {
           "branch": null,
-          "revision": "d693c60cf36a377c6e5596197386ba0ce44079ea",
+          "revision": "c1d7d1b7d0a4ee16b0e89ed62d3b816a858f8cb2",
           "version": null
         }
       },
@@ -141,8 +141,8 @@
         "repositoryURL": "https://github.com/llvm-swift/FileCheck.git",
         "state": {
           "branch": null,
-          "revision": "0dc8a5bff1a7f01e1d7bcc20c79e2127b2ea3eeb",
-          "version": "0.2.5"
+          "revision": "f7c5f1a9479b33a876a6f5632ca2b92a7ce4b667",
+          "version": "0.2.6"
         }
       },
       {

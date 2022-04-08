@@ -84,7 +84,16 @@ class BeamNoteSharingUtils {
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .notePublishing)
-                completion?(.failure(error))
+                if !becomePublic, let serverError = error as? RestAPIServer.Error, serverError == .notFound {
+                    // This is when you try to unpublish an unexisting note server-side (probably server deleted)
+                    // Even if we had a failure, we need to update and save the note, and report the completion as a failure.
+                    note.publicationStatus = .unpublished
+                    note.save(completion: { _ in
+                        completion?(.failure(error))
+                    })
+                } else {
+                    completion?(.failure(error))
+                }
                 note.ongoingPublicationOperation = false
             case .success(let status):
                 note.publicationStatus = status
