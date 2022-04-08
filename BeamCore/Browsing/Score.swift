@@ -13,7 +13,7 @@ private func aggregateLastEvent(event: ReadingEvent?, otherEvent: ReadingEvent?)
     guard let unwrappedEvent = event, let unwrappedOtherEvent = otherEvent else { return event ?? otherEvent }
     return unwrappedEvent.date > unwrappedOtherEvent.date ? unwrappedEvent : unwrappedOtherEvent
 }
-private func nilMax(date: Date?, otherDate: Date?) -> Date? {
+public func nilMax(date: Date?, otherDate: Date?) -> Date? {
     guard let unwrappedDate = date, let unwrappedOtherDate = otherDate else { return date ?? otherDate }
     return max(unwrappedDate, unwrappedOtherDate)
 }
@@ -70,6 +70,8 @@ public class Score: Codable, Equatable {
         case inbounds
         case videoTotalDuration
         case videoReadingDuration
+        case visitCount
+        case lastCreationDate
         case id
     }
     public var score: Float {
@@ -82,6 +84,7 @@ public class Score: Codable, Equatable {
     }
 
     public var id: UUID? = UUID()
+    public var visitCount: Int = 0
     public var readingTimeToLastEvent: CFTimeInterval = 0 //< how long did the user spent reading this page
     public var textSelections: Int = 0 //< how many chunks of text were selected by the user
     public var scrollRatioX: Float = 0 //< how much of the page was seen by the user ([0, 1])
@@ -96,6 +99,26 @@ public class Score: Codable, Equatable {
     public var lastEvent: ReadingEvent?
     public var isForeground: Bool = false
     public var lastCreationDate: Date?
+
+    init() {}
+
+    public required init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(UUID.self, forKey: .id)
+        visitCount = (try container.decodeIfPresent(Int.self, forKey: .visitCount)) ?? 1
+        readingTimeToLastEvent = try container.decode(Double.self, forKey: .readingTimeToLastEvent)
+        textSelections = try container.decode(Int.self, forKey: .textSelections)
+        scrollRatioX = try container.decode(Float.self, forKey: .scrollRatioX)
+        scrollRatioY = try container.decode(Float.self, forKey: .scrollRatioY)
+        openIndex = try container.decode(Int.self, forKey: .openIndex)
+        outbounds = try container.decode(Int.self, forKey: .outbounds)
+        textAmount = try container.decode(Int.self, forKey: .textAmount)
+        area = try container.decode(Float.self, forKey: .area)
+        inbounds = try container.decode(Int.self, forKey: .inbounds)
+        videoTotalDuration = try container.decode(Double.self, forKey: .videoTotalDuration)
+        videoReadingDuration = try container.decode(Double.self, forKey: .videoReadingDuration)
+        lastCreationDate = try container.decodeIfPresent(Date.self, forKey: .lastCreationDate)
+    }
 
     public func readingTimeScore(toDate: Date = BeamDate.now) -> Float {
         guard let lastEvent = lastEvent else { return Float(readingTimeToLastEvent) }

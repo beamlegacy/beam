@@ -57,6 +57,14 @@ class BrowsingTreeScoreTests: XCTestCase {
         let date1 = tree.current.events[0].date
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date1)
     }
+    func testVisitCount() throws {
+        let tree = BrowsingTree(nil)
+        tree.navigateTo(url: "http://a.com", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        let link = tree.current.link
+        tree.navigateTo(url: "http://b.com", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://a.com", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        XCTAssertEqual(tree.scoreFor(link: link).visitCount, 2)
+    }
 
     func testScoreHalflive() throws {
         let score = Score()
