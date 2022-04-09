@@ -30,8 +30,8 @@ class AutoFillPasswordsTestView: PreferencesBaseView {
     
     @discardableResult
     func searchForPasswordBy(_ searchKeyword: String) -> AutoFillPasswordsTestView {
-        buttonTables(AutofillPasswordViewLocators.TextFields.searchField.accessibilityIdentifier).clickOnExistence()
-        buttonTables(AutofillPasswordViewLocators.TextFields.searchField.accessibilityIdentifier).typeText(searchKeyword)
+        textFieldSheets(AutofillPasswordViewLocators.TextFields.searchField.accessibilityIdentifier).clickOnExistence()
+        textFieldSheets(AutofillPasswordViewLocators.TextFields.searchField.accessibilityIdentifier).typeText(searchKeyword)
         return self
     }
     

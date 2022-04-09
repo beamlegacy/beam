@@ -113,7 +113,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
     func showOtherPasswords() {
         delegate?.dismissMenu()
         guard let mainWindow = AppDelegate.main.window else { return }
-        guard let childWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: true, useBeamShadow: false, movable: true) else { return }
+        guard let childWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: true, canBecomeMain: false, withShadow: true, useBeamShadow: false, movable: true, autocloseIfNotMoved: false) else { return }
         otherPasswordsDialog = childWindow
         let otherPasswords = OtherPasswordsSheet(viewModel: otherPasswordsViewModel) { [weak self] entry in
             self?.closeOtherPasswordsDialog()
@@ -126,6 +126,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         }
         let position = CGPoint(x: (mainWindow.frame.size.width - otherPasswords.width) / 2, y: (mainWindow.frame.size.height + otherPasswords.height) / 2)
         childWindow.setView(with: otherPasswords, at: position, fromTopLeft: true)
+        childWindow.makeKeyAndOrderFront(nil)
     }
 
     func onSuggestNewPassword(state: PasswordManagerMenuCellState) {
