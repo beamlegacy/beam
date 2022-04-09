@@ -25,11 +25,13 @@ class PopoverWindow: NSWindow {
     private var _canBecomeKey: Bool
     private var _canBecomeMain: Bool
     private var _useBeamShadow: Bool
+    private var _autocloseIfNotMoved: Bool
 
-    init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false) {
+    init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false, autocloseIfNotMoved: Bool = true) {
         _canBecomeKey = canBecomeKey
         _canBecomeMain = canBecomeMain
         _useBeamShadow = useBeamShadow
+        _autocloseIfNotMoved = autocloseIfNotMoved
         shadowColor = lightBeamShadow ? .From(color: .black, alpha: 0.16) : .combining(lightColor: .From(color: .black, alpha: 0.16), darkColor: .From(color: .black, alpha: 0.7))
         super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
     }
@@ -68,7 +70,7 @@ class PopoverWindow: NSWindow {
     }
 
     func closeIfNotMoved() {
-        guard !didMove else { return }
+        guard _autocloseIfNotMoved, !didMove else { return }
         close()
     }
 
@@ -90,14 +92,14 @@ class PopoverWindow: NSWindow {
 
     override func resignMain() {
         super.resignMain()
-        if !didMove {
+        if _autocloseIfNotMoved && !didMove {
             self.close()
             NotificationCenter.default.removeObserver(self, name: .init("NSWindowDidMoveNotification"), object: nil)
         }
     }
 
     override func resignKey() {
-        if !didMove {
+        if _autocloseIfNotMoved && !didMove {
             self.close()
             NotificationCenter.default.removeObserver(self, name: .init("NSWindowDidMoveNotification"), object: nil)
         }
