@@ -10,7 +10,14 @@ final class PDFDocumentViewCoordinator: NSObject {
     private var swiftUIView: PDFDocumentView?
     private var findString = PassthroughSubject<String?, Never>()
     private var findMatches = [PDFSelection]()
-    private var findMatchIndex = PassthroughSubject<Int, Never>()
+
+    private var findMatchIndex = 0 {
+        didSet {
+            guard findMatchIndex != oldValue else { return }
+            swiftUIView?.findMatchIndex?.wrappedValue = findMatchIndex
+        }
+    }
+
     private var miscCancellables = Set<AnyCancellable>()
     private var pdfNotificationCancellables = Set<AnyCancellable>()
     private let notificationCenter = NotificationCenter.default
@@ -60,6 +67,8 @@ final class PDFDocumentViewCoordinator: NSObject {
             self?.updateNSViewPosition()
         }
 
+        clearFindMatches()
+
         observeNSView()
         observeScrollView()
         observePDFDocument()
@@ -89,7 +98,7 @@ final class PDFDocumentViewCoordinator: NSObject {
         }
 
         if !autoScales,
-            nsView?.scaleFactor != scaleFactor {
+           nsView?.scaleFactor != scaleFactor {
             nsView?.scaleFactor = scaleFactor
         }
 
@@ -213,14 +222,19 @@ final class PDFDocumentViewCoordinator: NSObject {
     }
 
     private func updateFindMatch() {
-        guard let index = swiftUIView?.findMatchIndex?.wrappedValue else { return }
-        findMatchIndex.send(index)
+        guard
+            let index = swiftUIView?.findMatchIndex?.wrappedValue,
+            findMatchIndex != index
+        else {
+            return
+        }
+
+        findMatchIndex = index
+        selectFindMatch()
     }
 
     private func clearFindMatches() {
         findMatches = []
-        findMatchIndex.send(0)
-
         nsView?.highlightedSelections = []
         nsView?.currentSelection = nil
     }
@@ -238,30 +252,54 @@ final class PDFDocumentViewCoordinator: NSObject {
         nsView?.highlightedSelections = findMatches
     }
 
-    private func selectFirstFindMatch() {
-        guard !findMatches.isEmpty else { return }
-        selectFindMatch(at: 0)
+    private func selectFindMatch() {
+        // Keep the match index as is if there's no existing search results, which likely means we are restoring a
+        // previous search.
+        if !findMatches.isEmpty {
+            clampFindMatchIndex()
+        }
+
+        selectFindMatch(at: findMatchIndex)
     }
 
     private func selectFindMatch(at index: Int) {
-        if !findMatches.isEmpty {
-            let selection = findMatches[index]
-            nsView?.setCurrentSelection(selection, animate: true)
-
-            if let selectionPage = selection.pages.first {
-                // Get the bounds of the match in the page space and extend its dimensions, so that when
-                // programmatically navigating to the match, it is located at a position away from the window bounds
-                // and doesn't overlap with the toolbar.
-                let selectionBoundsInPageSpace = selection.bounds(for: selectionPage)
-                let extendedBounds = selectionBoundsInPageSpace.insetBy(dx: -50, dy: -120)
-                nsView?.go(to: extendedBounds, on: selectionPage)
-            } else {
-                nsView?.scrollSelectionToVisible(nil)
-            }
+        guard
+            !findMatches.isEmpty,
+            index >= 0,
+            index < findMatches.count
+        else {
+            return
         }
 
-        DispatchQueue.main.async { [weak self] in
-            self?.swiftUIView?.findMatchIndex?.wrappedValue = index
+        let selection = findMatches[index]
+        nsView?.setCurrentSelection(selection, animate: true)
+
+        if let selectionPage = selection.pages.first {
+            // Get the bounds of the match in the page space and extend its dimensions, so that when
+            // programmatically navigating to the match, it is located at a position away from the window bounds
+            // and doesn't overlap with the toolbar.
+            let selectionBoundsInPageSpace = selection.bounds(for: selectionPage)
+            let extendedBounds = selectionBoundsInPageSpace.insetBy(dx: -50, dy: -120)
+            nsView?.go(to: extendedBounds, on: selectionPage)
+        } else {
+            nsView?.scrollSelectionToVisible(nil)
+        }
+    }
+
+    private func clampFindMatchIndex() {
+        let matchCount = findMatches.count
+
+        if findMatchIndex >= matchCount {
+            findMatchIndex = 0
+
+        } else if findMatchIndex < 0 {
+            findMatchIndex = matchCount - 1
+        }
+    }
+
+    private func resetFindMatchIndex() {
+        if !findMatches.isEmpty {
+            findMatchIndex = 0
         }
     }
 
@@ -270,45 +308,30 @@ final class PDFDocumentViewCoordinator: NSObject {
             .removeDuplicates()
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .sink { [weak self] string in
-                self?.clearFindMatches()
+                // Before starting a new search, reset the current match index only if we are not resetting an
+                // existing search. Otherwise, it's likely that we are restoring a previous search, and therefore must
+                // keep the match index around and select this match once search completes.
+                self?.resetFindMatchIndex()
 
                 if let string = string, !string.isEmpty {
                     self?.beginFindString(string)
                 } else {
+                    self?.clearFindMatches()
                     self?.swiftUIView?.onFindMatches?([])
                     self?.swiftUIView?.onSelectionChanged?(nil)
                 }
-            }
-            .store(in: &miscCancellables)
-
-        findMatchIndex
-            .removeDuplicates()
-            .map { [weak self] index -> Int in
-                guard
-                    let matchCount = self?.findMatches.count,
-                    matchCount > 0
-                else {
-                    return 0
-                }
-
-                if index >= matchCount {
-                    return 0
-                }
-
-                if index < 0 {
-                    return matchCount - 1
-                }
-
-                return index
-            }
-            .sink { [weak self] index in
-                self?.selectFindMatch(at: index)
             }
             .store(in: &miscCancellables)
     }
 
     private func observePDFDocument() {
         pdfNotificationCancellables = []
+
+        notificationCenter.publisher(for: .PDFDocumentDidBeginFind, object: pdfDocument)
+            .sink { [weak self] _ in
+                self?.findMatches = []
+            }
+            .store(in: &pdfNotificationCancellables)
 
         notificationCenter.publisher(for: .PDFDocumentDidFindMatch, object: pdfDocument)
             .compactMap { note in
@@ -322,7 +345,7 @@ final class PDFDocumentViewCoordinator: NSObject {
         notificationCenter.publisher(for: .PDFDocumentDidEndFind, object: pdfDocument)
             .sink { [weak self] _ in
                 self?.highlightFindMatches()
-                self?.selectFirstFindMatch()
+                self?.selectFindMatch()
 
                 if let selections = self?.findMatches {
                     self?.swiftUIView?.onFindMatches?(selections)
