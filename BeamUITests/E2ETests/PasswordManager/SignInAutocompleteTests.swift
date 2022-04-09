@@ -114,7 +114,54 @@ class SignInAutocompleteTests: BaseTest {
         }
 
     }
-    
+
+    func testOtherPasswordsSearch() {
+        let journalView = launchApp()
+
+        step("Given I populate passwords and load a test page"){
+            uiMenu.populatePasswordsDB()
+            OmniBoxUITestsHelper(journalView.app).tapCommand(.loadUITestPagePassword)
+        }
+        let passwordPage = UITestPagePasswordManager()
+
+        step("When I click Other passwords option"){
+            passwordPage.clickInputField(.password)
+        }
+        let passPrefView = helper.openPasswordPreferences()
+
+        step("Then Password preferences window is opened, and menu isn't visible anymore"){
+            XCTAssertTrue(passPrefView.isPasswordPreferencesOpened())
+            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+        }
+
+        step("Then the list shows entries for apple.com and facebook.com"){
+            XCTAssertTrue(passPrefView.staticTextTables("apple.com").exists)
+            XCTAssertTrue(passPrefView.staticTextTables("facebook.com").exists)
+        }
+
+        step("When I search for apple"){
+            passPrefView.searchForPasswordBy("apple")
+        }
+
+        step("Then the list shows apple.com and not facebook.com"){
+            XCTAssertTrue(passPrefView.staticTextTables("apple.com").exists)
+            XCTAssertFalse(passPrefView.staticTextTables("facebook.com").exists)
+        }
+
+        step("When I empty the search field"){
+            helper.typeKeyboardKey(.delete)
+            helper.typeKeyboardKey(.delete)
+            helper.typeKeyboardKey(.delete)
+            helper.typeKeyboardKey(.delete)
+            helper.typeKeyboardKey(.delete)
+        }
+
+        step("Then the list shows apple.com and facebook.com again"){
+            XCTAssertTrue(passPrefView.staticTextTables("apple.com").exists)
+            XCTAssertTrue(passPrefView.staticTextTables("facebook.com").exists)
+        }
+    }
+
     func SKIPtestSearchPasswords() throws {
         try XCTSkipIf(true, "Identifiers needed")
     }
