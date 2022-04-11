@@ -7,7 +7,6 @@ import Quick
 import Nimble
 import Combine
 import Promises
-import PromiseKit
 import PMKFoundation
 
 @testable import Beam
@@ -93,28 +92,6 @@ class DocumentManagerNetworkTests: QuickSpec {
 
                     let remoteStruct = helper.fetchOnAPI(docStruct)
                     expect(remoteStruct) == docStruct
-                }
-            }
-
-            context("with PromiseKit") {
-                it("uploads existing documents") {
-                    let networkCalls = APIRequest.callsCount
-                    let promise: PromiseKit.Promise<Bool> = sut.saveAllOnAPI()
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        promise.done { success in
-                            expect(success) == true
-                            done()
-                        }.catch { error in
-                            fail("Should not happen: \(error)")
-                        }
-                    }
-
-                    expect(APIRequest.callsCount - networkCalls) == 1
-
-                    let remoteStruct = helper.fetchOnAPI(docStruct)
-                    expect(remoteStruct?.id) == docStruct.id
-                    expect(remoteStruct?.data) == docStruct.data
                 }
             }
 
@@ -501,68 +478,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    context("with PromiseKit") {
-                        beforeEach {
-                            docStruct = helper.saveLocally(docStruct)
-                        }
-                        it("saves the document on the API") {
-                            let promise: PromiseKit.Promise<Bool> = sut.saveOnApi(docStruct)
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { success in
-                                    expect(success) == true
-                                    done()
-                                }.catch { fail("Should not be called: \($0)"); done() }
-                            }
-
-                            let remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct) == docStruct
-                        }
-
-                        xit("cancels previous unfinished saves") {
-                            beamHelper.disableNetworkRecording()
-                            helper.deleteAllDatabases()
-                            docStruct = helper.createDocumentStruct()
-                            docStruct = helper.saveLocally(docStruct)
-
-                            let previousNetworkCall = APIRequest.callsCount
-                            let times = 10
-                            let title = docStruct.title
-                            var newTitle = title
-
-                            for index in 0..<times {
-                                newTitle = "\(title) - \(index)"
-                                docStruct.title = newTitle
-                                docStruct.version += 1
-                                let promise: PromiseKit.Promise<Bool> = sut.saveOnApi(docStruct)
-                                promise.done {
-                                    fail("Should not be called: \($0) for \(docStruct.titleAndId)")
-                                }.catch { error in
-                                    expect(error).to(matchError(DocumentManagerError.operationCancelled))
-                                }
-                            }
-
-                            newTitle = "\(title) - last"
-                            waitUntil(timeout: .seconds(10)) { done in
-                                docStruct.title = newTitle
-                                docStruct.version += 1
-                                let promise: PromiseKit.Promise<Bool> = sut.saveOnApi(docStruct)
-                                promise.done { success in
-                                    expect(success) == true
-                                    done()
-                                }.catch {
-                                    fail("Should not be called: \($0) for \(docStruct.titleAndId)")
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - previousNetworkCall) == 1
-
-                            let remoteStruct = helper.fetchOnAPI(docStruct)
-                            expect(remoteStruct?.title) == newTitle
-                        }
-                    }
-
                     context("with Promises") {
                         beforeEach {
                             docStruct = helper.saveLocally(docStruct)
@@ -669,21 +584,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                         expect(remoteObject) == docStruct
                     }
                 }
-                context("PromiseKit") {
-                    it("saves as beamObject") {
-                        let promise: PromiseKit.Promise<DocumentStruct> = sut.saveOnBeamObjectAPI(docStruct)
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.done { receivedDocStruct in
-                                expect(receivedDocStruct) == docStruct
-                                done()
-                            }.catch { fail("Should not be called: \($0)"); done() }
-                        }
-
-                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
-                        expect(remoteObject) == docStruct
-                    }
-                }
                 context("Promises") {
                     it("saves as beamObject") {
                         let promise: Promises.Promise<DocumentStruct> = sut.saveOnBeamObjectAPI(docStruct)
@@ -730,25 +630,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                             } catch {
                                 fail(error.localizedDescription)
                             }
-                        }
-
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
-                        expect(remoteObject1) == docStruct
-
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
-                        expect(remoteObject2) == docStruct2
-                    }
-                }
-                context("PromiseKit") {
-                    it("saves as beamObjects") {
-                        let objects: [DocumentStruct] = [docStruct, docStruct2]
-                        let promise: PromiseKit.Promise<[DocumentStruct]> = sut.saveOnBeamObjectsAPI(objects)
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.done { receivedObjects in
-                                expect(receivedObjects) == objects
-                                done()
-                            }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
                         let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
@@ -819,24 +700,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                         let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
                         expect(remoteObject1) == docStruct
 
-                        let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
-                        expect(remoteObject2) == docStruct2
-                    }
-                }
-                context("PromiseKit") {
-                    it("saves as beamObjects") {
-                        let promise: PromiseKit.Promise<[DocumentStruct]> = sut.saveAllOnBeamObjectApi()
-                        
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.done { documents in
-                                expect(documents).to(haveCount(2))
-                                done()
-                            }.catch { fail("Should not be called: \($0)"); done() }
-                        }
-                        
-                        let remoteObject1: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
-                        expect(remoteObject1) == docStruct
-                        
                         let remoteObject2: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct2)
                         expect(remoteObject2) == docStruct2
                     }

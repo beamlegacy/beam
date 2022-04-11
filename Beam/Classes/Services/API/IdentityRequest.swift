@@ -1,5 +1,4 @@
 import Foundation
-import PromiseKit
 import Promises
 
 enum IdentityRequestError: Error, Equatable {
@@ -52,47 +51,6 @@ extension IdentityRequest {
         let bodyParamsRequest = GraphqlParameters(fileName: "identities", variables: EmptyVariable())
 
         return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
-    }
-}
-
-// MARK: PromiseKit
-extension IdentityRequest {
-    func create(_ accessToken: String,
-                _ provider: Provider) -> PromiseKit.Promise<CreateIdentity> {
-        let identity = IdentityType(provider: provider.rawValue, accessToken: accessToken)
-        let parameters = IdentityParameters(identity: identity)
-        let bodyParamsRequest = GraphqlParameters(fileName: "create_identity", variables: parameters)
-
-        let promise: PromiseKit.Promise<CreateIdentity> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                         authenticatedCall: true)
-
-        return promise
-    }
-
-    func delete(_ id: String) -> PromiseKit.Promise<DeleteIdentity> {
-        let identity = IdentityType(id: id)
-        let parameters = IdentityParameters(identity: identity)
-        let bodyParamsRequest = GraphqlParameters(fileName: "delete_identity", variables: parameters)
-
-        let promise: PromiseKit.Promise<DeleteIdentity> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                                         authenticatedCall: true)
-
-        return promise
-    }
-
-    func fetchAll() -> PromiseKit.Promise<[IdentityType]> {
-        let bodyParamsRequest = GraphqlParameters(fileName: "identities", variables: EmptyVariable())
-
-        let promise: PromiseKit.Promise<UserMe> = performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                             authenticatedCall: true)
-
-        return promise.map(on: backgroundQueue) { me in
-            guard let identities = me.identities else {
-                throw IdentityRequestError.parserError
-            }
-
-            return identities
-        }
     }
 }
 
