@@ -660,9 +660,11 @@ extension BrowserTab: WebViewControllerDelegate {
         if case .javascript = navigationDescription.source {
             shouldWaitForBetterContent = true
         }
-        state?.browserTabsManager.tabDidFinishNavigating(self, url: url, originalRequestedURL: navigationDescription.requestedURL,
-                                                         shouldWaitForBetterContent: shouldWaitForBetterContent,
-                                                         isLinkActivation: isLinkActivation)
+
+        state?.webIndexingController.tabDidNavigate(self, toURL: url, inWebView: webView, originalRequestedURL: navigationDescription.requestedURL,
+                                                    shouldWaitForBetterContent: shouldWaitForBetterContent,
+                                                    isLinkActivation: isLinkActivation, currentTab: state?.browserTabsManager.currentTab)
+        state?.browserTabsManager.tabDidFinishNavigating(self, url: url)
     }
 
     func webViewController(_ controller: WebViewController, didChangeLoadedContentType contentDescription: BrowserContentDescription?) {

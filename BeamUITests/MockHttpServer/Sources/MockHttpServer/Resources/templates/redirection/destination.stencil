@@ -1,0 +1,42 @@
+<html>
+
+<head>
+<title>Redirection Destination</title>
+
+<script>
+    function autoClickIfNeeded() {
+        var autoClick = "{{ params.clickRedirection }}"
+        if (autoClick.length == 0) {
+            return;
+        }
+        setTimeout(function() {
+            clickOnRedirection(autoClick)
+        }, 500);
+    }
+    function clickOnRedirection(type) {
+        var link = document.getElementById(type);
+        link.click();
+    }
+</script>
+
+</head>
+
+<body onload="autoClickIfNeeded()">
+<h1>Final Redirection Reached</h1>
+
+<h2>Redirect Again:</h2>
+<ul>
+{% for redirection in params.redirections %}
+<li>
+<a id="{{redirection}}" href="http://localhost:{{ params.port }}/redirection?type={{redirection}}">{{ redirection }}</a>
+</li>
+{% endfor %}
+</ul>
+
+<ul>
+<li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>
+</ul>
+
+</body>
+
+</html>

@@ -198,7 +198,7 @@ class OmniboxViewTests: BaseTest {
     func testOmniboxTextSelectionAndEditing() throws {
         let initialSearch = "http://localhost:8080/"
         let expectedInitialSearchURLinTab = "http://localhost:8080/"
-        let expectedTabTitle = "Mock Form Server"
+        let expectedTabTitle = "Mock HTTP Server"
         
         let editedSourceToSearch = "menu.form.lvh.me"
         let expectedEditedSourceToSearchURL = "http://menu.form.lvh.me:8080/"

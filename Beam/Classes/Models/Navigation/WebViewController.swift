@@ -187,7 +187,7 @@ class WebViewController {
 }
 
 // MARK: - Navigation Handling
-enum WebViewControllerNavigationSource {
+enum WebViewControllerNavigationSource: Equatable {
     case webKit
     case javascript(replacing: Bool)
 }
