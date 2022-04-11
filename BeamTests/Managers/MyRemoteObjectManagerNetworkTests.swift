@@ -4,7 +4,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import PromiseKit
 import Promises
 
 @testable import Beam
@@ -145,64 +144,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
             }
         }
 
-        sharedExamples("saveAllOnBeamObjectApi with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
-            var networkCalls = APIRequest.callsCount
-
-            beforeEach {
-                networkCalls = APIRequest.callsCount
-                let block = sharedExampleContext()
-                let sut = block["sut"] as! MyRemoteObjectManager
-
-                let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveAllOnBeamObjectApi()
-
-                waitUntil(timeout: .seconds(10)) { done in
-                    promise.done { success in
-                        done()
-                    }.catch { error in
-                        fail("Should not happen: \(error)")
-                        done()
-                    }
-                }
-            }
-
-            it("saves all objects") {
-                let block = sharedExampleContext()
-                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
-
-                if let callsCount = block["callsCount"] as? Int {
-                    expect(APIRequest.callsCount - networkCalls) == callsCount
-                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
-                } else {
-                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                }
-
-                for index in 1...3 {
-                    if let expectedTitle = block["expectedTitle\(index)"] as? String,
-                       let object = block["object\(index)"] as? MyRemoteObject {
-                        var expectedResult = object.copy()
-                        expectedResult.title = expectedTitle
-
-                        let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-                        expect(expectedResult) == remoteObject
-                    }
-                }
-
-                for key in [UUID(uuidString: "195d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                            UUID(uuidString: "295d94e1-e0df-4eca-93e6-8778984bcd58")!,
-                            UUID(uuidString: "395d94e1-e0df-4eca-93e6-8778984bcd58")!] {
-                    let object = MyRemoteObjectManager.store[key]
-                    expect(object) == (try beamObjectHelper.fetchOnAPI(object))
-                }
-            }
-
-            it("stores previousChecksum") {
-                for (_, object) in MyRemoteObjectManager.store {
-                    expect(object.previousChecksum).toNot(beNil())
-                }
-            }
-        }
-
         sharedExamples("saveOnBeamObjectsAPI with Foundation") { (sharedExampleContext: @escaping SharedExampleContext) in
             it("saves all objects") {
                 let block = sharedExampleContext()
@@ -280,80 +221,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                             dump(expectedResult)
                             dump("not ok :(")
                         }
-                    } else {
-                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
-                    }
-                }
-            }
-        }
-
-        sharedExamples("saveOnBeamObjectsAPI with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
-            it("saves all objects") {
-                let block = sharedExampleContext()
-                let sut = block["sut"] as! MyRemoteObjectManager
-                let networkCalls = APIRequest.callsCount
-                let object1 = block["object1"] as! MyRemoteObject
-                let object2 = block["object2"] as! MyRemoteObject
-                let object3 = block["object3"] as! MyRemoteObject
-                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
-
-                let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-
-                waitUntil(timeout: .seconds(10)) { done in
-                    promise.done { remoteObject in
-                        done()
-                    }.catch { error in
-                        fail("Should not happen: \(error)")
-                        done()
-                    }
-                }
-
-                if let callsCount = block["callsCount"] as? Int {
-                    expect(APIRequest.callsCount - networkCalls) == callsCount
-                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
-                } else {
-                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                }
-
-                for index in 1...3 {
-                    let object = block["object\(index)"] as! MyRemoteObject
-                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-
-                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
-                        var expectedResult = object.copy()
-                        expectedResult.title = expectedTitle
-                        expect(expectedResult) == remoteObject
-                    } else {
-                        expect(object) == remoteObject
-                    }
-                }
-            }
-
-            it("stores previousChecksum") {
-                let block = sharedExampleContext()
-                let sut = block["sut"] as! MyRemoteObjectManager
-                let object1 = block["object1"] as! MyRemoteObject
-                let object2 = block["object2"] as! MyRemoteObject
-                let object3 = block["object3"] as! MyRemoteObject
-
-                let promise: PromiseKit.Promise<[MyRemoteObject]> = sut.saveOnBeamObjectsAPI([object1, object2, object3])
-                waitUntil(timeout: .seconds(10)) { done in
-                    promise.done { remoteObject in
-                        done()
-                    }.catch { error in
-                        fail("Should not happen: \(error)")
-                        done()
-                    }
-                }
-
-                for index in 1...3 {
-                    let object = block["object\(index)"] as! MyRemoteObject
-
-                    if let expectedTitle = block["expectedTitle\(index)"] as? String {
-                        var expectedResult = object.copy()
-                        expectedResult.title = expectedTitle
-                        expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(expectedResult))
                     } else {
                         expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
                     }
@@ -493,70 +360,6 @@ class SaveOnBeamObjectAPIConfiguration: QuickConfiguration {
                         }
                     } catch {
                         fail(error.localizedDescription)
-                    }
-                }
-
-                if let expectedTitle = block["expectedTitle"] as? String {
-                    var expectedResult = object.copy()
-                    expectedResult.title = expectedTitle
-                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
-                } else {
-                    expect(MyRemoteObjectManager.store[object.beamObjectId]?.previousChecksum) == (try checksum(object))
-                }
-            }
-        }
-
-        sharedExamples("saveOnBeamObjectAPI with PromiseKit") { (sharedExampleContext: @escaping SharedExampleContext) in
-            it("saves new object") {
-                let block = sharedExampleContext()
-                let sut = block["sut"] as! MyRemoteObjectManager
-                let object = block["object"] as! MyRemoteObject
-                let networkCalls = APIRequest.callsCount
-
-                let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
-                waitUntil(timeout: .seconds(10)) { done in
-                    promise.done { remoteObject in
-                        done()
-                    }.catch { error in
-                        fail("Should not happen: \(error)")
-                        done()
-                    }
-                }
-
-                let expectedNetworkCalls = block["networkCallFiles"] as! [String]
-
-                if let callsCount = block["callsCount"] as? Int {
-                    expect(APIRequest.callsCount - networkCalls) == callsCount
-                    expect(APIRequest.networkCallFiles) == expectedNetworkCalls
-                } else {
-                    expect(APIRequest.callsCount - networkCalls) == expectedNetworkCalls.count
-                    expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                }
-
-                if let expectedTitle = block["expectedTitle"] as? String {
-                    var expectedResult = object.copy()
-                    expectedResult.title = expectedTitle
-                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-                    expect(expectedResult) == remoteObject
-                    expect(MyRemoteObjectManager.store[object.beamObjectId]) == expectedResult
-                } else {
-                    let remoteObject: MyRemoteObject? = try beamObjectHelper.fetchOnAPI(object)
-                    expect(object) == remoteObject
-                }
-            }
-
-            it("stores previousChecksum") {
-                let block = sharedExampleContext()
-                let sut = block["sut"] as! MyRemoteObjectManager
-                let object = block["object"] as! MyRemoteObject
-
-                let promise: PromiseKit.Promise<MyRemoteObject> = sut.saveOnBeamObjectAPI(object)
-                waitUntil(timeout: .seconds(10)) { done in
-                    promise.done { remoteObject in
-                        done()
-                    }.catch { error in
-                        fail("Should not happen: \(error)")
-                        done()
                     }
                 }
 
@@ -735,34 +538,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
                     }
 
-                    context("with PromiseKit") {
-                        it("fetches object") {
-                            let networkCalls = APIRequest.callsCount
-                            let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
-
-                            waitUntil(timeout: .seconds(10)) { done in
-                                promise.done { remoteObject in
-                                    let dateFormatter = ISO8601DateFormatter()
-                                    let date = dateFormatter.date(from: "2021-03-19T12:21:13Z")
-
-                                    expect(remoteObject?.updatedAt) == date
-                                    expect(object1.updatedAt) == dateFormatter.date(from: fixedDate)
-                                    done()
-                                }.catch { error in
-                                    fail("Should not happen: \(error)")
-                                    done()
-                                }
-                            }
-
-                            expect(APIRequest.callsCount - networkCalls) == 2
-
-                            let expectedNetworkCalls = ["beam_object_updated_at",
-                                                        "beam_object"]
-
-                            expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                        }
-                    }
-
                     context("with Promises") {
                         it("fetches object") {
                             let networkCalls = APIRequest.callsCount
@@ -820,30 +595,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
                         }
-                        context("with PromiseKit") {
-                            it("fetches object") {
-                                let networkCalls = APIRequest.callsCount
-                                let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1, forced: true)
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    promise.done { remoteObject in
-                                        let dateFormatter = ISO8601DateFormatter()
-                                        expect(remoteObject?.updatedAt) == dateFormatter.date(from: fixedDate)
-                                        expect(object1.updatedAt) == dateFormatter.date(from: fixedDate)
-                                        done()
-                                    }.catch { error in
-                                        fail("Should not happen: \(error)")
-                                        done()
-                                    }
-                                }
-
-                                expect(APIRequest.callsCount - networkCalls) == 1
-
-                                let expectedNetworkCalls = ["beam_object"]
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                            }
-                        }
                         context("with Promises") {
                             it("fetches object") {
                                 let networkCalls = APIRequest.callsCount
@@ -893,28 +644,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
                             }
                         }
-                        context("with PromiseKit") {
-                            it("doesnt't fetch object") {
-                                let networkCalls = APIRequest.callsCount
-                                let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
-
-                                waitUntil(timeout: .seconds(10)) { done in
-                                    promise.done { remoteObject in
-                                        expect(remoteObject).to(beNil())
-                                        done()
-                                    }.catch { error in
-                                        fail("Should not happen: \(error)")
-                                        done()
-                                    }
-                                }
-
-                                expect(APIRequest.callsCount - networkCalls) == 1
-
-                                let expectedNetworkCalls = ["beam_object_updated_at"]
-
-                                expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                            }
-                        }
                         context("with Promises") {
                             it("doesnt't fetch object") {
                                 let networkCalls = APIRequest.callsCount
@@ -952,28 +681,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                     expect(remoteObject).to(beNil())
                                 }.toNot(throwError())
 
-                                done()
-                            }
-                        }
-
-                        expect(APIRequest.callsCount - networkCalls) == 1
-
-                        let expectedNetworkCalls = ["beam_object_updated_at"]
-
-                        expect(APIRequest.networkCallFiles.suffix(expectedNetworkCalls.count)) == expectedNetworkCalls
-                    }
-                }
-                context("PromiseKit") {
-                    it("doesn't return error") {
-                        let networkCalls = APIRequest.callsCount
-                        let promise: PromiseKit.Promise<MyRemoteObject?> = sut.refreshFromBeamObjectAPI(object: object1)
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.done { remoteObject in
-                                expect(remoteObject).to(beNil())
-                                done()
-                            }.catch { error in
-                                fail("Should not happen: \(error)")
                                 done()
                             }
                         }
@@ -1048,13 +755,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
 
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "callsCount": 1,
-                             "networkCallFiles": ["sign_in", "update_beam_objects"]
-                            ]
-                        }
-
                         itBehavesLike("saveAllOnBeamObjectApi with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
                              "callsCount": 1,
@@ -1107,12 +807,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         afterEach { Configuration.beamObjectDataUploadOnSeparateCall = beforeConfiguration }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "networkCallFiles": ["update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
                              "networkCallFiles": ["update_beam_objects"]
                             ]
@@ -1187,15 +881,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "expectedTitle1": newTitle1,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_object",
-                                                  "update_beam_object"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
                              "expectedTitle1": newTitle1,
                              "networkCallFiles": ["update_beam_objects",
@@ -1302,15 +987,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         itBehavesLike("saveAllOnBeamObjectApi with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_object",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
                              "expectedTitle1": "merged: \(newTitle1)\(title1!)",
                              "networkCallFiles": ["update_beam_objects",
@@ -1428,14 +1104,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ["sut": sut as MyRemoteObjectManager,
                              "networkCallFiles": ["update_beam_objects",
                                                   "paginated_beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1567,18 +1235,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle2": "merged: \(newTitle2)\(title2!)",
                              "networkCallFiles": ["update_beam_objects",
                                                   "paginated_beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "expectedTitle1": "merged: \(newTitle1)\(title1!)",
-                             "expectedTitle2": "merged: \(newTitle2)\(title2!)",
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1717,14 +1373,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ["sut": sut as MyRemoteObjectManager,
                              "networkCallFiles": ["update_beam_objects",
                                                   "paginated_beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -1871,21 +1519,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
 
                              "networkCallFiles": ["update_beam_objects",
                                                   Beam.Configuration.beamObjectDataOnSeparateCall ? "paginated_beam_objects_data_url" : "paginated_beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveAllOnBeamObjectApi with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
-
-                             "networkCallFiles": ["update_beam_objects",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "paginated_beam_objects_data_url" : "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -2042,16 +1675,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
 
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "callsCount": 1,
-                             "networkCallFiles": ["sign_in", "update_beam_objects"]
-                            ]
-                        }
-
                         itBehavesLike("saveOnBeamObjectsAPI with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object1": object1 as MyRemoteObject,
@@ -2115,16 +1738,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "callsCount": 1,
-                             "networkCallFiles": ["sign_in", "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object1": object1 as MyRemoteObject,
                              "object2": object2 as MyRemoteObject,
@@ -2358,17 +1971,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
 
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                  "update_beam_object"]
-                            ]
-                        }
-
                         itBehavesLike("saveOnBeamObjectsAPI with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object1": object1 as MyRemoteObject,
@@ -2470,18 +2072,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         itBehavesLike("saveOnBeamObjectsAPI with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_object",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object1": object1 as MyRemoteObject,
                              "object2": object2 as MyRemoteObject,
@@ -2600,17 +2190,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "object3": object3 as MyRemoteObject,
                              "networkCallFiles": ["update_beam_objects",
                                                   "paginated_beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -2740,19 +2319,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                              "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
                              "networkCallFiles": ["update_beam_objects",
                                                   "paginated_beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
                                                   "update_beam_objects"]
                             ]
                         }
@@ -2889,17 +2455,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
 
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
                         itBehavesLike("saveOnBeamObjectsAPI with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object1": object1 as MyRemoteObject,
@@ -3038,20 +2593,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
 
-                        itBehavesLike("saveOnBeamObjectsAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object1": object1 as MyRemoteObject,
-                             "object2": object2 as MyRemoteObject,
-                             "object3": object3 as MyRemoteObject,
-                             "expectedTitle1": "merged: \(newTitle1)\(title1!)" as String,
-                             "expectedTitle2": "merged: \(newTitle2)\(title2!)" as String,
-                             "expectedTitle3": "merged: \(newTitle3)\(title3!)" as String,
-                             "networkCallFiles": ["update_beam_objects",
-                                                  "beam_objects",
-                                                  "update_beam_objects"]
-                            ]
-                        }
-
                         itBehavesLike("saveOnBeamObjectsAPI with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object1": object1 as MyRemoteObject,
@@ -3181,14 +2722,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             ]
                         }
 
-                        itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "callsCount": 1,
-                             "networkCallFiles": ["sign_in", "update_beam_object"]
-                            ]
-                        }
-
                         itBehavesLike("saveOnBeamObjectAPI with Promises") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object": object as MyRemoteObject,
@@ -3249,14 +2782,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                         }
 
                         itBehavesLike("saveOnBeamObjectAPI with Foundation") {
-                            ["sut": sut as MyRemoteObjectManager,
-                             "object": object as MyRemoteObject,
-                             "callsCount": 1,
-                             "networkCallFiles": ["sign_in", "update_beam_object"]
-                            ]
-                        }
-
-                        itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
                             ["sut": sut as MyRemoteObjectManager,
                              "object": object as MyRemoteObject,
                              "callsCount": 1,
@@ -3376,14 +2901,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                                 ]
                             }
 
-                            itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object": object as MyRemoteObject,
-                                 "networkCallFiles": ["update_beam_object",
-                                                      "beam_object",
-                                                      "update_beam_object"]
-                                ]
-                            }
 
                             itBehavesLike("saveOnBeamObjectAPI with Promises") {
                                 ["sut": sut as MyRemoteObjectManager,
@@ -3460,16 +2977,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
                             }
 
                             itBehavesLike("saveOnBeamObjectAPI with Foundation") {
-                                ["sut": sut as MyRemoteObjectManager,
-                                 "object": object as MyRemoteObject,
-                                 "expectedTitle": "merged: \(newTitle)\(title)",
-                                 "networkCallFiles": ["update_beam_object",
-                                                      Beam.Configuration.beamObjectDataOnSeparateCall ? "beam_object_data_url" : "beam_object",
-                                                      "update_beam_objects"]
-                                ]
-                            }
-
-                            itBehavesLike("saveOnBeamObjectAPI with PromiseKit") {
                                 ["sut": sut as MyRemoteObjectManager,
                                  "object": object as MyRemoteObject,
                                  "expectedTitle": "merged: \(newTitle)\(title)",

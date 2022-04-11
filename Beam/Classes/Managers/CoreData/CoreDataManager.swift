@@ -1,7 +1,6 @@
 import Foundation
 import CoreData
 import Promises
-import PromiseKit
 import BeamCore
 
 /*
@@ -249,17 +248,6 @@ class CoreDataManager {
         storeType = description.type
         return container
     }()
-}
-
-// MARK: PromiseKit
-extension CoreDataManager {
-    func background() -> PromiseKit.Guarantee<NSManagedObjectContext> {
-        .value(backgroundContext)
-    }
-
-    func newBackgroundContext() -> PromiseKit.Guarantee<NSManagedObjectContext> {
-        .value(persistentContainer.newBackgroundContext())
-    }
 }
 
 // MARK: Promises

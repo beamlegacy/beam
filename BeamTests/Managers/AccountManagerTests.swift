@@ -4,7 +4,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import PromiseKit
 import Promises
 
 @testable import Beam
