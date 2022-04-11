@@ -1,0 +1,29 @@
+<html>
+
+<head>
+<title>Javascript Redirection</title>
+
+<script>
+    function redirect() {
+        var replace = "{{ params.replace }}"
+        setTimeout(function() {
+            if (replace) {
+                window.location.replace("{{ params.destination }}");
+            } else {
+                window.location.href = "{{ params.destination }}";
+            }
+        }, {{ params.delay }});
+    }
+</script>
+</head>
+
+<body onload="redirect()">
+<h1>Javascript Redirection</h1>
+
+<ul>
+<li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>
+</ul>
+
+</body>
+
+</html>
