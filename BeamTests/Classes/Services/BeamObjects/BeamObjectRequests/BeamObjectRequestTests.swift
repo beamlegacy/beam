@@ -3,7 +3,6 @@ import XCTest
 import Quick
 import Nimble
 import Promises
-import PromiseKit
 
 @testable import Beam
 @testable import BeamCore
