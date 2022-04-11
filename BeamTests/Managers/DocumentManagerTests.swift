@@ -6,7 +6,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import PromiseKit
 import Promises
 
 @testable import Beam
@@ -44,26 +43,6 @@ class DocumentManagerTests: QuickSpec {
                         sut.deleteAll(includedRemote: false) { _ in
                             done()
                         }
-                    }
-                    let count = sut.count()
-                    if count > 0 {
-                        let documentStructs = try sut.fetchAll()
-                        dump(documentStructs)
-
-                        fail("Still have documents: \(documentStructs.compactMap { $0.title })")
-                    }
-                    expect(count) == 0
-                }
-            }
-            context("with PromiseKit") {
-                it("deletes all") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.deleteAll(includedRemote: false)
-
-                        promise.done { success in
-                            expect(success) == true
-                            done()
-                        }.catch { _ in }
                     }
                     let count = sut.count()
                     if count > 0 {
@@ -174,98 +153,6 @@ class DocumentManagerTests: QuickSpec {
                                 expect { try result.get() }.toNot(throwError())
                                 done()
                             })
-                        }
-
-                        let count = sut.count(filters: [.title(docStruct.title), .includeDeleted])
-                        expect(count) == 2
-                    }
-                }
-            }
-
-            context("with PromiseKit") {
-                it("saves document") {
-                    let docStruct = helper.createDocumentStruct()
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
-
-                        promise.done { success in
-                                expect(success) == true
-                                done()
-                            }
-                            .catch { _ in }
-                    }
-
-                    let count = sut.count(filters: [.id(docStruct.id)])
-                    expect(count) == 1
-                }
-
-                it("saves only the last call on coreData") {
-                    var docStruct = helper.createDocumentStruct()
-
-                    var count = 0
-                    let times = 15
-                    var error = false
-                    for _ in 0..<times {
-                        docStruct.version += 1
-                        let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
-
-                        promise
-                            .done { _ in count += 1 }
-                            .catch(policy: .allErrors) { _ in
-                                error = true
-                            }
-                    }
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        docStruct.version += 1
-
-                        let promise: PromiseKit.Promise<Bool> = sut.save(docStruct)
-
-                        promise.done { success in
-                            expect(success) == true
-                            done()
-                        }
-                        .catch(policy: .allErrors) {
-                            fail("Shouldn't happen: \($0)")
-                        }
-                    }
-
-                    expect(count) < (times - 1)
-                    expect(error) == true
-                }
-
-                context("with duplicate titles") {
-                    it("should raise error") {
-                        var docStruct = helper.createDocumentStruct()
-                        docStruct = helper.saveLocally(docStruct)
-
-                        var docStruct2 = helper.createDocumentStruct()
-                        docStruct2.title = docStruct.title
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let promise: PromiseKit.Promise<Bool> = sut.save(docStruct2)
-
-                            promise.done { _ in
-                                fail("Shouldn't happen")
-                                done()
-                            }
-                            .catch { error in
-                                expect((error as NSError).code) == 1001
-                                done()
-                            }
-                        }
-
-                        docStruct2.deletedAt = BeamDate.now
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let promise: PromiseKit.Promise<Bool> = sut.save(docStruct2)
-
-                            promise.done { success in
-                                    expect(success) == true
-                                    done()
-                                }
-                                .catch { _ in }
                         }
 
                         let count = sut.count(filters: [.title(docStruct.title), .includeDeleted])
@@ -403,22 +290,6 @@ class DocumentManagerTests: QuickSpec {
                     expect(count).to(equal(0))
                 }
             }
-            context("with PromiseKit") {
-                it("deletes document") {
-                    var docStruct = helper.createDocumentStruct()
-                    docStruct = helper.saveLocally(docStruct)
-                    waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<Bool> = sut.delete(document: docStruct)
-                        promise
-                            .done { _ in done() }
-                            .catch { _ in }
-                    }
-
-                    let count = sut.count(filters: [.id(docStruct.id)])
-
-                    expect(count).to(equal(0))
-                }
-            }
             context("with Promises") {
                 it("deletes document") {
                     var docStruct = helper.createDocumentStruct()
@@ -547,54 +418,6 @@ class DocumentManagerTests: QuickSpec {
                 expect(failDocStruct).to(beNil())
             }
 
-            context("With PromiseKit") {
-                var title: String!
-                beforeEach {
-                    title = String.randomTitle()
-                }
-
-                it("creates document") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        sut
-                            .create(id: UUID(), title: title)
-                            .done { docStruct in
-                                expect(docStruct.title).to(equal(title))
-                                done()
-                            }
-                            .catch { _ in }
-                    }
-                }
-
-                it("creates a document and execute the proper thread") {
-                    waitUntil(timeout: .seconds(10)) { done in
-                        sut
-                            .create(id: UUID(), title: title)
-                            .done { docStruct in
-                                expect(docStruct.title).to(equal(title))
-                                done()
-                            }
-                            .catch { _ in }
-                    }
-                }
-
-                it("doesn't create a document") {
-                    var docStruct = helper.createDocumentStruct(title: title)
-                    docStruct = helper.saveLocally(docStruct)
-                    waitUntil(timeout: .seconds(10)) { done in
-                        sut
-                            .create(id: UUID(), title: title)
-                            .done { docStruct in
-                                fail("Shouldn't happen")
-                                done()
-                            }
-                            .catch { error in
-                                expect((error as NSError).code).to(equal(1001))
-                                done()
-                            }
-                    }
-                }
-            }
-
             context("With Promises") {
                 var title: String!
                 beforeEach {
@@ -700,22 +523,6 @@ class DocumentManagerTests: QuickSpec {
                         }
 
                         semaphore.wait()
-                    }
-                }
-            }
-
-            context("with PromiseKit") {
-                it("fetches asynchronisely") {
-                    let title = String.randomTitle()
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        let promise: PromiseKit.Promise<DocumentStruct> = sut.fetchOrCreate(title: title)
-                        promise
-                            .done { docStruct in
-                                expect(docStruct.title) == title
-                                done()
-                            }
-                            .catch { _ in }
                     }
                 }
             }

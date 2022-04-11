@@ -6,7 +6,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import PromiseKit
 import Promises
 
 @testable import Beam
@@ -84,42 +83,6 @@ class DatabaseManagerTests: QuickSpec {
                     expect(count) == 1
                 }
             }
-
-            context("with PromiseKit") {
-                it("saves database") {
-                    let dbStruct = helper.createDatabaseStruct()
-                    let promise: PromiseKit.Promise<Bool> = sut.save(dbStruct)
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        promise.done { success in
-                            expect(success) == true
-                            done()
-                        }.catch { fail("Should not be called: \($0)"); done() }
-                    }
-
-                    let count = Database.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
-                    expect(count) == 1
-                }
-            }
-
-            context("with Promises") {
-                it("saves database") {
-                    let dbStruct = helper.createDatabaseStruct()
-                    let promise: Promises.Promise<Bool> = sut.save(dbStruct)
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        promise.then { success in
-                            expect(success) == true
-                            done()
-                        }.catch { fail("Should not be called: \($0)"); done() }
-                    }
-
-                    let count = Database.countWithPredicate(mainContext,
-                                                            NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
-                    expect(count) == 1
-                }
-            }
         }
 
         describe(".allDatabases()") {
@@ -159,40 +122,6 @@ class DatabaseManagerTests: QuickSpec {
                             expect { try result.get() } == false
                             done()
                         }
-                    }
-
-                    let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                            NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
-                    expect(count) == 0
-                }
-            }
-
-            context("with PromiseKit") {
-                it("deletes database") {
-                    let promise: PromiseKit.Promise<Bool> = sut.delete(dbStruct)
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        promise.done { success in
-                            expect(success) == false
-                            done()
-                        }.catch { fail("Should not be called: \($0)"); done() }
-                    }
-
-                    let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,
-                                                            NSPredicate(format: "id = %@", dbStruct.id as CVarArg))
-                    expect(count) == 0
-                }
-            }
-
-            context("with Promises") {
-                it("deletes database") {
-                    let promise: Promises.Promise<Bool> = sut.delete(dbStruct)
-
-                    waitUntil(timeout: .seconds(10)) { done in
-                        promise.then { success in
-                            expect(success) == false
-                            done()
-                        }.catch { fail("Should not be called: \($0)"); done() }
                     }
 
                     let count = Database.countWithPredicate(CoreDataManager.shared.mainContext,

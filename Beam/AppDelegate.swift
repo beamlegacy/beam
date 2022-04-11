@@ -11,7 +11,6 @@ import SwiftUI
 import Combine
 import Sentry
 import Preferences
-import PromiseKit
 import PMKFoundation
 import BeamCore
 
