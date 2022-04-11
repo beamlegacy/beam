@@ -20,6 +20,8 @@ class WebIndexingController {
     private weak var previousTabBrowsingTree: BrowsingTree?
     private let signpost = SignPost("WebIndexingController")
 
+    weak var delegate: WebIndexControllerDelegate?
+
     init(clusteringManager: ClusteringManager) {
         self.clusteringManager = clusteringManager
     }
@@ -79,6 +81,7 @@ class WebIndexingController {
             self.clusteringManager.addPage(id: id, parentId: parentId, value: tabInfo)
             _ = LinkStore.shared.visit(tabInfo.url.string, title: tabInfo.document.title, content: tabInfo.textContent)
         }
+        delegate?.webIndexingController(self, didIndexPageForURL: tabInfo.url)
     }
 
     /// Unused. We let the LinkStore do its job.
@@ -209,4 +212,8 @@ extension WebIndexingController {
     func currentTabDidChange(_ currentTab: BrowserTab?, previousCurrentTab: BrowserTab?) {
         previousTabBrowsingTree = previousCurrentTab?.browsingTree
     }
+}
+
+protocol WebIndexControllerDelegate: AnyObject {
+    func webIndexingController(_ controller: WebIndexingController, didIndexPageForURL url: URL)
 }

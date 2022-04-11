@@ -91,7 +91,11 @@ public extension URL {
         else {
             return nil
         }
-        return URL(string: "\(scheme)://\(host)/")
+        var urlString = "\(scheme)://\(host)/"
+        if let port = self.port {
+            urlString = "\(scheme)://\(host):\(port)/"
+        }
+        return URL(string: urlString)
     }
 
     /// Returns a string containing only the scheme and host.

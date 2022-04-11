@@ -1,11 +1,11 @@
 <html>
 
 <head>
-<title>Mock Form Server</title>
+<title>Mock HTTP Server</title>
 </head>
 
 <body>
-<h1>Mock Form Server</h1>
+<h1>Mock HTTP Server</h1>
 
 
 <h2>Browser:</h2>
@@ -22,6 +22,15 @@
 {% for form in params.forms %}
 <li>
 <a href="http://{{ form }}.form.lvh.me:{{ params.port }}">http://{{ form }}.form.lvh.me:{{ params.port }}</a>
+</li>
+{% endfor %}
+</ul>
+
+<h2>Redirections:</h2>
+<ul>
+{% for redirection in params.redirections %}
+<li>
+<a href="http://lvh.me:{{ params.port }}/redirection/{{ redirection }}">http://lvh.me:{{ params.port }}/redirection/{{ redirection }}</a>
 </li>
 {% endfor %}
 </ul>
