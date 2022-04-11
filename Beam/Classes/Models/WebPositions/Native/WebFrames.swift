@@ -161,11 +161,13 @@ final class WebFrames: ObservableObject {
         return reconnected
     }
 
-    private func descendents(of href: String) -> Set<String> {
+    private func descendents(of href: String, recursionLimit: Int? = nil) -> Set<String> {
+        let currentRecursionLimit = recursionLimit ?? framesInfo.count
+        guard currentRecursionLimit > 0 else { return [] }
         var descendents = Set<String>()
         if let children = hrefTree[href] {
             for href in children {
-                descendents.formUnion(self.descendents(of: href))
+                descendents.formUnion(self.descendents(of: href, recursionLimit: currentRecursionLimit - 1))
             }
             descendents.insert(href)
         }
