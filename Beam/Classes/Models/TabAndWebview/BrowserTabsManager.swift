@@ -314,8 +314,7 @@ extension BrowserTabsManager {
 // MARK: - Tab events
 extension BrowserTabsManager {
 
-    func tabDidFinishNavigating(_ tab: BrowserTab, url: URL, originalRequestedURL: URL?,
-                                shouldWaitForBetterContent: Bool, isLinkActivation: Bool) {
+    func tabDidFinishNavigating(_ tab: BrowserTab, url: URL) {
 
         if data.pinnedTabs.isEmpty && tabPinSuggester.isEligible(url: url) {
             Logger.shared.logInfo("Suggested url to pin \(url)", category: .tabPinSuggestion)
@@ -323,10 +322,6 @@ extension BrowserTabsManager {
             // tab.pinSuggest()
             // self.tabPinSuggester.hasSuggested(url: url)
         }
-        state?.webIndexingController.tabDidNavigate(tab, toURL: url, inWebView: tab.webView, originalRequestedURL: originalRequestedURL,
-                                                    shouldWaitForBetterContent: shouldWaitForBetterContent,
-                                                    isLinkActivation: isLinkActivation,
-                                                    currentTab: currentTab)
     }
 }
 
