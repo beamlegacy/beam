@@ -1,0 +1,19 @@
+<html>
+
+<head>
+<title>HTML redirection</title>
+
+<meta http-equiv="refresh" content="0; URL={{ params.destination }}" />
+
+</head>
+
+<body>
+<h1>HTML redirection</h1>
+
+<ul>
+<li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>
+</ul>
+
+</body>
+
+</html>

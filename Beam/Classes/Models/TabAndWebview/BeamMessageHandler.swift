@@ -5,6 +5,9 @@ import BeamCore
  Handles messages sent from web page's javascript.
  */
 class SimpleBeamMessageHandler: NSObject, WKScriptMessageHandler {
+
+    weak var webPage: WebPage?
+
     internal init(
         messages: [String],
         jsFileName: String,
@@ -35,17 +38,26 @@ class SimpleBeamMessageHandler: NSObject, WKScriptMessageHandler {
             return
         }
 
-        guard let beamWebView = webView as? BeamWebView else {
-            Logger.shared.logError("Expected to cast", category: .web)
+        var webPage = self.webPage
+        if webPage == nil {
+            guard let beamWebView = webView as? BeamWebView else {
+                Logger.shared.logError("Expected to cast", category: .web)
+                return
+            }
+
+            guard let webViewPage = beamWebView.page else {
+                // Failing to case type to BeamWebView during a "Sign in with Apple" flow is most likely due to the creation of a "SecretWebView"
+                // https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/Cocoa/SOAuthorization/PopUpSOAuthorizationSession.mm#L193
+                Logger.shared.logError("Expected WebView before receiving WKScriptMessages", category: .web)
+                return
+            }
+            webPage = webViewPage
+        }
+        guard let webPage = webPage else {
+            Logger.shared.logError("Message Handle couldn't find a webPage", category: .web)
             return
         }
 
-        guard let beamWebPage = beamWebView.page else {
-            // Failing to case type to BeamWebView during a "Sign in with Apple" flow is most likely due to the creation of a "SecretWebView"
-            // https://github.com/WebKit/WebKit/blob/main/Source/WebKit/UIProcess/Cocoa/SOAuthorization/PopUpSOAuthorizationSession.mm#L193
-            Logger.shared.logError("Expected WebView before receiving WKScriptMessages", category: .web)
-            return
-        }
-        onMessage(messageName: message.name, messageBody: message.body, from: beamWebPage, frameInfo: message.frameInfo)
+        onMessage(messageName: message.name, messageBody: message.body, from: webPage, frameInfo: message.frameInfo)
     }
 }

@@ -1,0 +1,34 @@
+<html>
+
+<head>
+<title>Navigation Page</title>
+
+<script>
+    function performNavigation(url, replace) {
+        if (replace) {
+            history.replaceState({}, "", url)
+        } else {
+            history.pushState({}, "", url)
+        }
+        updateDisplayedURL();
+    }
+
+    function updateDisplayedURL() {
+        document.getElementById("current").innerHTML = window.location.href;
+    }
+</script>
+
+</head>
+
+<body onload="updateDisplayedURL()">
+<h1>Navigatable Page</h1>
+
+<p>Current url: <span id="current""></span></p>
+
+<ul>
+<li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>
+</ul>
+
+</body>
+
+</html>
