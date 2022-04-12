@@ -53,6 +53,7 @@
         "PasswordPreferencesTests\/testAddPasswordItem()",
         "PasswordPreferencesTests\/testAutofillUsernameAndPasswords()",
         "ReferencesTests",
+        "ReportBugFeatureTests",
         "SearchOnCardTests",
         "SearchOnPdfTests",
         "SearchOnWebTests",
