@@ -19,6 +19,7 @@ enum KeyCode: UInt16 {
     case space = 49
     case backspace = 51
     case lineFeed = 52
+    case tab = 48
 
     case one = 18
     case two = 19
