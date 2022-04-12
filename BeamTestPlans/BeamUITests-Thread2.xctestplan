@@ -44,6 +44,7 @@
         "PasswordPreferencesTests",
         "PnSAddToCardTests",
         "ReferencesTests",
+        "ReportBugFeatureTests",
         "SearchOnCardTests",
         "SearchOnPdfTests",
         "SearchOnWebTests",
