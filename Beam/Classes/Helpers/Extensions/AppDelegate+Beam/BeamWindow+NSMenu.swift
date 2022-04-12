@@ -221,6 +221,16 @@ extension BeamWindow {
         if event.keyCode == KeyCode.escape.rawValue {
             state.browserTabsManager.currentTab?.respondToEscapeKey()
         }
+        if event.keyCode == KeyCode.tab.rawValue {
+            if event.modifierFlags.contains(.control) && state.mode == .web {
+                if event.modifierFlags.contains(.shift) {
+                    state.browserTabsManager.showPreviousTab()
+                } else {
+                    state.browserTabsManager.showNextTab()
+                }
+                return
+            }
+        }
         guard let keyValue = KeyCode.getKeyValueFrom(for: event.keyCode) else { return }
         switch event.keyCode {
         case KeyCode.zero.rawValue:
