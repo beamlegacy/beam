@@ -18,6 +18,7 @@
       "skippedTests" : [
         "BaseTest",
         "BrowserFancyUrlTests",
+        "BrowserOpenModalTests",
         "CardEditTests",
         "EditorShortcutsTests",
         "HelpAndFeedbackTests",

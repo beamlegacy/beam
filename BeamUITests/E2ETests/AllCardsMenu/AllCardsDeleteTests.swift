@@ -61,4 +61,32 @@ class AllCardsDeleteTests: BaseTest {
         }
 
     }
+    
+    func testUndoDeleteCardAction() {
+        
+        let journalView = launchApp()
+        allCardsView = AllCardsTestView()
+        let indexOfCard = 0
+        var cardName : String?
+        var cardsBeforeDeletion: Int?
+        
+        step ("Given I create a note") {
+            journalView.createCardViaOmniboxSearch(cardName1)
+            ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+            cardsBeforeDeletion = allCardsView!.getNumberOfCards()
+        }
+        
+        step ("When I delete created note from All Cards view and undo it") {
+            cardName = allCardsView!.getCardNameValueByIndex(indexOfCard)
+            allCardsView!.deleteCardByIndex(indexOfCard)
+            ShortcutsHelper().shortcutActionInvoke(action: .undo)
+        }
+        
+        step ("Then deleted note appears in the list again") {
+            allCardsView!.waitForAllCardsViewToLoad()
+            allCardsView!.waitForCardTitlesToAppear()
+            XCTAssertEqual(allCardsView!.getNumberOfCards(), cardsBeforeDeletion!)
+            XCTAssertTrue(allCardsView!.isCardNameAvailable(cardName!))
+        }
+    }
 }
