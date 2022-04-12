@@ -76,7 +76,7 @@ struct OnboardingEmailConnectView: View {
             updateMissingRequirements(for: newText)
             updateButtonState()
         }, onCommit: { _ in
-            triggerConnect()
+            validateForm()
         }, onTab: {
             isPasswordEditing.toggle()
             isPasswordVerificationEditing.toggle()
