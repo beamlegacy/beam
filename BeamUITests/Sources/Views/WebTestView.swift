@@ -128,6 +128,10 @@ class WebTestView: BaseView {
     func waitForTabTitleToEqual(index: Int, expectedString: String) -> Bool {
         return waitForStringValueEqual(expectedString, getBrowserTabTitleElements()[index])
     }
+    
+    func waitForPublishedNoteToLoad(noteName: String) -> Bool {
+        return app.windows.scrollViews.webViews["\(noteName) - beam"].waitForExistence(timeout: implicitWaitTimeout)
+    }
 
     private let tabPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPrefix.accessibilityIdentifier)'")
     func getAnyTab() -> XCUIElement {

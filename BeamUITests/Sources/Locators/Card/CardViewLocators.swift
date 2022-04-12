@@ -25,6 +25,7 @@ enum CardViewLocators {
         case linkAllButton = "link-all-references-button"
         case deleteCardButton = "editor-delete"
         case publishCardButton = "NoteHeaderPublishButton"
+        case unpublishCardButton = "Unpublish"
         case linkNamesButton = "cardTitleLayer"
         case sourceButton = "source"
         case expandButton = "global-expand"
@@ -47,6 +48,7 @@ enum CardViewLocators {
     enum StaticTexts: String, CaseIterable, UIElement {
         case privateLabel = "Private"
         case publishedLabel = "Published"
+        case linkCopiedLabel = "Link Copied"
         case publishLabel = "ContextMenuItem-publish"
         case unpublishLabel = "ContextMenuItem-unpublish"
         case copyLinkLabel = "ContextMenuItem-copy link"

@@ -38,8 +38,12 @@ class CardTestView: BaseView {
         return self.getElementStringValue(element: cardTitleStatic)
     }
     
+    func getDeleteNoteButton() -> XCUIElement {
+        return image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier)
+    }
+    
     func clickDeleteButton() -> AlertTestView {
-        image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).clickOnHittable()
+        getDeleteNoteButton().clickOnHittable()
         return AlertTestView()
     }
     
@@ -69,9 +73,8 @@ class CardTestView: BaseView {
     
     @discardableResult
     func unpublishCard() -> CardTestView {
-        image(CardViewLocators.Buttons.editorButton.accessibilityIdentifier).click()
-        _ = staticText(CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
-        staticText(CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier).click()
+        button(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).clickOnExistence()
+        app.windows.sheets["alert"].buttons[CardViewLocators.Buttons.unpublishCardButton.accessibilityIdentifier].clickOnHittable()
         return self
     }
     
