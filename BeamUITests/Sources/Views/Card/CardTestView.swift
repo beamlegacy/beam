@@ -51,6 +51,16 @@ class CardTestView: BaseView {
         return cardTitle
     }
     
+    func getNewNoteCreationButton() -> XCUIElement {
+        return staticText(CardViewLocators.Buttons.newNoteCreation.accessibilityIdentifier)
+    }
+    
+    @discardableResult
+    func clickNewNoteCreationButton() -> OmniBoxTestView {
+        getNewNoteCreationButton().clickOnExistence()
+        return OmniBoxTestView()
+    }
+    
     @discardableResult
     func publishCard() -> CardTestView {
         button(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).clickOnExistence()
