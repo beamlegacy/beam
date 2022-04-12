@@ -134,10 +134,10 @@ struct OnboardingEmailConnectView: View {
                     if let errorMessage = errorMessage {
                         Text(errorMessage)
                             .foregroundColor(BeamColor.Shiraz.swiftUI)
-                    } else if !isSignIn && isPasswordEditing  {
+                    } else if !isSignIn && isPasswordEditing {
                         StyledText(verbatim: "Use at least 8 characters, 1 symbol and 1 number")
                             .style(.foregroundColor(BeamColor.Generic.text.swiftUI), ranges: { passwordHelpRanges(in: $0, matchingRequirements: false) })
-                    } else if !isSignIn, !passwordField.isEmpty, passwordField != passwordVerificationField{
+                    } else if !isSignIn, !passwordField.isEmpty, passwordField != passwordVerificationField {
                         Text(verbatim: "Make sure your passwords match")
                     } else {
                         Text("Preserve Height").hidden()
@@ -287,6 +287,8 @@ struct OnboardingEmailConnectView: View {
 
     private func showEmailConfirmationStep() {
         onboardingManager.temporaryCredentials = (emailField, passwordField)
+        // If the user is signing in, but is not yet validated, we should probably consider it as a signup
+        onboardingManager.userDidSignUp = true
         finish(.init(type: .emailConfirm))
     }
 
