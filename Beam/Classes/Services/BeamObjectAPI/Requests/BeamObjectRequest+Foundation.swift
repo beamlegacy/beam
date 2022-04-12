@@ -383,44 +383,48 @@ extension BeamObjectRequest {
                                    _ completion: @escaping (Swift.Result<[BeamObject], Error>) -> Void) throws {
 
         Task {
-            var allBeamObjects: [BeamObject] = []
-            var hasNext = true
-            var after = ""
-            let first = Configuration.beamObjectsPageSize
-            var success = true
-            var error: Error?
-            while hasNext && success {
-                let parameters = PaginatedBeamObjectsParameters(receivedAtAfter: receivedAtAfter,
-                                                                ids: ids,
-                                                                beamObjectType: beamObjectType,
-                                                                skipDeleted: skipDeleted,
-                                                                first: first,
-                                                                after: after,
-                                                                last: nil,
-                                                                before: nil)
-                guard let paginatedBeamObjects = try await fetchPageWithFile(filename, parameters, raisePrivateKeyError: raisePrivateKeyError) else {
-                    success = false
-                    error = APIRequestError.parserError
-                    break
+            do {
+                var allBeamObjects: [BeamObject] = []
+                var hasNext = true
+                var after = ""
+                let first = Configuration.beamObjectsPageSize
+                var success = true
+                var error: Error?
+                while hasNext && success {
+                    let parameters = PaginatedBeamObjectsParameters(receivedAtAfter: receivedAtAfter,
+                                                                    ids: ids,
+                                                                    beamObjectType: beamObjectType,
+                                                                    skipDeleted: skipDeleted,
+                                                                    first: first,
+                                                                    after: after,
+                                                                    last: nil,
+                                                                    before: nil)
+                    guard let paginatedBeamObjects = try await fetchPageWithFile(filename, parameters, raisePrivateKeyError: raisePrivateKeyError) else {
+                        success = false
+                        error = APIRequestError.parserError
+                        break
+                    }
+                    allBeamObjects.append(contentsOf: paginatedBeamObjects.beamObjects ?? [])
+                    let hasNextPage = paginatedBeamObjects.pageInfo.hasNextPage
+                    let endCursor = paginatedBeamObjects.pageInfo.endCursor
+                    let startCursor = paginatedBeamObjects.pageInfo.startCursor
+
+                    hasNext = endCursor != nil && hasNextPage && (startCursor != endCursor)
+
+                    Logger.shared.logDebug("beamObjects received so far: \(allBeamObjects.count), hasNext: \(hasNext), next cursor: \(String(describing: endCursor))", category: .network)
+
+                    if hasNext {
+                        after = endCursor!
+                    }
                 }
-                allBeamObjects.append(contentsOf: paginatedBeamObjects.beamObjects ?? [])
-                let hasNextPage = paginatedBeamObjects.pageInfo.hasNextPage
-                let endCursor = paginatedBeamObjects.pageInfo.endCursor
-                let startCursor = paginatedBeamObjects.pageInfo.startCursor
 
-                hasNext = endCursor != nil && hasNextPage && (startCursor != endCursor)
-
-                Logger.shared.logDebug("beamObjects received so far: \(allBeamObjects.count), hasNext: \(hasNext), next cursor: \(String(describing: endCursor))", category: .network)
-
-                if hasNext {
-                    after = endCursor!
+                if success {
+                    completion(.success(allBeamObjects))
+                } else {
+                    completion(.failure(error!))
                 }
-            }
-
-            if success {
-                completion(.success(allBeamObjects))
-            } else {
-                completion(.failure(error!))
+            } catch {
+                completion(.failure(error))
             }
         }
     }
