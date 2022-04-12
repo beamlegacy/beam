@@ -485,3 +485,44 @@ class BeamObjectsRequests: QuickSpec {
         }
     }
 }
+
+
+class BeamObjectsRequestsTestNetworkError: QuickSpec {
+    // swiftlint:disable:next function_body_length
+    override func spec() {
+        let beamHelper = BeamTestsHelper()
+        var sut: BeamObjectRequest!
+
+        beforeEach {
+            sut = BeamObjectRequest()
+            Beam.Configuration.reset()
+            beamHelper.disableNetworkRecording()
+            BeamURLSession.shouldNotBeVinyled = true
+        }
+
+        afterEach {
+            BeamURLSession.shouldNotBeVinyled = false
+        }
+
+        context("with paginated query and not authenticated") {
+            it("returns an error") {
+                waitUntil(timeout: .seconds(10)) { done in
+                    do {
+                        _ = try sut.fetchAllWithGraphQL(ids: [UUID()]) { result in
+                            switch result {
+                            case .failure(let error):
+                                expect(error).to(matchError(APIRequestError.notAuthenticated))
+                            case .success:
+                                fail()
+                            }
+                            done()
+                        }
+                    } catch {
+                        fail(error.localizedDescription)
+                        done()
+                    }
+                }
+            }
+        }
+    }
+}
