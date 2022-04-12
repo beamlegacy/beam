@@ -19,16 +19,12 @@ build for testing:
   script:
     - time bundle exec fastlane build_for_testing
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - mkdir -p logs
-    - mv ${HOME}/Library/Logs/scan/*.log logs
-    - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - mv ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
   tags:
     - macos-mono
   interruptible: true
@@ -61,16 +57,15 @@ xctests:
     - pwd
     - time bundle exec fastlane tests
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
     - mkdir -p logs
-    - mv ${HOME}/Library/Logs/scan/*.log logs
-    - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - mv ${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - mv -f ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
+    - mv -f ${HOME}/Library/Logs/scan/*.log logs
   tags:
     - macos-mono
   interruptible: true
@@ -139,13 +134,14 @@ UITestThread1:
   script:
     - time bundle exec fastlane uitestsThread1
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf ${HOME}/cache/*
+    - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
-    - mv ${HOME}/Library/logs/scan/*.log logs
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r ${HOME}/Downloads/*
+    - mv ${HOME}/Library/logs/scan/*.log logs
   tags:
     - macos-mono
   interruptible: true
@@ -184,13 +180,14 @@ UITestThread2:
   script:
     - time bundle exec fastlane uitestsThread2
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf ${HOME}/cache/*
+    - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
-    - mv ${HOME}/Library/logs/scan/*.log logs
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r ${HOME}/Downloads/*
+    - mv ${HOME}/Library/logs/scan/*.log logs
   tags:
     - macos-mono
   interruptible: true
@@ -229,13 +226,14 @@ UITestThread3:
   script:
     - time bundle exec fastlane uitestsThread3
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf ${HOME}/cache/*
+    - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
-    - mv ${HOME}/Library/logs/scan/*.log logs
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r ${HOME}/Downloads/*
+    - mv ${HOME}/Library/logs/scan/*.log logs
   tags:
     - macos-mono
   interruptible: true
@@ -274,13 +272,14 @@ UITestThread4:
   script:
     - time bundle exec fastlane uitestsThread4
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf ${HOME}/cache/*
+    - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
-    - mv ${HOME}/Library/logs/scan/*.log logs
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r ${HOME}/Downloads/*
+    - mv ${HOME}/Library/logs/scan/*.log logs
   tags:
     - macos-mono
   interruptible: true
@@ -319,13 +318,14 @@ UITestThread5:
   script:
     - time bundle exec fastlane uitestsThread5
   after_script:
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
-    - rm "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
+    - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf ${HOME}/cache/*
+    - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
-    - mv ${HOME}/Library/logs/scan/*.log logs
     - mv ${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/*.log logs
-    - rm -r "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
-    - rm -r ${HOME}/Downloads/*
+    - mv ${HOME}/Library/logs/scan/*.log logs
   tags:
     - macos-mono
   interruptible: true
