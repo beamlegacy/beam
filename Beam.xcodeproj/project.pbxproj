@@ -1117,6 +1117,9 @@
 		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
 		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
 		B52744CD270B03730045805F /* SearchOnCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52744CC270B03730045805F /* SearchOnCardTests.swift */; };
+		B52C147D27FF051800D67EE5 /* ReportBugFeatureTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147C27FF051800D67EE5 /* ReportBugFeatureTests.swift */; };
+		B52C147F27FF05D700D67EE5 /* AboutPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */; };
+		B52C148127FF068000D67EE5 /* AboutPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */; };
 		B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */; };
 		B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */; };
 		B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */; };
@@ -2852,6 +2855,9 @@
 		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
 		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
 		B52744CC270B03730045805F /* SearchOnCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOnCardTests.swift; sourceTree = "<group>"; };
+		B52C147C27FF051800D67EE5 /* ReportBugFeatureTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReportBugFeatureTests.swift; sourceTree = "<group>"; };
+		B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesTestView.swift; sourceTree = "<group>"; };
+		B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		B54D934626CA6A07006BBDEE /* BrowserTabViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabViewTests.swift; sourceTree = "<group>"; };
 		B551F3BE26BD0EBF00B72D27 /* WebsiteAuthTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthTest.swift; sourceTree = "<group>"; };
 		B551F3C026BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebsiteAuthPopupTestView.swift; sourceTree = "<group>"; };
@@ -6814,6 +6820,14 @@
 			path = PointAndShoot;
 			sourceTree = "<group>";
 		};
+		B52C147627FF04EE00D67EE5 /* About */ = {
+			isa = PBXGroup;
+			children = (
+				B52C147C27FF051800D67EE5 /* ReportBugFeatureTests.swift */,
+			);
+			path = About;
+			sourceTree = "<group>";
+		};
 		B54D934526CA69DD006BBDEE /* Browser */ = {
 			isa = PBXGroup;
 			children = (
@@ -7029,6 +7043,7 @@
 				B5FAE2FF270ED94300EAC8A3 /* GeneralPreferenceTestView.swift */,
 				B5FAE303270EE16800EAC8A3 /* AccountTestView.swift */,
 				D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */,
+				B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7040,6 +7055,7 @@
 				B5FAE301270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift */,
 				B5FAE305270EE17800EAC8A3 /* AccountViewLocators.swift */,
 				D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */,
+				B52C148027FF068000D67EE5 /* AboutPreferencesViewLocators.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7149,6 +7165,7 @@
 		B5FAE2F1270ECEC500EAC8A3 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				B52C147627FF04EE00D67EE5 /* About */,
 				A3E7B4BE27AC45FD0074C9BB /* Passwords */,
 			);
 			path = Preferences;
@@ -9028,6 +9045,7 @@
 				B5EB9A7626C28192004C798A /* GoMenu.swift in Sources */,
 				B5FAE2FC270ECFA600EAC8A3 /* ShortcutsHelper.swift in Sources */,
 				B57A9B3626AB07B8002C954D /* UIElement.swift in Sources */,
+				B52C147D27FF051800D67EE5 /* ReportBugFeatureTests.swift in Sources */,
 				B5FB3A2027E8C32800037FD5 /* OnboardingImportDataViewLocators.swift in Sources */,
 				375D83CB278D6AE80064C246 /* BrowserStatusBarTests.swift in Sources */,
 				B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */,
@@ -9039,6 +9057,7 @@
 				A53C8F532644B22B003A5DF8 /* OmniBoxUITestsHelper.swift in Sources */,
 				B5CDFF3D274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift in Sources */,
 				B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */,
+				B52C148127FF068000D67EE5 /* AboutPreferencesViewLocators.swift in Sources */,
 				B57535F026BD5F690053CE2D /* NoteEditorTests.swift in Sources */,
 				B5CDFF2F274E3FD600742CC9 /* OnboardingLandingTestView.swift in Sources */,
 				B5A76EBB27FC7D0900964340 /* OnboardingAccountConfirmationTestView.swift in Sources */,
@@ -9066,6 +9085,7 @@
 				52A94E3C25E90094004BAC93 /* XCUIElement+Beam.swift in Sources */,
 				B5E38D5826EA23D900236FBD /* SearchTestView.swift in Sources */,
 				B557155726FA257700F6C9D4 /* UpdateTestView.swift in Sources */,
+				B52C147F27FF05D700D67EE5 /* AboutPreferencesTestView.swift in Sources */,
 				B5984C9A27031F3B00192B5F /* AutoFillPasswordsTestView.swift in Sources */,
 				B5CDFF31274E400F00742CC9 /* OnboardingLandingViewLocators.swift in Sources */,
 				8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */,
