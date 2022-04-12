@@ -58,9 +58,12 @@ class BeamWebView: WKWebView {
         allowsMagnification = true
         customUserAgent = Constants.SafariUserAgent
 
-        monitor = NSEvent.addLocalMonitorForEvents(matching: .flagsChanged) { [weak self] event in
+        monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
             guard let self = self, self.page != nil else { return event }
             self.optionKeyToggle(event.modifierFlags)
+            if event.modifierFlags.contains(.control) && event.keyCode == KeyCode.tab.rawValue {
+                self.window?.keyDown(with: event)
+            }
             return event
         }
         #if TEST || DEBUG
