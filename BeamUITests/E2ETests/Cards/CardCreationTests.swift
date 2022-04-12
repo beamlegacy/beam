@@ -108,4 +108,21 @@ class CardCreationTests: BaseTest {
         }
 
     }
+    
+    func testCreateNoteViewIcon() {
+        launchApp()
+        cardView = CardTestView()
+        
+        step("When I click New note icon") {
+            cardView!.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(cardNameToBeCreated)
+            cardView!.typeKeyboardKey(.enter)
+        }
+        
+        step("Then I can sucessfully create a note") {
+            XCTAssertTrue(cardView!.waitForCardViewToLoad())
+            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        }
+        
+    }
+    
 }
