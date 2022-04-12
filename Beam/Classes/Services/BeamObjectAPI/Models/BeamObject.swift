@@ -322,7 +322,7 @@ extension BeamObject {
         assert(!encrypted)
 
         if Configuration.env == .test,
-           EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString() != Configuration.testPrivateKey {
+           EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString() != Configuration.testPrivateKey, !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) {
             fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)` in your tests")
         }
 
