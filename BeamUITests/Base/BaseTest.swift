@@ -56,11 +56,14 @@ class BaseTest: XCTestCase {
     
     @discardableResult
     func launchApp() -> JournalTestView {
+        continueAfterFailure = false
         XCUIApplication().launch()
         return JournalTestView()
     }
     
+    @discardableResult
     func launchAppWithArgument(_ argument: String) -> JournalTestView {
+        continueAfterFailure = false
         let app = XCUIApplication()
         app.launchArguments = [argument]
         app.launch()

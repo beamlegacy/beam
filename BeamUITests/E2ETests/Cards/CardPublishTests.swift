@@ -11,10 +11,22 @@ import XCTest
 class CardPublishTests: BaseTest {
     
     var cardView: CardTestView?
+    let shortcuts = ShortcutsHelper()
+    
+    private func switchReloadAndAssert(cardName: String, isPublished: Bool = true) {
+        shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+        shortcuts.shortcutActionInvoke(action: .reloadPage)
+        if isPublished {
+            XCTAssertTrue(WebTestView().waitForPublishedNoteToLoad(noteName: cardName))
+        } else {
+            XCTAssertFalse(WebTestView().waitForPublishedNoteToLoad(noteName: cardName))
+        }
+    }
+    
     func testDefaultPublishStatus() {
         launchApp()
         step("Given I publish default note without being logged in"){
-            ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+            shortcuts.shortcutActionInvoke(action: .showAllCards)
             cardView = AllCardsTestView().openFirstCard()
         }
         
@@ -29,60 +41,62 @@ class CardPublishTests: BaseTest {
         }
     }
     
-    func SKIPtestPublishCard() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
-        let cardNameToBeCreated = "Note publish"
-        let journalView = JournalTestView()
-        launchAppWithArgument(uiTestModeLaunchArgument)
-        //UITestsMenuBar().logout()
+    func testPublishUnpublishNote() throws {
+        
+        let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
         UITestsMenuBar().signInApp()
+        let cardNameToBeCreated = "Note publish"
+        let shortcuts = ShortcutsHelper()
         
         step("Given I create \(cardNameToBeCreated) note"){
-            //To be replaced with UITests helper - card creation
             cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
         }
-
-        step("Then the note is private by default"){
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-        }
-                        
-        step("When I publish the note"){
+        
+        step("When I publish the note") {
+            NSPasteboard.general.clearContents() //to clean the paste contents
             cardView!.publishCard()
         }
         
-        step("Then published label and link icon are displayed"){
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.publishedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        step("Then I can open it in the web") {
+            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            shortcuts.shortcutActionInvoke(action: .newTab)
+            shortcuts.shortcutActionInvoke(action: .paste)
+            cardView!.typeKeyboardKey(.enter)
+            XCTAssertTrue(WebTestView().waitForPublishedNoteToLoad(noteName: cardNameToBeCreated))
         }
-
-        step("Then I can open the link in web browser"){
         
+        step("When I unpublish the note") {
+            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            cardView!.unpublishCard()
+        }
+        
+        step("Then I can not open it in the web") {
+            switchReloadAndAssert(cardName: cardNameToBeCreated, isPublished: false)
+        }
+        
+        step("When I publish the note") {
+            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            cardView!.publishCard()
+        }
+        
+        step("Then I can open it in the web") {
+            switchReloadAndAssert(cardName: cardNameToBeCreated)
+        }
+        
+        step("When I delete the note") {
+            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            cardView!
+                .clickDeleteButton()
+                .confirmDeletion()
+        }
+        
+        step("Then I can not open it in the web") {
+            switchReloadAndAssert(cardName: cardNameToBeCreated, isPublished: false)
         }
     }
     
     func SKIPtestPublishedCardContentCorrectness() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
+        try XCTSkipIf(true, "TBD Make sure the content is correctly applied on changes")
     }
     
-    func SKIPtestUnpublishPublishedCard() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2159/perform-uitest-locally-trigger-the-vinyl-fatalerror")
-        let cardNameToBeCreated = "Unpublish"
-        let journalView = launchApp()
-        
-        step("Given I create \(cardNameToBeCreated) note"){
-            //To be replaced with UITests helper - card creation
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
-        }
-
-        step("When I publish and then unpublish the note"){
-            cardView!.publishCard()
-            cardView!.unpublishCard()
-        }
-
-        step("Then private label and lock icon are displayed"){
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.privateLock.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-        }
-
-    }    
 }
