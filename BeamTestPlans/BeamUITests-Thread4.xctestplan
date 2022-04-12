@@ -53,6 +53,7 @@
         "PnSAddToCardTests",
         "ReferencesTests",
         "SearchOnPdfTests",
+        "ReportBugFeatureTests",
         "SearchOnWebTests",
         "SignInTests",
         "WaitHelper",
