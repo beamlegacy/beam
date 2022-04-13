@@ -97,7 +97,9 @@ final class BeamNoteDocumentWrapper: NSDocument {
     }
 
     func importNote() throws {
-        guard let note = note, let docStruct = note.documentStruct else { return }
+        guard let note = note else { return }
+        note.databaseId = DatabaseManager.defaultDatabase.id
+        guard let docStruct = note.documentStruct else { return }
 
         // We use the same mecanism than when recieving notes from the sync, so that we can go thru a tested and well known code path:
         let documentManager = DocumentManager()
