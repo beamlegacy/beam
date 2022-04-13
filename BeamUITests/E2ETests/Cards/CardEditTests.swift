@@ -178,6 +178,56 @@ class CardEditTests: BaseTest {
             XCTAssertTrue(nodesAfterDraggingUp == expectedNotesAfterDraggingUp)
         }
     }
+    
+    func testOptionCmdBackpaceShortucsUsage() {
+        let cardNameToBeCreated = "DeleteShortcuts"
+        let firstPart = "text "
+        let secondPart = "to be "
+        let thirdPart = "deleted"
+        let journalView = launchApp()
+        cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        
+        step("When I use Option+backspace and CMD+backspace on empty note"){
+            shortcutsHelper.shortcutActionInvoke(action: .removeLastWord)
+            shortcutsHelper.shortcutActionInvoke(action: .removeEntireLine)
+        }
+        
+        step("Then nothing happens"){
+            XCTAssertTrue(waitForStringValueEqual(emptyString, (cardView?.getTextNodeByIndex(nodeIndex: 0))!))
+        }
+        
+        step("When I populate the row with the text \(firstPart + secondPart + thirdPart)") {
+            cardView?.typeInCardNoteByIndex(noteIndex: 0, text: firstPart + secondPart + thirdPart, needsActivation: true)
+        }
+        
+        step("When I use Option+backspace once"){
+            shortcutsHelper.shortcutActionInvoke(action: .removeLastWord)
+        }
+        
+        step("Then the following part of text is left:\(firstPart + secondPart)"){
+            XCTAssertTrue(waitForStringValueEqual(firstPart + secondPart, (cardView?.getTextNodeByIndex(nodeIndex: 0))!))
+        }
+        
+        step("When I use Option+backspace twice") {
+            shortcutsHelper.shortcutActionInvokeRepeatedly(action: .removeLastWord, numberOfTimes: 2)
+        }
+        
+        step("Then the following part of text is left:\(firstPart)"){
+            XCTAssertTrue(waitForStringValueEqual(firstPart, (cardView?.getTextNodeByIndex(nodeIndex: 0))!))
+        }
+        
+        step("When I add to the row the following text \(secondPart + thirdPart)") {
+            cardView?.typeInCardNoteByIndex(noteIndex: 0, text: secondPart + thirdPart, needsActivation: true)
+        }
+        
+        step("When I use CMD+backspace twice") {
+            shortcutsHelper.shortcutActionInvoke(action: .removeEntireLine)
+        }
+        
+        step("Then the row is empty"){
+            XCTAssertTrue(waitForStringValueEqual(emptyString, (cardView?.getTextNodeByIndex(nodeIndex: 0))!))
+        }
+    }
 
 
     func SKIPtestIntendUnintendNote() throws {

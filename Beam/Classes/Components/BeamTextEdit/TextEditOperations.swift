@@ -362,6 +362,62 @@ extension TextRoot {
         }
     }
 
+    func deleteWordForward() {
+        cancelNodeSelection()
+        guard let node = focusedWidget as? TextNode else {
+            deleteForward()
+            return
+        }
+        guard selectedTextRange.isEmpty else {
+            cmdManager.deleteText(in: node, for: selectedTextRange)
+            return
+        }
+        let endOfNextWord = indexAfterNextWord(in: node)
+        cmdManager.deleteText(in: node, for: cursorPosition..<endOfNextWord)
+    }
+
+    func deleteWordBackward() {
+        cancelNodeSelection()
+        guard let node = focusedWidget as? TextNode else {
+            deleteBackward()
+            return
+        }
+        guard selectedTextRange.isEmpty else {
+            cmdManager.deleteText(in: node, for: selectedTextRange)
+            return
+        }
+        let beginningPreviousWord = indexBeforePreviousWord(in: node)
+        cmdManager.deleteText(in: node, for: beginningPreviousWord..<cursorPosition)
+    }
+
+    func deleteToBeginningOfLine() {
+        cancelNodeSelection()
+        guard let node = focusedWidget as? TextNode else {
+            deleteBackward()
+            return
+        }
+        guard selectedTextRange.isEmpty else {
+            cmdManager.deleteText(in: node, for: selectedTextRange)
+            return
+        }
+        let beginningOfLine = node.beginningOfLineFromPosition(cursorPosition)
+        cmdManager.deleteText(in: node, for: beginningOfLine..<cursorPosition)
+    }
+
+    func deleteToEndOfLine() {
+        cancelNodeSelection()
+        guard let node = focusedWidget as? TextNode else {
+            deleteForward()
+            return
+        }
+        guard selectedTextRange.isEmpty else {
+            cmdManager.deleteText(in: node, for: selectedTextRange)
+            return
+        }
+        let endOfLine = node.endOfLineFromPosition(cursorPosition)
+        cmdManager.deleteText(in: node, for: cursorPosition..<endOfLine)
+    }
+
     func rangeToDeleteText(in node: TextNode, cursorAt cursorPos: Int, forward: Bool) -> Range<Int> {
         guard selectedTextRange.isEmpty else {
             return extendRangeWithUneditableRanges(selectedTextRange, in: node)

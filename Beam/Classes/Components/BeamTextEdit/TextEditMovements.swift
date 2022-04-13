@@ -92,6 +92,13 @@ extension TextRoot {
             }
             return
         }
+
+        cursorPosition = indexAfterNextWord(in: node)
+        cancelSelection(.end)
+        node.invalidateText()
+    }
+
+    func indexAfterNextWord(in node: TextNode) -> Int {
         var pos = cursorPosition
         node.text.text.enumerateSubstrings(in: node.text.index(at: cursorPosition)..<node.text.text.endIndex, options: .byWords) { (_, r1, _, stop) in
             pos = node.position(at: r1.upperBound)
@@ -101,21 +108,25 @@ extension TextRoot {
            let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: true) {
             pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
         }
-        cursorPosition = pos
-        cancelSelection(.end)
-        node.invalidateText()
+        return pos
     }
 
     func moveWordLeft() {
         cancelNodeSelection()
-        guard let node = focusedWidget as? TextNode,
-              cursorPosition != 0
-        else {
+        guard let node = focusedWidget as? TextNode, cursorPosition != 0 else {
             if focusedWidget as? ElementNode != nil {
                 moveLeft()
             }
             return
         }
+
+        let pos = indexBeforePreviousWord(in: node)
+        cursorPosition = pos == cursorPosition ? 0 : pos
+        cancelSelection(.start)
+        node.invalidateText()
+    }
+
+    func indexBeforePreviousWord(in node: TextNode) -> Int {
         var range = node.text.text.startIndex ..< node.text.text.endIndex
         node.text.text.enumerateSubstrings(in: node.text.text.startIndex..<node.text.text.index(at: cursorPosition), options: .byWords) { (_, r1, _, _) in
             range = r1
@@ -125,9 +136,7 @@ extension TextRoot {
            let updatedCaretIndex = node.caretIndexAvoidingUneditableRange(caretIndex, after: false) {
             pos = node.caretAtIndex(updatedCaretIndex).positionOnScreen
         }
-        cursorPosition = pos == cursorPosition ? 0 : pos
-        cancelSelection(.start)
-        node.invalidateText()
+        return pos
     }
 
     func moveWordRightAndModifySelection() {
