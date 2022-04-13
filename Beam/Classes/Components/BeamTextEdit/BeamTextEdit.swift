@@ -1801,18 +1801,26 @@ public extension CALayer {
 //    override public func deleteBackwardByDecomposingPreviousCharacter(_ sender: Any?) {
 //    }
 
-//    override public func deleteWordForward(_ sender: Any?) {
-//    }
-//
-//    override public func deleteWordBackward(_ sender: Any?) {
-//    }
-//
-//    override public func deleteToBeginningOfLine(_ sender: Any?) {
-//    }
-//
-//    override public func deleteToEndOfLine(_ sender: Any?) {
-//    }
-//
+    override public func deleteWordForward(_ sender: Any?) {
+        rootNode?.deleteWordForward()
+        hideInlineFormatter()
+    }
+
+    override public func deleteWordBackward(_ sender: Any?) {
+        rootNode?.deleteWordBackward()
+        hideInlineFormatter()
+    }
+
+    override public func deleteToBeginningOfLine(_ sender: Any?) {
+        rootNode?.deleteToBeginningOfLine()
+        hideInlineFormatter()
+    }
+
+    override public func deleteToEndOfLine(_ sender: Any?) {
+        rootNode?.deleteToEndOfLine()
+        hideInlineFormatter()
+    }
+
 //    override public func deleteToBeginningOfParagraph(_ sender: Any?) {
 //    }
 //

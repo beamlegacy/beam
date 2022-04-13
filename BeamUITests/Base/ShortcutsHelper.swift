@@ -11,7 +11,7 @@ import XCTest
 class ShortcutsHelper {
     
     private func invokeCMDKey(_ key: String) {
-        XCUIApplication().typeKey(key, modifierFlags:.command)
+        XCUIApplication().typeKey(key, modifierFlags: .command)
     }
     
     private func invokeCMDOptionKey(_ key: String) {
@@ -24,6 +24,10 @@ class ShortcutsHelper {
     
     private func invokeCMDKey(_ key: XCUIKeyboardKey) {
         XCUIApplication().typeKey(key, modifierFlags:[.command])
+    }
+    
+    private func invokeOptionKey(_ key: XCUIKeyboardKey) {
+        XCUIApplication().typeKey(key, modifierFlags: .option)
     }
     
     private func invokeCMDOptionKey(_ key: XCUIKeyboardKey) {
@@ -83,6 +87,8 @@ class ShortcutsHelper {
         case selectOnRight
         case moveBulletDown
         case moveBulletUp
+        case removeLastWord
+        case removeEntireLine
     }
     
     @discardableResult
@@ -132,6 +138,8 @@ class ShortcutsHelper {
         case .beginOfNote: invokeCMDKey(.upArrow)
         case .moveBulletDown: invokeCntrlOptionCmdFunctionKey(.downArrow)
         case .moveBulletUp: invokeCntrlOptionCmdFunctionKey(.upArrow)
+        case .removeLastWord: invokeOptionKey(.delete)
+        case .removeEntireLine: invokeCMDKey(.delete)
         }
         return BaseView()
     }
