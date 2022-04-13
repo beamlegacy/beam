@@ -675,12 +675,16 @@ extension DocumentManager {
         do {
             let databaseIds = DatabaseManager().all().map { $0.id }
             let filters: [DocumentFilter] = onlyOrphans ? [.notDatabaseIds(databaseIds), .includeDeleted] : [.notDatabaseIds([databaseId]), .includeDeleted]
+            let start = BeamDate.now
             var count = 0
             for document in try documentManager.fetchAll(filters: filters) {
                 let noteId = document.id
+                let start = BeamDate.now
                 guard let note = BeamNote.fetch(id: noteId, includeDeleted: true, keepInMemory: false, verifyDatabase: false),
                       note.databaseId != databaseId
                 else { continue }
+                let initialDocumentStruct = note.documentStruct
+                Logger.shared.logInfo("fetched note \(note.titleAndId) from db \(String(describing: note.databaseId))", category: .database, localTimer: start)
 
                 // make sure we don't have duplicate notes:
                 if note.type.isJournal {
@@ -712,10 +716,16 @@ extension DocumentManager {
                                 }
                             }
                         } else {
+                            if let documentStruct = initialDocumentStruct {
+                                let semaphore = DispatchSemaphore(value: 0)
+                                documentManager.delete(document: documentStruct, false) { _ in
+                                    semaphore.signal()
+                                }
+                                semaphore.wait()
+                            }
                             note.databaseId = databaseId
                             _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
                         }
-
                     }
                 } else {
                     // This is a regular note, if we have a collision we need to add an index to the end of the name until we find a non colliding name:
@@ -752,12 +762,24 @@ extension DocumentManager {
                         title = note.title + " (\(index))"
                     }
 
+                    Logger.shared.logInfo("move note \(note.titleAndId) from db \(String(describing: note.databaseId)) to \(databaseId)", category: .database, localTimer: start)
+
+                    let beforeSave = BeamDate.now
                     note.title = title
                     note.databaseId = databaseId
+                    if let documentStruct = initialDocumentStruct {
+                        let semaphore = DispatchSemaphore(value: 0)
+                        documentManager.delete(document: documentStruct, false) { _ in
+                            semaphore.signal()
+                        }
+                        semaphore.wait()
+                    }
                     _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
+                    Logger.shared.logInfo("save note \(note.titleAndId) from db \(String(describing: note.databaseId)) to \(databaseId)", category: .database, localTimer: beforeSave)
                 }
                 count += 1
             }
+            Logger.shared.logInfo("Moved \(count) orphan notes to database \(databaseId)", category: .database, localTimer: start)
             completion(.success(true))
         } catch {
             completion(.failure(error))
