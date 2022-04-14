@@ -642,6 +642,18 @@ import Sentry
             autocompleteManager.resetQuery()
             autocompleteManager.clearAutocompleteResults()
         }
+        if mode == .web, let currentTab = currentTab {
+            currentTab.makeFirstResponder()
+        }
+    }
+
+    func shouldAllowFirstResponderTakeOver(_ responder: NSResponder?) -> Bool {
+        if omniboxInfo.isFocused && responder is BeamWebView {
+            // prevent autofocus inputs from stealing the omnibox focus
+            // https://linear.app/beamapp/issue/BE-3557/page-loading-is-dismissing-omnibox
+            return NSApp.currentEvent?.isUserInteractionEvent == true
+        }
+        return true
     }
 
     func startNewSearch() {

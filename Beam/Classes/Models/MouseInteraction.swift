@@ -7,14 +7,6 @@
 
 import Foundation
 
-extension NSEvent {
-    var isRightClick: Bool {
-        let rightClick = [.rightMouseDown, .rightMouseUp, .rightMouseDragged].contains(self.type)
-        let controlClick = self.modifierFlags.contains(.control)
-        return rightClick || controlClick
-    }
-}
-
 public enum MouseInteractionType {
     case hovered
     case clicked
