@@ -105,7 +105,11 @@ class BrowserTabsManager: ObservableObject {
     }
 
     private func updateClusteringOpenPages() {
-        self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + tabs.map { ClusteringManager.BrowsingTreeOpenInTab(browsingTree: $0.browsingTree, browserTabManagerId: self.browserTabManagerId) }
+        var openTabs: [ClusteringManager.BrowsingTreeOpenInTab] = []
+        for tab in tabs where !tab.isPinned {
+            openTabs.append(ClusteringManager.BrowsingTreeOpenInTab(browsingTree: tab.browsingTree, browserTabManagerId: self.browserTabManagerId))
+        }
+        self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + openTabs
     }
 
 }
