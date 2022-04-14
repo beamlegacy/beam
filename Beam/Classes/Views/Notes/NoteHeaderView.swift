@@ -185,12 +185,7 @@ struct NoteHeaderView: View {
 
     private func showConnectWindow() {
         publishShowError = nil
-        UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: loc("Connect to Beam to sync encrypt and publish your notes."),
-                            buttonTitle: loc("Connect"), secondaryButtonTitle: loc("Cancel"), buttonAction: {
-            let onboardingManager = data.onboardingManager
-            onboardingManager.prepareForConnectOnly()
-            onboardingManager.presentOnboardingWindow()
-        })
+        data.onboardingManager.showOnboardingForConnectOnly(withConfirmationAlert: true)
     }
 
     private func showPublicationError(error: NoteHeaderPublishButton.ErrorMessage) {

@@ -151,15 +151,22 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         }.eraseToAnyPublisher()
     }
 
-    func showConnectWindow() {
-        let onboardingManager = data?.onboardingManager
-        onboardingManager?.prepareForConnectOnly()
-        onboardingManager?.presentOnboardingWindow()
+    func showConnectWindow(withConfirmationAlert: Bool) {
+        data?.onboardingManager.showOnboardingForConnectOnly(withConfirmationAlert: withConfirmationAlert)
     }
 }
 
 extension AllNotesPageViewModel: AllNotesPageContextualMenuDelegate {
-    func contextualMenuWillUndoRedDeleteDocuments() {
+
+    func contextualMenuShouldPublishNote() -> Bool {
+        guard BeamNoteSharingUtils.canMakePublic else {
+            showConnectWindow(withConfirmationAlert: true)
+            return false
+        }
+        return true
+    }
+
+    func contextualMenuWillUndoRedoDeleteDocuments() {
         self.refreshAllNotes()
     }
 
