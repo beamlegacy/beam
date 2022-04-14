@@ -7,6 +7,7 @@
 
 import Foundation
 import Combine
+import BeamCore
 
 struct OnboardingStep: Equatable {
     enum StepType {
@@ -104,10 +105,23 @@ class OnboardingManager: ObservableObject {
         Persistence.Authentication.hasSeenOnboarding = false
     }
 
-    func prepareForConnectOnly() {
+    private func prepareForConnectOnly() {
         resetOnboarding()
         needsToDisplayOnboard = true
         onlyConnect = true
+    }
+
+    func showOnboardingForConnectOnly(withConfirmationAlert: Bool = false) {
+        let presentBlock: () -> Void = {
+            self.prepareForConnectOnly()
+            self.presentOnboardingWindow()
+        }
+        if withConfirmationAlert {
+            UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: loc("Connect to Beam to sync encrypt and publish your notes."),
+                                buttonTitle: loc("Connect"), secondaryButtonTitle: loc("Cancel"), buttonAction: presentBlock)
+        } else {
+            presentBlock()
+        }
     }
 
     func backToPreviousStep() {

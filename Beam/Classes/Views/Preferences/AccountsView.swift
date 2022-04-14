@@ -38,8 +38,7 @@ class AccountsViewModel: ObservableObject {
 
     fileprivate func showOnboarding() {
         let onboardingManager = AppDelegate.main.data.onboardingManager
-        onboardingManager.prepareForConnectOnly()
-        onboardingManager.presentOnboardingWindow()
+        onboardingManager.showOnboardingForConnectOnly(withConfirmationAlert: false)
     }
 }
 
