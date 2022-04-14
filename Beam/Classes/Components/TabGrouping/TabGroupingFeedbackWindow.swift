@@ -19,17 +19,18 @@ class TabGroupingFeedbackViewModel: ObservableObject {
 
     private func prepareData() {
         let pagesGroups = self.clusteringManager.tabGroupingUpdater.builtPagesGroups.values
-        for pagesGroup in pagesGroups {
-            if !self.groups.contains(pagesGroup),
-                let pageGroupCopy = pagesGroup.copy() {
-                self.groups.append(pageGroupCopy)
-            }
+        for pagesGroup in pagesGroups where !self.groups.contains(pagesGroup) {
+            guard let pageGroupCopy = pagesGroup.copy() else { continue }
+            self.groups.append(pageGroupCopy)
         }
 
         let pages = self.clusteringManager.openBrowsing.allOpenBrowsingPages
         let pagesGrouped = self.groups.flatMap({ $0.pageIDs })
         for page in pages where !pagesGrouped.contains(where: { $0 == page }) {
-            guard let pageId = page, let hueTint = getNewhueTint() else { continue }
+            guard let pageId = page,
+                  let hueTint = getNewhueTint(),
+                  !self.groups.flatMap({ $0.pageIDs }).contains(pageId) else { continue }
+
             self.groups.append(TabClusteringGroup(pageIDs: [pageId], hueTint: hueTint))
         }
     }
