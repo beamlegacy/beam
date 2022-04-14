@@ -14,6 +14,7 @@ struct NoteHeaderView: View {
     private static let leadingPadding: CGFloat = 18
     static let topPadding: CGFloat = PreferencesManager.editorHeaderTopPadding
     @ObservedObject var model: NoteHeaderView.ViewModel
+    @EnvironmentObject var data: BeamData
 
     var topPadding: CGFloat = Self.topPadding
     private let errorColor = BeamColor.Shiraz
@@ -148,7 +149,7 @@ struct NoteHeaderView: View {
                                             }
                                         }
                                         if !canPerform {
-                                            showPublicationError(error: .loggedOut)
+                                            showConnectWindow()
                                         }
                                     })
 //            Feature not available yet.
@@ -180,6 +181,16 @@ struct NoteHeaderView: View {
         } else {
             showPublicationError(error: .custom(error.localizedDescription))
         }
+    }
+
+    private func showConnectWindow() {
+        publishShowError = nil
+        UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: loc("Connect to Beam to sync encrypt and publish your notes."),
+                            buttonTitle: loc("Connect"), secondaryButtonTitle: loc("Cancel"), buttonAction: {
+            let onboardingManager = data.onboardingManager
+            onboardingManager.prepareForConnectOnly()
+            onboardingManager.presentOnboardingWindow()
+        })
     }
 
     private func showPublicationError(error: NoteHeaderPublishButton.ErrorMessage) {
