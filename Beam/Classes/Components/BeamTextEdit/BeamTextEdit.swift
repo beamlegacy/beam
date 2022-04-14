@@ -2144,6 +2144,7 @@ public extension CALayer {
         guard let movedNode = widget as? ElementNode else { return false }
 
         if let node = rootNode.widgetAt(point: CGPoint(x: point.x, y: point.y - rootNode.frame.minY)) as? ElementNode,
+           !(node is ProxyNode),
            node !== widget,
            node.parent !== widget,
            !widget.allChildren.contains(node),
