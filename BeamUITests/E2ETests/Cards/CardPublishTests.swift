@@ -10,7 +10,7 @@ import XCTest
 
 class CardPublishTests: BaseTest {
     
-    var cardView: CardTestView?
+    var cardView: CardTestView!
     let shortcuts = ShortcutsHelper()
     
     private func switchReloadAndAssert(cardName: String, isPublished: Bool = true) {
@@ -31,13 +31,15 @@ class CardPublishTests: BaseTest {
         }
         
         step("Then by default there is no copy link button"){
-            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            cardView!.publishCard()
+            XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            cardView.publishCard()
         }
 
-        step("Then I get the error message and link button doesn't appear"){
-            XCTAssertTrue(cardView!.staticText("You need to be logged in").waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertFalse(cardView!.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        step("Then I get the connect alert message and link button doesn't appear"){
+            XCTAssertTrue(cardView.app.dialogs.staticTexts["Connect to Beam"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardView.app.dialogs.buttons["Connect"].exists)
+            cardView.app.dialogs.buttons["Cancel"].click()
+            XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
     
@@ -54,20 +56,20 @@ class CardPublishTests: BaseTest {
         
         step("When I publish the note") {
             NSPasteboard.general.clearContents() //to clean the paste contents
-            cardView!.publishCard()
+            cardView.publishCard()
         }
         
         step("Then I can open it in the web") {
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             shortcuts.shortcutActionInvoke(action: .newTab)
             shortcuts.shortcutActionInvoke(action: .paste)
-            cardView!.typeKeyboardKey(.enter)
+            cardView.typeKeyboardKey(.enter)
             XCTAssertTrue(WebTestView().waitForPublishedNoteToLoad(noteName: cardNameToBeCreated))
         }
         
         step("When I unpublish the note") {
             shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            cardView!.unpublishCard()
+            cardView.unpublishCard()
         }
         
         step("Then I can not open it in the web") {
@@ -76,7 +78,7 @@ class CardPublishTests: BaseTest {
         
         step("When I publish the note") {
             shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            cardView!.publishCard()
+            cardView.publishCard()
         }
         
         step("Then I can open it in the web") {
@@ -85,7 +87,7 @@ class CardPublishTests: BaseTest {
         
         step("When I delete the note") {
             shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            cardView!
+            cardView
                 .clickDeleteButton()
                 .confirmDeletion()
         }
