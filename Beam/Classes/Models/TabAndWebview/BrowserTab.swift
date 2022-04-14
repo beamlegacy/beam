@@ -480,13 +480,18 @@ import Promises
         // bring back the focus to where it was
         refocusDispatchItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
-            guard let webView = self?.webView, self?.isActiveTab() == true, self?.state?.omniboxInfo.isFocused == false else { return }
-            webView.window?.makeFirstResponder(webView)
-            webView.page?.executeJS("refocusLastElement()", objectName: "WebViewFocus")
+            guard self?.isActiveTab() == true, self?.state?.omniboxInfo.isFocused == false else { return }
+            self?.makeFirstResponder()
             self?.updateFavIcon(fromWebView: true)
         }
         refocusDispatchItem = workItem
         DispatchQueue.main.asyncAfter(deadline: .now().advanced(by: .milliseconds(200)), execute: workItem)
+    }
+
+    func makeFirstResponder() {
+        webView.window?.makeFirstResponder(webView)
+        guard !isLoading else { return }
+        webView.page?.executeJS("refocusLastElement()", objectName: "WebViewFocus")
     }
 
     func switchToCard() {
