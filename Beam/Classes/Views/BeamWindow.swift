@@ -34,6 +34,13 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         set { _ = newValue }
     }
 
+    override func makeFirstResponder(_ responder: NSResponder?) -> Bool {
+        guard state.shouldAllowFirstResponderTakeOver(responder) else {
+            return false
+        }
+        return super.makeFirstResponder(responder)
+    }
+
     private var trafficLights: [NSButton?]?
     private var trafficLightLeftMargin: CGFloat = 20
 
