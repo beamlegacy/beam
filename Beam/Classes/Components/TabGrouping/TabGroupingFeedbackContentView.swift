@@ -121,17 +121,16 @@ struct TabGroupingFeedbackContentView: View {
                                 TabGroupingTabView(url: url,
                                                    title: title,
                                                    color: Color(hue: tabGroup.hueTint, saturation: 0.6, brightness: 1, opacity: 0.25))
-                                    .padding(.bottom, 5)
                                     .onDrag {
                                         return NSItemProvider(object: TabItem(tabId: tabId))
                                     }
                             }
                         }
-                        Separator(horizontal: true, hairline: false, rounded: true, color: BeamColor.Generic.separator)
-                                            .padding(.top, 16)
-                    }.padding(.top, 16)
+                    }.padding(.vertical, 16)
                     .onDrop(of: [TabItem.typeIdentifier],
                              delegate: TabDropDelegate(newGrpId: tabGroup.id, viewModel: viewModel))
+                    Separator(horizontal: true, hairline: false, rounded: true, color: BeamColor.Generic.separator)
+
                 }
             }
             .padding(.bottom, 16)
