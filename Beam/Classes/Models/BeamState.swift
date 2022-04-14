@@ -444,6 +444,7 @@ import Sentry
 
             if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
+                stopFocusOmnibox()
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text)
                 mode = .web
@@ -465,10 +466,11 @@ import Sentry
 
             if  mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
                 navigateCurrentTab(toURL: url)
+                stopFocusOmnibox()
             } else {
                 _ = createTab(withURL: url, originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
+                mode = .web
             }
-            mode = .web
 
         case .note(let noteId, _):
             navigateToNote(id: noteId ?? result.uuid)
