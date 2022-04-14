@@ -10,7 +10,8 @@ import BeamCore
 import Promises
 
 protocol AllNotesPageContextualMenuDelegate: AnyObject {
-    func contextualMenuWillUndoRedDeleteDocuments()
+    func contextualMenuShouldPublishNote() -> Bool
+    func contextualMenuWillUndoRedoDeleteDocuments()
     func contextualMenuWillDeleteDocuments(ids: [UUID], all: Bool)
 }
 
@@ -169,6 +170,9 @@ class AllNotesPageContextualMenu {
     }
 
     @objc private func makePublic() {
+        guard delegate?.contextualMenuShouldPublishNote() != false else {            
+            return
+        }
         makeNotes(isPublic: true).then { _ in
             self.onFinishBlock?(true)
         }
@@ -268,7 +272,7 @@ private class AllNotesMenuUndoRegisterer {
         undoManager?.registerUndo(withTarget: self, handler: { _ in
             self.registerUndo(redo: !redo, actionName: actionName)
             let completion: (Bool) -> Void = { _ in
-                self.menuDelegate?.contextualMenuWillUndoRedDeleteDocuments()
+                self.menuDelegate?.contextualMenuWillUndoRedoDeleteDocuments()
             }
             if redo {
                 self.cmdManager.redoAsync(context: DocumentManager(), completion: completion)
