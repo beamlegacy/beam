@@ -136,7 +136,7 @@ struct AllNotesPageContentView: View {
                     cardsFilters
                 } else {
                     ButtonLabel(loc("Connect to Beam to publish your notes")) {
-                        model.showConnectWindow()
+                        model.showConnectWindow(withConfirmationAlert: false)
                     }
                 }
             }
