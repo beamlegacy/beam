@@ -11,23 +11,17 @@ import BeamCore
 /// WebPage method implementations
 extension BrowserTab: WebPage {
 
-    // MARK: Note handling
-    func addToNote(allowSearchResult: Bool, inSourceBullet: Bool = true) -> BeamElement? {
-        guard let url = url else {
-            Logger.shared.logError("Cannot get current URL", category: .general)
-            return nil
-        }
-        guard allowSearchResult || SearchEngineProvider.provider(for: url) != nil else {
-            Logger.shared.logWarning("Adding search results is not allowed", category: .web)
-            return nil
-        } // Don't automatically add search results
-
-        if inSourceBullet {
-            let element = noteController.addContent(url: url, text: title, reason: .pointandshoot)
-            return element
-        } else {
-            let element = noteController.note
-            return element
+    // MARK: - Note handling
+    /// Add provided BeamElements to the Destination Note. If a source is provided, the content will be added
+    /// underneath the source url. A new source url will be created if non exists yet.
+    /// - Parameters:
+    ///   - content: An array of BeamElement to add
+    ///   - source: The source url of where content was added from.
+    ///   - reason: Reason to create BeamElement
+    /// - Returns: The BeamElement where content was added to. (discardable)
+    func addContent(content: [BeamElement], with source: URL? = nil, reason: NoteElementAddReason) {
+        Task.detached(priority: .background) { [weak self] in
+            await self?.noteController.addContent(content: content, with: source, title: self?.title, reason: reason)
         }
     }
 
@@ -45,7 +39,7 @@ extension BrowserTab: WebPage {
         return BeamNote.fetch(title: noteTitle)
     }
 
-    // MARK: Tab handling
+    // MARK: - Tab handling
     private func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
         let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
@@ -150,8 +144,6 @@ extension BrowserTab: WebPage {
         guard let (hoverLayer, hoverGroup, webViewGroup) = animator.buildFullPageCollectAnimation() else { return }
 
         let mouseLocation = self.getMouseLocation()
-        let pageTitle = self.title.isEmpty ? url.absoluteString : self.title
-
         let remover = LayerRemoverAnimationDelegate(with: hoverLayer) { [weak self] _ in
             // Skip full page collect when the page has been collected previously
             guard pns.hasCollectedFullPage == false else { return }
@@ -160,22 +152,20 @@ extension BrowserTab: WebPage {
                     id: UUID().uuidString,
                     rect: self?.webView.frame ?? .zero,
                     mouseLocation: mouseLocation,
-                    html: "<a href=\"\(url)\">\(pageTitle)</a>",
+                    html: "",
                     animated: true
                 )
 
                 let shootGroup = PointAndShoot.ShootGroup.init(
                     id: UUID().uuidString,
                     targets: [target],
-                    text: "",
-                    href: "",
-                    shapeCache: nil,
                     showRect: false,
                     fullPageCollect: true
                 )
 
-                if let note = self?.noteController.note {
-                    pns.addShootToNote(targetNote: note, withNote: nil, group: shootGroup, withSourceBullet: false, completion: {})
+                // If noteController has a destination note we can directly add to that note
+                if let noteController = self?.noteController, let note = noteController.note {
+                    pns.addSocialTitleToNote(noteController: noteController, note: note, sourceUrl: url, shootGroup: shootGroup)
                 } else {
                     pns.activeShootGroup = shootGroup
                 }

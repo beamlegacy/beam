@@ -45,7 +45,7 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
         XCTAssertFalse(PreferencesManager.browsingSessionCollectionIsOn, "Browsing Session Collection is expected to be turned OFF by default")
     }
 
-    func testCollect_Enabled_Add_One() throws {
+    func testCollect_Enabled_Add_One() async throws {
         // Enable Browsing Collect
         PreferencesManager.browsingSessionCollectionIsOn = true
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
@@ -53,7 +53,7 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
 
         // When the user visits a page, add url to note
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: searchElement.text.text)
-        let added = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let added = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
 
         guard let noteChildren = controller.note?.children,
               let lastChild = noteChildren.last else {
@@ -65,7 +65,7 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
         XCTAssertEqual(lastChild, added)
     }
 
-    func testCollect_Enabled_Add_Two() throws {
+    func testCollect_Enabled_Add_Two() async throws {
         // Enable Browsing Collect
         PreferencesManager.browsingSessionCollectionIsOn = true
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
@@ -73,21 +73,20 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
 
         // When the user visits a page, add url to note
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: searchElement.text.text)
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         // Add second
-        let secondAdd = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let secondAdd = await controller.addLink(url: URL(string: "https://www.nos.nl")!, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
 
         guard let noteChildren = controller.note?.children,
               let lastChild = noteChildren.last else {
                   XCTFail("Expected atlast one child element on note")
                   return
               }
-
         XCTAssertEqual(noteChildren.count, 3) // New bullet, not nested
         XCTAssertEqual(lastChild, secondAdd)
     }
 
-    func testCollect_Enabled_Add_Two_Deduplicate() throws {
+    func testCollect_Enabled_Add_Two_Deduplicate() async throws {
         // Enable Browsing Collect
         PreferencesManager.browsingSessionCollectionIsOn = true
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
@@ -95,9 +94,9 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
 
         // When the user visits a page, add url to note
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: searchElement.text.text)
-        let firstAdd = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let firstAdd = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         // Add same second
-        let secondAdd = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let secondAdd = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
 
         guard let noteChildren = controller.note?.children,
               let lastChild = noteChildren.last else {
@@ -110,7 +109,7 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
         XCTAssertEqual(firstAdd, secondAdd)
     }
 
-    func testCollect_Enabled_Add_Three_Paralel() throws {
+    func testCollect_Enabled_Add_Three_Paralel() async throws {
         // Enable Browsing Collect
         PreferencesManager.browsingSessionCollectionIsOn = true
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
@@ -118,11 +117,11 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
 
         // When the user visits a page, add url to note
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: searchElement.text.text)
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         // Add second
-        let _ = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.linked.website")!, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         // Add third paralel
-        let parallelAdd = controller.add(url: URL(string: "http://some.other")!, text: "Some parallel website", reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let parallelAdd = await controller.addLink(url: URL(string: "http://some.other")!, reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
 
         guard let noteChildren = controller.note?.children,
               let lastChild = noteChildren.last else {
@@ -134,66 +133,66 @@ class WebNoteControllerTest_BrowsingCollect: XCTestCase {
         XCTAssertEqual(lastChild, parallelAdd)
     }
 
-    func testCollect_Disabled_Preference_false() throws {
+    func testCollect_Disabled_Preference_false() async throws {
         // Disable Preference
         PreferencesManager.browsingSessionCollectionIsOn = false
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
         let isNavigatingFromNote = true
 
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: searchElement.text.text)
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         let noteChildren = controller.note?.children ?? []
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.linked.website")!, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: URL(string: "http://some.other")!, text: "Some parallel website", reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.other")!, reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
     }
 
-    func testCollect_Disabled_Not_Navigated_From_Note() throws {
+    func testCollect_Disabled_Not_Navigated_From_Note() async throws {
         // Disable Preference
         PreferencesManager.browsingSessionCollectionIsOn = true
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
         let isNavigatingFromNote = false
 
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: searchElement.text.text)
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         let noteChildren = controller.note?.children ?? []
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.linked.website")!, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: URL(string: "http://some.other")!, text: "Some parallel website", reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.other")!, reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
     }
 
-    func testCollect_Disabled_No_Origin_Node() throws {
+    func testCollect_Disabled_No_Origin_Node() async throws {
         // Disable Preference
         PreferencesManager.browsingSessionCollectionIsOn = true
         defer { PreferencesManager.browsingSessionCollectionIsOn = false }
         let isNavigatingFromNote = true
 
         let origin: BrowsingTreeOrigin? = nil
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         let noteChildren = controller.note?.children ?? []
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: url, text: websiteTitle, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: url, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: URL(string: "http://some.linked.website")!, text: "Some linked website", reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.linked.website")!, reason: .navigation, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
 
-        let _ = controller.add(url: URL(string: "http://some.other")!, text: "Some parallel website", reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
+        let _ = await controller.addLink(url: URL(string: "http://some.other")!, reason: .loading, isNavigatingFromNote: isNavigatingFromNote, browsingOrigin: origin)
         XCTAssertEqual(noteChildren.count, 1)
     }
 }
