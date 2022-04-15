@@ -40,13 +40,17 @@ struct JournalScrollView: NSViewRepresentable {
             safeTop: Toolbar.height,
             onStartEditing: { self.isEditing = true },
             verticalSpace: 0,
-            topOffset: Self.firstNoteTopOffset(forProxy: proxy)
+            topOffset: Self.firstNoteTopOffset(forProxy: proxy, isIncognito: state.isIncognito)
         )
         journalStackView.frame = NSRect(x: 0, y: 0, width: proxy.size.width, height: proxy.size.height)
         if USE_STACKVIEW_CACHING {
             state.cachedJournalStackView = journalStackView
         }
         return journalStackView
+    }
+
+    static func incognitoOffset(isIncognito: Bool) -> CGFloat {
+        isIncognito ? 141 : 0
     }
 
     func createScrollAndStackViews() -> NSScrollView {
@@ -96,7 +100,7 @@ struct JournalScrollView: NSViewRepresentable {
         if state.data.newDay {
             state.data.reloadJournal()
         }
-        journalStackView.topOffset = Self.firstNoteTopOffset(forProxy: proxy)
+        journalStackView.topOffset = Self.firstNoteTopOffset(forProxy: proxy, isIncognito: state.isIncognito) + Self.incognitoOffset(isIncognito: state.isIncognito)
         journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
     }
@@ -129,8 +133,8 @@ struct JournalScrollView: NSViewRepresentable {
 }
 
 extension JournalScrollView {
-    static func firstNoteTopOffset(forProxy proxy: GeometryProxy) -> CGFloat {
-        return OmniboxContainer.firstNoteTopOffsetForJournal(height: proxy.size.height).rounded()
+    static func firstNoteTopOffset(forProxy proxy: GeometryProxy, isIncognito: Bool) -> CGFloat {
+        return OmniboxContainer.firstNoteTopOffsetForJournal(height: proxy.size.height).rounded() + incognitoOffset(isIncognito: isIncognito)
     }
 }
 

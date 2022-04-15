@@ -104,7 +104,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                 .tooltipOnHover(Shortcut.AvailableShortcut.newSearch.description)
                 .accessibilityIdentifier("nav-omnibox")
             if showPivotButton {
-                ToolbarModeSwitcher(modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)
+                ToolbarModeSwitcher(isIncognito: state.isIncognito, modeWeb: state.mode != .web, tabsCount: state.browserTabsManager.tabs.count, action: toggleMode)
                     .tooltipOnHover(Shortcut.AvailableShortcut.toggleNoteWeb.description)
             }
         }

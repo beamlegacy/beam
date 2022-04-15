@@ -33,6 +33,7 @@
         "DownloadsTest",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
+        "IncognitoModeTests",
         "JavascriptNativeInteractionsTests",
         "JournalTest",
         "LinksTests",

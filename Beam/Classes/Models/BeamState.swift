@@ -15,6 +15,20 @@ import Sentry
 
 @objc public class BeamState: NSObject, ObservableObject, Codable {
     var data: BeamData
+
+    let isIncognito: Bool
+    var incognitoCookiesManager: CookiesManager?
+
+    /// This property will give you access to the CookieManager object the most appropriate for this state
+    /// If in Incognito mode, we will have the incognito cookie manager, otherwise the global one
+    /// For now, this incognito manager is not used
+    var cookieManager: CookiesManager {
+        if let manager = incognitoCookiesManager, isIncognito {
+            return manager
+        }
+        return data.cookieManager
+    }
+
     private let searchEngine: SearchEngineDescription = PreferredSearchEngine()
 
     @Published var currentNote: BeamNote? {
@@ -52,8 +66,9 @@ import Sentry
         NoteMediaPlayerManager()
     }()
 
-    private(set) lazy var webIndexingController: WebIndexingController = {
-        WebIndexingController(clusteringManager: data.clusteringManager)
+    private(set) lazy var webIndexingController: WebIndexingController? = {
+        guard !isIncognito else { return nil }
+        return WebIndexingController(clusteringManager: data.clusteringManager)
     }()
 
     @Published var backForwardList = NoteBackForwardList()
@@ -457,7 +472,8 @@ import Sentry
                 return
             }
 
-            if url == urlWithScheme,
+            if !isIncognito,
+               url == urlWithScheme,
                let mnemonic = result.completingText,
                url.hostname?.starts(with: mnemonic) ?? false {
                 // Create a mnemonic shortcut
@@ -512,8 +528,12 @@ import Sentry
         mode = .web
     }
 
-    override public init() {
+    public init(incognito: Bool = false) {
         data = AppDelegate.main.data
+        isIncognito = incognito
+        if isIncognito {
+            incognitoCookiesManager = CookiesManager()
+        }
         super.init()
         setup(data: data)
 
@@ -535,6 +555,7 @@ import Sentry
 
     required public init(from decoder: Decoder) throws {
         data = AppDelegate.main.data
+        isIncognito = false
         super.init()
 
         let container = try decoder.container(keyedBy: CodingKeys.self)
@@ -581,7 +602,11 @@ import Sentry
     }
 
     func setup(webView: WKWebView) {
-        data.setup(webView: webView)
+        if isIncognito, let cookiesManager = incognitoCookiesManager {
+            cookiesManager.setupCookies(for: webView)
+        } else {
+            data.cookieManager.setupCookies(for: webView)
+        }
         ContentBlockingManager.shared.configure(webView: webView)
     }
 
@@ -736,7 +761,7 @@ extension BeamState: BrowserTabsManagerDelegate {
         }
     }
     func tabsManagerDidChangeCurrentTab(_ currentTab: BrowserTab?, previousTab: BrowserTab?) {
-        webIndexingController.currentTabDidChange(currentTab, previousCurrentTab: previousTab)
+        webIndexingController?.currentTabDidChange(currentTab, previousCurrentTab: previousTab)
         resetDestinationCard()
         stopFocusOmnibox()
     }
