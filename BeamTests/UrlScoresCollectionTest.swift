@@ -232,4 +232,24 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(score.scrollRatioX, 0.4) //doesn't get replaced by nan
         XCTAssertEqual(score.scrollRatioY, 0.5) //doesn't get replaced by nan
     }
+
+    func testDailyIsPinned() throws {
+        let dailyStore = FakeDailyScoreStore()
+        let tree = BrowsingTree(nil, frecencyScorer: nil, longTermScoreStore: nil, dailyScoreStore: dailyStore)
+        tree.navigateTo(url: "http://abc.com", title: "", startReading: false, isLinkActivation: false, readCount: 0)
+        let urlId0 = tree.current.link
+        tree.navigateTo(url: "http://def.com", title: "", startReading: false, isLinkActivation: false, readCount: 0)
+        let urlId1 = tree.current.link
+        tree.isPinned = true
+        tree.navigateTo(url: "http://ghi.com", title: "", startReading: false, isLinkActivation: false, readCount: 0)
+        let urlId2 = tree.current.link
+        tree.isPinned = false
+
+        //tree wasn't pinned when url was loaded
+        XCTAssertEqual(dailyStore.data[urlId0]?.isPinned, false)
+        //pinned occured while page was loaded
+        XCTAssertEqual(dailyStore.data[urlId1]?.isPinned, true)
+        //tree was already pinned when url loaded and unpinning has no effect on score
+        XCTAssertEqual(dailyStore.data[urlId2]?.isPinned, true)
+    }
 }
