@@ -39,6 +39,9 @@ struct TabView: View {
     private var sideViewsTransition: AnyTransition {
         !isSelected ? .identity : .asymmetric(insertion: defaultFadeTransitionDelayed, removal: defaultFadeTransition)
     }
+    private var isIncognito: Bool {
+        tab.state?.isIncognito == true
+    }
 
     private func shouldShowTitle(geometry: GeometryProxy) -> Bool {
         geometry.size.width >= 100
@@ -53,7 +56,7 @@ struct TabView: View {
             return Color(hue: hueTint, saturation: 0.6, brightness: 0.5)
         }
         if isSelected {
-            return BeamColor.Generic.text.swiftUI
+            return isIncognito ? BeamColor.InvertedNiobium.swiftUI : BeamColor.Generic.text.swiftUI
         }
         return BeamColor.Corduroy.swiftUI
     }
@@ -103,7 +106,12 @@ struct TabView: View {
     private func trailingViews(shouldShowCopy: Bool, shouldShowMedia: Bool) -> some View {
         return HStack(spacing: BeamSpacing._60) {
             if shouldShowCopy {
-                TabContentIcon(name: "editor-url_copy", width: 12, action: onCopy)
+                TabContentIcon(name: "editor-url_copy",
+                               width: 12,
+                               color: isIncognito ? BeamColor.InvertedAlphaGray : BeamColor.AlphaGray,
+                               hoveredColor: isIncognito ? BeamColor.InvertedCorduroy : BeamColor.Corduroy,
+                               pressedColor: isIncognito ? BeamColor.InvertedNiobium : BeamColor.Niobium,
+                               action: onCopy)
                     .transition(sideViewsTransition)
             }
             if shouldShowMedia {
@@ -133,7 +141,11 @@ struct TabView: View {
     }
 
     private var closeIcon: some View {
-        TabContentIcon(name: "tabs-close_xs", color: BeamColor.LightStoneGray, action: onClose)
+        TabContentIcon(name: "tabs-close_xs",
+                       color: isIncognito ?  BeamColor.InvertedLightStoneGray: BeamColor.LightStoneGray,
+                       hoveredColor: isIncognito ?  BeamColor.InvertedCorduroy: BeamColor.Corduroy,
+                       pressedColor: isIncognito ? BeamColor.InvertedNiobium : BeamColor.Niobium,
+                       action: onClose)
     }
 
     private func centerViewTransition(foregroundHoverStyle: Bool) -> AnyTransition {
@@ -360,12 +372,13 @@ struct TabView: View {
                     .font(font)
                     .foregroundColor(foregroundColor)
                     .if(!isDragging || colorScheme == .dark) {
-                        $0.blendModeLightMultiplyDarkScreen()
+                        $0.blendModeLightMultiplyDarkScreen(invert: isIncognito && isSelected)
                     }
                     .background(
                         // Using Capsule as background instead of Capsule's label property because we have different gestures (drag/click) + paddings
                         // and they don't play well with the rendering updates of the capsule label with parameters.
-                        ToolbarCapsuleButton(isSelected: false, isForeground: isSelected,
+                        ToolbarCapsuleButton(isIncognito: isIncognito,
+                                             isSelected: false, isForeground: isSelected,
                                              tabStyle: true, hueTint: hueTint,
                                              label: { _, _ in Group { } }, action: nil)
                             .onTouchDown { down in

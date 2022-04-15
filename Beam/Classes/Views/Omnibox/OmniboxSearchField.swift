@@ -18,6 +18,8 @@ struct OmniboxSearchField: View {
     @Binding var isEditing: Bool
     @Binding var modifierFlagsPressed: NSEvent.ModifierFlags?
 
+    let incognitoIconName = "browser-incognito"
+
     private var textFieldText: Binding<String> {
         $autocompleteManager.searchQuery
     }
@@ -26,7 +28,7 @@ struct OmniboxSearchField: View {
         if mode == .noteCreation {
             return loc("Create Note")
         }
-        return loc("Search the web and your notes")
+        return state.isIncognito ? loc("Search the web incognito and your notes") : loc("Search the web and your notes")
     }
 
     private func leadingIconName(for mode: AutocompleteManager.Mode) -> String? {
@@ -40,7 +42,7 @@ struct OmniboxSearchField: View {
             return AutocompleteResult.Source.createNote.iconName
         }
 
-        return AutocompleteResult.Source.searchEngine.iconName
+        return state.isIncognito ? incognitoIconName : AutocompleteResult.Source.searchEngine.iconName
     }
 
     private var selectedAutocompleteResult: AutocompleteResult? {

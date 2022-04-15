@@ -412,8 +412,12 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         self.createWindow(frame: nil, restoringTabs: false)
     }
 
+    @IBAction func newIncognitoWindow(_ sender: Any?) {
+        self.createWindow(frame: nil, restoringTabs: false, isIncognito: true)
+    }
+
     @discardableResult
-    func createWindow(frame: NSRect?, restoringTabs: Bool) -> BeamWindow? {
+    func createWindow(frame: NSRect?, restoringTabs: Bool, isIncognito: Bool = false) -> BeamWindow? {
         guard !data.onboardingManager.needsToDisplayOnboard else {
             data.onboardingManager.delegate = self
             data.onboardingManager.presentOnboardingWindow()
@@ -422,6 +426,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         // Create the window and set the content view.
         let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
                                 data: data,
+                                isIncognito: isIncognito,
                                 minimumSize: frame?.size ?? defaultWindowMinimumSize)
         if frame == nil && windows.count == 0 {
             window.center()

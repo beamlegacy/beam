@@ -64,18 +64,34 @@ import Promises
 
     private var observersCancellables = Set<AnyCancellable>()
 
-    static var webViewConfiguration = BeamWebViewConfigurationBase(handlers: [
-        WebPositionsMessageHandler(),
-        PointAndShootMessageHandler(),
-        JSNavigationMessageHandler(),
-        LoggingMessageHandler(),
-        MediaPlayerMessageHandler(),
-        GeolocationMessageHandler(),
-        WebSearchMessageHandler(),
-        WebViewFocusMessageHandler(),
-        PasswordMessageHandler(),
-        LinkMouseOverMessageHandler()
-    ])
+    static let webViewConfiguration = BeamWebViewConfigurationBase(handlers: handlers(isIncognito: false))
+
+    static var incognitoWebViewConfiguration: BeamWebViewConfigurationBase {
+        BeamWebViewConfigurationBase(handlers: handlers(isIncognito: true), isIncognito: true)
+    }
+
+    private static func handlers(isIncognito: Bool) -> [SimpleBeamMessageHandler] {
+        var handlers = [
+            WebPositionsMessageHandler(),
+            PointAndShootMessageHandler(),
+            JSNavigationMessageHandler(),
+
+            MediaPlayerMessageHandler(),
+            GeolocationMessageHandler(),
+            WebSearchMessageHandler(),
+            WebViewFocusMessageHandler(),
+            
+            LinkMouseOverMessageHandler()
+        ]
+        if !isIncognito {
+            handlers.append(contentsOf: [
+                LoggingMessageHandler(),
+                PasswordMessageHandler()
+            ])
+        }
+        return handlers
+    }
+
     var browsingTreeOrigin: BrowsingTreeOrigin?
 
     var showsStatusBar: Bool {
@@ -87,7 +103,7 @@ import Promises
     }
 
     // MARK: - WebPage properties
-    @Published public var webView: BeamWebView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration) {
+    @Published public var webView: BeamWebView {
         didSet {
             observeWebView()
         }
@@ -173,7 +189,7 @@ import Promises
        - id:
        - webView:
      */
-    init(state: BeamState?, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote?, rootElement: BeamElement? = nil,
+    init(state: BeamState, browsingTreeOrigin: BrowsingTreeOrigin?, originMode: Mode, note: BeamNote?, rootElement: BeamElement? = nil,
          id: UUID = UUID(), webView: BeamWebView? = nil) {
         self.state = state
         self.id = id
@@ -184,9 +200,11 @@ import Promises
         if let suppliedWebView = webView {
             self.webView = suppliedWebView
             backForwardList = suppliedWebView.backForwardList
+        } else {
+            self.webView = BeamWebView(frame: .zero, configuration: state.isIncognito ? BrowserTab.incognitoWebViewConfiguration : BrowserTab.webViewConfiguration)
         }
 
-        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin)
+        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: state.isIncognito)
         noteController = WebNoteController(note: note, rootElement: rootElement)
 
         super.init()
@@ -194,7 +212,7 @@ import Promises
         if webView == nil {
             self.webView.wantsLayer = true
             self.webView.allowsMagnification = true
-            state?.setup(webView: self.webView)
+            state.setup(webView: self.webView)
             backForwardList = self.webView.backForwardList
         }
 
@@ -212,8 +230,9 @@ import Promises
         self.title = title
         self.isPinned = true
         self.originMode = .web
+        self.webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
 
-        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin)
+        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: false)
         noteController = WebNoteController(note: nil, rootElement: nil)
 
         super.init()
@@ -221,14 +240,19 @@ import Promises
         updateFavIcon(fromWebView: false)
     }
 
-    private static func newBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
-        BrowsingTree(
-            origin,
-            frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
-            longTermScoreStore: LongTermUrlScoreStore(),
-            domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(db: GRDBDatabase.shared),
-            dailyScoreStore: GRDBDailyUrlScoreStore()
-        )
+    private static func newBrowsingTree(origin: BrowsingTreeOrigin?, isIncognito: Bool) -> BrowsingTree {
+        if isIncognito {
+            return BrowsingTree.incognitoBrowsingTree(origin: origin)
+        } else {
+            return BrowsingTree(
+                origin,
+                linkStore: LinkStore.shared,
+                frecencyScorer: ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage()),
+                longTermScoreStore: LongTermUrlScoreStore(),
+                domainPath0TreeStatsStore: DomainPath0TreeStatsStorage(db: GRDBDatabase.shared),
+                dailyScoreStore: GRDBDailyUrlScoreStore()
+            )
+        }
     }
 
     required init?(coder: NSCoder) {
@@ -264,6 +288,9 @@ import Promises
         isFromNoteSearch = false
 
         originMode = .web
+
+        webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
+
         super.init()
     }
 
@@ -579,7 +606,8 @@ import Promises
     }
 
     internal func sendTree(grouped: Bool = false) {
-        guard let sender = state?.data.browsingTreeSender else { return }
+        guard let state = state, !state.isIncognito else { return }
+        guard let sender = state.data.browsingTreeSender else { return }
         if grouped {
             sender.groupSend(browsingTree: browsingTree)
         } else {
@@ -588,7 +616,8 @@ import Promises
     }
 
     internal func saveTree(grouped: Bool = false) {
-        guard let appSessionId = state?.data.sessionId else { return }
+        guard let state = state, !state.isIncognito else { return }
+        let appSessionId = state.data.sessionId
         if grouped {
             BrowsingTreeStoreManager.shared.groupSave(browsingTree: self.browsingTree, appSessionId: appSessionId)
         } else {
@@ -671,7 +700,7 @@ extension BrowserTab: WebViewControllerDelegate {
             shouldWaitForBetterContent = true
         }
 
-        state?.webIndexingController.tabDidNavigate(self, toURL: url, inWebView: webView, originalRequestedURL: navigationDescription.requestedURL,
+        state?.webIndexingController?.tabDidNavigate(self, toURL: url, inWebView: webView, originalRequestedURL: navigationDescription.requestedURL,
                                                     shouldWaitForBetterContent: shouldWaitForBetterContent,
                                                     isLinkActivation: isLinkActivation, currentTab: state?.browserTabsManager.currentTab)
         state?.browserTabsManager.tabDidFinishNavigating(self, url: url)
