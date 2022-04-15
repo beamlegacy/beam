@@ -298,11 +298,12 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         // Make group mutable
         var shootGroup = group
         // Convert html to BeamText
+        let html = shootGroup.html()
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page?.downloadManager, page.fileStorage)
-        htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [weak self] (beamElements: [BeamElement]) in
-            guard let self = self else { return }
+        htmlNoteAdapter.convert(html: html) { [self] (beamElements: [BeamElement]) in
             // exit early when failing to collect correctly
-            guard beamElements.count != 0 else {
+            // When the shootGroup contains html but no beamElements, show alert
+            if beamElements.isEmpty && !html.isEmpty {
                 self.showAlert(shootGroup, beamElements, "failed to collect html elements", completion: {
                     shootGroup.setConfirmation(.failure)
                     self.showShootConfirmation(group: shootGroup)
@@ -323,32 +324,44 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             shootGroup.setNoteInfo(NoteInfo(id: targetNote.id, title: targetNote.title))
             // Set Destination note to the current note
             page.setDestinationNote(targetNote, rootElement: targetNote)
-            // Add all quotes to source Note
-            let addWithSourceBullet = withSourceBullet ? self.shouldAddWithSourceBullet(elements) : withSourceBullet
-            if let destinationElement = page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
-                if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
-                    // Append NoteText last quote
-                    let note = self.createNote(noteText)
-                    lastQuote.addChild(note)
-                }
 
-                // Add to source Note
-                if destinationElement.children.count == 1,
-                   let onlyChild = destinationElement.children.first,
-                   onlyChild.text.isEmpty, onlyChild.kind == .bullet {
-                    destinationElement.removeChild(onlyChild)
-                }
-                elements.forEach({ quote in destinationElement.addChild(quote) })
-
-                // Add sourceUrl to note sources
-                self.setNoteSources(targetNote: targetNote, sourceUrl: sourceUrl)
-
-                // Show confirmation UI
-                shootGroup.setConfirmation(.success)
-                self.showShootConfirmation(group: shootGroup)
-                completion()
+            // Append NoteText last collected element
+            if let noteText = noteText, !noteText.isEmpty, let lastElement = elements.last {
+                let note = self.createNote(noteText)
+                lastElement.addChild(note)
             }
-        })
+
+            // Add collected elements to Note. Optionally add with source bullet
+            page.addContent(content: elements, with: withSourceBullet ? sourceUrl : nil, reason: .pointandshoot)
+
+            // Add sourceUrl to note sources
+            self.setNoteSources(targetNote: targetNote, sourceUrl: sourceUrl)
+
+            // Show confirmation UI
+            shootGroup.setConfirmation(.success)
+            self.showShootConfirmation(group: shootGroup)
+            completion()
+        }
+    }
+
+    func addSocialTitleToNote(noteController: WebNoteController, note: BeamNote, sourceUrl: URL, shootGroup: ShootGroup) {
+        Task.detached(priority: .background) { [weak self] in
+            var mutableShootGroup = shootGroup
+            // update shootGroup with note information
+            mutableShootGroup.numberOfElements = 1
+            mutableShootGroup.setNoteInfo(NoteInfo(id: note.id, title: note.title))
+            // update shootGroup with confirmation state
+            mutableShootGroup.setConfirmation(.success)
+            // If add link returns an element
+            await noteController.addLink(url: sourceUrl, reason: .pointandshoot, ignoreExistingSocialTitles: true)
+
+            await MainActor.run { [weak self, mutableShootGroup] in
+                // Add sourceUrl to note sources
+                self?.setNoteSources(targetNote: note, sourceUrl: sourceUrl)
+                // Show confirmation UI
+                self?.showShootConfirmation(group: mutableShootGroup)
+            }
+        }
     }
 
     func shareShootToService(group: ShootGroup, service: ShareService) {
@@ -460,58 +473,5 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     /// - Parameter id: ID of target to remove
     func removeTarget(_ id: String) {
         self.page?.executeJS("removeTarget(\"\(id)\")", objectName: "PointAndShoot")
-    }
-
-    //This variable could be migrated as a preference if we want. Setting to true gives the original PnS behavior
-    var embedMediaInSourceBullet = false
-
-    /// Decides if this set of elements should be inserted with a source bullet
-    /// - Parameter elements: Array of BeamElement content
-    /// - Returns: true if elements should be added under a source bullen
-    private func shouldAddWithSourceBullet(_ elements: [BeamElement]) -> Bool {
-        guard !embedMediaInSourceBullet,
-              let first = elements.first,
-                elements.count == 1 else { return true }
-
-        // A single Image should be inserted without source bullet
-        if first.kind.isMedia {
-            return false
-        }
-
-        // If the element is a external link of a single embeddable url and
-        // the convertLinksToEmbed preference is disabled. The link element should
-        // be inserted without source bullet.
-        for link in first.outLinks {
-            if let url = URL(string: link) {
-                let canEmbed = EmbedContentBuilder().canBuildEmbed(for: url)
-                let disabledConvertingLinksToEmbed = HtmlVisitor.allowConvertToEmbed == false
-                if canEmbed && disabledConvertingLinksToEmbed {
-                    // If the element text is the same as the url target
-                    // update the set the page title to the element text
-                    if first.text.text == link,
-                       let pageTitle = self.page?.title {
-                        var linkWithPageTitle = BeamText(text: pageTitle)
-                        linkWithPageTitle.addAttributes([.link(link)], to: linkWithPageTitle.wholeRange)
-                        first.text = linkWithPageTitle
-                    }
-                    return false
-                }
-            }
-        }
-
-        // A single link matching the source bullet link should be inserted without source bullet
-        guard let pageUrl = self.page?.url?.absoluteString else {
-            Logger.shared.logDebug("Could not find page url while checking text links", category: .pointAndShoot)
-            return true
-        }
-        guard let pageTitle = self.page?.title else {
-            Logger.shared.logDebug("Could not find page title while checking text links", category: .pointAndShoot)
-            return true
-        }
-        for link in first.text.links where (link == pageUrl) || (first.text.text == pageTitle) {
-            return false
-        }
-
-        return true
     }
 }

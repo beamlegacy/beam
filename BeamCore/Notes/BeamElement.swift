@@ -248,6 +248,7 @@ public enum ElementKind: Codable, Equatable {
             }
 
             self = .blockReference(noteID, elementID)
+
         default:
             throw ElementKindError.typeNameUnknown(typeName)
         }
@@ -827,6 +828,9 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         text.links + children.flatMap { $0.outLinks }
     }
 
+    /// Recursively search BeamElement links for matching link
+    /// - Parameter link: link to search for
+    /// - Returns: BeamElement containing matching link, nil if no element found
     open func elementContainingLink(to link: String) -> BeamElement? {
         if text.links.contains(link) {
             return self
@@ -841,6 +845,29 @@ open class BeamElement: Codable, Identifiable, Hashable, ObservableObject, Custo
         return nil
     }
 
+    /// Recursively search BeamElement sources for matching sourceLink
+    /// - Parameter link: link to search for
+    /// - Returns: BeamElement containing matching link, nil if no element found
+    open func elementContainingSource(to link: String) -> BeamElement? {
+        for source in text.sources {
+            if case .remote(let url) = source.origin,
+               url.absoluteString == link {
+                return self
+            }
+        }
+
+        for c in children {
+            if let element = c.elementContainingSource(to: link) {
+                return element
+            }
+        }
+
+        return nil
+    }
+
+    /// Recursively search BeamElement text for matching string
+    /// - Parameter someText: string to search for
+    /// - Returns: BeamElement containing matching string, nil if no element found
     open func elementContainingText(someText: String) -> BeamElement? {
         if text.text == someText {
             return self

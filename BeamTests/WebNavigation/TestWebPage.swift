@@ -107,17 +107,13 @@ class TestWebPage: WebPage {
         return Promise(true)
     }
 
-    func logInNote(url: URL, title: String?, reason: NoteElementAddReason) {
-        events.append("logInNote \(url) \(title ?? "") \(reason)")
+    func logInNote(url: URL, reason: NoteElementAddReason) {
+        events.append("logInNote \(url) \(reason)")
     }
 
-    func addToNote(allowSearchResult: Bool, inSourceBullet: Bool = true) -> BeamCore.BeamElement? {
-        events.append("addToNote \(allowSearchResult)")
-        if let url = self.url {
-            self.logInNote(url: url, title: self.title, reason: .pointandshoot)
-        }
-        // use last note
-        return activeNote
+    func addContent(content: [BeamElement], with source: URL? = nil, reason: NoteElementAddReason) {
+        let sourceURL = source?.absoluteString ?? ""
+        events.append("addContent \(sourceURL)")
     }
 
     func closeTab() {
