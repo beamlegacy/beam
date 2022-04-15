@@ -63,93 +63,15 @@ class WebNoteController: Encodable, Decodable {
         AppDelegate.main.data.todaysNote
     }
 
-    /**
-     Determine which element any add should target.
-     */
-    private func targetElement(reason: NoteElementAddReason) -> BeamElement {
-        guard let latest = element.children.last else {
-            element = addElement(reason: reason)
-            return element
-        }
-        element = latest.text.isEmpty ? latest : addElement(reason: reason)
-        return element
-    }
+    private var cancellables = Set<AnyCancellable>()
 
-    private func addElement(reason: NoteElementAddReason) -> BeamElement {
-        let newElement = BeamElement()
-        if reason == .navigation && !nested {
-            element.addChild(newElement)
-            rootElement = element
-            nested = true
-        } else {
-            rootElement.addChild(newElement)
-        }
-        return newElement
-    }
-
+    // MARK: - Inits
     init(note: BeamNote?, rootElement from: BeamElement? = nil) {
         self.note = note
         _rootElement = from
         _element = _rootElement
 
         setupObservers()
-    }
-
-    func setDestination(note: BeamNote?, rootElement: BeamElement? = nil) {
-        self.note = note
-        if let rootElement = rootElement ?? note {
-            self.rootElement = rootElement
-        } else {
-            _rootElement = nil
-        }
-    }
-
-    /// Add the current page to the current note based on the browsing session collection preference.
-    /// - Parameters:
-    ///   - url: Url of current page
-    ///   - text: Text to add
-    ///   - reason: Enum reason for adding the note
-    ///   - isNavigatingFromNote: Boolean if it's navigating from a note
-    ///   - browsingOrigin: browsing tree origin value
-    /// - Returns: BeamElement of updated note or nil
-    public func add(url: URL, text: String?, reason: NoteElementAddReason, isNavigatingFromNote: Bool? = nil, browsingOrigin: BrowsingTreeOrigin? = nil) -> BeamElement? {
-        // With BrowsingSessionCollect enabled AND Navigating from Note
-        guard PreferencesManager.browsingSessionCollectionIsOn, isNavigatingFromNote == true else {
-
-               if let newText = text,
-                  noteOrDefault.text.text != newText,
-                  reason == .receivedPageTitle {
-                   // Allow for updating the Note text even when collect is disabled
-                   setContents(url: url, text: text)
-               }
-
-               return nil
-        }
-
-        // collect browsing links
-        switch browsingOrigin {
-        case .searchFromNode, .browsingNode:
-            return addContent(url: url, text: text, reason: reason)
-        default:
-            return nil
-        }
-    }
-
-    /// Add the current page url to the current note. and return
-    /// - Parameters:
-    ///   - url: Url of current page
-    ///   - text: Text to add
-    ///   - reason: Enum reason for adding the note
-    /// - Returns: BeamElement with added url
-    func addContent(url: URL, text: String?, reason: NoteElementAddReason) -> BeamElement {
-        let linkString = url.absoluteString
-        let noteToUse = noteOrDefault
-        let existingLink = noteToUse.elementContainingLink(to: linkString)
-        let existingText = (text != nil && !text!.isEmpty ? noteToUse.elementContainingText(someText: text!) : nil)
-        element = existingLink ?? existingText ?? targetElement(reason: reason)
-        setContents(url: url, text: text)
-        Logger.shared.logDebug("add current page '\(text ?? "nil")' with url \(url) to note '\(noteToUse.title)'", category: .web)
-        return element
     }
 
     required public init(from decoder: Decoder) throws {
@@ -170,63 +92,8 @@ class WebNoteController: Encodable, Decodable {
         setupObservers()
     }
 
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        if let note = note {
-            try container.encode(note.id, forKey: .note)
-        }
-        try container.encode(rootElement.id, forKey: .rootElement)
-        try container.encode(element.id, forKey: .element)
-    }
-
-    private func currentElementIsSimple() -> Bool {
-        if element.text.ranges.count == 1 {
-            let range = element.text.ranges.first
-            if let range = range {
-                let result = range.attributes.count <= 1
-                return result
-            } else {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     Set current element text and URL.
-
-     - Parameters:
-       - text:
-       - url:
-     */
-    func setContents(url: URL, text: String? = nil) {
-        guard currentElementIsSimple(), let range = element.text.ranges.first else {
-            return
-        }
-
-        let name = getContentName(url: url, text: text)
-        var attributes = range.attributes
-        let alreadyHadLink = !element.text.links.isEmpty
-
-        if !alreadyHadLink || name != range.string {
-            // let updatedAttributed = range.attributes + [.link(url.absoluteString)]
-            attributes.append(.link(url.absoluteString))
-            element.text = BeamText(text: name, attributes: attributes)
-        }
-    }
-
-    private func getContentName(url: URL, text: String? = nil) -> String {
-        var titleStr = element.text.text
-        if let text = text, !text.isEmpty {
-            titleStr = text
-        }
-        return titleStr.isEmpty ? url.absoluteString : titleStr
-    }
-
-    var cancellables = [AnyCancellable]()
     private func setupObservers() {
-        cancellables.append(DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-                                .sink { id in
+        DocumentManager.documentDeleted.receive(on: DispatchQueue.main).sink { id in
             if self.note?.id == id {
                 self.note = nil
             }
@@ -236,8 +103,218 @@ class WebNoteController: Encodable, Decodable {
             if self._element?.id == id {
                 self._element = nil
             }
+        }.store(in: &cancellables)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        if let note = note {
+            try container.encode(note.id, forKey: .note)
+        }
+        try container.encode(rootElement.id, forKey: .rootElement)
+        try container.encode(element.id, forKey: .element)
+    }
+
+    // MARK: - Adding Content to Note
+    /// Add provided BeamElements to the Destination Note. If a source is provided, the content will be added
+    /// underneath the source url. A new source url will be created if non exists yet.
+    /// - Parameters:
+    ///   - content: An array of BeamElement to add
+    ///   - source: The source url of where content was added from.
+    ///   - title: Page title used as title when API request fails
+    ///   - reason: Reason for creating a BeamElement
+    public func addContent(content: [BeamElement], with source: URL? = nil, title: String? = nil, reason: NoteElementAddReason) async {
+        // If a source is provided, and content type should be added with source bullet. Then add content to bullet of the source url
+        if let source = source, shouldAddWithSourceBullet(content, pageUrl: source) {
+            // If we have an existing one use that, else create a new source bullet
+            if let existingSocialTitle = findSocialTitleOnNote(source: source) {
+                Logger.shared.logDebug("Source exists, adding \(content) with source:\(source) as child of:\(element)", category: .web)
+                element = existingSocialTitle
+            } else {
+                // Creating SocialTitle
+                Logger.shared.logDebug("Source not found, adding \(content) with source:\(source) as child of last element:\(element) of note", category: .web)
+                element = getEmptyOrCreateTargetElement(reason: reason)
+                let text = await convertURLToBeamTextLink(url: source, title: title)
+                // Update UI back on main thread
+                await MainActor.run {
+                    element.text = text
+                }
+            }
         }
 
-        )
+        // If the last child of destination element is empty bullet, remove that bullet before adding content
+        if let lastChild = element.children.last,
+           lastChild.text.isEmpty, lastChild.kind == .bullet {
+            // Update UI back on main thread
+            await MainActor.run {
+                element.removeChild(lastChild)
+            }
+        }
+
+        // Add content to the note
+        Logger.shared.logDebug("Adding content:\(content) as child of:\(element)", category: .web)
+        // Update UI back on main thread
+        await MainActor.run {
+            element.addChildren(content)
+        }
+    }
+
+    /// Determine which element any add should target.
+    /// - Parameter reason: The season for which an element is added
+    /// - Returns: returns the target BeamElement
+    private func getEmptyOrCreateTargetElement(reason: NoteElementAddReason) -> BeamElement {
+        // Get the last child on the targetElement
+        // If it's an empty element use the latest.
+        if let latest = element.children.last, latest.text.isEmpty {
+            return latest
+        }
+
+        // When the latest element has content we create a new element to target
+        element = createNewTargetElement(reason: reason)
+        return element
+    }
+
+    /// Creates a new BeamElement, The reason and current position of the rootElement
+    /// determines if the new element gets added as a root element or child.
+    /// - Parameter reason: The season for which an element is added
+    /// - Returns: returns the target BeamElement
+    private func createNewTargetElement(reason: NoteElementAddReason) -> BeamElement {
+        let newElement = BeamElement()
+        if reason == .navigation && !nested {
+            // create a new root element
+            element.addChild(newElement)
+            rootElement = element
+            nested = true
+        } else {
+            // create element as child of root element
+            // Update UI back on main thread
+            rootElement.addChild(newElement)
+        }
+        return newElement
+    }
+
+    // MARK: - Add Link to Note
+    /// Add the current page to the current note based on the browsing session collection preference.
+    /// - Parameters:
+    ///   - url: Url of current page
+    ///   - text: Text to add
+    ///   - reason: Enum reason for adding the note
+    ///   - isNavigatingFromNote: Boolean if it's navigating from a note
+    ///   - browsingOrigin: browsing tree origin value
+    /// - Returns: BeamElement of updated note or nil
+    public func addLink(url: URL, reason: NoteElementAddReason, isNavigatingFromNote: Bool? = nil, browsingOrigin: BrowsingTreeOrigin? = nil) async -> BeamElement? {
+        // With BrowsingSessionCollect enabled AND Navigating from Note
+        guard PreferencesManager.browsingSessionCollectionIsOn, isNavigatingFromNote == true else { return nil }
+
+        // collect browsing links
+        switch browsingOrigin {
+        case .searchFromNode, .browsingNode:
+            await addContent(content: [], with: url, reason: reason)
+            return element
+        default:
+            return nil
+        }
+    }
+
+    public func replaceSearchWithSearchLink(_ search: String, url: URL) async {
+        guard noteOrDefault.text.text != search,
+              !element.outLinks.contains(url.absoluteString) else {
+            return
+        }
+        let text = await convertURLToBeamTextLink(url: url)
+        // Update UI back on main thread
+        await MainActor.run {
+            element.text = text
+        }
+    }
+
+    /// Wrapper around addContent() to simplify adding a source link
+    /// - Parameter url: source link to add
+    /// - Parameter reason: Enum reason for adding the note
+    /// - Returns: The target element that was created or updated
+    public func addLink(url: URL, reason: NoteElementAddReason, ignoreExistingSocialTitles: Bool) async {
+        await addContent(content: [], with: url, reason: reason)
+    }
+
+    // MARK: - Destination Note Methods
+    /// Set provided note as target destination for new content.
+    /// - Parameters:
+    ///   - note: Destination Note
+    ///   - rootElement: Element on target note to insert content at. If nill the root of the target note will be used
+    public func setDestination(note: BeamNote, rootElement: BeamElement? = nil) {
+        self.note = note
+        self.rootElement = rootElement ?? note
+        self.element = rootElement ?? note
+    }
+
+    /// Removes any target destination note or element and returns it to the default values.
+    public func resetDestinationNote() {
+        self.note = nil
+        self._rootElement = nil
+    }
+
+    // This variable could be migrated as a preference if we want. Setting to true gives the original PnS behavior
+    var embedMediaInSourceBullet = false
+}
+
+// MARK: - Utilities
+extension WebNoteController {
+
+    /// Decides if this set of elements should be inserted with a source bullet
+    /// - Parameter elements: Array of BeamElement content
+    /// - Returns: true if elements should be added under a source bullen
+    private func shouldAddWithSourceBullet(_ elements: [BeamElement], pageUrl: URL) -> Bool {
+        guard !embedMediaInSourceBullet,
+              let first = elements.first,
+              elements.count == 1 else { return true }
+
+        // A single Image should be inserted without source bullet
+        if first.kind.isMedia {
+            return false
+        }
+
+        // insert link that could be embed without SocialTitle
+        // If the element is a external link of a single embeddable url and
+        // the convertLinksToEmbed preference is disabled. The link element should
+        // be inserted without source bullet.
+        for link in first.outLinks {
+            if let url = URL(string: link) {
+                let canEmbed = EmbedContentBuilder().canBuildEmbed(for: url)
+                let disabledConvertingLinksToEmbed = HtmlVisitor.allowConvertToEmbed == false
+                if canEmbed && disabledConvertingLinksToEmbed {
+                    return false
+                }
+            }
+        }
+
+        return true
+    }
+
+    /// Search destination note for a BeamElement containing the SocialTitle and nothing else.
+    /// - Parameter source: The URL to search for
+    /// - Returns: BeamElement if element is found. otherwise nil
+    private func findSocialTitleOnNote(source: URL) -> BeamElement? {
+        if let elementWithLink = noteOrDefault.elementContainingLink(to: source.absoluteString) {
+            // Only a valid source link when the link range is the whole text
+            for range in elementWithLink.text.linkRanges where range.range == elementWithLink.text.wholeRange {
+                return elementWithLink
+            }
+
+        }
+
+        return nil
+    }
+
+    /// Calls Proxy API to get page title of url
+    /// - Parameter url: url for the linkBullet
+    /// - Parameter title: Fallback text that will be visible
+    /// - Returns: BeamElement with .link
+    private func convertURLToBeamTextLink(url: URL, title: String? = nil) async -> BeamText {
+        guard url.scheme != "file", let link = await SocialTitleFetcher.shared.fetch(for: url) else {
+            Logger.shared.logError("API request for link title failed. falling back on page title", category: .web)
+            return BeamText(title ?? url.absoluteString, attributes: [.link(url.absoluteString)])
+        }
+
+        return BeamText(link.title, attributes: [.link(link.url.absoluteString)])
     }
 }

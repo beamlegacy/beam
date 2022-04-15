@@ -17,6 +17,7 @@ class PointAndShootShootingTest: PointAndShootTest {
     override func setUpWithError() throws {
         initTestBed()
         self.pns.mouseLocation = NSPoint(x: 201, y: 202)
+        self.testPage?.url = URL(string: TestWebPage.urlStr)
     }
 
     func testFailShootWithoutActivePointGroup() throws {
@@ -96,12 +97,14 @@ class PointAndShootShootingTest: PointAndShootTest {
             html: "<p>Pointed text</p>",
             animated: false
         )
+        let url = "https://pnsTest.co"
+        self.testPage?.url = URL(string: url)
         // Point
-        self.pns.point(target, "text string", "https://pnsTest.co")
+        self.pns.point(target, "text string", url)
         // Shoot
         XCTAssertNil(self.pns.activeShootGroup)
         self.pns.isAltKeyDown = true
-        self.pns.pointShoot(target.id, target, "text string", "https://pnsTest.co")
+        self.pns.pointShoot(target.id, target, "text string", url)
         XCTAssertNotNil(self.pns.activeShootGroup)
 
         guard let testPage = self.testPage else {
@@ -112,9 +115,8 @@ class PointAndShootShootingTest: PointAndShootTest {
         if let group = self.pns.activeShootGroup {
             let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
             self.pns.addShootToNote(targetNote: testPage.activeNote, group: group, completion: {
-                XCTAssertEqual(self.testPage?.events.count, 3)
-                XCTAssertEqual(self.testPage?.events[1], "addToNote true")
-                XCTAssertEqual(self.testPage?.events[2], "logInNote https://webpage.com PNS MockPage pointandshoot")
+                XCTAssertEqual(self.testPage?.events.count, 2)
+                XCTAssertEqual(self.testPage?.events[1], "addContent \(url)")
                 expectation.fulfill()
             })
             wait(for: [expectation], timeout: 10.0)

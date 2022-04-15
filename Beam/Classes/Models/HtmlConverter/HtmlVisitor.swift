@@ -217,8 +217,7 @@ class HtmlVisitor {
         return result
     }
 
-    /// Utility to convert BeamElement containing a single embedable url to embed kind
-    private func convertElementToEmbed(_ element: BeamElement) -> BeamElement {
+    private func embeddableURL(_ element: BeamElement) -> URL? {
         let links = element.text.links
         guard HtmlVisitor.allowConvertToEmbed,
               links.count == 1,
@@ -227,8 +226,15 @@ class HtmlVisitor {
               EmbedContentBuilder().canBuildEmbed(for: url),
               // Use the Embed Provider matcher to cleanup the embed url
               let embedUrl = EmbedContentBuilder().embedMatchURL(for: url) else {
-            return element
+            return nil
         }
+
+        return embedUrl
+    }
+
+    /// Utility to convert BeamElement containing a single embedable url to embed kind
+    private func convertElementToEmbed(_ element: BeamElement) -> BeamElement {
+        guard let embedUrl = embeddableURL(element) else { return element }
         // If the embed was already created earlier, return early
         let embedWasPreviouslyAdded = embedURLs.contains(embedUrl)
         guard !embedWasPreviouslyAdded else { return BeamElement() }
