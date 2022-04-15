@@ -46,7 +46,10 @@ class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
         let cal = Calendar(identifier: .iso8601)
         guard let day = cal.date(byAdding: DateComponents(day: -daysAgo), to: now)?.localDayString() else { return [] }
         let scores = db.getDailyUrlScores(day: day)
-        let sorted = scores.sorted { (leftScore, rightScore) in leftScore.score > rightScore.score }
+        let filtered = scores.filter { score in
+            !(score.isPinned || score.urlId == Link.missing.id)
+        }
+        let sorted = filtered.sorted { (leftScore, rightScore) in leftScore.score > rightScore.score }
         return Array(sorted.prefix(topN))
     }
 }
