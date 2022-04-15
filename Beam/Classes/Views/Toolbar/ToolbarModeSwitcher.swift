@@ -11,6 +11,7 @@ import BeamCore
 struct ToolbarModeSwitcher: View {
     @Environment(\.isMainWindow) private var isMainWindow
 
+    var isIncognito: Bool = false
     var modeWeb: Bool = false
     var tabsCount: Int = 0
     var action: (() -> Void)?
@@ -51,7 +52,9 @@ struct ToolbarModeSwitcher: View {
             ToolbarButton(icon: "transparent", action: action)
             ZStack {
                 Group {
-                    if modeWeb {
+                    if isIncognito {
+                        lottieView(name: "nav-pivot_incognito")
+                    } else if modeWeb {
                         lottieView(name: "nav-pivot_card")
                         if tabsCount >= 100 {
                             Icon(name: "nav-pivot-infinite", size: CGSize(width: 12, height: 6), color: foregroundColor.swiftUI)
@@ -67,7 +70,13 @@ struct ToolbarModeSwitcher: View {
                         lottieView(name: "nav-pivot_web")
                     }
                     if !showLottie {
-                        Icon(name: modeWeb ? "nav-pivot_web" : "nav-pivot_card", width: 24, color: foregroundColor.swiftUI)
+                        if isIncognito {
+                            Icon(name: modeWeb ? "nav-pivot_incognito" : "nav-pivot_incognito", width: 24, color: foregroundColor.swiftUI)
+
+                        } else {
+                            Icon(name: modeWeb ? "nav-pivot_web" : "nav-pivot_card", width: 24, color: foregroundColor.swiftUI)
+
+                        }
                     }
                 }
                 .opacity(slotMachine.isVisible ? 0 : 1)
@@ -203,6 +212,8 @@ struct ToolbarModeSwitcher_Previews: PreviewProvider {
                 ToolbarModeSwitcher(modeWeb: true, tabsCount: 3)
                 ToolbarModeSwitcher(modeWeb: true, tabsCount: 33)
                 ToolbarModeSwitcher(modeWeb: true, tabsCount: 123)
+                ToolbarModeSwitcher(isIncognito: true, modeWeb: false)
+                ToolbarModeSwitcher(isIncognito: true, modeWeb: true, tabsCount: 3)
             }
             .padding()
         }

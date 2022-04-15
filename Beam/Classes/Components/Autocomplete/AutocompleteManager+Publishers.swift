@@ -39,13 +39,16 @@ extension AutocompleteManager {
             return notesPublishers
         }
 
-        let webPublishers = [
+        var webPublishers = [
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteMnemonicResults(for: searchText), source: .mnemonic),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
-            futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
-            getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter)
+            futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url)
         ]
+
+        if let state = beamState, !state.isIncognito {
+            webPublishers.append(getSearchEnginePublisher(for: searchText, searchEngine: searchEngineCompleter))
+        }
 
         let otherPublishers = [futureToPublisher(autocompleteActionsResults(for: searchText), source: .action)]
 

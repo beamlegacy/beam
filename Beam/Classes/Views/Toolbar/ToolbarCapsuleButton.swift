@@ -14,6 +14,7 @@ struct ToolbarCapsuleButton<Content: View>: View {
     var text: String
     var isSelected = false
     var isForeground = false
+    var isIncognito = false
     var tabStyle = false
     var hueTint: Double?
     var label: ((_ isHovering: Bool, _ isPressed: Bool) -> Content)?
@@ -22,7 +23,7 @@ struct ToolbarCapsuleButton<Content: View>: View {
     @State var isHovering: Bool = false
     @State var isPressed: Bool = false
 
-    init(isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, hueTint: Double? = nil,
+    init(isIncognito: Bool = false, isSelected: Bool = false, isForeground: Bool = false, tabStyle: Bool = false, hueTint: Double? = nil,
          @ViewBuilder label: @escaping (_ isHovering: Bool, _ isPressed: Bool) -> Content,
          action: (() -> Void)? = nil) {
         self.text = ""
@@ -32,6 +33,7 @@ struct ToolbarCapsuleButton<Content: View>: View {
         self.hueTint = hueTint
         self.label = label
         self.action = action
+        self.isIncognito = isIncognito
     }
 
     private var backgroundColor: Color {
@@ -41,7 +43,22 @@ struct ToolbarCapsuleButton<Content: View>: View {
         } else if isPressed {
             return BeamColor.Mercury.swiftUI
         } else if isForeground {
-            return BeamColor.ToolBar.capsuleForegroundBackgrond.swiftUI
+            return BeamColor.ToolBar.capsuleForegroundBackground.swiftUI
+        } else if isHovering {
+            return BeamColor.Nero.swiftUI.opacity(0.7)
+        }
+        return .clear
+    }
+
+    private var incognitoBackgroundColor: Color {
+        guard isIncognito else { return backgroundColor }
+        guard isEnabled else { return .clear }
+        if let hueTint = hueTint {
+            return Color(hue: hueTint, saturation: 0.4, brightness: 1, opacity: 0.2)
+        } else if isPressed {
+            return BeamColor.Mercury.swiftUI
+        } else if isForeground {
+            return isIncognito ? BeamColor.ToolBar.capsuleIncognitoForegroundBackground.swiftUI : BeamColor.ToolBar.capsuleForegroundBackground.swiftUI
         } else if isHovering {
             return BeamColor.Nero.swiftUI.opacity(0.7)
         }
@@ -57,6 +74,29 @@ struct ToolbarCapsuleButton<Content: View>: View {
                 return BeamColor.ToolBar.capsuleTabStrokeClicked.swiftUI
             } else if isForeground {
                 return BeamColor.ToolBar.capsuleTabForegroundStroke.swiftUI
+            } else if isHovering {
+                return BeamColor.ToolBar.capsuleStroke.swiftUI
+            }
+        } else {
+            if isPressed {
+                return BeamColor.ToolBar.capsuleStrokeClicked.swiftUI
+            } else if isForeground || isHovering {
+                return BeamColor.ToolBar.capsuleStroke.swiftUI
+            }
+        }
+        return .clear
+    }
+
+    private var incognitoStrokeColor: Color {
+        guard isIncognito else { return strokeColor }
+        guard isEnabled else { return .clear }
+        if tabStyle {
+            if isForeground, let hueTint = hueTint {
+                return Color(hue: hueTint, saturation: 1, brightness: 0.8, opacity: 0.5)
+            } else if isPressed {
+                return BeamColor.ToolBar.capsuleTabStrokeClicked.swiftUI
+            } else if isForeground {
+                return BeamColor.ToolBar.capsuleIncognitoTabForegroundStroke.swiftUI
             } else if isHovering {
                 return BeamColor.ToolBar.capsuleStroke.swiftUI
             }
@@ -117,12 +157,12 @@ struct ToolbarCapsuleButton<Content: View>: View {
         )
         .lineLimit(1)
         .foregroundColor(foregroundColor)
-        .background(backgroundColor)
+        .background(isIncognito ? incognitoBackgroundColor : backgroundColor)
         .cornerRadius(6)
         .padding(0.5)
         .overlay(
             RoundedRectangle(cornerRadius: 6.5)
-                .strokeBorder(style: .init(lineWidth: 0.5)).foregroundColor(strokeColor)
+                .strokeBorder(style: .init(lineWidth: 0.5)).foregroundColor(isIncognito ? incognitoStrokeColor : strokeColor)
         )
         .if(!isForeground || isPressed || colorScheme == .dark) {
             $0.blendModeLightMultiplyDarkScreen()

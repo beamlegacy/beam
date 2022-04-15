@@ -375,6 +375,11 @@
                                                 <action selector="newWindow:" target="Ady-hI-5gd" id="3A8-wm-3V3"/>
                                             </connections>
                                         </menuItem>
+                                        <menuItem title="New Incognito Window" keyEquivalent="N" id="QcG-Vu-mEf">
+                                            <connections>
+                                                <action selector="newIncognitoWindow:" target="Ady-hI-5gd" id="GLM-ei-9Bs"/>
+                                            </connections>
+                                        </menuItem>
                                         <menuItem title="New Tab" keyEquivalent="t" id="XvS-Ku-fBs" userLabel="New Search...">
                                             <connections>
                                                 <action selector="newSearch:" target="Ady-hI-5gd" id="A5z-dM-XS8"/>

@@ -91,7 +91,7 @@ struct ModeView: View {
     private func onScroll(_ scrollPoint: CGPoint, containerGeometry: GeometryProxy) {
         let scrollOffset = scrollPoint.y + cardScrollViewTopInset
         contentIsScrolled = scrollOffset >
-        JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry)
+        JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry, isIncognito: state.isIncognito)
 
         CustomPopoverPresenter.shared.dismissPopovers()
         guard !transitionModel.isTransitioning else { return }

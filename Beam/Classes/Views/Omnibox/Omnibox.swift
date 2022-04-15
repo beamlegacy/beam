@@ -11,6 +11,7 @@ import BeamCore
 struct Omnibox: View {
 
     static let defaultHeight: CGFloat = 57
+    static let incognitoDefaultHeight: CGFloat = 207
 
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var autocompleteManager: AutocompleteManager
@@ -75,6 +76,8 @@ struct Omnibox: View {
                     AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
                                          elements: autocompleteManager.autocompleteResults,
                                          modifierFlagsPressed: modifierFlagsPressed)
+                } else if state.isIncognito && isInsideNote {
+                    OmniboxIncognitoExplanation()
                 }
             }
         }
@@ -215,6 +218,8 @@ struct OmniboxContainer: View {
 
 struct Omnibox_Previews: PreviewProvider {
     static let state = BeamState()
+    static let incognitoState = BeamState(incognito: true)
+
     static let autocompleteManager = AutocompleteManager(searchEngine: GoogleSearch(), beamState: nil)
 
     static var autocompleteManagerWithResults: AutocompleteManager {
@@ -242,6 +247,22 @@ struct Omnibox_Previews: PreviewProvider {
         Group {
             Omnibox()
                 .environmentObject(state)
+                .environmentObject(autocompleteManagerWithResults)
+                .environmentObject(state.browserTabsManager)
+        }
+        .padding()
+        .frame(width: 600, height: 300, alignment: .top)
+        Group {
+            Omnibox()
+                .environmentObject(incognitoState)
+                .environmentObject(state.autocompleteManager)
+                .environmentObject(state.browserTabsManager)
+        }
+        .padding()
+        .frame(width: 600, height: 150, alignment: .top)
+        Group {
+            Omnibox()
+                .environmentObject(incognitoState)
                 .environmentObject(autocompleteManagerWithResults)
                 .environmentObject(state.browserTabsManager)
         }

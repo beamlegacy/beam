@@ -32,7 +32,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
 
-    var cookies: HTTPCookieStorage
+    let cookieManager: CookiesManager
+
     var downloadManager: BeamDownloadManager = BeamDownloadManager()
     var importsManager: ImportsManager = ImportsManager()
     lazy var calendarManager: CalendarManager = {
@@ -109,7 +110,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         sessionExporter = ClusteringSessionExporter()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
-        cookies = HTTPCookieStorage()
+        cookieManager = CookiesManager()
 
         let enableUpdateAutoCheck = ![.debug, .test].contains(Configuration.env)
 
@@ -379,33 +380,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
     }
 
-    public func cookiesDidChange(in cookieStore: WKHTTPCookieStore) {
-        cookieStore.getAllCookies({ [weak self] cookies in
-            guard let self = self else { return }
-
-            for cookie in cookies {
-                self.cookies.setCookie(cookie)
-            }
-        })
-    }
-
     public func clearCookiesAndCache() {
-        HTTPCookieStorage.shared.cookies?.forEach(HTTPCookieStorage.shared.deleteCookie)
-
-        WKWebsiteDataStore.default().fetchDataRecords(ofTypes: WKWebsiteDataStore.allWebsiteDataTypes(), completionHandler: { records in
-            records.forEach { record in
-                WKWebsiteDataStore.default().removeData(ofTypes: record.dataTypes, for: [record], completionHandler: {})
-            }
-        })
+        self.cookieManager.clearCookiesAndCache()
     }
 
     func setup(webView: WKWebView) {
-        let configuration = webView.configurationWithoutMakingCopy
-        for cookie in cookies.cookies ?? [] {
-            configuration.websiteDataStore.httpCookieStore.setCookie(cookie)
-        }
-
-        configuration.websiteDataStore.httpCookieStore.add(self)
+        cookieManager.setupCookies(for: webView)
     }
 
     ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
