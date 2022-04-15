@@ -22,6 +22,13 @@ class BrowserTabTests: XCTestCase {
     func testTabInit_AssignsNoteToNoteController() throws {
         XCTAssertEqual(tab.noteController.note, note)
     }
+    func testPinnedInit() throws {
+        let url = URL(string: "http://elmundo.es")!
+        let tab = BrowserTab(pinnedTabWithId: UUID(), url: url, title: "El journal")
+        XCTAssert(tab.browsingTree.isPinned)
+        tab.isPinned = false
+        XCTAssertFalse(tab.browsingTree.isPinned)
+    }
 
     func testPerformance_InitTab() throws {
         self.measure {
