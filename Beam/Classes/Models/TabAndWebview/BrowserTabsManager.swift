@@ -35,6 +35,8 @@ class BrowserTabsManager: ObservableObject {
     @Published public var tabs: [BrowserTab] = [] {
         didSet {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
+
+            guard let state = state, !state.isIncognito else { return }
             self.autoSave()
             self.updateClusteringOpenPages()
         }
