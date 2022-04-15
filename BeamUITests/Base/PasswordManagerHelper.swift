@@ -18,13 +18,17 @@ class PasswordManagerHelper: BaseView {
     }
 
     func clickKeyIcon() {
-        app.dialogs.buttons["autofill-password"].clickOnExistence()
+        getKeyIconElement().clickOnExistence()
     }
 
     func clickPopupLoginText(login: String) {
         app.dialogs.staticTexts[login].clickOnExistence()
     }
-    
+
+    func getKeyIconElement() -> XCUIElement {
+        app.dialogs.buttons["autofill-password"]
+    }
+
     func getAutofillPopupElement(login: String) -> XCUIElement {
         return app.dialogs.containing(.staticText, identifier: login).element
     }
