@@ -117,7 +117,7 @@ class OnboardingManager: ObservableObject {
             self.presentOnboardingWindow()
         }
         if withConfirmationAlert {
-            UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: loc("Connect to Beam to sync encrypt and publish your notes."),
+            UserAlert.showAlert(message: loc("Connect to Beam"), informativeText: loc("Connect to Beam to sync, encrypt and publish your notes."),
                                 buttonTitle: loc("Connect"), secondaryButtonTitle: loc("Cancel"), buttonAction: presentBlock)
         } else {
             presentBlock()

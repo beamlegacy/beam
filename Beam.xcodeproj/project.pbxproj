@@ -999,6 +999,9 @@
 		A552DF3325F1741900570C85 /* GlobalCenteringContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */; };
 		A55760822665501000DEE86C /* TableViewColumn.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55760812665501000DEE86C /* TableViewColumn.swift */; };
 		A55A019427DF49BF002403D5 /* BeamTableCellLottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */; };
+		A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98BC2805F60200717D3E /* ShareHelper.swift */; };
+		A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C42806FB5F00717D3E /* ShareService.swift */; };
+		A55C98C7280767CA00717D3E /* ShareHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A55C98C6280767CA00717D3E /* ShareHelperTests.swift */; };
 		A5651A7726035D3A0035F12B /* AppDelegate+NSMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */; };
 		A56696B12614CF7F00B814D2 /* TableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A56696B02614CF7F00B814D2 /* TableView.swift */; };
 		A567157125F66F8600B46110 /* StyledText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A567157025F66F8600B46110 /* StyledText.swift */; };
@@ -2743,6 +2746,9 @@
 		A552DF3225F1741900570C85 /* GlobalCenteringContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalCenteringContainer.swift; sourceTree = "<group>"; };
 		A55760812665501000DEE86C /* TableViewColumn.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewColumn.swift; sourceTree = "<group>"; };
 		A55A019327DF49BF002403D5 /* BeamTableCellLottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTableCellLottieView.swift; sourceTree = "<group>"; };
+		A55C98BC2805F60200717D3E /* ShareHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelper.swift; sourceTree = "<group>"; };
+		A55C98C42806FB5F00717D3E /* ShareService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareService.swift; sourceTree = "<group>"; };
+		A55C98C6280767CA00717D3E /* ShareHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHelperTests.swift; sourceTree = "<group>"; };
 		A5651A7626035D3A0035F12B /* AppDelegate+NSMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+NSMenu.swift"; sourceTree = "<group>"; };
 		A56696B02614CF7F00B814D2 /* TableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableView.swift; sourceTree = "<group>"; };
 		A567157025F66F8600B46110 /* StyledText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StyledText.swift; sourceTree = "<group>"; };
@@ -4098,6 +4104,7 @@
 				A043B7FC26593A4800E267E5 /* TabGrouping */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
 				A0C5D845263C636C00FA6F6E /* Toast */,
+				A55C98C32806FAC400717D3E /* Sharing */,
 				A5153EDB260CC4AC00C84902 /* UIElements */,
 			);
 			path = Components;
@@ -5465,6 +5472,7 @@
 				A5EA892726A9C08100AB5A16 /* CalendarPickerViewModelTests.swift */,
 				37B85B4C27A2C629003871F9 /* Download */,
 				37520B1F27EABF1C00A1C20B /* MediaContent */,
+				A55C98C6280767CA00717D3E /* ShareHelperTests.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -6562,6 +6570,15 @@
 				A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */,
 			);
 			path = BottomToolbar;
+			sourceTree = "<group>";
+		};
+		A55C98C32806FAC400717D3E /* Sharing */ = {
+			isa = PBXGroup;
+			children = (
+				A55C98BC2805F60200717D3E /* ShareHelper.swift */,
+				A55C98C42806FB5F00717D3E /* ShareService.swift */,
+			);
+			path = Sharing;
 			sourceTree = "<group>";
 		};
 		A57BFEC02615B4AC00CFB646 /* TableView */ = {
@@ -8148,6 +8165,7 @@
 				37C413182785529300954FD7 /* GoogleSearch.swift in Sources */,
 				370794CD27D7AA0300D2768B /* CustomPDFView.swift in Sources */,
 				A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */,
+				A55C98BD2805F60200717D3E /* ShareHelper.swift in Sources */,
 				33FE719826D38A0400E63849 /* SearchLocationView.swift in Sources */,
 				A05ADF3F264D67D3002DF91A /* PasswordsDB.swift in Sources */,
 				A519F0672721A25000BB42E2 /* Cache.swift in Sources */,
@@ -8613,6 +8631,7 @@
 				41FAD34F25E5742800D78B36 /* CALayer+Animation.swift in Sources */,
 				524299EE25A488E000F4DBF5 /* AdvancedPreferencesView.swift in Sources */,
 				A5D8858C274E4EB600F37859 /* OmniboxClearButton.swift in Sources */,
+				A55C98C52806FB5F00717D3E /* ShareService.swift in Sources */,
 				522BC3E826A8724B0018B51E /* BeamObjectManagerProtocol.swift in Sources */,
 				418171FC2581107C00317ED8 /* RoamImporter.swift in Sources */,
 				A56FFE0326971F8500BEE6A1 /* CalendarPickerFormatterView.swift in Sources */,
@@ -8909,6 +8928,7 @@
 				524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */,
 				8A7F948326A8576100270A74 /* PointAndShootHandleMouseClickTest.swift in Sources */,
 				37C41327278553BC00954FD7 /* PreferredSearchEngineTests.swift in Sources */,
+				A55C98C7280767CA00717D3E /* ShareHelperTests.swift in Sources */,
 				A5CDB01727FF9D9F003F93B3 /* WebViewControllerJSNavigationHandlingTests.swift in Sources */,
 				DA5A16EA26F8EB4200226C89 /* BeamTextEditTests.swift in Sources */,
 				8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */,

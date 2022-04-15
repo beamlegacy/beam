@@ -19,6 +19,7 @@ struct PointAndShootCardPicker: View {
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
 
     var focusOnAppear = true
+    var onShare: ((_ service: ShareService?) -> Void)?
     var onComplete: ((_ targetNote: BeamNote?, _ comment: String?, _ completion: @escaping () -> Void) -> Void)?
 
     @StateObject private var autocompleteModel = DestinationNoteAutocompleteList.Model()
@@ -38,6 +39,7 @@ struct PointAndShootCardPicker: View {
     private let placeholderColor = BeamColor.PointShoot.placeholder.nsColor
     private let secondLabelTextColor = BeamColor.Generic.text.nsColor
     @State private var shootCompleted: Bool = false
+    @State private var userInputtedText: Bool = false
 
     var completed: Bool {
         shootCompleted || completedGroup?.fullPageCollect == true
@@ -50,6 +52,7 @@ struct PointAndShootCardPicker: View {
     @State private var destinationCardName: String?
     @State var todaysCardName: String = ""
     @State private var lastInputWasBackspace = false
+    @State private var justCopied = false
     private var cursorIsOnCardName: Bool {
         if let selection = cardSearchFieldSelection {
             return selection.upperBound <= cardSearchField.count
@@ -70,6 +73,54 @@ struct PointAndShootCardPicker: View {
         autocompleteModel.selectedResult?.text ?? todaysCardName
     }
 
+    private var textFieldView: some View {
+        BeamTextField(text: $cardSearchField,
+                      isEditing: $isEditingCardName,
+                      placeholder: placeholderText,
+                      font: font,
+                      textColor: textColor, placeholderColor: placeholderColor,
+                      selectedRange: cardSearchFieldSelection, selectedRangeColor: selectedRangeColor
+        ) { text in
+            onTextDidChange(text)
+        } onCommit: { modifierFlags in
+            enableResizeAnimation()
+            let withOption = modifierFlags?.contains(.option) ?? false
+            onFinishEditing(withOption)
+        } onEscape: {
+            onCancelEditing()
+        } onTab: {
+            // select note when pressing tab
+            if currentCardName == nil || !cardSearchField.isEmpty {
+                selectSearchResult()
+            }
+            return true
+        } onCursorMovement: { move -> Bool in
+            autocompleteModel.handleCursorMovement(move)
+        } onModifierFlagPressed: { event in
+            if shouldShowCopyShareView &&
+                event.modifierFlags.contains(.command) && event.keyCode == KeyCode.c.rawValue {
+                copyShoot()
+            }
+        } onStopEditing: {
+            DispatchQueue.main.async {
+                cardSearchFieldSelection = nil
+            }
+            enableResizeAnimation()
+        } onSelectionChanged: { range in
+            guard range.lowerBound != cardSearchFieldSelection?.lowerBound ||
+                    range.upperBound != cardSearchFieldSelection?.upperBound else { return }
+            DispatchQueue.main.async {
+                cardSearchFieldSelection = Range(range)
+            }
+        }
+        .frame(minHeight: 16)
+        .padding(BeamSpacing._40)
+        .background(
+            Token(text: cardSearchField, currentCardName: currentCardName, tokenize: cursorIsOnCardName,
+                  selectedResult: lastInputWasBackspace ? nil : autocompleteModel.selectedResult, completed: completed)
+        )
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // MARK: - Top Half
@@ -80,46 +131,7 @@ struct PointAndShootCardPicker: View {
                 // MARK: - TextField
                 ZStack {
                     if !completed {
-                        BeamTextField(text: $cardSearchField,
-                                      isEditing: $isEditingCardName,
-                                      placeholder: placeholderText,
-                                      font: font,
-                                      textColor: textColor, placeholderColor: placeholderColor,
-                                      selectedRange: cardSearchFieldSelection, selectedRangeColor: selectedRangeColor
-                        ) { text in
-                            onTextDidChange(text)
-                        } onCommit: { modifierFlags in
-                            enableResizeAnimation()
-                            let withOption = modifierFlags?.contains(.option) ?? false
-                            onFinishEditing(withOption)
-                        } onEscape: {
-                            onCancelEditing()
-                        } onTab: {
-                            // select note when pressing tab
-                            if currentCardName == nil || !cardSearchField.isEmpty {
-                                selectSearchResult()
-                            }
-                            return true
-                        } onCursorMovement: { move -> Bool in
-                            autocompleteModel.handleCursorMovement(move)
-                        } onStopEditing: {
-                            DispatchQueue.main.async {
-                                cardSearchFieldSelection = nil
-                            }
-                            enableResizeAnimation()
-                        } onSelectionChanged: { range in
-                            guard range.lowerBound != cardSearchFieldSelection?.lowerBound ||
-                                    range.upperBound != cardSearchFieldSelection?.upperBound else { return }
-                            DispatchQueue.main.async {
-                                cardSearchFieldSelection = Range(range)
-                            }
-                        }
-                        .frame(minHeight: 16)
-                        .padding(BeamSpacing._40)
-                        .background(
-                            Token(text: cardSearchField, currentCardName: currentCardName, tokenize: cursorIsOnCardName,
-                                  selectedResult: lastInputWasBackspace ? nil : autocompleteModel.selectedResult, completed: completed)
-                        )
+                        textFieldView
                     } else if completedGroup?.confirmation == .success {
                         Text(destinationCardName ?? getFinalCardName())
                             .foregroundColor(BeamColor.Beam.swiftUI)
@@ -147,14 +159,16 @@ struct PointAndShootCardPicker: View {
             .frame(height: 42)
             .blendModeLightMultiplyDarkScreen()
 
-            if !completed {
+            if !completed && currentCardName == nil {
                 // MARK: - Autocomplete
-                if currentCardName == nil {
-                    DestinationNoteAutocompleteList(model: autocompleteModel)
-                        .onSelectAutocompleteResult {
-                            onFinishEditing()
-                        }
-                }
+                DestinationNoteAutocompleteList(model: autocompleteModel)
+                    .onSelectAutocompleteResult {
+                        onFinishEditing()
+                    }
+            }
+
+            if shouldShowCopyShareView {
+                copyShareView
             }
         }
         .onAppear {
@@ -187,7 +201,6 @@ struct PointAndShootCardPicker: View {
 }
 
 extension PointAndShootCardPicker {
-    // MARK: - PrefixLabel Component
     struct PrefixLabel: View {
         var completed: Bool
         var confirmation: PointAndShoot.ShootConfirmation?
@@ -272,7 +285,18 @@ extension PointAndShootCardPicker {
 }
 
 extension PointAndShootCardPicker {
-    // MARK: - onTextDidChange
+    /// Temporarily allow animation on the parent wrapper
+    private func enableResizeAnimation() {
+        DispatchQueue.main.async {
+            self.allowAnimation = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1)) {
+                self.allowAnimation = false
+            }
+        }
+    }
+}
+
+extension PointAndShootCardPicker {
     private func onTextDidChange(_ text: String) {
         var searchText = text
         if let currentCardName = currentCardName,
@@ -280,18 +304,17 @@ extension PointAndShootCardPicker {
             cardSearchField = ""
             searchText = ""
         }
+        userInputtedText = true
         lastInputWasBackspace = text.count == autocompleteModel.searchText.count - 1
         autocompleteModel.searchText = searchText
         currentCardName = nil
     }
-}
 
-extension PointAndShootCardPicker {
     private func onCancelEditing() {
         guard !completed else { return }
         onComplete?(nil, nil, {})
     }
-    // MARK: - onFinishEditing
+
     private func onFinishEditing(_ withOption: Bool = false) {
         guard !completed else { return }
         // Select search result
@@ -329,7 +352,6 @@ extension PointAndShootCardPicker {
 }
 
 extension PointAndShootCardPicker {
-    // MARK: - selectSearchResult
     private func selectSearchResult(_ withOption: Bool = false) {
         guard let result = autocompleteModel.selectedResult else {
             Logger.shared.logError("Failed to return a selected autocompleteModel result", category: .pointAndShoot)
@@ -355,7 +377,6 @@ extension PointAndShootCardPicker {
 }
 
 extension PointAndShootCardPicker {
-    // MARK: - fetchOrCreateNote
     @discardableResult
     private func fetchOrCreateNote(named name: String) -> BeamNote {
         let note = BeamNote.fetchOrCreate(title: name)
@@ -363,7 +384,6 @@ extension PointAndShootCardPicker {
         return note
     }
 
-    // MARK: - fetchOrCreateJournalNote
     @discardableResult
     private func fetchOrCreateJournalNote(date: Date) -> BeamNote {
         let note = BeamNote.fetchOrCreateJournalNote(date: date)
@@ -372,29 +392,88 @@ extension PointAndShootCardPicker {
     }
 }
 
+// MARK: - Copy & Share
 extension PointAndShootCardPicker {
-    // MARK: - onComplete
-    func onComplete(perform action: @escaping (_ targetNote: BeamNote?, _ comment: String?, _ completion: @escaping () -> Void) -> Void ) -> Self {
-        var copy = self
-        copy.onComplete = action
-        return copy
-    }
-}
+    @objc private class ShareTarget: NSObject {
+        var onSelect: ((NSMenuItem) -> Void)?
 
-extension PointAndShootCardPicker {
-    /// Temporarily allow animation on the parent wrapper
-    func enableResizeAnimation() {
-        DispatchQueue.main.async {
-            self.allowAnimation = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(1)) {
-                self.allowAnimation = false
+        @objc func shareShoot(_ sender: Any?) {
+            guard let sender = sender as? NSMenuItem else {
+                return
             }
+            onSelect?(sender)
+        }
+    }
+
+    private func copyShoot() {
+        guard !justCopied else { return }
+        onShare?(.copy)
+        SoundEffectPlayer.shared.playSound(.beginRecord)
+        justCopied = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            justCopied = false
+        }
+    }
+
+    private func showShareMenu(at point: CGPoint) {
+        guard let window = state.associatedWindow else { return }
+        let menu = NSMenu()
+        menu.font = BeamFont.regular(size: 13).nsFont
+
+        let target = ShareTarget()
+        target.onSelect = { item in
+            guard let service = item.representedObject as? ShareService else { return }
+            onShare?(service)
+        }
+        ShareService.allCases(except: [.copy]).forEach { service in
+            let item = NSMenuItem(
+                title: service.title,
+                action: nil,
+                keyEquivalent: ""
+            )
+            item.target = target
+            item.action = #selector(ShareTarget.shareShoot(_:))
+            item.image = NSImage(named: service.icon)
+            item.representedObject = service
+            menu.addItem(item)
+        }
+
+        let position = CGRect(origin: point, size: .zero).flippedRectToBottomLeftOrigin(in: window).origin
+        menu.popUp(positioning: nil, at: position, in: window.contentView)
+    }
+
+    private var shouldShowCopyShareView: Bool {
+        !completed && (cardSearchField.isEmpty || !userInputtedText)
+    }
+
+    private var copyShareView: some View {
+        VStack(spacing: 0) {
+            Separator(horizontal: true)
+            HStack {
+                ButtonLabel(justCopied ? loc("Copied") : loc("Copy"),
+                            icon: justCopied ? "collect-generic" : "editor-url_copy_16") {
+                    copyShoot()
+                }
+                Spacer()
+                HStack(spacing: 0) {
+                    Spacer()
+                    ButtonLabel(loc("Share"), icon: "social-share")
+                        .opacity(0)
+                        .overlay(GeometryReader { proxy in
+                            ButtonLabel(loc("Share"), icon: "social-share") {
+                                let frame = proxy.frame(in: .global)
+                                let point = CGPoint(x: frame.minX, y: frame.maxY + 8)
+                                showShareMenu(at: point)
+                            }
+                        })
+                }
+            }
+            .padding(BeamSpacing._80)
         }
     }
 }
 
 struct ShootCardPicker_Previews: PreviewProvider {
-    // MARK: - ShootCardPicker_Previews
     @State static var allowAnimation: Bool = false
     static let data = BeamData()
     static var previews: some View {
