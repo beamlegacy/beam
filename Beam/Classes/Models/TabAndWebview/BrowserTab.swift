@@ -29,7 +29,11 @@ import Promises
 
     @Published var browsingTree: BrowsingTree
     @Published var privateMode = false
-    @Published var isPinned = false
+    @Published var isPinned = false {
+        didSet {
+            browsingTree.isPinned = isPinned
+        }
+    }
     @Published var screenshotCapture: NSImage?
     @Published var hasCopiedURL: Bool = false
 
@@ -213,6 +217,7 @@ import Promises
         noteController = WebNoteController(note: nil, rootElement: nil)
 
         super.init()
+        browsingTree.isPinned = true
         updateFavIcon(fromWebView: false)
     }
 

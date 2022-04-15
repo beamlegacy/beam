@@ -26,13 +26,16 @@ class DailyUrlStorageTest: XCTestCase {
         }
         db.updateDailyUrlScore(urlId: id, day: day1) {
             $0.scrollRatioY += 0.5
+            $0.isPinned = true
         }
         var records0 = db.getDailyUrlScores(day: day0)
         XCTAssertEqual(records0.count, 1)
         XCTAssertEqual(records0[0].readingTimeToLastEvent, 10)
+        XCTAssertFalse(records0[0].isPinned)
         var records1 = db.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
         XCTAssertEqual(records1[0].scrollRatioY, 0.5)
+        XCTAssert(records1[0].isPinned)
         try db.clearDailyUrlScores(toDay: "2020-01-01")
 
         //clearing records older than 1 day
@@ -52,6 +55,8 @@ class DailyUrlStorageTest: XCTestCase {
         storage.apply(to: ids[1]) { $0.scrollRatioY = 0.3 }
         BeamDate.travel(36 * 60 * 60)
         storage.apply(to: ids[1]) { $0.scrollRatioY = 0.7 }
+        storage.apply(to: ids[0]) { $0.isPinned = true } //filtered out in getHighScoredUrlIds
+        storage.apply(to: Link.missing.id) { $0.visitCount = 1 } //filtered out in getHighScoredUrlIds
         
         //scores are sorted by score value
         let scores0 = storage.getHighScoredUrlIds(daysAgo: 1, topN: 2)
