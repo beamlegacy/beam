@@ -45,14 +45,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     @Published var activeSelectGroup: ShootGroup?
     @Published var activeShootGroup: ShootGroup?
     @Published var collectedGroups: [ShootGroup] = []
-    @Published var dismissedGroups: [ShootGroup] = [] {
-        didSet {
-            // Stop watching the groups that are dismissed
-            dismissedGroups.forEach({ group in
-                removeTarget(group.id)
-            })
-        }
-    }
+    /// Don't append directly but go through the `dismissShootGroup` method
+    @Published var dismissedGroups: [ShootGroup] = []
     @Published var shootConfirmationGroup: ShootGroup?
     @Published var isAltKeyDown: Bool = false
     @Published var hasActiveSelection: Bool = false
@@ -151,8 +145,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
         // Dismiss group when we won't we creating or updating any ShootGroup
         guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil else {
-            let tempGroup = ShootGroup(id: groupId, targets: [], text: text, href: href, shapeCache: shapeCache)
-            dismissedGroups.append(tempGroup)
+            dismissShootGroup(id: groupId, href: href)
             return
         }
 
@@ -175,8 +168,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             throttledHaptic()
         } else {
             if !isAltKeyDown {
-                let tempGroup = ShootGroup(id: groupId, targets: [], text: text, href: href, shapeCache: shapeCache)
-                dismissedGroups.append(tempGroup)
+                dismissShootGroup(id: groupId, href: href)
             }
         }
     }
@@ -229,7 +221,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
         if let selectionGroup = activeSelectGroup, activeSelectGroup?.id == id {
             activeSelectGroup = nil
-            dismissedGroups.append(selectionGroup)
+            dismissShootGroup(id: selectionGroup.id, href: selectionGroup.href)
         }
     }
 
@@ -424,6 +416,9 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         activeShootGroup = nil
         shapeCache.clear()
         collectedGroups.removeAll()
+        dismissedGroups.forEach { group in
+            dismissShootGroup(id: group.id, href: group.href)
+        }
         dismissedGroups.removeAll()
         shootConfirmationGroup = nil
         isAltKeyDown = false
@@ -433,11 +428,11 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
 
     func cancelShoot() {
         if let group = activeShootGroup {
-            dismissedGroups.append(group)
+            dismissShootGroup(id: group.id, href: group.href)
             activeShootGroup = nil
         }
         if let group = activeSelectGroup {
-            dismissedGroups.append(group)
+            dismissShootGroup(id: group.id, href: group.href)
             activeSelectGroup = nil
         }
     }
