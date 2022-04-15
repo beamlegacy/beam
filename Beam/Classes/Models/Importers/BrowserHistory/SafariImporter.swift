@@ -11,9 +11,14 @@ import GRDB
 import BeamCore
 
 /*
- History database schema:
+ History database schema (Safari 15):
  CREATE TABLE history_items (id INTEGER PRIMARY KEY AUTOINCREMENT,url TEXT NOT NULL UNIQUE,domain_expansion TEXT NULL,visit_count INTEGER NOT NULL,daily_visit_counts BLOB NOT NULL,weekly_visit_counts BLOB NULL,autocomplete_triggers BLOB NULL,should_recompute_derived_visit_counts INTEGER NOT NULL,visit_count_score INTEGER NOT NULL, status_code INTEGER NOT NULL DEFAULT 0);
- CREATE TABLE sqlite_sequence(name,seq);
+ CREATE TABLE history_visits (id INTEGER PRIMARY KEY AUTOINCREMENT,history_item INTEGER NOT NULL REFERENCES history_items(id) ON DELETE CASCADE,visit_time REAL NOT NULL,title TEXT NULL,load_successful BOOLEAN NOT NULL DEFAULT 1,http_non_get BOOLEAN NOT NULL DEFAULT 0,synthesized BOOLEAN NOT NULL DEFAULT 0,redirect_source INTEGER NULL UNIQUE REFERENCES history_visits(id) ON DELETE CASCADE,redirect_destination INTEGER NULL UNIQUE REFERENCES history_visits(id) ON DELETE CASCADE,origin INTEGER NOT NULL DEFAULT 0,generation INTEGER NOT NULL DEFAULT 0,attributes INTEGER NOT NULL DEFAULT 0,score INTEGER NOT NULL DEFAULT 0);
+ */
+
+/*
+ Safari 13:
+ CREATE TABLE history_items (id INTEGER PRIMARY KEY AUTOINCREMENT,url TEXT NOT NULL UNIQUE,domain_expansion TEXT NULL,visit_count INTEGER NOT NULL,daily_visit_counts BLOB NOT NULL,weekly_visit_counts BLOB NULL,autocomplete_triggers BLOB NULL,should_recompute_derived_visit_counts INTEGER NOT NULL,visit_count_score INTEGER NOT NULL);
  CREATE TABLE history_visits (id INTEGER PRIMARY KEY AUTOINCREMENT,history_item INTEGER NOT NULL REFERENCES history_items(id) ON DELETE CASCADE,visit_time REAL NOT NULL,title TEXT NULL,load_successful BOOLEAN NOT NULL DEFAULT 1,http_non_get BOOLEAN NOT NULL DEFAULT 0,synthesized BOOLEAN NOT NULL DEFAULT 0,redirect_source INTEGER NULL UNIQUE REFERENCES history_visits(id) ON DELETE CASCADE,redirect_destination INTEGER NULL UNIQUE REFERENCES history_visits(id) ON DELETE CASCADE,origin INTEGER NOT NULL DEFAULT 0,generation INTEGER NOT NULL DEFAULT 0,attributes INTEGER NOT NULL DEFAULT 0,score INTEGER NOT NULL DEFAULT 0);
  */
 
@@ -47,6 +52,8 @@ final class SafariImporter: BrowserHistoryImporter {
         case countNotAvailable
     }
 
+    private static var nonConcurrently = ExclusiveRunner()
+
     var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
 
     var publisher: AnyPublisher<BrowserHistoryResult, Error> {
@@ -69,6 +76,12 @@ final class SafariImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from dbPath: String, startDate: Date? = nil) throws {
+        try Self.nonConcurrently.run {
+            try importHistoryOnce(from: dbPath, startDate: startDate)
+        }
+    }
+
+    private func importHistoryOnce(from dbPath: String, startDate: Date?) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -77,7 +90,8 @@ final class SafariImporter: BrowserHistoryImporter {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM history_visits") else {
                     throw ImportError.countNotAvailable
                 }
-                let rows = try SafariHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time, v.title, v.load_successful, i.url, i.domain_expansion, i.status_code, v.origin, v.generation, v.attributes FROM history_visits v JOIN history_items i ON v.history_item = i.id ORDER BY v.visit_time ASC")
+                Logger.shared.logDebug("Safari history: \(itemCount) items in database, start date = \(startDate?.description ?? "none")", category: .browserImport)
+                let rows = try SafariHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time, v.title, i.url FROM history_visits v JOIN history_items i ON v.history_item = i.id ORDER BY v.visit_time ASC")
                     .filter { $0.timestamp > startDate ?? Date.distantPast }
 
                 while let row = try rows.next() {
@@ -85,8 +99,10 @@ final class SafariImporter: BrowserHistoryImporter {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
                     }
                 }
+                Logger.shared.logInfo("Safari history database access finished successfully", category: .browserImport)
                 currentSubject?.send(completion: .finished)
             } catch {
+                Logger.shared.logError("Safari history database access failed: \(error)", category: .browserImport)
                 currentSubject?.send(completion: .failure(error))
             }
         }

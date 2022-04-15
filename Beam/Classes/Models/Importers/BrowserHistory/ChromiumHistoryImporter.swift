@@ -69,6 +69,8 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
         case countNotAvailable
     }
 
+    private static var nonConcurrently = ExclusiveRunner()
+
     var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>?
 
     var publisher: AnyPublisher<BrowserHistoryResult, Error> {
@@ -91,6 +93,12 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
     }
 
     func importHistory(from dbPath: String, startDate: Date? = nil) throws {
+        try Self.nonConcurrently.run {
+            try importHistoryOnce(from: dbPath, startDate: startDate)
+        }
+    }
+
+    private func importHistoryOnce(from dbPath: String, startDate: Date? = nil) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
