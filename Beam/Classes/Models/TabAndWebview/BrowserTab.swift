@@ -481,7 +481,7 @@ import Promises
 
         lastViewDate = BeamDate.now
         browsingTree.startReading()
-        guard !isLoading && url != nil && state?.omniboxInfo.isFocused != true else { return }
+        guard !isLoading && url != nil && state?.omniboxInfo.isFocused != true && pointAndShoot?.activeShootGroup == nil else { return }
         // bring back the focus to where it was
         refocusDispatchItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
