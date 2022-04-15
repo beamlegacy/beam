@@ -160,6 +160,8 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
         browser.browserType
     }
 
+    private static var nonConcurrently = ExclusiveRunner()
+
     var passwordsPublisher: AnyPublisher<BrowserPasswordResult, Swift.Error> {
         let subject = currentSubject ?? PassthroughSubject<BrowserPasswordResult, Swift.Error>()
         currentSubject = subject
@@ -189,6 +191,12 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
 
     // can't be made private (used in unit tests)
     internal func importPasswords(from databaseURLs: [URLProvider], keychainSecret: String) throws {
+        try Self.nonConcurrently.run {
+            try importPasswordsOnce(from: databaseURLs, keychainSecret: keychainSecret)
+        }
+    }
+
+    private func importPasswordsOnce(from databaseURLs: [URLProvider], keychainSecret: String) throws {
         var importError: Swift.Error?
         for databaseURL in databaseURLs {
             do {

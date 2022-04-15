@@ -21,6 +21,8 @@ extension AppDelegate {
             UserAlert.showError(message: "\(error.failureDescription): the database file couldn't be found.", informativeText: nil)
         case .databaseInUse:
             UserAlert.showError(message: "Please quit \(error.browser.description).", informativeText: "Beam can only \(error.actionDescription) if \(error.browser.description) is closed. Close it and try again.")
+        case .concurrentImport:
+            UserAlert.showError(message: "Another import is in progress.", informativeText: "Try again later.")
         case .keychainError:
             UserAlert.showError(message: "\(error.failureDescription): unable to extract the encryption key from the keychain.", informativeText: nil)
         case .invalidFormat:

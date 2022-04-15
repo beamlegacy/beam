@@ -21,6 +21,7 @@ public class ImportsManager: NSObject, ObservableObject {
         case userCancelled
         case fileNotFound
         case databaseInUse
+        case concurrentImport
         case keychainError
         case invalidFormat
         case saveError
@@ -54,6 +55,7 @@ public class ImportsManager: NSObject, ObservableObject {
         let id = UUID()
         let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser))
         var maxDate = Date.distantPast
+        var receivedCount = 0
         do {
             let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage())
             let cancellable = importer.publisher.sink(receiveCompletion: { completion in
@@ -74,13 +76,16 @@ public class ImportsManager: NSObject, ObservableObject {
                 }
                 self.cancellableScope.removeValue(forKey: id)
             }, receiveValue: { result in
+                receivedCount += 1
+                if receivedCount.isMultiple(of: 1000) {
+                    Logger.shared.logDebug("History import: received \(receivedCount)/\(result.itemCount)", category: .browserImport)
+                }
                 guard let url = result.item.url else { return }
                 let absoluteString = url.absoluteString
                 let title = result.item.title
                 browsingTree.addChildToRoot(url: absoluteString, title: title, date: result.item.timestamp)
                 let urlId = browsingTree.current.link
                 frecencyUpdater.add(urlId: urlId, date: result.item.timestamp, eventType: .webLinkActivation)
-                Logger.shared.logDebug("\(result.item.timestamp): \(result.item.title ?? "---") [\(url)] (total count: \(result.itemCount))")
                 if result.item.timestamp > maxDate { maxDate = result.item.timestamp }
             })
             cancellableScope[id] = cancellable
@@ -157,6 +162,8 @@ public class ImportsManager: NSObject, ObservableObject {
             }
         } else if let error = error as? GRDB.DatabaseError, error.resultCode == .SQLITE_BUSY {
             decodedError = .databaseInUse
+        } else if error is ExclusiveRunner.Error {
+            decodedError = .concurrentImport
         } else {
             decodedError = .other(underlyingError: error)
         }

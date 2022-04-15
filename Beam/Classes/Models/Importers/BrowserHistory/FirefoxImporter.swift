@@ -79,6 +79,8 @@ final class FirefoxImporter: BrowserHistoryImporter {
         case countNotAvailable
     }
 
+    private static var nonConcurrently = ExclusiveRunner()
+
     private func defaultDirectoryPath(profilesFile: URL) throws -> String {
         let profiles = try parseINI(filename: profilesFile.path)
         let path = profiles
@@ -120,6 +122,12 @@ final class FirefoxImporter: BrowserHistoryImporter {
     }
 
     func importHistory(from dbPath: String, startDate: Date? = nil) throws {
+        try Self.nonConcurrently.run {
+            try importHistoryOnce(from: dbPath, startDate: startDate)
+        }
+    }
+
+    private func importHistoryOnce(from dbPath: String, startDate: Date?) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
