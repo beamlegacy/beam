@@ -269,7 +269,7 @@ struct TabView: View {
             if let copyMessage = copyMessage {
                 base
                     .opacity(0)
-                    .overlay(copyMessageView(message: copyMessage))
+                    .overlay(copyMessageView(message: copyMessage).fixedSize(horizontal: true, vertical: false))
                     .transition(centerViewTransition(foregroundHoverStyle: true))
             } else if showForegroundHoverStyle {
                 base
