@@ -15,8 +15,16 @@ extension PointAndShoot {
     }
 
     struct ShootGroup {
-        init(id: String, targets: [Target] = [], text: String = "", href: String,
-             noteInfo: NoteInfo = NoteInfo(title: ""), shapeCache: PnSTargetsShapeCache? = nil, showRect: Bool = true, fullPageCollect: Bool = false) {
+        init(
+            id: String,
+            targets: [Target] = [],
+            text: String = "",
+            href: String = "",
+            noteInfo: NoteInfo = NoteInfo(title: ""),
+            shapeCache: PnSTargetsShapeCache? = nil,
+            showRect: Bool = true,
+            fullPageCollect: Bool = false
+        ) {
             self.id = id
             self.href = href
             self.targets = targets

@@ -330,21 +330,22 @@ import Promises
                                       cursorPosition: element.text.wholeRange.upperBound)
     }
 
-    @discardableResult
-    internal func logInNote(url: URL, title: String?, reason: NoteElementAddReason) -> BeamElement? {
-        var elementToFocus: BeamElement?
-        if isFromNoteSearch {
-            noteController.setContents(url: url, text: title)
-            isFromNoteSearch = false
-            elementToFocus = noteController.element
-        } else {
-            elementToFocus = noteController.add(url: url, text: title, reason: reason, isNavigatingFromNote: isFromNoteSearch, browsingOrigin: self.browsingTree.origin)
-        }
-        if let elementToFocus = elementToFocus {
-            updateFocusedStateToElement(elementToFocus)
-            return elementToFocus
-        } else {
-            return nil
+    internal func logInNote(url: URL, reason: NoteElementAddReason) {
+        Task {
+            // Add url to note based on NoteSearch
+            if isFromNoteSearch, case .searchFromNode(let search) = browsingTreeOrigin, let search = search {
+                isFromNoteSearch = false
+                await noteController.replaceSearchWithSearchLink(search, url: url)
+            } else {
+                if let elementToFocus = await noteController.addLink(
+                    url: url,
+                    reason: reason,
+                    isNavigatingFromNote: isFromNoteSearch,
+                    browsingOrigin: self.browsingTree.origin
+                ) {
+                    updateFocusedStateToElement(elementToFocus)
+                }
+            }
         }
     }
 
@@ -592,7 +593,7 @@ import Promises
     }
 
     private func resetDestinationNote() {
-        noteController.setDestination(note: nil)
+        noteController.resetDestinationNote()
         state?.resetDestinationCard()
     }
 
@@ -692,7 +693,7 @@ extension BrowserTab: WebViewControllerDelegate {
         }
 
         if case .searchFromNode = browsingTreeOrigin {
-            logInNote(url: url, title: webView.title, reason: isLinkActivation ? .navigation : .loading)
+            logInNote(url: url, reason: isLinkActivation ? .navigation : .loading)
         }
 
         var shouldWaitForBetterContent = false
