@@ -299,7 +299,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         var shootGroup = group
         // Convert html to BeamText
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page?.downloadManager, page.fileStorage)
-        htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [self] (beamElements: [BeamElement]) in
+        htmlNoteAdapter.convert(html: shootGroup.html(), completion: { [weak self] (beamElements: [BeamElement]) in
+            guard let self = self else { return }
             // exit early when failing to collect correctly
             guard beamElements.count != 0 else {
                 self.showAlert(shootGroup, beamElements, "failed to collect html elements", completion: {
@@ -323,7 +324,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             // Set Destination note to the current note
             page.setDestinationNote(targetNote, rootElement: targetNote)
             // Add all quotes to source Note
-            let addWithSourceBullet = withSourceBullet ? shouldAddWithSourceBullet(elements) : withSourceBullet
+            let addWithSourceBullet = withSourceBullet ? self.shouldAddWithSourceBullet(elements) : withSourceBullet
             if let destinationElement = page.addToNote(allowSearchResult: true, inSourceBullet: addWithSourceBullet) {
                 if let noteText = noteText, !noteText.isEmpty, let lastQuote = elements.last {
                     // Append NoteText last quote
@@ -348,6 +349,21 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
                 completion()
             }
         })
+    }
+
+    func shareShootToService(group: ShootGroup, service: ShareService) {
+        guard let page = self.page, let sourceUrl = page.url else { return }
+        Task { @MainActor in
+            let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, page.downloadManager, page.fileStorage)
+            let helper = ShareHelper(sourceUrl, htmlNoteAdapter: htmlNoteAdapter) { [weak self] url in
+                let webView = self?.page?.createNewWindow(url, nil, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
+                webView?.load(URLRequest(url: url))
+            }
+            await helper.shareContent(group.html(), originURL: sourceUrl, service: service)
+            if service != .copy {
+                cancelShoot()
+            }
+        }
     }
 
     /// Draws shoot confirmation

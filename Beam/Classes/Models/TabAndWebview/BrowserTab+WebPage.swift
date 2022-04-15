@@ -102,7 +102,7 @@ extension BrowserTab: WebPage {
             // IMPORTANT!!: WebKit will perform the `URLRequest` automatically!! Attempting to do
             // the request here manually leads to incorrect results!!
             // source: https://github.com/ghostery/user-agent-ios/blob/61126a96930553d9d9ac5eae3503d17fe586fafe/Client/Frontend/Browser/BrowserViewController/BrowserViewController+WebViewDelegates.swift#L30-L33
-            let transientWebViewWindow = TransientWebViewWindow(originPage: self, configuration: configuration, windowFeatures: windowFeatures)
+            let transientWebViewWindow = TransientWebViewWindow(originPage: self, url: targetURL, configuration: configuration, windowFeatures: windowFeatures)
             transientWebViewWindow.makeKeyAndOrderFront(nil)
             newWindow = transientWebViewWindow
             newWebView = transientWebViewWindow.webView

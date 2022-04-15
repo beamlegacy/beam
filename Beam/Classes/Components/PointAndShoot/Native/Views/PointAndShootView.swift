@@ -126,24 +126,26 @@ struct PointAndShootView: View {
             let size =  pns.shootConfirmationGroup == nil ? Self.defaultPickerSize : Self.smallPickerSize
             PointAndShootCardPickerPositioning(group: pns.translateAndScaleGroup(group), cardPickerSize: size) {
                 FormatterViewBackgroundV2 {
-                    PointAndShootCardPicker(completedGroup: pns.shootConfirmationGroup, allowAnimation: $allowAnimation)
-                        .onComplete { (targetNote, note, completion) in
-                            if let targetNote = targetNote,
-                               let shootGroup = pns.activeShootGroup {
-                                pns.addShootToNote(targetNote: targetNote, withNote: note, group: shootGroup, completion: {
-                                    completion()
-                                    self.offset = 10
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
-                                        self.offset = 0
-                                    }
-                                })
-                            } else {
-                                pns.dismissActiveShootGroup()
-                            }
-                            if let currentTab = browserTabsManager.currentTab {
-                                currentTab.webviewWindow?.makeFirstResponder(currentTab.webView)
-                            }
+                    PointAndShootCardPicker(completedGroup: pns.shootConfirmationGroup, allowAnimation: $allowAnimation) { service in
+                        guard let group = pns.activeShootGroup, let service = service else { return }
+                        pns.shareShootToService(group: group, service: service)
+                    } onComplete: { (targetNote, note, completion) in
+                        if let targetNote = targetNote,
+                           let shootGroup = pns.activeShootGroup {
+                            pns.addShootToNote(targetNote: targetNote, withNote: note, group: shootGroup, completion: {
+                                completion()
+                                self.offset = 10
+                                DispatchQueue.main.asyncAfter(deadline: .now() + 0.16) {
+                                    self.offset = 0
+                                }
+                            })
+                        } else {
+                            pns.dismissActiveShootGroup()
                         }
+                        if let currentTab = browserTabsManager.currentTab {
+                            currentTab.webviewWindow?.makeFirstResponder(currentTab.webView)
+                        }
+                    }
                 }
             }
             .wiggleEffect(animatableValue: wiggleValue)
