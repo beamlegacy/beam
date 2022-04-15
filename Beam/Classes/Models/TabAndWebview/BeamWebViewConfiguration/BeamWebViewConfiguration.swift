@@ -46,13 +46,17 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
 
     /// Doing `registerAllMessageHandlers` in the convenience init fixes a bug in webkit
     /// where the `WKWebViewConfiguration` creates multiple references to the assigned WKMessageHandlers
-    convenience init(handlers: [SimpleBeamMessageHandler] = []) {
+    convenience init(handlers: [SimpleBeamMessageHandler] = [], isIncognito: Bool = false) {
         self.init()
         self.handlers = handlers
         registerAllMessageHandlers()
 
         if let windowCleanupSource = loadFile(from: "WindowCleanup", fileType: "js") {
             addJS(source: windowCleanupSource, when: .atDocumentEnd)
+        }
+
+        if isIncognito {
+            websiteDataStore = WKWebsiteDataStore.nonPersistent()
         }
     }
 

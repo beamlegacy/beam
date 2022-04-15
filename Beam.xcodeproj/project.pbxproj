@@ -107,6 +107,10 @@
 		333E4F8D270AE2B7005B72CD /* BeamTextEdit+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */; };
 		333E61842707094000847A0C /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 333E61832707094000847A0C /* Swime */; };
 		3343794327037578004EF5A4 /* BeamWindow+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3343794227037578004EF5A4 /* BeamWindow+Search.swift */; };
+		334559B02800729200B4BF57 /* OmniboxIncognitoExplanation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */; };
+		33551D2727FC6F4600598164 /* nav-pivot_incognito.json in Resources */ = {isa = PBXBuildFile; fileRef = 33551D2127FC6F4600598164 /* nav-pivot_incognito.json */; };
+		33551D3E27FE2B0E00598164 /* CookiesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33551D3D27FE2B0E00598164 /* CookiesManager.swift */; };
+		33551D6327FF74AE00598164 /* IncognitoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33551D6227FF74AD00598164 /* IncognitoTests.swift */; };
 		3355997426CBDDC900F52C23 /* SearchInContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997326CBDDC900F52C23 /* SearchInContentView.swift */; };
 		3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3355997526CBE0AE00F52C23 /* SearchViewModel.swift */; };
 		335CBA9127CF617A005FE658 /* MouseCursorManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 335CBA9027CF617A005FE658 /* MouseCursorManager.swift */; };
@@ -1110,6 +1114,7 @@
 		B507CB34275F8CB800DFF11A /* SlashMenuTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B507CB33275F8CB800DFF11A /* SlashMenuTests.swift */; };
 		B50E1C9126FCC30D00E767AE /* SignInSuccessfullyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50E1C9026FCC30D00E767AE /* SignInSuccessfullyTests.swift */; };
 		B50E1C9926FCC8AD00E767AE /* PasswordManagerHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = B50E1C9826FCC8AD00E767AE /* PasswordManagerHelper.swift */; };
+		B51C99AF2805C46400A2577E /* IncognitoModeTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51C99AE2805C46400A2577E /* IncognitoModeTests.swift */; };
 		B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */; };
 		B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */; };
 		B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51DC76F26F4501E0074ACCA /* PnSTestView.swift */; };
@@ -1533,6 +1538,10 @@
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
 		333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Search.swift"; sourceTree = "<group>"; };
 		3343794227037578004EF5A4 /* BeamWindow+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+Search.swift"; sourceTree = "<group>"; };
+		334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxIncognitoExplanation.swift; sourceTree = "<group>"; };
+		33551D2127FC6F4600598164 /* nav-pivot_incognito.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "nav-pivot_incognito.json"; sourceTree = "<group>"; };
+		33551D3D27FE2B0E00598164 /* CookiesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookiesManager.swift; sourceTree = "<group>"; };
+		33551D6227FF74AD00598164 /* IncognitoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoTests.swift; sourceTree = "<group>"; };
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		335CBA9027CF617A005FE658 /* MouseCursorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseCursorManager.swift; sourceTree = "<group>"; };
@@ -2847,6 +2856,7 @@
 		B507CB33275F8CB800DFF11A /* SlashMenuTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlashMenuTests.swift; sourceTree = "<group>"; };
 		B50E1C9026FCC30D00E767AE /* SignInSuccessfullyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignInSuccessfullyTests.swift; sourceTree = "<group>"; };
 		B50E1C9826FCC8AD00E767AE /* PasswordManagerHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerHelper.swift; sourceTree = "<group>"; };
+		B51C99AE2805C46400A2577E /* IncognitoModeTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncognitoModeTests.swift; sourceTree = "<group>"; };
 		B51DC76B26F44F990074ACCA /* PnSAddToCardTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSAddToCardTests.swift; sourceTree = "<group>"; };
 		B51DC76D26F44FE00074ACCA /* PnSViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSViewLocators.swift; sourceTree = "<group>"; };
 		B51DC76F26F4501E0074ACCA /* PnSTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PnSTestView.swift; sourceTree = "<group>"; };
@@ -3686,6 +3696,7 @@
 				4181716C2581107C00317ED8 /* BeamData.swift */,
 				4181734D2581204900317ED8 /* BeamState.swift */,
 				8AEF7FA027A2FBBD00D3E266 /* BeamWindowInfo.swift */,
+				33551D3D27FE2B0E00598164 /* CookiesManager.swift */,
 				A5C9F004261353420096380F /* WindowPage.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
 				A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */,
@@ -6170,6 +6181,7 @@
 				9652A93226A6B13700F0590C /* FakeNoteGeneratorTests.swift */,
 				9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */,
 				5227B2CE26DD12EF0006FA7D /* ZZZTests.swift */,
+				33551D6227FF74AD00598164 /* IncognitoTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -6727,6 +6739,7 @@
 				418171D82581107C00317ED8 /* OmniboxSearchField.swift */,
 				A5D8858D274E4F0100F37859 /* OmniboxBackground.swift */,
 				A5D8858B274E4EB600F37859 /* OmniboxClearButton.swift */,
+				334559AF2800729200B4BF57 /* OmniboxIncognitoExplanation.swift */,
 			);
 			path = Omnibox;
 			sourceTree = "<group>";
@@ -6786,6 +6799,7 @@
 				A5F47EC926F8D71C004B7CDE /* editor-unpublish.json */,
 				A5347A6B2763B53F006EEF8C /* nav-pivot_card.json */,
 				A5347A692763B53A006EEF8C /* nav-pivot_web.json */,
+				33551D2127FC6F4600598164 /* nav-pivot_incognito.json */,
 			);
 			path = Lotties;
 			sourceTree = "<group>";
@@ -6804,6 +6818,14 @@
 				B507CB31275F8C3800DFF11A /* DatePickerTestView.swift */,
 			);
 			path = SlashMenu;
+			sourceTree = "<group>";
+		};
+		B51C99A82805C44100A2577E /* Incognito mode */ = {
+			isa = PBXGroup;
+			children = (
+				B51C99AE2805C46400A2577E /* IncognitoModeTests.swift */,
+			);
+			path = "Incognito mode";
 			sourceTree = "<group>";
 		};
 		B51DC76526F44F5D0074ACCA /* PointAndShoot */ = {
@@ -6993,6 +7015,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				B51C99A82805C44100A2577E /* Incognito mode */,
 				B5FB3A1727E8C16400037FD5 /* SignInOut */,
 				8AA5F0BF27ABE50900D25A13 /* BrokenSites */,
 				B5792588275E46F50093B32B /* ImportExport */,
@@ -7713,6 +7736,7 @@
 				8AEF14CD27F1D1D200A27C1B /* MediaPlayer_prod.js in Resources */,
 				A5F47ECA26F8D71C004B7CDE /* editor-unpublish.json in Resources */,
 				A5C661A627A1A57200727ACB /* editor-delete.json in Resources */,
+				33551D2727FC6F4600598164 /* nav-pivot_incognito.json in Resources */,
 				A03B908B27BE99AC001FBE64 /* HowToBeam.json in Resources */,
 				8ABFD6A02791D82B001E35DE /* confirm.aiff in Resources */,
 				5224CD602685FFB500D4179E /* delete_all_beam_objects.graphql in Resources */,
@@ -8581,6 +8605,7 @@
 				52B9A370264546570063AEEF /* MinimalistWebViewWindow.swift in Sources */,
 				8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */,
 				418172072581107C00317ED8 /* Document.swift in Sources */,
+				33551D3E27FE2B0E00598164 /* CookiesManager.swift in Sources */,
 				4100D96B25AEFEEA00EF04CB /* BeamTextEdit+Shortcut.swift in Sources */,
 				A51C4C262771DD8D002DD122 /* OnboardingImportsPasswordInstructions.swift in Sources */,
 				A0379C43266E6C5B00D75D6B /* AllowListTableView.swift in Sources */,
@@ -8731,6 +8756,7 @@
 				A5EBF14A26D7BE3100597A1C /* GutterContainerView.swift in Sources */,
 				37C4132F278554A100954FD7 /* Ecosia.swift in Sources */,
 				9691C2BC2645F93100F70DA1 /* EmbedNode.swift in Sources */,
+				334559B02800729200B4BF57 /* OmniboxIncognitoExplanation.swift in Sources */,
 				3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */,
 				BAA67DDD4452566DFF99171E /* PasswordOverlayController.swift in Sources */,
 				A54A45352767973900B9AE1B /* UserInfoRequest+Promises.swift in Sources */,
@@ -8886,6 +8912,7 @@
 				A5CDB01727FF9D9F003F93B3 /* WebViewControllerJSNavigationHandlingTests.swift in Sources */,
 				DA5A16EA26F8EB4200226C89 /* BeamTextEditTests.swift in Sources */,
 				8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */,
+				33551D6327FF74AE00598164 /* IncognitoTests.swift in Sources */,
 				A501B4CF2734397E00407F3E /* EmbedContentLocalStrategyTests.swift in Sources */,
 				96A5DAFD27C146E100746719 /* DocumentManagerReceiveObjectTests.swift in Sources */,
 				8A7C80F526F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift in Sources */,
@@ -8991,6 +9018,7 @@
 				B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */,
 				B5BA078926AF3E4700D31FED /* UITestsMenuBar.swift in Sources */,
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
+				B51C99AF2805C46400A2577E /* IncognitoModeTests.swift in Sources */,
 				D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */,
 				D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */,
 				B50E1C9126FCC30D00E767AE /* SignInSuccessfullyTests.swift in Sources */,

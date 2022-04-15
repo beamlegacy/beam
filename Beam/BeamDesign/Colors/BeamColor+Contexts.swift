@@ -185,8 +185,9 @@ extension BeamColor {
         static let capsuleStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
         static let capsuleTabForegroundStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.25)
         static let capsuleTabStrokeClicked = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.1, darkColor: From(color: .white), darkAlpha: 0.45)
-        static let capsuleForegroundBackgrond = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
-
+        static let capsuleForegroundBackground = BeamColor.combining(lightColor: .Generic.background, darkColor: .Mercury)
+        static let capsuleIncognitoTabForegroundStroke = BeamColor.combining(lightColor: From(color: .black), lightAlpha: 0.55, darkColor: From(color: .white), darkAlpha: 0.1)
+        static let capsuleIncognitoForegroundBackground = BeamColor.combining(lightColor: .Corduroy, darkColor: .Niobium)
     }
 }
 

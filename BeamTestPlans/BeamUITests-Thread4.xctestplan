@@ -35,6 +35,7 @@
         "EditorShortcutsTests",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
+        "IncognitoModeTests",
         "JavascriptNativeInteractionsTests\/testJSNativeAlertInteraction()",
         "JavascriptNativeInteractionsTests\/testJSNativeConfirmationInteraction()",
         "JournalTest",

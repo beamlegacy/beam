@@ -24,7 +24,7 @@ class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
 }
 
 class BeamWindow: NSWindow, NSDraggingDestination {
-    var state: BeamState = BeamState()
+    var state: BeamState
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
     var data: BeamData
 
@@ -45,8 +45,9 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     private var trafficLightLeftMargin: CGFloat = 20
 
     // swiftlint:disable:next function_body_length
-    init(contentRect: NSRect, data: BeamData, minimumSize: CGSize? = nil) {
+    init(contentRect: NSRect, data: BeamData, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
         self.data = data
+        state = BeamState(incognito: isIncognito)
 
         data.setupJournal(firstSetup: true)
 

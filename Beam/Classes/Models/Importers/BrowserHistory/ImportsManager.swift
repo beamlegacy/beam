@@ -53,7 +53,7 @@ public class ImportsManager: NSObject, ObservableObject {
 
     func startBrowserHistoryImport(from importer: BrowserHistoryImporter) {
         let id = UUID()
-        let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser))
+        let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser), linkStore: LinkStore.shared)
         var maxDate = Date.distantPast
         var receivedCount = 0
         do {
