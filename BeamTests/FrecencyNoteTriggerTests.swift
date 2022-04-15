@@ -97,20 +97,10 @@ class FrecencyNoteTriggerTests: XCTestCase {
             return nil
         }
 
-        func addToNote(allowSearchResult: Bool, inSourceBullet: Bool = true) -> BeamElement? {
-            guard let url = url else {
-                Logger.shared.logError("Cannot get current URL", category: .general)
-                return nil
-            }
-            guard allowSearchResult || SearchEngineProvider.provider(for: url) != nil else {
-                Logger.shared.logWarning("Adding search results is not allowed", category: .web)
-                return nil
-            } // Don't automatically add search results
-
+        func addContent(content: [BeamElement], with source: URL? = nil, reason: NoteElementAddReason) {
+            Logger.shared.logWarning("Incomplete implementation of addContent logic", category: .web)
             let element = BeamElement("url: \(url) text: \(title)")
             pnsNote.addChild(element)
-            return element
-
         }
 
     }

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import BeamCore
 
 extension NSAttributedString {
 
@@ -51,6 +52,17 @@ extension NSAttributedString {
         self.enumerateAttribute(.link, in: NSRange(0..<self.length)) { value, range, _ in
             if let url = value as? URL {
                 ranges[url.absoluteString] = range
+            }
+        }
+        return ranges
+    }
+
+    func getRemoteSourceLinks() -> [String: NSRange] {
+        var ranges: [String: NSRange] = [:]
+        self.enumerateAttribute(.source, in: NSRange(0..<self.length)) { value, range, _ in
+            if let metadata = value as? SourceMetadata,
+               case .remote(let link) = metadata.origin {
+                ranges[link.absoluteString] = range
             }
         }
         return ranges
