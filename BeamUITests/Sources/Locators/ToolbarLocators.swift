@@ -20,7 +20,7 @@ enum ToolbarLocators {
         case homeButton = "journal"
         case openCardButton = "pivot-card"
         case openWebButton = "pivot-web"
-        case downloadsButton = "nav-downloads"
+        case downloadsButton = "downloads"
         case downloadDoneButton = "nav-downloads_done"
         case cardSwitcher = "card-switcher"
         case cardSwitcherJournal = "card-switcher-journal"
