@@ -33,6 +33,7 @@
         "EditorShortcutsTests",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
+        "IncognitoModeTests",
         "JavascriptNativeInteractionsTests\/testJSNativeConfirmationInteraction()",
         "JavascriptNativeInteractionsTests\/testJSNativeFileDialogInteraction()",
         "JavascriptNativeInteractionsTests\/testJSNativePromptInteraction()",

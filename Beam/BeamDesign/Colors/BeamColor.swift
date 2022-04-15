@@ -19,6 +19,14 @@ indirect enum BeamColor {
     case CharmedGreen
     /** A light gray. Lighter in dark mode */
     case Corduroy
+    /** AlphaGray with dark and light variation inverted */
+    case InvertedAlphaGray
+    /** Corduroy with dark and light variation inverted */
+    case InvertedCorduroy
+    /** LightStoneGray with dark and light variation inverted */
+    case InvertedLightStoneGray
+    /** Niobium with dark and light variation inverted */
+    case InvertedNiobium
     /** A light gray. Darker in dark mode */
     case LightStoneGray
     /** A white in light mode. A fake black in dark mode */

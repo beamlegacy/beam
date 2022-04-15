@@ -208,13 +208,14 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 
     public var title: String {
-        LinkStore.linkFor(link)?.title ?? "<???>"
+        linkStore.linkFor(id: link)?.title ?? "<???>"
     }
     public var url: String {
-        LinkStore.linkFor(link)?.url ?? Link.missing.url
+        linkStore.linkFor(id: link)?.url ?? Link.missing.url
     }
     private var isForeground: Bool = false
     private var lastStartReading: Date?
+    var linkStore: LinkStore
 
     private func readingTimeSinceLastEvent(date: Date) -> CFTimeInterval {
         guard let lastEvent = events.last else { return 0 }
@@ -248,7 +249,7 @@ public class BrowsingNode: ObservableObject, Codable {
                 if let scorer = tree.frecencyScorer {
                     if readingTime >= 0 {
                         scorer.update(id: link, value: readingTime, eventType: visitType, date: lastStartReading, paramKey: .webReadingTime30d0)
-                        Self.updateDomainFrecency(scorer: scorer, id: link, value: readingTime, date: lastStartReading, paramKey: .webReadingTime30d0)
+                        Self.updateDomainFrecency(linkStore: linkStore, scorer: scorer, id: link, value: readingTime, date: lastStartReading, paramKey: .webReadingTime30d0)
                     } else {
                         Logger.shared.logWarning("⚠️ Negative reading time encountered for url: \(url) - start time: \(lastStartReading) - end time: \(date)", category: .web)
                     }
@@ -274,17 +275,18 @@ public class BrowsingNode: ObservableObject, Codable {
         return isLinkActivation ? .webLinkActivation : .webSearchBar
     }
 
-    private static func updateDomainFrecency(scorer: FrecencyScorer, id: UUID, value: Float, date: Date, paramKey: FrecencyParamKey) {
-        let isDomain = LinkStore.shared.isDomain(id: id)
+    private static func updateDomainFrecency(linkStore: LinkStore, scorer: FrecencyScorer, id: UUID, value: Float, date: Date, paramKey: FrecencyParamKey) {
+        let isDomain = linkStore.isDomain(id: id)
         if !isDomain,
-            let domainId = LinkStore.shared.getDomainId(id: id) {
+            let domainId = linkStore.getDomainId(id: id) {
             scorer.update(id: domainId, value: value, eventType: .webDomainIncrement, date: date, paramKey: paramKey)
         }
     }
 
-    public init(tree: BrowsingTree, parent: BrowsingNode?, url: String, title: String?, isLinkActivation: Bool, date: Date = BeamDate.now) {
+    public init(tree: BrowsingTree, parent: BrowsingNode?, linkStore: LinkStore, url: String, title: String?, isLinkActivation: Bool, date: Date = BeamDate.now) {
         id = UUID()
-        self.link = LinkStore.visit(url, title: title).id
+        self.linkStore = linkStore
+        self.link = linkStore.visit(url, title: title).id
         self.parent = parent
         self.tree = tree
         self.isLinkActivation = isLinkActivation
@@ -293,7 +295,7 @@ public class BrowsingNode: ObservableObject, Codable {
         tree.longTermScoreStore?.apply(to: link) { $0.lastCreationDate = date }
         if let scorer = tree.frecencyScorer {
             scorer.update(id: link, value: 1, eventType: visitType, date: date, paramKey: .webVisit30d0)
-            Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
+            Self.updateDomainFrecency(linkStore: linkStore, scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
             }
         scoreApply { $0.visitCount += 1 }
         if tree.isPinned {
@@ -301,12 +303,13 @@ public class BrowsingNode: ObservableObject, Codable {
         }
         score.visitCount += 1
     }
-    init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool) {
+    init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool, linkStore: LinkStore) {
         self.id = id
         self.link = link
         self.events = events
         self.legacy = legacy
         self.isLinkActivation = isLinkActivation
+        self.linkStore = linkStore
     }
 
     // Codable:
@@ -320,6 +323,8 @@ public class BrowsingNode: ObservableObject, Codable {
     }
 
     public required init(from decoder: Decoder) throws {
+
+        self.linkStore = LinkStore.shared
         let container = try decoder.container(keyedBy: CodingKeys.self)
         // TODO: Remove legacyLink handling when all legacy trees have been deleted
         if (try? container.decode(UInt64.self, forKey: .link)) != nil {
@@ -435,38 +440,51 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     @Published public private(set) var current: BrowsingNode!
 
     public let origin: BrowsingTreeOrigin
-    var frecencyScorer: FrecencyScorer?
-    var longTermScoreStore: LongTermUrlScoreStoreProtocol?
-    var dailyScoreStore: DailyUrlScoreStoreProtocol?
-    var domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
+    let frecencyScorer: FrecencyScorer?
+    let longTermScoreStore: LongTermUrlScoreStoreProtocol?
+    let dailyScoreStore: DailyUrlScoreStoreProtocol?
+    let domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
+    let linkStore: LinkStore
+
+    public static func incognitoBrowsingTree(origin: BrowsingTreeOrigin?) -> BrowsingTree {
+        BrowsingTree(origin, linkStore: LinkStore(linkManager: FakeLinkManager()), frecencyScorer: nil, longTermScoreStore: nil, domainPath0TreeStatsStore: nil, dailyScoreStore: nil)
+    }
+
     public var isPinned = false {
         didSet {
             dailyScoreStore?.apply(to: current.link) { $0.isPinned = $0.isPinned || isPinned }
         }
     }
 
-    public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
+    public init(_ origin: BrowsingTreeOrigin?, linkStore: LinkStore = LinkStore.shared, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
         self.origin = origin ?? defaultOrigin
+        self.linkStore = linkStore
         self.frecencyScorer = frecencyScorer
         self.longTermScoreStore = longTermScoreStore
         self.dailyScoreStore = dailyScoreStore
         self.domainPath0TreeStatsStore = domainPath0TreeStatsStore
-        self.root = BrowsingNode(tree: self, parent: nil, url: Link.missing.url, title: nil, isLinkActivation: false)
+        self.root = BrowsingNode(tree: self, parent: nil, linkStore: linkStore, url: Link.missing.url, title: nil, isLinkActivation: false)
         self.current = root
     }
-    init(root: BrowsingNode, current: BrowsingNode, scores: [UUID: Score], origin: BrowsingTreeOrigin) {
+    init(root: BrowsingNode, current: BrowsingNode, linkStore: LinkStore, scores: [UUID: Score], origin: BrowsingTreeOrigin) {
         self.root = root
         self.current = current
         self.scores = scores
         self.origin = origin
+        self.linkStore = linkStore
+
+        dailyScoreStore = nil
+        frecencyScorer = nil
+        longTermScoreStore = nil
+        domainPath0TreeStatsStore = nil
     }
     func lifeTime(to date: Date = BeamDate.now) -> Double {
         guard let birthDate = root.events.first?.date else { return 0 }
         return date.timeIntervalSince(birthDate)
     }
     public var anonymized: BrowsingTree {
-        BrowsingTree(root: root, current: current, scores: scores, origin: origin.anonymized)
+        BrowsingTree(root: root, current: current, linkStore: linkStore, scores: scores, origin: origin.anonymized)
     }
 
     public init(origin: BrowsingTreeOrigin, root: BrowsingNode, current: BrowsingNode, scores: [UUID: Score]) {
@@ -474,6 +492,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         self.root = root
         self.scores = scores
         self.current = current
+
+        dailyScoreStore = nil
+        frecencyScorer = nil
+        longTermScoreStore = nil
+        domainPath0TreeStatsStore = nil
+        linkStore = LinkStore.shared
     }
 
     // Codable:
@@ -487,6 +511,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
     public required init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+
+        dailyScoreStore = nil
+        frecencyScorer = nil
+        longTermScoreStore = nil
+        domainPath0TreeStatsStore = nil
+        linkStore = LinkStore.shared
 
         origin = (try? container.decode(BrowsingTreeOrigin.self, forKey: .origin)) ?? defaultOrigin
         root = try container.decode(BrowsingNode.self, forKey: .root)
@@ -537,7 +567,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     public var currentLink: String {
-        LinkStore.linkFor(current.link)?.url ?? Link.missing.url
+        linkStore.linkFor(id: current.link)?.url ?? Link.missing.url
     }
 
     @discardableResult
@@ -561,11 +591,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool, readCount: Int) {
-        guard current.link != LinkStore.getOrCreateIdFor(link) else { return }
+        guard current.link != linkStore.getOrCreateIdFor(url: link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
         current.addEvent(event)
-        let node = BrowsingNode(tree: self, parent: current, url: link, title: title, isLinkActivation: isLinkActivation)
+        let node = BrowsingNode(tree: self, parent: current, linkStore: linkStore, url: link, title: title, isLinkActivation: isLinkActivation)
         current.children.append(node)
         current = node
         if startReading {
@@ -578,7 +608,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     //to use only in history import (prevent deep nesting then impossible to encode)
     public func addChildToRoot(url link: String, title: String?, date: Date) {
         guard case .historyImport = origin else { return }
-        let node = BrowsingNode(tree: self, parent: root, url: link, title: title, isLinkActivation: true, date: date)
+        let node = BrowsingNode(tree: self, parent: root, linkStore: linkStore, url: link, title: title, isLinkActivation: true, date: date)
         root.children.append(node)
         current = node
     }
@@ -641,7 +671,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     public var idUrlMapping: [UUID: String] {
         var mapping = [UUID: String]()
         links.forEach {
-            mapping[$0] = (LinkStore.linkFor($0)?.url ?? Link.missing.url)
+            mapping[$0] = (linkStore.linkFor(id: $0)?.url ?? Link.missing.url)
         }
         return mapping
     }

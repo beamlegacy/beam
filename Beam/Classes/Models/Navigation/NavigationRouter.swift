@@ -25,7 +25,7 @@ final class NavigationRouter {
             switch url.scheme {
             case "beam-pdf", "beam-pdfs":
                 let urlSession = URLSession.shared
-                let cookieStore = webView.configuration.websiteDataStore.httpCookieStore
+                let cookieStore = webView.configurationWithoutMakingCopy.websiteDataStore.httpCookieStore
                 cookieStore.getAllCookies { cookies in
                     urlSession.configuration.httpCookieStorage?.setCookies(cookies, for: url, mainDocumentURL: nil)
 

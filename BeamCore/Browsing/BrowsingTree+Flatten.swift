@@ -15,7 +15,8 @@ extension BrowsingNode {
             link: link,
             events: events,
             legacy: legacy,
-            isLinkActivation: isLinkActivation
+            isLinkActivation: isLinkActivation,
+            linkStore: linkStore
         )
     }
 }

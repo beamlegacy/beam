@@ -43,7 +43,7 @@ class BrowserTabIndexingTests: XCTestCase {
         state = BeamState()
         state.data = BeamData()
         mockIndexingDelegate = MockWebIndexingDelegate()
-        state.webIndexingController.delegate = mockIndexingDelegate
+        state.webIndexingController?.delegate = mockIndexingDelegate
         tab = BrowserTab(state: state, browsingTreeOrigin: .searchBar(query: "http", referringRootId: nil), originMode: .web, note: nil)
 
         destinationURL = redirectURL(for: .none)
