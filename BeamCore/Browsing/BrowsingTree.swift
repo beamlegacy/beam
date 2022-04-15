@@ -296,6 +296,9 @@ public class BrowsingNode: ObservableObject, Codable {
             Self.updateDomainFrecency(scorer: scorer, id: link, value: 1, date: date, paramKey: .webVisit30d0)
             }
         scoreApply { $0.visitCount += 1 }
+        if tree.isPinned {
+            tree.dailyScoreStore?.apply(to: link) { $0.isPinned = true }
+        }
         score.visitCount += 1
     }
     init(id: UUID, link: UUID, events: [ReadingEvent], legacy: Bool, isLinkActivation: Bool) {
@@ -436,6 +439,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     var longTermScoreStore: LongTermUrlScoreStoreProtocol?
     var dailyScoreStore: DailyUrlScoreStoreProtocol?
     var domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol?
+    public var isPinned = false {
+        didSet {
+            dailyScoreStore?.apply(to: current.link) { $0.isPinned = $0.isPinned || isPinned }
+        }
+    }
 
     public init(_ origin: BrowsingTreeOrigin?, frecencyScorer: FrecencyScorer? = nil, longTermScoreStore: LongTermUrlScoreStoreProtocol? = nil,
                 domainPath0TreeStatsStore: DomainPath0TreeStatsStorageProtocol? = nil, dailyScoreStore: DailyUrlScoreStoreProtocol? = nil) {
