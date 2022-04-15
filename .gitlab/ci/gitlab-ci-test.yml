@@ -2,7 +2,7 @@ build for testing:
   # This will build an app that will be reused on UI Tests Thread
   timeout: 20 minutes
   dependencies: []
-  stage: test
+  stage: build
   rules:
     - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
     - if: '$CI_COMMIT_BRANCH == "master"'
@@ -32,6 +32,7 @@ build for testing:
 xctests:
   timeout: 20 minutes
   dependencies: []
+  needs: []
   stage: test
   artifacts:
     expire_in: 7d
@@ -69,36 +70,6 @@ xctests:
   tags:
     - macos-mono
   interruptible: true
-
-swift lint:
-  timeout: 5 minutes
-  dependencies: []
-  stage: test
-  variables:
-    GIT_SUBMODULE_STRATEGY: none
-  artifacts:
-    when: always
-    paths:
-      - fastlane/codequality_report.json
-    reports:
-      codequality: fastlane/codequality_report.json
-  script:
-    - bundle exec fastlane lint
-  rules:
-    - if: '$SWIFT_LINT_DISABLED'
-      when: never
-    - if: '$CI_PIPELINE_SOURCE == "schedule"'
-      when: never
-    - if: '$CI_MERGE_REQUEST_EVENT_TYPE == "merge_train"'
-      when: never
-    - if: '$CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH'
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - if: '$CI_COMMIT_BRANCH == "develop"'
-    - if: '$CI_COMMIT_BRANCH =~ /^beta-.+/'
-    - if: '$CI_COMMIT_BRANCH =~ /^release-.+/'
-    - if: '$CI_PIPELINE_SOURCE == "merge_request_event"'
-  tags:
-    - macos-mono
 
 UITestThread1:
   timeout: 25 minutes
@@ -334,6 +305,7 @@ js_test:
   variables:
     RUN_BENCHMARK: "true"
   stage: test
+  needs: []
   image: node:16-alpine
   before_script:
     - date
@@ -367,8 +339,8 @@ coverage_check:
   before_script:
     - date
   dependencies: []
-  stage: build
-  needs: [xctests, UITestThread1, UITestThread2, UITestThread3, UITestThread4]
+  stage: test
+  needs: [xctests, UITestThread1, UITestThread2, UITestThread3, UITestThread4, UITestThread5]
   rules:
     - if: '$COVERAGE_CHECK_DISABLED'
       when: never
