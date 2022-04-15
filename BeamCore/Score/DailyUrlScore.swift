@@ -20,6 +20,7 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
     public var scrollRatioY: Float = 0
     public var textAmount: Int = 0
     public var area: Float = 0
+    public var isPinned: Bool = false //true if isPinned at least once during period
 
     public init(urlId: UUID, localDay: String) {
         self.urlId = urlId

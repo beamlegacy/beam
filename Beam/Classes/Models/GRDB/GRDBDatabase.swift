@@ -527,6 +527,12 @@ struct GRDBDatabase {
             try db.drop(table: "LongTermUrlScore")
             try db.rename(table: "newLongTermUrlScore", to: "LongTermUrlScore")
         }
+
+        migrator.registerMigration("addIsPinnedToDailyUrlScores") { db in
+            try db.alter(table: "DailyUrlScore") { table in
+                table.add(column: "isPinned", .boolean).defaults(to: false)
+            }
+        }
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
