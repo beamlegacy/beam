@@ -37,7 +37,7 @@ class EditorShortcutsTests: BaseTest {
             cardView!.getCardNoteElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
         }
         
-        step ("Then I'm redirected to a new tab and the card has not beed changed"){
+        step ("Then I'm redirected to a new tab and the card has not been changed"){
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
             webView.openDestinationCard()
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
