@@ -14,17 +14,18 @@ extension PointAndShoot {
     /// Dismiss activeShootGroup. Group gets added to dismissedGroups array and activeShootGroup gets cleared.
     func dismissActiveShootGroup() {
         if let group = activeShootGroup {
-            dismissedGroups.append(group)
+            dismissShootGroup(id: group.id, href: group.href)
             activeShootGroup = nil
         }
     }
 
-    /// Dismiss target shoot gorup. Group gets added to dismissedGroups array. Removes group from stored values if ids match target id
+    /// Dismiss target shoot group. Group gets added to dismissedGroups array. Removes group from stored values if ids match target id
     /// - Parameter id: ID of group to remove
     /// - Parameter href: Href of the page
     func dismissShootGroup(id: String, href: String) {
         let group = ShootGroup(id: id, href: href)
         dismissedGroups.append(group)
+        removeTarget(id)
 
         if activeShootGroup?.id == group.id {
             activeShootGroup = nil
