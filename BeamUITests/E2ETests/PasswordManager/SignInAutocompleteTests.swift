@@ -45,6 +45,35 @@ class SignInAutocompleteTests: BaseTest {
         self.credentialsAutocompleteAssertion(login: login)
     }
     
+    func testPasswordMenuIsHiddenWhenOmniboxIsVisible() {
+        launchApp()
+        uiMenu.destroyDB()
+            .startMockHTTPServer()
+            .populatePasswordsDB()
+        OmniBoxTestView().searchInOmniBox(signInPageURL, true)
+
+        step("When I click on password field"){
+            mockPage.getPasswordFieldElement(false).clickOnExistence()
+        }
+        step("Then the key icon is visible"){
+            XCTAssertTrue(helper.getKeyIconElement().exists)
+        }
+
+        step("When I show the omnibox"){
+            ShortcutsHelper().shortcutActionInvoke(action: .showOmnibox)
+        }
+        step("Then the key icon is hidden"){
+            XCTAssertFalse(helper.getKeyIconElement().exists)
+        }
+
+        step("When I dismiss the omnibox"){
+            helper.typeKeyboardKey(.escape)
+        }
+        step("Then the key icon is visible again"){
+            XCTAssertTrue(helper.getKeyIconElement().exists)
+        }
+    }
+
     func testOtherPasswordsAppearanceRemovalFill() {
         let login = "qa@beamapp.co"
         let journalView = launchApp()
