@@ -6,14 +6,15 @@
 
 <body>
 <h1>Mock Form Server</h1>
-<table>
+<ul>
 {% for param in params %}
-<tr>
-<td>{{ param.key }}</td>
-<td>{{ param.value }}</td>
-</tr>
+<li>
+<span>{{ param.key }}</span>
+<span> = </span>
+<span>{{ param.value }}</span>
+</li>
 {% endfor %}
-</table>
+</ul>
 <a href="/">Back</a>
 </body>
 
