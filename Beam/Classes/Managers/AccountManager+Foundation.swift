@@ -244,6 +244,7 @@ extension AccountManager {
 
     static func logout() {
         Persistence.cleanUp()
+        AppDelegate.main.data.calendarManager.disconnectAll()
         AppDelegate.main.disconnectWebSockets()
         AuthenticationManager.shared.persistenceDidUpdate()
 

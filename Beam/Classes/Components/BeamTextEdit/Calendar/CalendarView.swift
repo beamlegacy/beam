@@ -130,7 +130,7 @@ struct CalendarView: View {
                     Spacer()
                 }
             }
-        }.frame(width: 161, alignment: .leading)
+        }
     }
 
     private func prompt(_ meeting: Meeting) {
