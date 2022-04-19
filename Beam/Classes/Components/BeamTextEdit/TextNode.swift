@@ -630,7 +630,8 @@ public class TextNode: ElementNode {
             let clickPos = positionAt(point: mouseInfo.position)
 
             if let link = linkAt(point: mouseInfo.position) {
-                openExternalLink(link: link, element: element)
+                let inBackground = mouseInfo.event.modifierFlags.contains(.command)
+                openExternalLink(link: link, element: element, inBackground: inBackground)
                 return true
             }
 
