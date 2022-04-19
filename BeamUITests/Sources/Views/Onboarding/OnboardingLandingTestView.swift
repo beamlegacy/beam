@@ -85,7 +85,7 @@ class OnboardingLandingTestView: BaseView {
     }
     
     func isOnboardingPageOpened() -> Bool {
-        return staticText(OnboardingLandingViewLocators.StaticTexts.onboardingTitle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return button(OnboardingLandingViewLocators.Buttons.continueWithGoogleButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) 
     }
     
     @discardableResult
