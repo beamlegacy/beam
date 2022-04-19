@@ -257,6 +257,20 @@ extension DestinationNoteAutocompleteList {
             return results
         }
 
+        private func getEmptySearchRecentsNotes(documentManager: DocumentManager, itemLimit: Int) -> ([DocumentStruct], [UUID: FrecencyNoteRecord]) {
+            let scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey)
+            var items = documentManager.loadDocumentsById(ids: Array(scores.keys))
+            if recentsAlwaysShowTodayNote, let todayNote = data?.todaysNote.documentStruct {
+                if let index = items.firstIndex(where: { $0.id == todayNote.id }) {
+                    items.remove(at: index)
+                } else if !items.isEmpty {
+                    items.removeLast()
+                }
+                items.insert(todayNote, at: 0)
+            }
+            return (items, scores)
+        }
+
         private func getSearchResultForNoteTitle(text: String, itemLimit: Int) -> [AutocompleteResult] {
             var autocompleteItems: [AutocompleteResult]
             var allowCreateCard = false
@@ -271,16 +285,7 @@ extension DestinationNoteAutocompleteList {
             } else if useRecents {
                 //When query is empty, we get top N frecencies' noteIds
                 //and fetch corresponding notes (avoids fetching all the notes)
-                scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: itemLimit, paramKey: AutocompleteManager.noteFrecencyParamKey)
-                items = documentManager.loadDocumentsById(ids: Array(scores.keys))
-                if recentsAlwaysShowTodayNote, let todayNote = data?.todaysNote.documentStruct {
-                    if let index = items.firstIndex(where: { $0.id == todayNote.id }) {
-                        items.remove(at: index)
-                    } else if !items.isEmpty {
-                        items.removeLast()
-                    }
-                    items.insert(todayNote, at: 0)
-                }
+                (items, scores) = getEmptySearchRecentsNotes(documentManager: documentManager, itemLimit: itemLimit)
             }
             let cleanedItems: [DocumentStruct] = items.compactMap { doc in
                 if text.containsSymbol || text.containsWhitespace {

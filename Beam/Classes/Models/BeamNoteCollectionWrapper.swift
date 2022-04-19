@@ -40,7 +40,7 @@ final class BeamNoteCollectionWrapper: NSDocument {
         for doc in noteDocuments {
             guard let wrapper = try? doc.fileWrapper(ofType: BeamNoteDocumentWrapper.documentTypeName)
             else {
-                Logger.shared.logError("Error while exporting \(doc.note?.titleAndId)", category: .document)
+                Logger.shared.logError("Error while exporting \(doc.note?.titleAndId ?? "<nil note>")", category: .document)
                 continue
             }
             rootWrapper.addFileWrapper(wrapper)

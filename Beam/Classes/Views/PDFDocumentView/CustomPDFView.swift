@@ -2,89 +2,85 @@ import PDFKit
 
 final class CustomPDFView: PDFView {
 
-    // swiftlint:disable:next function_body_length
     /// Recreates a new menu from scratch.
     /// We could have instead intercept the default menu in `PDFView.willOpenMenu(_:with:)`, but unfortunately it is
     /// only called when clicking outside the bounds of the PDF document.
     override func menu(for event: NSEvent) -> NSMenu? {
-        let automaticallyResizeItem = makeMenuItem(
-            title: NSLocalizedString("Automatically Resize", comment: "Automatically Resize menu item"),
-            identifier: Self.automaticallyResizeIdentifier,
-            action: #selector(automaticallyResizeClicked)
-        )
-
-        let zoomInItem = makeMenuItem(
-            title: NSLocalizedString("Zoom In", comment: "Zoom In menu item"),
-            identifier: Self.zoomInIdentifier,
-            action: #selector(zoomIn(_:))
-        )
-
-        let zoomOutItem = makeMenuItem(
-            title: NSLocalizedString("Zoom Out", comment: "Zoom Out menu item"),
-            identifier: Self.zoomOutIdentifier,
-            action: #selector(zoomOut(_:))
-        )
-
-        let actualSizeItem = makeMenuItem(
-            title: NSLocalizedString("Actual Size", comment: "Actual Size menu item"),
-            identifier: Self.actualSizeIdentifier,
-            action: #selector(actualSizeClicked)
-        )
-
-        let singlePageItem = makeMenuItem(
-            title: NSLocalizedString("Single Page", comment: "Single Page menu item"),
-            identifier: Self.singlePageItemIdentifier,
-            action: #selector(singlePageClicked)
-        )
-
-        let singlePageContinuousItem = makeMenuItem(
-            title: NSLocalizedString("Single Page Continuous", comment: "Single Page Continuous menu item"),
-            identifier: Self.singlePageContinuousItemIdentifier,
-            action: #selector(singlePageContinuousClicked)
-        )
-
-        let twoPagesItem = makeMenuItem(
-            title: NSLocalizedString("Two Pages", comment: "Two Pages menu item"),
-            identifier: Self.twoPagesItemIdentifier,
-            action: #selector(twoPagesClicked)
-        )
-
-        let twoPagesContinuousItem = makeMenuItem(
-            title: NSLocalizedString("Two Pages Continuous", comment: "Two Pages Continuous menu item"),
-            identifier: Self.twoPagesContinuousItemIdentifier,
-            action: #selector(twoPagesContinuousClicked)
-        )
-
-        let nextPageItem = makeMenuItem(
-            title: NSLocalizedString("Next Page", comment: "Next Page menu item"),
-            identifier: Self.nextPageItemIdentifier,
-            action: #selector(nextPageClicked)
-        )
-
-        let previousPageItem = makeMenuItem(
-            title: NSLocalizedString("Previous Page", comment: "Previous Page menu item"),
-            identifier: Self.previousPageItemIdentifier,
-            action: #selector(previousPageClicked)
-        )
 
         let menu = NSMenu()
-
-        menu.items = [
-            automaticallyResizeItem,
-            zoomInItem,
-            zoomOutItem,
-            actualSizeItem,
-            .separator(),
-            singlePageItem,
-            singlePageContinuousItem,
-            twoPagesItem,
-            twoPagesContinuousItem,
-            .separator(),
-            nextPageItem,
-            previousPageItem
-        ]
+        menu.items = []
+        + sizingItems()
+        + [.separator()]
+        + pagingDisplayItems()
+        + [.separator()]
+        + pageNavigationtems()
 
         return menu
+    }
+
+    private func sizingItems() -> [NSMenuItem] {
+        [
+            makeMenuItem(
+                title: NSLocalizedString("Automatically Resize", comment: "Automatically Resize menu item"),
+                identifier: Self.automaticallyResizeIdentifier,
+                action: #selector(automaticallyResizeClicked)
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Zoom In", comment: "Zoom In menu item"),
+                identifier: Self.zoomInIdentifier,
+                action: #selector(zoomIn(_:))
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Zoom Out", comment: "Zoom Out menu item"),
+                identifier: Self.zoomOutIdentifier,
+                action: #selector(zoomOut(_:))
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Actual Size", comment: "Actual Size menu item"),
+                identifier: Self.actualSizeIdentifier,
+                action: #selector(actualSizeClicked)
+            )
+        ]
+    }
+
+    private func pagingDisplayItems() -> [NSMenuItem] {
+        [
+            makeMenuItem(
+                title: NSLocalizedString("Single Page", comment: "Single Page menu item"),
+                identifier: Self.singlePageItemIdentifier,
+                action: #selector(singlePageClicked)
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Single Page Continuous", comment: "Single Page Continuous menu item"),
+                identifier: Self.singlePageContinuousItemIdentifier,
+                action: #selector(singlePageContinuousClicked)
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Two Pages", comment: "Two Pages menu item"),
+                identifier: Self.twoPagesItemIdentifier,
+                action: #selector(twoPagesClicked)
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Two Pages Continuous", comment: "Two Pages Continuous menu item"),
+                identifier: Self.twoPagesContinuousItemIdentifier,
+                action: #selector(twoPagesContinuousClicked)
+            )
+        ]
+    }
+
+    private func pageNavigationtems() -> [NSMenuItem] {
+        [
+            makeMenuItem(
+                title: NSLocalizedString("Next Page", comment: "Next Page menu item"),
+                identifier: Self.nextPageItemIdentifier,
+                action: #selector(nextPageClicked)
+            ),
+            makeMenuItem(
+                title: NSLocalizedString("Previous Page", comment: "Previous Page menu item"),
+                identifier: Self.previousPageItemIdentifier,
+                action: #selector(previousPageClicked)
+            )
+        ]
     }
 
     @objc private func automaticallyResizeClicked() {

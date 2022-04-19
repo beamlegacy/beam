@@ -2,6 +2,7 @@
 //  __component_name__MessageHandler.swift
 //  Beam
 //
+// swiftlint:disable type_name
 
 import Foundation
 import BeamCore

@@ -84,7 +84,8 @@ extension AppDelegate {
             }
         } else {
             // try to decode and import this file
-            guard let data = try? Data(contentsOf: url) else {
+            let data = try? Data(contentsOf: url)
+            guard data != nil else {
                 Logger.shared.logError("Unable to import data from \(url)", category: .general)
                 return
             }
