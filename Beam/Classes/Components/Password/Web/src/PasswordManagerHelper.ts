@@ -1,6 +1,17 @@
+import {BeamHTMLElement, BeamWindow} from "@beam/native-beamtypes"
+import {BeamElementHelper} from "@beam/native-utils"
+
 export class PasswordManagerHelper {
+  win: BeamWindow
   frameIdentifier = ""
   lastId = 0
+
+	/**
+	 * @param win {(BeamWindow)}
+	 */
+	constructor(win: BeamWindow<any>) {
+	  this.win = win
+	}
 
   /**
    * Returns true if element is a textField element
@@ -99,9 +110,8 @@ export class PasswordManagerHelper {
   getTextFieldsInDocument(): Element[] {
     const textFields = []
     for (const tagName of ["input", "select", "textarea"]) {
-      const inputElements = document.getElementsByTagName(tagName)
-      for (let e = 0; e < inputElements.length; e++) {
-        const element = inputElements.item(e)
+      const inputElements = this.win.document.querySelectorAll(tagName) as BeamHTMLElement[]
+      for (const element of inputElements) {
         if (this.isTextField(element) && this.isEnabled(element)) {
           this.getOrCreateBeamId(element)
           const attributes = element.attributes
@@ -110,6 +120,7 @@ export class PasswordManagerHelper {
             const attr = attributes.item(a)
             textField[attr.name] = attr.value
           }
+          textField["visible"] = BeamElementHelper.isVisible(element, this.win)
           textFields.push(textField)
         }
       }
