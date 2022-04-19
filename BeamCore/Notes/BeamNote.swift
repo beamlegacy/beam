@@ -347,6 +347,7 @@ public class BeamNote: BeamElement {
         if var note = note as? BeamNoteDocument {
             note.lastChangedElement = child
         }
+        recordScoreWordCount()
     }
 
     public static func unloadAllNotes() {
@@ -478,6 +479,13 @@ public class BeamNote: BeamElement {
         tombstones.remove(child.id)
     }
 
+    public func recordScoreWordCount() {
+        NoteScorer.shared.updateWordCount(noteId: id, wordCount: textStats.wordsCount)
+    }
+    override public func change(_ type: BeamElement.ChangeType) {
+        super.change(type)
+        recordScoreWordCount()
+    }
 }
 
 public func beamCheckMainThread() {

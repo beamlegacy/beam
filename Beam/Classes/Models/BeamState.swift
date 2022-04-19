@@ -234,6 +234,8 @@ import Sentry
         note.sources.refreshScores {}
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d0)
         data.noteFrecencyScorer.update(id: note.id, value: 1.0, eventType: .noteVisit, date: BeamDate.now, paramKey: .note30d1)
+        NoteScorer.shared.incrementVisitCount(noteId: note.id)
+        note.recordScoreWordCount()
         currentPage = nil
         currentNote = note
         if let elementId = elementId {
