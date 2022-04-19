@@ -56,6 +56,7 @@ enum CardViewLocators {
         case blockRefUnlock = "ContextMenuItem-unlock"
         case blockRefRemove = "ContextMenuItem-remove"
         case blockRefOrigin = "ContextMenuItem-view origin"
+        case backgroundTabOpened = "Opened in background"
     }
     
     enum TextViews: String, CaseIterable, UIElement {

@@ -27,8 +27,6 @@ struct NoteHeaderView: View {
 
     private var copyLinkView: some View {
         let justCopiedLink = model.justCopiedLinkFrom == .fromLinkIcon
-        let transition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
-                                                  removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.05)))
         return ButtonLabel(icon: "editor-url_link", customStyle: .tinyIconStyle) {
             model.copyLink(source: .fromLinkIcon)
         }
@@ -37,11 +35,11 @@ struct NoteHeaderView: View {
                 if justCopiedLink {
                     Tooltip(title: "Link Copied")
                         .fixedSize().offset(x: -22, y: 0)
-                        .transition(transition)
+                        .transition(Tooltip.defaultTransition)
                 } else if hoveringLinkButton {
                     Tooltip(title: "Copy Link")
                         .fixedSize().offset(x: -22, y: 0)
-                        .transition(transition)
+                        .transition(Tooltip.defaultTransition)
                 }
             }, alignment: .trailing)
         .onHover { hoveringLinkButton = $0 }
