@@ -12,6 +12,8 @@ class ZZZTests: QuickSpec {
 
         beforeEach {
             Configuration.beamObjectDirectCall = false
+            BeamDate.freeze("2022-04-18T06:00:03Z")
+
             BeamTestsHelper.logout()
             beamHelper.beginNetworkRecording()
             BeamTestsHelper.login()
@@ -23,6 +25,7 @@ class ZZZTests: QuickSpec {
 
         afterEach {
             beamHelper.endNetworkRecording()
+            BeamDate.reset()
         }
 
         describe("BeamObjects") {

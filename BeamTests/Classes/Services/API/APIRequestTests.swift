@@ -16,12 +16,14 @@ class APIRequestTests: QuickSpec {
 
         beforeEach {
             self.sut = APIRequest()
+            BeamDate.freeze("2022-04-18T06:00:03Z")
             Configuration.reset()
         }
 
         afterEach {
             Configuration.reset()
             beamHelper.endNetworkRecording()
+            BeamDate.reset()
         }
 
         describe("with regular graphql request") {
