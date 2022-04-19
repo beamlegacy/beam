@@ -13,6 +13,14 @@ extension XCUIElement: WaitHelper {
         self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).tap()
         return self
     }
+    
+    @discardableResult
+    public func clickMultipleTimes(times: Int) -> XCUIElement {
+        for _ in 1...times {
+            self.tapInTheMiddle()
+        }
+        return self
+    }
 
     @discardableResult
     public func hoverInTheMiddle() -> XCUIElement {
