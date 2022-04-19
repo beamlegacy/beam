@@ -37,6 +37,7 @@
         "OmniboxViewTests\/testOmniboxDefaultActions()",
         "OmniboxViewTests\/testOmniboxPivotButtonClicking()",
         "OnboardingTests",
+        "PDFFilesBrowserViewTests",
         "PasswordPreferencesTests",
         "PnSAddToCardTests",
         "ReferencesTests",
