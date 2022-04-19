@@ -98,7 +98,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     private func getDefaultItemsForLink(for node: TextNode, link: URL) -> [ContextMenuItem] {
         var allItems = [
             ContextMenuItem(title: "Open Link", action: {
-                node.openExternalLink(link: link, element: node.element)
+                node.openExternalLink(link: link, element: node.element, inBackground: false)
                 self.hideInlineFormatter()
             }),
             ContextMenuItem.separator(),

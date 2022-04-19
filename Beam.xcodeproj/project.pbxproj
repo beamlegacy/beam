@@ -1042,10 +1042,11 @@
 		A59738C727103D3C00821F90 /* Meeting+BeamText.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59738C627103D3C00821F90 /* Meeting+BeamText.swift */; };
 		A599F8D327849AF200657CD5 /* AppDelegate+Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */; };
 		A59C4413268233960066AA0E /* CheckboxLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59C4412268233960066AA0E /* CheckboxLayer.swift */; };
-		A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleEffect.swift */; };
+		A59D33882655101A002E7E96 /* WiggleBounceEffects.swift in Sources */ = {isa = PBXBuildFile; fileRef = A59D33872655101A002E7E96 /* WiggleBounceEffects.swift */; };
 		A5A2314526FB355B00D01D08 /* DividerNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2314426FB355B00D01D08 /* DividerNode.swift */; };
 		A5A2D52F27393730003D0925 /* AnimatedGradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2D52E27393730003D0925 /* AnimatedGradient.swift */; };
 		A5A2D53727394F55003D0925 /* ActionableButton+Gradient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A2D53627394F55003D0925 /* ActionableButton+Gradient.swift */; };
+		A5A3BB2928083C2D00D7B4C5 /* nav-pivot_tab_increment.json in Resources */ = {isa = PBXBuildFile; fileRef = A5A3BB2328083C2D00D7B4C5 /* nav-pivot_tab_increment.json */; };
 		A5A6152526A808B600193C03 /* AutocompleteManager+Sorting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */; };
 		A5A6A428267F123C007F1B2F /* CommandManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5109F902670227800304B3A /* CommandManagerTests.swift */; };
 		A5A955CB2695576D00F3FDD2 /* CalendarPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */; };
@@ -2797,10 +2798,11 @@
 		A59738C627103D3C00821F90 /* Meeting+BeamText.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Meeting+BeamText.swift"; sourceTree = "<group>"; };
 		A599F8D227849AF200657CD5 /* AppDelegate+Onboarding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "AppDelegate+Onboarding.swift"; sourceTree = "<group>"; };
 		A59C4412268233960066AA0E /* CheckboxLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxLayer.swift; sourceTree = "<group>"; };
-		A59D33872655101A002E7E96 /* WiggleEffect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleEffect.swift; sourceTree = "<group>"; };
+		A59D33872655101A002E7E96 /* WiggleBounceEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WiggleBounceEffects.swift; sourceTree = "<group>"; };
 		A5A2314426FB355B00D01D08 /* DividerNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DividerNode.swift; sourceTree = "<group>"; };
 		A5A2D52E27393730003D0925 /* AnimatedGradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnimatedGradient.swift; sourceTree = "<group>"; };
 		A5A2D53627394F55003D0925 /* ActionableButton+Gradient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ActionableButton+Gradient.swift"; sourceTree = "<group>"; };
+		A5A3BB2328083C2D00D7B4C5 /* nav-pivot_tab_increment.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "nav-pivot_tab_increment.json"; sourceTree = "<group>"; };
 		A5A6152426A808B600193C03 /* AutocompleteManager+Sorting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Sorting.swift"; sourceTree = "<group>"; };
 		A5A955CA2695576D00F3FDD2 /* CalendarPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarPickerView.swift; sourceTree = "<group>"; };
 		A5AD646227C53D27005FC3B1 /* TabContentIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabContentIcon.swift; sourceTree = "<group>"; };
@@ -4150,7 +4152,7 @@
 				3392E56C269D82FE000FA401 /* ClickCatchingView.swift */,
 				A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */,
 				A5144000263803600021DD56 /* TrackableScrollView.swift */,
-				A59D33872655101A002E7E96 /* WiggleEffect.swift */,
+				A59D33872655101A002E7E96 /* WiggleBounceEffects.swift */,
 				A53C9872267B4B6400D4AE90 /* AnimatableOffsetEffect.swift */,
 				A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */,
 				872644762619903B0070E83D /* StepperControl.swift */,
@@ -6839,6 +6841,7 @@
 				A5347A6B2763B53F006EEF8C /* nav-pivot_card.json */,
 				A5347A692763B53A006EEF8C /* nav-pivot_web.json */,
 				33551D2127FC6F4600598164 /* nav-pivot_incognito.json */,
+				A5A3BB2328083C2D00D7B4C5 /* nav-pivot_tab_increment.json */,
 			);
 			path = Lotties;
 			sourceTree = "<group>";
@@ -7732,6 +7735,7 @@
 				418171F42581107C00317ED8 /* sign_up.graphql in Resources */,
 				8AE3EA9727F36D5E0010A42C /* Beam.css in Resources */,
 				032562AB26051D3B006513E4 /* Info.plist in Resources */,
+				A5A3BB2928083C2D00D7B4C5 /* nav-pivot_tab_increment.json in Resources */,
 				A07B03F0279AF1D200D14C45 /* Inter-Light.otf in Resources */,
 				8AE3EA9327F36D5E0010A42C /* UITests-4.html in Resources */,
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
@@ -8533,7 +8537,7 @@
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				A07C013D2705ED2700D91750 /* GoogleCalendarService.swift in Sources */,
 				A0CB5ADE268B1FF500D1EF02 /* GeneralPreferencesView.swift in Sources */,
-				A59D33882655101A002E7E96 /* WiggleEffect.swift in Sources */,
+				A59D33882655101A002E7E96 /* WiggleBounceEffects.swift in Sources */,
 				4181721B2581107C00317ED8 /* Maths.swift in Sources */,
 				A0642C3226D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel in Sources */,
 				A0D8B9C926B84FBA007D0748 /* PrivacyPreferencesView.swift in Sources */,

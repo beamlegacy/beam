@@ -39,8 +39,8 @@ struct NoteView: View {
             BTextEditScrollable(
                 note: note,
                 state: state,
-                openURL: { url, element in
-                    state.handleOpenUrl(url, note: note, element: element)
+                openURL: { url, element, inBackground in
+                    state.handleOpenUrl(url, note: note, element: element, inBackground: inBackground)
                 },
                 openCard: { cardId, elementId, unfold in
                     state.navigateToNote(id: cardId, elementId: elementId, unfold: unfold ?? false)

@@ -368,7 +368,7 @@ public extension CALayer {
     public var activateOnLostFocus = true
     public var useFocusRing = false
 
-    public var openURL: (URL, BeamElement) -> Void = { _, _ in }
+    public var openURL: (URL, BeamElement, _ inBackground: Bool) -> Void = { _, _, _ in }
     public var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void = { _, _, _ in }
     public var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
