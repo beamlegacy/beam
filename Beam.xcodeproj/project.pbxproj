@@ -1260,6 +1260,9 @@
 		DA23C75427F31816005508EB /* DailyUrlStorageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA23C75327F31816005508EB /* DailyUrlStorageTest.swift */; };
 		DA3239D8269DDE2F00A1F4C3 /* LongTermUrlScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */; };
 		DA3239DE269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */; };
+		DA3A84B7280466C900092200 /* NoteScoreTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */; };
+		DA3A84BE2805C3D500092200 /* NoteDailySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */; };
+		DA3A84C52805DCCD00092200 /* NoteDailySummaryTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
 		DA52E967276B4430008D4990 /* BrowserType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA52E966276B4430008D4990 /* BrowserType.swift */; };
 		DA52E96E276B57BD008D4990 /* BrowserImportManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA52E96D276B57BD008D4990 /* BrowserImportManagerTest.swift */; };
@@ -1274,12 +1277,14 @@
 		DA69305A268DB375008EF756 /* BrowsingTreeSenderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */; };
 		DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */; };
 		DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */; };
+		DA8D947F27FF17D90073AD2D /* NoteScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D947E27FF17D90073AD2D /* NoteScores.swift */; };
+		DA8D948127FF37250073AD2D /* NoteScoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D948027FF37250073AD2D /* NoteScoreTest.swift */; };
+		DA8D949128008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D949028008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift */; };
 		DA905D50277B0BC500307146 /* FrecencyNoteScore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */; };
 		DA905D52277CB20A00307146 /* FrecencyNoteStorageTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA905D51277CB20A00307146 /* FrecencyNoteStorageTest.swift */; };
 		DA9E5B9D26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */; };
 		DAA0A50A270CA8ED00F952E5 /* BrowsingTreeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */; };
 		DAA3875426B043C800CAE20B /* FrecencyNoteRecordTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */; };
-		DAA3879D26B1837300CAE20B /* FrecencyNoteTriggerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */; };
 		DAA60C232666893300C927E5 /* SessionLinkRanker.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAA60C182666892600C927E5 /* SessionLinkRanker.swift */; };
 		DAA60C2C2666899A00C927E5 /* BeamState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4181734D2581204900317ED8 /* BeamState.swift */; };
 		DAAF40C427D79BEB00083AA0 /* TabPinSuggesterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAAF40C327D79BEB00083AA0 /* TabPinSuggesterTests.swift */; };
@@ -3014,6 +3019,9 @@
 		DA23C75327F31816005508EB /* DailyUrlStorageTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = DailyUrlStorageTest.swift; path = BeamTests/Classes/Models/GRDB/DailyUrlStorageTest.swift; sourceTree = SOURCE_ROOT; };
 		DA3239D7269DDE2F00A1F4C3 /* LongTermUrlScore.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LongTermUrlScore.swift; sourceTree = "<group>"; };
 		DA3239DD269DE06F00A1F4C3 /* LongTermUrlScore+GRDB.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "LongTermUrlScore+GRDB.swift"; sourceTree = "<group>"; };
+		DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteScoreTriggerTests.swift; sourceTree = "<group>"; };
+		DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDailySummary.swift; sourceTree = "<group>"; };
+		DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDailySummaryTest.swift; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
 		DA52E966276B4430008D4990 /* BrowserType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserType.swift; sourceTree = "<group>"; };
 		DA52E96D276B57BD008D4990 /* BrowserImportManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImportManagerTest.swift; sourceTree = "<group>"; };
@@ -3027,12 +3035,14 @@
 		DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeSenderTest.swift; path = ../BrowsingTreeSenderTest.swift; sourceTree = "<group>"; };
 		DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedNoteSourcesUpdater.swift; sourceTree = "<group>"; };
 		DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScoreTests.swift; sourceTree = "<group>"; };
+		DA8D947E27FF17D90073AD2D /* NoteScores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScores.swift; sourceTree = "<group>"; };
+		DA8D948027FF37250073AD2D /* NoteScoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScoreTest.swift; sourceTree = "<group>"; };
+		DA8D949028008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainDailyNoteScoreStore.swift; sourceTree = "<group>"; };
 		DA905D4F277B0BC500307146 /* FrecencyNoteScore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteScore.swift; sourceTree = "<group>"; };
 		DA905D51277CB20A00307146 /* FrecencyNoteStorageTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteStorageTest.swift; sourceTree = "<group>"; };
 		DA9E5B9C26A843520040F09B /* NoteSources+LongTermUrlScoreStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NoteSources+LongTermUrlScoreStore.swift"; sourceTree = "<group>"; };
 		DAA0A509270CA8ED00F952E5 /* BrowsingTreeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeStore.swift; sourceTree = "<group>"; };
 		DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteRecordTest.swift; sourceTree = "<group>"; };
-		DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyNoteTriggerTests.swift; sourceTree = "<group>"; };
 		DAA60C182666892600C927E5 /* SessionLinkRanker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SessionLinkRanker.swift; sourceTree = "<group>"; };
 		DAAF40C327D79BEB00083AA0 /* TabPinSuggesterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPinSuggesterTests.swift; sourceTree = "<group>"; };
 		DAAF40CA27D8BB4F00083AA0 /* TabPinSuggester.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabPinSuggester.swift; sourceTree = "<group>"; };
@@ -3323,6 +3333,7 @@
 		0DEE97A3264296E000AB95AE /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */,
 				DAFAEE802770CA4200BCAE4F /* BrowsingTreeProcessorTest.swift */,
 				759442D426FCA85500CBFB7A /* Navigation */,
 				0DD0DACA2681C7330005339A /* GRDB */,
@@ -3739,6 +3750,7 @@
 				DAAF40CA27D8BB4F00083AA0 /* TabPinSuggester.swift */,
 				96D71CEE27FB2F3E0094F54D /* BeamNoteDocumentWrapper.swift */,
 				96D71CFC27FEFED90094F54D /* BeamNoteCollectionWrapper.swift */,
+				DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -4181,6 +4193,7 @@
 			isa = PBXGroup;
 			children = (
 				4181717C2581107C00317ED8 /* TemporaryFile.swift */,
+				DA8D949028008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift */,
 			);
 			path = Stores;
 			sourceTree = "<group>";
@@ -6042,6 +6055,7 @@
 				A0EDF5DA266EE08C0079803E /* BeamPlaceholder.swift */,
 				DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */,
 				969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */,
+				DA8D947E27FF17D90073AD2D /* NoteScores.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -6073,6 +6087,7 @@
 		96319D1D2616232700D1CF31 /* BeamCoreTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA8D948027FF37250073AD2D /* NoteScoreTest.swift */,
 				96A5DAE227C0251C00746719 /* MajimaTests */,
 				96F2DEDA27BE4983007CF466 /* Assets */,
 				DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */,
@@ -6152,10 +6167,10 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */,
 				A5E00B4C27EB5A9F00474360 /* Autocomplete */,
 				DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */,
 				876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */,
-				DAA3879C26B1837300CAE20B /* FrecencyNoteTriggerTests.swift */,
 				DAA3875326B043C800CAE20B /* FrecencyNoteRecordTest.swift */,
 				DAEEA77B26A701CC00AE72DE /* NoteSourceTests.swift */,
 				96D71CE027F735400094F54D /* MessagePackTests.swift */,
@@ -8042,6 +8057,7 @@
 				4E6097C826CEA93700F90260 /* ActiveSources.swift in Sources */,
 				96A5DADF27C0250D00746719 /* Merge.swift in Sources */,
 				37B85B4527A2C21D003871F9 /* URL+AvailableFileURL.swift in Sources */,
+				DA8D947F27FF17D90073AD2D /* NoteScores.swift in Sources */,
 				DA52E967276B4430008D4990 /* BrowserType.swift in Sources */,
 				DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */,
 				DAEC880F2739953A0087FC18 /* BatchFrecencyUpdater.swift in Sources */,
@@ -8086,6 +8102,7 @@
 				3719855027C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift in Sources */,
 				A06D5FA32683454C009D7C38 /* DeepCopyTests.swift in Sources */,
 				96A5DAEC27C0254300746719 /* ScalarMergeTests.swift in Sources */,
+				DA8D948127FF37250073AD2D /* NoteScoreTest.swift in Sources */,
 				8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */,
 				A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */,
 				DAF063F327D130F6000406DE /* Date+DayTruncatedTests.swift in Sources */,
@@ -8221,6 +8238,7 @@
 				527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */,
 				A0877A3726FDD8400081C7D8 /* ChangeCredentialsView.swift in Sources */,
 				4181727B258110D100317ED8 /* AppDelegate+Data.swift in Sources */,
+				DA3A84BE2805C3D500092200 /* NoteDailySummary.swift in Sources */,
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
 				A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */,
 				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,
@@ -8555,6 +8573,7 @@
 				032562AF26051D3B006513E4 /* RBFilter.m in Sources */,
 				A0CFFA4926D9304F004FC8C1 /* JournalDateConverter.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
+				DA8D949128008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift in Sources */,
 				8AA2431626E63A5F002A553A /* SwiftSoup+Beam.swift in Sources */,
 				8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */,
 				529599F7272718CD00F3F843 /* APIRequest+Foundation.swift in Sources */,
@@ -8860,6 +8879,7 @@
 				032562D926051D55006513E4 /* RBClientTests.m in Sources */,
 				8A3C216D2670FF880029AC1A /* PointAndShootTargetTest.swift in Sources */,
 				37520B1E27EAA50800A1C20B /* BeamElement+DisplaySizePreferencesStorageTests.swift in Sources */,
+				DA3A84C52805DCCD00092200 /* NoteDailySummaryTest.swift in Sources */,
 				525C235825BAFCAA001B9625 /* MergeTests.swift in Sources */,
 				032562BB26051D45006513E4 /* RBFilterManagerTests.m in Sources */,
 				A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */,
@@ -8914,7 +8934,6 @@
 				032562E626051D5D006513E4 /* RBFilterBuilderTests.m in Sources */,
 				DAA3875426B043C800CAE20B /* FrecencyNoteRecordTest.swift in Sources */,
 				032562E126051D5A006513E4 /* RBFilterManagerStateTests.m in Sources */,
-				DAA3879D26B1837300CAE20B /* FrecencyNoteTriggerTests.swift in Sources */,
 				967B2685255465C5003F40E3 /* HtmlNoteAdapterTests.swift in Sources */,
 				032562D426051D52006513E4 /* RBDatabaseTests.m in Sources */,
 				A53EC30D2657C175001BCCCD /* CoreDataContextObserverTests.swift in Sources */,
@@ -8997,6 +9016,7 @@
 				370794C527D7A92100D2768B /* IncrementorTests.swift in Sources */,
 				52C3078225C311B00027C4B1 /* BeamDateTests.swift in Sources */,
 				032562F426051D67006513E4 /* RBSQLiteTests.m in Sources */,
+				DA3A84B7280466C900092200 /* NoteScoreTriggerTests.swift in Sources */,
 				032562C726051D4B006513E4 /* RBMockClient.m in Sources */,
 				968A2DCA263973540021107F /* TextFrameTests.swift in Sources */,
 				87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */,
