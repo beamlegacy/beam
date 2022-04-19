@@ -10,6 +10,7 @@ import Quick
 import Nimble
 import Promises
 @testable import Beam
+@testable import BeamCore
 
 class UserInfoRequestTests: QuickSpec {
     override func spec() {
@@ -25,6 +26,7 @@ class UserInfoRequestTests: QuickSpec {
         beforeEach {
             availableUsername = String("UIRTests-\(UUID())".prefix(29))
             sut = UserInfoRequest()
+            BeamDate.freeze("2022-04-18T06:00:03Z")
             BeamTestsHelper.logout()
             beamHelper.beginNetworkRecording()
             BeamTestsHelper.login()
@@ -33,6 +35,7 @@ class UserInfoRequestTests: QuickSpec {
         afterEach {
             BeamTestsHelper.logout()
             beamHelper.endNetworkRecording()
+            BeamDate.reset()
         }
 
         describe(".setUsername") {
