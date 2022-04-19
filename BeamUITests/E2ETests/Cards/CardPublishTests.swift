@@ -11,7 +11,9 @@ import XCTest
 class CardPublishTests: BaseTest {
     
     var cardView: CardTestView!
+    var allCardsView: AllCardsTestView!
     let shortcuts = ShortcutsHelper()
+    let dialogView = DialogTestView()
     
     private func switchReloadAndAssert(cardName: String, isPublished: Bool = true) {
         shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
@@ -25,23 +27,47 @@ class CardPublishTests: BaseTest {
     
     func testDefaultPublishStatus() {
         launchApp()
-        step("Given I publish default note without being logged in"){
+        step("Given I open all cards menu"){
             shortcuts.shortcutActionInvoke(action: .showAllCards)
-            cardView = AllCardsTestView().openFirstCard()
+            allCardsView = AllCardsTestView()
+        }
+        
+        step("Then I see a label with instructions to publish note and redirected to Onboarding view on click") {
+            allCardsView.getPublishInstructionsLabel().clickOnExistence()
+            XCTAssertTrue(OnboardingLandingTestView().isOnboardingPageOpened())
+            shortcuts.shortcutActionInvoke(action: .close)
+        }
+        
+        step("When I open a default card") {
+            cardView = allCardsView.openFirstCard()
         }
         
         step("Then by default there is no copy link button"){
             XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("When I try to publish the card") {
             cardView.publishCard()
         }
 
-        step("Then I get the connect alert message and link button doesn't appear"){
-            XCTAssertTrue(cardView.app.dialogs.staticTexts["Connect to Beam"].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertTrue(cardView.app.dialogs.buttons["Connect"].exists)
-            cardView.app.dialogs.buttons["Cancel"].click()
+        step("Then I get the connect alert message and link button doesn't appear") {
+            XCTAssertTrue(dialogView.app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(dialogView.app.staticTexts[ AlertViewLocators.StaticTexts.connectBeam.accessibilityIdentifier].exists)
+        }
+        
+        step("Then link button doesn't appear on Cancel button click") {
+            dialogView.getButton(locator: .cancelButton).tapInTheMiddle()
             XCTAssertFalse(cardView.image(CardViewLocators.Buttons.copyCardLinkButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
+        
+        step("Then Onboarding view appears on Connect button click") {
+            cardView.publishCard()
+            dialogView.getButton(locator: .connectButton).tapInTheMiddle()
+            XCTAssertTrue(OnboardingLandingTestView().isOnboardingPageOpened())
+        }
     }
+    
+    
     
     func testPublishUnpublishNote() throws {
         
