@@ -1,7 +1,6 @@
 import Foundation
 import CoreData
 import Combine
-import PMKFoundation
 import BeamCore
 
 enum DocumentManagerError: Error {

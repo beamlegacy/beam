@@ -9,9 +9,10 @@ import Foundation
 import BeamCore
 
 class JournalStackView: JournalSimpleStackView {
-    //swiftlint:disable:next function_body_length
+
     var countChanged = false
 
+    //swiftlint:disable:next function_body_length
     override func layout() {
         guard let scrollView = enclosingScrollView else { return }
         defer {

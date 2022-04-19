@@ -33,7 +33,7 @@ typedef NS_OPTIONS(NSUInteger, _WKCaptureDevices) {
 };
 
 @protocol WKUIDelegatePrivate <WKUIDelegate>
-- (void)_webView:(WKWebView *)webView getWindowFrameWithCompletionHandler:(void (^)(CGRect))completionHandler;
+- (void)_webView:(WKWebView * _Nonnull)webView getWindowFrameWithCompletionHandler:(void (^)(CGRect))completionHandler;
 - (void)_webView:(WKWebView *)webView requestUserMediaAuthorizationForDevices:(_WKCaptureDevices)devices url:(NSURL *)url mainFrameURL:(NSURL *)mainFrameURL decisionHandler:(void (^)(BOOL authorized))decisionHandler;
 @end
 

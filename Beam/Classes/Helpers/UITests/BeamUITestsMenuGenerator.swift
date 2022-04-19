@@ -7,7 +7,7 @@ import MockHttpServer
 import SwiftUI // Remove once we remove .testMeetingModal menu
 
 class BeamUITestsMenuGenerator {
-    // swiftlint:disable:next cyclomatic_complexity
+    // swiftlint:disable:next cyclomatic_complexity function_body_length
     func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
         case .populateDBWithJournal: populateWithJournalNote(count: 10)
@@ -102,14 +102,14 @@ class BeamUITestsMenuGenerator {
 
         Logger.shared.logDebug("current Note: \(currentNote.id) copy: \(newNote.id)", category: .documentDebug)
 
-        newNote.save { result in
+        newNote.save(completion: { result in
             switch result {
             case .failure(let error):
                 Logger.shared.logError(error.localizedDescription, category: .general)
             case .success(let success):
                 Logger.shared.logInfo("Saved! \(success)", category: .documentDebug)
             }
-        }
+        })
     }
 
     private func destroyDatabase() {
