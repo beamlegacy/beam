@@ -125,6 +125,12 @@ class CalendarManager: ObservableObject {
         }
     }
 
+    func disconnectAll() {
+        self.meetingsForNote.removeAll()
+        self.connectedSources.removeAll()
+        Persistence.Authentication.googleCalendarTokens = nil
+    }
+
     func requestMeetings(for dateMin: Date, and dateMax: Date? = nil, onlyToday: Bool, query: String? = nil, completionHandler: @escaping ([Meeting]) -> Void) {
         var allMeetings: [Meeting] = []
         let dispatchGroup = DispatchGroup()
