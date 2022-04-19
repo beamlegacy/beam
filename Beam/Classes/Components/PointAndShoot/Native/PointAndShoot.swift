@@ -436,6 +436,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
             date: BeamDate.now,
             paramKey: .note30d1
         )
+        // Update daily note score
+        NoteScorer.shared.incrementCaptureToCount(noteId: targetNote.id)
     }
 
     /// Clears all stored Point and Shoot session data

@@ -97,6 +97,7 @@ extension BeamTextEdit {
         if let linkedNoteId = linkedNoteId {
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d0)
             data?.noteFrecencyScorer.update(id: linkedNoteId, value: 1.0, eventType: .noteBiDiLink, date: BeamDate.now, paramKey: .note30d1)
+            NoteScorer.shared.incrementBidiLinkToCount(noteId: linkedNoteId)
         }
         cmdManager.insertText(BeamText(text: " "), in: node, at: linkEnd)
         rootNode.cursorPosition = linkEnd + 1

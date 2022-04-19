@@ -15,7 +15,7 @@ import Combine
 fileprivate var pnsNoteTitle = "Grocery list"
 fileprivate var pnsNote = BeamNote(title: pnsNoteTitle)
 
-class FrecencyNoteTriggerTests: XCTestCase {
+class NoteScoreTriggerTests: XCTestCase {
 
     var scorer: FakeFrecencyScorer!
     var data: BeamData!
@@ -116,10 +116,20 @@ class FrecencyNoteTriggerTests: XCTestCase {
         let state = BeamState()
         state.data = data
         let note = BeamNote(title: "Amazing Thoughts")
+        note.addChild(BeamElement("Nothing"))
+        KeychainDailyNoteScoreStore.shared.clear()
 
-        //When navigating to a note, frecency score of note gets updated
+        XCTAssertNil(NoteScorer.shared.getLocalDailyScore(noteId: note.id, daysAgo: 0))
+
+        //When navigating to a note, frecency and daily scores of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)
         state.navigateToNote(note)
+        let dailyScore = try XCTUnwrap(NoteScorer.shared.getLocalDailyScore(noteId: note.id, daysAgo: 0))
+        XCTAssertEqual(dailyScore.visitCount, 1)
+        XCTAssertEqual(dailyScore.addedBidiLinkToCount, 0)
+        XCTAssertEqual(dailyScore.captureToCount, 0)
+        XCTAssertEqual(dailyScore.lastWordCount, 1)
+
         XCTAssertEqual(scorer.updateCalls.count, 2)
         let call = scorer.updateCalls[0]
         XCTAssertEqual(call.id, note.id)
@@ -148,9 +158,15 @@ class FrecencyNoteTriggerTests: XCTestCase {
         //When point and shooting to a note, frecency score of note gets updated
         XCTAssertEqual(scorer.updateCalls.count, 0)
         XCTAssertNotNil(pns.activeShootGroup)
+        XCTAssertNil(NoteScorer.shared.getLocalDailyScore(noteId: pnsNote.id, daysAgo: 0))
         if let group = pns.activeShootGroup {
             let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
             pns.addShootToNote(targetNote: pnsNote, group: group, completion: {
+                let dailyScore = NoteScorer.shared.getLocalDailyScore(noteId: pnsNote.id, daysAgo: 0)
+                XCTAssertEqual(dailyScore?.captureToCount, 1)
+                XCTAssertEqual(dailyScore?.addedBidiLinkToCount, 0)
+                XCTAssertEqual(dailyScore?.visitCount, 0)
+
                 XCTAssertEqual(self.scorer.updateCalls.count, 2)
                 let call = self.scorer.updateCalls[0]
                 XCTAssertEqual(call.id, pnsNote.id)
