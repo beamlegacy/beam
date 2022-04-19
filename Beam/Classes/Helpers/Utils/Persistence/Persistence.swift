@@ -79,6 +79,9 @@ enum Persistence {
             return decodedMaxDateByBrowser[browserType]
         }
     }
+    enum NoteScores {
+        @StandardStorable("NoteScores.daily") static var daily: Data?
+    }
 
     // swiftlint:disable nesting
     enum Sync {
