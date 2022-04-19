@@ -177,5 +177,35 @@ class WebTestView: BaseView {
     func isGoogleSearchTabOpened() -> Bool {
         return image("Google").waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
+    
+    func getPrintPopupWindow() -> XCUIElement {
+        return app.dialogs["Print"].staticTexts["Print"]
+    }
+    
+    @discardableResult
+    func cancelPDFPrintAction() -> WebTestView {
+        app.splitGroups.buttons["Cancel"].tapInTheMiddle()
+        return self
+    }
+    
+    func getPDFPrintButton() -> XCUIElement {
+        return image(WebViewLocators.PDFElements.printButton.accessibilityIdentifier)
+    }
+    
+    func getPDFDownloadButton() -> XCUIElement {
+        return image(WebViewLocators.PDFElements.downloadButton.accessibilityIdentifier)
+    }
+    
+    func getPDFZoomInButton() -> XCUIElement {
+        return image(WebViewLocators.PDFElements.zoomInButton.accessibilityIdentifier)
+    }
+    
+    func getPDFZoomOutButton() -> XCUIElement {
+        return image(WebViewLocators.PDFElements.zoomOutButton.accessibilityIdentifier)
+    }
+    
+    func getCurrentPDFZoomRatio() -> String {
+        return getElementStringValue(element: staticText(WebViewLocators.PDFElements.zoomRatio.accessibilityIdentifier))
+    }
 
 }

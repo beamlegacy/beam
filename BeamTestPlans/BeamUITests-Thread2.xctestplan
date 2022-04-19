@@ -42,6 +42,7 @@
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",
         "OmniboxViewTests\/testOmniboxDefaultActions()",
         "OmniboxViewTests\/testOmniboxPivotButtonClicking()",
+        "PDFFilesBrowserViewTests",
         "PasswordPreferencesTests",
         "PnSAddToCardTests",
         "ReferencesTests",
