@@ -22,6 +22,7 @@ class PublishNoteAPITests: XCTestCase {
 
     override func setUpWithError() throws {
         BeamTestsHelper.logout()
+        BeamDate.freeze("2022-04-18T06:00:03Z")
         beamTestHelper.beginNetworkRecording(test: self)
 
         LoggerRecorder.shared.reset()
@@ -60,6 +61,7 @@ class PublishNoteAPITests: XCTestCase {
         helper.deleteDocumentStruct(testNoteDocumentStruct)
         BeamTestsHelper.logout()
         beamTestHelper.endNetworkRecording()
+        BeamDate.reset()
     }
 
     func testNotePublicationUnpublication() {
