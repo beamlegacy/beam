@@ -59,9 +59,6 @@ struct AccountsView: View {
 
     @ObservedObject var viewModel: AccountsViewModel
 
-    let transition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
-                                              removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08)))
-
     private let accountManager = AccountManager()
     private let contentWidth: Double = PreferencesManager.contentWidth
     private let checkboxHelper = NSButtonCheckboxHelper()
@@ -312,7 +309,7 @@ struct AccountsView: View {
                             Tooltip(title: "Encryption Key Copied !")
                                 .fixedSize()
                                 .offset(x: 140, y: -25)
-                                .transition(transition)
+                                .transition(Tooltip.defaultTransition)
                         }
                     })
 

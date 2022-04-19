@@ -295,7 +295,9 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
         browserTabsManager.addNewTabAndGroup(tab, setCurrent: setCurrent, withURL: url)
-        mode = .web
+        if setCurrent {
+            mode = .web
+        }
         return tab
     }
 
@@ -320,10 +322,10 @@ import Sentry
         return tab
     }
 
-    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL) {
+    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL, setCurrent: Bool = true) {
         EventsTracker.logBreadcrumb(message: "createTabFromNote \(note.id)/\(note.title) element \(element.id)/\(element.kind) withURL \(url)", category: "BeamState")
         let origin = BrowsingTreeOrigin.linkFromNote(noteName: note.title)
-        _ = addNewTab(origin: origin, note: note, element: element, url: url)
+        _ = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: element, url: url)
     }
 
     func createEmptyTab() {
@@ -419,12 +421,17 @@ import Sentry
         return n
     }
 
-    func handleOpenUrl(_ url: URL, note: BeamNote?, element: BeamElement?) {
+    func handleOpenUrl(_ url: URL, note: BeamNote?, element: BeamElement?, inBackground: Bool) {
         if URL.browserSchemes.contains(url.scheme) {
             if let note = note, let element = element {
-                createTabFromNote(note, element: element, withURL: url)
+                createTabFromNote(note, element: element, withURL: url, setCurrent: !inBackground)
             } else {
-                _ = createTab(withURL: url, originalQuery: nil)
+                _ = createTab(withURL: url, originalQuery: nil, setCurrent: !inBackground)
+            }
+            if inBackground, let currentEvent = NSApp.currentEvent, let window = associatedWindow {
+                var location = currentEvent.locationInWindow.flippedPointToTopLeftOrigin(in: window)
+                location.y -= 20
+                overlayViewModel.presentTooltip(text: loc("Opened in background"), at: location)
             }
         } else if url.scheme != nil {
             NSWorkspace.shared.open(url)

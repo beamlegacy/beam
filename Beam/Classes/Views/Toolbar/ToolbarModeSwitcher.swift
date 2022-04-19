@@ -18,6 +18,9 @@ struct ToolbarModeSwitcher: View {
 
     @State private var showLottie: Bool = false
     @State private var isHovering = false
+    @State private var bouncingCount: Int?
+    @State private var bouncingAnimatableValue: CGFloat = 0
+
     private let defaultColor = BeamColor.LightStoneGray
     private let hoveringColor = BeamColor.Generic.text
     private let inactiveColor = BeamColor.ToolBar.buttonForegroundInactiveWindow
@@ -33,6 +36,13 @@ struct ToolbarModeSwitcher: View {
                         .combined(with: .opacity.animation(.easeInOut(duration: 0.025).delay(0.12))),
                     removal: .animatableOffset(offset: CGSize(width: 0, height: -3)).animation(.easeInOut(duration: 0.6).delay(0.01))
                         .combined(with: .opacity.animation(.easeInOut(duration: 0.07).delay(0.09)))
+        )
+    }
+
+    private var bouncingTextTransition: AnyTransition {
+        .asymmetric(insertion: .identity,
+                    removal: .animatableOffset(offset: CGSize(width: 0, height: 3)).animation(BeamAnimation.easeInOut(duration: 0.1))
+                        .combined(with: .opacity.animation(.easeInOut(duration: 0.1)))
         )
     }
 
@@ -56,15 +66,32 @@ struct ToolbarModeSwitcher: View {
                         lottieView(name: "nav-pivot_incognito")
                     } else if modeWeb {
                         lottieView(name: "nav-pivot_card")
+                            .opacity(bouncingCount != nil ? 0 : 1)
+                            if bouncingCount != nil {
+                                lottieView(name: "nav-pivot_tab_increment")
+                            }
                         if tabsCount >= 100 {
                             Icon(name: "nav-pivot-infinite", size: CGSize(width: 12, height: 6), color: foregroundColor.swiftUI)
                                 .transition(textTransition)
                         } else {
-                            Text("\(tabsCount)")
-                                .font(BeamFont.semibold(size: 9).swiftUI)
-                                .foregroundColor(foregroundColor.swiftUI)
-                                .transition(textTransition)
-                                .offset(x: 0, y: -0.5)
+                            ZStack(alignment: .center) {
+                                Text("\(tabsCount)")
+                                    .transition(textTransition)
+                                    .offset(x: 0, y: bouncingCount != nil ? -3 : 0)
+                                    .opacity(bouncingCount != nil ? 0 : 1)
+                                    .animation(bouncingCount != nil ? nil : BeamAnimation.easeInOut(duration: 0.1).delay(0.1), value: bouncingCount)
+                                if let bouncingCount = bouncingCount {
+                                    Text("\(bouncingCount)")
+                                        .transition(bouncingTextTransition)
+                                }
+                            }
+                            .offset(x: 0, y: -0.5)
+                            .font(BeamFont.semibold(size: 9).swiftUI)
+                            .foregroundColor(foregroundColor.swiftUI)
+                            .bounceEffect(animatableValue: bouncingAnimatableValue,
+                                          amount: Int(bouncingAnimatableValue).isMultiple(of: 2) ? 4 : -4,
+                                          numberOfShakes: 1)
+                            .animation(Animation.linear(duration: 0.07), value: bouncingAnimatableValue)
                         }
                     } else {
                         lottieView(name: "nav-pivot_web")
@@ -72,7 +99,6 @@ struct ToolbarModeSwitcher: View {
                     if !showLottie {
                         if isIncognito {
                             Icon(name: modeWeb ? "nav-pivot_incognito" : "nav-pivot_incognito", width: 24, color: foregroundColor.swiftUI)
-
                         } else {
                             Icon(name: modeWeb ? "nav-pivot_web" : "nav-pivot_card", width: 24, color: foregroundColor.swiftUI)
 
@@ -106,9 +132,25 @@ struct ToolbarModeSwitcher: View {
                 }
             }
         }
+
+        // Slot machine change
         .onChange(of: modeWeb) { _ in
             slotMachine.receivedToggle()
         }
+
+        // Bounce on tabs count change
+        .onChange(of: tabsCount) { [tabsCount] _ in
+            guard modeWeb else { return }
+            bouncingCount = tabsCount
+            bouncingAnimatableValue += 1
+            let currentBouncingValue = bouncingAnimatableValue
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(150)) {
+                guard bouncingAnimatableValue == currentBouncingValue else { return }
+                bouncingCount = nil
+            }
+        }
+
+        // Accessibility
         .accessibilityElement(children: .ignore)
         .accessibilityAddTraits(.isButton)
         .accessibilityLabel(modeWeb ? "\(tabsCount)" : "note")

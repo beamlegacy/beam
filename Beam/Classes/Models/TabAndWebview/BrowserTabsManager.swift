@@ -170,7 +170,7 @@ extension BrowserTabsManager {
         } else {
             tabs.append(tab)
         }
-        if setCurrent {
+        if setCurrent || currentTab == nil {
             currentTab = tab
         }
         data.sessionLinkRanker.addTree(tree: tab.browsingTree)

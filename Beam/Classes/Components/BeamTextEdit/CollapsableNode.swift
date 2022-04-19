@@ -73,12 +73,10 @@ extension Collapsable where Self: ElementNode {
             text.layer.addSublayer(linkImageLayer)
         }
 
-        text.mouseDown = { [weak self ] _ -> Bool in
-            if let url = self?.mediaURL {
-                let element = self?.element
-                let note = element?.note
-
-                self?.editor?.state?.handleOpenUrl(url, note: note, element: element)
+        text.mouseDown = { [weak self] mouseInfo -> Bool in
+            if let url = self?.mediaURL, let element = self?.element {
+                let inBackground = mouseInfo.event.modifierFlags.contains(.command)
+                self?.editor?.openURL(url, element, inBackground)
                 return true
             }
             return false
