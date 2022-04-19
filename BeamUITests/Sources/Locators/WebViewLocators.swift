@@ -29,4 +29,12 @@ enum WebViewLocators {
         case autocompleteResult = "autocompleteResult"
     }
     
+    enum PDFElements: String, CaseIterable, UIElement {
+        case downloadButton = "download-file_download"
+        case printButton = "download-file_print"
+        case zoomInButton = "download-file_zoomin"
+        case zoomOutButton = "download-file_zoomout"
+        case zoomRatio = "pdf-toolbar"
+    }
+    
 }
