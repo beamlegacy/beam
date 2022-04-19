@@ -712,6 +712,35 @@ class DocumentManagerTests: QuickSpec {
                 }
             }
         }
-    }
 
+        describe(".fetchUpdatedBetween") {
+            it("fetches the right document") {
+                var calendar = Calendar(identifier: .iso8601)
+                calendar.timeZone = TimeZone(identifier: "utc") ?? calendar.timeZone
+                var docStruct0 = helper.createDocumentStruct()
+                var docStruct1 = helper.createDocumentStruct()
+
+                docStruct0.updatedAt = calendar.date(from: DateComponents(year: 2021, month: 1, day: 1, hour: 1)) ?? Date()
+                waitUntil(timeout: .seconds(10)) { done in
+                    sut.save(docStruct0, completion:  { _ in
+                        done()
+                    })
+                }
+
+                docStruct1.updatedAt = calendar.date(from: DateComponents(year: 2021, month: 2, day: 1, hour: 1)) ?? Date()
+                waitUntil(timeout: .seconds(10)) { done in
+                    sut.save(docStruct0, completion:  { _ in
+                        done()
+                    })
+                }
+
+                let date0 = calendar.date(from: DateComponents(year: 2021, month: 1, day: 1, hour: 0)) ?? Date()
+                let date1 = calendar.date(from: DateComponents(year: 2021, month: 1, day: 1, hour: 2)) ?? Date()
+
+                let fetched = try sut.fetchAllNotesUpdatedBetween(date0: date0, date1: date1)
+                expect(fetched.count) == 1
+                expect(fetched[0].id) == docStruct0.id
+            }
+        }
+    }
 }

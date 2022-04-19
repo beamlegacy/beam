@@ -106,6 +106,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     //swiftlint:disable:next function_body_length
     override init() {
         LinkStore.shared = LinkStore(linkManager: BeamLinkDB.shared)
+        NoteScorer.shared = NoteScorer(dailyStorage: KeychainDailyNoteScoreStore.shared)
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
