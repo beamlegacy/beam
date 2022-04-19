@@ -25,6 +25,7 @@
         "BrowserShortcutsTests",
         "BrowserStatusBarTests",
         "BrowserTabViewTests",
+        "CaptureCopyShareTests",
         "CardCreationTests",
         "CardPublishTests",
         "CardViewEmbedsTests",
