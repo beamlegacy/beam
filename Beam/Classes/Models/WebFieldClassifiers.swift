@@ -10,45 +10,49 @@ import Combine
 import BeamCore
 
 final class WebFieldClassifiers {
-    private var classifiersByFrame: [String: WebAutocompleteContext] = [:]
+    private var classifier: WebFieldClassifier
+    private var classifierResultsByFrame: [String: WebFieldClassifier.ClassifierResult] = [:]
     private var cancellables = Set<AnyCancellable>()
 
     init(webFrames: WebFrames) {
+        classifier = WebFieldClassifier()
         webFrames.removedFrames.sink { href in
             Logger.shared.logDebug("Removing classifier for frame \(href)", category: .passwordManagerInternal)
-            self.classifiersByFrame[href] = nil
+            self.classifierResultsByFrame[href] = nil
         }
         .store(in: &cancellables)
     }
 
-    private init() {}
+    private init() {
+        fatalError()
+    }
 
     func clear() {
-        classifiersByFrame.removeAll()
+        classifierResultsByFrame.removeAll()
     }
 
     func classify(fields: [DOMInputElement], host: String?, frameInfo: WKFrameInfo?) -> [String] {
         guard let frameHref = frameInfo?.request.url?.absoluteString else {
             return []
         }
-        let classifier = classifiersByFrame[frameHref] ?? WebAutocompleteContext()
-        classifiersByFrame[frameHref] = classifier
-        return classifier.update(with: fields, on: host)
+        let result = classifier.classify(rawFields: fields, on: host)
+        classifierResultsByFrame[frameHref] = result
+        return result.activeFields
     }
 
     func autocompleteGroup(for elementId: String, frameInfo: WKFrameInfo?) -> WebAutocompleteGroup? {
-        guard let frameHref = frameInfo?.request.url?.absoluteString, let classifier = classifiersByFrame[frameHref] else {
+        guard let frameHref = frameInfo?.request.url?.absoluteString else {
             Logger.shared.logWarning("No classifier for input element \(elementId) in frame \(frameInfo?.request.url?.absoluteString ?? "nil")", category: .passwordManager)
             return nil
         }
-        return classifier.autocompleteGroup(for: elementId)
+        return classifierResultsByFrame[frameHref]?.autocompleteGroups[elementId]
     }
 
     func allInputFields(frameInfo: WKFrameInfo?) -> [WebInputField] {
-        guard let frameHref = frameInfo?.request.url?.absoluteString, let classifier = classifiersByFrame[frameHref] else {
+        guard let frameHref = frameInfo?.request.url?.absoluteString else {
             return []
         }
-        return classifier.allInputFields
+        return classifierResultsByFrame[frameHref]?.allInputFields ?? []
     }
 
     func allInputFieldIds(frameInfo: WKFrameInfo?) -> [String] { // no order constraint
