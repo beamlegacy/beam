@@ -22,7 +22,7 @@ class SearchOnPDFTests: BaseTest {
         let searchView = SearchTestView()
         let searchText = "Beam"
         
-        step("When I open a PDF file") { //To be replaced with Mock PDF page
+        step("When I open a PDF file") { 
             OmniBoxTestView().searchInOmniBox("http://www.lvh.me:8080/static/test.pdf", true)
         }
         
