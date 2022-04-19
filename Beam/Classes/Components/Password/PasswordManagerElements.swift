@@ -35,6 +35,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
     var required: String?
     var value: String?
     var inputmode: DOMInputMode?
+    var visible: Bool
 
     private enum CodingKeys: String, CodingKey {
         case type
@@ -46,12 +47,13 @@ struct DOMInputElement: Codable, Equatable, Hashable {
         case required
         case value
         case inputmode
+        case visible
     }
 }
 
 extension DOMInputElement {
     var debugDescription: String {
-        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
+        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), visible: \(visible), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
     }
 }
 
