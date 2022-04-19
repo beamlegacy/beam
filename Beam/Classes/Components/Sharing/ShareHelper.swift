@@ -104,16 +104,24 @@ class ShareHelper {
         return NSImage(data: imageRecord.data)
     }
 
-    @MainActor private func handleURL(_ url: URL) {
-        let urlRequest = URLRequest(url: url)
-        let deeplinkHandler = ExternalDeeplinkHandler(request: urlRequest)
-        if deeplinkHandler.isDeeplink() {
-            if deeplinkHandler.shouldOpenDeeplink() {
-                NSWorkspace.shared.open(url)
+    @MainActor private func handleURL(_ url: URL) async {
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            // Workaround to allow using `NSAlert` in a `Task`.
+            // See [FB9857161](https://github.com/feedback-assistant/reports/issues/288)
+            DispatchQueue.main.async {
+                let urlRequest = URLRequest(url: url)
+                let deeplinkHandler = ExternalDeeplinkHandler(request: urlRequest)
+                if deeplinkHandler.isDeeplink() {
+                    if deeplinkHandler.shouldOpenDeeplink() {
+                        NSWorkspace.shared.open(url)
+                    }
+                } else {
+                    self.openWebURL(url)
+                }
+                continuation.resume()
             }
-        } else {
-            openWebURL(url)
         }
+
     }
 }
 
