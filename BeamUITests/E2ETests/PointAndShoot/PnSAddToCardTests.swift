@@ -19,8 +19,8 @@ class PnSAddToCardTests: BaseTest {
         "Point And Shoot Test Fixture I-Beam",
         "Point And Shoot Test Fixture Cursor"
     ]
-    var cardNotes: [XCUIElement]?
-    var cardView: CardTestView?
+    var cardNotes: [XCUIElement]!
+    var cardView: CardTestView!
 
     func SKIPtestAddTextToTodaysCard() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
@@ -52,9 +52,9 @@ class PnSAddToCardTests: BaseTest {
         }
         
         step("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the note"){
-            XCTAssertEqual(cardNotes!.count, 2)
-            XCTAssertEqual(pnsView.getElementStringValue(element:  cardNotes![0]), expectedItemText1)
-            XCTAssertEqual(pnsView.getElementStringValue(element:cardNotes![1]), expectedItemText2)
+            XCTAssertEqual(cardNotes.count, 2)
+            XCTAssertEqual(pnsView.getElementStringValue(element:  cardNotes[0]), expectedItemText1)
+            XCTAssertEqual(pnsView.getElementStringValue(element:cardNotes[1]), expectedItemText2)
         }
 
     }
@@ -73,14 +73,13 @@ class PnSAddToCardTests: BaseTest {
         step("Then it is successfully added to the note"){
             OmniBoxTestView().navigateToCardViaPivotButton()
             cardView = CardTestView()
-            _ = cardView!.waitForCardViewToLoad()
-            cardNotes = cardView!.getCardNotesForVisiblePart()
+            _ = cardView.waitForCardViewToLoad()
+            cardNotes = cardView.getCardNotesForVisiblePart()
         }
         
-        
         step("Then 2 non-empty notes are added"){
-            XCTAssertEqual(cardNotes!.count, 2)
-            XCTAssertNotEqual(cardView!.getElementStringValue(element: cardNotes![0]), emptyString, "note added is an empty string")
+            XCTAssertEqual(cardNotes.count, 2)
+            XCTAssertNotEqual(cardView.getElementStringValue(element: cardNotes[0]), emptyString, "note added is an empty string")
         }
 
     }
@@ -102,19 +101,19 @@ class PnSAddToCardTests: BaseTest {
         step("Then it is successfully added to the note"){
             XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             OmniBoxTestView().navigateToCardViaPivotButton()
-            _ = cardView!.waitForCardViewToLoad()
-            cardNotes = cardView!.getCardNotesForVisiblePart()
+            _ = cardView.waitForCardViewToLoad()
+            cardNotes = cardView.getCardNotesForVisiblePart()
         }
 
         step("Then 2 non-empty notes are added to an empty first one?"){
-            XCTAssertTrue(cardNotes!.count == 2 || cardNotes!.count == 3) //CI specific issue handling
-            if cardNotes!.count == 2 {
-                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![0]), "Point And Shoot Test Fixture Cursor")
-                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+            XCTAssertTrue(cardNotes.count == 2 || cardNotes.count == 3) //CI specific issue handling
+            if cardNotes.count == 2 {
+                XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
             } else {
-                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![0]), emptyString)
-                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![1]), "Point And Shoot Test Fixture Cursor")
-                XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![2]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+                XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), emptyString)
+                XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[1]), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[2]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
             }
         }
         
@@ -139,9 +138,9 @@ class PnSAddToCardTests: BaseTest {
 
         step("Then it is successfully added to the note"){
             OmniBoxTestView().navigateToCardViaPivotButton()
-            _ = cardView!.waitForCardViewToLoad()
-            cardNotes = cardView!.getCardNotesForVisiblePart()
-            XCTAssertTrue(cardNotes!.count == 2 || cardNotes!.count == 3) //CI specific issue handling
+            _ = cardView.waitForCardViewToLoad()
+            cardNotes = cardView.getCardNotesForVisiblePart()
+            XCTAssertTrue(cardNotes.count == 2 || cardNotes.count == 3) //CI specific issue handling
         }
 
     }
@@ -160,7 +159,7 @@ class PnSAddToCardTests: BaseTest {
             let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
             pnsView.addToCardByName(gifItemToAdd, cardNameToBeCreated)
             cardView = webView.openDestinationCard()
-            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
+            XCTAssertTrue(waitForCountValueEqual(timeout: cardView.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
         }
 
         step ("Then I successfully collect image"){
@@ -168,7 +167,7 @@ class PnSAddToCardTests: BaseTest {
             let imageItemToAdd = pnsView.image("forest")
             pnsView.addToCardByName(imageItemToAdd, cardNameToBeCreated)
             webView.openDestinationCard()
-            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView!.implicitWaitTimeout) seconds")
+            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
         }
 
     }
@@ -187,9 +186,9 @@ class PnSAddToCardTests: BaseTest {
         }
 
         step ("Then the note contains video link"){
-            cardNotes = cardView!.getCardNotesForVisiblePart()
-            XCTAssertEqual(cardNotes!.count, 2)
-            if let videoNote = cardView?.getElementStringValue(element:  cardNotes![1]) {
+            cardNotes = cardView.getCardNotesForVisiblePart()
+            XCTAssertEqual(cardNotes.count, 2)
+            if let videoNote = cardView?.getElementStringValue(element:  cardNotes[1]) {
                 XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
             } else {
                 XCTFail("expected cardNote[0].value to be a string")
@@ -205,9 +204,9 @@ class PnSAddToCardTests: BaseTest {
 
         step ("When the journal is first loaded the note is empty by default"){
             cardView = CardTestView()
-            let beforeCardNotes = cardView!.getCardNotesForVisiblePart()
+            let beforeCardNotes = cardView.getCardNotesForVisiblePart()
             XCTAssertEqual(beforeCardNotes.count, 1)
-            XCTAssertEqual(cardView!.getElementStringValue(element: beforeCardNotes[0]), emptyString)
+            XCTAssertEqual(cardView.getElementStringValue(element: beforeCardNotes[0]), emptyString)
             helper.openTestPage(page: .media)
             let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
             pnsView.addToTodayCard(itemToCollect)
@@ -224,8 +223,8 @@ class PnSAddToCardTests: BaseTest {
 
         step ("Then the note is still empty"){
             cardNotes = CardTestView().getCardNotesForVisiblePart()
-            XCTAssertEqual(cardNotes!.count, 1)
-            XCTAssertTrue(cardView!.getElementStringValue(element: cardNotes![0]) == emptyString || cardView!.getElementStringValue(element: cardNotes![0]) == "Media Player Test Page") //CI specific issue handling
+            XCTAssertEqual(cardNotes.count, 1)
+            XCTAssertTrue(cardView.getElementStringValue(element: cardNotes[0]) == emptyString || cardView.getElementStringValue(element: cardNotes[0]) == "Media Player Test Page") //CI specific issue handling
         }
 
     }
@@ -249,10 +248,10 @@ class PnSAddToCardTests: BaseTest {
         
         step ("Then I see \(expectedNoteText) as collected link"){
             cardView = CardTestView()
-            cardNotes = cardView!.getCardNotesForVisiblePart()
+            cardNotes = cardView.getCardNotesForVisiblePart()
             //To be refactored once BE-2117 merged
-            XCTAssertEqual(cardNotes!.count, 1)
-            XCTAssertEqual(cardView!.getElementStringValue(element: cardNotes![0]), expectedNoteText)
+            XCTAssertEqual(cardNotes.count, 1)
+            XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
         }
 
     }

@@ -19,6 +19,7 @@
         "BaseTest",
         "BrowserFancyUrlTests",
         "BrowserOpenModalTests",
+        "CaptureCopyShareTests",
         "CardEditTests",
         "EditorShortcutsTests",
         "HelpAndFeedbackTests",
