@@ -4,6 +4,7 @@
 //
 //  Created by Paul Lefkopoulos on 19/08/2021.
 //
+// swiftlint:disable:next file_length
 
 import XCTest
 @testable import BeamCore
@@ -247,7 +248,7 @@ class BrowsingTreeTest: XCTestCase {
         BeamDate.reset()
     }
 
-    //swiftlint:disable:next function_body_length
+    // swiftlint:disable:next function_body_length
     func testFlattenUnflatten() throws {
 
         func isEqual(_ leftNode: BrowsingNode, _ rightNode: BrowsingNode) {
