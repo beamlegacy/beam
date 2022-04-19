@@ -908,6 +908,7 @@
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
 		A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */; };
+		A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A311436C280D2ADE00BB74F4 /* DialogTestView.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
@@ -1136,8 +1137,8 @@
 		B557156326FAF18200F6C9D4 /* AllCardsViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557156226FAF18200F6C9D4 /* AllCardsViewTests.swift */; };
 		B557156526FAF1BA00F6C9D4 /* AllCardsDeleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B557156426FAF1BA00F6C9D4 /* AllCardsDeleteTests.swift */; };
 		B55B4E3F26C108B900604850 /* OmniboxViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55B4E3E26C108B900604850 /* OmniboxViewTests.swift */; };
-		B55E4D2F27FEE1E200F73218 /* SearchOnPDFTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E4D2E27FEE1E200F73218 /* SearchOnPDFTests.swift */; };
 		B55E4D2727FEDD1C00F73218 /* PublishedNoteViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E4D2627FEDD1C00F73218 /* PublishedNoteViewLocators.swift */; };
+		B55E4D2F27FEE1E200F73218 /* SearchOnPDFTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B55E4D2E27FEE1E200F73218 /* SearchOnPDFTests.swift */; };
 		B5625CB6271480490074A080 /* BrowserShortcutsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5625CB5271480490074A080 /* BrowserShortcutsTests.swift */; };
 		B5625CBD271480590074A080 /* EditorShortcutsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5625CBC271480590074A080 /* EditorShortcutsTests.swift */; };
 		B57535ED26BD48040053CE2D /* JournalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = B57535EC26BD48040053CE2D /* JournalTest.swift */; };
@@ -2654,6 +2655,7 @@
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
 		A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNoteCreator.swift; sourceTree = "<group>"; };
+		A311436C280D2ADE00BB74F4 /* DialogTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogTestView.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
@@ -2881,8 +2883,8 @@
 		B557156226FAF18200F6C9D4 /* AllCardsViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsViewTests.swift; sourceTree = "<group>"; };
 		B557156426FAF1BA00F6C9D4 /* AllCardsDeleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllCardsDeleteTests.swift; sourceTree = "<group>"; };
 		B55B4E3E26C108B900604850 /* OmniboxViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewTests.swift; sourceTree = "<group>"; };
-		B55E4D2E27FEE1E200F73218 /* SearchOnPDFTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOnPDFTests.swift; sourceTree = "<group>"; };
 		B55E4D2627FEDD1C00F73218 /* PublishedNoteViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishedNoteViewLocators.swift; sourceTree = "<group>"; };
+		B55E4D2E27FEE1E200F73218 /* SearchOnPDFTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOnPDFTests.swift; sourceTree = "<group>"; };
 		B5625CB5271480490074A080 /* BrowserShortcutsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserShortcutsTests.swift; sourceTree = "<group>"; };
 		B5625CBC271480590074A080 /* EditorShortcutsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditorShortcutsTests.swift; sourceTree = "<group>"; };
 		B57535EC26BD48040053CE2D /* JournalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JournalTest.swift; sourceTree = "<group>"; };
@@ -6415,6 +6417,7 @@
 			children = (
 				B5FAE2E6270DDD6C00EAC8A3 /* AlertTestView.swift */,
 				A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */,
+				A311436C280D2ADE00BB74F4 /* DialogTestView.swift */,
 			);
 			path = Popups;
 			sourceTree = "<group>";
@@ -9020,6 +9023,7 @@
 				B5F845E126F8CC9C00B15209 /* ReferencesTests.swift in Sources */,
 				B5E8011226AEB7C100C8BD61 /* WaitHelper.swift in Sources */,
 				B551F3C526BD10AD00B72D27 /* AppWebsiteTestView.swift in Sources */,
+				A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */,
 				B5EB9A6A26C25FB8004C798A /* OmniboxDestinationTests.swift in Sources */,
 				A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */,
 				52FC002425E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,

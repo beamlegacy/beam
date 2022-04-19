@@ -10,11 +10,17 @@ import Foundation
 enum AlertViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case alertDeleteButton = "Delete"
-        case alertCancelButton = "Cancel"
-        case alertRemoveButton = "Remove"
-        case alertNotNowButton = "Not Now"
-        case alertSavePasswordButton = "Save Password"
+        case deleteButton = "Delete"
+        case cancelButton = "Cancel"
+        case connectButton = "Connect"
+        case removeButton = "Remove"
+        case notNowButton = "Not Now"
+        case savePasswordButton = "Save Password"
+    }
+    
+    enum StaticTexts: String, CaseIterable, UIElement {
+        case connectBeam = "Connect to Beam"
+        case connectDescription = "Connect to Beam to sync, encrypt and publish your notes."
     }
 
 }
