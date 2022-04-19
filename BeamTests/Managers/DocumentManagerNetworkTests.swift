@@ -7,7 +7,6 @@ import Quick
 import Nimble
 import Combine
 import Promises
-import PMKFoundation
 
 @testable import Beam
 @testable import BeamCore

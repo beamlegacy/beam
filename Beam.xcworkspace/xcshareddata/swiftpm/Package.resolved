@@ -51,8 +51,8 @@
         "repositoryURL": "https://github.com/mxcl/Chalk.git",
         "state": {
           "branch": null,
-          "revision": "9aa9f348b86db3cf6702a3e43c081ecec80cf3c7",
-          "version": "0.4.0"
+          "revision": "a7f58e47a08ca5a84f73acc4bcf6c2c19d990609",
+          "version": "0.5.0"
         }
       },
       {
@@ -132,8 +132,8 @@
         "repositoryURL": "https://github.com/will-lumley/FaviconFinder.git",
         "state": {
           "branch": null,
-          "revision": "f62aeb293fcc8e6a399e9e8e0d152d42e7167b1f",
-          "version": "3.2.0"
+          "revision": "1f74844f77f79b95c0bb0130b3a87d4f340e6d3a",
+          "version": "3.3.0"
         }
       },
       {
@@ -164,15 +164,6 @@
         }
       },
       {
-        "package": "PMKFoundation",
-        "repositoryURL": "https://github.com/PromiseKit/Foundation.git",
-        "state": {
-          "branch": null,
-          "revision": "985f17fa69ee0e5b7eb3ff9be87ffc4e05fc0927",
-          "version": "3.4.0"
-        }
-      },
-      {
         "package": "GoogleAppMeasurement",
         "repositoryURL": "https://github.com/google/GoogleAppMeasurement.git",
         "state": {
@@ -195,8 +186,8 @@
         "repositoryURL": "https://github.com/google/GoogleUtilities.git",
         "state": {
           "branch": null,
-          "revision": "b3bb0c5551fb3f80ca939829639ab5b093edd14f",
-          "version": "7.7.0"
+          "revision": "f4abe56ce62a779e64b525eb133c8fc2a84bbc1f",
+          "version": "7.7.1"
         }
       },
       {
@@ -204,8 +195,8 @@
         "repositoryURL": "https://github.com/groue/GRDB.swift.git",
         "state": {
           "branch": null,
-          "revision": "32b2923e890df320906e64cbd0faca22a8bfda14",
-          "version": "5.12.0"
+          "revision": "15c06e037430c8a2dc570f9199dd7bf8caa21195",
+          "version": "5.22.2"
         }
       },
       {
@@ -222,8 +213,8 @@
         "repositoryURL": "https://github.com/google/gtm-session-fetcher.git",
         "state": {
           "branch": null,
-          "revision": "bc6a19702ac76ac4e488b68148710eb815f9bc56",
-          "version": "1.7.0"
+          "revision": "eca9404a18f53727e4698211aaf2615eb93b962a",
+          "version": "1.7.1"
         }
       },
       {
@@ -393,7 +384,7 @@
         "repositoryURL": "https://github.com/OAuthSwift/OAuthSwift.git",
         "state": {
           "branch": "master",
-          "revision": "8e62dc0243de97e37640e97fd0641fad4dbe6e1f",
+          "revision": "fb65e918099c584edf822b37104d72d369c2a1bb",
           "version": null
         }
       },
@@ -422,15 +413,6 @@
           "branch": null,
           "revision": "ffeaaad1def45d0625720dc1adae3789cd9c167d",
           "version": "2.5.0"
-        }
-      },
-      {
-        "package": "PromiseKit",
-        "repositoryURL": "https://github.com/mxcl/PromiseKit.git",
-        "state": {
-          "branch": null,
-          "revision": "3fd8c77ded8a4bbee548e3bd6c987ffe8c1e3574",
-          "version": "6.17.0"
         }
       },
       {
@@ -465,8 +447,8 @@
         "repositoryURL": "https://github.com/getsentry/sentry-cocoa.git",
         "state": {
           "branch": null,
-          "revision": "32f29184d0d8ffd5a7299a37b90ab3cb343db1f3",
-          "version": "7.10.1"
+          "revision": "ccb6c292a202eb9366c87889509ef5a793d7137a",
+          "version": "7.13.0"
         }
       },
       {
@@ -492,8 +474,8 @@
         "repositoryURL": "https://github.com/apple/swift-argument-parser.git",
         "state": {
           "branch": null,
-          "revision": "82905286cc3f0fa8adc4674bf49437cab65a8373",
-          "version": "1.1.1"
+          "revision": "f3c9084a71ef4376f2fabbdf1d3d90a49f1fabdb",
+          "version": "1.1.2"
         }
       },
       {
@@ -510,8 +492,8 @@
         "repositoryURL": "https://github.com/apple/swift-crypto.git",
         "state": {
           "branch": null,
-          "revision": "a8911e0fadc25aef1071d582355bd1037a176060",
-          "version": "2.0.4"
+          "revision": "067254c79435de759aeef4a6a03e43d087d61312",
+          "version": "2.0.5"
         }
       },
       {
@@ -537,8 +519,8 @@
         "repositoryURL": "https://github.com/apple/swift-protobuf.git",
         "state": {
           "branch": null,
-          "revision": "7e2c5f3cbbeea68e004915e3a8961e20bd11d824",
-          "version": "1.18.0"
+          "revision": "e1499bc69b9040b29184f7f2996f7bab467c1639",
+          "version": "1.19.0"
         }
       },
       {
@@ -564,8 +546,8 @@
         "repositoryURL": "https://github.com/scinfu/SwiftSoup.git",
         "state": {
           "branch": null,
-          "revision": "02c63b7be50bda384f22c56c64d347231754a07e",
-          "version": "2.3.3"
+          "revision": "41e7c263fb8c277e980ebcb9b0b5f6031d3d4886",
+          "version": "2.4.2"
         }
       },
       {

@@ -216,7 +216,7 @@ extension BrowserTabsManager {
         // This make sure any webview is not retained by the first responder chain
         let window = AppDelegate.main.window
         if window?.firstResponder is BeamWebView {
-            window?.makeFirstResponder(nil)
+            _ = window?.makeFirstResponder(nil)
         }
         if let currentTab = currentTab {
             DispatchQueue.main.async {
