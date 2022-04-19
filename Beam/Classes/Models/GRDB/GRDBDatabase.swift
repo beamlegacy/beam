@@ -6,10 +6,14 @@ import Foundation
 
 /// GRDBDatabase lets the application access the database.
 /// It's role is to setup the database schema.
+///
+/// this file needs clean up https://linear.app/beamapp/issue/BE-3317/clean-up-grdbdatabaseswift
 struct GRDBDatabase {
+    // swiftlint:disable:previous type_body_length
+
     /// Creates a `GRDBDatabase`, and make sure the database schema is ready.
-    //swiftlint:disable:next function_body_length
     public init(_ dbWriter: DatabaseWriter, migrate: Bool = true) throws {
+        // swiftlint:disable:previous function_body_length cyclomatic_complexity
         self.dbWriter = dbWriter
 
         // Initialize DB schema

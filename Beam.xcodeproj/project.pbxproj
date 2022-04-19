@@ -859,7 +859,6 @@
 		A0A3BED5266FD1B200566D6C /* BeamStepperButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A3BED4266FD1B200566D6C /* BeamStepperButton.swift */; };
 		A0A4301626655993003A3C08 /* ClusteringManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A4301526655993003A3C08 /* ClusteringManager.swift */; };
 		A0A84FB72636FA99008F0326 /* JWTDecode in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB71E25B9A9B600959146 /* JWTDecode */; };
-		A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 523E91CB25D17004001124E0 /* PMKFoundation */; };
 		A0A84FC02636FA99008F0326 /* CocoaLumberjackSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 96319D52261623BB00D1CF31 /* CocoaLumberjackSwift */; };
 		A0A84FC12636FA99008F0326 /* Nimble in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C11525C2C4AE009C51E1 /* Nimble */; };
 		A0A84FC22636FA99008F0326 /* Quick in Frameworks */ = {isa = PBXBuildFile; productRef = 5239C12E25C2C4C6009C51E1 /* Quick */; };
@@ -3098,7 +3097,6 @@
 				A5471C03279DD6AD00CDED9D /* FirebaseAnalyticsWithoutAdIdSupport in Frameworks */,
 				96D71CE927F735D10094F54D /* MessagePack in Frameworks */,
 				3315DC932667859A002A47CF /* Promises in Frameworks */,
-				A0A84FBC2636FA99008F0326 /* PMKFoundation in Frameworks */,
 				8A0DFADC275668E40044515B /* FaviconFinder in Frameworks */,
 				33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */,
 				3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */,
@@ -7443,7 +7441,6 @@
 				527FB72325B9AAA200959146 /* Fakery */,
 				52E5297125CD980B00307858 /* Promises */,
 				52E5297325CD980B00307858 /* PromisesTestHelpers */,
-				523E91CB25D17004001124E0 /* PMKFoundation */,
 				524CF6D225F276D1007312F0 /* KeychainAccess */,
 				964FE5E02625D8AA00966E03 /* GRDB */,
 				52CA277B26401D7000146A00 /* OAuthSwift */,
@@ -7586,7 +7583,6 @@
 				5239C11425C2C4AE009C51E1 /* XCRemoteSwiftPackageReference "Nimble" */,
 				5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */,
 				52E5297025CD980A00307858 /* XCRemoteSwiftPackageReference "promises" */,
-				523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */,
 				524CF6D125F276D1007312F0 /* XCRemoteSwiftPackageReference "KeychainAccess" */,
 				964FE5DF2625D8AA00966E03 /* XCRemoteSwiftPackageReference "GRDB.swift" */,
 				52CA277A26401D7000146A00 /* XCRemoteSwiftPackageReference "OAuthSwift" */,
@@ -11313,14 +11309,6 @@
 				minimumVersion = 3.0.0;
 			};
 		};
-		523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/PromiseKit/Foundation.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 3.3.4;
-			};
-		};
 		524299AD25A47CA500F4DBF5 /* XCRemoteSwiftPackageReference "Preferences" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/sindresorhus/Preferences";
@@ -11515,11 +11503,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5239C12D25C2C4C6009C51E1 /* XCRemoteSwiftPackageReference "Quick" */;
 			productName = Quick;
-		};
-		523E91CB25D17004001124E0 /* PMKFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 523E91CA25D17004001124E0 /* XCRemoteSwiftPackageReference "Foundation" */;
-			productName = PMKFoundation;
 		};
 		524299AE25A47CA500F4DBF5 /* Preferences */ = {
 			isa = XCSwiftPackageProductDependency;

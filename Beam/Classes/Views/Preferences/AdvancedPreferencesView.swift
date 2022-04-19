@@ -302,7 +302,7 @@ struct AdvancedPreferencesView: View {
                             .allDocumentsIds(includeDeletedNotes: true)
                             .forEach {
                                 let note = BeamNote.fetch(id: $0, includeDeleted: false, keepInMemory: false)
-                                note?.save { _ in }
+                                note?.save(completion: { _ in })
                             }
                     }, label: {
                         Text("Notes browsing sessions").frame(minWidth: 100)

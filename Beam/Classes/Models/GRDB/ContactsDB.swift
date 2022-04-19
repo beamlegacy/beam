@@ -16,7 +16,7 @@ enum ContactsDBError: Error {
 }
 
 struct ContactRecord: Decodable {
-    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
     var uuid: UUID = .null
     var noteId: UUID

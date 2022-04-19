@@ -108,13 +108,13 @@ class AllNotesPageContextualMenu {
             action: #selector(exportNotesToBeamNote),
             keyEquivalent: ""
         ))
-        if false {
-            exportMenu.addItem(NSMenuItem(
-                title: "Markdown...",
-                action: nil,
-                keyEquivalent: ""
-            ))
-        }
+//        if false {
+//            exportMenu.addItem(NSMenuItem(
+//                title: "Markdown...",
+//                action: nil,
+//                keyEquivalent: ""
+//            ))
+//        }
         if selectedNotes.count <= 0 {
             exportMenu.addItem(NSMenuItem(
                 title: "Entire database...",
@@ -170,7 +170,7 @@ class AllNotesPageContextualMenu {
     }
 
     @objc private func makePublic() {
-        guard delegate?.contextualMenuShouldPublishNote() != false else {            
+        guard delegate?.contextualMenuShouldPublishNote() != false else {
             return
         }
         makeNotes(isPublic: true).then { _ in
