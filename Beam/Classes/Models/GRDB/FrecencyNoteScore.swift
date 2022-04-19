@@ -18,7 +18,7 @@ public struct FrecencyNoteRecord: Codable, BeamObjectProtocol {
         UniqueKey(frecencyKey: frecencyKey, noteId: noteId)
     }
 
-    public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+    public static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
     static var beamObjectType: BeamObjectObjectType = .noteFrecency
     static let BeamElementForeignKey = ForeignKey([FrecencyNoteRecord.Columns.noteId], to: [BeamElementRecord.Columns.noteId])
 

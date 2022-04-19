@@ -21,7 +21,7 @@ enum PasswordDBError: Error {
 }
 
 struct PasswordRecord {
-    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.string
+    internal static let databaseUUIDEncodingStrategy = DatabaseUUIDEncodingStrategy.uppercaseString
 
     var uuid: UUID = .null
     var entryId: String
