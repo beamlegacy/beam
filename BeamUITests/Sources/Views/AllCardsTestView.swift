@@ -114,4 +114,8 @@ class AllCardsTestView: BaseView {
         button(AllCardsViewLocators.Buttons.journalButton.accessibilityIdentifier).click()
         return JournalTestView()
     }
+    
+    func getPublishInstructionsLabel() -> XCUIElement {
+        return staticText(AllCardsViewLocators.StaticTexts.publishInstruction.accessibilityIdentifier)
+    }
 }
