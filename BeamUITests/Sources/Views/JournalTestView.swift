@@ -72,4 +72,12 @@ class JournalTestView: BaseView {
         self.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).clickOnExistence()
         return UpdateTestView()
     }
+    
+    func getImageNodes() -> [XCUIElement] {
+        return app.windows.scrollViews[JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier].textViews.matching(identifier: CardViewLocators.TextFields.imageNode.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    func getImageNodesCount() -> Int {
+        return getImageNodes().count
+    }
 }
