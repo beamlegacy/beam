@@ -11,6 +11,7 @@ import XCTest
 class NoteEditorTests: BaseTest {
     
     let cardTestView = CardTestView()
+    let shortcuts = ShortcutsHelper()
     let texts = [
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     
@@ -23,6 +24,12 @@ class NoteEditorTests: BaseTest {
     
         "The standard@chunk.com of Lorem Ipsum https://used.since.the 1500s is reproduced.com below for those interested. Sections 1.10.32 and 1.10.33 from de Finibus Bonorum et Malorum by Cicero are also reproduced in their exact original form, accompanied by English versions from the 1914 translation by H. Rackham."
     ]
+    
+    private func cmdClickFirstNote() {
+        XCUIElement.perform(withKeyModifiers: .command) {
+            cardTestView.getTextNodes()[0].coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
+        }
+    }
     
     func testTypeTextInNote() {
         let journalView = launchApp()
@@ -85,7 +92,6 @@ class NoteEditorTests: BaseTest {
             }
         }
 
-        
         step("When I press delete button"){
             journalView.typeKeyboardKey(.delete)
         }
@@ -107,6 +113,37 @@ class NoteEditorTests: BaseTest {
         
         step("Then Bold context menu item is NOT displayed"){
             XCTAssertTrue(waitForDoesntExist(boldMenuItem))
+        }
+    }
+    
+    func testOpenTabOnBackground() {
+        
+        step("Given I open a note") {
+            launchApp()
+            shortcuts.shortcutActionInvoke(action: .showAllCards)
+            AllCardsTestView().waitForAllCardsViewToLoad()
+            AllCardsTestView().openFirstCard()
+        }
+        
+        step("Given I type a URL in text editor"){
+            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: "youtube.com ", needsActivation: true)
+        }
+        
+        step("When I CMD+click on URL"){
+            self.cmdClickFirstNote()
+        }
+        
+        step("Then I see pivot button value is incremented") {
+            XCTAssertTrue(cardTestView.staticText(CardViewLocators.StaticTexts.backgroundTabOpened.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertEqual(cardTestView.getPivotButtonCounter(), "1")
+            
+            self.cmdClickFirstNote()
+            XCTAssertEqual(cardTestView.getPivotButtonCounter(), "2")
+        }
+        
+        step("Then correct number of tabs is opened"){
+            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            XCTAssertEqual(WebTestView().getNumberOfTabs(), 2)
         }
     }
 }

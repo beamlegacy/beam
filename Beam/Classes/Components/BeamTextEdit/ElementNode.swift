@@ -387,9 +387,9 @@ public class ElementNode: Widget {
         context.fill(contentsFrame)
     }
 
-    func openExternalLink(link: URL, element: BeamElement) {
+    func openExternalLink(link: URL, element: BeamElement, inBackground: Bool) {
         editor?.hideInlineFormatter()
-        editor?.openURL(link, element)
+        editor?.openURL(link, element, inBackground)
     }
 
     func nextVisibleNode<NodeType: Widget>(_ type: NodeType.Type, includingChildren: Bool = true) -> NodeType? {

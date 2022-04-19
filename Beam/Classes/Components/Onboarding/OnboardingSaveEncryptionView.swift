@@ -18,8 +18,6 @@ struct OnboardingSaveEncryptionView: View {
     @State var encryptionKeyIsCopied = false
 
     private let defaultContentWidth: Double = 290
-    private let transition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
-                                              removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08)))
 
     private var iconButtonStyle: ButtonLabelStyle {
         var style = ButtonLabelStyle.tinyIconStyle
@@ -49,7 +47,7 @@ struct OnboardingSaveEncryptionView: View {
                                 Tooltip(title: "Encryption Key Copied !")
                                     .fixedSize()
                                     .offset(x: 0, y: -35)
-                                    .transition(transition)
+                                    .transition(Tooltip.defaultTransition)
                             }
                         })
             }

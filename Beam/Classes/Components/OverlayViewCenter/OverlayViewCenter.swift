@@ -24,6 +24,11 @@ struct OverlayViewCenter: View {
                 })
                 .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.3)))
             }
+            if let tooltipText = viewModel.showTooltip {
+                Tooltip(title: tooltipText)
+                    .position(viewModel.tooltipPosition)
+                    .transition(Tooltip.defaultTransition)
+            }
             ZStack {}
                 .toast(isPresented: $viewModel.showToast) {
                     viewModel.toastView

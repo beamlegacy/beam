@@ -424,7 +424,8 @@ extension EmbedNode {
         }
 
         let layer = CollapsedContentLayer(name: "collapsed", text: text) { [weak editor, weak element] in
-            editor?.state?.handleOpenUrl(url, note: element?.note, element: element)
+            guard let editor = editor, let element = element else { return }
+            editor.openURL(url, element, false)
         }
 
         FaviconProvider.shared.favicon(fromURL: url) { [weak layer] favicon in

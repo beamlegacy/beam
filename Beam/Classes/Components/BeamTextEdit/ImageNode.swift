@@ -262,9 +262,10 @@ class ImageNode: ResizableNode {
         }
 
         sourceLayer.mouseUp = { [weak self] mouseInfo in
-            guard mouseInfo.event.clickCount == 1 else { return false }
-            if let url = self?.imageSourceURL {
-                self?.editor?.state?.handleOpenUrl(url, note: self?.element.note, element: self?.element)
+            guard mouseInfo.event.clickCount == 1, let self = self else { return false }
+            if let url = self.imageSourceURL {
+                let inBackground = mouseInfo.event.modifierFlags.contains(.command)
+                self.editor?.openURL(url, self.element, inBackground)
                 shape.opacity = 0.7
                 return true
             }

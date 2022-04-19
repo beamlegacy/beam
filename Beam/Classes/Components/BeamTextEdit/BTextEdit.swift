@@ -16,7 +16,7 @@ public struct BTextEditScrollable<Content: View>: NSViewRepresentable {
 
     var note: BeamNote
     var state: BeamState
-    var openURL: (URL, BeamElement) -> Void
+    var openURL: (URL, BeamElement, _ inBackground: Bool) -> Void
     var openCard: (_ noteId: UUID, _ elementId: UUID?, _ unfold: Bool?) -> Void
     var startQuery: (TextNode, Bool) -> Void = { _, _ in }
 
