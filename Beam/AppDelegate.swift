@@ -102,6 +102,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         DispatchQueue.global().async {
             BrowsingTreeStoreManager.shared.softDelete(olderThan: 60, maxRows: 20_000)
             GRDBDailyUrlScoreStore().cleanup()
+            NoteScorer.shared.cleanup()
         }
         startDisplayingBrowserImportErrors()
 
@@ -459,6 +460,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             data.clusteringManager.saveOrphanedUrlsAtSessionClose(orphanedUrlManager: data.clusteringOrphanedUrlManager)
         }
         data.clusteringManager.exportSummaryForNextSession()
+        KeychainDailyNoteScoreStore.shared.save()
     }
 
     public func saveCloseTabsCmd(onExit: Bool) {

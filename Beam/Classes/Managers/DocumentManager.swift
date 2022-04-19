@@ -53,6 +53,7 @@ enum DocumentFilter {
     /// don't filter out anything
     case includeDeleted
     case updatedSince(Date)
+    case updatedBetween(Date, Date)
 
     case limit(Int)
     case offset(Int)
@@ -808,6 +809,9 @@ extension DocumentManager {
             case let .updatedSince(date):
                 predicates.append(NSPredicate(format: "updated_at >= %@", date as CVarArg))
 
+            case let .updatedBetween(date0, date1):
+                predicates.append(NSPredicate(format: "updated_at >= %@ AND updated_at <= %@", date0 as CVarArg, date1 as CVarArg))
+
             case let .limit(limit):
                 request.fetchLimit = limit
 
@@ -1055,5 +1059,9 @@ extension DocumentManager {
         checkThread()
         return try fetchAll(filters: [.titleMatch(title), .limit(limit)],
                             sortingKey: .title(true))
+    }
+    func fetchAllNotesUpdatedBetween(date0: Date, date1: Date) throws -> [Document] {
+        checkThread()
+        return try fetchAll(filters: [.type(DocumentType.note), .updatedBetween(date0, date1), .nonDeleted])
     }
 }
