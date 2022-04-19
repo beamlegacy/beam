@@ -153,4 +153,12 @@ class PnSTestView: BaseView {
         /// Assert height size
         XCTAssertEqual(PnsFrame.height, referenceElement.height + padding, accuracy: 10, message)
     }
+    
+    func getCopyButton() -> XCUIElement {
+        return staticText(PnSViewLocators.StaticTexts.copy.accessibilityIdentifier)
+    }
+    
+    func getShareButton() -> XCUIElement {
+        return staticText(PnSViewLocators.StaticTexts.share.accessibilityIdentifier)
+    }
 }
