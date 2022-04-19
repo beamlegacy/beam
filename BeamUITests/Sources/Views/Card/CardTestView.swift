@@ -157,6 +157,10 @@ class CardTestView: BaseView {
     func getTextNodes() -> [XCUIElement] {
         return getTextNodesElementsQuery().allElementsBoundByIndex
     }
+    
+    func getPivotButtonCounter() -> String {
+        return button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).title
+    }
 
     func getTextNodesElementsQuery() -> XCUIElementQuery {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)

@@ -20,6 +20,9 @@ struct Tooltip: View {
                       darkColor: NSColor.black.withAlphaComponent(0.24)))
     }
 
+    static let defaultTransition = AnyTransition.asymmetric(insertion: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.2)),
+                                                            removal: AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.08)))
+
     var body: some View {
         VStack(spacing: 4) {
             HStack(spacing: 0) {
