@@ -1,0 +1,65 @@
+{
+  "configurations" : [
+    {
+      "id" : "387BBD94-9899-44C1-AB3C-77BAD946C676",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "testRepetitionMode" : "retryOnFailure",
+    "testTimeoutsEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "skippedTests" : [
+        "AllCardsDeleteTests",
+        "BaseTest",
+        "BrowserFancyUrlTests",
+        "BrowserShortcutsTests",
+        "BrowserStatusBarTests",
+        "BrowserTabViewTests",
+        "CaptureCopyShareTests",
+        "CardCreationTests",
+        "CardPublishTests",
+        "CardViewEmbedsTests",
+        "DeleteNotesTests",
+        "DownloadsTest",
+        "EditorShortcutsTests",
+        "GoogleSheetsTests",
+        "HelpAndFeedbackTests",
+        "IncognitoModeTests",
+        "JavascriptNativeInteractionsTests",
+        "JournalTest",
+        "LinksTests",
+        "LoginTest",
+        "NoteEditorTests",
+        "OmniboxAutocompleteTests",
+        "OmniboxViewTests",
+        "OnboardingTests",
+        "PDFFilesBrowserViewTests",
+        "PasswordPreferencesTests",
+        "PnSAddToCardTests",
+        "ReferencesTests",
+        "ReportBugFeatureTests",
+        "SearchOnCardTests",
+        "SearchOnWebTests",
+        "SignInAutocompleteTests",
+        "SignUpAutocompleteTests",
+        "SigninTests",
+        "SlashMenuTests",
+        "TextEditorContextViewTests",
+        "UpdateViewTests",
+        "WebsiteAuthTest"
+      ],
+      "target" : {
+        "containerPath" : "container:Beam.xcodeproj",
+        "identifier" : "965A78472514F149009980D4",
+        "name" : "BeamUITests"
+      }
+    }
+  ],
+  "version" : 1
+}
