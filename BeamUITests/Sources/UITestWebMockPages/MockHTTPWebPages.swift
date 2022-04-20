@@ -22,10 +22,6 @@ class MockHTTPWebPages: BaseView {
     func getConfirmPasswordFieldElement() -> XCUIElement {
         return app.windows.webViews["Sign Up"].groups.containing(.staticText, identifier:"Confirm Password: ").children(matching: .secureTextField).element
     }
-    
-    func getEmailFieldElement() -> XCUIElement {
-        return app.windows.webViews["Sign In"].groups.containing(.staticText, identifier:"Username: ").children(matching: .textField).element
-    }
 
     func getUsernameFieldElement(title: String) -> XCUIElement {
         return app.windows.webViews["Sign In"].groups.containing(.staticText, identifier:title).children(matching: .textField).element
@@ -37,6 +33,10 @@ class MockHTTPWebPages: BaseView {
 
     func getContinueButtonElement() -> XCUIElement {
         return app.windows.webViews["Sign In"].buttons["Continue"]
+    }
+    
+    func getNextButtonElement() -> XCUIElement {
+        return app.windows.webViews["Sign In"].staticTexts["Next"]
     }
 
     func getResultValue(label: String) -> String? {

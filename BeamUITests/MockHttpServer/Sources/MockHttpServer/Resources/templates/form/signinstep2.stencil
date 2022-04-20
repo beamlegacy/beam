@@ -1,7 +1,7 @@
 <html>
 
 <head>
-<title>Sign In Step 2</title>
+<title>Sign In</title>
 <link href="/static/{{ params.style }}.css" rel="stylesheet"/>
 </head>
 

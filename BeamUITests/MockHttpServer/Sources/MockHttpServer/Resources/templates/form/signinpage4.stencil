@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign In</title>
+    <link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+  </head>
+
+  <body>
+    <h1>Sign In Page 4</h1>
+    <form action="/view" method="POST">
+      <div id="signin">
+        <h2>Sign In</h2>
+        <div>Email: <input type="email" placeholder="example@gmail.com" autocomplete="email" minlength="0" maxlength="64" required="required" name="username" id="username"></input></div>
+        <div>Password: <input type="password" placeholder=" " autocomplete="current-password" pattern="^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])\S{8,}$" minlength="8" maxlength="255" required="required" name="password" id="password"></input></div>
+      </div>
+      <div><button type="submit">Continue</button></div>
+    </form>
+  </body>
+
+</html>
