@@ -244,6 +244,17 @@ platform :mac do
     end
   end
 
+  def version_name
+    case Actions.git_branch
+    when "develop"
+      "beam develop"
+    when /\Abeta-.*/
+      "beam beta"
+    else
+      "beam"
+    end
+  end
+
   def review_build?
     ENV["CI_MERGE_REQUEST_EVENT_TYPE"] == "merge_train" || ENV["CI_PIPELINE_SOURCE"] == "merge_request_event" || publishing_channel().match(/^review\//) || (ENV['CI_ENVIRONMENT_NAME'] && ENV['CI_ENVIRONMENT_NAME'].strip.empty?)
   end
@@ -609,7 +620,7 @@ platform :mac do
     end
     human_version = "#{lane_context[SharedValues::VERSION_NUMBER]}"
     machine_version = "#{lane_context[SharedValues::BUILD_NUMBER]}"
-    release_title = "Version #{human_version}, build #{machine_version}"
+    release_title = "#{version_name}"
         
     rootFolder = Dir.chdir("..") { Dir.pwd } 
     UI.success "#{rootFolder}"
