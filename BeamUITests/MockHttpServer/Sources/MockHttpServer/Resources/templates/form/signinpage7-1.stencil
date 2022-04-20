@@ -1,0 +1,16 @@
+<html>
+
+<head>
+	<title>Sign In</title>
+	<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+	<h1>Sign In Page 7 - Sign in to your account (step 1) - twitter</h1>
+	<form action="/signinstep2" method="POST">
+		<div>Email: <input type="text" autocomplete="username" autocapitalize="sentences" autofocus name="username" id="username"></input></div>
+		<div><button type="submit">Continue</button></div>
+	</form>
+</body>
+
+</html>

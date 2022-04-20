@@ -18,7 +18,7 @@ class SignInAutocompleteTests: BaseTest {
     private func credentialsAutocompleteAssertion(login: String) {
         step("THEN after clicking on pop-up login text the credentials are successfully populated"){
             helper.clickPopupLoginText(login: login)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getEmailFieldElement()), login)
+            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Username: ")), login)
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(false)), "••••••••••")
         }
     }
@@ -39,7 +39,7 @@ class SignInAutocompleteTests: BaseTest {
         ShortcutsHelper().shortcutActionInvoke(action: .reloadPage)
         
         step("GIVEN I click on email field"){
-            mockPage.getEmailFieldElement().clickOnExistence()
+            mockPage.getUsernameFieldElement(title: "Username: ").clickOnExistence()
         }
         
         self.credentialsAutocompleteAssertion(login: login)

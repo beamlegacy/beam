@@ -16,6 +16,14 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination3()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination4()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination5()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination6()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination7()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination8()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination9()",
+        "AllCardsDeleteTests",
         "BaseTest",
         "BrowserFancyUrlTests",
         "BrowserOpenModalTests",
