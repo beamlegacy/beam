@@ -16,11 +16,19 @@ class PasswordManagerHelper: BaseView {
     func doesAutofillPopupExist(login: String) -> Bool {
         return getAutofillPopupElement(login: login).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
+    
+    func doesOtherPasswordsPopupExist() -> Bool {
+        return getOtherPasswordsOptionElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
+    
+    func doesSuggestNewPasswordExist() -> Bool {
+        return getSuggestNewPassword().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
 
     func clickKeyIcon() {
         getKeyIconElement().clickOnExistence()
     }
-
+    
     func clickPopupLoginText(login: String) {
         app.dialogs.staticTexts[login].clickOnExistence()
     }
@@ -39,6 +47,10 @@ class PasswordManagerHelper: BaseView {
     
     func getOtherPasswordsOptionElementFor(hostName: String) -> XCUIElement {
         return app.staticTexts["Other Passwords for " + hostName]
+    }
+    
+    func getSuggestNewPassword() -> XCUIElement {
+        return app.staticTexts["Suggest new password"]
     }
     
     @discardableResult
