@@ -501,6 +501,7 @@
 		75BDCDAD26F339B1004BBC7E /* ErrorPageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75BDCDAC26F339B1004BBC7E /* ErrorPageManager.swift */; };
 		75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F5909126F3972F001D5D19 /* ErrorPageView.swift */; };
 		75FD7B6F2707006400BEFBA7 /* BeamSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75FD7B6E2707006400BEFBA7 /* BeamSchemeHandler.swift */; };
+		8714A3E428100767007DDF4F /* OneFieldAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714A3E328100767007DDF4F /* OneFieldAutofillTests.swift */; };
 		8718E152280483C900CFF53D /* AdvancedPasswordAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8718E151280483C900CFF53D /* AdvancedPasswordAutofillTests.swift */; };
 		8718E15F2805E63A00CFF53D /* ExclusiveRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8718E15E2805E63A00CFF53D /* ExclusiveRunner.swift */; };
 		872644772619903B0070E83D /* StepperControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644762619903B0070E83D /* StepperControl.swift */; };
@@ -1966,6 +1967,7 @@
 		75BDCDAC26F339B1004BBC7E /* ErrorPageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageManager.swift; sourceTree = "<group>"; };
 		75F5909126F3972F001D5D19 /* ErrorPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageView.swift; sourceTree = "<group>"; };
 		75FD7B6E2707006400BEFBA7 /* BeamSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSchemeHandler.swift; sourceTree = "<group>"; };
+		8714A3E328100767007DDF4F /* OneFieldAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneFieldAutofillTests.swift; sourceTree = "<group>"; };
 		8718E151280483C900CFF53D /* AdvancedPasswordAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPasswordAutofillTests.swift; sourceTree = "<group>"; };
 		8718E15E2805E63A00CFF53D /* ExclusiveRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExclusiveRunner.swift; sourceTree = "<group>"; };
 		872644762619903B0070E83D /* StepperControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperControl.swift; sourceTree = "<group>"; };
@@ -6960,6 +6962,7 @@
 				B5984C9127031D7A00192B5F /* SignUpAutocompleteTests.swift */,
 				A3E7B4BC27AC23D50074C9BB /* SignInAutocompleteTests.swift */,
 				8718E151280483C900CFF53D /* AdvancedPasswordAutofillTests.swift */,
+				8714A3E328100767007DDF4F /* OneFieldAutofillTests.swift */,
 			);
 			path = PasswordManager;
 			sourceTree = "<group>";
@@ -9104,6 +9107,7 @@
 				B579258F275E473E0093B32B /* DeleteNotesTests.swift in Sources */,
 				A3E7B4BB27AC1A0C0074C9BB /* MockHTTPWebPages.swift in Sources */,
 				B5C71D532716F4280028D495 /* UITestPagePasswordManager.swift in Sources */,
+				8714A3E428100767007DDF4F /* OneFieldAutofillTests.swift in Sources */,
 				B5F845E526F8CCB500B15209 /* BlockReferenceTests.swift in Sources */,
 				A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */,
 				B5FAE306270EE17800EAC8A3 /* AccountViewLocators.swift in Sources */,
