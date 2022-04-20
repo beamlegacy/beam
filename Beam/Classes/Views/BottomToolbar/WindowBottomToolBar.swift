@@ -189,6 +189,7 @@ private struct BottomToolBarTrailingIconView: View {
         ButtonLabel("New Note", icon: "tool-new", customStyle: WindowBottomToolBar.buttonStyle(withIcon: true)) {
             state.startNewNote()
         }
+        .tooltipOnHover(Shortcut.AvailableShortcut.newNote.keysDescription, alignment: .top)
         .accessibility(identifier: "NewNoteButton")
     }
 
