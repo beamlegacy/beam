@@ -114,7 +114,7 @@ final class WebFieldAutofillOverlay {
             // omnibox is visible: remove child windows
             dismissPasswordManagerMenu()
             clearIcon()
-        } else {
+        } else if page?.isActiveTab() ?? false {
             // omnibox is hidden, and the field still has focus: show icon and menu if exists
             showIcon(frameInfo: nil)
             if let menuViewModel = menuViewModel {
