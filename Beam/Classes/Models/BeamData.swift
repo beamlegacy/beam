@@ -414,6 +414,12 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         self.versionChecker.logMessage = { logMessage in
             Logger.shared.logInfo(logMessage, category: .autoUpdate)
         }
+        self.versionChecker.customPostinstall = { installed in
+            if installed {
+                (NSApp.delegate as? AppDelegate)?.skipTerminateMethods = true
+                NSApp.relaunch()
+            }
+        }
 
         autoUpdateStartupCheck()
     }
@@ -426,10 +432,10 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             checkForUpdateCancellable = versionChecker.$state.sink { [weak self] state in
                 guard let self = self else { return }
                 switch state {
-                case .downloaded:
+                case .downloaded(let release):
                     //We need to DispatchAsync here because, if not, the AlertPanel will pause the thread before the state will actually be changed to .downloaded
                     DispatchQueue.main.async {
-                        self.showUpdateAlert(onStartUp: true, isThereAnUpdate: true)
+                        self.showUpdateAlert(onStartUp: true, availableRelease: release.appRelease)
                         self.checkForUpdateCancellable = nil
                     }
                 case .noUpdate where self.versionChecker.lastCheck != nil:
@@ -447,28 +453,26 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }
 
     func checkForUpdate() {
-        versionChecker.areAnyUpdatesAvailable { isThereAnUpdate in
-            self.showUpdateAlert(onStartUp: false, isThereAnUpdate: isThereAnUpdate)
+        versionChecker.areAnyUpdatesAvailable { checkResult in
+            self.showUpdateAlert(onStartUp: false, availableRelease: checkResult)
         }
     }
 
-    private func showUpdateAlert(onStartUp: Bool, isThereAnUpdate: Bool) {
-        if onStartUp && !isThereAnUpdate { return }
+    private func showUpdateAlert(onStartUp: Bool, availableRelease: AppRelease?) {
+        if onStartUp && availableRelease == nil { return }
 
-        let appName = Information.appName ?? "beam"
+        if let release = availableRelease {
+            UpdatePanel.showReleaseNoteWindow(with: release, versionChecker: versionChecker)
+        } else {
+            let appName = Information.appName ?? "beam"
 
-        let updateAlertMessage = isThereAnUpdate ? "A new version of \(appName) is available!" : "You’re up-to-date!"
-        let updateAlertInformativeText = isThereAnUpdate ? "" : "You are already using the latest version of \(appName)."
-        let updateAlertButtonTitle = isThereAnUpdate ? "Update Now" : "OK"
-        let updateAlertSecondaryButtonTitle = isThereAnUpdate ? onStartUp ? "Update Later" : "Cancel" : ""
+            let updateAlertMessage = "You’re up-to-date!"
+            let updateAlertInformativeText = "You are already using the latest version of \(appName)."
+            let updateAlertButtonTitle = "OK"
 
-        UserAlert.showMessage(message: updateAlertMessage,
-                              informativeText: updateAlertInformativeText,
-                              buttonTitle: updateAlertButtonTitle,
-                              secondaryButtonTitle: updateAlertSecondaryButtonTitle) {
-            if isThereAnUpdate {
-                self.versionChecker.checkForUpdates(forceInstall: true)
-            }
+            UserAlert.showMessage(message: updateAlertMessage,
+                                  informativeText: updateAlertInformativeText,
+                                  buttonTitle: updateAlertButtonTitle) { }
         }
     }
 }
