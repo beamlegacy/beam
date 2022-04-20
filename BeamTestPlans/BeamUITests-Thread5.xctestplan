@@ -16,6 +16,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedPasswordAutofillTests",
         "AdvancedPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination1()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination2()",
@@ -36,6 +37,7 @@
         "BrowserTabViewTests",
         "CaptureCopyShareTests",
         "CardCreationTests",
+        "CardEditTests",
         "CardPublishTests",
         "CardViewEmbedsTests",
         "CardViewTests",
@@ -63,14 +65,15 @@
         "PasswordPreferencesTests\/testViewPasswordItemDetails()",
         "PnSAddToCardTests",
         "SearchOnCardTests",
+        "SearchOnPDFTests",
         "SignInAutocompleteTests",
         "SignInSucessfullyTests",
         "SignInTests",
         "SignUpAutocompleteTests",
         "SigninTests",
-        "SlashMenuTests",
+        "SlashMenuTests\/testDatePickerCardCreation()",
         "TextEditorContextViewTests",
-        "UpdateViewTests",
+        "UpdateViewTests\/testUpdateAvailableEverywhereInCardView()",
         "WaitHelper",
         "WebsiteAuthTest"
       ],

@@ -16,6 +16,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedPasswordAutofillTests",
         "AdvancedPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination1()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination2()",
@@ -45,8 +46,11 @@
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "IncognitoModeTests",
+        "JavascriptNativeInteractionsTests",
         "JavascriptNativeInteractionsTests\/testJSNativeAlertInteraction()",
         "JavascriptNativeInteractionsTests\/testJSNativeConfirmationInteraction()",
+        "JavascriptNativeInteractionsTests\/testJSNativeFileDialogInteraction()",
+        "JavascriptNativeInteractionsTests\/testJSNativePromptInteraction()",
         "JournalTest",
         "LinksTests",
         "LoginPasswordAutocompleteTests",
@@ -57,6 +61,7 @@
         "OmniboxViewTests\/testOmniBoxDoesNotBounce()",
         "OmniboxViewTests\/testOmniBoxSearchField()",
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",
+        "OmniboxViewTests\/testOmniboxIsDismissedWhenSummonedTwice()",
         "OmniboxViewTests\/testOmniboxPivotButtonClicking()",
         "OnboardingTests",
         "PDFFilesBrowserViewTests",
@@ -64,9 +69,13 @@
         "PnSAddToCardTests",
         "ReferencesTests",
         "ReportBugFeatureTests",
+        "SearchOnPDFTests",
         "SearchOnPdfTests",
         "SearchOnWebTests",
         "SignInTests",
+        "SlashMenuTests",
+        "SlashMenuTests\/testDatePickerCardCreation()",
+        "UpdateViewTests\/testUpdateViewAppearance()",
         "WaitHelper",
         "dummytests"
       ],
