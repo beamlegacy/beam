@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign In</title>
+    <link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+  </head>
+
+  <body>
+    <h1>Sign In (custom)</h1>
+    <form action="/view" method="POST">
+      {% for field in params.fields %}
+      <div>{{ field.label }}: <input type="{{ field.type }}" {% if field.autocomplete %}autocomplete="{{ field.autocomplete }}"{% endif %} {% if field.name %}name="{{ field.name }}"{% endif %} id="{{ field.elemid }}"></input></div>
+      {% endfor %}
+      <div><button type="submit">Continue</button></div>
+    </form>
+  </body>
+
+</html>
+

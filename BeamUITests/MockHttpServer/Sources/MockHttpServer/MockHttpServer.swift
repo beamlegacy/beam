@@ -60,6 +60,10 @@ public class MockHttpServer {
                 next()
             }
         }
+        router.get("/custom") { request, response, next in
+            self.renderCustomFieldsStencil(request, response)
+            next()
+        }
     }
 
     private func installBrowserHandlers(to router: Router) {
@@ -152,7 +156,7 @@ public class MockHttpServer {
     private var formNames: [String] {
         Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates/form")
             .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
-            .filter { $0 != "main" && $0 != "view" }
+            .filter { $0 != "main" && $0 != "view" && $0 != "customfields" }
     }
 
     private var browserNames: [String] {
@@ -166,11 +170,48 @@ public class MockHttpServer {
     }
 
     fileprivate func renderStencil(_ request: RouterRequest, _ response: RouterResponse, _ stencilName: String, additionalParams: [String: String]? = nil) {
+        guard stencilName != "form/custom" else {
+            return renderCustomFieldsStencil(request, response)
+        }
         do {
             var parameters: [String: String] = additionalParams ?? [:]
             let style = request.queryParameters["style"] ?? "default"
             parameters["style"] = style
             try response.render("\(stencilName).stencil", with: parameters, forKey: "params")
+        } catch {
+            response.status(.notFound).send(String(describing: error))
+        }
+    }
+
+    fileprivate func renderCustomFieldsStencil(_ request: RouterRequest, _ response: RouterResponse) {
+        struct Params: Encodable {
+            var style: String
+            var fields: [Field]
+        }
+        struct Field: Encodable {
+            var label: String
+            var type: String
+            var autocomplete: String?
+            var name: String?
+            var elemid: String
+        }
+        do {
+            let style = request.queryParameters["style"] ?? "default"
+            var fields = [Field]()
+            var index = 1
+            while let label = request.queryParameters["label\(index)"] {
+                let field = Field(
+                    label: label,
+                    type: request.queryParameters["type\(index)", default: "text"],
+                    autocomplete: request.queryParameters["autocomplete\(index)"],
+                    name: request.queryParameters["name\(index)"],
+                    elemid: request.queryParameters["id\(index)", default: label]
+                )
+                fields.append(field)
+                index += 1
+            }
+            let parameters = Params(style: style, fields: fields)
+            try response.render("form/customfields.stencil", with: parameters, forKey: "params")
         } catch {
             response.status(.notFound).send(String(describing: error))
         }
