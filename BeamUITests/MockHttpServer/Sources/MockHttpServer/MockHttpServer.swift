@@ -47,6 +47,8 @@ public class MockHttpServer {
         router.post("/view", handler: submitHandler)
         router.all("/signinstep2", middleware: BodyParser())
         router.post("/signinstep2", handler: step2Handler)
+        router.all("/signinpage9-2", middleware: BodyParser())
+        router.post("/signinpage9-2", handler: step2Handler)
 
         Kitura.addHTTPServer(onPort: port, with: router)
     }

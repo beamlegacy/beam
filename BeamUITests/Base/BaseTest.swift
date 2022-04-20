@@ -24,6 +24,7 @@ class BaseTest: XCTestCase {
     let correctPassword = "JKRZ6#ykhm_6KR!"
     let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
+    let host = "form.lvh.me"
 
     override func tearDownWithError() throws {
         super.tearDown()
