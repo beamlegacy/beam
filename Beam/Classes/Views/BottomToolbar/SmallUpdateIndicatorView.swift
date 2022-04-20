@@ -146,33 +146,7 @@ struct SmallUpdateIndicatorView: View {
     }
 
     private func showReleaseNoteWindow(with release: AppRelease, hideButtonOnClose: Bool = false) {
-        let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
-
-        guard let frame = indicatorFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
-
-        let releaseNoteView = ReleaseNoteView(release: release, closeAction: {
-            if hideButtonOnClose {
-                withAnimation {
-                    opacity = 0
-                }
-            }
-            window?.close()
-        }, beforeInstallAction: {
-            window?.close()
-        }, afterInstallAction: { installed in
-            if installed {
-                (NSApp.delegate as? AppDelegate)?.skipTerminateMethods = true
-                NSApp.relaunch()
-            }
-        }, history: versionChecker.missedReleases, checker: self.versionChecker, style: beamStyle, autoRelaunchAfterInstall: false)
-            .cornerRadius(10)
-
-        var origin = CGPoint(x: frame.minX + 7, y: frame.minY - 6)
-        if let parentWindow = window?.parent {
-            origin = origin.flippedPointToBottomLeftOrigin(in: parentWindow)
-        }
-        window?.setView(with: releaseNoteView, at: origin)
-        window?.makeKey()
+        UpdatePanel.showReleaseNoteWindow(with: release, versionChecker: versionChecker)
     }
 
     private struct FramePreferenceKey: PreferenceKey {
