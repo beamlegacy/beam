@@ -13,8 +13,12 @@ RELEASE_COMMIT=$(curl -sS -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB
 
 # Do not create cherry pick for the first build of release branch from develop
 if [ "$LAST_DEVELOP_COMMIT" != "$RELEASE_COMMIT" ]; then
+    
     # create branch for the cherry pick
-    curl -sS -X POST -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/repository/branches?ref=$CI_COMMIT_SHA&branch=cherry-pick/$CI_COMMIT_SHORT_SHA"
+    curl -sS -X POST -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/repository/branches?ref=develop&branch=cherry-pick/$CI_COMMIT_SHORT_SHA"
+
+    # cherry pick to branch
+    curl -sS -X POST -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/cherry_pick?branch=cherry-pick/$CI_COMMIT_SHORT_SHA"
 
     # Get title and id of cherry picked MR
     MR_TITLE=$(curl -sS -H "PRIVATE-TOKEN: $GITLAB_API_ACCESS_TOKEN" "${GITLAB_API_URL}/projects/$CI_PROJECT_ID/repository/commits/$CI_COMMIT_SHA/merge_requests" | \
