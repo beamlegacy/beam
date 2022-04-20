@@ -83,6 +83,8 @@
 		33088D6326B06677004FAE99 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 33088D6226B06677004FAE99 /* ZIPFoundation */; };
 		330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D380D265FB76C00A2536B /* DownloaderView.swift */; };
 		330D3824265FC6B200A2536B /* DownloadCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 330D3823265FC6B200A2536B /* DownloadCell.swift */; };
+		3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3312203328097382006A5EA1 /* UpdatePanel.swift */; };
+		331220362809BFEB006A5EA1 /* SimpleHostingWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331220352809BFEB006A5EA1 /* SimpleHostingWindow.swift */; };
 		3315DC912667859A002A47CF /* Preferences in Frameworks */ = {isa = PBXBuildFile; productRef = 524299AE25A47CA500F4DBF5 /* Preferences */; };
 		3315DC922667859A002A47CF /* Fakery in Frameworks */ = {isa = PBXBuildFile; productRef = 527FB72325B9AAA200959146 /* Fakery */; };
 		3315DC932667859A002A47CF /* Promises in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297125CD980B00307858 /* Promises */; };
@@ -1534,6 +1536,8 @@
 		3303E10226FA22D300E175AC /* user_infos.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = user_infos.graphql; sourceTree = "<group>"; };
 		330D380D265FB76C00A2536B /* DownloaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloaderView.swift; sourceTree = "<group>"; };
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
+		3312203328097382006A5EA1 /* UpdatePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePanel.swift; sourceTree = "<group>"; };
+		331220352809BFEB006A5EA1 /* SimpleHostingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHostingWindow.swift; sourceTree = "<group>"; };
 		332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+UserInfos.swift"; sourceTree = "<group>"; };
 		332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishNoteAPITests.swift; sourceTree = "<group>"; };
 		3330D7CA265E466D008C9E20 /* ToolbarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarDownloadButton.swift; sourceTree = "<group>"; };
@@ -3380,6 +3384,15 @@
 			path = "Additional APIs";
 			sourceTree = "<group>";
 		};
+		3312202D2809736D006A5EA1 /* Update */ = {
+			isa = PBXGroup;
+			children = (
+				3312203328097382006A5EA1 /* UpdatePanel.swift */,
+				331220352809BFEB006A5EA1 /* SimpleHostingWindow.swift */,
+			);
+			path = Update;
+			sourceTree = "<group>";
+		};
 		33353EB326F0EA6B00063078 /* Help and Feedback */ = {
 			isa = PBXGroup;
 			children = (
@@ -3916,6 +3929,7 @@
 				A5B7184B274B929D0010FE8E /* Toolbar */,
 				A54936B0260B71FE00EF7622 /* BottomToolbar */,
 				370794C627D7AA0300D2768B /* PDFDocumentView */,
+				3312202D2809736D006A5EA1 /* Update */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
 				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
@@ -8317,6 +8331,7 @@
 				CE304C3B27DB5501005AE274 /* URLSession+async.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				37DB5A0B27BB514400534760 /* EmbedAnimator.swift in Sources */,
+				3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */,
 				5241E5F626F8B0A900B08F69 /* AccountManager+Foundation.swift in Sources */,
 				5241E5E926F89AE700B08F69 /* UserSessionRequest+Foundation.swift in Sources */,
 				A0CB5AEA268B231400D1EF02 /* CardsPreferencesView.swift in Sources */,
@@ -8684,6 +8699,7 @@
 				4181723C2581107C00317ED8 /* TextEditMovements.swift in Sources */,
 				A52BFE63260901980028D3F3 /* Separator.swift in Sources */,
 				33353ECA26F3360800063078 /* DiscoverShortcutsView.swift in Sources */,
+				331220362809BFEB006A5EA1 /* SimpleHostingWindow.swift in Sources */,
 				A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */,
 				A53C8F4E26446C6C003A5DF8 /* SharingBannerInfo.swift in Sources */,
 				330D380E265FB76C00A2536B /* DownloaderView.swift in Sources */,
