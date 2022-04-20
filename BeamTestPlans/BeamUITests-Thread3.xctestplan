@@ -16,6 +16,14 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination1()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination2()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination3()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination4()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination7()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination8()",
+        "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination9()",
         "AllCardsDeleteTests",
         "AllCardsViewTests",
         "BaseTest",

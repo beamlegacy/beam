@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign In</title>
+    <link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+  </head>
+
+  <body>
+    <h1>Sign In Page 2</h1>
+    <form action="/view" method="POST">
+      <div id="signin">
+        <h2>Sign In</h2>
+        <div>Email: <input type="text" placeholder="Adresse email ou numéro de téléphone" title="Adresse email ou numéro de téléphone" autocomplete="username" field="username" name="username" id="username"></input></div>
+        <div>Password: <input type="password" placeholder="Mot de passe" autocomplete="current-password" field="password" name="password" id="password"></input></div>
+      </div>
+      <div><button type="submit">Continue</button></div>
+    </form>
+  </body>
+
+</html>
