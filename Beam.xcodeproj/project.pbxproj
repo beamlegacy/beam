@@ -913,8 +913,8 @@
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
-		A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */; };
 		A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */; };
+		A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */; };
 		A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */; };
 		A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */; };
 		A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */; };
@@ -2669,8 +2669,8 @@
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
-		A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFFilesBrowserViewTests.swift; sourceTree = "<group>"; };
 		A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureCopyShareTests.swift; sourceTree = "<group>"; };
+		A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFFilesBrowserViewTests.swift; sourceTree = "<group>"; };
 		A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewTests.swift; sourceTree = "<group>"; };
 		A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupTestView.swift; sourceTree = "<group>"; };
 		A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupViewLocators.swift; sourceTree = "<group>"; };
@@ -3008,6 +3008,7 @@
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
+		D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread6.xctestplan"; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
 		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
@@ -7211,6 +7212,7 @@
 				B5EEBFF12757DCB500DA9782 /* BeamUITests-Thread4.xctestplan */,
 				B5EEBFF22757DCCC00DA9782 /* BeamUITests-Thread1.xctestplan */,
 				D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */,
+				D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */,
 			);
 			path = BeamTestPlans;
 			sourceTree = "<group>";

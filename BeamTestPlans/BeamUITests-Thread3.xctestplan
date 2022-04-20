@@ -16,6 +16,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedPasswordAutofillTests",
         "AdvancedPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination1()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination2()",
@@ -42,9 +43,6 @@
         "DownloadsTest",
         "EditorShortcutsTests",
         "GoogleSheetsTests",
-        "JavascriptNativeInteractionsTests\/testJSNativeAlertInteraction()",
-        "JavascriptNativeInteractionsTests\/testJSNativeFileDialogInteraction()",
-        "JavascriptNativeInteractionsTests\/testJSNativePromptInteraction()",
         "JournalTest",
         "LinksTests",
         "LoginPasswordAutocompleteTests",
@@ -52,11 +50,11 @@
         "NoteEditorTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
-        "OmniboxViewTests",
         "OmniboxViewTests\/testOmniBoxSearchField()",
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",
         "OmniboxViewTests\/testOmniboxDefaultActions()",
         "OmniboxViewTests\/testOmniboxPivotButtonClicking()",
+        "OmniboxViewTests\/testOmniboxTextSelectionAndEditing()",
         "OnboardingTests",
         "PDFFilesBrowserViewTests",
         "PasswordPreferencesTests\/testAddPasswordItem()",
@@ -64,6 +62,7 @@
         "ReferencesTests",
         "ReportBugFeatureTests",
         "SearchOnCardTests",
+        "SearchOnPDFTests",
         "SearchOnPdfTests",
         "SearchOnWebTests",
         "SignInAutocompleteTests",
