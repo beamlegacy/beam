@@ -12,14 +12,7 @@ class UpdateTestView: BaseView {
     
     @discardableResult
     func closeUpdateWindow() -> JournalTestView {
-        button(UpdateViewLocators.Buttons.closeButton.accessibilityIdentifier).clickOnExistence()
+        button(UpdateViewLocators.Buttons.later.accessibilityIdentifier).clickOnExistence()
         return JournalTestView()
     }
-    
-    @discardableResult
-    func viewAll() -> WebTestView {
-        button(UpdateViewLocators.Buttons.viewAllButton.accessibilityIdentifier).clickOnExistence()
-        return WebTestView()
-    }
-
 }

@@ -11,8 +11,7 @@ enum UpdateViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement  {
         case updateNowButton = "Update now"
-        case closeButton = "close"
-        case viewAllButton = "View all"
+        case later = "Later"
     }
     
 }
