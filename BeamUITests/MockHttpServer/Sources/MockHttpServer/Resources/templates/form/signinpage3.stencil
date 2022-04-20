@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8" />
+    <title>Sign In</title>
+    <link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+  </head>
+
+  <body>
+    <h1>Sign In Page 3 - https://app.payfit.com/</h1>
+    <form action="/view" method="POST">
+      <div id="signin">
+        <h2>Sign In</h2>
+        <div>Email: <input autocapitalize="none" autocomplete="email" autocorrect="off" inputmode="email" type="text" placeholder="Type your email address" name="username" id="username"></input></div>
+        <div>Password: <input autocomplete="current-password" type="password" placeholder="••••••••" name="password" id="password"></input></div>
+      </div>
+      <div><button type="submit">Continue</button></div>
+    </form>
+  </body>
+
+</html>
