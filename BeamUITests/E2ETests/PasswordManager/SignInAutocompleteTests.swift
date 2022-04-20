@@ -11,6 +11,7 @@ import XCTest
 class SignInAutocompleteTests: BaseTest {
     
     let signInPageURL = "http://signin.form.lvh.me:8080/"
+    let signUpPageURL = "http://signup.form.lvh.me:8080/"
     let uiMenu = UITestsMenuBar()
     let mockPage = MockHTTPWebPages()
     let helper = PasswordManagerHelper()
@@ -71,6 +72,35 @@ class SignInAutocompleteTests: BaseTest {
         }
         step("Then the key icon is visible again"){
             XCTAssertTrue(helper.getKeyIconElement().exists)
+        }
+    }
+
+    func testPasswordMenuIsHiddenWhenOmniboxTriggersTabChange() {
+        launchApp()
+        uiMenu.destroyDB()
+            .startMockHTTPServer()
+            .populatePasswordsDB()
+        OmniBoxTestView().searchInOmniBox(signInPageURL, true)
+
+        step("When I click on password field"){
+            mockPage.getPasswordFieldElement(false).clickOnExistence()
+        }
+        step("Then the key icon is visible"){
+            XCTAssertTrue(helper.getKeyIconElement().exists)
+        }
+
+        step("When I show the omnibox"){
+            ShortcutsHelper().shortcutActionInvoke(action: .showOmnibox)
+        }
+        step("Then the key icon is hidden"){
+            XCTAssertFalse(helper.getKeyIconElement().exists)
+        }
+
+        step("When I open a new tab"){
+            OmniBoxTestView().searchInOmniBox(signUpPageURL, true)
+        }
+        step("Then the key icon is still hidden"){
+            XCTAssertFalse(helper.getKeyIconElement().exists)
         }
     }
 
