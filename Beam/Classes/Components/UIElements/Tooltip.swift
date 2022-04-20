@@ -54,6 +54,7 @@ struct TooltipHoverModifier: ViewModifier {
     @Environment(\.windowFrame) private var windowFrame
 
     var title: String
+    var alignment: Alignment = .bottom
     private let tooltipMargin = BeamSpacing._100
     private let showDelay = 1300 // 1.3s just like Apple's macOS button tooltips
     private class ViewModel: ObservableObject {
@@ -86,7 +87,12 @@ struct TooltipHoverModifier: ViewModifier {
                 Color.clear.preference(key: TooltipSizeKey.self, value: $0.size)
             })
             .onPreferenceChange(TooltipSizeKey.self) { tooltipSize in
-                var offset = CGSize(width: 0, height: tooltipSize?.height ?? 0)
+                var offset = CGSize(width: 0, height: 0)
+                if alignment.vertical == .top {
+                    offset.height = -(tooltipSize?.height ?? 0)
+                } else {
+                    offset.height = tooltipSize?.height ?? 0
+                }
                 let parentFrame = containerGeometry.frame(in: .global)
                 let tooltipMaxX = parentFrame.midX + (tooltipSize?.width ?? 0) / 2 + tooltipMargin
                 let tooltipMinX = parentFrame.midX - (tooltipSize?.width ?? 0) / 2 - tooltipMargin
@@ -98,21 +104,21 @@ struct TooltipHoverModifier: ViewModifier {
                 tooltipOffset = offset
             }
             .transition(
-                .opacity.combined(with: .animatableOffset(offset: CGSize(width: 0, height: -5)))
+                .opacity.combined(with: .animatableOffset(offset: CGSize(width: 0, height: alignment.vertical == .top ? 5 : -5)))
                     .animation(BeamAnimation.easeInOut(duration: 0.15)))
             .offset(tooltipOffset)
     }
     private var overlayProxy: some View {
         GeometryReader { proxy in
             ZStack { }
-            .overlay(showTooltip ? renderTooltip(with: proxy) : nil, alignment: .bottom)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+            .overlay(showTooltip ? renderTooltip(with: proxy) : nil, alignment: alignment)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: alignment)
         }
     }
 
     func body(content: Content) -> some View {
         content
-            .overlay(overlayProxy)
+            .overlay(overlayProxy, alignment: alignment)
             .onHover { isHovering = $0 }
             .onTouchDown { touching in
                 guard touching else { return }
@@ -130,8 +136,8 @@ struct TooltipHoverModifier: ViewModifier {
 }
 
 extension View {
-    func tooltipOnHover(_ title: String) -> some View {
-        modifier(TooltipHoverModifier(title: title))
+    func tooltipOnHover(_ title: String, alignment: Alignment = .bottom) -> some View {
+        modifier(TooltipHoverModifier(title: title, alignment: alignment))
     }
 }
 
