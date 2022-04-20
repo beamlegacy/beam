@@ -250,7 +250,7 @@ final class WebFieldClassifier {
         var element: DOMInputElement
         var evaluation: [WebAutocompleteAction: WeightedRole]
 
-        var bestMatch: RoleInContext? {
+        func bestMatch(thresholds: [WebAutocompleteAction: Match]) -> RoleInContext? {
             let candidates = evaluation.filter { $0.value.match != .never }
             let perfectMatches = candidates.filter { $0.value.match == .always }
             if let perfectMatch = perfectMatches.first {
@@ -259,9 +259,11 @@ final class WebFieldClassifier {
                 }
                 return RoleInContext(role: perfectMatch.value.role, action: perfectMatch.key)
             }
-            let bestMatches = candidates.sorted { pair1, pair2 in
-                pair1.value.match < pair2.value.match
-            }
+            let bestMatches = candidates
+                .filter { $0.value.match >= thresholds[$0.key, default: .never] }
+                .sorted { pair1, pair2 in
+                    pair1.value.match < pair2.value.match
+                }
             guard let bestMatch = bestMatches.last else { return nil }
             if case let .score(score) = bestMatch.value.match, score < 0 { return nil }
             return RoleInContext(role: bestMatch.value.role, action: bestMatch.key)
@@ -388,7 +390,8 @@ final class WebFieldClassifier {
 
         let evaluatedFields = evaluateFields(allowedFields, biasTowardLogin: biasTowardLogin, biasTowardAccountCreation: biasTowardAccountCreation)
         let ambiguousPasswordAction = containsPasswordFieldsUsableForLogin && containsPasswordFieldsUsableForNewAccount
-        return makeClassifierResult(fields: evaluatedFields, ambiguousPasswordAction: ambiguousPasswordAction)
+        let thresholds: [WebAutocompleteAction: Match] = [.login: containsPasswordFieldsUsableForLogin ? .score(0) : .score(900), .createAccount: containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900)]
+        return makeClassifierResult(fields: evaluatedFields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction)
     }
 
     private func includedInEvaluation(_ inputElement: DOMInputElement) -> Bool {
@@ -402,12 +405,12 @@ final class WebFieldClassifier {
         }
     }
 
-    private func makeClassifierResult(fields: [EvaluatedField], ambiguousPasswordAction: Bool) -> ClassifierResult {
+    private func makeClassifierResult(fields: [EvaluatedField], thresholds: [WebAutocompleteAction: Match], ambiguousPasswordAction: Bool) -> ClassifierResult {
         Logger.shared.logDebug("Making classifier results for: \(fields)", category: .passwordManagerInternal)
         var groups: [String: WebAutocompleteGroup] = [:]
         var activeFields: [String] = []
         for field in fields {
-            if let group = makeAutocompleteGroup(from: field, in: fields, ambiguousPasswordAction: ambiguousPasswordAction) {
+            if let group = makeAutocompleteGroup(from: field, in: fields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction) {
                 let id = field.element.beamId
                 groups[id] = group
                 activeFields.append(id)
@@ -417,8 +420,8 @@ final class WebFieldClassifier {
         return ClassifierResult(autocompleteGroups: groups, activeFields: activeFields)
     }
 
-    private func makeAutocompleteGroup(from field: EvaluatedField, in fields: [EvaluatedField], ambiguousPasswordAction: Bool) -> WebAutocompleteGroup? {
-        guard let best = field.bestMatch else { return nil }
+    private func makeAutocompleteGroup(from field: EvaluatedField, in fields: [EvaluatedField], thresholds: [WebAutocompleteAction: Match], ambiguousPasswordAction: Bool) -> WebAutocompleteGroup? {
+        guard let best = field.bestMatch(thresholds: thresholds) else { return nil }
         Logger.shared.logDebug("Best match for: \(field): \(best)", category: .passwordManagerInternal)
         switch best.role {
         case .currentPassword:
