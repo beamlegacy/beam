@@ -103,11 +103,19 @@ class AllNotesPageContextualMenu {
 
     private func setupExportMenu(in menu: NSMenu, countSuffix: String) {
         let exportMenu = NSMenu()
+        #if BEAM_BETA
+        exportMenu.addItem(NSMenuItem(
+            title: "beamNote...",
+            action: nil,
+            keyEquivalent: ""
+        ))
+        #else
         exportMenu.addItem(NSMenuItem(
             title: "beamNote...",
             action: #selector(exportNotesToBeamNote),
             keyEquivalent: ""
         ))
+        #endif
 //        if false {
 //            exportMenu.addItem(NSMenuItem(
 //                title: "Markdown...",
@@ -116,11 +124,19 @@ class AllNotesPageContextualMenu {
 //            ))
 //        }
         if selectedNotes.count <= 0 {
+            #if BEAM_BETA
+            exportMenu.addItem(NSMenuItem(
+                title: "Entire database...",
+                action: nil,
+                keyEquivalent: ""
+            ))
+            #else
             exportMenu.addItem(NSMenuItem(
                 title: "Entire database...",
                 action: #selector(databaseExport),
                 keyEquivalent: ""
             ))
+            #endif
         }
         let exportItem = NSMenuItem(
             title: "Export\(countSuffix)",
