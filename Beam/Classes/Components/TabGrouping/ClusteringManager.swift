@@ -320,6 +320,14 @@ class ClusteringManager: ObservableObject {
         }
     }
 
+    func shouldBeWith(page: PageID, group: [PageID]) {
+
+    }
+
+    func shouldBeApart(page: PageID, group: [PageID]) {
+        
+    }
+
     func cleanTextFrom(note: BeamNote) -> [String] {
         var fullText = [note.title] + note.allTexts.map { $0.1.text }
         guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return fullText }
