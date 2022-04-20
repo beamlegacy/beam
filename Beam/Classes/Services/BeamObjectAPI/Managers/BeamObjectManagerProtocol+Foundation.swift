@@ -5,6 +5,7 @@ import BeamCore
 extension BeamObjectManagerDelegate {
     func saveAllOnBeamObjectApi(force: Bool = false, _ completion: @escaping ((Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -41,6 +42,7 @@ extension BeamObjectManagerDelegate {
                               deep: Int = 0,
                               _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -94,8 +96,12 @@ extension BeamObjectManagerDelegate {
             }
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
-            BeamObjectManagerCall.deleteObjectsSemaphores(uuids: uuids)
-            semaphores.forEach { $0.signal() }
+            self.saveOnBeamObjectsAPIError(objects: objects,
+                                                       uuids: uuids,
+                                                       semaphores: semaphores,
+                                                       deep: deep,
+                                                       error: error,
+                                                       completion)
         }
 
         return networkTask
@@ -148,6 +154,7 @@ extension BeamObjectManagerDelegate {
     func deleteFromBeamObjectAPI(object: BeamObjectType,
                                  _ completion: @escaping (Result<Bool, Error>) -> Void) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -164,6 +171,7 @@ extension BeamObjectManagerDelegate {
     func deleteFromBeamObjectAPI(objects: [BeamObjectType],
                                  _ completion: @escaping (Result<Bool, Error>) -> Void) throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -201,6 +209,7 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     func deleteAllFromBeamObjectAPI(_ completion: @escaping (Result<Bool, Error>) -> Void) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -220,6 +229,7 @@ extension BeamObjectManagerDelegate {
                                   _ forced: Bool = false,
                                   _ completion: @escaping ((Result<BeamObjectType?, Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -289,6 +299,7 @@ extension BeamObjectManagerDelegate {
     @discardableResult
     func fetchAllFromBeamObjectAPI(raisePrivateKeyError: Bool = false, _ completion: @escaping ((Result<[BeamObjectType], Error>) -> Void)) throws -> APIRequest {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -302,6 +313,7 @@ extension BeamObjectManagerDelegate {
                              force: Bool = false,
                              _ completion: @escaping ((Result<BeamObjectType, Error>) -> Void)) throws -> APIRequest? {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
 
@@ -344,8 +356,10 @@ extension BeamObjectManagerDelegate {
             }
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .beamObjectNetwork)
-            BeamObjectManagerCall.deleteObjectSemaphore(uuid: object.beamObjectId)
-            semaphore.signal()
+            self.saveOnBeamObjectAPIError(object: object,
+                                                      semaphore: semaphore,
+                                                      error: error,
+                                                      completion)
         }
 
         return networkTask
