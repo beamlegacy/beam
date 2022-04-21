@@ -15,28 +15,28 @@ class MockHTTPWebPages: BaseView {
         return app.windows.webViews[viewAccessibility].groups.containing(.staticText, identifier:"Password: ").children(matching: .secureTextField).element
     }
     
-    func getPasswordFieldElement(title: String) -> XCUIElement {
-        return app.windows.webViews["Sign In"].groups.containing(.staticText, identifier:title).children(matching: .secureTextField).element
+    func getPasswordFieldElement(title: String, inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].groups.containing(.staticText, identifier:title).children(matching: .secureTextField).element
     }
 
     func getConfirmPasswordFieldElement() -> XCUIElement {
         return app.windows.webViews["Sign Up"].groups.containing(.staticText, identifier:"Confirm Password: ").children(matching: .secureTextField).element
     }
 
-    func getUsernameFieldElement(title: String) -> XCUIElement {
-        return app.windows.webViews["Sign In"].groups.containing(.staticText, identifier:title).children(matching: .textField).element
+    func getUsernameFieldElement(title: String, inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].groups.containing(.staticText, identifier:title).children(matching: .textField).element
     }
 
-    func getLinkElement(_ title: String) -> XCUIElement {
-        return app.windows.webViews["Sign In"].links.containing(.staticText, identifier: title).element
+    func getLinkElement(_ title: String, inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].links.containing(.staticText, identifier: title).element
     }
 
-    func getContinueButtonElement() -> XCUIElement {
-        return app.windows.webViews["Sign In"].buttons["Continue"]
+    func getContinueButtonElement(inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].buttons["Continue"]
     }
     
-    func getNextButtonElement() -> XCUIElement {
-        return app.windows.webViews["Sign In"].staticTexts["Next"]
+    func getNextButtonElement(inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].staticTexts["Next"]
     }
 
     func getResultValue(label: String) -> String? {
