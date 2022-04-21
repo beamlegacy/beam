@@ -866,7 +866,7 @@
                                                 <action selector="toggleListAction:" target="Ady-hI-5gd" id="YSj-JS-lsb"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem title="Quote" tag="3" keyEquivalent="U" id="quo-dq-hts" userLabel="Quote">
+                                        <menuItem title="Quote" tag="3" hidden="YES" enabled="NO" keyEquivalent="U" id="quo-dq-hts" userLabel="Quote">
                                             <connections>
                                                 <action selector="toggleQuoteAction:" target="Ady-hI-5gd" id="88N-gp-ci6"/>
                                             </connections>
@@ -1393,13 +1393,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="673"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="671"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="671"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="669"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="671"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="669"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1561,7 +1561,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="656" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="654" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">
