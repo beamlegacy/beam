@@ -7,43 +7,82 @@
 
 import BeamCore
 
-// TODO Add unit tests
 class PasswordGenerator {
     static let shared = PasswordGenerator()
 
-    let lowercase = "abcdefghijkmnopqrstuvwxyz" // without "l"
-    let uppercase = "ABCDEFGHIJKLMNPQRSTUVWXYZ" // without "O"
-    let digits = "123456789" // without "0"
-    let symbols = "&()+-*/%#@!?.:,;="
+    private static let lowercaseConsonants = "bcdfghjkmnpqrstvwxz" // without "l"
+    private static let lowercaseVowels = "aeiouy"
+    private static let uppercaseConsonants = "BCDFGHJKLMNPQRSTVWXZ"
+    private static let uppercaseVowels = "AEUY" // without "I" and "O"
+    private static let digits = "123456789" // without "0"
+    private static let symbols = "&()+-*/%#@!?.:,;="
 
-    func generatePassword(length: Int) -> String {
-        var password = ""
-        for _ in 0..<length {
-            let nextChar: Character
-            switch Int.random(in: 0..<10) {
-            case 0:
-                nextChar = symbols.randomElement()!
-            case 1:
-                nextChar = digits.randomElement()!
-            case 2, 3:
-                nextChar = uppercase.randomElement()!
-            default:
-                nextChar = lowercase.randomElement()!
-            }
-            password += String(nextChar)
+    private enum TrigramPosition: Int, CaseIterable {
+        case left
+        case middle
+        case right
+    }
+
+    private struct Trigram {
+        private var storage: [Character]
+
+        private init(_ left: Character, _ middle: Character, _ right: Character) {
+            storage = [left, middle, right]
         }
-        return password
+
+        var string: String {
+            String(storage)
+        }
+
+        static func random() -> Self {
+            guard let left = lowercaseConsonants.randomElement(), let middle = lowercaseVowels.randomElement(), let right = lowercaseConsonants.randomElement() else {
+                fatalError()
+            }
+            return .init(left, middle, right)
+        }
+
+        mutating func insertDigit() {
+            guard let position = TrigramPosition.allCases.randomElement(), let digit = digits.randomElement() else { fatalError() }
+            storage[position.rawValue] = digit
+        }
+
+        mutating func insertUppercase() {
+            guard let position = TrigramPosition.allCases.randomElement(), let consonant = uppercaseConsonants.randomElement(), let vowel = uppercaseVowels.randomElement() else { fatalError() }
+            switch position {
+            case .left, .right:
+                storage[position.rawValue] = consonant
+            case .middle:
+                storage[position.rawValue] = vowel
+            }
+        }
+    }
+
+    /// Generate Safari-like password:
+    /// 3 blocks of 6 characters, alternating consonants and vowels (cvccvc), with 1 uppercase letter + 1 digit
+    /// Entropy: 73 bits
+    func generatePassword(blockCount: Int = 3) -> String {
+        let trigramCount = blockCount * 2
+        var trigrams = (0..<trigramCount).map { _ in Trigram.random() }
+        trigrams[0].insertDigit()
+        trigrams[1].insertUppercase()
+        trigrams.shuffle()
+        return trigrams.reduce(into: "") { string, trigram in
+            if string.count % 7 == 6 {
+                string += "-"
+            }
+            string += trigram.string
+        }
     }
 
     func generatePassphrase(wordCount: Int) -> String {
         guard let wordsFile = WordsFile() else {
-            return generatePassword(length: wordCount * 5) // fallback to random character sequence
+            return generatePassword() // fallback to random character sequence
         }
         let numberPosition = Int.random(in: 0...wordCount) // allows for number-free passphrases
         var passphrase = ""
         for position in 0..<wordCount {
             if !passphrase.isEmpty {
-                passphrase += String(symbols.randomElement()!)
+                passphrase += String(Self.symbols.randomElement()!)
             }
             var word = wordsFile.randomWord()
             if Int.random(in: 0..<wordCount) == 0 {
