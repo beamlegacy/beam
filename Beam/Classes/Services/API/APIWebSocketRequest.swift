@@ -53,6 +53,7 @@ class APIWebSocketRequest: APIRequest {
     var disconnectHandler: (() -> Void)?
 
     private var subscribeHandlers: [UUID: ((Swift.Result<UUID, Error>) -> Void)] = [:]
+    private var subscribeHandlersQueue = DispatchQueue(label: "APIWebSocketRequest_subscribeHandlers")
     private var queryCommandHandlers: [UUID: ((Swift.Result<String, Error>) -> Void)] = [:]
     private static var webSocketUploadedBytes: Int64 = 0
     private static var webSocketDownloadedBytes: Int64 = 0
@@ -172,7 +173,9 @@ class APIWebSocketRequest: APIRequest {
 
     private func reset() {
         queryCommandHandlers = [:]
-        subscribeHandlers = [:]
+        subscribeHandlersQueue.async {
+            self.subscribeHandlers = [:]
+        }
         connectHandler = nil
         channelIds = []
         lastReceivedPing = nil
@@ -346,12 +349,15 @@ class APIWebSocketRequest: APIRequest {
 
         channelIds.append(channelId)
 
-        guard let completionHandler = subscribeHandlers[channelId] else {
+        var completionHandler: ((Swift.Result<UUID, Error>) -> Void)?
+        subscribeHandlersQueue.sync {
+            completionHandler = subscribeHandlers[channelId]
+            subscribeHandlers.removeValue(forKey: channelId)
+        }
+        guard let completionHandler = completionHandler else {
             Logger.shared.logError("Received confirm_subscription but no handler!", category: .webSocket)
             return
         }
-        subscribeHandlers.removeValue(forKey: channelId)
-
         completionHandler(.success(channelId))
     }
 
@@ -474,7 +480,9 @@ class APIWebSocketRequest: APIRequest {
                 // TODO: reconnect?
             }
 
-            self?.subscribeHandlers[channelId] = completionHandler
+            self?.subscribeHandlersQueue.async {
+                self?.subscribeHandlers[channelId] = completionHandler
+            }
         }
 
         return channelId
