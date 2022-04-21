@@ -31,9 +31,18 @@ class JSNavigationMessageHandler: SimpleBeamMessageHandler {
                 Logger.shared.logError("Expected a url in location change message \(String(describing: msgPayload))", category: .web)
                 return
             }
-            guard let url = URL(string: href) else {
+            guard var url = URL(string: href) else {
                 Logger.shared.logError("\(href) is not a valid URL in navigation message", category: .web)
                 return
+            }
+
+            if url.host == nil {
+                // Sometimes the JS event sends only the url path ("/page/A.html"). WebView most likely have the full url already.
+                guard let webViewURL = webPage.webView.url, webViewURL.absoluteString.contains(href) else {
+                    Logger.shared.logError("\(href) doesn't have a host and is not a valid URL in navigation message", category: .web)
+                    return
+                }
+                url = webViewURL
             }
             guard let navigationHandler = webPage.webViewNavigationHandler else { return }
             let replace: Bool = type == "replaceState" ? true : false

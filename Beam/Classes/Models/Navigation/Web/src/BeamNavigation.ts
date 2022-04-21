@@ -59,7 +59,10 @@ export class BeamNavigation {
     const stateUrl = args[2]
     if (stateUrl) {
       const location = this.win.location
-      const href = location.href
+      let href = location.href
+      if (href == "about:blank") {
+        href = stateUrl
+      }
       const type = e.type
       this.win.webkit.messageHandlers.nav_locationChanged.postMessage({
         href,
