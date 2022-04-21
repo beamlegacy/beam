@@ -228,15 +228,17 @@ struct OnboardingView: View {
                 if let first = randomDetails.first {
                     detailToDisplay = first
                 }
-                detailLoopCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
-                    var newDetail = randomDetails.randomElement()
-                    while newDetail == detailToDisplay {
-                        newDetail = randomDetails.randomElement()
-                    }
-                    guard let newDetail = newDetail else { return }
+                if randomDetails.count > 1 {
+                    detailLoopCancellable = Timer.publish(every: 3, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
+                        var newDetail = randomDetails.randomElement()
+                        while newDetail == detailToDisplay {
+                            newDetail = randomDetails.randomElement()
+                        }
+                        guard let newDetail = newDetail else { return }
 
-                    detailToDisplay = newDetail
-                })
+                        detailToDisplay = newDetail
+                    })
+                }
             }
             .onDisappear {
                 detailLoopCancellable?.cancel()
