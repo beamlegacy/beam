@@ -21,7 +21,7 @@ struct PasswordGeneratorSettingsCell: View {
                     StepperControl(min: 2, max: 6, value: $viewModel.generatorPassphraseWordCount)
                 case .password:
                     Text("Length: ")
-                    StepperControl(min: 8, max: 30, value: $viewModel.generatorPasswordLength)
+                    StepperControl(min: 2, max: 6, value: $viewModel.generatorPasswordBlockCount)
                 }
             }
         }
