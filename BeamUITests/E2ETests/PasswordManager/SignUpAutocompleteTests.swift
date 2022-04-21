@@ -17,6 +17,7 @@ class SignUpAutocompleteTests: BaseTest {
 
     let signUpPageURL = "http://signup.form.lvh.me:8080/"
     let signInPageURL = "http://signin.form.lvh.me:8080/"
+    let signUpViewAccessibility = "Sign Up"
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -58,9 +59,21 @@ class SignUpAutocompleteTests: BaseTest {
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getConfirmPasswordFieldElement()) , emptyString)
             XCTAssertFalse(passwordPopup.doesTitleExist())
         }
-
     }
     
+    func testPasswordSuggestionIsNotDisplayedOnUsernameField() {
+        OmniBoxTestView().searchInOmniBox(signUpPageURL, true)
+
+        step("WHEN I click on Password field"){
+            mockPage.getUsernameFieldElement(title: "Username: ", inView: signUpViewAccessibility).tapInTheMiddle()
+        }
+
+        step("THEN no password suggestion appears"){
+            XCTAssertFalse(passwordPopup.doesTitleExist())
+            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement()) , emptyString)
+        }
+    }
+
     func testPasswordSuggestionIsUnavailableForSignInPages() {
         OmniBoxTestView().searchInOmniBox(signInPageURL, true)
         
@@ -72,8 +85,6 @@ class SignUpAutocompleteTests: BaseTest {
             XCTAssertFalse(passwordPopup.doesTitleExist())
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(false)) , emptyString)
         }
-
     }
-    
     
 }

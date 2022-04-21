@@ -190,6 +190,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func handleInputFieldFocus(elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?, contents: String?) {
+        guard menuOptions(for: elementId, emptyField: true, inGroup: autocompleteGroup) != nil else { return }
         let overlay = WebFieldAutofillOverlay(page: page, scrollUpdater: scrollUpdater, frameInfo: frameInfo, elementId: elementId, inGroup: autocompleteGroup) { frameInfo in
             self.showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
         }
@@ -232,6 +233,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
         switch autocompleteGroup.action {
         case .createAccount:
+            guard let fieldWithFocus = autocompleteGroup.field(id: elementId), fieldWithFocus.role.isPassword else { return nil }
             return emptyField ? .createAccount : .createAccountWithMenu
         case .login:
             return .login
