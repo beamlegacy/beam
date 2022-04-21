@@ -119,7 +119,7 @@ private struct HelpButtonView: View {
     private func showHelpAndFeedbackMenuView() {
         let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true)
 
-        guard let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
+        guard let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window?.parent) else { return }
 
         let view = HelpAndFeedbackMenuView(window: window)
             .environmentObject(state)
