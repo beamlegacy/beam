@@ -23,6 +23,7 @@ build for testing:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
   tags:
@@ -62,6 +63,7 @@ xctests:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Logs/Beam/Vinyl/${CI_JOB_ID}"
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos.dev/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
     - mkdir -p logs
@@ -108,6 +110,7 @@ UITestThread1:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf ${HOME}/cache/*
     - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
@@ -154,6 +157,7 @@ UITestThread2:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf ${HOME}/cache/*
     - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
@@ -200,6 +204,7 @@ UITestThread3:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf ${HOME}/cache/*
     - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
@@ -246,6 +251,7 @@ UITestThread4:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf ${HOME}/cache/*
     - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
@@ -292,6 +298,7 @@ UITestThread5:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf ${HOME}/cache/*
     - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
@@ -338,6 +345,7 @@ UITestThread6:
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/Beam-test-${CI_JOB_ID}"*
     - rm -f "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/GRDB-test-${CI_JOB_ID}"*
     - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test-${CI_JOB_ID}"
+    - rm -rf "${HOME}/Library/Containers/co.beamapp.macos/Data/Library/Application Support/Beam/BeamData-test"
     - rm -rf ${HOME}/cache/*
     - rm -rf ${HOME}/Downloads/*
     - mkdir -p logs
