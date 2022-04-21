@@ -12,7 +12,7 @@ class EditorShortcutsTests: BaseTest {
     
     let helper = ShortcutsHelper()
     let webView = WebTestView()
-    var cardView: CardTestView?
+    var cardView: CardTestView!
     
     func testInstantSearchFromCard() {
         let searchWord = "Everest"
@@ -20,21 +20,25 @@ class EditorShortcutsTests: BaseTest {
         step ("Given I search for \(searchWord)"){
             launchApp()
             cardView = openFirstCardInAllCardsList()
-            cardView!.typeInCardNoteByIndex(noteIndex: 0, text: searchWord)
+            cardView.typeInCardNoteByIndex(noteIndex: 0, text: searchWord)
             helper.shortcutActionInvoke(action: .instantSearch)
         }
         
         step ("Then I see 1 tab opened"){
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
             webView.openDestinationCard()
-            XCTAssertTrue(cardView!.waitForCardViewToLoad())
+            XCTAssertTrue(cardView.waitForCardViewToLoad())
         }
         
         step ("Then I see \(searchWord) link as a first note"){
-            XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 1)
-            XCTAssertTrue(cardView!.getCardNoteValueByIndex(0) == searchWord + " - Google Search" ||
-                            cardView!.getCardNoteValueByIndex(0) == searchWord + " - Recherche Google" || cardView!.getCardNoteValueByIndex(0) == "https://www.google.com/search?q=\(searchWord)&client=safari")
-            cardView!.getCardNoteElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
+            XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 1)
+            let actualNoteValue = cardView.getCardNoteValueByIndex(0)
+            XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
+                          actualNoteValue == searchWord + " - Recherche Google" ||
+                          actualNoteValue == "https://www.google.com/search?q=\(searchWord)&client=safari" ||
+                          actualNoteValue == "https://www.google.com/search?q=\(searchWord)",
+                          "Actual note value:\(actualNoteValue)")
+            cardView.getCardNoteElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
         }
         
         step ("Then I'm redirected to a new tab and the card has not been changed"){
@@ -42,8 +46,11 @@ class EditorShortcutsTests: BaseTest {
             webView.openDestinationCard()
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
             XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 1)
-            XCTAssertTrue(cardView!.getCardNoteValueByIndex(0) == searchWord + " - Google Search" ||
-                            cardView!.getCardNoteValueByIndex(0) == searchWord + " - Recherche Google" || cardView!.getCardNoteValueByIndex(0) == "https://www.google.com/search?q=\(searchWord)&client=safari")
+            let actualNoteValue = cardView.getCardNoteValueByIndex(0)
+            XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
+                          actualNoteValue == searchWord + " - Recherche Google" ||
+                          actualNoteValue == "https://www.google.com/search?q=\(searchWord)&client=safari" ||
+                          actualNoteValue == "https://www.google.com/search?q=\(searchWord)")
         }
         
     }
@@ -56,67 +63,67 @@ class EditorShortcutsTests: BaseTest {
             cardView = openFirstCardInAllCardsList()
             helper.shortcutActionInvoke(action: .selectAll)
             helper.shortcutActionInvoke(action: .copy)
-            cardView!.typeKeyboardKey(.delete)
+            cardView.typeKeyboardKey(.delete)
             helper.shortcutActionInvoke(action: .undo)
             helper.shortcutActionInvoke(action: .redo)
         }
         
         
-        BeamUITestsHelper(cardView!.app).tapCommand(.insertTextInCurrentNote)
-        let firstNoteValue = cardView!.getCardNoteValueByIndex(1)
+        BeamUITestsHelper(cardView.app).tapCommand(.insertTextInCurrentNote)
+        let firstNoteValue = cardView.getCardNoteValueByIndex(1)
         
         helper.shortcutActionInvoke(action: .selectAll)
-        cardView!.typeKeyboardKey(.delete)
+        cardView.typeKeyboardKey(.delete)
         step ("Then deleted 1st note successfully"){
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), firstNoteValue)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), firstNoteValue)
         }
         
         step ("Then deleted all notes successfully"){
             helper.shortcutActionInvokeRepeatedly(action: .selectAll, numberOfTimes: 3)
-            cardView!.typeKeyboardKey(.delete)
+            cardView.typeKeyboardKey(.delete)
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), emptyString)
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString)
             
         }
         
         step ("Then undo deletion successfully"){
             helper.shortcutActionInvoke(action: .undo)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), firstNoteValue)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), firstNoteValue)
             
         }
         
         step ("Then redo deletion successfully"){
             helper.shortcutActionInvoke(action: .redo)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), "")
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString)
         }
         
         step ("Then undo redone successfully"){
             helper.shortcutActionInvoke(action: .undo)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), firstNoteValue)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), firstNoteValue)
         }
         
         step ("Then replace existing text"){
-            cardView!.getCardNoteElementByIndex(0).tapInTheMiddle()
+            cardView.getCardNoteElementByIndex(0).tapInTheMiddle()
             helper.shortcutActionInvokeRepeatedly(action: .selectAll, numberOfTimes: 3)
-            cardView!.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), textToType)
+            cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), textToType)
             
         }
         
         step ("Then copy paste existing text"){
             helper.shortcutActionInvoke(action: .selectAll)
             helper.shortcutActionInvoke(action: .copy)
-            cardView!.typeKeyboardKey(.rightArrow)
-            cardView!.typeKeyboardKey(.return)
-            cardView!.pasteText(textToPaste: textToType)
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: cardView!.getCardNotesElementQueryForVisiblePart()))
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), textToType)
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(1), textToType)
+            cardView.typeKeyboardKey(.rightArrow)
+            cardView.typeKeyboardKey(.return)
+            cardView.pasteText(textToPaste: textToType)
+            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: cardView.getCardNotesElementQueryForVisiblePart()))
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), textToType)
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(1), textToType)
         }
     }
     
@@ -151,7 +158,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Then the destination card is remained \(card2)"){
-            XCTAssertEqual(cardView!.getCardTitle(), card2)
+            XCTAssertEqual(cardView.getCardTitle(), card2)
         }
         
         step ("Then \(card2) is a destination note in web mode"){
