@@ -19,7 +19,7 @@ enum PnSViewLocators {
         case failedCollectPopup = "Failed to collect"
         case copy = "Copy"
         case copied = "Copied"
-        case share = "Share"
+        case share = "social-share"
     }
     
     enum Other: String, CaseIterable, UIElement  {

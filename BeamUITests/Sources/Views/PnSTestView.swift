@@ -10,7 +10,8 @@ import XCTest
 
 class PnSTestView: BaseView {
     
-    func triggerAddToCardPopup(_ element: XCUIElement) {
+    @discardableResult
+    func triggerAddToCardPopup(_ element: XCUIElement) -> PnSTestView {
         XCUIElement.perform(withKeyModifiers: .option) {
             let elementMiddle = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             // click at middle of element1 to make sure the page has focus
@@ -18,6 +19,7 @@ class PnSTestView: BaseView {
             _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
             elementMiddle.click()
         }
+        return PnSTestView()
     }
     
     @discardableResult
@@ -159,6 +161,10 @@ class PnSTestView: BaseView {
     }
     
     func getShareButton() -> XCUIElement {
-        return staticText(PnSViewLocators.StaticTexts.share.accessibilityIdentifier)
+        return app.windows.children(matching: .image).matching(identifier: PnSViewLocators.StaticTexts.share.accessibilityIdentifier).element(boundBy: 0)
+    }
+    
+    func isWindowOpenedWithContaining(title: String, isLowercased: Bool = false) -> Bool {
+        return app.windows.matching(NSPredicate(format: "title CONTAINS '\(isLowercased ? title.lowercased() : title)'")).element.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 }
