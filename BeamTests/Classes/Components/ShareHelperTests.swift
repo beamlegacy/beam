@@ -8,7 +8,6 @@
 import XCTest
 @testable import Beam
 
-
 class ShareHelperTests: XCTestCase {
 
     private var sut: ShareHelper!
@@ -38,7 +37,11 @@ class ShareHelperTests: XCTestCase {
         await sut.shareContent(html, originURL: baseURL, service: .twitter)
         await waitForExpectations(timeout: timeout, handler: nil)
 
-        XCTAssertEqual(receivedURL?.absoluteString, buildExpectedTwitterURL(with: text))
+        let resultURL = receivedURL?.absoluteString ?? ""
+        XCTAssertTrue(resultURL.starts(with: "https://twitter.com/intent/tweet?"))
+        XCTAssertTrue(resultURL.contains("via=getonbeam"))
+        XCTAssertTrue(resultURL.contains("text=\(text.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "<failToEncode>")"))
+        XCTAssertTrue(resultURL.contains("url=\(baseURL.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "<failToEncode>")"))
     }
 
     func testShareHtmlWithLinesOfTextToTwitter() async {
@@ -54,7 +57,11 @@ class ShareHelperTests: XCTestCase {
         await waitForExpectations(timeout: timeout, handler: nil)
 
         let fullText = [text, text, text].joined(separator: .lineSeparator)
-        XCTAssertEqual(receivedURL?.absoluteString, buildExpectedTwitterURL(with: fullText))
+        let resultURL = receivedURL?.absoluteString ?? ""
+        XCTAssertTrue(resultURL.starts(with: "https://twitter.com/intent/tweet?"))
+        XCTAssertTrue(resultURL.contains("via=getonbeam"))
+        XCTAssertTrue(resultURL.contains("text=\(fullText.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "<failToEncode>")"))
+        XCTAssertTrue(resultURL.contains("url=\(baseURL.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? "<failToEncode>")"))
     }
 
     func testShareHtmlWithLinesOfTextToPasteboard() async {
