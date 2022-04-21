@@ -214,9 +214,9 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
     weak var delegate: PasswordManagerMenuDelegate?
 
     @Published var suggestion: String = ""
-    @Published var generatorOption: PasswordGeneratorOption = .passphrase
+    @Published var generatorOption: PasswordGeneratorOption = .password
     @Published var generatorPassphraseWordCount = 4
-    @Published var generatorPasswordLength = 20
+    @Published var generatorPasswordBlockCount = 3
 
     private var isLocked = false
     private var isDismissed = false
@@ -227,15 +227,15 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
         super.init()
         $generatorOption.sink(receiveValue: { [weak self] newValue in
             guard let self = self else { return }
-            self.generate(generatorOption: newValue, generatorPassphraseWordCount: self.generatorPassphraseWordCount, generatorPasswordLength: self.generatorPasswordLength)
+            self.generate(generatorOption: newValue, generatorPassphraseWordCount: self.generatorPassphraseWordCount, generatorPasswordBlockCount: self.generatorPasswordBlockCount)
         }).store(in: &subscribers)
         $generatorPassphraseWordCount.sink(receiveValue: { [weak self] newValue in
             guard let self = self else { return }
-            self.generate(generatorOption: self.generatorOption, generatorPassphraseWordCount: newValue, generatorPasswordLength: self.generatorPasswordLength)
+            self.generate(generatorOption: self.generatorOption, generatorPassphraseWordCount: newValue, generatorPasswordBlockCount: self.generatorPasswordBlockCount)
         }).store(in: &subscribers)
-        $generatorPasswordLength.sink(receiveValue: { [weak self] newValue in
+        $generatorPasswordBlockCount.sink(receiveValue: { [weak self] newValue in
             guard let self = self else { return }
-            self.generate(generatorOption: self.generatorOption, generatorPassphraseWordCount: self.generatorPassphraseWordCount, generatorPasswordLength: newValue)
+            self.generate(generatorOption: self.generatorOption, generatorPassphraseWordCount: self.generatorPassphraseWordCount, generatorPasswordBlockCount: newValue)
         }).store(in: &subscribers)
     }
 
@@ -261,15 +261,15 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
 
     private func generate() {
         isLocked = false
-        generate(generatorOption: generatorOption, generatorPassphraseWordCount: generatorPassphraseWordCount, generatorPasswordLength: generatorPasswordLength)
+        generate(generatorOption: generatorOption, generatorPassphraseWordCount: generatorPassphraseWordCount, generatorPasswordBlockCount: generatorPasswordBlockCount)
     }
 
-    private func generate(generatorOption: PasswordGeneratorOption, generatorPassphraseWordCount: Int, generatorPasswordLength: Int) {
+    private func generate(generatorOption: PasswordGeneratorOption, generatorPassphraseWordCount: Int, generatorPasswordBlockCount: Int) {
         switch generatorOption {
         case .passphrase:
             suggestion = PasswordGenerator.shared.generatePassphrase(wordCount: generatorPassphraseWordCount)
         case .password:
-            suggestion = PasswordGenerator.shared.generatePassword(length: generatorPasswordLength)
+            suggestion = PasswordGenerator.shared.generatePassword(blockCount: generatorPasswordBlockCount)
         }
     }
 

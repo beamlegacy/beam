@@ -504,6 +504,7 @@
 		75F5909226F3972F001D5D19 /* ErrorPageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75F5909126F3972F001D5D19 /* ErrorPageView.swift */; };
 		75FD7B6F2707006400BEFBA7 /* BeamSchemeHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75FD7B6E2707006400BEFBA7 /* BeamSchemeHandler.swift */; };
 		8714A3E428100767007DDF4F /* OneFieldAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714A3E328100767007DDF4F /* OneFieldAutofillTests.swift */; };
+		8714A3FB28118CB6007DDF4F /* PasswordGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8714A3FA28118CB6007DDF4F /* PasswordGeneratorTests.swift */; };
 		8718E152280483C900CFF53D /* AdvancedPasswordAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8718E151280483C900CFF53D /* AdvancedPasswordAutofillTests.swift */; };
 		8718E15F2805E63A00CFF53D /* ExclusiveRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8718E15E2805E63A00CFF53D /* ExclusiveRunner.swift */; };
 		872644772619903B0070E83D /* StepperControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644762619903B0070E83D /* StepperControl.swift */; };
@@ -1972,6 +1973,7 @@
 		75F5909126F3972F001D5D19 /* ErrorPageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageView.swift; sourceTree = "<group>"; };
 		75FD7B6E2707006400BEFBA7 /* BeamSchemeHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamSchemeHandler.swift; sourceTree = "<group>"; };
 		8714A3E328100767007DDF4F /* OneFieldAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OneFieldAutofillTests.swift; sourceTree = "<group>"; };
+		8714A3FA28118CB6007DDF4F /* PasswordGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorTests.swift; sourceTree = "<group>"; };
 		8718E151280483C900CFF53D /* AdvancedPasswordAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedPasswordAutofillTests.swift; sourceTree = "<group>"; };
 		8718E15E2805E63A00CFF53D /* ExclusiveRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExclusiveRunner.swift; sourceTree = "<group>"; };
 		872644762619903B0070E83D /* StepperControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperControl.swift; sourceTree = "<group>"; };
@@ -3352,6 +3354,7 @@
 				87685675277371A7002A8069 /* MockPasswordsDB.swift */,
 				8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */,
 				375D83BD278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift */,
+				8714A3FA28118CB6007DDF4F /* PasswordGeneratorTests.swift */,
 				877888DA269C977C00D703F0 /* PasswordImporterTest.swift */,
 				8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */,
 				872F658C27F204E4005475B8 /* HostnameCanonicalizerTests.swift */,
@@ -8957,6 +8960,7 @@
 				524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */,
 				A54A45372767983900B9AE1B /* UserInfoRequestTests.swift in Sources */,
 				52DEF1CA252B259700561493 /* CoreDataManagerTests.swift in Sources */,
+				8714A3FB28118CB6007DDF4F /* PasswordGeneratorTests.swift in Sources */,
 				8A7F949426A8612D00270A74 /* PointAndShootLeavePageTest.swift in Sources */,
 				52C3294225AC7A8E00EF11E7 /* DocumentTests.swift in Sources */,
 				032562E626051D5D006513E4 /* RBFilterBuilderTests.m in Sources */,
