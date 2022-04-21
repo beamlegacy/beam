@@ -53,7 +53,7 @@ enum SectionShortcuts: String {
                                                                         Shortcut(modifiers: [], keys: [.string("##")])], separationString: "and"),
                     KeyboardFeature(name: "Bold", shortcuts: [Shortcut(modifiers: [], keys: [.string("**")])]),
                     KeyboardFeature(name: "Italic", shortcuts: [Shortcut(modifiers: [], keys: [.string("*")])]),
-                    KeyboardFeature(name: "Strikeout", shortcuts: [Shortcut(modifiers: [], keys: [.string("~~")])]),
+                    KeyboardFeature(name: "Strikethrough", shortcuts: [Shortcut(modifiers: [], keys: [.string("~~")]), Shortcut(modifiers: [.shift, .command], keys: [.string("E")])], separationString: "or"),
                     KeyboardFeature(name: "Journal", shortcuts: [Shortcut.AvailableShortcut.showJournal.value]),
                     KeyboardFeature(name: "All Notes", shortcuts: [Shortcut.AvailableShortcut.showAllNotes.value]),
                     KeyboardFeature(name: "Find", shortcuts: [Shortcut(modifiers: [.command], keys: [.string("F")])])
