@@ -59,29 +59,52 @@ enum ShareService: CaseIterable {
 
     private var twitterBeamUsername: String { "getonbeam" }
     private var facebookAppID: String { EnvironmentVariables.Oauth.Facebook.appID }
-    private var lineBreak: String { "%0D%0A" }
 
     func buildURL(with textParam: String, url: URL?) -> URL? {
-        var urlString: String
-        let encodedContent = textParam.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let encodedURL = url?.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        var baseURLString: String
+        var urlText: String?
+        if let absoluteURLString = url?.absoluteString, absoluteURLString.mayBeWebURL {
+            urlText = absoluteURLString
+        }
+        var queryItems: [String: String?] = [:]
         switch self {
         case .copy:
             return nil
         case .twitter:
-            urlString = "https://twitter.com/intent/tweet?text=\(encodedContent)&url=\(encodedURL)&via=\(twitterBeamUsername)"
+            baseURLString = "https://twitter.com/intent/tweet"
+            queryItems = ["via": twitterBeamUsername, "url": urlText, "text": textParam]
         case .facebook:
-            urlString = "https://www.facebook.com/dialog/share?app_id=\(facebookAppID)&display=popup&quote=\(encodedContent)&href=\(encodedURL)"
+            baseURLString = "https://www.facebook.com/dialog/share"
+            queryItems = ["app_id": facebookAppID, "display": "popup", "quote": textParam]
+            queryItems["href"] = urlText ?? "beamapp.co" // facebook requires a href
         case .linkedin:
-            urlString = "https://www.linkedin.com/shareArticle?mini=true&url=\(encodedURL)&title=\(encodedContent)"
+            baseURLString = "https://www.linkedin.com/shareArticle"
+            queryItems = ["mini": "true", "url": urlText, "title": textParam]
         case .reddit:
-            urlString = "https://reddit.com/submit?title=\(encodedContent)&url=\(encodedURL)"
+            baseURLString = "https://reddit.com/submit"
+            queryItems = ["url": urlText, "title": textParam]
         case .email:
-            urlString = "mailto:?body=\(encodedContent)\(lineBreak)\(lineBreak)\(encodedURL)"
+            baseURLString = "mailto:"
+            queryItems["body"] = "\(textParam)\n\n\(urlText ?? "")"
         case .messages:
-            urlString = "sms:&body=\(encodedContent)\(lineBreak)\(lineBreak)\(encodedURL)"
+            // sms url needs a `&` before the body, so building the url manually here
+            let encodedContent = textParam.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? textParam
+            let encodedURL = urlText?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+            let lineBreak = "%0D%0A"
+            baseURLString = "sms:&body=\(encodedContent)\(lineBreak)\(lineBreak)\(encodedURL)"
         }
-        return URL(string: urlString)
+
+        var components = URLComponents(string: baseURLString)
+        components?.queryItems = dictionnaryToURLQueryItems(queryItems)
+        return components?.url
+    }
+
+    private func dictionnaryToURLQueryItems(_ dic: [String: String?]) -> [URLQueryItem] {
+        var items = [URLQueryItem]()
+        dic.forEach { key, value in
+            items.append(URLQueryItem(name: key, value: value))
+        }
+        return items
     }
 
     static func allCases(except: [ShareService]) -> [ShareService] {
