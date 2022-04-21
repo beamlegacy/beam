@@ -19,6 +19,7 @@ class WebIndexingController {
     private var clusteringManager: ClusteringManager
     private weak var previousTabBrowsingTree: BrowsingTree?
     private let signpost = SignPost("WebIndexingController")
+    private var delayedReadOperations: [UUID: DelayedReadWebViewOperation] = [:]
 
     weak var delegate: WebIndexControllerDelegate?
 
@@ -26,62 +27,26 @@ class WebIndexingController {
         self.clusteringManager = clusteringManager
     }
 
-    // Copied from BrowserTab.appendToIndexer block
-    private func appendToIndexer(url: URL, title: String, readabilityResult: Readability,
-                                 originalRequestedURL: URL?,
-                                 tab: BrowserTab, currentTabBrowsingTree: BrowsingTree?) {
-
-        var textForClustering = [""]
-        let tabTree = tab.browsingTree.deepCopy()
-        let currentTabTree = currentTabBrowsingTree?.deepCopy()
+    private func appendToClustering(url: URL, tabIndexingInfo: TabIndexingInfo, readabilityResult: Readability) {
 
         self.indexingQueue.async { [unowned self] in
+            var finalTabInfo = tabIndexingInfo
             let htmlNoteAdapter = HtmlNoteAdapter(url)
-            textForClustering = htmlNoteAdapter.convertForClustering(html: readabilityResult.content)
+            finalTabInfo.cleanedTextContentForClustering = htmlNoteAdapter.convertForClustering(html: readabilityResult.content)
 
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
+                signpost.begin("indexTab")
+                defer { signpost.end("indexTab") }
 
-                let indexDocument = IndexDocument(source: url.absoluteString, title: title, contents: readabilityResult.textContent)
-                var shouldIndexUserTypedUrl = originalRequestedURL != nil && originalRequestedURL != tab.url
+                var currentId: UUID?
+                var parentId: UUID?
+                (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: finalTabInfo)
+                guard let id = currentId else { return }
 
-                // this check in case last url redirected just contains a /
-                if let url = tab.url, let userTypedUrl = originalRequestedURL {
-                    if url.absoluteString.prefix(url.absoluteString.count - 1) == userTypedUrl.absoluteString {
-                        shouldIndexUserTypedUrl = false
-                    }
-                }
-
-                let tabInfo = TabIndexingInfo(url: url,
-                                              requestedURL: shouldIndexUserTypedUrl ? originalRequestedURL : nil,
-                                              shouldBeIndexed: tab.responseStatusCode == 200,
-                                              tabTree: tabTree,
-                                              currentTabTree: currentTabTree,
-                                              parentBrowsingNode: tabTree?.current.parent,
-                                              previousTabTree: self.previousTabBrowsingTree,
-                                              document: indexDocument,
-                                              textContent: readabilityResult.textContent,
-                                              cleanedTextContentForClustering: textForClustering,
-                                              isPinnedTab: tab.isPinned)
-                self.indexTabInfo(tabInfo)
-                self.previousTabBrowsingTree = nil
+                self.clusteringManager.addPage(id: id, parentId: parentId, value: finalTabInfo)
             }
         }
-    }
-
-    // Copied from BeamData.tabToIndex.sink
-    private func indexTabInfo(_ tabInfo: TabIndexingInfo) {
-        signpost.begin("indexTab")
-        defer { signpost.end("indexTab") }
-        var currentId: UUID?
-        var parentId: UUID?
-        (currentId, parentId) = self.clusteringManager.getIdAndParent(tabToIndex: tabInfo)
-        guard let id = currentId else { return }
-        if tabInfo.shouldBeIndexed {
-            self.clusteringManager.addPage(id: id, parentId: parentId, value: tabInfo)
-            _ = LinkStore.shared.visit(tabInfo.url.string, title: tabInfo.document.title, content: tabInfo.textContent)
-        }
-        delegate?.webIndexingController(self, didIndexPageForURL: tabInfo.url)
     }
 
     /// Unused. We let the LinkStore do its job.
@@ -101,31 +66,42 @@ class WebIndexingController {
         }
     }
 
-    // swiftlint will be fixed in upcoming MR. To simplify the first refactor MR
-    // swiftlint:disable:next function_parameter_count
-    private func indexNavigation(to url: URL, isLinkActivation: Bool, startReading: Bool,
-                                 browsingTree: BrowsingTree, read: Readability? = nil, fallbackTitle: String?,
-                                 originalRequestedURL: URL?,
-                                 tab: BrowserTab, currentTab: BrowserTab?) {
+    private func indexNavigation(to url: URL, tabIndexingInfo: TabIndexingInfo, read: Readability? = nil,
+                                 browsingTree: BrowsingTree, isLinkActivation: Bool, startReading: Bool) {
 
-        // Alway index the visit, event if we were not able to read the content
-        let title = read?.title ?? fallbackTitle ?? ""
+        // Always update the browsingTree, event if we were not able to read the content
+        let title = tabIndexingInfo.document.title
         browsingTree.navigateTo(url: url.absoluteString, title: title,
                                 startReading: startReading,
                                 isLinkActivation: isLinkActivation,
-                                readCount: read?.content.count ?? 0)
+                                readCount: tabIndexingInfo.textContent.count)
 
         guard let read = read else { return }
 
+        let browsingTreeCopy = browsingTree.deepCopy()
+        var tabIndexingInfo = tabIndexingInfo
+        tabIndexingInfo.tabTree = browsingTreeCopy
+
         try? TextSaver.shared?.save(nodeId: browsingTree.current.id, text: read)
 
-        appendToIndexer(url: url, title: title, readabilityResult: read, originalRequestedURL: originalRequestedURL,
-                        tab: tab, currentTabBrowsingTree: currentTab?.browsingTree)
+        if tabIndexingInfo.shouldBeIndexed {
+            _ = LinkStore.shared.visit(tabIndexingInfo.url.string, title: tabIndexingInfo.document.title, content: tabIndexingInfo.textContent)
+            appendToClustering(url: url, tabIndexingInfo: tabIndexingInfo, readabilityResult: read)
+        }
+        delegate?.webIndexingController(self, didIndexPageForURL: tabIndexingInfo.url)
     }
 
     /// handle the case where a redirection happened and we never get a title for the original url
-    private func indexRedirectedURLIfNeeded(requestedURL: URL?, currentURL: URL, title: String?) {
-        guard let requestedURL = requestedURL, requestedURL != currentURL else { return }
+    ///
+    /// Returns `true` if the requestedURL was indexed.
+    private func indexRedirectedURLIfNeeded(requestedURL: URL?, currentURL: URL, title: String?) -> Bool {
+        guard let requestedURL = requestedURL else { return false }
+
+        // this checks in case last url redirected just contains a /
+        guard requestedURL != currentURL && currentURL.absoluteString.prefix(currentURL.absoluteString.count - 1) != requestedURL.absoluteString else {
+            return false
+        }
+
         Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedURL) - \(String(describing: title))")
         let urlToIndex = requestedURL.absoluteString
 
@@ -136,8 +112,20 @@ class WebIndexingController {
         let link = LinkStore.shared.visit(urlToIndex, title: title, content: nil, destination: destinationURL.absoluteString)
         ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage())
             .update(id: link.id, value: 1.0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
+        return true
     }
 
+    /// Once we received some Readbility result from the webView, the tab indexing info can be more precise.
+    private func updateTabIndexingInfo(_ tabIndexingInfo: TabIndexingInfo, withReadabilityResult read: Readability?) -> TabIndexingInfo {
+        var result = tabIndexingInfo
+        if let read = read {
+            let title = read.title
+            let indexDocument = IndexDocument(source: tabIndexingInfo.url.absoluteString, title: title, contents: read.textContent)
+            result.document = indexDocument
+            result.textContent = read.textContent
+        }
+        return result
+    }
 }
 
 struct TabIndexingInfo {
@@ -148,9 +136,9 @@ struct TabIndexingInfo {
     weak var currentTabTree: BrowsingTree?
     weak var parentBrowsingNode: BrowsingNode?
     weak private(set) var previousTabTree: BrowsingTree?
-    let document: IndexDocument
-    let textContent: String
-    let cleanedTextContentForClustering: [String]
+    fileprivate(set) var document: IndexDocument
+    fileprivate(set) var textContent: String = ""
+    fileprivate(set) var cleanedTextContentForClustering: [String] = []
     private(set) var isPinnedTab: Bool = false
 }
 
@@ -159,51 +147,61 @@ extension WebIndexingController {
 
     // MARK: Navigation events
 
-    // swiftlint will be fixed in upcoming MR. To simplify the first refactor MR
-    // swiftlint:disable:next function_parameter_count
-    func tabDidNavigate(_ tab: BrowserTab, toURL url: URL, inWebView webView: WKWebView, originalRequestedURL: URL?,
+    func tabDidNavigate(_ tab: BrowserTab, toURL url: URL, originalRequestedURL: URL?,
                         shouldWaitForBetterContent: Bool, isLinkActivation: Bool, currentTab: BrowserTab?) {
+
+        let webView = tab.webView
+        let tabID = tab.id
         let fallbackTitle = webView.title
         let startReading = tab == currentTab
         let browsingTree = tab.browsingTree
-        indexRedirectedURLIfNeeded(requestedURL: originalRequestedURL, currentURL: url, title: fallbackTitle)
+        let currentTabBrowsingTree = currentTab?.browsingTree.deepCopy()
+        let shouldIndexUserRequestedURL = indexRedirectedURLIfNeeded(requestedURL: originalRequestedURL, currentURL: url, title: fallbackTitle)
 
+        let indexDocument = IndexDocument(source: url.absoluteString, title: fallbackTitle ?? "", contents: "")
+
+        var tabIndexingInfo = TabIndexingInfo(url: url,
+                                              requestedURL: shouldIndexUserRequestedURL ? originalRequestedURL : nil,
+                                              shouldBeIndexed: tab.responseStatusCode == 200,
+                                              tabTree: browsingTree,
+                                              currentTabTree: currentTabBrowsingTree,
+                                              parentBrowsingNode: browsingTree.current.parent,
+                                              previousTabTree: previousTabBrowsingTree,
+                                              document: indexDocument,
+                                              isPinnedTab: tab.isPinned)
+
+        previousTabBrowsingTree = nil
+
+        let finishBlock: (Readability?) -> Void = { [weak self] readabilityResultToUse in
+            tabIndexingInfo = self?.updateTabIndexingInfo(tabIndexingInfo, withReadabilityResult: readabilityResultToUse) ?? tabIndexingInfo
+            self?.indexNavigation(to: url, tabIndexingInfo: tabIndexingInfo, read: readabilityResultToUse,
+                                  browsingTree: browsingTree, isLinkActivation: isLinkActivation, startReading: startReading)
+        }
+        if let delayedRead = delayedReadOperations[tabID] {
+            delayedRead.cancel(sendFirstRead: true)
+            delayedReadOperations.removeValue(forKey: tabID)
+        }
         Readability.read(webView) { [weak self] result in
-            guard let self = self else { return }
-            var readabilityResultToUse: Readability?
             switch result {
-            case let .success(read):
-                readabilityResultToUse = read
-
-                // This is ugly, and should be refactored using new async syntax when possible
-                // But it's needed to try to index the good content when navigating from JS
-                if shouldWaitForBetterContent {
-                    let reIndexDelay = 4
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(reIndexDelay)) {
-                        Readability.read(webView) { [weak self, weak webView] result2 in
-                            switch result2 {
-                            case let .success(read2):
-                                if read2 != read, let webViewURL = webView?.url, webViewURL == url {
-                                    readabilityResultToUse = read2
-                                }
-                            case let .failure(error):
-                                Logger.shared.logError("Error while indexing web page on 2nd read: \(error)", category: .web)
-                            }
-                            self?.indexNavigation(to: url, isLinkActivation: isLinkActivation, startReading: startReading,
-                                                  browsingTree: browsingTree, read: readabilityResultToUse, fallbackTitle: fallbackTitle, originalRequestedURL: originalRequestedURL,
-                                                  tab: tab, currentTab: currentTab)
-                        }
-                    }
-                } else {
-                    self.indexNavigation(to: url, isLinkActivation: isLinkActivation, startReading: startReading,
-                                         browsingTree: browsingTree, read: readabilityResultToUse, fallbackTitle: fallbackTitle, originalRequestedURL: originalRequestedURL,
-                                         tab: tab, currentTab: currentTab)
-                }
             case let .failure(error):
                 Logger.shared.logError("Error while indexing web page: \(error)", category: .web)
-                self.indexNavigation(to: url, isLinkActivation: isLinkActivation, startReading: startReading,
-                                     browsingTree: browsingTree, fallbackTitle: fallbackTitle, originalRequestedURL: originalRequestedURL,
-                                     tab: tab, currentTab: currentTab)
+                finishBlock(nil)
+            case let .success(read):
+                if !shouldWaitForBetterContent {
+                    finishBlock(read)
+                } else {
+                    // For some contexts, we perform another read of the webview content after a moment
+                    // in hope that the content is fully loaded.
+                    // Typically a JS navigation could seem instant from a webview perspective while the website still layouts its content.
+                    //
+                    // We put the 2nd content read in an async task to be performed after a delay.
+                    // In the meantime, if the tab receives another navigation, or the webView changes URL,
+                    // we cancel the task and just use whatever we had at first read.
+
+                    let delayedReadOperation = DelayedReadWebViewOperation(url: url, webView: webView, firstRead: read, finishBlock: finishBlock)
+                    self?.delayedReadOperations[tabID] = delayedReadOperation
+                    delayedReadOperation.start()
+                }
             }
         }
     }
@@ -212,8 +210,92 @@ extension WebIndexingController {
     func currentTabDidChange(_ currentTab: BrowserTab?, previousCurrentTab: BrowserTab?) {
         previousTabBrowsingTree = previousCurrentTab?.browsingTree
     }
+
+    func tabDidClose(_ tab: BrowserTab) {
+        let tabID = tab.id
+        if let delayedRead = delayedReadOperations[tabID] {
+            delayedRead.cancel(sendFirstRead: true)
+            delayedReadOperations.removeValue(forKey: tabID)
+        }
+    }
 }
 
 protocol WebIndexControllerDelegate: AnyObject {
     func webIndexingController(_ controller: WebIndexingController, didIndexPageForURL url: URL)
+}
+
+/// Perfoms a readability read of the webview after a delay.
+///
+/// The operation can be stopped before the end of the delay,
+/// to not perform the second read while still sending the information of the first read.
+private final class DelayedReadWebViewOperation: Operation {
+
+    private let url: URL
+    private let firstRead: Readability?
+    private let finishBlock: (Readability?) -> Void
+    private weak var webView: WKWebView?
+
+    /// Delay in seconds
+    private let delay = 4
+    override var isAsynchronous: Bool {
+        true
+    }
+
+    init(url: URL, webView: WKWebView, firstRead: Readability?, finishBlock: @escaping (Readability?) -> Void) {
+        self.url = url
+        self.firstRead = firstRead
+        self.webView = webView
+        self.finishBlock = finishBlock
+        super.init()
+    }
+
+    private var dispatchedMainWorkItem: DispatchWorkItem?
+    private var hasFinishedAlready = false
+    override var isFinished: Bool {
+        hasFinishedAlready
+    }
+
+    private func finish(with read: Readability?) {
+        guard !isFinished else { return }
+        hasFinishedAlready = true
+        finishBlock(read)
+    }
+
+    override func start() {
+        let workItem = DispatchWorkItem(block: main)
+        dispatchedMainWorkItem = workItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delay), execute: workItem)
+    }
+
+    override func main() {
+        guard !isFinished else { return }
+        hasFinishedAlready = true
+        guard !isCancelled, let webView = webView, webView.url == url else {
+            finish(with: firstRead)
+            return
+        }
+        Readability.read(webView) { [weak self] result2 in
+            var readabilityResultToUse = self?.firstRead
+            switch result2 {
+            case let .failure(error):
+                Logger.shared.logError("Error while indexing web page on 2nd read: \(error), fallback to first read", category: .web)
+            case let .success(read2):
+                if read2 != self?.firstRead, let webViewURL = webView.url, webViewURL == self?.url {
+                    readabilityResultToUse = read2
+                }
+            }
+            self?.finish(with: readabilityResultToUse)
+        }
+    }
+
+    func cancel(sendFirstRead: Bool) {
+        if sendFirstRead && !isFinished {
+            finish(with: firstRead)
+        }
+        self.cancel()
+    }
+
+    override func cancel() {
+        dispatchedMainWorkItem?.cancel()
+    }
 }
