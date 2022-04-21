@@ -701,7 +701,7 @@ extension BrowserTab: WebViewControllerDelegate {
             shouldWaitForBetterContent = true
         }
 
-        state?.webIndexingController?.tabDidNavigate(self, toURL: url, inWebView: webView, originalRequestedURL: navigationDescription.requestedURL,
+        state?.webIndexingController?.tabDidNavigate(self, toURL: url, originalRequestedURL: navigationDescription.requestedURL,
                                                     shouldWaitForBetterContent: shouldWaitForBetterContent,
                                                     isLinkActivation: isLinkActivation, currentTab: state?.browserTabsManager.currentTab)
         state?.browserTabsManager.tabDidFinishNavigating(self, url: url)
