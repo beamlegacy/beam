@@ -12,6 +12,7 @@ class CaptureCopyShareTests: BaseTest {
     
     let pnsView = PnSTestView()
     let journalView = JournalTestView()
+    let textToCapture = " capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime"
     
     private func switchToJournalAndPasteToFirstNode() {
         ShortcutsHelper().shortcutActionInvoke(action: .switchBetweenCardWeb)
@@ -20,11 +21,20 @@ class CaptureCopyShareTests: BaseTest {
         ShortcutsHelper().shortcutActionInvoke(action: .paste)
     }
     
+    private func triggerShareOption(elementToAdd: XCUIElement, title: String, clickMenuItem: Bool = true) {
+        pnsView
+            .triggerAddToCardPopup(elementToAdd)
+            .getShareButton()
+            .clickOnExistence()
+        if clickMenuItem {
+            pnsView.menuItem(title).clickOnExistence()
+        }
+    }
+    
     func testCopyCapturedText() {
         launchApp()
         let helper = BeamUITestsHelper(journalView.app)
         helper.openTestPage(page: .page3)
-        let textToCapture = " capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime"
         
         step ("When I capture text and click Copy") {
             let textElementToAdd = pnsView.staticText(textToCapture)
@@ -62,6 +72,36 @@ class CaptureCopyShareTests: BaseTest {
         step ("Then I see image is pasted correctly") {
             self.switchToJournalAndPasteToFirstNode()
             XCTAssertEqual(journalView.getImageNodesCount(), 1)
+        }
+    }
+    
+    func testShareCapturedText() {
+        launchApp()
+        let helper = BeamUITestsHelper(journalView.app)
+        helper.openTestPage(page: .page3)
+        let windows = ["Twitter", "Facebook", "LinkedIn", "Reddit"]
+        let apps = ["Email", "Messages"]
+        
+        let textElementToAdd = pnsView.staticText(textToCapture)
+        
+        for windowTitle in windows {
+            step ("Then \(windowTitle) window is opened using Share option") {
+                self.triggerShareOption(elementToAdd: textElementToAdd, title: windowTitle)
+                
+                XCTAssertTrue(
+                    pnsView.isWindowOpenedWithContaining(title: windowTitle) ||
+                    pnsView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)
+                    )
+                
+                ShortcutsHelper().shortcutActionInvoke(action: .close)
+            }
+        }
+        
+        step ("Then \(apps.joined(separator: ",")) options exist in Share options") {
+            self.triggerShareOption(elementToAdd: textElementToAdd, title: apps[0], clickMenuItem: false)
+            for appTitle in apps {
+                XCTAssertTrue(pnsView.menuItem(appTitle).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            }
         }
     }
     
