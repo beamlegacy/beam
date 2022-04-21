@@ -75,7 +75,7 @@ class HelpAndFeedbackTests: BaseTest {
         step("Then I am on Shortcusts menu"){
             let cmdLabel = helpView!.image(HelpViewLocators.Images.cmdLabel.accessibilityIdentifier)
             XCTAssertTrue(cmdLabel.waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertEqual(helpView!.getNumberOfCMDLabels(), 25)
+            XCTAssertEqual(helpView!.getNumberOfCMDLabels(), 26)
         }
 
         step("When I close shortcuts help menu"){
