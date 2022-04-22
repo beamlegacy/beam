@@ -41,7 +41,7 @@ public struct BeamNoteReference: Codable, Equatable, Hashable {
 
 public enum PublicationStatus: Codable, Equatable {
     case unpublished
-    case published(URL, Date)
+    case published(URL, URL?, Date)
 
     public var isPublic: Bool {
         switch self {
@@ -58,10 +58,11 @@ public enum PublicationStatus: Codable, Equatable {
         switch self {
         case .unpublished:
             try container.encode(PublicationState.unpublished, forKey: .status)
-        case .published(let publicationURL, let publicationDate):
+        case .published(let publicationURL, let publicationUrlShort, let publicationDate):
             try container.encode(PublicationState.published, forKey: .status)
             try container.encode(publicationURL, forKey: .publicationUrl)
             try container.encode(publicationDate, forKey: .publicationDate)
+            try container.encode(publicationUrlShort, forKey: .publicationUrlShort)
         }
     }
 
@@ -75,13 +76,15 @@ public enum PublicationStatus: Codable, Equatable {
         case .published:
             let publicationDate = try container.decode(Date.self, forKey: .publicationDate)
             let publicationURL = try container.decode(URL.self, forKey: .publicationUrl)
-            self = .published(publicationURL, publicationDate)
+            let publicationUrlShort = try container.decodeIfPresent(URL.self, forKey: .publicationUrlShort)
+            self = .published(publicationURL, publicationUrlShort, publicationDate)
         }
     }
 
     enum CodingKeys: String, CodingKey {
         case status
         case publicationUrl
+        case publicationUrlShort
         case publicationDate
     }
 
@@ -460,7 +463,7 @@ public class BeamNote: BeamElement {
     }
 
     public var shouldUpdatePublishedVersion: Bool {
-        guard case .published(_, let publicationDate) = publicationStatus else { return false }
+        guard case .published(_, _, let publicationDate) = publicationStatus else { return false }
         let timeInterval = self.updateDate.timeIntervalSince(publicationDate)
         return timeInterval > 2
     }
