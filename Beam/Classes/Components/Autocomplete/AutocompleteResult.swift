@@ -273,6 +273,16 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         rawInfoPrefixScore > rawTextPrefixScore ? text : information
     }
 
+    /// The text that the omnibox text field should set as value when this result is selected
+    var textFieldText: String {
+        switch source {
+        case .createNote:
+            return information ?? displayText
+        default:
+            return displayText
+        }
+    }
+
     /// inferior result means it should appear lower in the search results.
     static func < (lhs: AutocompleteResult, rhs: AutocompleteResult) -> Bool {
         let lScore = lhs.weightedScore
