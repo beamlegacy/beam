@@ -207,7 +207,7 @@ class AutocompleteManager: ObservableObject {
         guard mode != .noteCreation else { return }
 
         let result = autocompleteResults[i]
-        let resultText = result.displayText
+        let resultText = result.textFieldText
 
         // if the first result is compatible with autoselection, select the added string
         if i == 0, let completingText = result.completingText,
