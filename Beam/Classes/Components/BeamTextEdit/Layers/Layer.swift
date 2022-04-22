@@ -38,6 +38,10 @@ import AVFoundation
     }
     var layout: () -> Void
 
+    /// Layer adds a compositing filter to the CALayer (dark screen, light multiply) and update it on appearance change
+    /// Setting this property to false will prevent the addition and update of this filter to allow its management elsewhere
+    var addDefaultCompositingFilter = true
+
     /// The app appearance at the time UI elements using dynamic colors were last updated.
     private var currentAppearance: NSAppearance?
 
@@ -65,8 +69,6 @@ import AVFoundation
         if layer.delegate == nil {
             layer.delegate = self
         }
-
-        self.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
 
         setAccessibilityRole(.button)
         setAccessibilityLabel(name)
@@ -132,7 +134,11 @@ import AVFoundation
     ///
     /// If you override this method, call this method on super at some point in your implementation in case a
     /// superclass also overrides this method.
-    func updateColors() {}
+    func updateColors() {
+        if addDefaultCompositingFilter {
+            self.layer.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
+        }
+    }
 
     final func updateColorsIfNeeded() {
         // Stop if appearance has not changed since last pass
