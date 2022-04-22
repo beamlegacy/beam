@@ -25,8 +25,8 @@ class BeamNoteSharingUtils {
     }
 
     static func getPublicLink(for note: BeamNote) -> URL? {
-        if case .published(let link, _) = note.publicationStatus {
-            return link
+        if case .published(let link, let shortLink, _) = note.publicationStatus {
+            return shortLink ?? link
         } else {
             return nil
         }
