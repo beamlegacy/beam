@@ -72,9 +72,11 @@ struct OmniboxSearchField: View {
     private var resultSubtitle: String? {
         guard isEditing, autocompleteManager.mode == .general else { return nil }
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
-        if let info = autocompleteResult.displayInformation {
+        if case .createNote = autocompleteResult.source {
+            return loc("Create Note")
+        } else if let info = autocompleteResult.displayInformation {
             return info
-        } else if autocompleteResult.source == .searchEngine {
+        } else if case .searchEngine = autocompleteResult.source {
             return autocompleteManager.searchEngine.description
         }
         return nil
