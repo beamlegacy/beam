@@ -396,6 +396,46 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(passwordGroup1.relatedFields.contains { $0.id == "id-login-2" })
         XCTAssertTrue(passwordGroup1.relatedFields.contains { $0.id == "id-password-1" })
     }
+
+    /// From ebay.com signup
+    func testMultipleTextFieldsWithSameAutocomplete() throws {
+        let inputs = [
+            DOMInputElement(type: .text, beamId: "id-firstname", autocomplete: "on", name: "firstname", visible: true),
+            DOMInputElement(type: .text, beamId: "id-lastname", autocomplete: "on", name: "lastname", visible: true),
+            DOMInputElement(type: .text, beamId: "id-email", autocomplete: "on", name: "email", visible: true),
+            DOMInputElement(type: .password, beamId: "id-password", autocomplete: "off", name: "password", visible: true),
+        ]
+
+        let results = classifier.classify(rawFields: inputs, on: "example.com")
+
+        XCTAssertFalse(results.activeFields.contains("id-firstname")) // ignored because page contains another field with higher score
+        XCTAssertFalse(results.activeFields.contains("id-firstname")) // ignored because page contains another field with higher score
+        XCTAssertTrue(results.activeFields.contains("id-email"))
+        XCTAssertTrue(results.activeFields.contains("id-password"))
+        XCTAssertEqual(results.activeFields.count, 2)
+
+        let ids = results.allInputFieldIds
+        XCTAssertFalse(ids.contains("id-firstname")) // ignored because page contains another field with higher score
+        XCTAssertFalse(ids.contains("id-lastname")) // ignored because page contains another field with higher score
+        XCTAssertTrue(ids.contains("id-email"))
+        XCTAssertTrue(ids.contains("id-password"))
+        XCTAssertEqual(ids.count, 2)
+
+        XCTAssertNil(results.autocompleteGroups["id-firstname"])
+        XCTAssertNil(results.autocompleteGroups["id-lastname"])
+
+        let loginGroup = try XCTUnwrap(results.autocompleteGroups["id-email"])
+        XCTAssertTrue(loginGroup.isAmbiguous)
+        XCTAssertEqual(loginGroup.relatedFields.count, 2)
+        XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-email" })
+        XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-password" })
+
+        let passwordGroup = try XCTUnwrap(results.autocompleteGroups["id-password"])
+        XCTAssertTrue(passwordGroup.isAmbiguous)
+        XCTAssertEqual(passwordGroup.relatedFields.count, 2)
+        XCTAssertTrue(passwordGroup.relatedFields.contains { $0.id == "id-email" })
+        XCTAssertTrue(passwordGroup.relatedFields.contains { $0.id == "id-password" })
+    }
 }
 
 fileprivate extension WebFieldClassifier.ClassifierResult {

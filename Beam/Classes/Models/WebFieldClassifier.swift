@@ -230,23 +230,23 @@ final class WebFieldClassifier {
         }
     }
 
-    private enum Match: Equatable, Comparable {
+    fileprivate enum Match: Equatable, Comparable {
         case never
         case score(Int)
         case always
     }
 
-    private struct WeightedRole {
+    fileprivate struct WeightedRole {
         var role: WebInputField.Role
         var match: Match
     }
 
-    private struct RoleInContext {
+    fileprivate struct RoleInContext {
         var role: WebInputField.Role
         var action: WebAutocompleteAction
     }
 
-    private struct EvaluatedField {
+    fileprivate struct EvaluatedField {
         var element: DOMInputElement
         var evaluation: [WebAutocompleteAction: WeightedRole]
 
@@ -338,6 +338,12 @@ final class WebFieldClassifier {
                 if value.contains("login") || value.contains("account") || value.contains("user") {
                     score += 10
                 }
+                if value.contains("email") {
+                    score += 5
+                }
+                if value.contains("first") || value.contains("last") {
+                    score -= 10
+                }
             }
         return .init(role: expectedRole, match: .score(score + bias))
     }
@@ -390,7 +396,12 @@ final class WebFieldClassifier {
 
         let evaluatedFields = evaluateFields(allowedFields, biasTowardLogin: biasTowardLogin, biasTowardAccountCreation: biasTowardAccountCreation)
         let ambiguousPasswordAction = containsPasswordFieldsUsableForLogin && containsPasswordFieldsUsableForNewAccount
-        let thresholds: [WebAutocompleteAction: Match] = [.login: containsPasswordFieldsUsableForLogin ? .score(0) : .score(900), .createAccount: containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900)]
+        let minimumLoginMatch = evaluatedFields.bestMatch(forRole: .currentUsername)
+        let minimiumCreateAccountMatch = evaluatedFields.bestMatch(forRole: .newUsername)
+        let thresholds: [WebAutocompleteAction: Match] = [
+            .login: max(minimumLoginMatch, containsPasswordFieldsUsableForLogin ? .score(0) : .score(900)),
+            .createAccount: max(minimiumCreateAccountMatch, containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900))
+        ]
         return makeClassifierResult(fields: evaluatedFields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction)
     }
 
@@ -463,5 +474,11 @@ final class WebFieldClassifier {
         default:
             return nil
         }
+    }
+}
+
+fileprivate extension Array where Element == WebFieldClassifier.EvaluatedField {
+    func bestMatch(forRole role: WebInputField.Role) -> WebFieldClassifier.Match {
+        map { $0.matchForRole(role) }.max() ?? .never
     }
 }
