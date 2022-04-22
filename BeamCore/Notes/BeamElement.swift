@@ -160,11 +160,13 @@ public enum ElementKind: Codable, Equatable {
                 displayInfos = MediaDisplayInfos(height: nil, width: nil, displayRatio: sizeRatio)
             }
 
+            let sourceMetadata = try container.decodeIfPresent(SourceMetadata.self, forKey: .sourceMetadata)
+
             // Compatibility: We went through multiple strategies to decode the image source.
             // For backwards compatibility all strategies are still supported
             // V4
             if let imageId = try? container.decodeIfPresent(UUID.self, forKey: .source) {
-                self = .image(imageId, displayInfos: displayInfos)
+                self = .image(imageId, origin: sourceMetadata, displayInfos: displayInfos)
                 return
             }
             // V3
