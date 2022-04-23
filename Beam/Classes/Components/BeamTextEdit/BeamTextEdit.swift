@@ -893,6 +893,9 @@ public extension CALayer {
                         node.cmdManager.reparentElement(child, to: newElement, atIndex: newElement.children.count)
                     }
                 }
+                if case .check = node.elementKind, node.elementText.isEmpty {
+                    node.cmdManager.formatText(in: node, for: .bullet, with: nil, for: nil, isActive: true)
+                }
             }
 
             if let toFocus = node.nodeFor(newElement) {
