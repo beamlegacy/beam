@@ -20,7 +20,8 @@ enum OnboardingLandingViewLocators {
     
     enum StaticTexts: String, CaseIterable, UIElement {
         case googleAuthWindowText = "Google"
-        case onboardingTitle = "Welcome to Beam"
+        case onboardingConnectTitle = "Connect to Beam"
+        case onboardingWelcomeTitle = "Welcome to Beam"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
