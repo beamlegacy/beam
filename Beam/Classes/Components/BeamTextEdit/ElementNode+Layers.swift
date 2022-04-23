@@ -235,7 +235,7 @@ extension ElementNode {
         if layer == nil {
             layer = createCheckboxLayer(at: layers[LayerName.bullet.rawValue]?.frame.origin ?? .zero)
         }
-        layer?.frame = NSRect(x: 20, y: 3, width: 14, height: 14)
+        layer?.frame = NSRect(x: 20, y: 1, width: 14, height: 14)
         layer?.isChecked = checked
         layer?.layer.isHidden = hidden
     }

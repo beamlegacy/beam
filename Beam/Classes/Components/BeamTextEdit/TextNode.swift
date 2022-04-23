@@ -318,7 +318,7 @@ public class TextNode: ElementNode {
     func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
         switch elementKind {
         case .check:
-            return NSEdgeInsets(top: 0, left: 20, bottom: 0, right: 0)
+            return NSEdgeInsets(top: 0, left: 21, bottom: 0, right: 0)
         default:
             return NSEdgeInsetsZero
         }
