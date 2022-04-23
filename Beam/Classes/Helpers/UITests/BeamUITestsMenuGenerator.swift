@@ -52,6 +52,8 @@ class BeamUITestsMenuGenerator {
         case .stopMockHttpServer: stopMockHttpServer()
         case .enableCreateJournalOnce: enableCreateJournalOnce()
         case .disableCreateJournalOnce: disableCreateJournalOnce()
+        case .deletePrivateKeys: deletePrivateKeys()
+        case .deleteAllRemoteObjects: deleteAllRemoteObjects()
         default: break
         }
     }
@@ -286,6 +288,19 @@ class BeamUITestsMenuGenerator {
         for window in AppDelegate.main.windows {
             window.state.cachedJournalStackView = nil
             window.state.cachedJournalScrollView = nil
+        }
+    }
+
+    private func deletePrivateKeys() {
+        Persistence.Encryption.privateKeys = nil
+        Persistence.Encryption.updateDate = BeamDate.now
+    }
+
+    private func deleteAllRemoteObjects() {
+        _ = try? BeamObjectManager().deleteAll(nil) { _ in
+            DispatchQueue.main.async {
+                AppDelegate.main.deleteAllLocalData()
+            }
         }
     }
 
