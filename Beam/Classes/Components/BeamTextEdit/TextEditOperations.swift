@@ -288,6 +288,11 @@ extension TextRoot {
                     }
                 }
 
+                if node.previousNodeIsRoot, case .check = node.elementKind {
+                    node.cmdManager.formatText(in: textNode, for: .bullet, with: nil, for: nil, isActive: false)
+                    return
+                }
+
                 guard let prevNode = node.previousVisibleNode(ElementNode.self),
                       !(node is BlockReferenceNode) else {
                     return

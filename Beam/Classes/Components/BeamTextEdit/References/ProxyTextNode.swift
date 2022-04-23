@@ -60,7 +60,7 @@ class ProxyTextNode: TextNode, ProxyNode {
     override func textPadding(elementKind: ElementKind) -> NSEdgeInsets {
         switch elementKind {
         case .check:
-            return NSEdgeInsets(top: 0, left: 20, bottom: 0, right: isContainedInLink ? 20 : 50)
+            return NSEdgeInsets(top: 0, left: 21, bottom: 0, right: isContainedInLink ? 20 : 50)
         default:
             return NSEdgeInsets(top: 0, left: 0, bottom: 0, right: isContainedInLink ? 20 : 50)
         }
