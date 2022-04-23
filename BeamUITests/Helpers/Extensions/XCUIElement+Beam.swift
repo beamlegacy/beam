@@ -102,9 +102,12 @@ extension XCUIElement: WaitHelper {
     }
     
     @discardableResult
-    public func focusAndTypeTextOnExistence(_ text: String) -> XCUIElement {
+    public func focusAndTypeTextOnExistence(_ text: String,_ clearTextField: Bool = false) -> XCUIElement {
         _ = self.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         self.tapInTheMiddle()
+        if clearTextField {
+            self.clear()
+        }
         self.typeText(text)
         return self
     }

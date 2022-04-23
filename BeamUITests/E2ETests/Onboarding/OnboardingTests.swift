@@ -12,13 +12,46 @@ class OnboardingTests: BaseTest {
     
     let onboardingView = OnboardingLandingTestView()
     let onboardingUsernameView = OnboardingUsernameTestView()
+    var onboardingPrivateKeyView: OnboardingPrivateKeyTestView!
+    var onboardingImportDataTestView: OnboardingImportDataTestView!
+    var onboardingLostPKTestView: OnboardingLostPKTestView!
+    var journalView: JournalTestView!
+    var deletePK = false
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding"){
-            //BeamUITestsHelper(launchApp().app).tapCommand(.showOnboarding)
             BeamUITestsHelper(launchAppWithArgument(uiTestModeLaunchArgument).app).tapCommand(.showOnboarding)
         }
+    }
+    
+    override func tearDown() {
+        if deletePK {
+            UITestsMenuBar().deletePrivateKeys()
+        }
+        super.tearDown()
+    }
+    
+    private func passAuthorisationViews(email: String, password: String) -> OnboardingPrivateKeyTestView {
+        onboardingView.getEmailTextField().tapInTheMiddle()
+        onboardingView.getEmailTextField().typeText(self.correctEmail)
+        onboardingView.clickContinueWithEmailButton()
+        
+        onboardingUsernameView.getPasswordTextField().tapInTheMiddle()
+        onboardingUsernameView.getPasswordTextField().typeText(self.correctPassword)
+        onboardingUsernameView.typeKeyboardKey(.escape) //get rid of the pop-up window if exists
+        return onboardingUsernameView.clickConnectButton()
+    }
+    
+    private func assertHistoryPasswordCheckboxes(_ assertTrue: Bool = true) {
+        if assertTrue {
+            XCTAssertTrue(onboardingImportDataTestView.getHistoryCheckboxTitle().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getPasswordCheckboxTitle().exists)
+        } else {
+            XCTAssertFalse(onboardingImportDataTestView.getHistoryCheckboxTitle().exists)
+            XCTAssertFalse(onboardingImportDataTestView.getPasswordCheckboxTitle().exists)
+        }
+            
     }
     
     func testTermsConditionsAndPrivacyPolicy() {
@@ -60,7 +93,7 @@ class OnboardingTests: BaseTest {
         }
         
         step("And user is still on Onboarding landing page"){
-            XCTAssertTrue(onboardingView.isOnboardingPageOpened())
+            XCTAssertTrue(onboardingView.waitForLandingViewToLoad())
         }
     }
     
@@ -88,7 +121,7 @@ class OnboardingTests: BaseTest {
         }
         
         step("And I'm redirected to Landing view on pressing Back button"){
-            XCTAssertTrue(onboardingUsernameView.goToPreviousPage().isOnboardingPageOpened())
+            XCTAssertTrue(onboardingUsernameView.goToPreviousPage().waitForLandingViewToLoad())
             onboardingView.clickContinueWithEmailButton()
         }
         
@@ -244,7 +277,6 @@ class OnboardingTests: BaseTest {
         
     }
 
-    
     func testSignUpLater() {
         
         step("Then Journal is opened on Sign up later click"){
@@ -253,7 +285,126 @@ class OnboardingTests: BaseTest {
                             .waitForJournalViewToLoad()
                             .isJournalOpened())
         }
+    }
+    
+    func testOnboardingPrivateKeyVerification() {
+        deletePK = true
+        UITestsMenuBar().deletePrivateKeys()
         
+        step("When I pass autorisation views") {
+            onboardingPrivateKeyView = passAuthorisationViews(email: self.correctEmail, password: self.correctPassword)
+        }
+        
+        step("Then PK view is loaded and Continue button is disabled") {
+            XCTAssertTrue(onboardingPrivateKeyView.waitForPKViewLoaded())
+            XCTAssertTrue(waitForIsDisabled( (onboardingPrivateKeyView.getContinueButton())))
+            XCTAssertTrue(onboardingPrivateKeyView.getImportPKFileButton().isEnabled)
+            XCTAssertTrue(onboardingPrivateKeyView.getBackButton().isEnabled)
+        }
+        
+        step("When I click I forgot my key button") {
+            onboardingLostPKTestView = onboardingPrivateKeyView.cantFindPKButtonClick()
+        }
+        
+        step("Then I'm redirected to Lost PK view") {
+            XCTAssertTrue(onboardingLostPKTestView.waitForLostPKViewLoading())
+            XCTAssertTrue(onboardingLostPKTestView.getViewDescription().exists)
+            XCTAssertTrue(onboardingLostPKTestView.getViewWarningText().exists)
+            XCTAssertTrue(onboardingLostPKTestView.getEraseDataButton().isHittable)
+            onboardingLostPKTestView!.getBackButton().tapInTheMiddle()
+        }
+        
+        step("When I add incorrect PK and click continue button") {
+            onboardingPrivateKeyView.getPKTextField().focusAndTypeTextOnExistence("sometext")
+            XCTAssertTrue(waitForIsEnabled( (onboardingPrivateKeyView.getContinueButton())))
+            onboardingPrivateKeyView.getContinueButton().tapInTheMiddle()
+        }
+        
+        step("Then I see an error") {
+            XCTAssertTrue(onboardingPrivateKeyView.getErrorTitle().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(onboardingPrivateKeyView.getErrorDescription().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            AlertTestView().getAlertDialog().buttons["OK"].tapInTheMiddle()
+        }
+        
+        step("When I add correct PK and click continue button") {
+            onboardingPrivateKeyView.getPKTextField().focusAndTypeTextOnExistence(correctEncKey, true)
+            XCTAssertTrue(waitForIsEnabled( (onboardingPrivateKeyView.getContinueButton())))
+            onboardingImportDataTestView = onboardingPrivateKeyView.clickContinueButton()
+        }
+        
+        step("Then it is successfully applied") {
+            XCTAssertTrue(onboardingImportDataTestView.waitForImportDataViewLoad())
+        }
+    }
+    
+    func testSignInSuccessfullyFromOnboarding() {
+        deletePK = true
+        UITestsMenuBar().deletePrivateKeys()
+        step("When I pass authorisation") {
+            onboardingImportDataTestView = passAuthorisationViews(email: self.correctEmail, password: self.correctPassword).setPKAndClickContinueButton(privateKey: self.correctEncKey)
+        }
+        
+        step("Then I'm on a Journal view") {
+            XCTAssertTrue(onboardingImportDataTestView
+                                .clickSkipButton()
+                                .waitForJournalViewToLoad()
+                                .isJournalOpened())
+        }
+    }
+    
+    func testOnboardingImportView() throws {
+        try XCTSkipIf(true, "blocked by https://linear.app/beamapp/issue/BE-3880/ansible-script-update-to-install-chrome-firefox-brave-browsers-on-ci")
+        step("Given I'm on import data view'") { onboardingView.signUpLater()
+            onboardingImportDataTestView = OnboardingImportDataTestView()
+        }
+        
+        step("Then Safari import is correctly displayed") {
+            onboardingImportDataTestView.waitForImportDataViewLoad()
+            self.assertHistoryPasswordCheckboxes()
+            XCTAssertTrue(onboardingImportDataTestView.getSafariDescriptionRow1().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getSafariDescriptionRow2().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getSafariMozillaDescriptionRow3().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getChooseCSVButton().isEnabled)
+            XCTAssertFalse(onboardingImportDataTestView.getImportButton().isEnabled)
+        }
+        
+        step("Then Google Chrome import is correctly displayed") {
+            onboardingImportDataTestView.selectBrowser(.chrome)
+            self.assertHistoryPasswordCheckboxes()
+            XCTAssertTrue(onboardingImportDataTestView.getImportButton().isEnabled)
+        }
+        
+        step("Then Mozilla Firefox import is correctly displayed") {
+            onboardingImportDataTestView.selectBrowser(.firefox)
+            self.assertHistoryPasswordCheckboxes()
+            XCTAssertTrue(onboardingImportDataTestView.getMozillaDescriptionRow1().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getMozillaDescriptionRow2().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getSafariMozillaDescriptionRow3().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getChooseCSVButton().isEnabled)
+            XCTAssertFalse(onboardingImportDataTestView.getImportButton().isEnabled)
+        }
+        
+        step("Then Brave import is correctly displayed") {
+            onboardingImportDataTestView.selectBrowser(.brave)
+            self.assertHistoryPasswordCheckboxes()
+            XCTAssertTrue(onboardingImportDataTestView.getImportButton().isEnabled)
+        }
+        
+        step("Then CSV import is correctly displayed") {
+            onboardingImportDataTestView.selectBrowser(.csv)
+            self.assertHistoryPasswordCheckboxes(false)
+            XCTAssertFalse(onboardingImportDataTestView.getImportButton().isEnabled)
+            XCTAssertTrue(onboardingImportDataTestView.getCSVDescriptionRow1().exists)
+            XCTAssertTrue(onboardingImportDataTestView.getCSVDescriptionRow2().exists)
+        }
+        
+        step("When I click back Button") {
+            onboardingImportDataTestView.clickBackButton()
+        }
+        
+        step("Then I'm redirected to PK verification view") {
+            XCTAssertTrue(onboardingView.waitForLandingViewToLoad())
+        }
     }
     
 }
