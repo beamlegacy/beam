@@ -358,5 +358,4 @@ extension BeamTextEdit {
         }
         return nil
     }
-
 }
