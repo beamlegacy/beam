@@ -97,4 +97,8 @@ class OnboardingLandingTestView: BaseView {
     func isContinueWithEmailButtonActivated() -> Bool {
         return waitFor(PredicateFormat.isHittable.rawValue, getConnectWithEmailButton(), minimumWaitTimeout)  
     }
+    
+    func waitForLandingViewToLoad() -> Bool {
+        return staticText(OnboardingLandingViewLocators.StaticTexts.onboardingWelcomeTitle.accessibilityIdentifier).waitForExistence(timeout: minimumWaitTimeout)
+    }
 }

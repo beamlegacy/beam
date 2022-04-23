@@ -52,22 +52,6 @@ class SigninTests: BaseTest {
         }
     }
         
-    func testSignInSuccessfullyFromOnboarding() throws {
-        try XCTSkipIf(true, "WIP")
-        step("TBD"){
-        XCTAssertTrue(onboardingView.clickContinueWithEmailButton().waitForUsernameViewOpened(), "Username view wasn't opened")
-        }
-        
-        step("TBD"){
-        XCTAssertTrue(onboardingUsernameView
-                        .populateCredentialFields(email: correctEmail, password: correctPassword)
-                        .clickConnectButton()
-                        .clickSkipButton()
-                        .waitForJournalViewToLoad()
-                        .isJournalOpened(), "Journal view didn't load")
-        }
-    }
-        
     func testSignInUsingInvalidCredentials() throws {
         try XCTSkipIf(true, "Is duplicated by testConnectWithEmailUsernameSignInRequirements. To be refactored/removed")
         step("GIVEN Username view is opened"){

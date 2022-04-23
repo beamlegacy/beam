@@ -79,4 +79,16 @@ class UITestsMenuBar: BaseMenuBar {
         menuItem(UITestMenuAvailableCommands.showWebViewCount.rawValue).clickOnExistence()
         return self
     }
+    
+    @discardableResult
+    func deletePrivateKeys() -> UITestsMenuBar {
+        menuItem(UITestMenuAvailableCommands.deletePrivateKeys.rawValue).clickOnExistence()
+        return self
+    }
+
+    @discardableResult
+    func deleteAllRemoteObjects() -> UITestsMenuBar {
+        menuItem(UITestMenuAvailableCommands.deleteAllRemoteObjects.rawValue).clickOnExistence()
+        return self
+    }
 }

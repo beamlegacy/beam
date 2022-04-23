@@ -57,9 +57,9 @@ class OnboardingUsernameTestView: BaseView {
     }
     
     @discardableResult
-    func clickConnectButton() -> OnboardingImportDataTestView {
+    func clickConnectButton() -> OnboardingPrivateKeyTestView {
         getConnectButtonElement().clickOnHittable()
-        return OnboardingImportDataTestView()
+        return OnboardingPrivateKeyTestView()
     }
     
     func clickBackButton() -> OnboardingLandingTestView {
