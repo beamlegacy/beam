@@ -46,8 +46,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var cancellableScope = Set<AnyCancellable>()
     var importErrorCancellable: AnyCancellable?
 
-    private let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
-    private let defaultWindowSize = CGSize(width: 1024, height: 768)
+    static let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
+    static let defaultWindowSize = CGSize(width: 1024, height: 768)
     public private(set) lazy var documentManager = DocumentManager()
     public private(set) lazy var databaseManager = DatabaseManager()
     public private(set) lazy var beamObjectManager = BeamObjectManager()
@@ -424,10 +424,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return nil
         }
         // Create the window and set the content view.
-        let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: defaultWindowSize),
+        let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: Self.defaultWindowSize),
                                 data: data,
                                 isIncognito: isIncognito,
-                                minimumSize: frame?.size ?? defaultWindowMinimumSize)
+                                minimumSize: frame?.size ?? Self.defaultWindowMinimumSize)
         if frame == nil && windows.count == 0 {
             window.center()
         } else {

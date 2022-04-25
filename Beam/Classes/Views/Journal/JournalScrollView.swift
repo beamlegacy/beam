@@ -80,7 +80,6 @@ struct JournalScrollView: NSViewRepresentable {
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .leading, relatedBy: .equal, toItem: scrollView.contentView, attribute: .leading, multiplier: 1.0, constant: 0))
         scrollView.contentView.addConstraint(NSLayoutConstraint(item: journalStackView, attribute: .trailing, relatedBy: .equal, toItem: scrollView.contentView, attribute: .trailing, multiplier: 1.0, constant: 0))
 
-        journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
         if USE_SCROLLVIEW_CACHING {
             state.cachedJournalScrollView = scrollView
@@ -101,7 +100,6 @@ struct JournalScrollView: NSViewRepresentable {
             state.data.reloadJournal()
         }
         journalStackView.topOffset = Self.firstNoteTopOffset(forProxy: proxy, isIncognito: state.isIncognito) + Self.incognitoOffset(isIncognito: state.isIncognito)
-        journalStackView.setNotes(state.data.journal, focussingOn: state.journalNoteToFocus, force: false)
         resetJournalFocus()
     }
 
