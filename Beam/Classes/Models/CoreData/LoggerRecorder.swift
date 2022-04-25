@@ -21,8 +21,10 @@ class LoggerRecorder {
 
         Logger.shared.callback = { (message, level, category, thread, duration) in
             guard let context = self.context else { return }
-
             context.perform {
+                // self.context may contains a more up to date version
+                // after importing backup for instance as loggerRecorder is reset.
+                guard let context = self.context else { return }
                 let logEntry = LogEntry(context: context)
                 logEntry.created_at = BeamDate.now
                 logEntry.log = "[\(thread)] \(message)"
