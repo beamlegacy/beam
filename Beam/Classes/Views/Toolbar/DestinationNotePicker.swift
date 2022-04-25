@@ -116,7 +116,8 @@ struct DestinationNotePicker: View {
                             cancelSearch()
                         } onCursorMovement: { move -> Bool in
                             autocompleteModel.handleCursorMovement(move)
-                        } onStartEditing: {
+                        } onStartEditing: { [weak state] in
+                            guard let state = state else { return }
                             Logger.shared.logInfo("[DestinationNotePicker] Start Editing", category: .ui)
                             if tab.noteController.note == nil {
                                 state.destinationCardName = ""
