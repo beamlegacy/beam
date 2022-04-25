@@ -15,6 +15,10 @@ struct ModeView: View {
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     var containerGeometry: GeometryProxy
     @Binding var contentIsScrolled: Bool
+    func setContentIsScrolled(_ value: Bool) {
+        guard contentIsScrolled != value else { return }
+        contentIsScrolled = value
+    }
 
     @State private var transitionModel = ModeTransitionModel()
     private let cardScrollViewTopInset: CGFloat = Toolbar.height
@@ -25,7 +29,9 @@ struct ModeView: View {
                 EnhancedWebView(tab: tab).clipped()
             }
         }
-        .onAppear { contentIsScrolled = false }
+        .onAppear {
+            setContentIsScrolled(false)
+        }
         .transition(.webContentTransition(windowInfo.windowIsResizing))
     }
 
@@ -34,10 +40,14 @@ struct ModeView: View {
             if let currentNote = state.currentNote {
                 NoteView(note: currentNote, containerGeometry: containerGeometry, topInset: cardScrollViewTopInset, leadingPercentage: PreferencesManager.editorLeadingPercentage,
                          centerText: false, initialFocusedState: state.notesFocusedStates.currentFocusedState) { scrollPoint in
-                    contentIsScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle - cardScrollViewTopInset
+
+                    let isScrolled = scrollPoint.y > NoteView.topSpacingBeforeTitle - cardScrollViewTopInset
+                    setContentIsScrolled(isScrolled)
                     CustomPopoverPresenter.shared.dismissPopovers()
                 }
-                .onAppear { contentIsScrolled = false }
+                .onAppear {
+                    setContentIsScrolled(false)
+                }
                 .transition(.noteContentTransition(transitionModel: transitionModel))
             }
         }
@@ -70,7 +80,7 @@ struct ModeView: View {
                 DispatchQueue.main.async {
                     state.data.reloadAllEvents()
                 }
-                contentIsScrolled = false
+                setContentIsScrolled(false)
                 guard !transitionModel.isTransitioning && state.mode == .today else { return }
                 state.startShowingOmniboxInJournal()
                 state.autocompleteManager.clearAutocompleteResults()
@@ -90,8 +100,12 @@ struct ModeView: View {
 
     private func onScroll(_ scrollPoint: CGPoint, containerGeometry: GeometryProxy) {
         let scrollOffset = scrollPoint.y + cardScrollViewTopInset
-        contentIsScrolled = scrollOffset >
+        let isScrolled = scrollOffset >
         JournalScrollView.firstNoteTopOffset(forProxy: containerGeometry, isIncognito: state.isIncognito)
+
+        if isScrolled != contentIsScrolled {
+            setContentIsScrolled(isScrolled)
+        }
 
         CustomPopoverPresenter.shared.dismissPopovers()
         guard !transitionModel.isTransitioning else { return }

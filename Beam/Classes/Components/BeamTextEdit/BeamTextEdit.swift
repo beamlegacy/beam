@@ -524,9 +524,12 @@ public extension CALayer {
     }
 
     static func textNodeWidth(for containerSize: CGSize) -> CGFloat {
-        let ratio = Self.bigThreshold / min(max(containerSize.width, Self.smallTreshold), Self.bigThreshold)
-        let result = max(PreferencesManager.editorMaxWidth / ratio, PreferencesManager.editorMinWidth).rounded(.toNearestOrAwayFromZero)
-        return max(result, Self.minimumEmptyEditorWidth)
+        let clampedWidth = containerSize.width.clamp(Self.smallTreshold, Self.bigThreshold) - Self.smallTreshold
+        let clampedRatio = clampedWidth / (Self.bigThreshold - Self.smallTreshold)
+        let adjustmentAmplitude = maximumEmptyEditorWidth - Self.minimumEmptyEditorWidth
+        let computedWidth = Self.minimumEmptyEditorWidth + clampedRatio * adjustmentAmplitude
+        let result = max(computedWidth, Self.minimumEmptyEditorWidth)
+        return result
     }
 
     // This is the root node of what we are editing:
@@ -605,6 +608,7 @@ public extension CALayer {
 
     static let minimumEmptyEditorHeight = CGFloat(184)
     static let minimumEmptyEditorWidth = CGFloat(PreferencesManager.editorMinWidth)
+    static let maximumEmptyEditorWidth = CGFloat(PreferencesManager.editorMaxWidth)
     var realContentSize: NSSize = .zero
     var safeContentSize: NSSize = .zero
 
@@ -615,16 +619,18 @@ public extension CALayer {
                 let size = root.allVisibleTexts.reduce(0) { partialResult, element in
                     partialResult + Int(1 + element.1.text.count / 80) * fontSize
                 }
-                return NSSize(width: Self.minimumEmptyEditorWidth, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
+                let result = NSSize(width: AppDelegate.defaultWindowMinimumSize.width, height: max(Self.minimumEmptyEditorHeight, CGFloat(size)))
+                return result
             }
 
-            return NSSize(width: Self.minimumEmptyEditorWidth, height: Self.minimumEmptyEditorHeight)
+            let result = NSSize(width: AppDelegate.defaultWindowMinimumSize.width, height: Self.minimumEmptyEditorHeight)
+            return result
         }
         let textNodeWidth = Self.textNodeWidth(for: frame.size)
         rootNode.availableWidth = textNodeWidth
         let noteHeight = rootNode.idealSize.height + topOffsetActual + footerHeight + cardTopSpace
         let leadingGutterHeight = leadingGutterSize.height + topOffsetActual + footerHeight + cardTopSpace + cardHeaderPosY
-        realContentSize = NSSize(width: textNodeWidth, height: max(noteHeight, leadingGutterHeight))
+        realContentSize = NSSize(width: max(AppDelegate.defaultWindowMinimumSize.width, textNodeWidth), height: max(noteHeight, leadingGutterHeight))
         safeContentSize = realContentSize
         if !journalMode {
             safeContentSize.height = max(visibleRect.maxY, safeContentSize.height)
