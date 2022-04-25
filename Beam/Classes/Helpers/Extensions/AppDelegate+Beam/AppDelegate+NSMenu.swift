@@ -34,8 +34,8 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
     func subscribeToStateChanges(for state: BeamState) {
         state.$mode
             .receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                guard let self = self else { return }
+            .sink { [weak self, weak state] _ in
+                guard let self = self, let state = state else { return }
                 self.updateMainMenuItems(for: state)
             }
             .store(in: &cancellableScope)
