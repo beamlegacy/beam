@@ -97,6 +97,11 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         registerForDraggedTypes([.fileURL])
     }
 
+    deinit {
+        state.cachedJournalScrollView = nil
+        state.cachedJournalStackView = nil
+    }
+
     override func performClose(_ sender: Any?) {
         if state.mode != .web && state.hasUnpinnedBrowserTabs {
             state.mode = .web
