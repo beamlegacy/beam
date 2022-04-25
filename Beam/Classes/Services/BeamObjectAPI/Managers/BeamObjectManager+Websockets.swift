@@ -2,8 +2,15 @@ import Foundation
 import BeamCore
 
 extension BeamObjectManager {
+    // swiftlint:disable function_body_length
     /// `handler` might be called multiple times in case of reconnection
     func liveSync(_ handler: @escaping (Bool) -> Void) {
+        guard Configuration.env != .test else {
+            Logger.shared.logDebug("websocket is disabled during tests", category: .webSocket)
+            handler(false)
+            return
+        }
+
         guard AuthenticationManager.shared.isAuthenticated else {
             Logger.shared.logDebug("websocket is disabled because the user isn't authenticated", category: .webSocket)
             handler(false)
