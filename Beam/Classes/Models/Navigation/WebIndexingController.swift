@@ -82,8 +82,6 @@ class WebIndexingController {
         var tabIndexingInfo = tabIndexingInfo
         tabIndexingInfo.tabTree = browsingTreeCopy
 
-        try? TextSaver.shared?.save(nodeId: browsingTree.current.id, text: read)
-
         if tabIndexingInfo.shouldBeIndexed {
             _ = LinkStore.shared.visit(tabIndexingInfo.url.string, title: tabIndexingInfo.document.title, content: tabIndexingInfo.textContent)
             appendToClustering(url: url, tabIndexingInfo: tabIndexingInfo, readabilityResult: read)
