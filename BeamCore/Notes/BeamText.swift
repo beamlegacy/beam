@@ -392,7 +392,7 @@ public struct BeamText: Codable {
             pos += length
         }
 
-        fatalError()
+        return max(ranges.count - 1, 0)
     }
 
     public mutating func addAttributes(_ attributes: [Attribute], to positionRange: Swift.Range<Int>) {
