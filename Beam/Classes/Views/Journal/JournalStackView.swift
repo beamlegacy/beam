@@ -51,6 +51,17 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
                 guard let self = self else { return }
                 self.setNotes(self.notes, focussingOn: nil, force: true)
             }.store(in: &scope)
+
+        state.data.$journal.sink { [weak self] journalNotes in
+            guard let self = self else { return }
+            self.setNotes(journalNotes, focussingOn: self.state.journalNoteToFocus, force: false)
+        }.store(in: &scope)
+
+        state.$journalNoteToFocus.sink { [weak self] focusedNote in
+            guard let self = self else { return }
+            self.setNotes(self.notes, focussingOn: focusedNote, force: true)
+        }
+
     }
 
     required init?(coder: NSCoder) {
@@ -125,7 +136,7 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     }
 
     override public var intrinsicContentSize: NSSize {
-        let width = BeamTextEdit.minimumEmptyEditorWidth
+        let width = AppDelegate.defaultWindowMinimumSize.width
 
         var height = topOffset
         for note in self.notes {
@@ -150,7 +161,7 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
     }
 
     //swiftlint:disable:next cyclomatic_complexity function_body_length
-    public func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
+    private func setNotes(_ notes: [BeamNote], focussingOn: BeamNote?, force: Bool) {
         inspectDatabaseChange()
 
         let sortedNotes = notes.sorted(by: { lhs, rhs in
