@@ -479,10 +479,12 @@ import Promises
         updateFavIcon(fromWebView: false, cacheOnly: true, clearIfNotFound: true)
     }
 
-    func reload() {
+    func reload(configureWebViewWithAdBlocker: Bool = true) {
         hasError = false
         tabWillLeaveCurrentPage()
-        ContentBlockingManager.shared.configure(webView: webView)
+        if configureWebViewWithAdBlocker {
+            ContentBlockingManager.shared.configure(webView: webView)
+        }
         if let webviewUrl = webView.url, BeamURL(webviewUrl).isErrorPage, let originalUrl = BeamURL(webviewUrl).originalURLFromErrorPage {
             webView.replaceLocation(with: originalUrl)
         } else if webView.url == nil, let url = url {
