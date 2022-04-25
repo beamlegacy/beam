@@ -70,7 +70,7 @@ class CardPublishTests: BaseTest {
     
     
     func testPublishUnpublishNote() throws {
-        
+        try XCTSkipIf(true, "To be included after https://linear.app/beamapp/issue/BE-3934/uitestmenu-sign-in-with-correct-pk fix")
         let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
         UITestsMenuBar().signInApp()
         let cardNameToBeCreated = "Note publish"
