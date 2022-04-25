@@ -13,7 +13,7 @@ import Combine
     This model helps enable/disabling transition depending on the current vs previous mode
  */
 class ModeTransitionModel {
-    var state: BeamState? {
+    weak var state: BeamState? {
         didSet {
             cancellables.removeAll()
             guard let newState = state else { return }
