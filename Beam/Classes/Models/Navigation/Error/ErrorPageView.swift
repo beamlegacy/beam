@@ -10,7 +10,7 @@ import SwiftUI
 struct ErrorPageView: View {
     let errorManager: ErrorPageManager
     let onReloadTab: () -> Void?
-
+    
     var errorImage: some View {
         Image(errorManager.error == .radblock ? "error-page_adblock" : "error-page")
             .renderingMode(.template)
@@ -18,15 +18,26 @@ struct ErrorPageView: View {
             .padding(.bottom, 16)
     }
 
-    private func actionButton(title: String, action: @escaping () -> Void) -> some View {
-        Text(title)
-            .font(BeamFont.regular(size: 13).swiftUI)
-            .padding(.vertical, 7)
-            .padding(.horizontal, 30)
-            .foregroundColor(BeamColor.Corduroy.swiftUI)
-            .background(BeamColor.Mercury.swiftUI)
-            .cornerRadius(3)
-            .onTapGesture(perform: action)
+    struct ActionButton: View {
+        var title: String
+        var action: (() -> Void)
+        @State private var isHovering: Bool = false
+
+        var body: some View {
+            Button {
+                 action()
+             } label: {
+                 Text(title)
+                     .font(BeamFont.regular(size: 13).swiftUI)
+             }
+             .buttonStyle(.plain)
+             .padding(.vertical, 7)
+             .padding(.horizontal, 30)
+             .foregroundColor( isHovering ? BeamColor.Bluetiful.swiftUI : BeamColor.Corduroy.swiftUI)
+             .background(BeamColor.Mercury.swiftUI)
+             .onHover { isHovering = $0 }
+             .cornerRadius(3)
+        }
     }
 
     var body: some View {
@@ -38,8 +49,11 @@ struct ErrorPageView: View {
                 .foregroundColor(BeamColor.LightStoneGray.swiftUI)
                 .padding(.bottom, 10)
             Text(errorManager.primaryMessage)
+                .lineLimit(nil)
+                .frame(maxWidth: 298)
                 .font(BeamFont.medium(size: 12).swiftUI)
                 .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                .padding(.bottom, 10)
             Text(errorManager.secondaryMessage)
                 .font(BeamFont.medium(size: 12).swiftUI)
                 .foregroundColor(BeamColor.LightStoneGray.swiftUI)
@@ -52,12 +66,12 @@ struct ErrorPageView: View {
                     .foregroundColor(BeamColor.Niobium.swiftUI)
                     .padding(.bottom, 14)
                 HStack(spacing: 12) {
-                    actionButton(title: "Just this time") {
+                    ActionButton(title: "Just this time") {
                         errorManager.authorizeJustOnce {
                             onReloadTab()
                         }
                     }
-                    actionButton(title: "Permanently") {
+                    ActionButton(title: "Permanently") {
                         errorManager.permanentlyAuthorize {
                             onReloadTab()
                         }
