@@ -52,7 +52,9 @@ struct BeamTextAttributedStringBuilder {
             if let refRanges = config.referencesRanges {
                 for refRange in refRanges {
                     if range.range.contains(refRange.lowerBound) && range.range.contains(refRange.upperBound) {
-                        let r = NSRange(location: refRange.lowerBound, length: max(0, min(range.range.upperBound - refRange.lowerBound, refRange.count)))
+                        let strRange = attributedString.wholeRange
+                        let r = NSRange(location: refRange.lowerBound, length: max(0, min(strRange.length - refRange.lowerBound, refRange.count)))
+                        guard r.length > 0 else { continue }
                         attributedString.addAttribute(.foregroundColor, value: BeamColor.Editor.reference.staticColor, range: r)
                     }
                 }
