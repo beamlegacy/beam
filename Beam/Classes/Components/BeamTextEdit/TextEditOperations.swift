@@ -280,7 +280,7 @@ extension TextRoot {
             if cursorPosition == 0 && state.selectedTextRange.isEmpty {
                 if node.previousNodeIsRoot && node.textCount == 0 {
                     switch node.elementKind {
-                    case .heading:
+                    case .heading, .check:
                         node.cmdManager.formatText(in: textNode, for: .bullet, with: nil, for: nil, isActive: false)
                         return
                     default:
@@ -288,7 +288,7 @@ extension TextRoot {
                     }
                 }
 
-                if node.previousNodeIsRoot, case .check = node.elementKind {
+                if case .check = node.elementKind {
                     node.cmdManager.formatText(in: textNode, for: .bullet, with: nil, for: nil, isActive: false)
                     return
                 }
