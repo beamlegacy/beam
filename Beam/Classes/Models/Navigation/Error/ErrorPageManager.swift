@@ -62,7 +62,7 @@ class ErrorPageManager {
         case .network:
             return "It looks like your computer is not connected"
         case .radblock:
-            return "The site “\(domain)”"
+            return "The site “\(errorUrl.string)”"
         case .hostUnreachable:
             return "Beam cannot find the server for"
         case .unknown:
@@ -122,6 +122,15 @@ class ErrorPageManager {
         ContentBlockingManager.shared.configure(webView: webView)
         NotificationCenter.default
             .publisher(for: .RBDatabaseDidAddEntry)
+            .sink { [authorizeJustOnce] _ in
+                // Cause Radblock is very async and doesn't notify when all db are synchronized, we remove rules to get a fast-ui response
+                authorizeJustOnce {
+                    completion()
+                }
+            }
+            .store(in: &cancellables)
+        NotificationCenter.default
+            .publisher(for: .RBDatabaseDidUpdateEntry)
             .sink { [authorizeJustOnce] _ in
                 // Cause Radblock is very async and doesn't notify when all db are synchronized, we remove rules to get a fast-ui response
                 authorizeJustOnce {

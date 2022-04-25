@@ -102,7 +102,7 @@ struct EnhancedWebView: View {
 
                 if tab.hasError, let errorPageManager = tab.errorPageManager {
                     ErrorPageView(errorManager: errorPageManager) {
-                        tab.reload()
+                        tab.reload(configureWebViewWithAdBlocker: false)
                     }
                 }
             }
