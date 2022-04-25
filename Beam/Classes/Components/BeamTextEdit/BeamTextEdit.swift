@@ -60,12 +60,7 @@ public extension CALayer {
 // swiftlint:disable:next type_body_length
 @objc public class BeamTextEdit: NSView, NSTextInputClient, CALayerDelegate {
     var data: BeamData?
-    weak var state: BeamState? {
-        didSet {
-            state?.currentEditor = self
-            data = state?.data
-        }
-    }
+    public private(set) weak var state: BeamState?
 
     var cardTopSpace: CGFloat {
         journalMode ? PreferencesManager.editorJournalTopPadding : PreferencesManager.editorCardTopPadding
@@ -217,6 +212,7 @@ public extension CALayer {
         note = root
 
         super.init(frame: NSRect())
+        self.state?.currentEditor = self
         self.sign = Self.signPost.createId(object: self)
 
         setAccessibilityIdentifier("TextEdit")
