@@ -69,6 +69,16 @@ public class GRDBUrlFrecencyStorage: FrecencyStorage {
 
         return nil
     }
+    public func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore] {
+        let keyValues = db.getFrecencies(urlIds: ids, paramKey: paramKey)
+            .map { (id, record) in
+                (id, FrecencyScore(id: record.urlId,
+                                   lastTimestamp: record.lastAccessAt,
+                                   lastScore: record.frecencyScore,
+                                   sortValue: record.frecencySortScore))
+            }
+        return Dictionary(uniqueKeysWithValues: keyValues)
+    }
 
     public func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
         let record = FrecencyUrlRecord(urlId: score.id,
@@ -105,6 +115,22 @@ class LinkStoreFrecencyUrlStorage: FrecencyStorage {
               let score = link.frecencyVisitScore,
               let sortScore = link.frecencyVisitSortScore else { return nil }
         return FrecencyScore(id: id, lastTimestamp: lastAccessAt, lastScore: score, sortValue: sortScore)
+    }
+    func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore] {
+        guard paramKey == .webVisit30d0 else { return [UUID: FrecencyScore]() }
+        do {
+            let links = try linkDB.fetchWithIds(ids)
+            let scores = links.compactMap { link -> (UUID, FrecencyScore)? in
+                guard let lastAccessAt = link.frecencyVisitLastAccessAt,
+                    let score = link.frecencyVisitScore,
+                    let sortScore = link.frecencyVisitSortScore else { return nil }
+                return (link.id, FrecencyScore(id: link.id, lastTimestamp: lastAccessAt, lastScore: score, sortValue: sortScore))
+            }
+            return Dictionary(uniqueKeysWithValues: scores)
+        } catch {
+            Logger.shared.logError("Couldn't fetch url frecencies: \(error)", category: .database)
+            return [UUID: FrecencyScore]()
+        }
     }
 
     func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {

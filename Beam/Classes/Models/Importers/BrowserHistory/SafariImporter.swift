@@ -47,6 +47,7 @@ struct SafariHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 
 final class SafariImporter: BrowserHistoryImporter {
     let sourceBrowser: BrowserType = .safari
+    let itemLimit: Int = BrowserHistoryImportConfig.itemLimit
 
     enum ImportError: Error {
         case countNotAvailable
@@ -91,9 +92,14 @@ final class SafariImporter: BrowserHistoryImporter {
                     throw ImportError.countNotAvailable
                 }
                 Logger.shared.logDebug("Safari history: \(itemCount) items in database, start date = \(startDate?.description ?? "none")", category: .browserImport)
-                let rows = try SafariHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time, v.title, i.url FROM history_visits v JOIN history_items i ON v.history_item = i.id ORDER BY v.visit_time ASC")
+                let rows = try SafariHistoryItem.fetchCursor(db, sql: """
+                    SELECT v.visit_time, v.title, i.url
+                    FROM history_visits v JOIN history_items i
+                    ON v.history_item = i.id
+                    ORDER BY v.visit_time ASC
+                    LIMIT :limit OFFSET :offset
+                    """, arguments: ["limit": itemLimit, "offset": max(itemCount - itemLimit, 0)])
                     .filter { $0.timestamp > startDate ?? Date.distantPast }
-
                 while let row = try rows.next() {
                     if row.url != nil {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
