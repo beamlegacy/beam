@@ -19,8 +19,12 @@ struct BrowserHistoryResult {
     var itemCount: Int
     var item: BrowserHistoryItem
 }
+struct BrowserHistoryImportConfig {
+    static let itemLimit = 100_000
+}
 
 protocol BrowserHistoryImporter: BrowserImporter {
+    var itemLimit: Int { get }
     var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>? { get set }
     var publisher: AnyPublisher<BrowserHistoryResult, Error> { get }
     func historyDatabaseURL() throws -> URLProvider?

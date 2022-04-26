@@ -61,6 +61,7 @@ struct ChromiumHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 }
 
 final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
+    let itemLimit: Int = BrowserHistoryImportConfig.itemLimit
     var sourceBrowser: BrowserType {
         browser.browserType
     }
@@ -108,7 +109,13 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
                     throw ImportError.countNotAvailable
                 }
                 // visit_time is number of microseconds since 1601-01-01
-                let rows = try ChromiumHistoryItem.fetchCursor(db, sql: "SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title FROM visits v JOIN urls u ON v.url = u.id ORDER BY v.visit_time ASC")
+                let rows = try ChromiumHistoryItem.fetchCursor(db, sql: """
+                    SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title
+                    FROM visits v JOIN urls u
+                    ON v.url = u.id
+                    ORDER BY v.visit_time ASC
+                    LIMIT :limit OFFSET :offset
+                    """, arguments: ["limit": itemLimit, "offset": max(itemCount - itemLimit, 0)])
                     .filter { $0.timestamp > startDate ?? Date.distantPast }
                 while let row = try rows.next() {
                     if row.url != nil {

@@ -132,14 +132,11 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
         return db.getLinks(matchingUrl: url)
     }
-    private func normalized(url: String) -> String {
-        URL(string: url)?.normalized.absoluteString ?? url
-    }
 
-    public func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID {
+    public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
         guard url != Link.missing.url else { return Link.missing.id }
         let normalizedUrl = normalized(url: url)
-        return db.getOrCreateIdFor(url: normalizedUrl, title: title, content: content, destination: destination)
+        return db.getOrCreateId(for: normalizedUrl, title: title, content: content, destination: destination)
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -165,11 +162,18 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     public func getDomainId(id: UUID) -> UUID? {
         guard let link = linkFor(id: id),
               let domain = URL(string: link.url)?.domain else { return nil }
-        return getOrCreateIdFor(url: domain.absoluteString, title: nil, content: nil, destination: nil)
+        return getOrCreateId(for: domain.absoluteString, title: nil, content: nil, destination: nil)
     }
 
     public func linkFor(url: String) -> Link? {
         db.linkFor(url: url)
+    }
+    public func insertOrIgnore(links: [Link]) {
+        do {
+            try db.insertOrIgnore(links: links.filter { $0.id != Link.missing.id })
+        } catch {
+            Logger.shared.logError("Couldn't insert links: \(error)", category: .linkDB)
+        }
     }
 
     @discardableResult
