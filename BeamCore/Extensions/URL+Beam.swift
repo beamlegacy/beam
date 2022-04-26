@@ -168,6 +168,7 @@ public extension URL {
         components.path = pathParts.count == 0 ? "/" : "/\(pathParts[0])"
         return components.url
     }
+    
     var isSearchEngineResultPage: Bool {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
               let host = components.host,

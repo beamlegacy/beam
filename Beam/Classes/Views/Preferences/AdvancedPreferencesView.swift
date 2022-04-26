@@ -41,6 +41,7 @@ struct AdvancedPreferencesView: View {
     @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
     @State var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
     @State var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
+    @State var enableDailySummary = PreferencesManager.enableDailySummary
 
     // Database
     @State private var newDatabaseTitle = ""
@@ -491,8 +492,11 @@ struct AdvancedPreferencesView: View {
                 Preferences.Section(title: "Create 100 random notes") {
                     Create100RandomNotes
                 }
-                Preferences.Section(title: "Create 10 random notes") {
+                Preferences.Section(title: "Create 10 random notes", bottomDivider: true) {
                     Create10RandomNotes
+                }
+                Preferences.Section(title: "Daily Summary") {
+                    enableDailySummaryView
                 }
             }.onAppear {
                 startObservers()
@@ -1000,6 +1004,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([createJournalOncePerWindow].publisher.first()) {
                 PreferencesManager.createJournalOncePerWindow = $0
+            }
+    }
+
+    private var enableDailySummaryView: some View {
+        return Toggle(isOn: $enableDailySummary) {
+            Text("Enable")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([enableDailySummary].publisher.first()) {
+                PreferencesManager.enableDailySummary = $0
             }
     }
 }

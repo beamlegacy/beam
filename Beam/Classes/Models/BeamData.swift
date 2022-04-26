@@ -351,6 +351,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         if newDay { newDay.toggle() }
     }
 
+    // MARK: - Calendar
     private func observeCalendarManager(_ calendarManager: CalendarManager) {
         calendarManager.$updated.sink { [weak self] updated in
             guard let self = self else { return }

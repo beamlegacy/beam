@@ -23,6 +23,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
     var isTreeBoundary: Bool { nodeProvider != nil }
 
     var isEmpty: Bool { children.isEmpty }
+    var allowSelection: Bool { true }
     let selectionInset: CGFloat = 5
     var selectionLayerPosX: CGFloat = 0
     var selectedAlone: Bool = true {
