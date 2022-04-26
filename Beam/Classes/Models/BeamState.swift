@@ -281,20 +281,20 @@ import Sentry
         updateCanGoBackForward()
     }
 
-    func navigateCurrentTab(toURL url: URL) {
-        EventsTracker.logBreadcrumb(message: "\(#function) toURL \(url)", category: "BeamState")
-        currentTab?.willSwitchToNewUrl(url: url)
-        currentTab?.load(url: url)
+    func navigateCurrentTab(toURLRequest request: URLRequest) {
+        EventsTracker.logBreadcrumb(message: "\(#function) toURLRequest \(request)", category: "BeamState")
+        currentTab?.willSwitchToNewUrl(url: request.url)
+        currentTab?.load(request: request)
 
         guard let currentTabId = currentTab?.id else { return }
         browserTabsManager.removeFromTabGroup(tabId: currentTabId)
         browserTabsManager.createNewGroup(for: currentTabId)
     }
 
-    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, url: URL? = nil, webView: BeamWebView? = nil) -> BrowserTab {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
+    func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
-        browserTabsManager.addNewTabAndGroup(tab, setCurrent: setCurrent, withURL: url)
+        browserTabsManager.addNewTabAndGroup(tab, setCurrent: setCurrent, withURLRequest: request)
         if setCurrent {
             mode = .web
         }
@@ -303,17 +303,17 @@ import Sentry
 
     /// Create a new browsertab in the current beam window. Will always switch the view mode to `.web`.
     /// - Parameters:
-    ///   - url: the URL to open.
+    ///   - request: the URLRequest to open.
     ///   - originalQuery: optional search query to configure the browsing tree with.
     ///   - setCurrent: optional flag to set created tab as the new focused tab. Defaults to true.
     ///   - note: optional BeamNote to set as destination.
     ///   - rootElement: optional root BeamElement where collected content with be added to.
     ///   - webView: optional webview to create a new tab with
     /// - Returns: Returns the newly created tab. The returned tab can safely be discarded.
-    @discardableResult func createTab(withURL url: URL, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
-        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: url))", category: "BeamState")
+    @discardableResult func createTab(withURLRequest request: URLRequest, originalQuery: String? = nil, setCurrent: Bool = true, note: BeamNote? = nil, rootElement: BeamElement? = nil, webView: BeamWebView? = nil) -> BrowserTab {
+        EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: note)) \(String(describing: request.url))", category: "BeamState")
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>", referringRootId: browserTabsManager.currentTab?.browsingTree.rootId)
-        let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, url: url, webView: webView)
+        let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, request: request, webView: webView)
 
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
             guard self?.omniboxInfo.isFocused == false, let tab = tab else { return }
@@ -322,10 +322,10 @@ import Sentry
         return tab
     }
 
-    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURL url: URL, setCurrent: Bool = true) {
-        EventsTracker.logBreadcrumb(message: "createTabFromNote \(note.id)/\(note.title) element \(element.id)/\(element.kind) withURL \(url)", category: "BeamState")
+    func createTabFromNote(_ note: BeamNote, element: BeamElement, withURLRequest request: URLRequest, setCurrent: Bool = true) {
+        EventsTracker.logBreadcrumb(message: "createTabFromNote \(note.id)/\(note.title) element \(element.id)/\(element.kind) withURLRequest \(request)", category: "BeamState")
         let origin = BrowsingTreeOrigin.linkFromNote(noteName: note.title)
-        _ = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: element, url: url)
+        _ = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: element, request: request)
     }
 
     func createEmptyTab() {
@@ -343,12 +343,13 @@ import Sentry
         EventsTracker.logBreadcrumb(message: "createTabFromNode \(node) withURL \(url)", category: "BeamState")
         guard let note = node.root?.note else { return }
         let origin = BrowsingTreeOrigin.searchFromNode(nodeText: node.strippedText)
-        _ = addNewTab(origin: origin, note: note, element: node.element, url: url)
+        _ = addNewTab(origin: origin, note: note, element: node.element, request: URLRequest(url: url))
     }
 
     func duplicate(tab: BrowserTab) {
+        guard let url = tab.url else { return }
         let duplicatedTab = BrowserTab(state: self, browsingTreeOrigin: tab.browsingTreeOrigin, originMode: .web, note: nil)
-        browserTabsManager.addNewTabAndGroup(duplicatedTab, setCurrent: true, withURL: tab.url)
+        browserTabsManager.addNewTabAndGroup(duplicatedTab, setCurrent: true, withURLRequest: URLRequest(url: url))
     }
 
     func closedTab(_ index: Int, allowClosingPinned: Bool = false) {
@@ -425,9 +426,9 @@ import Sentry
     func handleOpenUrl(_ url: URL, note: BeamNote?, element: BeamElement?, inBackground: Bool) {
         if URL.browserSchemes.contains(url.scheme) {
             if let note = note, let element = element {
-                createTabFromNote(note, element: element, withURL: url, setCurrent: !inBackground)
+                createTabFromNote(note, element: element, withURLRequest: URLRequest(url: url), setCurrent: !inBackground)
             } else {
-                _ = createTab(withURL: url, originalQuery: nil, setCurrent: !inBackground)
+                _ = createTab(withURLRequest: URLRequest(url: url), originalQuery: nil, setCurrent: !inBackground)
             }
             if inBackground, let currentEvent = NSApp.currentEvent, let window = associatedWindow {
                 var location = currentEvent.locationInWindow.flippedPointToTopLeftOrigin(in: window)
@@ -468,10 +469,10 @@ import Sentry
             }
 
             if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
-                navigateCurrentTab(toURL: url)
+                navigateCurrentTab(toURLRequest: URLRequest(url: url))
                 stopFocusOmnibox()
             } else {
-                _ = createTab(withURL: url, originalQuery: result.text)
+                _ = createTab(withURLRequest: URLRequest(url: url), originalQuery: result.text)
                 mode = .web
             }
 
@@ -491,10 +492,10 @@ import Sentry
             }
 
             if  mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
-                navigateCurrentTab(toURL: url)
+                navigateCurrentTab(toURLRequest: URLRequest(url: url))
                 stopFocusOmnibox()
             } else {
-                _ = createTab(withURL: url, originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
+                _ = createTab(withURLRequest: URLRequest(url: url), originalQuery: result.text, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
                 mode = .web
             }
 
@@ -530,9 +531,9 @@ import Sentry
         // Logger.shared.logDebug("Start query: \(url)")
 
         if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
-            navigateCurrentTab(toURL: url)
+            navigateCurrentTab(toURLRequest: URLRequest(url: url))
         } else {
-            _ = createTab(withURL: url, originalQuery: queryString, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
+            _ = createTab(withURLRequest: URLRequest(url: url), originalQuery: queryString, note: keepDestinationNote ? BeamNote.fetch(title: destinationCardName) : nil)
         }
         autocompleteManager.clearAutocompleteResults()
         mode = .web
@@ -622,7 +623,7 @@ import Sentry
 
     func generateTabs(_ number: Int = 100) {
         for _ in 0..<number {
-            _ = createTab(withURL: URL(string: "https://beamapp.co")!, originalQuery: "beamapp.co")
+            _ = createTab(withURLRequest: URLRequest(url: URL(string: "https://beamapp.co")!), originalQuery: "beamapp.co")
         }
     }
 
@@ -793,7 +794,7 @@ extension BeamState: BrowserTabsManagerDelegate {
 
     func displayWelcomeTour() {
         guard let onboardingURL = URL(string: EnvironmentVariables.webOnboardingURL) else { return }
-        createTab(withURL: onboardingURL)
+        createTab(withURLRequest: URLRequest(url: onboardingURL))
         Persistence.Authentication.hasSeenWelcomeTour = true
     }
 }

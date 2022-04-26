@@ -146,24 +146,24 @@ extension BrowserTabsManager {
     }
 
     // This is now the only entry point to add a tab
-    func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at tabIndex: Int? = nil) {
+    func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at tabIndex: Int? = nil) {
         if tabIndex == nil {
-            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: indexForNewTabInGroup)
+            addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: indexForNewTabInGroup)
         } else {
-            addNewTab(tab, setCurrent: setCurrent, withURL: url, at: tabIndex)
+            addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: tabIndex)
         }
 
         guard !tab.isPinned else { return }
-        if let currentTabGroupKey = currentTabGroupKey, (url != nil || tab.preloadUrl != nil) {
+        if let currentTabGroupKey = currentTabGroupKey, (request?.url != nil || tab.preloadUrl != nil) {
             tabsGroup[currentTabGroupKey]?.append(tab.id)
         } else {
             createNewGroup(for: tab.id)
         }
     }
 
-    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURL url: URL? = nil, at index: Int? = nil) {
-        if let url = url {
-            tab.load(url: url)
+    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at index: Int? = nil) {
+        if let request = request, request.url != nil {
+            tab.load(request: request)
         }
         if let tabIndex = index, tabs.count > tabIndex {
             tabs.insert(tab, at: tabIndex)
@@ -198,7 +198,7 @@ extension BrowserTabsManager {
             let lastClosedTabData = tabHistory.removeLast()
             guard let lastClosedTab = try? decoder.decode(BrowserTab.self, from: lastClosedTabData) else { return false }
             lastClosedTab.id = UUID()
-            addNewTab(lastClosedTab, setCurrent: true, withURL: nil)
+            addNewTab(lastClosedTab, setCurrent: true, withURLRequest: nil)
             return true
         }
         return false

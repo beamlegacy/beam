@@ -16,7 +16,7 @@ class TransientWebViewWindow: NSWindow, NSWindowDelegate {
         controller.wv
     }
 
-    init(originPage: WebPage?, url: URL, configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures? = nil) {
+    init(originPage: WebPage?, request: URLRequest, configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures? = nil) {
         let contentRect: CGRect = windowFeatures?.toRect() ?? .zero
         self.controller = .init(originPage: originPage, configuration: configuration, contentRect: contentRect)
 
@@ -31,7 +31,7 @@ class TransientWebViewWindow: NSWindow, NSWindowDelegate {
             defer: false
         )
         title = "Beam"
-        self.setFrameAutosaveName("BeamTransientWebViewWindow-\(url.minimizedHost ?? url.urlStringWithoutScheme)")
+        self.setFrameAutosaveName("BeamTransientWebViewWindow-\(String(describing: request.url?.minimizedHost ?? request.url?.urlStringWithoutScheme))")
         self.isReleasedWhenClosed = false
         self.contentView = self.controller.wv
         self.controller.delegate = self

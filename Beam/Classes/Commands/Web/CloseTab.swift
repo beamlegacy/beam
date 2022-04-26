@@ -111,7 +111,19 @@ class CloseTab: WebCommand {
             // Doesn't needs to be undone since it's already existing
             return true
         }
-        context.browserTabsManager.addNewTabAndGroup(tab, setCurrent: wasCurrentTab, withURL: tab.url, at: tabIndex)
+
+        var urlRequest: URLRequest?
+        if let url = tab.url {
+            urlRequest = URLRequest(url: url)
+        }
+
+        context.browserTabsManager.addNewTabAndGroup(
+            tab,
+            setCurrent: wasCurrentTab,
+            withURLRequest: urlRequest,
+            at: tabIndex
+        )
+
         if tab.isPinned {
             context.browserTabsManager.pinTab(tab)
         }

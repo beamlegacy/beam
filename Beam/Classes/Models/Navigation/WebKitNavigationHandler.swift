@@ -247,7 +247,12 @@ extension WebKitNavigationHandler {
         if let page = page, let targetURL = navigationAction.request.url,
            navigationAction.navigationType == .linkActivated,
            isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) {
-            _ = page.createNewTab(targetURL, nil, setCurrent: !isNavigationWithCommandKey(navigationAction))
+            _ = page.createNewTab(
+                navigationAction.request,
+                nil,
+                setCurrent: !isNavigationWithCommandKey(navigationAction),
+                rect: page.frame
+            )
             return true
         } else {
             return false
