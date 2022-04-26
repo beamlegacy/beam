@@ -8,32 +8,79 @@
 import SwiftUI
 
 /// SwiftUI wrapper for a NSVisualEffectView
-struct VisualEffectView: NSViewRepresentable {
-    private let material: NSVisualEffectView.Material
-    private let blendingMode: NSVisualEffectView.BlendingMode
+struct VisualEffectView: View {
+    private var material: NSVisualEffectView.Material
+    private var blendingMode: NSVisualEffectView.BlendingMode
+    private var state: NSVisualEffectView.State = .followsWindowActiveState
     private let isEmphasized: Bool
 
-    init(material: NSVisualEffectView.Material,
-         blendingMode: NSVisualEffectView.BlendingMode = .withinWindow,
-         emphasized: Bool = false) {
+    init(
+        material: NSVisualEffectView.Material,
+        blendingMode: NSVisualEffectView.BlendingMode = .withinWindow,
+        emphasized: Bool = false
+    ) {
         self.material = material
         self.blendingMode = blendingMode
         self.isEmphasized = emphasized
     }
 
-    func makeNSView(context: Context) -> NSVisualEffectView {
-        let view = NSVisualEffectView()
-        view.material = material
-        view.blendingMode = blendingMode
-        view.isEmphasized = isEmphasized
-        view.autoresizingMask = [.width, .height]
-        return view
+    var body: some View {
+        Representable(
+            material: material,
+            blendingMode: blendingMode,
+            state: state,
+            isEmphasized: isEmphasized
+        ).accessibility(hidden: true)
+    }
+}
+
+// MARK: - Representable
+extension VisualEffectView {
+    struct Representable: NSViewRepresentable {
+        var material: NSVisualEffectView.Material
+        var blendingMode: NSVisualEffectView.BlendingMode
+        var state: NSVisualEffectView.State
+        var isEmphasized: Bool
+
+        func makeNSView(context: Context) -> NSVisualEffectView {
+            context.coordinator.visualEffectView
+        }
+
+        func updateNSView(_ view: NSVisualEffectView, context: Context) {
+            context.coordinator.update(material: material)
+            context.coordinator.update(blendingMode: blendingMode)
+            context.coordinator.update(state: state)
+            context.coordinator.update(isEmphasized: isEmphasized)
+        }
+
+        func makeCoordinator() -> Coordinator {
+            Coordinator()
+        }
+
     }
 
-    func updateNSView(_ nsView: NSVisualEffectView, context: Context) {
-        nsView.material = material
-        nsView.blendingMode = blendingMode
-        nsView.isEmphasized = isEmphasized
+    class Coordinator {
+        let visualEffectView = NSVisualEffectView()
+
+        init() {
+            visualEffectView.blendingMode = .withinWindow
+        }
+
+        func update(material: NSVisualEffectView.Material) {
+            visualEffectView.material = material
+        }
+
+        func update(blendingMode: NSVisualEffectView.BlendingMode) {
+            visualEffectView.blendingMode = blendingMode
+        }
+
+        func update(state: NSVisualEffectView.State) {
+            visualEffectView.state = state
+        }
+
+        func update(isEmphasized: Bool) {
+            visualEffectView.isEmphasized = isEmphasized
+        }
     }
 }
 

@@ -77,7 +77,7 @@ class BrowserTabIndexingTests: XCTestCase {
         mockIndexingDelegate?.onIndexingFinished = { _ in
             expectation.fulfill()
         }
-        tab.load(url: initialURL)
+        tab.load(request: URLRequest(url: initialURL))
 
         waitForExpectations(timeout: defaultTimeout, handler: nil)
 
@@ -105,13 +105,13 @@ class BrowserTabIndexingTests: XCTestCase {
 
         expectation = self.expectation(description: "done_indexingURL1")
         let initialURL1 = redirectURL(for: .http301)
-        tab.load(url: initialURL1)
+        tab.load(request: URLRequest(url: initialURL1))
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(tab.url, destinationURL)
 
         expectation = self.expectation(description: "done_indexingURL2")
         let initialURL2 = redirectURL(for: .http302)
-        tab.load(url: initialURL2)
+        tab.load(request: URLRequest(url: initialURL2))
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(tab.url, destinationURL)
 
@@ -142,7 +142,7 @@ class BrowserTabIndexingTests: XCTestCase {
 
         let initialURL1 = redirectURL(for: .http301)
         expectation = self.expectation(description: "done_indexing1")
-        tab.load(url: initialURL1)
+        tab.load(request: URLRequest(url: initialURL1))
         waitForExpectations(timeout: defaultTimeout, handler: nil)
         XCTAssertEqual(tab.url, destinationURL)
 

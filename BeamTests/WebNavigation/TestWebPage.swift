@@ -75,14 +75,14 @@ class TestWebPage: WebPage {
         events.append("addJS \(source.hashValue) \(String(describing: when))")
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
-        events.append("createNewTab \(targetURL) \(setCurrent))")
+    func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage? {
+        events.append("createNewTab \(request.url) \(setCurrent))")
         return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
                            fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
     }
 
-    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
-        events.append("createNewWindow \(targetURL) \(setCurrent))")
+    func createNewWindow(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
+        events.append("createNewWindow \(request.url) \(setCurrent))")
         let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
                                   fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
 
