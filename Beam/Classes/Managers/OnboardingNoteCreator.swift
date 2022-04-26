@@ -19,14 +19,14 @@ class OnboardingNoteCreator {
         var name: String {
             switch self {
             case .yesterday, .capture:
-                return rawValue.prefix(1).capitalized + rawValue.dropFirst()
+                return rawValue.capitalizeFirstChar()
             case .howToBeam:
                 return "How to beam"
             }
         }
 
         var fileName: String {
-            rawValue.prefix(1).capitalized + rawValue.dropFirst()
+            rawValue.capitalizeFirstChar()
         }
 
         var imgNamePrefix: String {
