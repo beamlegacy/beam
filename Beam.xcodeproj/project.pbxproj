@@ -881,6 +881,7 @@
 		A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */; };
 		A0C04B8B27553C51003FC63A /* BeamUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
+		A0C4461C2811D926007B545D /* String+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C4461B2811D926007B545D /* String+Formatting.swift */; };
 		A0C58C382640026600FB95D8 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C58C372640026600FB95D8 /* ToastView.swift */; };
 		A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */; };
 		A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */; };
@@ -913,6 +914,7 @@
 		A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */; };
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
 		A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */; };
+		A0FB59BF2809D074001A1850 /* SummaryEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FB59BE2809D074001A1850 /* SummaryEngine.swift */; };
 		A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A311436C280D2ADE00BB74F4 /* DialogTestView.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
@@ -2645,6 +2647,7 @@
 		A0C04B8127552163003FC63A /* Beam8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam8.xcdatamodel; sourceTree = "<group>"; };
 		A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUserDefaults.swift; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
+		A0C4461B2811D926007B545D /* String+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Formatting.swift"; sourceTree = "<group>"; };
 		A0C58C372640026600FB95D8 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsConfirmationToast.swift; sourceTree = "<group>"; };
 		A0C63A6725FA249700FB4CCE /* BeamTextHolder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextHolder.swift; sourceTree = "<group>"; };
@@ -2677,6 +2680,7 @@
 		A0F558F026BD536A0024C47E /* PreferencesManager+EditorDebug.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+EditorDebug.swift"; sourceTree = "<group>"; };
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
 		A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNoteCreator.swift; sourceTree = "<group>"; };
+		A0FB59BE2809D074001A1850 /* SummaryEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryEngine.swift; sourceTree = "<group>"; };
 		A311436C280D2ADE00BB74F4 /* DialogTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogTestView.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
@@ -4151,6 +4155,7 @@
 				A5D8A6D826724E2600CEC37E /* Password */,
 				BAA679587D9259686224D133 /* PointAndShoot */,
 				8A035C5427E9F1D5007CA0FB /* Readability */,
+				A0FB59BD2809D068001A1850 /* Summary */,
 				A043B7FC26593A4800E267E5 /* TabGrouping */,
 				A57BFEC02615B4AC00CFB646 /* TableView */,
 				A0C5D845263C636C00FA6F6E /* Toast */,
@@ -6050,6 +6055,7 @@
 				8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */,
 				521FEC652604B830009000F9 /* String+c99.swift */,
 				A5208E26261F7419006193AF /* String+Calculations.swift */,
+				A0C4461B2811D926007B545D /* String+Formatting.swift */,
 				418173BD2581251600317ED8 /* URL+Beam.swift */,
 				8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */,
 				964FE5B62624813E00966E03 /* RandomAccessCollection+BinarySearch.swift */,
@@ -6453,6 +6459,14 @@
 				A0D0403B2719E16E00C0B71C /* CalendarView.swift */,
 			);
 			path = Calendar;
+			sourceTree = "<group>";
+		};
+		A0FB59BD2809D068001A1850 /* Summary */ = {
+			isa = PBXGroup;
+			children = (
+				A0FB59BE2809D074001A1850 /* SummaryEngine.swift */,
+			);
+			path = Summary;
 			sourceTree = "<group>";
 		};
 		A312850E27707C5E0051EECE /* Card */ = {
@@ -8089,6 +8103,7 @@
 				DAEEA73B26A5C4A600AE72DE /* NoteSource.swift in Sources */,
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
 				96A5DADE27C0250D00746719 /* Array.swift in Sources */,
+				A0C4461C2811D926007B545D /* String+Formatting.swift in Sources */,
 				3719855227C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift in Sources */,
 				9635C980276AABB300015575 /* SignPost.swift in Sources */,
 				370794C127D7A79100D2768B /* WKWebViewConfiguration.swift in Sources */,
@@ -8707,6 +8722,7 @@
 				37B85B7A27A2C81B003871F9 /* DownloadListFake.swift in Sources */,
 				37DB5A1427BB515700534760 /* CollapsedContentLayer.swift in Sources */,
 				A5BD34DE27C4FBC7002AA8C6 /* DistributedRandomGenerator.swift in Sources */,
+				A0FB59BF2809D074001A1850 /* SummaryEngine.swift in Sources */,
 				9661A58B266A70DA00CB56B3 /* NodeProvider.swift in Sources */,
 				872F658127F1C0EE005475B8 /* HostnameCanonicalizer.swift in Sources */,
 				37520B0D27EAA40000A1C20B /* MediaContentGeometry.swift in Sources */,

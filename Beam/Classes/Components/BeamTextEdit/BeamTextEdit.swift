@@ -1293,7 +1293,6 @@ public extension CALayer {
         if let elementNode = widget as? ElementNode, elementNode.isDraggedForMove {
             return
         }
-
         startSelectionDrag()
         mouseDraggedUpdate(with: event)
     }
@@ -1539,7 +1538,8 @@ public extension CALayer {
     }
 
     override public func moveLeftAndModifySelection(_ sender: Any?) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode,
+                let node = focusedWidget as? ElementNode, node.allowSelection else { return }
         let showFormatter = rootNode.cursorPosition != 0
         rootNode.moveLeftAndModifySelection()
         if showFormatter {
@@ -1566,8 +1566,8 @@ public extension CALayer {
     }
 
     override public func moveRightAndModifySelection(_ sender: Any?) {
-        guard let rootNode = rootNode else { return }
-        guard let node = focusedWidget as? ElementNode else { return }
+        guard let rootNode = rootNode,
+                let node = focusedWidget as? ElementNode, node.allowSelection else { return }
         let showFormatter = rootNode.cursorPosition != node.textCount
         rootNode.moveRightAndModifySelection()
         if showFormatter {
@@ -1650,10 +1650,15 @@ public extension CALayer {
         }
     }
 
+    var isOnlyOneThingSelected: Bool {
+        return (rootNode?.state.nodeSelection?.nodes.count ?? 0) <= 1 && !selectedTextRange.isEmpty
+    }
+
     override public func selectAll(_ sender: Any?) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode,
+              let node = focusedWidget as? ElementNode, node.allowSelection else { return }
         rootNode.selectAll()
-        if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
+        if isOnlyOneThingSelected {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         } else {
             hideInlineFormatter()
@@ -1661,17 +1666,19 @@ public extension CALayer {
     }
 
     override public func moveUpAndModifySelection(_ sender: Any?) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode,
+        let node = focusedWidget as? ElementNode, node.allowSelection else { return }
         rootNode.moveUpAndModifySelection()
-        if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
+        if isOnlyOneThingSelected {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
     }
 
     override public func moveDownAndModifySelection(_ sender: Any?) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode,
+        let node = focusedWidget as? ElementNode, node.allowSelection else { return }
         rootNode.moveDownAndModifySelection()
-        if rootNode.state.nodeSelection?.nodes.count ?? 0 <= 1 {
+        if isOnlyOneThingSelected {
             showInlineFormatterOnKeyEventsAndClick(isKeyEvent: true)
         }
     }

@@ -124,6 +124,8 @@ public class TextRoot: ElementNode {
         return self
     }
 
+    var dailySummaryNode: TextNode?
+    var continueToSummaryNode: TextNode?
     var topSpacerWidget: SpacerWidget?
     var middleSpacerWidget: SpacerWidget?
     var bottomSpacerWidget: SpacerWidget?
@@ -133,6 +135,8 @@ public class TextRoot: ElementNode {
 
     var otherSections: [Widget?] {
         [
+            dailySummaryNode,
+            continueToSummaryNode,
             topSpacerWidget,
             linksSection,
             middleSpacerWidget,
@@ -178,6 +182,9 @@ public class TextRoot: ElementNode {
         childrenSpacing = PreferencesManager.editorParentSpacing
 
         if let note = note {
+            if note.isTodaysNote {
+                createSummary()
+            }
             topSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeLinks, availableWidth: childAvailableWidth)
             linksSection = LinksSection(parent: self, note: note, availableWidth: childAvailableWidth)
             middleSpacerWidget = SpacerWidget(parent: self, spacerType: .beforeReferences, availableWidth: childAvailableWidth)
@@ -215,7 +222,7 @@ public class TextRoot: ElementNode {
         }
 
         if let note = self.note, note.fastLinksAndReferences.isEmpty,
-           note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
+            note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let first = children.first as? TextNode
             first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
         }
@@ -323,5 +330,63 @@ public class TextRoot: ElementNode {
             node.cmdManager.insertElement(newElement, inElement: parent.unproxyElement, afterElement: nil)
         }
         node.cmdManager.focus(newElement, in: node)
+    }
+
+    // MARK: - Summary Engine
+    override func didMoveToWindow(_ window: NSWindow?) {
+        super.didMoveToWindow(window)
+        if let note = note, note.isTodaysNote {
+            self.updateSummary()
+        }
+    }
+
+    private func createSummary() {
+        if PreferencesManager.enableDailySummary {
+            createDailyNode()
+            createContinueToSummaryNode()
+        }
+    }
+
+    private func createDailyNode() {
+        if let dailySummaryElement = SummaryEngine.getDailySummary() {
+            dailySummaryNode = TextNode(parent: self, element: dailySummaryElement, nodeProvider: nil, availableWidth: self.availableWidth)
+        }
+    }
+
+    private func createContinueToSummaryNode() {
+        if let continueToSummaryElement = SummaryEngine.getContinueToSummary() {
+            continueToSummaryNode = TextNode(parent: self, element: continueToSummaryElement, nodeProvider: nil, availableWidth: self.availableWidth)
+        }
+    }
+
+    func updateSummary() {
+        if PreferencesManager.enableDailySummary {
+            if dailySummaryNode != nil {
+                updateDailySummary()
+            } else {
+                createDailyNode()
+            }
+            if continueToSummaryNode != nil {
+                updateContinueToSummary()
+            } else {
+                createContinueToSummaryNode()
+            }
+        }
+    }
+
+    private func updateDailySummary() {
+        if let dailySummaryElement = SummaryEngine.getDailySummary() {
+            if dailySummaryNode?.text.text != dailySummaryElement.text.text {
+                dailySummaryNode?.text = dailySummaryElement.text
+            }
+        }
+    }
+
+    private func updateContinueToSummary() {
+        if let continueToSummaryElement = SummaryEngine.getContinueToSummary() {
+            if continueToSummaryNode?.text.text != continueToSummaryElement.text.text {
+                continueToSummaryNode?.text = continueToSummaryElement.text
+            }
+        }
     }
 }
