@@ -22,6 +22,7 @@ extension PreferencesManager {
     private static let showWebOnLaunchIfTabsKey = "showWebOnLaunchIfTabs"
     private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
     private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
+    private static let enableDailySummaryKey = "enableDailySummary"
 }
 
 // MARK: - Default Values
@@ -41,6 +42,7 @@ extension PreferencesManager {
     private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = true
     static let includeHistoryContentsInOmniBoxDefault = false
+    private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
 }
 
 extension PreferencesManager {
@@ -79,5 +81,8 @@ extension PreferencesManager {
 
     @UserDefault(key: includeHistoryContentsInOmniBoxKey, defaultValue: includeHistoryContentsInOmniBoxDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var includeHistoryContentsInOmniBox: Bool
+
+    @UserDefault(key: enableDailySummaryKey, defaultValue: enableDailySummaryDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var enableDailySummary: Bool
 
 }

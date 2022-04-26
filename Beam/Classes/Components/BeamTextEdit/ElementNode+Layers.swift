@@ -183,7 +183,7 @@ extension ElementNode {
     private func updateMoveHandleLayer() {
         guard let moveLayer = self.layers[LayerName.moveHandle.rawValue] else { return }
         moveLayer.layer.opacity = frontmostHover ? 1 : 0
-        moveLayer.layer.isHidden = self.elementText.isEmpty && element.kind.isText
+        moveLayer.layer.isHidden = self.elementText.isEmpty && element.kind.isText || self.elementKind == .dailySummary
         moveLayer.layer.backgroundColor = cursorHoverMoveHandle ? BeamColor.Editor.moveHandleHover.cgColor : BeamColor.Editor.bullet.cgColor
         moveLayer.layer.frame.origin = moveHandlePosition
 
