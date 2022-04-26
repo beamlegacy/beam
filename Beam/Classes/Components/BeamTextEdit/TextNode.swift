@@ -1283,7 +1283,7 @@ public class TextNode: ElementNode {
     //    Returns the range of characters in the specified line.
     public override func accessibilityRange(forLine line: Int) -> NSRange {
         guard let textFrame = textFrame,
-              textFrame.lines.count < line
+              line < textFrame.lines.count
         else { return NSRange() }
         let range = textFrame.lines[line].range
         return NSRange(location: range.lowerBound, length: range.count)
