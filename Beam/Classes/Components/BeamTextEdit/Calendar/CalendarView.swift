@@ -247,9 +247,16 @@ struct CalendarIemView: View {
                         .foregroundColor(isHoveringItem ? BeamColor.Niobium.swiftUI : BeamColor.AlphaGray.swiftUI)
                         .fixedSize(horizontal: true, vertical: false)
                 }
-                if let meetingLink = meetingLink {
+                if let meetingLink = meetingLink, let url = URL(string: meetingLink) {
                     Button {
-                        _ = AppDelegate.main.window?.state.addNewTab(origin: nil, setCurrent: true, note: nil, element: nil, url: URL(string: meetingLink), webView: nil)
+                        _ = AppDelegate.main.window?.state.addNewTab(
+                            origin: nil,
+                            setCurrent: true,
+                            note: nil,
+                            element: nil,
+                            request: URLRequest(url: url),
+                            webView: nil
+                        )
                     } label: {
                         Image("editor-calendar_video")
                             .renderingMode(.template)
