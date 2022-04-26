@@ -74,7 +74,6 @@ class ShareHelperTests: XCTestCase {
 
         let fullText = [text, text, text].joined(separator: .lineSeparator)
         XCTAssertEqual(pasteboard.string(forType: .string), fullText)
-        XCTAssertEqual(pasteboard.string(forType: .html), html)
     }
 
     private class MockDownloadManager: BeamDownloadManager {
