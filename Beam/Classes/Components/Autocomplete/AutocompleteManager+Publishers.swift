@@ -255,7 +255,7 @@ extension AutocompleteManager {
 
             let text = url.absoluteString
             var information: String?
-            let linkId = LinkStore.shared.getOrCreateIdFor(url: url.urlWithScheme.absoluteString, title: nil)
+            let linkId = LinkStore.shared.getOrCreateId(for: url.urlWithScheme.absoluteString, title: nil)
             if let link = LinkStore.shared.linkFor(id: linkId),
                let title = link.title {
                 information = title

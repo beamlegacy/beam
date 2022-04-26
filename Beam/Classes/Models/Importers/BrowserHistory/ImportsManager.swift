@@ -53,23 +53,21 @@ public class ImportsManager: NSObject, ObservableObject {
 
     func startBrowserHistoryImport(from importer: BrowserHistoryImporter) {
         let id = UUID()
-        let browsingTree = BrowsingTree(.historyImport(sourceBrowser: importer.sourceBrowser), linkStore: LinkStore.shared)
-        var maxDate = Date.distantPast
+        let batchImporter = BatchHistoryImporter(sourceBrowser: importer.sourceBrowser)
         var receivedCount = 0
+        let timer = BeamTimer()
+        let start = BeamDate.now
         do {
-            let frecencyUpdater = BatchFrecencyUpdater(frencencyStore: LinkStoreFrecencyUrlStorage())
             let cancellable = importer.publisher.sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    frecencyUpdater.saveAll()
-                    do {
-                        try BrowsingTreeStoreManager.shared.save(browsingTree: browsingTree)
-                    } catch {
-                        Logger.shared.logError("Couldn't save tree: \(error)", category: .browserImport)
+                    batchImporter.finalize {
                         self.sendError(ErrorType.saveError, action: .history, importer: importer)
                     }
-                    Persistence.ImportedBrowserHistory.save(maxDate: maxDate, browserType: importer.sourceBrowser)
+                    let end = BeamDate.now
                     Logger.shared.logInfo("Import finished successfully", category: .browserImport)
+                    timer.log(category: .browserImport)
+                    Logger.shared.logInfo("total: \(end.timeIntervalSince(start)) sec", category: .browserImport)
                 case .failure(let error):
                     Logger.shared.logError("Import History failed with error: \(error)", category: .browserImport)
                     self.sendError(error, action: .history, importer: importer)
@@ -80,13 +78,7 @@ public class ImportsManager: NSObject, ObservableObject {
                 if receivedCount.isMultiple(of: 1000) {
                     Logger.shared.logDebug("History import: received \(receivedCount)/\(result.itemCount)", category: .browserImport)
                 }
-                guard let url = result.item.url else { return }
-                let absoluteString = url.absoluteString
-                let title = result.item.title
-                browsingTree.addChildToRoot(url: absoluteString, title: title, date: result.item.timestamp)
-                let urlId = browsingTree.current.link
-                frecencyUpdater.add(urlId: urlId, date: result.item.timestamp, eventType: .webLinkActivation)
-                if result.item.timestamp > maxDate { maxDate = result.item.timestamp }
+                batchImporter.add(item: result.item)
             })
             cancellableScope[id] = cancellable
             try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser))

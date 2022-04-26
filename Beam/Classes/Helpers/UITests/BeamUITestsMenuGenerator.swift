@@ -162,7 +162,7 @@ class BeamUITestsMenuGenerator {
         let random = (try? BeamDate.now.description.MD5()) ?? "random_failed"
 
         for index in 1...count {
-            _ = LinkStore.shared.getOrCreateIdFor(url: "http://beamapp.co/test/\(index)/\(random)", title: "Title \(index) \(random)")
+            _ = LinkStore.shared.getOrCreateId(for: "http://beamapp.co/test/\(index)/\(random)", title: "Title \(index) \(random)")
         }
 
         Logger.shared.logDebug("Created \(count) links", category: .linkDB)

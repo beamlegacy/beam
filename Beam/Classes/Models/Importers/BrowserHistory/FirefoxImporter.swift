@@ -74,6 +74,8 @@ struct FirefoxHistoryItem: BrowserHistoryItem, Decodable, FetchableRecord {
 
 final class FirefoxImporter: BrowserHistoryImporter {
     let sourceBrowser: BrowserType = .firefox
+    let itemLimit: Int = BrowserHistoryImportConfig.itemLimit
+
     enum ImportError: Error {
         case pathNotFoundInDefaultProfile
         case countNotAvailable
@@ -136,7 +138,13 @@ final class FirefoxImporter: BrowserHistoryImporter {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM moz_historyvisits") else {
                     throw ImportError.countNotAvailable
                 }
-                let rows = try FirefoxHistoryItem.fetchCursor(db, sql: "SELECT v.visit_date, v.visit_type, v.session, p.url, p.title FROM moz_historyvisits v JOIN moz_places p ON v.place_id = p.id ORDER BY v.visit_date ASC")
+                let rows = try FirefoxHistoryItem.fetchCursor(db, sql: """
+                    SELECT v.visit_date, v.visit_type, v.session, p.url, p.title
+                    FROM moz_historyvisits v
+                    JOIN moz_places p ON v.place_id = p.id
+                    ORDER BY v.visit_date ASC
+                    LIMIT :limit OFFSET :offset
+                    """, arguments: ["limit": itemLimit, "offset": max(itemCount - itemLimit, 0)])
                     .filter { $0.timestamp > startDate ?? Date.distantPast }
                 while let row = try rows.next() {
                     if row.url != nil {

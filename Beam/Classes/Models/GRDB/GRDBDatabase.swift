@@ -1231,6 +1231,7 @@ extension GRDBDatabase {
 
         return result
     }
+
     func getFrecencies(urlIds: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyUrlRecord] {
         var scores = [UUID: FrecencyUrlRecord]()
         try? dbReader.read { db in
@@ -1497,7 +1498,7 @@ extension GRDBDatabase {
         }) ?? []
     }
 
-    func getOrCreateIdFor(url: String, title: String?, content: String?, destination: String?) -> UUID {
+    func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
         (try? dbReader.read { db in
             try Link.filter(Column("url") == url).fetchOne(db)?.id
         }) ?? visit(url: url, title: title, content: content, destination: destination).id
@@ -1572,29 +1573,33 @@ extension GRDBDatabase {
             try link.update(db, columns: updateColumns)
         }
     }
+
     func updateLinkFrecencies(scores: [FrecencyScore]) {
-        guard let links: [Link] = try? getLinks(ids: scores.map { $0.id }) else { return }
-        let scoresById = Dictionary(scores.map { ($0.id, $0) }, uniquingKeysWith: { (first, _) in first })
+        let q = """
+                UPDATE link
+                SET
+                    updatedAt = :updatedAt,
+                    frecencyVisitLastAccessAt = :lastAccessAt,
+                    frecencyVisitScore = :score,
+                    frecencyVisitSortScore = :sortScore
+                WHERE id = :id
+                """
         let now = BeamDate.now
-        let linksToUpdate: [Link] = links.compactMap { (link) in
-            guard let score = scoresById[link.id] else { return nil }
-            var newLink = link
-            newLink.frecencyVisitLastAccessAt = score.lastTimestamp
-            newLink.frecencyVisitScore = score.lastScore
-            newLink.frecencyVisitSortScore = score.sortValue
-            newLink.updatedAt = now
-            return newLink
-        }
-        let updateColumns = [
-            Column("updatedAt"),
-            Column("frecencyVisitLastAccessAt"),
-            Column("frecencyVisitScore"),
-            Column("frecencyVisitSortScore")
-        ]
-        _ = try? dbWriter.write { db in
-            for link in linksToUpdate {
-                try link.update(db, columns: updateColumns)
+        do {
+            _ = try dbWriter.write { db in
+                for score in scores {
+                    let arguments: StatementArguments = [
+                        "updatedAt": now,
+                        "lastAccessAt": score.lastTimestamp,
+                        "score": score.lastScore,
+                        "sortScore": score.sortValue,
+                        "id": score.id
+                    ]
+                    try db.execute(sql: q, arguments: arguments)
+                }
             }
+        } catch {
+            Logger.shared.logError("Couldn't update link frecencies: \(error)", category: .database)
         }
     }
 
@@ -1627,6 +1632,14 @@ extension GRDBDatabase {
                 return nil
             }
         return url
+    }
+
+    func insertOrIgnore(links: [Link]) throws {
+        try dbWriter.write { db in
+            for var link in links where try !link.exists(db) {
+                try link.insert(db)
+            }
+        }
     }
 
     // Search History and Aliases:

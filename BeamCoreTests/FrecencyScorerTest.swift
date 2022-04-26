@@ -19,6 +19,10 @@ class FrecencyScorerTest: XCTestCase {
         func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore? {
             return data[paramKey]?[id]
         }
+        func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore] {
+            guard let scores = data[paramKey] else { return Table() }
+            return Dictionary(uniqueKeysWithValues: scores.filter { (id, _) in ids.contains(id) })
+        }
         func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws {
             let urlId = score.id
             if data[paramKey] != nil {

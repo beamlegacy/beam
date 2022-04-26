@@ -487,7 +487,7 @@ import Sentry
                let mnemonic = result.completingText,
                url.hostname?.starts(with: mnemonic) ?? false {
                 // Create a mnemonic shortcut
-                _ = try? GRDBDatabase.shared.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateIdFor(url: url.absoluteString, title: nil))
+                _ = try? GRDBDatabase.shared.insertMnemonic(text: mnemonic, url: LinkStore.shared.getOrCreateId(for: url.absoluteString, title: nil))
             }
 
             if  mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {

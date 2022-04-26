@@ -8,7 +8,7 @@
 import Foundation
 
 public class BatchFrecencyUpdater {
-    var scores = [UUID: FrecencyScore]()
+    var incrementalScores = [UUID: FrecencyScore]()
     var frecencyStore: FrecencyStorage
     var params: [FrecencyParamKey: FrecencyParam] = FrecencyParameters
     let halfLife: Float
@@ -21,7 +21,7 @@ public class BatchFrecencyUpdater {
     }
 
     private func getScore(urlId: UUID) -> FrecencyScore? {
-        return scores[urlId] ?? (try? frecencyStore.fetchOne(id: urlId, paramKey: frecencyKey))
+        return incrementalScores[urlId]
     }
 
     private func eventWeight(eventType: FrecencyEventType, param: FrecencyParam) -> Float {
@@ -33,18 +33,20 @@ public class BatchFrecencyUpdater {
         let weightedValue = value * eventWeight(eventType: eventType, param: param)
         guard let previousScore = getScore(urlId: urlId) else {
             let score = FrecencyScore(id: urlId, lastTimestamp: date, lastScore: weightedValue, halfLife: halfLife)
-            scores[urlId] = score
+            incrementalScores[urlId] = score
             return
         }
-        scores[urlId] = previousScore.updated(date: date, value: value, halfLife: halfLife)
+        incrementalScores[urlId] = previousScore.updated(date: date, value: value, halfLife: halfLife)
     }
 
     public func saveAll() {
         do {
+            let existing = frecencyStore.fetchMany(ids: Array(incrementalScores.keys), paramKey: frecencyKey)
+            let scores = incrementalScores.merging(existing) { (lhs, rhs) in lhs.updated(date: rhs.lastTimestamp, value: rhs.lastScore, halfLife: halfLife) }
             try frecencyStore.save(scores: Array(scores.values), paramKey: frecencyKey)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .database)
         }
-        scores = [UUID: FrecencyScore]()
+        incrementalScores = [UUID: FrecencyScore]()
     }
 }
