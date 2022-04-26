@@ -129,7 +129,7 @@ public class TextNode: ElementNode {
         }
         return _attributedString!
     }
-
+    
     var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
     var markedTextRange: Range<Int>? { root?.markedTextRange }
 
@@ -514,7 +514,7 @@ public class TextNode: ElementNode {
 
     var useActionLayer = true
     func createActionLayerIfNeeded() -> Layer? {
-        guard element as? ProxyElement == nil, useActionLayer else { return nil }
+        guard element as? ProxyElement == nil, element.kind != .dailySummary, useActionLayer else { return nil }
         if let actionLayer = layers[Self.cmdEnterLayer] {
             return actionLayer
         }
@@ -651,17 +651,20 @@ public class TextNode: ElementNode {
                 })
                 return true
             } else if mouseInfo.event.clickCount == 1 && mouseInfo.event.modifierFlags.contains(.shift) {
+                guard allowSelection else { return true }
                 dragMode = .select(cursorPosition)
                 root?.extendSelection(to: clickPos)
                 editor.showInlineFormatterOnKeyEventsAndClick()
                 return true
             } else if mouseInfo.event.clickCount == 1 {
+                guard allowSelection else { return true }
                 focus(position: clickPos)
                 root?.cancelSelection(.current)
                 dragMode = .select(cursorPosition)
                 return true
             } else if mouseInfo.event.clickCount == 2 {
                 debounceClickTimer?.invalidate()
+                guard allowSelection else { return true }
                 root?.wordSelection(from: clickPos)
                 if !selectedTextRange.isEmpty {
                     editor.showInlineFormatterOnKeyEventsAndClick()
@@ -669,6 +672,7 @@ public class TextNode: ElementNode {
                 return true
             } else {
                 debounceClickTimer?.invalidate()
+                guard allowSelection else { return true }
                 root?.selectAll()
                 editor.detectTextFormatterType()
 
@@ -697,6 +701,7 @@ public class TextNode: ElementNode {
                 cursor = .arrow
                 editor.showLinkFormatterForSelection(mousePosition: mouseInfo.position, showMenu: true)
             } else {
+                guard allowSelection else { return true }
                 focus(position: clickPos)
                 root?.wordSelection(from: clickPos)
                 if !selectedTextRange.isEmpty {
@@ -712,7 +717,7 @@ public class TextNode: ElementNode {
         guard let editor = self.editor else { return false }
         editor.detectTextFormatterType()
 
-        if mouseIsDragged {
+        if mouseIsDragged, allowSelection {
             editor.showInlineFormatterOnKeyEventsAndClick(isKeyEvent: false)
             mouseIsDragged = false
         }

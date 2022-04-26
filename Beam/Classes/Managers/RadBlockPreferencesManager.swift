@@ -11,7 +11,7 @@ import BeamCore
 enum SynchronizeInterval: String, CaseIterable {
     case disabled, daily, biWeekly, weekly, monthly
 
-    var name: String { rawValue.prefix(1).capitalized + rawValue.dropFirst() }
+    var name: String { rawValue.capitalizeFirstChar() }
     var radBlockInterval: RBSynchronizeInterval {
         switch self {
         case .disabled:

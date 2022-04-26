@@ -40,7 +40,7 @@ struct Meeting: Identifiable, Equatable {
 
             if let atChar = self.email.range(of: "@"), self.name.isEmpty {
                 self.name = String(self.email.prefix(upTo: atChar.lowerBound))
-                self.name = self.name.prefix(1).capitalized + self.name.dropFirst()
+                self.name = self.name.capitalizeFirstChar()
             }
         }
 

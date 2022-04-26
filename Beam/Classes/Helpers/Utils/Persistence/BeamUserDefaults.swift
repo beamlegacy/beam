@@ -29,7 +29,7 @@ enum BeamUserDefaults: String, CaseIterable {
     }
 
     private var suiteNameBody: String {
-        self.rawValue.prefix(1).capitalized + self.rawValue.dropFirst()
+        rawValue.capitalizeFirstChar()
     }
 }
 
