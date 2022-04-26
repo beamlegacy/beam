@@ -157,6 +157,17 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         }
         return nil
     }
+    public func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore] {
+        let keyValues = db.getFrecencyScoreValues(noteIds: ids, paramKey: paramKey)
+            .map { (id, record) in
+                (id, FrecencyScore(id: record.noteId,
+                       lastTimestamp: record.lastAccessAt,
+                       lastScore: record.frecencyScore,
+                       sortValue: record.frecencySortScore))
+            }
+        return Dictionary(uniqueKeysWithValues: keyValues)
+    }
+
 
     private func createOrUpdate(record: FrecencyNoteRecord?, score: FrecencyScore, paramKey: FrecencyParamKey) -> FrecencyNoteRecord {
         if var updatedRecord = record {

@@ -591,7 +591,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
     }
 
     public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool, readCount: Int) {
-        guard current.link != linkStore.getOrCreateIdFor(url: link) else { return }
+        guard current.link != linkStore.getOrCreateId(for: link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
         current.addEvent(event)
@@ -605,11 +605,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         current.scoreApply { $0.textAmount = readCount }
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
     }
-    //to use only in history import (prevent deep nesting then impossible to encode)
-    public func addChildToRoot(url link: String, title: String?, date: Date) {
+    //to use only in history import
+    public func addChildToCurrent(url link: String, title: String?, date: Date) {
         guard case .historyImport = origin else { return }
-        let node = BrowsingNode(tree: self, parent: root, linkStore: linkStore, url: link, title: title, isLinkActivation: true, date: date)
-        root.children.append(node)
+        let node = BrowsingNode(tree: self, parent: current, linkStore: linkStore, url: link, title: title, isLinkActivation: true, date: date)
+        current.children.append(node)
         current = node
     }
 
@@ -707,6 +707,18 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         return score
     }
     public var rootId: UUID? { root?.id }
+
+    public func erase() {
+        guard let root = root else { return }
+        var toVisit = [root]
+        while toVisit.count > 0 {
+            let current = toVisit.removeLast()
+            let children = current.children
+            toVisit.append(contentsOf: children.reversed())
+            current.children = []
+            current.parent = nil
+        }
+    }
 
     // MARK: - Conversion from/to serializable format
     public convenience init?(flattenedTree: FlatennedBrowsingTree) {
