@@ -421,7 +421,8 @@ import Promises
         return plainData?.base64EncodedString(options: [])
     }
 
-    public func load(url: URL) {
+    public func load(request: URLRequest) {
+        guard let url = request.url else { return }
         hasError = false
         screenshotCapture = nil
         if !isFromNoteSearch {
@@ -433,7 +434,7 @@ import Promises
         if url.isFileURL {
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
-            webView.load(URLRequest(url: url))
+            webView.load(request)
         }
 
         Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .passwordManagerInternal)
@@ -467,7 +468,7 @@ import Promises
         if let suppliedPreloadURL = preloadUrl {
             preloadUrl = nil
             DispatchQueue.main.async { [weak self] in
-                self?.load(url: suppliedPreloadURL)
+                self?.load(request: URLRequest(url: suppliedPreloadURL))
             }
         }
     }
@@ -488,7 +489,7 @@ import Promises
         if let webviewUrl = webView.url, BeamURL(webviewUrl).isErrorPage, let originalUrl = BeamURL(webviewUrl).originalURLFromErrorPage {
             webView.replaceLocation(with: originalUrl)
         } else if webView.url == nil, let url = url {
-            load(url: url)
+            load(request: URLRequest(url: url))
         } else {
             webView.reload()
         }
@@ -544,9 +545,9 @@ import Promises
         browsingTree.switchToOtherTab()
     }
 
-    func willSwitchToNewUrl(url: URL) {
+    func willSwitchToNewUrl(url: URL?) {
         isFromNoteSearch = false
-        if self.url != nil && url.mainHost != self.url?.mainHost {
+        if self.url != nil && url?.mainHost != self.url?.mainHost {
             resetDestinationNote()
         }
     }

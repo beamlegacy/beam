@@ -126,7 +126,7 @@ class BeamUITestsMenuGenerator {
 
     private func loadUITestsPage(identifier: String) {
         if let localUrl = Bundle.main.url(forResource: "UITests-\(identifier)", withExtension: "html", subdirectory: nil) {
-            _ = AppDelegate.main.window?.state.createTab(withURL: localUrl, originalQuery: nil)
+            _ = AppDelegate.main.window?.state.createTab(withURLRequest: URLRequest(url: localUrl), originalQuery: nil)
         }
     }
 

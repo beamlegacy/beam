@@ -5,7 +5,7 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
     weak var page: WebPage?
 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        guard let url = navigationAction.request.url else { return nil }
+        let request = navigationAction.request
         if navigationAction.navigationType == .other {
             let defaultValue = true
             let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
@@ -21,16 +21,19 @@ class BeamWebkitUIDelegateController: NSObject, WebPageRelated, WKUIDelegate {
                                       menuBar=\(menubar),
                                       statusBar=\(statusBar),
                                       toolBars=\(toolBars),
-                                      containing \(url.absoluteString)
+                                      containing \(String(describing: request.url?.absoluteString))
                                       """, category: .web)
-                return page.createNewWindow(url, configuration, windowFeatures: windowFeatures, setCurrent: true)
+                return page.createNewWindow(request, configuration, windowFeatures: windowFeatures, setCurrent: true)
             } else {
-                Logger.shared.logInfo("Redirecting toward new tab containing \(url.absoluteString)", category: .web)
+                Logger.shared.logInfo("Redirecting toward new tab containing \(request)", category: .web)
             }
         }
-        Logger.shared.logInfo("Creating new webview tab for \(url.absoluteString)", category: .web)
-        let newTab = self.page?.createNewTab(url, configuration, setCurrent: true)
-        return newTab?.webView
+        Logger.shared.logInfo("Creating new webview tab for \(request)", category: .web)
+        let newTab = self.page?.createNewTab(request, configuration, setCurrent: true, rect: windowFeatures.toRect())
+        guard let newWebView = newTab?.webView else {
+            fatalError("should have webview")
+        }
+        return newWebView
     }
 
     func webViewDidClose(_ webView: WKWebView) {

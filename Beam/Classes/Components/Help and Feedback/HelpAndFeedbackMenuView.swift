@@ -133,7 +133,7 @@ struct HelpAndFeedbackMenuView: View {
                 .onTapGesture {
                     if let link = section.url {
                         state.mode = .web
-                        _ = state.createTab(withURL: link, originalQuery: nil)
+                        _ = state.createTab(withURLRequest: URLRequest(url: link), originalQuery: nil)
                     } else {
                         state.navigateToPage(.shortcutsWindowPage)
                     }
