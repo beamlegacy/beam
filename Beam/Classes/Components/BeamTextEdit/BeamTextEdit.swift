@@ -1154,7 +1154,7 @@ public extension CALayer {
     // these undo/redo methods override the subviews undoManagers behavior
     // if we're not actually the first responder, let's just forward it.
     @IBAction func undo(_ sender: Any) {
-        guard let rootNode = rootNode else { return }
+        guard let rootNode = rootNode, rootNode.note != nil else { return }
         if let firstResponder = window?.firstResponder, let undoManager = firstResponder.undoManager, firstResponder != self {
             undoManager.undo()
             return
