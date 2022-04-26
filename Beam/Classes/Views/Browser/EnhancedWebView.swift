@@ -32,7 +32,7 @@ struct EnhancedWebView: View {
                             contentState: pdfContentDescription.contentState,
                             searchState: tab.searchViewModel,
                             onClickLink: { url in
-                                tab.load(url: url)
+                                tab.load(request: URLRequest(url: url))
                             }
                         ).padding(.top, topContentInset)
 
