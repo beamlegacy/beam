@@ -31,7 +31,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Then I see \(searchWord) link as a first note"){
-            XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 1)
+            XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
             let actualNoteValue = cardView.getCardNoteValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
                           actualNoteValue == searchWord + " - Recherche Google" ||
@@ -45,7 +45,7 @@ class EditorShortcutsTests: BaseTest {
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
             webView.openDestinationCard()
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 1)
+            XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 2)
             let actualNoteValue = cardView.getCardNoteValueByIndex(0)
             XCTAssertTrue(actualNoteValue == searchWord + " - Google Search" ||
                           actualNoteValue == searchWord + " - Recherche Google" ||

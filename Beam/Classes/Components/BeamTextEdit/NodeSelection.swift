@@ -83,7 +83,7 @@ class NodeSelection {
     }
 
     func extendUp() {
-        guard let previousVisibleNode = end.previousVisibleNode(ElementNode.self) else { return }
+        guard let previousVisibleNode = end.previousVisibleNode(ElementNode.self), previousVisibleNode.allowSelection else { return }
         if isSelectingProxy {
             guard ((previousVisibleNode as? ProxyNode) != nil), previousVisibleNode.element.note == start.element.note, isSelectingProxy else { return }
         }
@@ -100,7 +100,7 @@ class NodeSelection {
     }
 
     func extendDown() {
-        guard let nextVisibleNode = end.nextVisibleNode(ElementNode.self) else { return }
+        guard let nextVisibleNode = end.nextVisibleNode(ElementNode.self), nextVisibleNode.allowSelection else { return }
         if isSelectingProxy {
             guard ((nextVisibleNode as? ProxyNode) != nil), nextVisibleNode.element.note == start.element.note else { return }
         } else {
@@ -124,7 +124,7 @@ class NodeSelection {
         } else {
             guard (node as? ProxyNode) == nil else { return }
         }
-
+        guard node.allowSelection else { return }
         node.selected = true
         nodes.insert(node)
         if nodes.count > 1 {
@@ -163,7 +163,7 @@ class NodeSelection {
 
     func appendChildren(of node: ElementNode) {
         for child in node.children {
-            guard let child = child as? ElementNode else { continue }
+            guard let child = child as? ElementNode, child.allowSelection else { continue }
             child.selectionLayerPosX = minOffset - child.offsetInRoot.x
             child.selectedAlone = false
             child.selected = true

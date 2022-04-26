@@ -65,6 +65,8 @@ public enum ElementKind: Codable, Equatable {
     /// - UUID: Target Element UUID
     /// - SourceMetadata
     case blockReference(UUID, UUID, origin: SourceMetadata? = nil)
+    /// Daily Summary
+    case dailySummary
 
     public var isText: Bool {
         !isMedia
@@ -123,6 +125,8 @@ public enum ElementKind: Codable, Equatable {
             return "embed '\(url.absoluteString)'"
         case .blockReference(let note, let elementId, _):
             return "blockReference '\(note).\(elementId)'"
+        case .dailySummary:
+            return "dailySummary"
         }
     }
 
@@ -250,7 +254,8 @@ public enum ElementKind: Codable, Equatable {
             }
 
             self = .blockReference(noteID, elementID)
-
+        case "dailySummary":
+            self = .dailySummary
         default:
             throw ElementKindError.typeNameUnknown(typeName)
         }
@@ -305,6 +310,9 @@ public enum ElementKind: Codable, Equatable {
             /// TODO: Rename .source to be descriptive e.g. "elementId"
             try container.encode(elementId, forKey: .source)
             try container.encode(sourceMetadata, forKey: .sourceMetadata)
+        case .dailySummary:
+            try container.encode("dailySummary", forKey: .type)
+
         }
     }
 }
