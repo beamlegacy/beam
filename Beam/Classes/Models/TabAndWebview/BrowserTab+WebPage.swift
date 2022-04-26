@@ -39,9 +39,9 @@ extension BrowserTab: WebPage {
         return BeamNote.fetch(title: noteTitle)
     }
 
-    // MARK: - Tab handling
-    private func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState) -> WebPage {
-        let newWebView = BeamWebView(frame: NSRect(), configuration: configuration ?? Self.webViewConfiguration)
+    // MARK: Tab handling
+    private func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, state: BeamState, rect: NSRect) -> WebPage {
+        let newWebView = BeamWebView(frame: rect, configuration: configuration ?? Self.webViewConfiguration)
         newWebView.wantsLayer = true
         newWebView.allowsMagnification = true
 
@@ -52,25 +52,30 @@ extension BrowserTab: WebPage {
             rootOrigin: browsingTree.origin.rootOrigin,
             rootId: browsingTree.rootId
         )
-        let newTab = state.addNewTab(origin: origin, setCurrent: setCurrent,
-                                     note: noteController.note, element: isFromNoteSearch ? noteController.element : nil,
-                                     url: targetURL, webView: newWebView)
+        let newTab = state.addNewTab(
+            origin: origin,
+            setCurrent: setCurrent,
+            note: noteController.note,
+            element: isFromNoteSearch ? noteController.element : nil,
+            request: request,
+            webView: newWebView
+        )
         newTab.browsingTree.current.score.openIndex = numberOfLinksOpenedInANewTab
         numberOfLinksOpenedInANewTab += 1
         browsingTree.openLinkInNewTab()
         return newTab
     }
 
-    func createNewTab(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, setCurrent: Bool) -> WebPage? {
+    func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage? {
         guard let state = state else { return nil }
         if let currentTab = state.browserTabsManager.currentTab, !currentTab.isPinned && !setCurrent && state.browserTabsManager.currentTabGroupKey != currentTab.id {
             state.browserTabsManager.removeFromTabGroup(tabId: currentTab.id)
             state.browserTabsManager.createNewGroup(for: currentTab.id)
         }
-        return createNewTab(targetURL, configuration, setCurrent: setCurrent, state: state)
+        return createNewTab(request, configuration, setCurrent: setCurrent, state: state, rect: rect)
     }
 
-    func createNewWindow(_ targetURL: URL, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
+    func createNewWindow(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
         // TODO: Open a new window compliant with windowFeatures instead, including slight offset similar to the default new window behaviour
         let defaultValue = true
         let menubar = windowFeatures.menuBarVisibility?.boolValue ?? defaultValue
@@ -78,17 +83,19 @@ extension BrowserTab: WebPage {
         let toolBars = windowFeatures.toolbarsVisibility?.boolValue ?? defaultValue
         let resizing = windowFeatures.allowsResizing?.boolValue ?? defaultValue
 
-        let x = windowFeatures.x?.floatValue ?? 0
-        let y = windowFeatures.y?.floatValue ?? 0
-        let width = windowFeatures.width?.floatValue ?? Float(webviewWindow?.frame.width ?? 800)
-        let height = windowFeatures.height?.floatValue ?? Float(webviewWindow?.frame.height ?? 600)
-        let windowFrame = NSRect(x: x, y: y, width: width, height: height)
-
         var newWebView: BeamWebView
         var newWindow: NSWindow
-        if menubar && statusBar && toolBars && resizing, let newBeamWindow = AppDelegate.main.createWindow(frame: windowFrame, restoringTabs: false) {
+        if menubar && statusBar && toolBars && resizing,
+           let newBeamWindow = AppDelegate.main.createWindow(frame: windowFeatures.toRect(), restoringTabs: false) {
             // we are being asked for the full browser experience, give it to them...
-            let tab = createNewTab(targetURL, configuration, setCurrent: setCurrent, state: newBeamWindow.state)
+            let tab = createNewTab(
+                request,
+                configuration,
+                setCurrent: setCurrent,
+                state: newBeamWindow.state,
+                rect: windowFeatures.toRect()
+            )
+
             newWindow = newBeamWindow
             newWebView = tab.webView
         } else {
@@ -96,7 +103,7 @@ extension BrowserTab: WebPage {
             // IMPORTANT!!: WebKit will perform the `URLRequest` automatically!! Attempting to do
             // the request here manually leads to incorrect results!!
             // source: https://github.com/ghostery/user-agent-ios/blob/61126a96930553d9d9ac5eae3503d17fe586fafe/Client/Frontend/Browser/BrowserViewController/BrowserViewController+WebViewDelegates.swift#L30-L33
-            let transientWebViewWindow = TransientWebViewWindow(originPage: self, url: targetURL, configuration: configuration, windowFeatures: windowFeatures)
+            let transientWebViewWindow = TransientWebViewWindow(originPage: self, request: request, configuration: configuration, windowFeatures: windowFeatures)
             transientWebViewWindow.makeKeyAndOrderFront(nil)
             newWindow = transientWebViewWindow
             newWebView = transientWebViewWindow.webView

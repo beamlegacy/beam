@@ -16,14 +16,16 @@ public class NSViewContainerView<ContentView: NSView>: NSView {
 
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                oldValue?.removeFromSuperview()
-
                 if let contentView = self.contentView {
                     // We are using autoresizingMask instead of autolayout to support embedded devtools (developerExtrasEnabled)
                     // see: https://stackoverflow.com/q/60727065
                     contentView.autoresizingMask = [.width, .height]
                     contentView.frame = self.contentHolder.bounds
-                    self.contentHolder.addSubview(contentView)
+                    if let oldValue = oldValue {
+                        self.contentHolder.replaceSubview(oldValue, with: contentView)
+                    } else {
+                        self.contentHolder.addSubview(contentView)
+                    }
                 }
             }
         }

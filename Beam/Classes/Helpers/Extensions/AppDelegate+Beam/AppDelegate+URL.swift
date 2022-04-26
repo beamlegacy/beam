@@ -100,7 +100,7 @@ extension AppDelegate {
             }
             window.makeKeyAndOrderFront(nil)
 
-            _ = window.state.createTab(withURL: url, originalQuery: url.absoluteString)
+            _ = window.state.createTab(withURLRequest: URLRequest(url: url), originalQuery: url.absoluteString)
             return true
         }
 

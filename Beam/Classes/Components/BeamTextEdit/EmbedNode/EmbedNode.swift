@@ -620,7 +620,7 @@ extension EmbedNode: EmbedContentViewDelegate {
         }
     }
 
-    func embedContentView(_ embedContentView: EmbedContentView, didRequestNewTab url: URL) {
+    func embedContentView(_ embedContentView: EmbedContentView, didRequestNewTab request: URLRequest) {
         guard
             let destinationNote = root?.editor?.note as? BeamNote,
             let rootElement = root?.element,
@@ -629,8 +629,8 @@ extension EmbedNode: EmbedContentViewDelegate {
             return
         }
 
-        // Create a new tab with the targetURL, the current note as destinationNote and the embedNode as rootElement
-        _ = state.createTab(withURL: url, note: destinationNote, rootElement: rootElement)
+        // Create a new tab with the target URLRequest, the current note as destinationNote and the embedNode as rootElement
+        _ = state.createTab(withURLRequest: request, note: destinationNote, rootElement: rootElement)
     }
 
     func embedContentView(

@@ -157,10 +157,7 @@ extension EmbedContentView: WKNavigationDelegate {
         decisionHandler: @escaping (WKNavigationActionPolicy, WKWebpagePreferences) -> Void
     ) {
         // When clicking on a link inside the EmbedNode
-        guard
-            let targetURL = navigationAction.request.url,
-            navigationAction.navigationType == .linkActivated
-        else {
+        guard navigationAction.navigationType == .linkActivated else {
             Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction)), allow navigation", category: .embed)
 
             decisionHandler(.allow, preferences)
@@ -169,7 +166,7 @@ extension EmbedContentView: WKNavigationDelegate {
 
         Logger.shared.logDebug("Embed decidePolicyFor: \(String(describing: navigationAction)), cancel navigation, creating new tab", category: .embed)
 
-        delegate?.embedContentView(self, didRequestNewTab: targetURL)
+        delegate?.embedContentView(self, didRequestNewTab: navigationAction.request)
 
         // Don't navigate the EmbedNode
         decisionHandler(.cancel, preferences)
@@ -221,8 +218,7 @@ extension EmbedContentView: WKNavigationDelegate {
 extension EmbedContentView: WKUIDelegate {
 
     func webView(_ webView: WKWebView, createWebViewWith configuration: WKWebViewConfiguration, for navigationAction: WKNavigationAction, windowFeatures: WKWindowFeatures) -> WKWebView? {
-        guard let url = navigationAction.request.url else { return nil }
-        delegate?.embedContentView(self, didRequestNewTab: url)
+        delegate?.embedContentView(self, didRequestNewTab: navigationAction.request)
         return nil
     }
 
