@@ -35,7 +35,6 @@ class ShareHelper {
 
     private struct ReadShareableContent {
         var text: String?
-        var html: String?
         var elements: [BeamElement]?
     }
 
@@ -56,7 +55,7 @@ class ShareHelper {
         }
 
         let text = texts.isEmpty ? nil : texts.joined(separator: .lineSeparator)
-        return ReadShareableContent(text: text, html: html, elements: elements)
+        return ReadShareableContent(text: text, elements: elements)
     }
 
     @MainActor private func setContentToPasteboard(_ content: ReadShareableContent) {
@@ -65,10 +64,8 @@ class ShareHelper {
         pasteboard.clearContents()
 
         if let text = content.text {
+            pasteboard.declareTypes([.string], owner: nil)
             pasteboard.setString(text, forType: .string)
-        }
-        if let html = content.html {
-            pasteboard.setString(html, forType: .html)
         }
 
         // When we have a single image, let's put the file directly in pasteboard
