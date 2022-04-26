@@ -41,7 +41,7 @@ struct EnhancedWebView: View {
                             .webViewStatusBar(isVisible: tab.showsStatusBar) {
                                 WebViewStatusText(mouseHoveringLocation: tab.mouseHoveringLocation)
                             }
-                            .if(!tab.webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
+                        .if(!tab.webView.supportsTopContentInset) { $0.padding(.top, topContentInset) }
                     }
 
                     ZStack {
