@@ -18,7 +18,7 @@ class BeamLinkDBTests: XCTestCase {
     func testDomain() throws {
         //not a domain case
         let url0 = "http://123.fr/yourdestiny.html"
-        let id0 = BeamLinkDB.shared.getOrCreateIdFor(url: url0, title: nil, content: nil, destination: nil)
+        let id0 = BeamLinkDB.shared.getOrCreateId(for: url0, title: nil, content: nil, destination: nil)
         var isDomain = BeamLinkDB.shared.isDomain(id: id0)
         XCTAssertFalse(isDomain)
         var domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id0))
@@ -27,7 +27,7 @@ class BeamLinkDBTests: XCTestCase {
 
         //domain case
         let url1 = "http://depannage.com"
-        let id1 = BeamLinkDB.shared.getOrCreateIdFor(url: url1, title: nil, content: nil, destination: nil)
+        let id1 = BeamLinkDB.shared.getOrCreateId(for: url1, title: nil, content: nil, destination: nil)
         isDomain = BeamLinkDB.shared.isDomain(id: id1)
         XCTAssert(isDomain)
         domainId = try XCTUnwrap(BeamLinkDB.shared.getDomainId(id: id1))
@@ -64,7 +64,7 @@ class BeamLinkDBTests: XCTestCase {
 
     func testMissingLinkHandling() {
         //when getting id for missing url, it retreives the link but doesn't save it in db
-        let createdLinkId: UUID = BeamLinkDB.shared.getOrCreateIdFor(url: "<???>", title: nil, content: nil, destination: nil)
+        let createdLinkId: UUID = BeamLinkDB.shared.getOrCreateId(for: "<???>", title: nil, content: nil, destination: nil)
         XCTAssertEqual(createdLinkId, Link.missing.id)
         XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
 
@@ -159,7 +159,7 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let t0 = BeamDate.now
         
-        let linkId0 = linkstore.getOrCreateIdFor(url: "http://moon.fr", title: nil, content: nil, destination: nil)
+        let linkId0 = linkstore.getOrCreateId(for: "http://moon.fr", title: nil, content: nil, destination: nil)
         let score = FrecencyScore(id: linkId0, lastTimestamp: t0, lastScore: 1, sortValue: 2)
         //storing frecency using readingTime param key doesn't fill link frecency fields
         try frencencyStorage.save(score: score, paramKey: .webReadingTime30d0)
@@ -186,7 +186,7 @@ class BeamLinkDBTests: XCTestCase {
         //test of save many
         BeamDate.travel(1.0)
         let t2 = BeamDate.now
-        let linkId1 = linkstore.getOrCreateIdFor(url: "http://sun.com", title: nil, content: nil, destination: nil)
+        let linkId1 = linkstore.getOrCreateId(for: "http://sun.com", title: nil, content: nil, destination: nil)
         let otherScore = FrecencyScore(id: linkId1, lastTimestamp: t2, lastScore: 2, sortValue: 7)
         updatedScore = FrecencyScore(id: linkId0, lastTimestamp: t2, lastScore: 1, sortValue: 2)
         try frencencyStorage.save(scores: [otherScore, updatedScore], paramKey: .webReadingTime30d0)
@@ -217,8 +217,8 @@ class BeamLinkDBTests: XCTestCase {
     func testUrlNormalization() {
         let nonStandardUrl = "http://lemonde.fr"
         let standardUrl = "http://lemonde.fr/"
-        let id0 = BeamLinkDB.shared.getOrCreateIdFor(url: nonStandardUrl, title: nil, content: nil, destination: nil)
-        let id1 = BeamLinkDB.shared.getOrCreateIdFor(url: standardUrl, title: nil, content: nil, destination: nil)
+        let id0 = BeamLinkDB.shared.getOrCreateId(for: nonStandardUrl, title: nil, content: nil, destination: nil)
+        let id1 = BeamLinkDB.shared.getOrCreateId(for: standardUrl, title: nil, content: nil, destination: nil)
         XCTAssertEqual(id0, id1)
 
         let link0 = BeamLinkDB.shared.visit(nonStandardUrl, title: nil, content: nil, destination: nil)

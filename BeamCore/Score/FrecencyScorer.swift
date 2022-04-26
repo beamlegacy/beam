@@ -101,6 +101,7 @@ public struct FrecencyScore {
 
 public protocol FrecencyStorage {
     func fetchOne(id: UUID, paramKey: FrecencyParamKey) throws -> FrecencyScore?
+    func fetchMany(ids: [UUID], paramKey: FrecencyParamKey) -> [UUID: FrecencyScore]
     func save(score: FrecencyScore, paramKey: FrecencyParamKey) throws
     func save(scores: [FrecencyScore], paramKey: FrecencyParamKey) throws
 }
