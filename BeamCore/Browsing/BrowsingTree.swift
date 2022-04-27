@@ -16,6 +16,7 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
     case linkFromNote(noteName: String?)
     case browsingNode(id: UUID, pageLoadId: UUID?, rootOrigin: BrowsingTreeOrigin?, rootId: UUID?) //following a cmd + click on link
     case historyImport(sourceBrowser: BrowserType)
+    case pinnedTab(url: URL?)
 
     public var rootOrigin: BrowsingTreeOrigin? {
         switch self {
@@ -31,6 +32,7 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         case .browsingNode(id: let id, pageLoadId: let pageLoadId, rootOrigin: let rootOrigin, rootId: let rootId):
             return .browsingNode(id: id, pageLoadId: pageLoadId, rootOrigin: rootOrigin?.anonymized, rootId: rootId)
         case .historyImport: return self
+        case .pinnedTab: return .pinnedTab(url: nil)
         }
     }
 
@@ -68,6 +70,9 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
         case .historyImport(let sourceBrowser):
             try container.encode("historyImport", forKey: .type)
             try container.encode(sourceBrowser.rawValue, forKey: .value)
+        case .pinnedTab(let url):
+            try container.encode("pinnedTab", forKey: .type)
+            try container.encode(url, forKey: .value)
         }
     }
 
@@ -90,6 +95,8 @@ public indirect enum BrowsingTreeOrigin: Codable, Equatable {
                 rootId: try? container.decodeIfPresent(UUID.self, forKey: .rootId))
         case "historyImport":
             self = .historyImport(sourceBrowser: try container.decode(BrowserType.self, forKey: .value))
+        case "pinnedTab":
+            self = .pinnedTab(url: try? container.decodeIfPresent(URL.self, forKey: .value))
         default:
             throw DecodingError.dataCorrupted(
                         DecodingError.Context(
@@ -270,6 +277,7 @@ public class BrowsingNode: ObservableObject, Codable {
             case .linkFromNote: return .webFromNote
             case .searchBar: return .webSearchBar
             case .historyImport: return .webSearchBar
+            case .pinnedTab: return .webLinkActivation
             }
         }
         return isLinkActivation ? .webLinkActivation : .webSearchBar
