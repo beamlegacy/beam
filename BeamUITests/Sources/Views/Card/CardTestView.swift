@@ -378,4 +378,17 @@ class CardTestView: BaseView {
     func getBreadCrumbTitleByIndex(_ index: Int) -> String {
         return self.getBreadCrumbElements()[index].title
     }
+    
+    func getCheckboxAtTextNote(_ noteNumber: Int) -> XCUIElement {
+        let index = noteNumber - 1
+        return getTextNodeByIndex(nodeIndex: index).buttons[CardViewLocators.Buttons.checkbox.accessibilityIdentifier]
+    }
+    
+    @discardableResult
+    func createCheckboxAtNote(_ noteNumber: Int) -> XCUIElement {
+        let index = noteNumber - 1
+        let checkboxShortcut = "-[]"
+        typeInCardNoteByIndex(noteIndex: index, text: checkboxShortcut, needsActivation: true)
+        return getTextNodeByIndex(nodeIndex: index)
+    }
 }

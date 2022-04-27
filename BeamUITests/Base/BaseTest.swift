@@ -101,4 +101,11 @@ class BaseTest: XCTestCase {
     func isAppRunning() -> Bool {
         return beamAppInstance.state != XCUIApplication.State.notRunning
     }
+    
+    @discardableResult
+    func launchAppAndOpenFirstCard() -> CardTestView {
+        launchApp()
+        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+        return AllCardsTestView().openFirstCard()
+    }
 }
