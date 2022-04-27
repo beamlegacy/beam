@@ -320,14 +320,42 @@ class ClusteringManager: ObservableObject {
         }
     }
 
-    func shouldBeWith(page: PageID, group: [PageID]) {
-
+    func shouldBeWithAndApart(pageId: PageID, beWith: [PageID], beApart: [PageID]) {
+        let pageToUpdate = Page(id: pageId, beWith: beWith, beApart: beApart)
+        isClustering = true
+        cluster.add(page: pageToUpdate, ranking: nil) { result in
+            DispatchQueue.main.async {
+                self.isClustering = false
+            }
+            switch result {
+            case .failure(let error):
+                self.isClustering = false
+                if error as? Cluster.AdditionError == .skippingToNextAddition {
+                    Logger.shared.logInfo("Skipping to next addition before performing the final clustering")
+                } else if error as? Cluster.AdditionError == .abortingAdditionDuringClustering {
+                    Logger.shared.logInfo("Aborting addition temporarility as to not hinder ongoing clustering process")
+                } else {
+                    Logger.shared.logError("Error while updating page in the cluster for \(pageToUpdate): \(error)", category: .clustering)
+                }
+            case .success(let result):
+                self.similarities = result.similarities
+                self.clusteredPagesId = result.pageGroups
+                self.clusteredNotesId = result.noteGroups
+                if result.flag == .sendRanking {
+                    self.sendRanking = true
+                    self.initialiseNotes = false
+                } else if result.flag == .addNotes {
+                    self.initialiseNotes = true
+                    self.sendRanking = false
+                } else {
+                    self.initialiseNotes = false
+                    self.sendRanking = false
+                }
+                self.logForClustering(result: result.pageGroups, changeCandidate: false)
+            }
+        }
     }
-
-    func shouldBeApart(page: PageID, group: [PageID]) {
-        
-    }
-
+    
     func cleanTextFrom(note: BeamNote) -> [String] {
         var fullText = [note.title] + note.allTexts.map { $0.1.text }
         guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return fullText }
