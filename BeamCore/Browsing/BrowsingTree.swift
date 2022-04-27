@@ -668,7 +668,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
 
         return set
     }
-    public var idUrlMapping: [UUID: String] {
+    public var idURLMapping: [UUID: String] {
         var mapping = [UUID: String]()
         links.forEach {
             mapping[$0] = (linkStore.linkFor(id: $0)?.url ?? Link.missing.url)
