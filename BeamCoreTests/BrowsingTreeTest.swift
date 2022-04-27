@@ -406,4 +406,14 @@ class BrowsingTreeTest: XCTestCase {
         XCTAssertEqual(storage.calls1[2].lifeTime, 1)
         BeamDate.reset()
     }
+
+    func testPinOriginJSONCoding() throws {
+        let origin = BrowsingTreeOrigin.pinnedTab(url: URL(string: "http://abc.fr/"))
+        let data = try JSONEncoder().encode(origin)
+        let decoded = try JSONDecoder().decode(BrowsingTreeOrigin.self, from: data)
+        switch decoded {
+        case let .pinnedTab(url: url): XCTAssertEqual(url?.absoluteString, "http://abc.fr/")
+        default: XCTFail("BrowsingTreeOrigin.pinnedTab coding issue")
+        }
+    }
 }
