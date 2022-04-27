@@ -11,7 +11,7 @@ import XCTest
 class SlashMenuTests: BaseTest {
     
     let datePicker = DatePickerTestView()
-    let cardTestView = CardTestView()
+    var cardTestView: CardTestView!
     let dayToSelect = "11"
     let monthToSelect = "June"
     let yearToSelect = "2025"
@@ -19,9 +19,7 @@ class SlashMenuTests: BaseTest {
     func testDatePickerCardCreation() {
         let localDateFormat = "\(dayToSelect) \(monthToSelect) \(yearToSelect)"
         let ciDateFormat = "\(monthToSelect) \(dayToSelect), \(yearToSelect)"
-        launchApp()
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
-        AllCardsTestView().openFirstCard()
+        cardTestView = launchAppAndOpenFirstCard()
         
         let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
 
@@ -47,12 +45,10 @@ class SlashMenuTests: BaseTest {
     func testNoteDividerCreation() {
         let row1Text = "row 1"
         let row2Text = "row 2"
-        launchApp()
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+        cardTestView = launchAppAndOpenFirstCard()
         
         step("Given I populate 2 notes accordingly with texts: \(row1Text) & \(row2Text)"){
-            AllCardsTestView()
-                .openFirstCard()
+            cardTestView
                 .typeInCardNoteByIndex(noteIndex: 0, text: row1Text)
                 .typeKeyboardKey(.enter)
             cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: row2Text)
@@ -72,6 +68,68 @@ class SlashMenuTests: BaseTest {
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), row1Text + " ")
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), emptyString)
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), row2Text)
+        }
+    }
+    
+    func testCheckBoxCreationMovementDeletion() {
+        cardTestView = launchAppAndOpenFirstCard()
+
+        step("Then I can successfuly create a checkbox using a shortcut") {
+            cardTestView.createCheckboxAtNote(1)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("Then the checkbox is removed successfully on delete button press") {
+            cardTestView.typeKeyboardKey(.delete)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("Then I can successfully create a checkbox using slash menu") {
+            cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier).clickSlashMenuItem(item: .todoCheckboxItem)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+        }
+        
+        step("Then checkbox is created on pressing return button") {
+            cardTestView.app.typeText("some text")
+            cardTestView.typeKeyboardKey(.leftArrow, 4)
+            cardTestView.typeKeyboardKey(.return)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(2).exists)
+        }
+        
+        step("Then all checkboxes are moved one row down on pressing return button") {
+            cardTestView.typeKeyboardKey(.upArrow)
+            cardTestView.typeKeyboardKey(.return)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(2).exists)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(3).exists)
+        }
+        
+        step("Then checkbox is created on pressing return button") {
+            cardTestView.typeKeyboardKey(.downArrow)
+            cardTestView.typeKeyboardKey(.rightArrow, 4)
+            cardTestView.typeKeyboardKey(.return)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(2).exists)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(3).exists)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(4).exists)
+        }
+        
+        step("Then checkbox is removed on pressing return button") {
+            cardTestView.typeKeyboardKey(.return)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(2).exists)
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(3).exists)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(4).exists)
+        }
+        
+        step("Then the text remains on its place after the checkbox removal") {
+            cardTestView.typeKeyboardKey(.upArrow)
+            cardTestView.typeKeyboardKey(.delete)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(1).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardTestView.getCheckboxAtTextNote(2).exists)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(3).exists)
+            XCTAssertFalse(cardTestView.getCheckboxAtTextNote(4).exists)
         }
     }
 }
