@@ -1,27 +1,26 @@
 import XCTest
-import Fakery
 
 @testable import Beam
 @testable import BeamCore
 
-class MockSocialTitleFetcher: SocialTitleFetcher {
-    static func getDefaultLinkTitle(url: URL) -> String {
-        "\(url.hostname ?? "") Enterprise Solutions"
-    }
-    func getMockTitle(_ url: URL) throws -> SocialTitle? {
-        SocialTitle(url: url, title: "\(url.hostname ?? "") Enterprise Solutions")
-    }
-    override func fetch(for url: URL, completion: @escaping (Result<SocialTitle?, SocialTitleFetcherError>) -> Void) {
-        let result = Result(catching: {
-            try getMockTitle(url)
-        }).mapError({ _ in
-            SocialTitleFetcherError.failedRequest
-        })
-        completion(result)
-    }
-}
-
 class WebNoteControllerTest: XCTestCase {
+    class MockSocialTitleFetcher: SocialTitleFetcher {
+        static func getDefaultLinkTitle(url: URL) -> String {
+            "\(url.hostname ?? "") Enterprise Solutions"
+        }
+        func getMockTitle(_ url: URL) throws -> SocialTitle? {
+            SocialTitle(url: url, title: "\(url.hostname ?? "") Enterprise Solutions")
+        }
+        override func fetch(for url: URL, completion: @escaping (Result<SocialTitle?, SocialTitleFetcherError>) -> Void) {
+            let result = Result(catching: {
+                try getMockTitle(url)
+            }).mapError({ _ in
+                SocialTitleFetcherError.failedRequest
+            })
+            completion(result)
+        }
+    }
+
     var words = WordsFile()
     var note = BeamNote(title: "Sample note")
 
