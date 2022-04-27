@@ -53,14 +53,14 @@ class BrowsingTreeSenderTest: XCTestCase {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
     }
 
-    func testSentData() throws {
-        func sentData(session: MockURLSession) throws  -> BrowsingTreeSendData {
-            let payload = try XCTUnwrap(session.lastPayload, "session uploadTask shoud have been called")
-            let sentData = try? decoder.decode(BrowsingTreeSendData.self, from: payload)
-            return try XCTUnwrap(sentData, "sent data should decode")
-        }
+    func sentData(session: MockURLSession) throws  -> BrowsingTreeSendData {
+        let decoder = JSONDecoder()
+        let payload = try XCTUnwrap(session.lastPayload, "session uploadTask shoud have been called")
+        let sentData = try? decoder.decode(BrowsingTreeSendData.self, from: payload)
+        return try XCTUnwrap(sentData, "sent data should decode")
+    }
 
-        let decoder = BeamJSONDecoder()
+    func testSentAnonymizedData() throws {
         let tree = BrowsingTree(nil)
         subject.send(browsingTree: tree)
         let unwrappedData = try sentData(session: session)
@@ -75,6 +75,7 @@ class BrowsingTreeSenderTest: XCTestCase {
         }
         XCTAssertEqual(unwrappedData.data.current.id, tree.current.id)
         XCTAssertEqual(unwrappedData.appSessionId, appSessionId)
+        XCTAssertNil(unwrappedData.idURLMapping)
 
         let anotherTree = BrowsingTree(nil)
         subject.send(browsingTree: anotherTree)
@@ -91,6 +92,8 @@ class BrowsingTreeSenderTest: XCTestCase {
         }
         XCTAssertEqual(unwrappedData.userId, otherUnwrappedData.userId)
         XCTAssertEqual(unwrappedData.appSessionId, otherUnwrappedData.appSessionId)
+        XCTAssertNil(otherUnwrappedData.idURLMapping)
+
 
     }
 
@@ -148,5 +151,31 @@ class BrowsingTreeSenderTest: XCTestCase {
         )
         sender = BrowsingTreeSender(session: session, config: missingTokenConfig, appSessionId: appSessionId)
         XCTAssertNil(sender)
+    }
+
+    func testClearSending() throws {
+        let notAnonymousConfig = BrowsingTreeSenderConfig(
+            dataStoreUrl: "http://url.fr",
+            dataStoreApiToken: "abc",
+            waitTimeOut: 2.0,
+            anonymized: false
+        )
+        let sender = try XCTUnwrap(BrowsingTreeSender(session: session, config: notAnonymousConfig, appSessionId: appSessionId))
+        let tree = BrowsingTree(.searchBar(query: "hummus recipe", referringRootId: nil))
+        tree.navigateTo(url: "http://abc.fr/", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        let urlId = try XCTUnwrap(tree.current.link)
+        sender.send(browsingTree: tree)
+        let unwrappedData = try sentData(session: session)
+
+        XCTAssertEqual(unwrappedData.rootCreatedAt, tree.root.events.first!.date.timeIntervalSince1970)
+        XCTAssertEqual(unwrappedData.rootId, tree.root.id)
+        XCTAssertEqual(unwrappedData.data.root.id, tree.root.id)
+        if case .searchBar(query: let query, referringRootId: _) = unwrappedData.data.origin {
+            XCTAssertEqual(query, "hummus recipe")
+        } else {
+            XCTFail("Sent data tree origin issue")
+        }
+        let expectedMapping = [tree.root!.link: "<???>", urlId: "http://abc.fr/"]
+        XCTAssertEqual(unwrappedData.idURLMapping, expectedMapping)
     }
 }
