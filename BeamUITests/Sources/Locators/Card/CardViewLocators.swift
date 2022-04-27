@@ -36,6 +36,7 @@ enum CardViewLocators {
         case noteMediaMuted = "note-media-muted"
         case moveHandle = "moveHandle"
         case newNoteCreation = "NewNoteButton"
+        case checkbox = "checkbox"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
