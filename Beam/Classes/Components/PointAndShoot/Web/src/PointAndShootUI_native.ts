@@ -103,6 +103,13 @@ export class PointAndShootUI_native implements PointAndShootUI {
       // Get the rectangles that make up the range
       let rangeRects = Array.from(range.getClientRects()) as BeamRect[]
 
+      // When doubleclicking on a paragraph, WebKit specifically will add an additional rect equal to the size of the endContainer
+      // We can deduce when this happens when the start- and endOffset are 0.
+      const shouldRemoveLastRect = range.startOffset == 0 && range.endOffset == 0 && rangeRects.length >= 2
+      if (shouldRemoveLastRect) {
+        rangeRects.pop()
+      }
+
       const parent = range.commonAncestorContainer as BeamElement
 
       // Get all childNotes directly under the parent
