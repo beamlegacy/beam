@@ -52,6 +52,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     public private(set) lazy var databaseManager = DatabaseManager()
     public private(set) lazy var beamObjectManager = BeamObjectManager()
 
+    private let networkMonitor = NetworkMonitor()
+    public private(set) var isNetworkReachable: Bool = false
+
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
@@ -127,17 +130,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
 
+        setupNetworkMonitor()
+
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
         AccountManager.updateInitialState()
-
-        if AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
-            beamObjectManager.liveSync { _ in
-                self.syncDataWithBeamObject()
-                self.data.updateNoteCount()
-            }
-        } else {
-            AccountManager.logoutIfNeeded()
-        }
 
         fetchTopDomains()
         getUserInfos()
@@ -157,6 +153,33 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         preferencesWindowController.close()
         openedPrefPanelOnce = true
+    }
+
+    // MARK: - Network Monitor
+
+    func setupNetworkMonitor() {
+        networkMonitor.startListening()
+        networkMonitor.networkStatusHandler.sink { [weak self] status in
+            switch status {
+            case .unknown, .notReachable:
+                self?.isNetworkReachable = false
+            case .reachable:
+                self?.isNetworkReachable = true
+                self?.checkPrivateKey()
+            }
+        }.store(in: &cancellableScope)
+    }
+
+    // MARK: - Private Key Check
+    func checkPrivateKey() {
+        if AccountManager.checkPrivateKey(useBuiltinPrivateKeyUI: true) == .signedIn {
+            beamObjectManager.liveSync { _ in
+                self.syncDataWithBeamObject()
+                self.data.updateNoteCount()
+            }
+        } else {
+            AccountManager.logoutIfNeeded()
+        }
     }
 
     // MARK: - Web sockets
