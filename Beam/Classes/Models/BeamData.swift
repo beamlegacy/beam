@@ -124,7 +124,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
             dataStoreApiToken: EnvironmentVariables.BrowsingTree.accessToken,
-            waitTimeOut: 2.0
+            waitTimeOut: 2.0,
+            anonymized: Configuration.branchType != .develop
         )
         browsingTreeSender = BrowsingTreeSender(config: treeConfig, appSessionId: sessionId)
         super.init()
