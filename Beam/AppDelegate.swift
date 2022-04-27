@@ -499,12 +499,14 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             tmpCmdManager.beginGroup(with: ClosedTabDataPersistence.closeTabCmdGrp)
 
             for tab in window.state.browserTabsManager.tabs.reversed() {
-                guard !tab.isPinned, tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
-                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
+                guard tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
                 // Since we don't run the cmd when closing the app we need to do this out of the CloseTab Cmd
                 if onExit {
-                    tab.closeApp()
+                    tab.appWillClose()
                 }
+                if tab.isPinned { continue }
+                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
+
                 tmpCmdManager.appendToDone(command: closeTabCmd)
             }
             tmpCmdManager.endGroup(forceGroup: true)
