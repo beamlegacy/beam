@@ -310,11 +310,13 @@ extension WebNoteController {
     /// - Parameter title: Fallback text that will be visible
     /// - Returns: BeamElement with .link
     private func convertURLToBeamTextLink(url: URL, title: String? = nil) async -> BeamText {
-        guard url.scheme != "file", let link = await SocialTitleFetcher.shared.fetch(for: url) else {
+        guard url.scheme != "file",
+              let link = await SocialTitleFetcher.shared.fetch(for: url),
+              let title = link.title.removingPercentEncoding else {
             Logger.shared.logError("API request for link title failed. falling back on page title", category: .web)
             return BeamText(title ?? url.absoluteString, attributes: [.link(url.absoluteString)])
         }
 
-        return BeamText(link.title, attributes: [.link(link.url.absoluteString)])
+        return BeamText(title, attributes: [.link(link.url.absoluteString)])
     }
 }
