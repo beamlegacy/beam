@@ -76,7 +76,6 @@
         "SignInTests",
         "SignUpAutocompleteTests",
         "SigninTests",
-        "SlashMenuTests\/testDatePickerCardCreation()",
         "TextEditorContextViewTests",
         "UpdateViewTests\/testUpdateAvailableEverywhereInCardView()",
         "WaitHelper",

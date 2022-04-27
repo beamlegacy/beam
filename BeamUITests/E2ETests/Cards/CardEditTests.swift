@@ -10,7 +10,7 @@ import XCTest
 
 class CardEditTests: BaseTest {
     
-    var cardView: CardTestView?
+    var cardView: CardTestView!
     let shortcutsHelper = ShortcutsHelper()
     
     func testRenameCardSuccessfully() {
@@ -28,23 +28,23 @@ class CardEditTests: BaseTest {
         }
         
         step("When I delete \(numberOfLetterToBeDeleted) letters from the title"){
-            cardView!.makeCardTitleEditable()
-            cardView!.typeKeyboardKey(.delete, numberOfLetterToBeDeleted)
-            cardView!.typeKeyboardKey(.enter)
+            cardView.makeCardTitleEditable()
+            cardView.typeKeyboardKey(.delete, numberOfLetterToBeDeleted)
+            cardView.typeKeyboardKey(.enter)
         }
         
         
         step("Then note title is changed to \(expectedCardRenameFirstTime)"){
-            XCTAssertEqual(cardView!.getCardTitle(), expectedCardRenameFirstTime)
+            XCTAssertEqual(cardView.getCardTitle(), expectedCardRenameFirstTime)
         }
         
         step("When I type \(expectedCardRenameSecondTime) to the title"){
-            cardView!.makeCardTitleEditable().typeText(expectedCardRenameSecondTime)
-            cardView!.typeKeyboardKey(.enter)
+            cardView.makeCardTitleEditable().typeText(expectedCardRenameSecondTime)
+            cardView.typeKeyboardKey(.enter)
         }
 
         step("Then note's title is changed to \(expectedCardRenameFirstTime + expectedCardRenameSecondTime)"){
-            XCTAssertEqual(cardView!.getCardTitle(), expectedCardRenameFirstTime + expectedCardRenameSecondTime)
+            XCTAssertEqual(cardView.getCardTitle(), expectedCardRenameFirstTime + expectedCardRenameSecondTime)
         }
     }
     
@@ -63,12 +63,12 @@ class CardEditTests: BaseTest {
         step("When I delete last letter from the title"){
             journalView.searchInOmniBox(cardTwoNameToBeCreated, false)
             WebTestView().selectCreateCard(cardTwoNameToBeCreated)
-            cardView!.makeCardTitleEditable()
-            cardView!.typeKeyboardKey(.delete)
+            cardView.makeCardTitleEditable()
+            cardView.typeKeyboardKey(.delete)
         }
         
         step("Then the following error appears \(expectedErrorMessage)"){
-            XCTAssertTrue(cardView!.staticText(expectedErrorMessage).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView.staticText(expectedErrorMessage).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
     }
     
@@ -82,17 +82,17 @@ class CardEditTests: BaseTest {
         }
         
         step("When I try to delete \(cardNameToBeCreated) and cancel it"){
-            cardView!
+            cardView
                 .clickDeleteButton()
                 .cancelDeletion()
         }
         
         step("Then the note is not deleted"){
-            XCTAssertEqual(cardView!.getCardTitle(), cardNameToBeCreated, "\(cardNameToBeCreated) is deleted")
+            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated, "\(cardNameToBeCreated) is deleted")
         }
         
         step("When I try to delete \(cardNameToBeCreated) and confirm it"){
-            cardView!
+            cardView
                 .clickDeleteButton()
                 .confirmDeletion()
         }
@@ -115,13 +115,13 @@ class CardEditTests: BaseTest {
         step("Then it has a source icon"){
             shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
             cardView = CardTestView()
-            let imageNote = cardView!.getImageNodeByIndex(nodeIndex: 0)
+            let imageNote = cardView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
-            XCTAssertTrue(cardView!.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
         step("Then I'm redirected to the source page when clicking on the icon"){
-            cardView!.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).tapInTheMiddle()
+            cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).tapInTheMiddle()
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
             let webPageUrl = webView.getTabUrlAtIndex(index: 1)
             XCTAssertTrue(webPageUrl.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageUrl)")
@@ -141,9 +141,9 @@ class CardEditTests: BaseTest {
         step("Then it has a move handle"){
             shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
             cardView = CardTestView()
-            let imageNote = cardView!.getImageNodeByIndex(nodeIndex: 0)
+            let imageNote = cardView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
-            XCTAssertTrue(cardView!.handle(CardViewLocators.Buttons.moveHandle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardView.handle(CardViewLocators.Buttons.moveHandle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
     
@@ -153,7 +153,7 @@ class CardEditTests: BaseTest {
             let journalView = launchApp()
             cardView = journalView.createCardViaOmniboxSearch("Bullets")
             BeamUITestsHelper(journalView.app).tapCommand(.insertTextInCurrentNote)
-            nodesBeforeChange = cardView!.getCardNotesTextForVisiblePart()
+            nodesBeforeChange = cardView.getCardNotesTextForVisiblePart()
         }
         
         step("WHEN I drag the bullet down") {
@@ -162,7 +162,7 @@ class CardEditTests: BaseTest {
         }
         
         step("THEN nodes are correctly placed") {
-            let nodesAfterDraggingDown = cardView!.getCardNotesTextForVisiblePart()
+            let nodesAfterDraggingDown = cardView.getCardNotesTextForVisiblePart()
             let expectedNotesAfterDraggingDown = [nodesBeforeChange[0], nodesBeforeChange[1], nodesBeforeChange[3], nodesBeforeChange[2], nodesBeforeChange[4]];
             XCTAssertTrue(nodesAfterDraggingDown == expectedNotesAfterDraggingDown)
         }
@@ -173,7 +173,7 @@ class CardEditTests: BaseTest {
         }
         
         step("THEN nodes are correctly placed") {
-            let nodesAfterDraggingUp = cardView!.getCardNotesTextForVisiblePart()
+            let nodesAfterDraggingUp = cardView.getCardNotesTextForVisiblePart()
             let expectedNotesAfterDraggingUp = [nodesBeforeChange[0], nodesBeforeChange[4], nodesBeforeChange[1], nodesBeforeChange[3], nodesBeforeChange[2]];
             XCTAssertTrue(nodesAfterDraggingUp == expectedNotesAfterDraggingUp)
         }
@@ -235,8 +235,8 @@ class CardEditTests: BaseTest {
         launchApp()
         
         cardView = openFirstCardInAllCardsList()
-        BeamUITestsHelper(cardView!.app).tapCommand(.insertTextInCurrentNote)
-        XCTAssertEqual(cardView!.getCountOfDisclosureTriangles(), 0)
-        cardView!.clickDisclosureTriangleByIndex(0)
+        BeamUITestsHelper(cardView.app).tapCommand(.insertTextInCurrentNote)
+        XCTAssertEqual(cardView.getCountOfDisclosureTriangles(), 0)
+        cardView.clickDisclosureTriangleByIndex(0)
     }
 }
