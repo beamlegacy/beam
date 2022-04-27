@@ -223,4 +223,16 @@ class ClusteringManagerTests: XCTestCase {
         
         Persistence.ContinueTo.summary = oldSummary
     }
+
+    func testShouldBeWithAndApart() throws {
+        clusteringManager.addPage(id: documents[0].id, parentId: nil, value: informations[0])
+        clusteringManager.addPage(id: documents[1].id, parentId: nil, value: informations[1])
+        clusteringManager.addPage(id: documents[2].id, parentId: nil, value: informations[2])
+        clusteringManager.addPage(id: documents[3].id, parentId: nil, value: informations[3])
+
+        clusteringManager.shouldBeWithAndApart(pageId: documents[0].id, beWith: [documents[1].id], beApart: [documents[2].id, documents[3].id])
+        clusteringManager.shouldBeWithAndApart(pageId: documents[2].id, beWith: [documents[3].id], beApart: [documents[0].id, documents[1].id])
+        expect(self.clusteringManager.clusteredPagesId).toEventually(equal([[self.pageIDs[0],self.pageIDs[1]], [self.pageIDs[2], self.pageIDs[3]]]))
+
+    }
 }
