@@ -12,23 +12,24 @@ import BeamCore
 struct ToolbarChevrons: View {
     @EnvironmentObject var state: BeamState
 
-    private var alwaysShowBack: Bool {
-        state.mode == .web && state.browserTabsManager.tabs.first { $0.canGoBack } != nil
-    }
     var body: some View {
         HStack(spacing: 1) {
-            let alwaysShowBack = alwaysShowBack
-            if state.canGoBack || alwaysShowBack {
-                ToolbarButton(icon: "nav-back", customIconSize: CGSize(width: 20, height: 24), customContainerSize: CGSize(width: 22, height: 28), action: goBack)
-                    .disabled(!state.canGoBack)
+            let canGoBackForward = state.canGoBackForward
+            let alwaysShow = state.shouldForceShowBackForward
+            if canGoBackForward.back || alwaysShow.back {
+                ToolbarButton(icon: "nav-back", customIconSize: CGSize(width: 20, height: 24),
+                              customContainerSize: CGSize(width: 22, height: 28), action: goBack)
+                    .disabled(!canGoBackForward.back)
                     .tooltipOnHover(
                         (state.mode != .web ? Shortcut.AvailableShortcut.goBackEditor : Shortcut.AvailableShortcut.goBack)
                             .description
                     )
                     .accessibilityIdentifier("goBack")
             }
-            if state.canGoForward {
-                ToolbarButton(icon: "nav-forward", customIconSize: CGSize(width: 20, height: 24), customContainerSize: CGSize(width: 22, height: 28), action: goForward)
+            if canGoBackForward.forward || alwaysShow.forward {
+                ToolbarButton(icon: "nav-forward", customIconSize: CGSize(width: 20, height: 24),
+                              customContainerSize: CGSize(width: 22, height: 28), action: goForward)
+                    .disabled(!canGoBackForward.forward)
                     .tooltipOnHover(
                         (state.mode != .web ? Shortcut.AvailableShortcut.goForwardEditor : Shortcut.AvailableShortcut.goForward)
                             .description
