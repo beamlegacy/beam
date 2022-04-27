@@ -1201,5 +1201,40 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
             }
         }
+
+        describe("saveToAPI(beamObject) without email") {
+            var object: MyRemoteObject!
+            let title = "This is my title"
+            let uuid = "995d94e1-e0df-4eca-93e6-8778984bcd28".uuid ?? UUID()
+            let previousEmail = Persistence.Authentication.email
+            beforeEach {
+                Persistence.Authentication.email = nil
+                object = MyRemoteObject(beamObjectId: uuid,
+                                        createdAt: BeamDate.now,
+                                        updatedAt: BeamDate.now,
+                                        deletedAt: nil,
+                                        title: title)
+            }
+
+            afterEach {
+                Persistence.Authentication.email = previousEmail
+            }
+
+            context("with Foundation") {
+                context("with new object") {
+                    it("does not saves new object and throw error") {
+                        waitUntil(timeout: .seconds(1)) { done in
+                            do {
+                                try sut.saveToAPI(object) { _ in }
+                            } catch {
+                                expect(error).to(matchError(BeamObject.BeamObjectError.noEmail))
+                                done()
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
