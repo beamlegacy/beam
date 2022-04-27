@@ -232,7 +232,7 @@ import Promises
         self.originMode = .web
         self.webView = BeamWebView(frame: .zero, configuration: BrowserTab.webViewConfiguration)
 
-        browsingTree = Self.newBrowsingTree(origin: browsingTreeOrigin, isIncognito: false)
+        browsingTree = Self.newBrowsingTree(origin: .pinnedTab(url: url), isIncognito: false)
         noteController = WebNoteController(note: nil, rootElement: nil)
 
         super.init()
@@ -578,7 +578,7 @@ import Promises
         state?.overlayViewModel.toastView = AnyView(CredentialsConfirmationToast(saved: saved))
     }
 
-    func closeApp() {
+    func appWillClose() {
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
