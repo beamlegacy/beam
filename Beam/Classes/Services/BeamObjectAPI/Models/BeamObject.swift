@@ -321,6 +321,10 @@ extension BeamObject {
 
         assert(!encrypted)
 
+        guard let email = Persistence.Authentication.email else {
+            throw BeamObjectError.noEmail
+        }
+
         if Configuration.env == .test,
            EncryptionManager.shared.privateKey(for: Persistence.emailOrRaiseError()).asString() != Configuration.testPrivateKey, !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) {
             fatalError("Not using the test key! Please use `try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)` in your tests")
@@ -333,9 +337,6 @@ extension BeamObject {
         encrypted = true
         data = encryptedClearData
 
-        guard let email = Persistence.Authentication.email else {
-            throw BeamObjectError.noEmail
-        }
         privateKeySignature = try EncryptionManager.shared.privateKey(for: email).asString().SHA256()
     }
 }
