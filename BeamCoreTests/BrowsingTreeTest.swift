@@ -151,7 +151,7 @@ class BrowsingTreeTest: XCTestCase {
         } catch { XCTFail("Error: \(error)") }
     }
 
-    func testIdUrlMapping() throws {
+    func testIdURLMapping() throws {
         let tree = BrowsingTree(nil)
         let root = tree.current!
         tree.navigateTo(url: "www.chocolate.com", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
@@ -159,7 +159,7 @@ class BrowsingTreeTest: XCTestCase {
         var mapping = [UUID: String]()
         mapping[root.link] = "<???>"
         mapping[current.link] = "www.chocolate.com"
-        XCTAssertEqual(tree.idUrlMapping, mapping)
+        XCTAssertEqual(tree.idURLMapping, mapping)
     }
 
     //swiftlint:disable:next function_body_length
