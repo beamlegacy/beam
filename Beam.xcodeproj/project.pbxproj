@@ -564,6 +564,7 @@
 		8A14E32A27F6468600DDCCE3 /* Geolocation_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A14E32827F6466400DDCCE3 /* Geolocation_prod.js */; };
 		8A1B8FCE26A9CB31006D849D /* PointAndShootPathFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */; };
 		8A23713226D91C2800D8526A /* PointAndShoot+Alert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */; };
+		8A238DBA28183019003333B2 /* WebNoteControllerTitleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A238DB928183019003333B2 /* WebNoteControllerTitleTests.swift */; };
 		8A27DCA227EDC8CA0044A9A2 /* Navigation_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC8027EDC8290044A9A2 /* Navigation_prod.js */; };
 		8A27DCA327EDC8CA0044A9A2 /* EmbedNode_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC6127EDC7A50044A9A2 /* EmbedNode_prod.js */; };
 		8A27DCA427EDC8CA0044A9A2 /* PasswordManager_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC8F27EDC86A0044A9A2 /* PasswordManager_prod.js */; };
@@ -2050,6 +2051,7 @@
 		8A14E32827F6466400DDCCE3 /* Geolocation_prod.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = Geolocation_prod.js; sourceTree = "<group>"; };
 		8A1B8FCD26A9CB31006D849D /* PointAndShootPathFrame.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootPathFrame.swift; sourceTree = "<group>"; };
 		8A23713126D91C2800D8526A /* PointAndShoot+Alert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PointAndShoot+Alert.swift"; sourceTree = "<group>"; };
+		8A238DB928183019003333B2 /* WebNoteControllerTitleTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebNoteControllerTitleTests.swift; sourceTree = "<group>"; };
 		8A27DBB027EDC7430044A9A2 /* tsconfig.tsbuildinfo */ = {isa = PBXFileReference; lastKnownFileType = text; path = tsconfig.tsbuildinfo; sourceTree = "<group>"; };
 		8A27DBB227EDC7430044A9A2 /* BeamEmbedHelper.d.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = BeamEmbedHelper.d.ts; sourceTree = "<group>"; };
 		8A27DBB327EDC7430044A9A2 /* BeamElementHelper.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = BeamElementHelper.js; sourceTree = "<group>"; };
@@ -6243,6 +6245,7 @@
 				A075AB0E268F5C9400FC85B1 /* BeamDataFolderTests.swift */,
 				8AA9EEB62678ACF6009D6B31 /* WebFieldClassifierTests.swift */,
 				BAA6711C12F68C78C7D44DA5 /* WebNoteControllerTest.swift */,
+				8A238DB928183019003333B2 /* WebNoteControllerTitleTests.swift */,
 				8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */,
 				8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */,
 				8784956027C62D7500195C62 /* WebFramesTest.swift */,
@@ -9097,6 +9100,7 @@
 				8A5EDB1A278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift in Sources */,
 				37B85B8C27A2C83B003871F9 /* BeamDownloadDocumentTests.swift in Sources */,
 				BAA67C9D1849C8B7A045A51F /* PointAndShootTest.swift in Sources */,
+				8A238DBA28183019003333B2 /* WebNoteControllerTitleTests.swift in Sources */,
 				DAF063F527D21492000406DE /* DomainPath0Tests.swift in Sources */,
 				96D71CE627F735400094F54D /* MessagePackTests.swift in Sources */,
 				BAA67A6498E4E69779855E19 /* DownloadManagerTests.swift in Sources */,
