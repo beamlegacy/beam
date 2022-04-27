@@ -882,6 +882,7 @@
 		A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0B8C44E26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift */; };
 		A0C04B8B27553C51003FC63A /* BeamUserDefaults.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */; };
 		A0C0C2A725E5109F00BE34F0 /* InsertElement.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */; };
+		A0C3D65727DB69AB007C0BFF /* NetworkMonitor.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C3D65627DB69AB007C0BFF /* NetworkMonitor.swift */; };
 		A0C4461C2811D926007B545D /* String+Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C4461B2811D926007B545D /* String+Formatting.swift */; };
 		A0C58C382640026600FB95D8 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C58C372640026600FB95D8 /* ToastView.swift */; };
 		A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */; };
@@ -2650,6 +2651,7 @@
 		A0C04B8127552163003FC63A /* Beam8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Beam8.xcdatamodel; sourceTree = "<group>"; };
 		A0C04B8A27553C51003FC63A /* BeamUserDefaults.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamUserDefaults.swift; sourceTree = "<group>"; };
 		A0C0C2A625E5109F00BE34F0 /* InsertElement.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsertElement.swift; sourceTree = "<group>"; };
+		A0C3D65627DB69AB007C0BFF /* NetworkMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkMonitor.swift; sourceTree = "<group>"; };
 		A0C4461B2811D926007B545D /* String+Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Formatting.swift"; sourceTree = "<group>"; };
 		A0C58C372640026600FB95D8 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
 		A0C5D85A263C638A00FA6F6E /* CredentialsConfirmationToast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CredentialsConfirmationToast.swift; sourceTree = "<group>"; };
@@ -4067,6 +4069,7 @@
 				5298EADE26272C2C0033862C /* CoreData */,
 				A523402C279DED950027E339 /* ThirdPartyLibraries */,
 				418171E72581107C00317ED8 /* AuthenticationManager.swift */,
+				A0C3D65627DB69AB007C0BFF /* NetworkMonitor.swift */,
 				418171E82581107C00317ED8 /* AccountManager.swift */,
 				5241E5F526F8B0A900B08F69 /* AccountManager+Foundation.swift */,
 				03CA9A9625CC61BF00E7CFA2 /* ContentBlockingManager.swift */,
@@ -8595,6 +8598,7 @@
 				418172092581107C00317ED8 /* CoreDataManager+backupExtension.swift in Sources */,
 				A07C013D2705ED2700D91750 /* GoogleCalendarService.swift in Sources */,
 				A0CB5ADE268B1FF500D1EF02 /* GeneralPreferencesView.swift in Sources */,
+				A0C3D65727DB69AB007C0BFF /* NetworkMonitor.swift in Sources */,
 				A59D33882655101A002E7E96 /* WiggleBounceEffects.swift in Sources */,
 				4181721B2581107C00317ED8 /* Maths.swift in Sources */,
 				A0642C3226D9979300B49054 /* Beam5ToBeam6Migration.xcmappingmodel in Sources */,
