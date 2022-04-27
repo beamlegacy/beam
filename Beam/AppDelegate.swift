@@ -101,7 +101,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         DispatchQueue.global().async {
             BrowsingTreeStoreManager.shared.softDelete(olderThan: 60, maxRows: 20_000)
-            GRDBDailyUrlScoreStore().cleanup()
+            GRDBDailyUrlScoreStore(daysToKeep: Configuration.DailyUrlStats.daysToKeep).cleanup()
             NoteScorer.shared.cleanup()
         }
         startDisplayingBrowserImportErrors()
