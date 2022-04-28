@@ -272,7 +272,7 @@ export class PointAndShootUI_native implements PointAndShootUI {
 
     // Make sure the element has something we're interested in, otherwise recurse up to the parent element. 
     // If after 5 levels no meaningful element is found exit.
-    if (!PointAndShootHelper.isMeaningfulOrChildrenAre(el, win)) {
+    if (!PointAndShootHelper.isMeaningfulOrChildrenAre(el, win) || PointAndShootHelper.isUselessSiteSpecificElement(el, win)) {
       if (count >= 0 && Boolean(el.parentElement)) {
         const newCount = count--
         return this.elementBounds(el.parentElement, area, clippingArea, newCount)
