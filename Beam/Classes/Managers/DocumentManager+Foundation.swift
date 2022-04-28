@@ -324,39 +324,11 @@ extension DocumentManager {
         }
     }
 
-    /// If the note we tried saving on the API is new and empty, we can safely delete it.
-    /// If the note we tried saving already has content, we soft delete it to avoid losing content.
-    private func deleteOrSoftDelete(_ localDocumentStruct: DocumentStruct,
-                                    _ completion: ((Swift.Result<Bool, Error>) -> Void)? = nil) {
-        // This is a new document, we can delete it
-        guard !localDocumentStruct.isEmpty else {
-            delete(document: localDocumentStruct) { result in
-                Logger.shared.logDebug("Deleted \(localDocumentStruct.titleAndId)",
-                                       category: .document)
-                completion?(result)
-            }
-            return
-        }
-
-        // This is a document with local changes, we soft delete it
-
-        var newDocumentStruct = localDocumentStruct.copy()
-        newDocumentStruct.deletedAt = BeamDate.now
-
-        saveThenSaveOnAPI(newDocumentStruct) { result in
-            switch result {
-            case .failure:
-                completion?(result)
-            case .success(let success):
-                Logger.shared.logDebug("Soft deleted \(newDocumentStruct.titleAndId)",
-                                       category: .document)
-                completion?(.success(success))
-            }
-        }
-    }
-
     // MARK: -
     // MARK: Delete
+    func softDelete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+        self.softDelete(ids: [id], completion: completion)
+    }
 
     func softDelete(ids: [UUID], clearData: Bool = true, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
         var errors: [Error] = []
@@ -419,10 +391,6 @@ extension DocumentManager {
                 completion(.failure(error))
             }
         }
-    }
-
-    func softDelete(id: UUID, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
-        self.softDelete(ids: [id], completion: completion)
     }
 
     func softUndelete(ids: [UUID], restoreData: [UUID: Data]? = nil, completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
@@ -702,26 +670,38 @@ extension DocumentManager {
                                 existingNote.children.append(content)
                             }
                             existingNote.resetCommandManager()
-                            _ = existingNote.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
+                            if existingNote.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave) {
 
-                            // Delete source note:
-                            documentManager.softDelete(id: note.id) { result in
-                                switch result {
-                                case let .failure(error):
-                                    Logger.shared.logError("Failed to softDelete \(note.titleAndId): \(error)", category: .document)
-                                case let .success(res):
-                                    if !res {
-                                        Logger.shared.logError("Failed to softDelete \(note.titleAndId)", category: .document)
+                                // Delete source note:
+                                let semaphore = DispatchSemaphore(value: 0)
+                                documentManager.softDelete(id: note.id) { result in
+                                    switch result {
+                                    case let .failure(error):
+                                        Logger.shared.logError("Failed to softDelete \(note.titleAndId): \(error)", category: .document)
+                                    case let .success(res):
+                                        if !res {
+                                            Logger.shared.logError("Failed to softDelete \(note.titleAndId)", category: .document)
+                                        }
                                     }
+                                    semaphore.signal()
                                 }
+                                semaphore.wait()
                             }
                         } else {
                             if let documentStruct = initialDocumentStruct {
                                 let semaphore = DispatchSemaphore(value: 0)
-                                documentManager.delete(document: documentStruct, false) { _ in
-                                    semaphore.signal()
+                                documentManager.softDelete(id: documentStruct.id) { result in
+                                    switch result {
+                                    case let .failure(error):
+                                        Logger.shared.logError("Failed to softDelete \(note.titleAndId): \(error)", category: .document)
+                                    case let .success(res):
+                                        if !res {
+                                            Logger.shared.logError("Failed to softDelete \(note.titleAndId)", category: .document)
+                                        }
+                                        semaphore.signal()
+                                    }
+                                    semaphore.wait()
                                 }
-                                semaphore.wait()
                             }
                             note.databaseId = databaseId
                             _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
@@ -769,13 +749,27 @@ extension DocumentManager {
                     note.databaseId = databaseId
                     if let documentStruct = initialDocumentStruct {
                         let semaphore = DispatchSemaphore(value: 0)
-                        documentManager.delete(document: documentStruct, false) { _ in
+                        documentManager.delete(document: documentStruct, false) { result in
+                            switch result {
+                            case let .failure(error):
+                                Logger.shared.logError("Delete note \(documentStruct.titleAndId) from db \(String(describing: documentStruct.databaseId)) to \(databaseId) failed: \(error)", category: .database, localTimer: beforeSave)
+                            case let .success(res):
+                                if !res {
+                                    Logger.shared.logError("Deleted note \(documentStruct.titleAndId) from db \(String(describing: documentStruct.databaseId)) to \(databaseId) failed.", category: .database, localTimer: beforeSave)
+                                } else {
+                                    Logger.shared.logInfo("Deleted note \(documentStruct.titleAndId) from db \(String(describing: documentStruct.databaseId)) to \(databaseId).", category: .database, localTimer: beforeSave)
+                                }
+
+                            }
                             semaphore.signal()
                         }
                         semaphore.wait()
                     }
-                    _ = note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave)
-                    Logger.shared.logInfo("save note \(note.titleAndId) from db \(String(describing: note.databaseId)) to \(databaseId)", category: .database, localTimer: beforeSave)
+                    if !note.syncedSave(alsoWaitForNetworkSave: Self.waitForNetworkCompletionOnSyncSave) {
+                        Logger.shared.logError("Couldn't save note \(note.titleAndId) from db \(String(describing: note.databaseId)) to \(databaseId)", category: .database, localTimer: beforeSave)
+                    } else {
+                        Logger.shared.logInfo("save note \(note.titleAndId) from db \(String(describing: note.databaseId)) to \(databaseId)", category: .database, localTimer: beforeSave)
+                    }
                 }
                 count += 1
             }
