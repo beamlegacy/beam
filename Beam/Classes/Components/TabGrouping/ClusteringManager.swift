@@ -198,7 +198,7 @@ class ClusteringManager: ObservableObject {
         switch tabToIndex.tabTree?.origin {
         case .linkFromNote(let noteName):
             if let noteName = noteName, let root = tabToIndex.tabTree?.root,
-               tabToIndex.parentBrowsingNode?.id == root.id,
+               tabToIndex.tabTree?.current.parent?.id == root.id,
                let id = id,
                let note = BeamNote.fetch(title: noteName) {
                 note.sources.add(urlId: id, noteId: note.id, type: .user, sessionId: self.sessionId, activeSources: self.activeSources)
@@ -218,12 +218,12 @@ class ClusteringManager: ObservableObject {
            current == .openLinkInNewTab { // The last event of the active tab is to open a link in a new tab
             parentId = parentOpenId
         } else { // A simple link opening in the same tab
-            if let parent = tabToIndex.parentBrowsingNode,
+            if let parent = tabToIndex.tabTree?.current.parent,
                let lastEventType = parent.events.last?.type,
                lastEventType == .navigateToLink { // TODO: Consider adding  || lastEventType == .exitForward || lastEventType == .exitBackward
-                parentId = tabToIndex.parentBrowsingNode?.link
+                parentId = parent.link
                 parentTimeStamp = parent.events.last?.date ?? Date.distantPast
-            } else if let parent = tabToIndex.parentBrowsingNode,
+            } else if let parent = tabToIndex.tabTree?.current.parent,
                       let root = tabToIndex.tabTree?.root,
                       parent.id == root.id,
                       let previousTabTree = tabToIndex.previousTabTree,

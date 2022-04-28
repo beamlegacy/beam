@@ -99,7 +99,6 @@ class ClusteringManagerTests: XCTestCase {
                                       shouldBeIndexed: oldInfo.shouldBeIndexed,
                                       tabTree: tabTree,
                                       currentTabTree: currentTabTree ?? oldInfo.currentTabTree,
-                                      parentBrowsingNode: parentBrowsingNode ?? oldInfo.parentBrowsingNode,
                                       previousTabTree: oldInfo.previousTabTree,
                                       document: oldInfo.document,
                                       textContent: oldInfo.textContent,
@@ -120,16 +119,14 @@ class ClusteringManagerTests: XCTestCase {
         tree.navigateTo(url: informations[0].url.string, title: nil, startReading: false, isLinkActivation: false, readCount: 400)
         nodes.append(tree.current)
         swapInfo(at: 0, tabTree: tree, parentBrowsingNode: nodes[0], currentTabTree: nil)
-
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
 
         // Navigate to second page from first page
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(tree.current)
-
         swapInfo(at: 1, tabTree: tree, parentBrowsingNode: nodes[1], currentTabTree: nil)
-
+        swapInfo(at: 1, tabTree: tree, parentBrowsingNode: nodes[1], currentTabTree: nil)
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
 
@@ -166,7 +163,6 @@ class ClusteringManagerTests: XCTestCase {
         tree.navigateTo(url: informations[0].url.string, title: documents[0].title, startReading: false, isLinkActivation: false, readCount: 400)
         nodes.append(tree.current)
         swapInfo(at: 0, tabTree: tree, parentBrowsingNode: nodes[0], currentTabTree: nil)
-
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
         expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
@@ -175,7 +171,6 @@ class ClusteringManagerTests: XCTestCase {
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(tree.current)
         swapInfo(at: 1, tabTree: tree, parentBrowsingNode: nodes[1], currentTabTree: nil)
-
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
         expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
