@@ -4,27 +4,20 @@ import os
 
 class LoggerRecorder {
     public static var shared = LoggerRecorder()
-    private var context: NSManagedObjectContext?
+    private var sema = DispatchSemaphore(value: 1)
 
     public func reset() {
-        // `context?.performAndWait()` ensures that:
-        // 1. Any running `callback` calls in `attach` are finishing and its context saved before we finished `reset()`
-        // 2. No lock needed for changing `self.context`
-
-        context?.performAndWait {
-            self.context = nil
-        }
+        sema.wait()
+        defer { sema.signal() }
+        Logger.shared.callback = nil
     }
 
     public func attach() {
-        self.context = CoreDataManager.shared.persistentContainer.newBackgroundContext()
+        sema.wait()
+        defer { sema.signal() }
 
         Logger.shared.callback = { (message, level, category, thread, duration) in
-            guard let context = self.context else { return }
-            context.perform {
-                // self.context may contains a more up to date version
-                // after importing backup for instance as loggerRecorder is reset.
-                guard let context = self.context else { return }
+            CoreDataManager.shared.persistentContainer.performBackgroundTask { context in
                 let logEntry = LogEntry(context: context)
                 logEntry.created_at = BeamDate.now
                 logEntry.log = "[\(thread)] \(message)"
@@ -38,10 +31,12 @@ class LoggerRecorder {
 
                 do {
                     try context.save()
-                    DispatchQueue.main.async {
-                        let object = try? CoreDataManager.shared.mainContext.existingObject(with: logEntry.objectID)
-                        NotificationCenter.default.post(name: .loggerInsert,
-                                                        object: object)
+
+                    if LoggerNSWindow.instances > 0 {
+                        DispatchQueue.main.async {
+                            let object = try? CoreDataManager.shared.mainContext.existingObject(with: logEntry.objectID)
+                            NotificationCenter.default.post(name: .loggerInsert, object: object)
+                        }
                     }
                 } catch {
                     Logger.shared.logDebug("Unable to save LoggerRecorder context: \(error.localizedDescription)", category: .coredata)

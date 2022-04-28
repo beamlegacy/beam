@@ -19,6 +19,10 @@ class LoggerSplitViewController: NSSplitViewController {
         }
     }
 
+    deinit {
+        LoggerNSWindow.instances -= 1
+    }
+
     public func toggleCategoryPanel() {
         splitViewItems[0].animator().isCollapsed = !splitViewItems[0].isCollapsed
     }
