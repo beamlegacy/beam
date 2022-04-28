@@ -130,10 +130,10 @@ struct TabIndexingInfo {
     let url: URL
     private(set) var requestedURL: URL?
     private(set) var shouldBeIndexed: Bool = true
-    weak var tabTree: BrowsingTree?
-    weak var currentTabTree: BrowsingTree?
-    weak var parentBrowsingNode: BrowsingNode?
-    weak private(set) var previousTabTree: BrowsingTree?
+    fileprivate(set) var tabTree: BrowsingTree?
+    private(set) var currentTabTree: BrowsingTree?
+    private(set) var parentBrowsingNode: BrowsingNode?
+    private(set) var previousTabTree: BrowsingTree?
     fileprivate(set) var document: IndexDocument
     fileprivate(set) var textContent: String = ""
     fileprivate(set) var cleanedTextContentForClustering: [String] = []
@@ -161,10 +161,10 @@ extension WebIndexingController {
         var tabIndexingInfo = TabIndexingInfo(url: url,
                                               requestedURL: shouldIndexUserRequestedURL ? originalRequestedURL : nil,
                                               shouldBeIndexed: tab.responseStatusCode == 200,
-                                              tabTree: browsingTree,
-                                              currentTabTree: currentTabBrowsingTree,
-                                              parentBrowsingNode: browsingTree.current.parent,
-                                              previousTabTree: previousTabBrowsingTree,
+                                              tabTree: browsingTree.deepCopy(),
+                                              currentTabTree: currentTabBrowsingTree?.deepCopy(),
+                                              parentBrowsingNode: browsingTree.current.parent?.deepCopy(),
+                                              previousTabTree: previousTabBrowsingTree?.deepCopy(),
                                               document: indexDocument,
                                               isPinnedTab: tab.isPinned)
 
