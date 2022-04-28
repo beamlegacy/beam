@@ -91,6 +91,25 @@ class ClusteringManagerTests: XCTestCase {
         expect(self.clusteringManager.clusteredNotesId).toEventually(contain([notes[0].id, notes[1].id, notes[2].id]) || contain([notes[1].id, notes[2].id]) || contain([notes[2].id]))
     }
 
+    private func swapInfo(at index: Int, tabTree: BrowsingTree, parentBrowsingNode: BrowsingNode?, currentTabTree: BrowsingTree?) {
+        let oldInfo = informations[index]
+
+        let newInfo = TabIndexingInfo(url: oldInfo.url,
+                                      requestedURL: oldInfo.requestedURL,
+                                      shouldBeIndexed: oldInfo.shouldBeIndexed,
+                                      tabTree: tabTree,
+                                      currentTabTree: currentTabTree ?? oldInfo.currentTabTree,
+                                      parentBrowsingNode: parentBrowsingNode ?? oldInfo.parentBrowsingNode,
+                                      previousTabTree: oldInfo.previousTabTree,
+                                      document: oldInfo.document,
+                                      textContent: oldInfo.textContent,
+                                      cleanedTextContentForClustering: oldInfo.cleanedTextContentForClustering,
+                                      isPinnedTab: oldInfo.isPinnedTab)
+
+        informations.remove(at: index)
+        informations.insert(newInfo, at: index)
+    }
+
     /// Test that the clusteringManager knows how to extract id-s and parenting relations correctly
     func testGetIdAndParent() throws {
         // Start a new browsing tree
@@ -100,16 +119,17 @@ class ClusteringManagerTests: XCTestCase {
         // Navigate to first page, no parent
         tree.navigateTo(url: informations[0].url.string, title: nil, startReading: false, isLinkActivation: false, readCount: 400)
         nodes.append(tree.current)
-        informations[0].tabTree = tree
-        informations[0].parentBrowsingNode = nodes[0]
+        swapInfo(at: 0, tabTree: tree, parentBrowsingNode: nodes[0], currentTabTree: nil)
+
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
 
         // Navigate to second page from first page
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(tree.current)
-        informations[1].tabTree = tree
-        informations[1].parentBrowsingNode = nodes[1]
+
+        swapInfo(at: 1, tabTree: tree, parentBrowsingNode: nodes[1], currentTabTree: nil)
+
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
 
@@ -118,8 +138,8 @@ class ClusteringManagerTests: XCTestCase {
         let newTabTree = BrowsingTree(nil)
         newTabTree.navigateTo(url: informations[2].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(newTabTree.current)
-        informations[2].tabTree = newTabTree
-        informations[2].currentTabTree = tree
+        swapInfo(at: 2, tabTree: newTabTree, parentBrowsingNode: nil, currentTabTree: tree)
+
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[2]).0) == nodes[3]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[2]).1) == nodes[2]?.link
 
@@ -129,8 +149,8 @@ class ClusteringManagerTests: XCTestCase {
         let anotherNewTabTree = BrowsingTree(nil)
         anotherNewTabTree.navigateTo(url: informations[3].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(anotherNewTabTree.current)
-        informations[3].tabTree = anotherNewTabTree
-        informations[3].currentTabTree = tree
+        swapInfo(at: 3, tabTree: anotherNewTabTree, parentBrowsingNode: nil, currentTabTree: tree)
+
         _ = self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3])
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).0) == nodes[4]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[3]).1) == nodes[1]?.link
@@ -145,8 +165,8 @@ class ClusteringManagerTests: XCTestCase {
         var nodes = [tree.current]
         tree.navigateTo(url: informations[0].url.string, title: documents[0].title, startReading: false, isLinkActivation: false, readCount: 400)
         nodes.append(tree.current)
-        informations[0].tabTree = tree
-        informations[0].parentBrowsingNode = nodes[0]
+        swapInfo(at: 0, tabTree: tree, parentBrowsingNode: nodes[0], currentTabTree: nil)
+
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).0) == nodes[1]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[0]).1).to(beNil())
         expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
@@ -154,8 +174,8 @@ class ClusteringManagerTests: XCTestCase {
         // Navigate to second page from first page
         tree.navigateTo(url: informations[1].url.string, title: nil, startReading: false, isLinkActivation: true, readCount: 400)
         nodes.append(tree.current)
-        informations[1].tabTree = tree
-        informations[1].parentBrowsingNode = nodes[1]
+        swapInfo(at: 1, tabTree: tree, parentBrowsingNode: nodes[1], currentTabTree: nil)
+
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).0) == nodes[2]?.link
         expect(self.clusteringManager.getIdAndParent(tabToIndex: self.informations[1]).1) == nodes[1]?.link
         expect(self.activeSources.activeSources) == [BeamNote.fetch(title: notes[0].title)!.id: [nodes[1]!.link]]
