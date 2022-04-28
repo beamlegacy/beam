@@ -1,6 +1,25 @@
 import Foundation
 
 class LoggerNSWindow: NSWindow {
+    static private var _instances = 0
+    static private var instancesSema = DispatchSemaphore(value: 1)
+
+    static var instances: Int {
+        get {
+            instancesSema.wait()
+            defer { instancesSema.signal() }
+
+            return _instances
+        }
+
+        set {
+            instancesSema.wait()
+            defer { instancesSema.signal() }
+
+            _instances = newValue
+        }
+    }
+
     @IBAction func deleteAll(_ sender: Any) {
         guard let delegate = self.delegate as? LoggerSplitViewController else { return }
 
