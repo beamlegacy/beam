@@ -132,7 +132,6 @@ struct TabIndexingInfo {
     private(set) var shouldBeIndexed: Bool = true
     fileprivate(set) var tabTree: BrowsingTree?
     private(set) var currentTabTree: BrowsingTree?
-    private(set) var parentBrowsingNode: BrowsingNode?
     private(set) var previousTabTree: BrowsingTree?
     fileprivate(set) var document: IndexDocument
     fileprivate(set) var textContent: String = ""
@@ -163,7 +162,6 @@ extension WebIndexingController {
                                               shouldBeIndexed: tab.responseStatusCode == 200,
                                               tabTree: browsingTree.deepCopy(),
                                               currentTabTree: currentTabBrowsingTree?.deepCopy(),
-                                              parentBrowsingNode: browsingTree.current.parent?.deepCopy(),
                                               previousTabTree: previousTabBrowsingTree?.deepCopy(),
                                               document: indexDocument,
                                               isPinnedTab: tab.isPinned)
