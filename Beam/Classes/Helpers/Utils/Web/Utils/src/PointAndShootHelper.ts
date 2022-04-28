@@ -66,6 +66,23 @@ export class PointAndShootHelper {
     )
   }
   /**
+   * Returns true if element matches a known html to ignore on specific urls.
+   *
+   * @static
+   * @param {BeamElement} element
+   * @param {BeamWindow} win
+   * @return {*}  {boolean} true if element should be ignored
+   * @memberof PointAndShootHelper
+   */
+  static isUselessSiteSpecificElement(element: BeamElement, win: BeamWindow): boolean {
+    // Amazon Magnifier
+    if (win.location.hostname?.includes("amazon.") && element.id == "magnifierLens") {
+      return true
+    }
+
+    return false
+  }
+  /**
    * Recursively check for the presence of any meaningful child nodes within a given element
    *
    * @static
