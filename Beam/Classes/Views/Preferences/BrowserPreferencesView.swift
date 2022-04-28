@@ -26,51 +26,82 @@ struct BrowserPreferencesView: View {
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(verticalAlignment: .top) {
-                Text("Default Browser:")
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                DefaultBrowserSection()
-            }
-            Preferences.Section(bottomDivider: true) {
-                Text("Search Engine:")
-            } content: {
-                SearchEngineSection()
-            }
-
-            Preferences.Section(bottomDivider: true, verticalAlignment: .top) {
-                Text("Bookmarks & Settings:")
-            } content: {
-                BookmarksSection(viewModel: viewModel)
-            }
-
-            Preferences.Section(bottomDivider: true) {
-                Text("Downloads:")
-            } content: {
-                DownloadSection()
-            }
-
-            Preferences.Section(bottomDivider: true) {
-                Text("Tabs:")
-            } content: {
-                TabsSection()
-            }
-
-            Preferences.Section(bottomDivider: true) {
-                Text("Sounds:")
-            } content: {
-                SoundsSection()
-            }
-
-            Preferences.Section(verticalAlignment: .top) {
-                Text("Clear Caches:")
-            } content: {
-                ClearCachesSection()
-            }
+            return getBrowserViewSections()
         }
         .font(BeamFont.regular(size: 13).swiftUI)
         .foregroundColor(BeamColor.Generic.text.swiftUI)
     }
+
+    // MARK: - Preferences Sections
+    private func getBrowserViewSections() -> [Preferences.Section] {
+        var sections: [Preferences.Section] = [searchEngineSection,
+                                               importBrowserDataSection,
+                                               downloadSection, tabsSection,
+                                               soundsSection, clearCachesSection]
+        if !BeamData.isDefaultBrowser {
+            sections.insert(defaultBrowserSection, at: 0)
+        }
+        return sections
+    }
+
+    private var defaultBrowserSection: Preferences.Section {
+        Preferences.Section(verticalAlignment: .top) {
+            Text("Default Browser:")
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            DefaultBrowserSection()
+        }
+    }
+
+    private var searchEngineSection: Preferences.Section {
+        Preferences.Section(bottomDivider: true) {
+            Text("Search Engine:")
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            SearchEngineSection()
+        }
+    }
+
+    private var importBrowserDataSection: Preferences.Section {
+        Preferences.Section(bottomDivider: true, verticalAlignment: .top) {
+            Text("Import Browser Data:")
+        } content: {
+            BookmarksSection(viewModel: viewModel)
+        }
+    }
+
+    private var downloadSection: Preferences.Section {
+        Preferences.Section(bottomDivider: true) {
+            Text("Downloads:")
+        } content: {
+            DownloadSection()
+        }
+    }
+
+    private var tabsSection: Preferences.Section {
+        Preferences.Section(bottomDivider: true) {
+            Text("Tabs:")
+        } content: {
+            TabsSection()
+        }
+    }
+
+    private var soundsSection: Preferences.Section {
+        Preferences.Section(bottomDivider: true) {
+            Text("Sounds:")
+        } content: {
+            SoundsSection()
+        }
+    }
+
+    private var clearCachesSection: Preferences.Section {
+        Preferences.Section(verticalAlignment: .top) {
+            Text("Clear Caches:")
+        } content: {
+            ClearCachesSection()
+        }
+    }
+
 }
 
 struct BrowserPreferencesView_Previews: PreviewProvider {
@@ -151,7 +182,7 @@ struct BookmarksSection: View {
                 Text("Import...")
                     .font(BeamFont.regular(size: 13).swiftUI)
             }.frame(width: 99, height: 20, alignment: .leading)
-            Text("Import your bookmarks, passwords and history from other browsers")
+            Text("Import your passwords and history from other browsers")
                 .font(BeamFont.regular(size: 11).swiftUI)
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .lineLimit(nil)
