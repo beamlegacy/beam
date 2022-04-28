@@ -223,4 +223,67 @@ class AdvancedPasswordAutofillTests: BaseTest {
     func testSignInPageAuthCombination9() {
         validateTwoStepsSignInPage(usernamePage: "signinpage9-1", passwordPage: "signinpage9-2", login: loginEmail, password:passwordEmail)
     }
+    
+    func testSignInPageWithTextfieldAutocompleted() {
+        let usernamePage = "signinebay"
+        let testData = "test"
+        
+        step("Given I navigate to \(usernamePage)") {
+            OmniBoxTestView().searchInOmniBox(baseUrl + usernamePage, true)
+        }
+        
+        step("When I click on Name field") {
+            mockPage.getUsernameFieldElement(title: "Name: ").clickOnExistence()
+        }
+        
+        step("Then password manager is not displayed") {
+            XCTAssertFalse(helper.doesAutofillPopupExist(login: loginEmail))
+            XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
+            mockPage.getUsernameFieldElement(title: "Name: ").clickClearAndType(testData)
+            mockPage.typeKeyboardKey(.escape) // Do not choose autocomplete
+        }
+        
+        step("When I click on Lastname field") {
+            mockPage.getUsernameFieldElement(title: "Lastname: ").clickOnExistence()
+        }
+        
+        step("Then password manager is not displayed") {
+            XCTAssertFalse(helper.doesAutofillPopupExist(login: loginUsername))
+            XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
+            mockPage.getUsernameFieldElement(title: "Lastname: ").clickClearAndType(testData)
+            mockPage.typeKeyboardKey(.escape) // Do not choose autocomplete
+        }
+        
+        step("When I click on Password field") {
+            mockPage.getPasswordFieldElement(title: "Password: ").clickOnExistence()
+        }
+        
+        step("Then password manager is displayed") {
+            XCTAssertTrue(helper.doesAutofillPopupExist(login: loginUsername))
+            XCTAssertTrue(helper.doesSuggestNewPasswordExist())
+        }
+        
+        step("When I click on Email field") {
+            mockPage.getUsernameFieldElement(title: "Email: ").clickOnExistence()
+        }
+        
+        step("Then password manager is displayed") {
+            XCTAssertTrue(helper.doesAutofillPopupExist(login: loginUsername))
+        }
+        
+        step("When I fill information") {
+            helper.clickPopupLoginText(login: loginUsername)
+        }
+        
+        step("And I submit the form") {
+            mockPage.getContinueButtonElement().clickOnExistence()
+        }
+        
+        step("Then the results page is populated with sign in data") {
+            XCTAssertEqual(mockPage.getResultValue(label: "firstname"), testData)
+            XCTAssertEqual(mockPage.getResultValue(label: "lastname"), testData)
+            XCTAssertEqual(mockPage.getResultValue(label: "username"), loginUsername)
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), passwordUsername)
+        }
+    }
 }
