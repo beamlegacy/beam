@@ -25,7 +25,9 @@ class SummaryEngine {
             for noteToContinue in notesToContinue {
                 noteToContinueText.append(BeamText(text: noteToContinue.title, attributes: [.internalLink(noteToContinue.noteId)]))
             }
-            element.text.append(joined(sources: noteToContinueText, with: ", "))
+            if let joinedText = joined(sources: noteToContinueText, with: ", ") {
+                element.text.append(joinedText)
+            }
         }
 
         let urlScores = GRDBDailyUrlScoreStore().getHighScoredUrlIds(daysAgo: 1, topN: 2)
@@ -35,8 +37,9 @@ class SummaryEngine {
             guard let link = LinkStore.linkFor(urlScore.urlId), let title = link.title else { continue }
             siteToContinueText.append(BeamText(text: title, attributes: [.link(link.url)]))
         }
+        guard let joinedText = joined(sources: siteToContinueText, with: ", ") else { return element }
         element.text.append(summarySeparator(" and "))
-        element.text.append(joined(sources: siteToContinueText, with: ", "))
+        element.text.append(joinedText)
 
         return element
     }
@@ -97,8 +100,8 @@ class SummaryEngine {
             createdNoteText.append(BeamText(text: createdNote.title, attributes: [.internalLink(createdNote.noteId)]))
         }
 
-        guard !createdNoteText.isEmpty else { return nil }
-        createdNoteBaseText.append(joined(sources: createdNoteText, with: " and "))
+        guard let joinedText = joined(sources: createdNoteText, with: " and ") else { return nil }
+        createdNoteBaseText.append(joinedText)
 
         return createdNoteBaseText
     }
@@ -112,8 +115,8 @@ class SummaryEngine {
             updatedNoteText.append(BeamText(text: updatedNote.title, attributes: [.internalLink(updatedNote.noteId)]))
         }
 
-        guard !updatedNoteText.isEmpty else { return nil }
-        updatedNoteBaseText.append(joined(sources: updatedNoteText, with: " and "))
+        guard let joinedText = joined(sources: updatedNoteText, with: " and ") else { return nil }
+        updatedNoteBaseText.append(joinedText)
 
         return updatedNoteBaseText
     }
@@ -128,13 +131,15 @@ class SummaryEngine {
             spentTimeOnSiteText.append(BeamText(text: title, attributes: [.link(link.url)]))
         }
 
-        guard !spentTimeOnSiteText.isEmpty else { return nil }
-        spentTimeOnSiteBaseText.append(joined(sources: spentTimeOnSiteText, with: " and "))
+        guard let joinedText = joined(sources: spentTimeOnSiteText, with: " and ") else { return nil }
+        spentTimeOnSiteBaseText.append(joinedText)
 
         return spentTimeOnSiteBaseText
     }
 
-    private static func joined(sources: [BeamText], with separator: String) -> BeamText {
+    private static func joined(sources: [BeamText], with separator: String) -> BeamText? {
+        guard !sources.isEmpty else { return nil }
+
         var sourceText = sources[0]
 
         guard sources.count > 1 else { return sourceText }
