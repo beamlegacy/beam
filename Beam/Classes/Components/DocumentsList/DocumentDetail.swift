@@ -17,6 +17,7 @@ struct DocumentDetail: View {
                     SaveButton
                     SoftDeleteButton
                     SoftUnDeleteButton
+                    RecoverFromLastSyncButton
                     LocalDeleteButton
                     DeleteButton
                     PublicButton
@@ -189,6 +190,17 @@ struct DocumentDetail: View {
         })
     }
 
+    private func recoverFromLastSync() {
+        var documentStruct = DocumentStruct(document: document)
+        guard let oldStruct = documentStruct.previousSavedObject else { return }
+        documentStruct.data = oldStruct.data
+        documentStruct.deletedAt = nil
+        documentStruct.version += 1
+
+        documentManager.saveThenSaveOnAPI(documentStruct, completion: { _ in
+        })
+    }
+
     private func save() {
         var documentStruct = DocumentStruct(document: document)
         documentStruct.updatedAt = BeamDate.now
@@ -228,6 +240,14 @@ struct DocumentDetail: View {
             softUnDelete()
         }, label: {
             Text("Recover").frame(minWidth: 100)
+        })
+    }
+
+    private var RecoverFromLastSyncButton: some View {
+        Button(action: {
+            recoverFromLastSync()
+        }, label: {
+            Text("Recover synced").frame(minWidth: 100)
         })
     }
 
