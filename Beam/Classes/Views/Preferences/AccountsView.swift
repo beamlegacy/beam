@@ -65,98 +65,112 @@ struct AccountsView: View {
 
 	var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
-                Text("Account:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                if viewModel.isloggedIn {
-                    accountLoggedInView
-                } else {
-                    accountLoggedOffView
-                }
-            }
-            Preferences.Section(title: "") {
-                Spacer(minLength: 26).frame(maxHeight: 26)
-            }
-            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .top) {
-                Text("Calendars & Contacts:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-            } content: {
-                VStack(alignment: .leading) {
-                    if viewModel.accountsCalendar.isEmpty {
-                        connectGoogleCalendarView
-                    } else {
-                        VStack(alignment: .leading) {
-                            VStack(alignment: .leading) {
-                                ForEach(viewModel.accountsCalendar) { account in
-                                    GoogleAccountView(viewModel: viewModel, account: account) {
-                                        viewModel.calendarManager.disconnect(from: .googleCalendar, sourceId: account.sourceId)
-                                        viewModel.accountsCalendar.removeAll(where: { $0 === account })
-                                    }
-                                }
-                            }.padding(.bottom, 20)
-
-                            Button(action: {
-                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                                    if connected { viewModel.calendarManager.updated = true }
-                                }
-                            }, label: {
-                                // TODO: loc
-                                Text("Connect Another Google Calendar...")
-                                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                    .frame(width: 236)
-                                    .padding(.top, -4)
-                            })
-                            VStack {
-                                Text("Connect with Google to import your Calendar & Contacts and easily take meeting notes.")
-                                    .font(BeamFont.regular(size: 11).swiftUI)
-                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-                                    .lineLimit(2)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .multilineTextAlignment(.leading)
-                            }.frame(width: 297, height: 26, alignment: .leading)
-                        }
-                    }
-                }
-            }
-
-            Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
-                Text("Encryption key:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-                    .if(!viewModel.isloggedIn) { view in
-                        view.hidden()
-                    }
-            } content: {
-                if viewModel.isloggedIn {
-                    EncryptionKeyView
-                    #if DEBUG
-                    RefreshTokenButton
-                    #endif
-                }
-            }
-
-            Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
-                Text("Manage:")
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 250, alignment: .trailing)
-                    .if(!viewModel.isloggedIn) { view in
-                        view.hidden()
-                    }
-            } content: {
-                if viewModel.isloggedIn {
-                    manageAccountView
-                }
-            }
+            return getAccountViewSections()
         }
 	}
 
+    // MARK: - Preferences Sections
+    private func getAccountViewSections() -> [Preferences.Section] {
+        var sections = [accountSection, spacerSection, calendarSection]
+        if viewModel.isloggedIn {
+            sections.append(contentsOf: [encryptionKeySection, manageAccountSection])
+        }
+        return sections
+    }
+
+    private var accountSection: Preferences.Section {
+        Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
+            Text("Account:")
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            if viewModel.isloggedIn {
+                accountLoggedInView
+            } else {
+                accountLoggedOffView
+            }
+        }
+    }
+
+    private var spacerSection: Preferences.Section {
+        Preferences.Section(title: "") {
+            Spacer(minLength: 26).frame(maxHeight: 26)
+        }
+    }
+
+    private var calendarSection: Preferences.Section {
+        Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .top) {
+            Text("Calendars & Contacts:")
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            VStack(alignment: .leading) {
+                if viewModel.accountsCalendar.isEmpty {
+                    connectGoogleCalendarView
+                } else {
+                    VStack(alignment: .leading) {
+                        VStack(alignment: .leading) {
+                            ForEach(viewModel.accountsCalendar) { account in
+                                GoogleAccountView(viewModel: viewModel, account: account) {
+                                    viewModel.calendarManager.disconnect(from: .googleCalendar, sourceId: account.sourceId)
+                                    viewModel.accountsCalendar.removeAll(where: { $0 === account })
+                                }
+                            }
+                        }.padding(.bottom, 20)
+
+                        Button(action: {
+                            viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                                if connected { viewModel.calendarManager.updated = true }
+                            }
+                        }, label: {
+                            // TODO: loc
+                            Text("Connect Another Google Calendar...")
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                .frame(width: 236)
+                                .padding(.top, -4)
+                        })
+                        VStack {
+                            Text("Connect with Google to import your Calendar & Contacts and easily take meeting notes.")
+                                .font(BeamFont.regular(size: 11).swiftUI)
+                                .foregroundColor(BeamColor.Corduroy.swiftUI)
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .multilineTextAlignment(.leading)
+                        }.frame(width: 297, height: 26, alignment: .leading)
+                    }
+                }
+            }
+        }
+    }
+
+    private var encryptionKeySection: Preferences.Section {
+        Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
+            Text("Encryption key:")
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            EncryptionKeyView
+            #if DEBUG
+            RefreshTokenButton
+            #endif
+        }
+    }
+
+    private var manageAccountSection: Preferences.Section {
+        Preferences.Section(bottomDivider: false, verticalAlignment: .top) {
+            Text("Manage:")
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            manageAccountView
+        }
+    }
+
+    // MARK: - Views
     private var accountLoggedInView: some View {
         VStack(alignment: .leading) {
             if let username = AuthenticationManager.shared.username {
