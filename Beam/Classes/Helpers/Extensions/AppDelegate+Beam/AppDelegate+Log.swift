@@ -10,6 +10,8 @@ extension AppDelegate {
     }
 
     @IBAction func showLogs(_ sender: Any) {
+        LoggerNSWindow.instances += 1
+
         let storyboard = NSStoryboard(name: "Main", bundle: nil) // type storyboard name instead of Main
         guard let windowController = storyboard.instantiateController(withIdentifier: "LoggerWindowController") as? LoggerWindowController else {
             return
@@ -18,6 +20,7 @@ extension AppDelegate {
         windowController.window?.center()
         windowController.window?.titleVisibility = .hidden
         windowController.window?.makeKeyAndOrderFront(window)
+
     }
 
     public func export(logEntries: [LogEntry]) {
