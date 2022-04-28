@@ -41,6 +41,8 @@ struct DocumentStruct: BeamObjectProtocol {
         } catch {
             Logger.shared.logError("Can't decode DocumenStruct \(titleAndId): \(error.localizedDescription)",
                                    category: .document)
+            Logger.shared.logError("data size: \(data.count), data: \(data.asString ?? "-")",
+                                   category: .document)
         }
 
         return false
@@ -123,8 +125,8 @@ extension DocumentStruct {
         self.data = Data()
         self.documentType = .note
 
-        document.managedObjectContext!.performAndWait({
-            document.managedObjectContext!.refresh(document, mergeChanges: true)
+        document.managedObjectContext?.performAndWait({
+            document.managedObjectContext?.refresh(document, mergeChanges: true)
             self.id = document.id
             self.createdAt = document.created_at
             self.updatedAt = document.updated_at
