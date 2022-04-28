@@ -95,14 +95,6 @@ struct CalendarView: View {
                 .padding(.leading, 14)
                 .onHover { isHoveringNotConnect = $0 }
                 .animation(.easeInOut(duration: 0.3))
-                .onTapGesture {
-                    viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                        if connected {
-                            viewModel.calendarManager.updated = true
-                            isHoveringConnect = true
-                        }
-                    }
-                }
         }
     }
 
@@ -117,18 +109,27 @@ struct CalendarView: View {
                 Spacer()
             }.frame(width: 21)
             if isHoveringNotConnect {
-                VStack(alignment: .leading, spacing: 4.5) {
-                    Text("Connect your Calendar")
-                        .font(BeamFont.medium(size: 12).swiftUI)
-                        .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-                    Text("Write a meeting note or join a video call")
-                        .lineLimit(3)
-                        .fixedSize(horizontal: false, vertical: true)
-                        .multilineTextAlignment(.leading)
-                        .font(BeamFont.regular(size: 11).swiftUI)
-                        .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-                    Spacer()
-                }
+                Button {
+                    viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                        if connected {
+                            viewModel.calendarManager.updated = true
+                            isHoveringConnect = true
+                        }
+                    }
+                } label: {
+                    VStack(alignment: .leading, spacing: 4.5) {
+                        Text("Connect your Calendar")
+                            .font(BeamFont.medium(size: 12).swiftUI)
+                            .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+                        Text("Write a meeting note or join a video call")
+                            .lineLimit(3)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .multilineTextAlignment(.leading)
+                            .font(BeamFont.regular(size: 11).swiftUI)
+                            .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+                        Spacer()
+                    }
+                }.buttonStyle(.plain)
             }
         }
     }

@@ -122,7 +122,8 @@ class GutterContainerView: NSView {
             if viewModel.meetings.count > 0 {
                 return NSSize(width: 0, height: (Int(CalendarView.itemSpacing) + calendarCellHeight) * (viewModel.meetings.count - 1) + calendarCellHeight)
             }
-            return NSSize(width: 0, height: calendarCellHeight)
+            let notConnectViewIsPresent = viewModel.todaysCalendar && viewModel.calendarManager.showedNotConnectedView < 3 && !viewModel.isConnected
+            return NSSize(width: 0, height: notConnectViewIsPresent ? calendarCellHeight * 3 : 0)
         case .none:
             return .zero
         }
