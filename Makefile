@@ -100,7 +100,7 @@ lint:
 
 install_variable_injector:
 	rm -rf variable-injector
-	git clone --depth 1 https://github.com/penso/variable-injector.git
+	git clone --depth 1 https://github.com/LucianoPAlmeida/variable-injector.git
 	(cd variable-injector && make install)
 	rm -rf variable-injector
 
