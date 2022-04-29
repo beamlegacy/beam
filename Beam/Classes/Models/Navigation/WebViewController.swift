@@ -270,6 +270,7 @@ extension WebViewController: WebViewNavigationHandler {
                 self.requestedURL = url
             }
         }
+        delegate?.webViewControllerIsNavigatingToANewPage(self)
     }
 
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {

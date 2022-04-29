@@ -75,12 +75,10 @@ import Promises
             WebPositionsMessageHandler(),
             PointAndShootMessageHandler(),
             JSNavigationMessageHandler(),
-
             MediaPlayerMessageHandler(),
             GeolocationMessageHandler(),
             WebSearchMessageHandler(),
             WebViewFocusMessageHandler(),
-            
             LinkMouseOverMessageHandler()
         ]
         if !isIncognito {
