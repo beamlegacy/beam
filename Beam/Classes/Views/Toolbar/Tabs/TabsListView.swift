@@ -346,7 +346,7 @@ struct TabsListView: View {
             return
         }
         viewModel.lastTouchWasOnUnselectedTab = true
-        state.browserTabsManager.currentTab = tabs[index]
+        state.browserTabsManager.setCurrenTab(at: index)
     }
 
     private func onTabTapped(at index: Int) {
