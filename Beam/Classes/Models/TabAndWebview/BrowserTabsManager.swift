@@ -23,7 +23,7 @@ class BrowserTabsManager: ObservableObject {
 
     weak var delegate: BrowserTabsManagerDelegate?
 
-    private var tabScope = Set<AnyCancellable>()
+    private var currentTabScope = Set<AnyCancellable>()
     private var dataScope = Set<AnyCancellable>()
     private var tabsAreVisible: Bool {
         self.delegate?.areTabsVisible(for: self) == true
@@ -93,17 +93,17 @@ class BrowserTabsManager: ObservableObject {
     }
 
     private func updateCurrentTabObservers() {
-        tabScope.removeAll()
-        currentTab?.$canGoBack.sink { [unowned self]  v in
+        currentTabScope.removeAll()
+        currentTab?.$canGoBack.receive(on: DispatchQueue.main).sink { [unowned self]  v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
             self.autoSave()
-        }.store(in: &tabScope)
-        currentTab?.$canGoForward.sink { [unowned self]  v in
+        }.store(in: &currentTabScope)
+        currentTab?.$canGoForward.receive(on: DispatchQueue.main).sink { [unowned self] v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
             self.autoSave()
-        }.store(in: &tabScope)
+        }.store(in: &currentTabScope)
     }
 
     private func updateClusteringOpenPages() {

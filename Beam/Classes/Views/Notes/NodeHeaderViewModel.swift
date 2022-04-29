@@ -234,7 +234,7 @@ extension NoteHeaderView {
 
             // To prevent complex interactions with the state and notifications it receives, let's apply the state changes before we delete the note:
             if let state = state {
-                if state.canGoBack {
+                if state.canGoBackForward.back {
                     state.goBack()
                 } else {
                     state.navigateToJournal(note: nil)
