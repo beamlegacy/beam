@@ -73,8 +73,10 @@ import Sentry
 
     @Published var backForwardList = NoteBackForwardList()
     @Published var notesFocusedStates = NoteEditFocusedStateStorage()
-    @Published var canGoBack: Bool = false
-    @Published var canGoForward: Bool = false
+    /// Capability to go back or forward in history, whether it's for the webview or notes/pages
+    @Published var canGoBackForward: (back: Bool, forward: Bool) = (false, false)
+    /// In web mode, we sometimes want to display the back or forward arrow in disabled mode
+    @Published var shouldForceShowBackForward: (back: Bool, forward: Bool) = (false, false)
     @Published var isFullScreen: Bool = false
     @Published var omniboxInfo = OmniboxLayoutInformation()
 
@@ -133,7 +135,7 @@ import Sentry
     let cmdManager = CommandManager<BeamState>()
 
     func goBack() {
-        guard canGoBack else { return }
+        guard canGoBackForward.back else { return }
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
         case .note, .page, .today:
@@ -155,7 +157,7 @@ import Sentry
     }
 
     func goForward() {
-        guard canGoForward else { return }
+        guard canGoBackForward.forward else { return }
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         switch mode {
         case .note, .page, .today:
@@ -200,11 +202,14 @@ import Sentry
     func updateCanGoBackForward() {
         switch mode {
         case .today, .note, .page:
-            canGoBack = !backForwardList.backList.isEmpty
-            canGoForward = !backForwardList.forwardList.isEmpty
+            canGoBackForward = (back: !backForwardList.backList.isEmpty, forward: !backForwardList.forwardList.isEmpty)
+            shouldForceShowBackForward = (false, false)
         case .web:
-            canGoBack = currentTab?.canGoBack ?? false
-            canGoForward = currentTab?.canGoForward ?? false
+            canGoBackForward = (back: currentTab?.canGoBack ?? false, forward: currentTab?.canGoForward ?? false)
+            // we keep the back and forward visible until we leave the web mode
+            let forceBack = shouldForceShowBackForward.back || canGoBackForward.back || browserTabsManager.tabs.first { $0.canGoBack } != nil
+            let forceForward = shouldForceShowBackForward.forward || canGoBackForward.forward || browserTabsManager.tabs.first { $0.canGoForward } != nil
+            shouldForceShowBackForward = (forceBack, forceForward)
         }
     }
 
@@ -778,8 +783,7 @@ extension BeamState: BrowserTabsManagerDelegate {
     }
 
     func tabsManagerBrowsingHistoryChanged(canGoBack: Bool, canGoForward: Bool) {
-        self.canGoBack = canGoBack
-        self.canGoForward = canGoForward
+        updateCanGoBackForward()
     }
 
     private func setDefaultDisplayMode() {
