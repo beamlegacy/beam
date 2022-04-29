@@ -12,8 +12,8 @@ struct TabView: View {
     static let minimumWidth: CGFloat = 29
     static let pinnedWidth: CGFloat = 32
     static let minimumActiveWidth: CGFloat = 120
+    static let minSingleTabWidth: Double = 370
     static let height: CGFloat = 29
-    private static let minSingleTabWidth: Double = 350
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.colorScheme) private var colorScheme
@@ -175,20 +175,26 @@ struct TabView: View {
 
     private func centerViewContent(foregroundHoverStyle: Bool,
                                    shouldShowSecurity: Bool, shouldShowClose: Bool,
-                                   leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
-        Group {
+                                   leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat, containerWidth: CGFloat) -> some View {
+        var minWidth: CGFloat = 0
+        if isSingleTab {
+            let availableWidth = (containerWidth - leadingViewsWidth - trailingViewsWidth)
+            let defaultMinWidth = Self.minSingleTabWidth - leadingViewsWidth - trailingViewsWidth
+            minWidth = min(defaultMinWidth, availableWidth)
+        }
+        return Group {
             if foregroundHoverStyle {
                 centerViewForegroundHoverContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
-                                                        leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                                                 leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth, minWidth: minWidth)
             } else {
                 centerViewDefaultContent(shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
-                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth, minWidth: minWidth)
             }
         }
     }
 
     private func centerViewDefaultContent(shouldShowSecurity: Bool, shouldShowClose: Bool,
-                                          leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
+                                          leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat, minWidth: CGFloat) -> some View {
         let iconSpacing = iconTitleSpacing(shouldShowSecurity: shouldShowSecurity)
         return HStack(spacing: iconSpacing) {
             iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
@@ -197,7 +203,7 @@ struct TabView: View {
                 .allowsHitTesting(false)
         }
         .if(isSingleTab) {
-            $0.frame(minWidth: Self.minSingleTabWidth)
+            $0.frame(minWidth: minWidth)
         }
         .if(!isSingleTab) {
             $0.opacity(0).overlay(GeometryReader { proxy in
@@ -216,7 +222,7 @@ struct TabView: View {
     }
 
     private func centerViewForegroundHoverContent(shouldShowSecurity: Bool, shouldShowClose: Bool,
-                                                  leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
+                                                  leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat, minWidth: CGFloat) -> some View {
         let iconSpacing = iconTitleSpacing(shouldShowSecurity: shouldShowSecurity)
         let urlString = tab.url?.urlStringWithoutScheme ?? tab.title
         let iconTitleContent = HStack(spacing: iconSpacing) {
@@ -227,16 +233,16 @@ struct TabView: View {
         }
         return Group {
             if isSingleTab {
-                // single tab width should be max(tabTitleWidth, minSingleTabWidth).
+                // single tab width should be max(tabTitleWidth, minSingleTabContentWidth).
                 // Using overlay over unhover content to produce this layout.
                 centerViewDefaultContent(shouldShowSecurity: false, shouldShowClose: false,
-                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
-                    .frame(minWidth: Self.minSingleTabWidth)
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth, minWidth: minWidth)
+                    .frame(minWidth: minWidth)
                     .opacity(0)
                     .overlay(GeometryReader { proxy in
                         iconTitleContent
-                            .frame(width: max(proxy.size.width, Self.minSingleTabWidth))
-                            .offset(x: -(Self.minSingleTabWidth - min(Self.minSingleTabWidth, proxy.size.width)) / 2, y: 0)
+                            .frame(width: max(proxy.size.width, minWidth))
+                            .offset(x: -(minWidth - min(minWidth, proxy.size.width)) / 2, y: 0)
                     })
             } else {
                 iconTitleContent
@@ -258,14 +264,14 @@ struct TabView: View {
         shouldShowSecurity ? 1 : BeamSpacing._40
     }
 
-    private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat) -> some View {
+    private func centerView(shouldShowSecurity: Bool, leadingViewsWidth: CGFloat, trailingViewsWidth: CGFloat, containerWidth: CGFloat) -> some View {
         ZStack {
             let isHovering = isEnabled && !disableHovering && (isHovering || isDragging)
             let showForegroundHoverStyle = isHovering && isSelected
             let shouldShowClose = isHovering
             let base = centerViewContent(foregroundHoverStyle: showForegroundHoverStyle,
                                          shouldShowSecurity: shouldShowSecurity, shouldShowClose: shouldShowClose,
-                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth)
+                                         leadingViewsWidth: leadingViewsWidth, trailingViewsWidth: trailingViewsWidth, containerWidth: containerWidth)
             if let copyMessage = copyMessage {
                 base
                     .opacity(0)
@@ -298,20 +304,23 @@ struct TabView: View {
         let shouldShowMedia = !shouldShowCompactSize && audioIsPlaying
         let showForegroundHoverStyle = isHovering && isSelected
         let hPadding = shouldShowCompactSize ? 0 : BeamSpacing._80
+        let spacerMinWidth = BeamSpacing._40
 
         let leadingViews = leadingViews(shouldShowClose: shouldShowClose)
         let trailingViews = trailingViews(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
         var estimatedTrailingViewsWidth: CGFloat = 0
-        if !showForegroundHoverStyle {
+        if isSingleTab {
+            estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: true, shouldShowMedia: shouldShowMedia)
+        } else if !showForegroundHoverStyle {
             estimatedTrailingViewsWidth = hPadding + self.estimatedTrailingViewsWidth(shouldShowCopy: shouldShowCopy, shouldShowMedia: shouldShowMedia)
         }
-        let estimatedLeadingViewsWidth: CGFloat = hPadding + (shouldShowClose ? 16 : 0)
+        let estimatedLeadingViewsWidth: CGFloat = hPadding + (shouldShowClose || isSingleTab ? 16 : 0) + (isSingleTab ? spacerMinWidth : 0)
         return HStack(spacing: 0) {
 
             // Leading Content
             if showForegroundHoverStyle {
                 leadingViews.transition(sideViewsTransition).padding(.leading, hPadding)
-                Spacer(minLength: BeamSpacing._40)
+                Spacer(minLength: spacerMinWidth)
             } else if isSingleTab {
                 ZStack {
                     // make space for the non-active-single hover style
@@ -319,7 +328,7 @@ struct TabView: View {
                     leadingViews.transition(sideViewsTransition)
                 }
                 .padding(.leading, hPadding)
-                Spacer(minLength: BeamSpacing._40)
+                Spacer(minLength: spacerMinWidth)
             } else {
                 Rectangle().fill(Color.clear).frame(minWidth: hPadding)
                     .overlay(
@@ -330,7 +339,7 @@ struct TabView: View {
 
             // Center Content
             if shouldShowTitle {
-                centerView(shouldShowSecurity: shouldShowSecurity, leadingViewsWidth: estimatedLeadingViewsWidth, trailingViewsWidth: estimatedTrailingViewsWidth)
+                centerView(shouldShowSecurity: shouldShowSecurity, leadingViewsWidth: estimatedLeadingViewsWidth, trailingViewsWidth: estimatedTrailingViewsWidth, containerWidth: containerGeometry.size.width)
                     .layoutPriority(2)
             } else if shouldShowCompactSize && audioIsPlaying {
                 audioView
@@ -340,7 +349,7 @@ struct TabView: View {
 
             // Trailing Content
             if showForegroundHoverStyle || isSingleTab {
-                Spacer(minLength: BeamSpacing._40)
+                Spacer(minLength: spacerMinWidth)
             }
             ZStack {
                 if showForegroundHoverStyle {
