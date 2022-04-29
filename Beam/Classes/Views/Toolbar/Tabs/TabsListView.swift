@@ -73,6 +73,10 @@ struct TabsListView: View {
         let rightSpacing = containerGlobal.maxX - contentGlobal.maxX
         let leftSpacing = contentGlobal.minX - containerGlobal.minX
         let offsetX = leftSpacing - rightSpacing + containerGlobal.minX
+        if contentGlobal.width - offsetX < TabView.minSingleTabWidth {
+            // we have too much pinned tab to be able to center the single tab, so it will be aligned on the right.
+            return 0
+        }
         return offsetX
     }
 
