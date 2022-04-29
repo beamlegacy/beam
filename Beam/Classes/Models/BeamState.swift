@@ -403,7 +403,7 @@ import Sentry
     private func closeTabIfPossible(_ tab: BrowserTab, allowClosingPinned: Bool = false) -> Bool {
         if tab.isPinned && !allowClosingPinned {
             if let nextUnpinnedTabIndex = browserTabsManager.tabs.firstIndex(where: { !$0.isPinned }) {
-                browserTabsManager.showTab(at: nextUnpinnedTabIndex)
+                browserTabsManager.setCurrenTab(at: nextUnpinnedTabIndex)
                 return true
             }
             return false
@@ -583,7 +583,7 @@ import Sentry
 
         browserTabsManager.tabs = try container.decode([BrowserTab].self, forKey: .tabs)
         if let tabIndex = try? container.decode(Int.self, forKey: .currentTab), tabIndex < browserTabsManager.tabs.count {
-            browserTabsManager.currentTab = browserTabsManager.tabs[tabIndex]
+            browserTabsManager.setCurrenTab(at: tabIndex)
         }
 
         setup(data: data)
