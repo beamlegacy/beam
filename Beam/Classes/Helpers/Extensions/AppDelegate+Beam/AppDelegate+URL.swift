@@ -80,7 +80,7 @@ extension AppDelegate {
             createWindow(frame: nil, restoringTabs: false)
         }
 
-        guard let window = window ?? windows.first else {
+        guard var window = window ?? windows.first else {
             Logger.shared.logDebug("Window not ready to open url. Waiting for it", category: .general)
             waitForWindowToProcessURL(components)
             return false
@@ -94,13 +94,20 @@ extension AppDelegate {
         if components.host != Configuration.publicHostname {
             guard let url = components.url else { return false }
             Logger.shared.logDebug("Opened external URL: \(url.absoluteString)", category: .general)
+            if let (existingTab, tabWindow) = existingOpenedTab(for: url) {
+                window = tabWindow
+                tabWindow.state.browserTabsManager.setCurrenTab(existingTab)
+                tabWindow.state.mode = .web
+            } else {
+                window.state.createTab(withURLRequest: URLRequest(url: url), originalQuery: url.absoluteString)
+            }
+
             NSApp.activate(ignoringOtherApps: true)
             if window.isMiniaturized {
                 window.deminiaturize(nil)
             }
             window.makeKeyAndOrderFront(nil)
 
-            _ = window.state.createTab(withURLRequest: URLRequest(url: url), originalQuery: url.absoluteString)
             return true
         }
 
@@ -126,6 +133,15 @@ extension AppDelegate {
         Logger.shared.logInfo("Didn't detect link \(components)", category: .general)
 
         return false
+    }
+
+    private func existingOpenedTab(for url: URL) -> (BrowserTab, BeamWindow)? {
+        for window in windows {
+            if let tab = window.state.browserTabsManager.openedTab(for: url) {
+                return (tab, window)
+            }
+        }
+        return nil
     }
 
     private func waitForWindowToProcessURL(_ components: NSURLComponents) {
