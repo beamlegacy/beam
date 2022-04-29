@@ -114,6 +114,30 @@ class BrowserTabsManager: ObservableObject {
         self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + openTabs
     }
 
+    private var indexForNewTabInGroup: Int? {
+        guard let currentTabGroupValue = currentTabGroupValue,
+              let currentTabIndex = tabs.firstIndex(where: {$0.id == currentTab?.id}) else { return nil }
+        if let lastTabIndex = tabs.firstIndex(where: {$0.id == currentTabGroupValue.last}), lastTabIndex > currentTabIndex {
+            return lastTabIndex + 1
+        } else {
+            return currentTabIndex + 1
+        }
+    }
+
+    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at index: Int? = nil) {
+        if let request = request, request.url != nil {
+            tab.load(request: request)
+        }
+        if let tabIndex = index, tabs.count > tabIndex {
+            tabs.insert(tab, at: tabIndex)
+        } else {
+            tabs.append(tab)
+        }
+        if setCurrent || currentTab == nil {
+            currentTab = tab
+        }
+        data.sessionLinkRanker.addTree(tree: tab.browsingTree)
+    }
 }
 
 // MARK: - Public methods
@@ -135,17 +159,7 @@ extension BrowserTabsManager {
         }
     }
 
-    private var indexForNewTabInGroup: Int? {
-        guard let currentTabGroupValue = currentTabGroupValue,
-              let currentTabIndex = tabs.firstIndex(where: {$0.id == currentTab?.id}) else { return nil }
-        if let lastTabIndex = tabs.firstIndex(where: {$0.id == currentTabGroupValue.last}), lastTabIndex > currentTabIndex {
-            return lastTabIndex + 1
-        } else {
-            return currentTabIndex + 1
-        }
-    }
-
-    // This is now the only entry point to add a tab
+    /// This is now the only entry point to add a tab
     func addNewTabAndGroup(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at tabIndex: Int? = nil) {
         if tabIndex == nil {
             addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: indexForNewTabInGroup)
@@ -161,21 +175,6 @@ extension BrowserTabsManager {
         }
     }
 
-    private func addNewTab(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at index: Int? = nil) {
-        if let request = request, request.url != nil {
-            tab.load(request: request)
-        }
-        if let tabIndex = index, tabs.count > tabIndex {
-            tabs.insert(tab, at: tabIndex)
-        } else {
-            tabs.append(tab)
-        }
-        if setCurrent || currentTab == nil {
-            currentTab = tab
-        }
-        data.sessionLinkRanker.addTree(tree: tab.browsingTree)
-    }
-
     func showNextTab() {
         guard let tab = currentTab, let i = tabs.firstIndex(of: tab) else { return }
         let index = (i + 1) % tabs.count
@@ -188,8 +187,12 @@ extension BrowserTabsManager {
         currentTab = tabs[index]
     }
 
-    func showTab(at index: Int) {
+    func setCurrenTab(at index: Int) {
         currentTab = tabs[index]
+    }
+
+    func setCurrenTab(_ tab: BrowserTab?) {
+        currentTab = tab
     }
 
     func reOpenedClosedTabFromHistory() -> Bool {
@@ -223,6 +226,10 @@ extension BrowserTabsManager {
                 currentTab.webView.window?.makeFirstResponder(currentTab.webView)
             }
         }
+    }
+
+    func openedTab(for url: URL) -> BrowserTab? {
+        tabs.first { $0.url?.absoluteString == url.absoluteString }
     }
 
     private func updateIsPinned(for tab: BrowserTab, isPinned: Bool) {
