@@ -87,13 +87,13 @@ class CloseTab: WebCommand {
 
             if context.browserTabsManager.currentTab === tab {
                 if let tabParentToGo = tabParentToGo, nextTabIdFromGroup == nil {
-                    context.browserTabsManager.currentTab = tabParentToGo
+                    context.browserTabsManager.setCurrenTab(tabParentToGo)
                 } else if let nextTabIdFromGroup = nextTabIdFromGroup {
-                    context.browserTabsManager.currentTab = context.browserTabsManager.tabs.first(where: {$0.id == nextTabIdFromGroup})
+                    context.browserTabsManager.setCurrenTab(context.browserTabsManager.tabs.first(where: {$0.id == nextTabIdFromGroup}))
                 } else if nextTabIndex >= 0 {
-                    context.browserTabsManager.currentTab = context.browserTabsManager.tabs[nextTabIndex]
+                    context.browserTabsManager.setCurrenTab(at: nextTabIndex)
                 } else {
-                    context.browserTabsManager.currentTab = nil
+                    context.browserTabsManager.setCurrenTab(nil)
                 }
                 wasCurrentTab = true
             }
