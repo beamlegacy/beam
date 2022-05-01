@@ -8,7 +8,6 @@
 import Foundation
 import BeamCore
 
-
 class KeychainDailyNoteScoreStore: InMemoryDailyNoteScoreStore {
     public static let shared = KeychainDailyNoteScoreStore()
 
