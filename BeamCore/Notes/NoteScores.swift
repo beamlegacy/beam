@@ -43,15 +43,18 @@ public protocol DailyNoteScoreStoreProtocol {
 
 open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
     public var scores = DailyNoteScores()
+    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "InMemoryDailyNoteScoreStore backgroundQueue")
 
     public init() {}
     public func apply(to noteId: UUID, changes: (NoteScore) -> Void) {
         guard let localDay = BeamDate.now.localDayString() else { return }
-        var dayScores = scores[localDay] ?? NoteScoresById()
-        let scoreToUpdate = dayScores[noteId] ?? NoteScore(noteId: noteId)
-        changes(scoreToUpdate)
-        dayScores[noteId] = scoreToUpdate
-        scores[localDay] = dayScores
+        Self.backgroundQueue.sync {
+            var dayScores = self.scores[localDay] ?? NoteScoresById()
+            let scoreToUpdate = dayScores[noteId] ?? NoteScore(noteId: noteId)
+            changes(scoreToUpdate)
+            dayScores[noteId] = scoreToUpdate
+            self.scores[localDay] = dayScores
+        }
     }
     public func cleanup(daysToKeep: Int) {
         let existingDays =  scores.keys
