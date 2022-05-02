@@ -145,6 +145,7 @@ public class TextRoot: ElementNode {
             debugSection
         ]
     }
+
     override func buildTextChildren(elements: [BeamElement]) -> [Widget] {
         return super.buildTextChildren(elements: elements) + otherSections.compactMap { $0 }
     }
@@ -175,6 +176,7 @@ public class TextRoot: ElementNode {
 
     override var offsetInRoot: NSPoint { NSPoint() }
 
+    // swiftlint:disable:next cyclomatic_complexity
     init(editor: BeamTextEdit, element: BeamElement, availableWidth: CGFloat) {
         super.init(editor: editor, element: element, nodeProvider: NodeProviderImpl(proxy: false), availableWidth: availableWidth)
 
@@ -365,11 +367,13 @@ public class TextRoot: ElementNode {
                 updateDailySummary()
             } else {
                 createDailyNode()
+                updateTextChildren(elements: element.children)
             }
             if continueToSummaryNode != nil {
                 updateContinueToSummary()
             } else {
                 createContinueToSummaryNode()
+                updateTextChildren(elements: element.children)
             }
         }
     }
@@ -377,7 +381,7 @@ public class TextRoot: ElementNode {
     private func updateDailySummary() {
         if let dailySummaryElement = SummaryEngine.getDailySummary() {
             if dailySummaryNode?.text.text != dailySummaryElement.text.text {
-                dailySummaryNode?.text = dailySummaryElement.text
+                dailySummaryNode?.element = dailySummaryElement
             }
         }
     }
@@ -385,7 +389,7 @@ public class TextRoot: ElementNode {
     private func updateContinueToSummary() {
         if let continueToSummaryElement = SummaryEngine.getContinueToSummary() {
             if continueToSummaryNode?.text.text != continueToSummaryElement.text.text {
-                continueToSummaryNode?.text = continueToSummaryElement.text
+                continueToSummaryNode?.element = continueToSummaryElement
             }
         }
     }
