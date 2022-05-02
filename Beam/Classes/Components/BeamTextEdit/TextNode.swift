@@ -129,7 +129,7 @@ public class TextNode: ElementNode {
         }
         return _attributedString!
     }
-    
+
     var selectedTextRange: Range<Int> { root?.selectedTextRange ?? 0..<0 }
     var markedTextRange: Range<Int>? { root?.markedTextRange }
 
@@ -382,7 +382,7 @@ public class TextNode: ElementNode {
                     let (textFrame, _) = self.buildTextFrames(position: position, width: width, height: nil, attributedString: attributedString)
                     DispatchQueue.main.async {
                         self.textFrame = textFrame
-                        invalidateLayout()
+                        self.invalidateLayout()
                     }
                 }
             }
