@@ -22,4 +22,10 @@ extension NSEvent {
         return !isSystemEvents
     }
 
+    /// Event is pressing any keyboard key
+    var isKeyboardEvent: Bool {
+        let keyboardEvents = [.keyDown, .keyUp].contains(self.type)
+        return keyboardEvents
+    }
+
 }
