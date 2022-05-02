@@ -58,6 +58,7 @@ public struct Link: Codable {
 
 public protocol LinkManager {
     func getLinks(matchingUrl url: String) -> [UUID: Link]
+    func getLinks(for ids: [UUID]) -> [UUID: Link]
     func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID
     func linkFor(id: UUID) -> Link?
     func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link
@@ -85,6 +86,7 @@ extension LinkManager {
 
 public class FakeLinkManager: LinkManager {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { [:] }
+    public func getLinks(for ids: [UUID]) -> [UUID: Link] { [:] }
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID { UUID.null }
     public func linkFor(id: UUID) -> Link? { nil }
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link { Link(url: url, title: title, content: content, destination: nil) }
@@ -104,6 +106,8 @@ public class LinkStore: LinkManager {
     }
 
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { linkManager.getLinks(matchingUrl: url) }
+    public func getLinks(for ids: [UUID]) -> [UUID: Link] { linkManager.getLinks(for: ids) }
+
     public func getOrCreateId(for url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> UUID { linkManager.getOrCreateId(for: url, title: title, content: content, destination: destination) }
     public func linkFor(id: UUID) -> Link? { linkManager.linkFor(id: id) }
     public func visit(_ url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> Link { linkManager.visit(url, title: title, content: content, destination: destination) }
@@ -149,6 +153,9 @@ public class InMemoryLinkManager: LinkManager {
     public init() {}
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
         linksById.filter { $0.value.url.contains(url) }
+    }
+    public func getLinks(for ids: [UUID]) -> [UUID: Link] {
+        linksById.filter { ids.contains($0.key) }
     }
     private func insert(link: Link) {
         linksById[link.id] = link

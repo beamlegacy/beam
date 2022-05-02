@@ -1894,16 +1894,18 @@ extension GRDBDatabase {
     }
 
     //day in format "YYYY-MM-DD"
-    func getDailyUrlScores(day: String) -> [DailyURLScore] {
+    func getDailyUrlScores(day: String) -> [UUID: DailyURLScore] {
         do {
             return try dbReader.read { db in
-                try DailyURLScore
-                    .filter(DailyURLScore.Columns.localDay == day)
-                    .fetchAll(db)
+                let cursor = try DailyURLScore
+                        .filter(DailyURLScore.Columns.localDay == day)
+                        .fetchCursor(db)
+                        .map { ($0.urlId, $0) }
+                return try Dictionary(uniqueKeysWithValues: cursor)
             }
         } catch {
             Logger.shared.logError("Couldn't fetch daily url scores at \(day): \(error)", category: .database)
-            return []
+            return [:]
         }
     }
 

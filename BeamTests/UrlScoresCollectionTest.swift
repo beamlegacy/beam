@@ -31,6 +31,7 @@ class UrlScoresCollectionTest: XCTestCase {
             changes(score)
             data[urlId] = score
         }
+        func getScores(daysAgo: Int) -> [UUID: DailyURLScore] { [:] }
     }
     
     func testNodeCreationScores() throws {

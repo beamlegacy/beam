@@ -1291,6 +1291,7 @@
 		DA69305A268DB375008EF756 /* BrowsingTreeSenderTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */; };
 		DA6A53B726C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */; };
 		DA76129826614E5A00349F2C /* BrowsingTreeScoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */; };
+		DA8AB36A281A8AFD0001FC3D /* DailyUrlScorerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8AB369281A8AFD0001FC3D /* DailyUrlScorerTest.swift */; };
 		DA8D947F27FF17D90073AD2D /* NoteScores.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D947E27FF17D90073AD2D /* NoteScores.swift */; };
 		DA8D948127FF37250073AD2D /* NoteScoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D948027FF37250073AD2D /* NoteScoreTest.swift */; };
 		DA8D949128008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8D949028008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift */; };
@@ -3065,6 +3066,7 @@
 		DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeSenderTest.swift; path = ../BrowsingTreeSenderTest.swift; sourceTree = "<group>"; };
 		DA6A53B626C2BEDC00B87B0C /* SuggestedNoteSourcesUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SuggestedNoteSourcesUpdater.swift; sourceTree = "<group>"; };
 		DA76129726614E5A00349F2C /* BrowsingTreeScoreTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowsingTreeScoreTests.swift; sourceTree = "<group>"; };
+		DA8AB369281A8AFD0001FC3D /* DailyUrlScorerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyUrlScorerTest.swift; sourceTree = "<group>"; };
 		DA8D947E27FF17D90073AD2D /* NoteScores.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScores.swift; sourceTree = "<group>"; };
 		DA8D948027FF37250073AD2D /* NoteScoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteScoreTest.swift; sourceTree = "<group>"; };
 		DA8D949028008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainDailyNoteScoreStore.swift; sourceTree = "<group>"; };
@@ -6132,6 +6134,7 @@
 		96319D1D2616232700D1CF31 /* BeamCoreTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA8AB369281A8AFD0001FC3D /* DailyUrlScorerTest.swift */,
 				DA8D948027FF37250073AD2D /* NoteScoreTest.swift */,
 				96A5DAE227C0251C00746719 /* MajimaTests */,
 				96F2DEDA27BE4983007CF466 /* Assets */,
@@ -8168,6 +8171,7 @@
 				96A5DAEC27C0254300746719 /* ScalarMergeTests.swift in Sources */,
 				DA8D948127FF37250073AD2D /* NoteScoreTest.swift in Sources */,
 				8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */,
+				DA8AB36A281A8AFD0001FC3D /* DailyUrlScorerTest.swift in Sources */,
 				A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */,
 				DAF063F327D130F6000406DE /* Date+DayTruncatedTests.swift in Sources */,
 				96A5DAEA27C0254300746719 /* TestHelper.swift in Sources */,
