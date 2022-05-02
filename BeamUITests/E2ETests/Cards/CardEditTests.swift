@@ -228,15 +228,4 @@ class CardEditTests: BaseTest {
             XCTAssertTrue(waitForStringValueEqual(emptyString, (cardView?.getTextNodeByIndex(nodeIndex: 0))!))
         }
     }
-
-
-    func SKIPtestIntendUnintendNote() throws {
-        try XCTSkipIf(true, "Blocked by https://linear.app/beamapp/issue/BE-2234/perform-uitest-locally-trigger-the-vinyl-fatalerror")
-        launchApp()
-        
-        cardView = openFirstCardInAllCardsList()
-        BeamUITestsHelper(cardView.app).tapCommand(.insertTextInCurrentNote)
-        XCTAssertEqual(cardView.getCountOfDisclosureTriangles(), 0)
-        cardView.clickDisclosureTriangleByIndex(0)
-    }
 }
