@@ -17,7 +17,7 @@ class SummaryEngine {
         var hasNotes: Bool = false
         let element = BeamElement()
         element.kind = .dailySummary
-        element.text = BeamText("Continue working on ", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
+        element.text = BeamText("Continue on ", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
 
         if let notesToContinue = try? NoteDailySummary().get(), !notesToContinue.isEmpty {
             hasNotes = true
@@ -38,9 +38,10 @@ class SummaryEngine {
             siteToContinueText.append(BeamText(text: title, attributes: [.link(urlScore.url.absoluteString)]))
         }
         guard let joinedText = joined(sources: siteToContinueText, with: ", ") else { return element }
-        element.text.append(summarySeparator(" and "))
+        if hasNotes {
+            element.text.append(summarySeparator(" and "))
+        }
         element.text.append(joinedText)
-
         return element
     }
 
@@ -59,31 +60,34 @@ class SummaryEngine {
                     updatedNotes.append(dailyNote)
                 }
             }
+
             if let createdNoteText = buildCreatedNoteText(createdNotes) {
                 hasCreatedNotes = true
                 element = BeamElement()
                 element?.kind = .dailySummary
-
                 element?.text = createdNoteText
             }
-            if let updatedNoteText = buildUpdatedNoteText(updatedNotes, isBeginningOfSentence: !hasCreatedNotes) {
+
+            if let updatedNoteText = buildUpdatedNoteText(updatedNotes) {
                 hasUpdatedNotes = true
                 if !hasCreatedNotes {
                     element = BeamElement()
                     element?.kind = .dailySummary
-                } else {
-                    element?.text.append(summarySeparator(", "))
                 }
+                element?.text.append(BeamText(hasCreatedNotes ? " Worked on " : "Worked on ", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)]))
                 element?.text.append(updatedNoteText)
             }
         }
 
         let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(daysAgo: 0, topN: 2)
         guard !urlScores.isEmpty,
-              let spentTimeOnSiteText = buildSpentTimeOnSiteText(urlScores, isBeginningOfSentence: !(hasCreatedNotes || hasUpdatedNotes)) else { return element }
-        if !hasCreatedNotes && !hasUpdatedNotes {
-            element = BeamElement()
-            element?.kind = .dailySummary
+              let spentTimeOnSiteText = buildSpentTimeOnSiteText(urlScores) else { return element }
+        if !hasUpdatedNotes {
+            if !hasCreatedNotes {
+                element = BeamElement()
+                element?.kind = .dailySummary
+            }
+            element?.text.append(BeamText(hasCreatedNotes ? " Worked on " : "Worked on ", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)]))
         } else {
             element?.text.append(summarySeparator(" and "))
         }
@@ -94,47 +98,37 @@ class SummaryEngine {
 
     private static func buildCreatedNoteText(_ createdNotes: [ScoredDocument]) -> BeamText? {
         guard !createdNotes.isEmpty else { return nil }
-        var createdNoteBaseText = BeamText("Created ", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
+        var createdNoteBaseText = BeamText("Started ", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
         var createdNoteText: [BeamText] = []
         for createdNote in createdNotes {
             createdNoteText.append(BeamText(text: createdNote.title, attributes: [.internalLink(createdNote.noteId)]))
         }
 
-        guard let joinedText = joined(sources: createdNoteText, with: " and ") else { return nil }
+        guard let joinedText = joined(sources: createdNoteText, with: ", ") else { return nil }
         createdNoteBaseText.append(joinedText)
-
+        createdNoteBaseText.append(BeamText(".", attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)]))
         return createdNoteBaseText
     }
 
-    private static func buildUpdatedNoteText(_ updatedNotes: [ScoredDocument], isBeginningOfSentence: Bool) -> BeamText? {
+    private static func buildUpdatedNoteText(_ updatedNotes: [ScoredDocument]) -> BeamText? {
         guard !updatedNotes.isEmpty else { return nil }
-        let baseText = "worked on "
-        var updatedNoteBaseText = BeamText(isBeginningOfSentence ? baseText.capitalizeFirstChar() : baseText, attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
         var updatedNoteText: [BeamText] = []
         for updatedNote in updatedNotes {
             updatedNoteText.append(BeamText(text: updatedNote.title, attributes: [.internalLink(updatedNote.noteId)]))
         }
 
-        guard let joinedText = joined(sources: updatedNoteText, with: " and ") else { return nil }
-        updatedNoteBaseText.append(joinedText)
-
-        return updatedNoteBaseText
+        return joined(sources: updatedNoteText, with: ", ")
     }
 
-    private static func buildSpentTimeOnSiteText(_ urlScores: [ScoredURL], isBeginningOfSentence: Bool) -> BeamText? {
+    private static func buildSpentTimeOnSiteText(_ urlScores: [ScoredURL]) -> BeamText? {
         guard !urlScores.isEmpty else { return nil }
-        let baseText = "spent time on "
-        var spentTimeOnSiteBaseText = BeamText(isBeginningOfSentence ? baseText.capitalizeFirstChar() : baseText, attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
         var spentTimeOnSiteText: [BeamText] = []
         for urlScore in urlScores {
             guard let title = urlScore.title else { continue }
             spentTimeOnSiteText.append(BeamText(text: title, attributes: [.link(urlScore.url.absoluteString)]))
         }
 
-        guard let joinedText = joined(sources: spentTimeOnSiteText, with: " and ") else { return nil }
-        spentTimeOnSiteBaseText.append(joinedText)
-
-        return spentTimeOnSiteBaseText
+        return joined(sources: spentTimeOnSiteText, with: ", ")
     }
 
     private static func joined(sources: [BeamText], with separator: String) -> BeamText? {
