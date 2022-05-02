@@ -91,6 +91,7 @@ class ShortcutsHelper {
         case showOmnibox
         case removeLastWord
         case removeEntireLine
+        case unindent
     }
     
     @discardableResult
@@ -144,6 +145,7 @@ class ShortcutsHelper {
         case .showOmnibox: invokeCMDKey("k")
         case .removeLastWord: invokeOptionKey(.delete)
         case .removeEntireLine: invokeCMDKey(.delete)
+        case .unindent: invokeShiftKey(.tab)
         }
         return BaseView()
     }

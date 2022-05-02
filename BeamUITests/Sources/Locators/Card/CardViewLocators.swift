@@ -13,6 +13,10 @@ enum CardViewLocators {
         case noteView = "noteView"
     }
     
+    enum DisclosureTriangles: String, CaseIterable, UIElement {
+        case indentationArrow = "node_arrow"
+    }
+    
     enum Buttons: String, CaseIterable, UIElement {
         case editorOptions = "editor-options"
         case contextMenuRename = "ContextMenuItem-rename"
