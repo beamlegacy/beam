@@ -692,9 +692,10 @@ import Sentry
 
     func shouldAllowFirstResponderTakeOver(_ responder: NSResponder?) -> Bool {
         if omniboxInfo.isFocused && responder is BeamWebView {
+            let currentEvent = NSApp.currentEvent
             // prevent autofocus inputs from stealing the omnibox focus
             // https://linear.app/beamapp/issue/BE-3557/page-loading-is-dismissing-omnibox
-            return NSApp.currentEvent?.isUserInteractionEvent == true
+            return currentEvent?.isKeyboardEvent != true && currentEvent?.isUserInteractionEvent == true
         }
         return true
     }
