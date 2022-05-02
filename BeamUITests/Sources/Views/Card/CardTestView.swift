@@ -25,6 +25,26 @@ class CardTestView: BaseView {
             .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
+    func getIndentationTriangleAtNode(nodeIndex: Int) -> XCUIElement {
+        return getTextNodeByIndex(nodeIndex: nodeIndex).disclosureTriangles.firstMatch
+    }
+    
+    func isIndentationTriangleOpened(nodeIndex: Int) -> Bool {
+        return getIndentationTriangleAtNode(nodeIndex: nodeIndex).label.hasSuffix(" opened")
+    }
+    
+    func isIndentationTriangleClosed(nodeIndex: Int) -> Bool {
+        return getIndentationTriangleAtNode(nodeIndex: nodeIndex).label.hasSuffix(" closed")
+    }
+    
+    func doesTextNodeHaveDisclosureTriangle(nodeIndex: Int) -> Bool {
+        return getIndentationTriangleAtNode(nodeIndex: nodeIndex).exists
+    }
+    
+    func getNumberOfDisclosureTriangles() -> Int {
+        return app.disclosureTriangles.matching(identifier: CardViewLocators.DisclosureTriangles.indentationArrow.accessibilityIdentifier).count
+    }
+    
     /*Deprecated 
     func openEditorOptions() {
         image(CardViewLocators.Buttons.editorOptions.accessibilityIdentifier).click()
@@ -275,23 +295,6 @@ class CardTestView: BaseView {
     func getLinksCounterElement() -> XCUIElement {
         _ = otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
-    }
-    
-    @discardableResult
-    func clickDisclosureTriangleByIndex(_ index: Int = 0) -> CardTestView {
-        let element = getDisclosureTriangles().element(boundBy: index)
-        element.tapInTheMiddle()
-        return self
-    }
-    
-    func getDisclosureTriangles() -> XCUIElementQuery {
-        return app.disclosureTriangles
-            .matching(identifier: AllCardsViewLocators.Others.disclosureTriangle.accessibilityIdentifier)
-            .matching(NSPredicate(format: PredicateFormat.isHittable.rawValue))
-    }
-    
-    func getCountOfDisclosureTriangles() -> Int {
-        return self.getDisclosureTriangles().count
     }
     
     @discardableResult

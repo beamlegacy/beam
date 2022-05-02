@@ -146,4 +146,114 @@ class NoteEditorTests: BaseTest {
             XCTAssertEqual(WebTestView().getNumberOfTabs(), 2)
         }
     }
+    
+    func testTextNodeIndentationLevels() {
+        launchAppAndOpenFirstCard()
+        
+        step("Given I create indentation levels") {
+            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
+            cardTestView.typeKeyboardKey(.return)
+            cardTestView.typeKeyboardKey(.tab)
+            
+            cardTestView.app.typeText("row2")
+            cardTestView.typeKeyboardKey(.return)
+            
+            cardTestView.app.typeText("row3")
+            cardTestView.typeKeyboardKey(.return)
+            cardTestView.typeKeyboardKey(.tab)
+            
+            cardTestView.app.typeText("row4")
+            cardTestView.typeKeyboardKey(.return)
+            
+            cardTestView.app.typeText("row5")
+            cardTestView.typeKeyboardKey(.tab)
+            cardTestView.typeKeyboardKey(.return)
+            
+            cardTestView.app.typeText("row6")
+        }
+        
+        step("Then there are 3 indentation disclosure triangles appeared for row 1, 3 and 4") {
+            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 3)
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 2))
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 3))
+        }
+        
+        step("When I unindent row5 2 times") {
+            cardTestView.typeKeyboardKey(.upArrow)
+            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+        }
+        
+        step("Then row5 and row6 positions are swapped") {
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(4), "row6")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(5), "row5")
+        }
+        
+        step("When I close row3") {
+            cardTestView.getIndentationTriangleAtNode(nodeIndex: 2).tapInTheMiddle()
+        }
+        
+        step("Then the number of disclosure tirangles is 2 available for row 1 and 3, rows 4 and 5 are hidden") {
+            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 2)
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(cardTestView.isIndentationTriangleClosed(nodeIndex: 2))
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), "row1")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), "row2")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), "row3")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(3), "row5")
+        }
+        
+        step("When I indent row5") {
+            cardTestView.typeKeyboardKey(.tab)
+        }
+        
+        step("Then number of disclosure tirangles is 3") {
+            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 3)
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 2))
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 3))
+        }
+        
+        step("When I unindent row5 and close row1") {
+            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            cardTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
+        }
+        
+        step("Then number of disclosure tirangles is 1 available for row 1") {
+            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 1)
+            XCTAssertTrue(cardTestView.isIndentationTriangleClosed(nodeIndex: 0))
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), "row5")
+        }
+        
+        step("When I open row1 and close row4") {
+            cardTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
+            cardTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
+        }
+        
+        step("Then number of disclosure tirangles is 2 available for row 3") {
+            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 3)
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 2))
+            XCTAssertTrue(cardTestView.isIndentationTriangleClosed(nodeIndex: 3))
+        }
+        
+        step("When I unindent row4 and row6") {
+            cardTestView.getTextNodeByIndex(nodeIndex: 3).tapInTheMiddle()
+            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            cardTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
+            cardTestView.getTextNodeByIndex(nodeIndex: 4).tapInTheMiddle()
+            ShortcutsHelper().shortcutActionInvoke(action: .unindent) 
+        }
+        
+        step("Then number of disclosure tirangles is 1 available for row 1 and all rows are visible") {
+            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 1)
+            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), "row1")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), "row2")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), "row3")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(3), "row4")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(4), "row6")
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(5), "row5")
+        }
+    }
 }
