@@ -132,7 +132,14 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] {
         return db.getLinks(matchingUrl: url)
     }
-
+    public func getLinks(for ids: [UUID]) -> [UUID: Link] {
+        do {
+            return try db.getLinks(ids: ids)
+        } catch {
+            Logger.shared.logError("Couldn't get links: \(error)", category: .linkDB)
+            return [UUID: Link]()
+        }
+    }
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
         guard url != Link.missing.url else { return Link.missing.id }
         let normalizedUrl = normalized(url: url)

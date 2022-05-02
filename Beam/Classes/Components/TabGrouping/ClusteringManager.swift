@@ -355,7 +355,7 @@ class ClusteringManager: ObservableObject {
             }
         }
     }
-    
+
     func cleanTextFrom(note: BeamNote) -> [String] {
         var fullText = [note.title] + note.allTexts.map { $0.1.text }
         guard let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return fullText }

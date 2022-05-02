@@ -42,14 +42,17 @@ class GRDBDailyUrlScoreStore: DailyUrlScoreStoreProtocol {
     }
 
     func getHighScoredUrlIds(daysAgo: Int = 1, topN: Int = 5) -> [DailyURLScore] {
-        let now = BeamDate.now
-        let cal = Calendar(identifier: .iso8601)
-        guard let day = cal.date(byAdding: DateComponents(day: -daysAgo), to: now)?.localDayString() else { return [] }
-        let scores = db.getDailyUrlScores(day: day)
+        let scores = getScores(daysAgo: daysAgo).values
         let filtered = scores.filter { score in
             !(score.isPinned || score.urlId == Link.missing.id)
         }
         let sorted = filtered.sorted { (leftScore, rightScore) in leftScore.score > rightScore.score }
         return Array(sorted.prefix(topN))
+    }
+    func getScores(daysAgo: Int = 1) -> [UUID: DailyURLScore] {
+        let now = BeamDate.now
+        let cal = Calendar(identifier: .iso8601)
+        guard let day = cal.date(byAdding: DateComponents(day: -daysAgo), to: now)?.localDayString() else { return [:] }
+        return db.getDailyUrlScores(day: day)
     }
 }
