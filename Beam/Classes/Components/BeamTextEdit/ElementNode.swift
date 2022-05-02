@@ -91,7 +91,7 @@ public class ElementNode: Widget {
     override var allowSelection: Bool {
         return self.elementKind != .dailySummary
     }
-    
+
     var parentIsSelectedAndClosed: Bool {
         if let open = self.parent?.open, let selected = self.parent?.selected, !open && selected {
             return true

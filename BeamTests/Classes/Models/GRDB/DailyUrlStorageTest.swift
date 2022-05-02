@@ -30,12 +30,14 @@ class DailyUrlStorageTest: XCTestCase {
         }
         var records0 = db.getDailyUrlScores(day: day0)
         XCTAssertEqual(records0.count, 1)
-        XCTAssertEqual(records0[0].readingTimeToLastEvent, 10)
-        XCTAssertFalse(records0[0].isPinned)
+        var record = try XCTUnwrap(records0[id])
+        XCTAssertEqual(record.readingTimeToLastEvent, 10)
+        XCTAssertFalse(record.isPinned)
         var records1 = db.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
-        XCTAssertEqual(records1[0].scrollRatioY, 0.5)
-        XCTAssert(records1[0].isPinned)
+        record = try XCTUnwrap(records1[id])
+        XCTAssertEqual(record.scrollRatioY, 0.5)
+        XCTAssert(record.isPinned)
         try db.clearDailyUrlScores(toDay: "2020-01-01")
 
         //clearing records older than 1 day
