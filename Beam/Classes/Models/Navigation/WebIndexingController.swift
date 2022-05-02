@@ -36,8 +36,8 @@ class WebIndexingController {
 
             DispatchQueue.main.async { [weak self] in
                 guard let self = self else { return }
-                signpost.begin("indexTab")
-                defer { signpost.end("indexTab") }
+                self.signpost.begin("indexTab")
+                defer { self.signpost.end("indexTab") }
 
                 var currentId: UUID?
                 var parentId: UUID?

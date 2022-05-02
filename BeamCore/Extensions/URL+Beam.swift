@@ -168,7 +168,7 @@ public extension URL {
         components.path = pathParts.count == 0 ? "/" : "/\(pathParts[0])"
         return components.url
     }
-    
+
     var isSearchEngineResultPage: Bool {
         guard let components = URLComponents(url: self, resolvingAgainstBaseURL: false),
               let host = components.host,
@@ -179,5 +179,10 @@ public extension URL {
         if host.contains("ecosia"), path == "/search" { return true }
         if host.contains("duckduckgo"), path == "/", query.starts(with: "q=") { return true }
         return false
+    }
+    var fragmentRemoved: URL? {
+        guard var components = URLComponents(url: self, resolvingAgainstBaseURL: false) else { return nil }
+        components.fragment = nil
+        return components.url
     }
 }

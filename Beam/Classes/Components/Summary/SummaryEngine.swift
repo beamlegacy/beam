@@ -30,12 +30,12 @@ class SummaryEngine {
             }
         }
 
-        let urlScores = GRDBDailyUrlScoreStore().getHighScoredUrlIds(daysAgo: 1, topN: 2)
+        let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(daysAgo: 1, topN: 2)
         guard !urlScores.isEmpty else { return hasNotes ? element : nil }
         var siteToContinueText: [BeamText] = []
         for urlScore in urlScores {
-            guard let link = LinkStore.linkFor(urlScore.urlId), let title = link.title else { continue }
-            siteToContinueText.append(BeamText(text: title, attributes: [.link(link.url)]))
+            guard let title = urlScore.title else { continue }
+            siteToContinueText.append(BeamText(text: title, attributes: [.link(urlScore.url.absoluteString)]))
         }
         guard let joinedText = joined(sources: siteToContinueText, with: ", ") else { return element }
         element.text.append(summarySeparator(" and "))
@@ -78,7 +78,7 @@ class SummaryEngine {
             }
         }
 
-        let urlScores = GRDBDailyUrlScoreStore().getHighScoredUrlIds(daysAgo: 0, topN: 2)
+        let urlScores = DailyUrlScorer(store: GRDBDailyUrlScoreStore()).getHighScoredUrls(daysAgo: 0, topN: 2)
         guard !urlScores.isEmpty,
               let spentTimeOnSiteText = buildSpentTimeOnSiteText(urlScores, isBeginningOfSentence: !(hasCreatedNotes || hasUpdatedNotes)) else { return element }
         if !hasCreatedNotes && !hasUpdatedNotes {
@@ -121,14 +121,14 @@ class SummaryEngine {
         return updatedNoteBaseText
     }
 
-    private static func buildSpentTimeOnSiteText(_ urlScores: [DailyURLScore], isBeginningOfSentence: Bool) -> BeamText? {
+    private static func buildSpentTimeOnSiteText(_ urlScores: [ScoredURL], isBeginningOfSentence: Bool) -> BeamText? {
         guard !urlScores.isEmpty else { return nil }
         let baseText = "spent time on "
         var spentTimeOnSiteBaseText = BeamText(isBeginningOfSentence ? baseText.capitalizeFirstChar() : baseText, attributes: [BeamText.Attribute.decorated(summaryDecoratedValue)])
         var spentTimeOnSiteText: [BeamText] = []
         for urlScore in urlScores {
-            guard let link = LinkStore.linkFor(urlScore.urlId), let title = link.title else { continue }
-            spentTimeOnSiteText.append(BeamText(text: title, attributes: [.link(link.url)]))
+            guard let title = urlScore.title else { continue }
+            spentTimeOnSiteText.append(BeamText(text: title, attributes: [.link(urlScore.url.absoluteString)]))
         }
 
         guard let joinedText = joined(sources: spentTimeOnSiteText, with: " and ") else { return nil }
