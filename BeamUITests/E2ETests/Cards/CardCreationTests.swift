@@ -86,7 +86,7 @@ class CardCreationTests: BaseTest {
         step("Then Journal has no mentions for created note"){
             ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
             journalView.waitForJournalViewToLoad()
-            XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 1)
+            XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 2)
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), emptyString )
         }
 
