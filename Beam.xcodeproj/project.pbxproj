@@ -1100,7 +1100,6 @@
 		A5E00B5327EB5AB200474360 /* AutocompleteSortingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E00B5227EB5AB200474360 /* AutocompleteSortingTests.swift */; };
 		A5E00B5527EB65E000474360 /* AutocompleteResultTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E00B5427EB65E000474360 /* AutocompleteResultTests.swift */; };
 		A5E04DEB263BEDA600BFB4C1 /* BrowserTabsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */; };
-		A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */; };
 		A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */; };
 		A5E3F16326F1ECBE007B1CAB /* String+RangesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */; };
 		A5E408C527F4591F00641413 /* AutocompleteManager+Mocks.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */; };
@@ -2869,7 +2868,6 @@
 		A5E00B5227EB5AB200474360 /* AutocompleteSortingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutocompleteSortingTests.swift; sourceTree = "<group>"; };
 		A5E00B5427EB65E000474360 /* AutocompleteResultTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutocompleteResultTests.swift; sourceTree = "<group>"; };
 		A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsManager.swift; sourceTree = "<group>"; };
-		A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabUITests.swift; sourceTree = "<group>"; };
 		A5E293892746C6C300638ABA /* FlippedGeometryHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlippedGeometryHelper.swift; sourceTree = "<group>"; };
 		A5E3F16226F1ECBE007B1CAB /* String+RangesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RangesTests.swift"; sourceTree = "<group>"; };
 		A5E408C427F4591F00641413 /* AutocompleteManager+Mocks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+Mocks.swift"; sourceTree = "<group>"; };
@@ -6270,7 +6268,6 @@
 				B57A9B2826AB0642002C954D /* Base */,
 				52DF49A425E420FB009A651E /* Helpers */,
 				965A784E2514F149009980D4 /* Info.plist */,
-				A5E112E826BA94E800BAD335 /* BrowserTabUITests.swift */,
 			);
 			path = BeamUITests;
 			sourceTree = "<group>";
@@ -9126,7 +9123,6 @@
 				B551F3C526BD10AD00B72D27 /* AppWebsiteTestView.swift in Sources */,
 				A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */,
 				B5EB9A6A26C25FB8004C798A /* OmniboxDestinationTests.swift in Sources */,
-				A5E112E926BA94E800BAD335 /* BrowserTabUITests.swift in Sources */,
 				52FC002425E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
 				A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */,
 				A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */,
