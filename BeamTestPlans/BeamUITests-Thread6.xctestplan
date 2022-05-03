@@ -18,6 +18,7 @@
         "AllCardsDeleteTests",
         "BaseTest",
         "BrowserFancyUrlTests",
+        "BrowserHistoryTests",
         "BrowserShortcutsTests",
         "BrowserStatusBarTests",
         "BrowserTabViewTests",
