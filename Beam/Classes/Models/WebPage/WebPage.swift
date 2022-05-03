@@ -53,7 +53,7 @@ protocol WebPage: AnyObject, Scorable {
     // MARK: Tab handling
     func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage?
     func createNewWindow(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView
-    func closeTab()
+    func tabWillClose()
 
     func collectTab()
     /**
@@ -122,7 +122,7 @@ extension WebPage {
         nil
     }
 
-    func closeTab() {
+    func tabWillClose() {
         self.authenticationViewModel?.cancel()
     }
 
