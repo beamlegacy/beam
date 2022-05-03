@@ -92,9 +92,14 @@ class AllNotesPageContextualMenu {
             action: #selector(backupImport),
             keyEquivalent: ""
         ))
-        let importItem = NSMenuItem(
+        importMenu.addItem(NSMenuItem(
             title: "JSON...",
             action: #selector(importFromJSON),
+            keyEquivalent: ""
+        ))
+        let importItem = NSMenuItem(
+            title: "Import",
+            action: nil,
             keyEquivalent: ""
         )
         menu.addItem(importItem)
