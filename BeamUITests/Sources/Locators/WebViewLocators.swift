@@ -13,6 +13,8 @@ enum WebViewLocators {
         case closeTabButton = "tabs-close_xs"
         case destinationCard = "DestinationNoteTitle"
         case goToJournalButton = "journal"
+        case goBackButton = "goBack"
+        case goForwardButton = "goForward"
     }
     
     enum SearchFields: String, CaseIterable, UIElement {

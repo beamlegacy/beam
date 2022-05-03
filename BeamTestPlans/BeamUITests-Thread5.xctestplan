@@ -31,6 +31,7 @@
         "BaseTest",
         "BlockReferenceTests",
         "BrowserFancyUrlTests",
+        "BrowserHistoryTests",
         "BrowserOpenModalTests",
         "BrowserShortcutsTests",
         "BrowserStatusBarTests",
