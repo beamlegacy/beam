@@ -17,4 +17,14 @@ class GoMenu: BaseMenuBar {
         menuItem("Change Note").click()
     }
     
+    func goBack() {
+        menuBarItem(menuBarTitle).click()
+        menuItem("Back").click()
+    }
+    
+    func goForward() {
+        menuBarItem(menuBarTitle).click()
+        menuItem("Forward").click()
+    }
+    
 }

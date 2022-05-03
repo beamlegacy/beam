@@ -92,6 +92,10 @@ class ShortcutsHelper {
         case removeLastWord
         case removeEntireLine
         case unindent
+        case browserHistoryForwardArrow
+        case browserHistoryBackArrow
+        case browserHistoryForward
+        case browserHistoryBack
     }
     
     @discardableResult
@@ -146,6 +150,10 @@ class ShortcutsHelper {
         case .removeLastWord: invokeOptionKey(.delete)
         case .removeEntireLine: invokeCMDKey(.delete)
         case .unindent: invokeShiftKey(.tab)
+        case .browserHistoryForwardArrow: invokeCMDKey(.rightArrow)
+        case .browserHistoryBackArrow: invokeCMDKey(.leftArrow)
+        case .browserHistoryForward: invokeCMDKey("]")
+        case .browserHistoryBack: invokeCMDKey("[")
         }
         return BaseView()
     }

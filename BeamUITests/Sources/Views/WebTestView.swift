@@ -207,5 +207,19 @@ class WebTestView: BaseView {
     func getCurrentPDFZoomRatio() -> String {
         return getElementStringValue(element: staticText(WebViewLocators.PDFElements.zoomRatio.accessibilityIdentifier))
     }
+    
+    func browseHistoryForwardButtonClick() -> WebTestView {
+        button(WebViewLocators.Buttons.goForwardButton.accessibilityIdentifier).tapInTheMiddle()
+        return WebTestView()
+    }
+    
+    func browseHistoryBackButtonClick() -> WebTestView {
+        button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).tapInTheMiddle()
+        return WebTestView()
+    }
+    
+    func activateAndWaitForSearchFieldToEqual(_ expectedUrl: String, tabIndex: Int = 0) -> Bool {
+        return self.activateSearchFieldFromTab(index:tabIndex).waitForSearchFieldValueToEqual(expectedValue: expectedUrl)
+    }
 
 }

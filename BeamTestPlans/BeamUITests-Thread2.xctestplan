@@ -29,6 +29,7 @@
         "AllCardsViewTests",
         "BaseTest",
         "BlockReferenceTests",
+        "BrowserHistoryTests",
         "BrowserOpenModalTests",
         "BrowserShortcutsTests",
         "BrowserStatusBarTests",
