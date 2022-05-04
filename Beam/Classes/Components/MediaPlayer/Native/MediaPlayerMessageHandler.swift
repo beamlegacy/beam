@@ -25,12 +25,13 @@ class MediaPlayerMessageHandler: SimpleBeamMessageHandler {
         case MediaPlayerMessages.MediaPlayer_media_playing_changed:
             guard var controller = webPage.mediaPlayerController,
                   let msgPayload = msgPayload,
-                  let playing = msgPayload["playing"] as? Bool,
+                  let playStateString = msgPayload["playState"] as? String,
+                  let playState = MediaPlayState(rawValue: playStateString),
                   let muted = msgPayload["muted"] as? Bool,
                   let pipSupported = msgPayload["pipSupported"] as? Bool,
                   let isInPip = msgPayload["isInPip"] as? Bool
             else { return }
-            controller.isPlaying = playing
+            controller.playState = playState
             controller.isMuted = muted
             controller.isPiPSupported = pipSupported
             controller.isInPiP = isInPip
