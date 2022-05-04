@@ -94,6 +94,19 @@ class DocumentManagerNetworkTests: QuickSpec {
                 }
             }
 
+            context("with async") {
+                asyncIt("uploads existing documents") {
+                    let networkCalls = APIRequest.callsCount
+
+                    let result = try await sut.saveAllOnAPI()
+                    expect(result).to(beTrue())
+                    expect(APIRequest.callsCount - networkCalls) == 1
+
+                    let remoteStruct = helper.fetchOnAPI(docStruct)
+                    expect(remoteStruct) == docStruct
+                }
+            }
+
             context("with Promises") {
                 it("uploads existing documents") {
                     let networkCalls = APIRequest.callsCount
@@ -148,6 +161,21 @@ class DocumentManagerNetworkTests: QuickSpec {
                     expect(APIRequest.callsCount - networkCalls) == 1
                 }
             }
+
+            context("with async") {
+                asyncIt("refreshes the local document") {
+                    let networkCalls = APIRequest.callsCount
+
+                    do {
+                        let result = try await sut.fetchAllOnApi()
+                        expect(result).to(beTrue())
+                    } catch {
+                        fail("Should not happen")
+                    }
+                    expect(APIRequest.callsCount - networkCalls) == 1
+                }
+            }
+
         }
 
         describe(".refresh()") {
@@ -181,6 +209,22 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 expect { try result.get() } == false
                                 done()
                             }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 1
+                    }
+                }
+
+                context("with async") {
+                    asyncIt("doesn't refresh the local document") {
+                        expect(AuthenticationManager.shared.isAuthenticated) == true
+                        expect(Configuration.networkEnabled) == true
+
+                        do {
+                            let result = try await sut.refresh(docStruct)
+                            expect(result).to(beFalse())
+                        } catch {
+                            fail("Should not happen")
                         }
 
                         expect(APIRequest.callsCount - networkCalls) == 1
@@ -274,6 +318,53 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(cdDocStruct.data) == newRemote.asData
                         }
                     }
+
+                    context("with async") {
+                        asyncIt("refreshes the local document") {
+                            // 1st: making sure the local data is `ancestor`
+                            guard let savedDocStruct = sut.loadById(id: docStruct.id, includeDeleted: false) else {
+                                fail("No coredata instance")
+                                return
+                            }
+
+                            expect(savedDocStruct.data) == ancestor.asData
+
+                            guard let cdDocStruct = try? sut.fetchWithId(docStruct.id, includeDeleted: false) else {
+                                fail("No coredata instance")
+                                return
+                            }
+                            //
+
+                            expect(cdDocStruct.data) == ancestor.asData
+                            sut.context.refresh(cdDocStruct, mergeChanges: false)
+                            expect(cdDocStruct.data) == ancestor.asData
+
+                            do {
+                                _ = try await sut.refresh(docStruct)
+                            } catch {
+                                fail("Should not happen")
+                            }
+
+                            expect(APIRequest.callsCount - networkCalls) == 2
+
+                            // 2nd: making sure the local data is `newRemote`
+                            guard let savedDocStruct = sut.loadById(id: docStruct.id, includeDeleted: false) else {
+                                fail("No coredata instance")
+                                return
+                            }
+
+                            expect(savedDocStruct.data) == newRemote.asData
+
+                            guard let cdDocStruct = try? sut.fetchWithId(docStruct.id, includeDeleted: false) else {
+                                fail("No coredata instance")
+                                return
+                            }
+
+                            expect(cdDocStruct.data) == newRemote.asData
+                            sut.context.refresh(cdDocStruct, mergeChanges: false)
+                            expect(cdDocStruct.data) == newRemote.asData
+                        }
+                    }
                 }
 
                 context("with conflict") {
@@ -343,6 +434,23 @@ class DocumentManagerNetworkTests: QuickSpec {
                             expect(try? newDocStruct?.textDescription()) == merged
                         }
                     }
+
+                    context("with async") {
+                        asyncIt("refreshes the local document") {
+                            let networkCalls = APIRequest.callsCount
+
+                            do {
+                                _ = try await sut.refresh(docStruct)
+                            } catch {
+                                fail("Should not happen")
+                            }
+
+                            expect([2, 5]).to(contain(APIRequest.callsCount - networkCalls))
+
+                            let newDocStruct = sut.loadById(id: docStruct.id, includeDeleted: false)
+                            expect(try? newDocStruct?.textDescription()) == merged
+                        }
+                    }
                 }
             }
 
@@ -359,6 +467,26 @@ class DocumentManagerNetworkTests: QuickSpec {
                                 expect { try result.get() } == false
                                 done()
                             }
+                        }
+
+                        expect(APIRequest.callsCount - networkCalls) == 1
+
+                        let newDocStruct = sut.loadById(id: docStruct.id, includeDeleted: false)
+                        expect(newDocStruct).toNot(beNil())
+
+                        // TODO: should a refresh returning false (no object on the API side) set the local object
+                        // as deleted?
+                        expect(newDocStruct?.deletedAt).to(beNil())
+                    }
+                }
+
+                context("with async") {
+                    asyncIt("doesn't refresh the local document") {
+                        do {
+                            let result = try await sut.refresh(docStruct)
+                            expect(result).to(beFalse())
+                        } catch {
+                            fail("Should not happen")
                         }
 
                         expect(APIRequest.callsCount - networkCalls) == 1
@@ -583,6 +711,21 @@ class DocumentManagerNetworkTests: QuickSpec {
                         expect(remoteObject) == docStruct
                     }
                 }
+
+                context("async") {
+                    asyncIt("saves as beamObject") {
+                        do {
+                            let result = try await sut.saveOnBeamObjectAPI(docStruct)
+                            expect(result).to(equal(docStruct))
+                        } catch {
+                            fail(error.localizedDescription)
+                        }
+
+                        let remoteObject: DocumentStruct? = try? beamObjectHelper.fetchOnAPI(docStruct)
+                        expect(remoteObject) == docStruct
+                    }
+                }
+
                 context("Promises") {
                     it("saves as beamObject") {
                         let promise: Promises.Promise<DocumentStruct> = sut.saveOnBeamObjectAPI(docStruct)
