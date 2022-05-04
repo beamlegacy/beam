@@ -352,7 +352,7 @@ import Promises
         guard let url = url else { favIcon = nil; return }
         updateFavIconDispatchItem?.cancel()
         let dispatchItem = DispatchWorkItem { [weak self] in
-            guard !fromWebView || cacheOnly || self?.webView != nil else { return }
+            guard !fromWebView || cacheOnly || (self?.webView != nil && self?.isLoading != true) else { return }
             FaviconProvider.shared.favicon(fromURL: url, webView: fromWebView ? self?.webView : nil, cacheOnly: cacheOnly) { [weak self] (favicon) in
                 guard let self = self else { return }
                 guard let image = favicon?.image else {
@@ -510,7 +510,8 @@ import Promises
 
         lastViewDate = BeamDate.now
         browsingTree.startReading()
-        guard !isLoading && url != nil && state?.omniboxInfo.isFocused != true && pointAndShoot?.activeShootGroup == nil else { return }
+        guard !isLoading && url != nil &&
+                state?.omniboxInfo.isFocused != true && pointAndShoot?.activeShootGroup == nil else { return }
         // bring back the focus to where it was
         refocusDispatchItem?.cancel()
         let workItem = DispatchWorkItem { [weak self] in
@@ -524,7 +525,7 @@ import Promises
 
     func makeFirstResponder() {
         webView.window?.makeFirstResponder(webView)
-        guard !isLoading else { return }
+        guard !isLoading && contentDescription != nil else { return }
         webView.page?.executeJS("refocusLastElement()", objectName: "WebViewFocus")
     }
 
