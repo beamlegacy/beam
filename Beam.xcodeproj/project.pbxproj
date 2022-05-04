@@ -54,11 +54,17 @@
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
 		0564F51327E8BC6600F969CA /* JJLISO8601DateFormatter in Frameworks */ = {isa = PBXBuildFile; productRef = 0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */; };
 		056F9BD427F3701600302709 /* paginated_beam_objects_with_import_error.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */; };
+		0570082928166F53007CD5F4 /* BeamObjectRequest+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0570082828166F53007CD5F4 /* BeamObjectRequest+async.swift */; };
+		0570083028166FC1007CD5F4 /* APIRequest+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0570082F28166FC1007CD5F4 /* APIRequest+async.swift */; };
 		05A3D59E27DF970A004CC7F1 /* account_exists.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05A3D59D27DF970A004CC7F1 /* account_exists.graphql */; };
 		05BE537127F2F9AD00399DA7 /* paginated_beam_objects_with_import_missing.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */; };
 		05C105C527EDE5FA007226CA /* paginated_beam_objects_data_url.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */; };
 		05C105C727EDEFC9007226CA /* paginated_beam_object_checksums.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */; };
 		05D4A7D927DBAF1B00CA1310 /* Date+iso8601millisecondsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */; };
+		05ED7D36281AD39B00F5316A /* BeamObjectManager+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05ED7D30281AD39A00F5316A /* BeamObjectManager+async.swift */; };
+		05EE1CC52818459400B174BB /* Quick+AsyncAwait.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EE1CC42818459300B174BB /* Quick+AsyncAwait.swift */; };
+		05EE43AE281BCC440032292D /* BeamObjectManagerProtocol+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EE43AD281BCC440032292D /* BeamObjectManagerProtocol+async.swift */; };
+		05EE43B5281BE57D0032292D /* DocumentManager+async.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05EE43B4281BE57D0032292D /* DocumentManager+async.swift */; };
 		0D15BE3F2681CEA40035F322 /* GRDBDatabase+Persistence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */; };
 		0D15BE432681DAC30035F322 /* BeamElementRecord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D15BE422681DAC30035F322 /* BeamElementRecord.swift */; };
 		0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */; };
@@ -1519,12 +1525,18 @@
 		051710E627EB5C4900E3C7A2 /* PaginatedBeamObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginatedBeamObjects.swift; sourceTree = "<group>"; };
 		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
 		056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_error.graphql; sourceTree = "<group>"; };
+		0570082828166F53007CD5F4 /* BeamObjectRequest+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+async.swift"; sourceTree = "<group>"; };
+		0570082F28166FC1007CD5F4 /* APIRequest+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "APIRequest+async.swift"; sourceTree = "<group>"; };
 		0572B83027DB21F30075533D /* Date+iso8601millisecondsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Date+iso8601millisecondsTests.swift"; sourceTree = "<group>"; };
 		0572B83727DB51E20075533D /* BeamJSONDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamJSONDecoder.swift; sourceTree = "<group>"; };
 		05A3D59D27DF970A004CC7F1 /* account_exists.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = account_exists.graphql; sourceTree = "<group>"; };
 		05BE536527F2D4F500399DA7 /* paginated_beam_objects_with_import_missing.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_missing.graphql; sourceTree = "<group>"; };
 		05C105C427EDE5FA007226CA /* paginated_beam_objects_data_url.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_data_url.graphql; sourceTree = "<group>"; };
 		05C105C627EDEFC9007226CA /* paginated_beam_object_checksums.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_object_checksums.graphql; sourceTree = "<group>"; };
+		05ED7D30281AD39A00F5316A /* BeamObjectManager+async.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "BeamObjectManager+async.swift"; sourceTree = "<group>"; };
+		05EE1CC42818459300B174BB /* Quick+AsyncAwait.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Quick+AsyncAwait.swift"; sourceTree = "<group>"; };
+		05EE43AD281BCC440032292D /* BeamObjectManagerProtocol+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectManagerProtocol+async.swift"; sourceTree = "<group>"; };
+		05EE43B4281BE57D0032292D /* DocumentManager+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DocumentManager+async.swift"; sourceTree = "<group>"; };
 		0D15BE3E2681CEA40035F322 /* GRDBDatabase+Persistence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "GRDBDatabase+Persistence.swift"; sourceTree = "<group>"; };
 		0D15BE422681DAC30035F322 /* BeamElementRecord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamElementRecord.swift; sourceTree = "<group>"; };
 		0D3DD8F22681CBA4009F2DF0 /* IndexDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IndexDocument.swift; sourceTree = "<group>"; };
@@ -3690,6 +3702,7 @@
 				418171642581107C00317ED8 /* APIRequest.swift */,
 				5232182127CE340800B753EF /* APIRequest+REST+Foundation.swift */,
 				529599F6272718CD00F3F843 /* APIRequest+Foundation.swift */,
+				0570082F28166FC1007CD5F4 /* APIRequest+async.swift */,
 				529599FA272718E300F3F843 /* APIRequest+Promises.swift */,
 				522969E126669016005067A6 /* APIWebSocketRequest.swift */,
 				529E1AD325D45CFA00DD25B8 /* APIRequestError.swift */,
@@ -4083,6 +4096,7 @@
 				525F932426E2392A00A5C7BD /* DocumentManager+BeamObjectManagerDelegate.swift */,
 				52019A6E26DE470A005E8278 /* DocumentManager+Foundation.swift */,
 				52019A7026DE4718005E8278 /* DocumentManager+Promises.swift */,
+				05EE43B4281BE57D0032292D /* DocumentManager+async.swift */,
 				5204FE3A25F128BD00FD22F8 /* DocumentStruct.swift */,
 				52C5A40826DFAB2D00CD559F /* DocumentStruct+Debug.swift */,
 				524CF6C925F2735D007312F0 /* EncryptionManager.swift */,
@@ -4361,12 +4375,14 @@
 			children = (
 				5224CD8B26860C0900D4179E /* BeamObjectManager.swift */,
 				52019A6226DE2CC9005E8278 /* BeamObjectManager+Foundation.swift */,
+				05ED7D30281AD39A00F5316A /* BeamObjectManager+async.swift */,
 				52019A6A26DE2F96005E8278 /* BeamObjectManager+Promises.swift */,
 				52019A6426DE2ECD005E8278 /* BeamObjectManager+Tests.swift */,
 				52019A6626DE2F65005E8278 /* BeamObjectManager+Websockets.swift */,
 				522BC3F426A872740018B51E /* BeamObjectManagerError.swift */,
 				522BC3E726A8724B0018B51E /* BeamObjectManagerProtocol.swift */,
 				52019A7826DE49C2005E8278 /* BeamObjectManagerProtocol+Foundation.swift */,
+				05EE43AD281BCC440032292D /* BeamObjectManagerProtocol+async.swift */,
 				52019A7C26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift */,
 				523060A727426D1400A03844 /* BeamObjectManagerCall.swift */,
 			);
@@ -4387,6 +4403,7 @@
 			children = (
 				5224CD812686043600D4179E /* BeamObjectRequest.swift */,
 				52019A5526DE2AB0005E8278 /* BeamObjectRequest+Foundation.swift */,
+				0570082828166F53007CD5F4 /* BeamObjectRequest+async.swift */,
 				52019A6026DE2ACB005E8278 /* BeamObjectRequest+Promises.swift */,
 			);
 			path = Requests;
@@ -4467,6 +4484,7 @@
 				529E1EE525D3EDA300F8B500 /* BeamTestsHelper.swift */,
 				A545D2FE25F7D92700E68F94 /* BeamTests-Bridging-Header.h */,
 				33AA4EB3270C3DC100B74868 /* ExtraAsserts.swift */,
+				05EE1CC42818459300B174BB /* Quick+AsyncAwait.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -8278,6 +8296,7 @@
 				87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */,
 				33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */,
 				A52B5017271D72FB0078670C /* PinnedBrowserTabsManager.swift in Sources */,
+				0570082928166F53007CD5F4 /* BeamObjectRequest+async.swift in Sources */,
 				3303E0EC26F8DC3F00E175AC /* PublicNote.swift in Sources */,
 				370794DB27D7AB0E00D2768B /* BrowserContentDescription.swift in Sources */,
 				521EEDF72593824100BA2485 /* AppDelegate+Document.swift in Sources */,
@@ -8313,6 +8332,7 @@
 				96988C8325BB0AF2000223A3 /* DestinationNotePicker.swift in Sources */,
 				A57BFEA12615B45C00CFB646 /* TableCellView.swift in Sources */,
 				A572629825FFADC5004416C0 /* MouseInteraction.swift in Sources */,
+				0570083028166FC1007CD5F4 /* APIRequest+async.swift in Sources */,
 				522D489D2719D1C00038DB81 /* LoggerNSWindow.swift in Sources */,
 				96E4CF72258E59F400D6DE22 /* BeamTextVisitor.swift in Sources */,
 				A5D6250A26034B1C00A3E676 /* FormatterViewBackground.swift in Sources */,
@@ -8697,6 +8717,7 @@
 				520088B82613265900AED835 /* Database.swift in Sources */,
 				338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */,
 				52019A7D26DE49D7005E8278 /* BeamObjectManagerProtocol+Promises.swift in Sources */,
+				05ED7D36281AD39B00F5316A /* BeamObjectManager+async.swift in Sources */,
 				A5C9F01126136B5F0096380F /* AllNotesPageContentView.swift in Sources */,
 				52A8698D26CBB3C000FCCC69 /* AppDelegate+ShowError.swift in Sources */,
 				52842D4E2715B3180099602C /* FilesWindow.swift in Sources */,
@@ -8787,6 +8808,7 @@
 				8A34EADC27C7AF750063DAF6 /* TransientWebViewWindow.swift in Sources */,
 				33353EDC26F36B4300063078 /* Shortcut.swift in Sources */,
 				A57BFEB92615B48300CFB646 /* CheckBoxTableCellView.swift in Sources */,
+				05EE43AE281BCC440032292D /* BeamObjectManagerProtocol+async.swift in Sources */,
 				A043B800265A547100E267E5 /* TabGroupingContentView.swift in Sources */,
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* ThirdPartyLibrariesManager.swift in Sources */,
@@ -8816,6 +8838,7 @@
 				521EEDE125937F5B00BA2485 /* DocumentsContentView.swift in Sources */,
 				A0C77A2226694D2300DCC85C /* AllowListModalView.swift in Sources */,
 				A523402E279DEDCE0027E339 /* ThirdPartyLibrariesManager+Sentry.swift in Sources */,
+				05EE43B5281BE57D0032292D /* DocumentManager+async.swift in Sources */,
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				52842D462715B2610099602C /* AppDelegate+File.swift in Sources */,
@@ -9102,6 +9125,7 @@
 				33AA4EB4270C3DC100B74868 /* ExtraAsserts.swift in Sources */,
 				A5E00B5327EB5AB200474360 /* AutocompleteSortingTests.swift in Sources */,
 				37C4131D278552A400954FD7 /* GoogleSearchTests.swift in Sources */,
+				05EE1CC52818459400B174BB /* Quick+AsyncAwait.swift in Sources */,
 				96E4CEF9258D7E8200D6DE22 /* BeamTextTests.swift in Sources */,
 				4E60970F26C554CD00F90260 /* SuggestedSourcesUpdaterTests.swift in Sources */,
 				9652A93526A6B27500F0590C /* FakeNoteGeneratorTests.swift in Sources */,
