@@ -129,6 +129,37 @@ class APIRequestTests: QuickSpec {
                     }
                 }
             }
+
+            context("with async") {
+                context("with good api hostname") {
+                    beforeEach {
+                        beamHelper.beginNetworkRecording()
+                    }
+                    asyncIt("sends a request") {
+                        let forgotPassword: ForgotPassword = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,authenticatedCall: false)
+                        expect(forgotPassword.success).to(beTrue())
+                    }
+                }
+
+                context("with wrong api hostname") {
+                    beforeEach {
+                        Configuration.apiHostname = "http://localhost2"
+                        beamHelper.disableNetworkRecording()
+                        BeamURLSession.shouldNotBeVinyled = true
+                    }
+                    afterEach {
+                        BeamURLSession.shouldNotBeVinyled = false
+                    }
+
+                   asyncIt("manages errors") {
+                        do {
+                            let _: ForgotPassword = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest,authenticatedCall: false)
+                        } catch {
+                            expect( (error as NSError).code) == NSURLErrorCannotFindHost
+                        }
+                   }
+                }
+            }
         }
 
         describe("with loaded fragments") {
@@ -238,6 +269,59 @@ class APIRequestTests: QuickSpec {
                                 expect(error).to(matchError(APIRequestError.parserError))
                             })
                             done()
+                        }
+                    }
+                }
+            }
+
+            context("with async") {
+                context("with good api hostname") {
+                    asyncIt("sends a request") {
+                        let userMe: UserMe = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest)
+                        expect(userMe).toNot(beNil())
+                    }
+                }
+
+                context("with missing fragment import graphql") {
+                    let bundle = Bundle(for: type(of: self))
+                    guard let filePath = bundle.path(forResource: "paginated_beam_objects_with_import_missing", ofType: "graphql") else {
+                        fail("Cannot find path for graphql file")
+                        return
+                    }
+                    let query = try! String(contentsOfFile: filePath)
+
+                    let bodyParamsRequest = GraphqlParameters(query: query, variables: variables)
+
+                    asyncIt("manages errors") {
+                        do {
+                            let _: UserMe = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest)
+                        } catch {
+                            switch error as! APIRequestError {
+                            case .apiRequestErrors(let errors):
+                                expect(errors[0].message).to(equal("Fragment pageInfo was used, but not defined"))
+                                break;
+                            default:
+                                fail("Wrong error: \(error)")
+                            }
+                        }
+                    }
+                }
+
+                context("with error import graphql") {
+                    let bundle = Bundle(for: type(of: self))
+                    guard let filePath = bundle.path(forResource: "paginated_beam_objects_with_import_error", ofType: "graphql") else {
+                        fail("Cannot find path for graphql file")
+                        return
+                    }
+                    let query = try! String(contentsOfFile: filePath)
+
+                    let bodyParamsRequest = GraphqlParameters(query: query, variables: variables)
+
+                    asyncIt("manages errors") {
+                        do {
+                            let _: UserMe = try await self.sut.performRequest(bodyParamsRequest: bodyParamsRequest)
+                        } catch {
+                            expect(error).to(matchError(APIRequestError.parserError))
                         }
                     }
                 }
