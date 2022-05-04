@@ -245,7 +245,6 @@ class HtmlNoteAdapterTests: XCTestCase {
     }
     
     func testYouTubevideo() throws {
-        try XCTSkipIf(true, "BE-2786 to wither fix a bug or fix the test")
         let html = """
         <video tabindex="-1" class="video-stream html5-main-video" controlslist="nodownload" style="width: 878px; height: 494px; left: 0px; top: 0px;" src="blob:https://www.youtube.com/269afa34-170e-476e-9528-11bddf201561"></video>
         """
@@ -253,11 +252,18 @@ class HtmlNoteAdapterTests: XCTestCase {
         let htmlNoteAdapter = self.setupTestMocks(urlString)
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
         htmlNoteAdapter.convert(html: html, completion: { (results: [BeamElement]) in
-            XCTAssertEqual(results.count, 1)
-            if let firstResult = results.first {
-                XCTAssertEqual(firstResult.kind, .bullet)
+            XCTAssertEqual(results.count, 1, "expected one result, recieved \(results) instead")
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertTrue(firstEl.kind.isEmbed, "expected kind to be embed, recieved \(firstEl.kind) instead")
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+                expectation.fulfill()
+            } else {
+                XCTFail("expected at least one element")
             }
-            expectation.fulfill()
         })
         wait(for: [expectation], timeout: 10.0)
     }
@@ -620,4 +626,55 @@ class HtmlNoteAdapterTests: XCTestCase {
         wait(for: [expectation], timeout: 10.0)
     }
 
+    func testTwitterHtml() {
+        let html = """
+        <a href="https://twitter.com/getonbeam/status/1512059116482670597">
+            https://twitter.com/getonbeam/status/1512059116482670597
+        </a>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://www.twitter.com")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 1, "expected one result, recieved \(results) instead")
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertTrue(firstEl.kind.isEmbed, "expected kind to be embed, recieved \(firstEl.kind) instead")
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+                expectation.fulfill()
+            } else {
+                XCTFail("expected at least one element")
+            }
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
+    func testRedditHtml() {
+        // Link to embeddable element containing an image
+        let html = """
+        <a href="https://www.reddit.com/r/MotivationalPics/comments/ud18lk/get_up_and_try/">
+            <img alt="Post image" class="_2_tDEnGMLxpM6uOa2kaDB3 ImageBox-image media-element _1XWObl-3b9tPy64oaG6fax" src="https://external-preview.redd.it/fz9RoZX4AMY1XcSaXJ7UjleSiSLxCCPVbicY1DaSC8w.jpg?auto=webp&amp;s=affc958af9879e10c655c85f534475702bb06a7e" style="max-height: 512px;">
+        </a>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://www.reddit.com")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 1, "expected one result, recieved \(results) instead")
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertTrue(firstEl.kind.isImage, "expected kind to be image, recieved \(firstEl.kind) instead")
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 1)
+                XCTAssertEqual(testFileStorage.events.count, 1)
+                expectation.fulfill()
+            } else {
+                XCTFail("expected at least one element")
+            }
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+    // TODO: test adding a plain embed?
 }
