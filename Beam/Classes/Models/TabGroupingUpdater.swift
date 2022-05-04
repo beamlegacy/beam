@@ -28,7 +28,10 @@ class TabClusteringGroup: Identifiable, Equatable, Codable {
 class TabGroupingUpdater {
     private let myQueue = DispatchQueue(label: "tabGroupingUpdaterQueue")
     var hueGenerator = DistributedRandomGenerator(range: 0.0..<1.0)
-
+    var hasPagesGroup: Bool {
+        return !builtPagesGroups.isEmpty
+    }
+    
     @Published private(set) var builtPagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
 
     func removeClosedPages(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]) -> [[ClusteringManager.PageID]] {

@@ -129,6 +129,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccountManager.logout()
         }
         #endif
+        
+        if Configuration.branchType == .develop {
+            self.autoAskTagGroupingFeedback()
+        }
 
         setupNetworkMonitor()
 
@@ -155,8 +159,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         openedPrefPanelOnce = true
     }
 
-    // MARK: - Network Monitor
+    // MARK: - TabGrouping Feedback
+    func autoAskTagGroupingFeedback() {
+        let now =  BeamDate.now
+        let cal = Calendar.current
+        guard let next = cal.date(byAdding: DateComponents(hour: 1), to: now) else { return }
+        let timer = Timer(fireAt: next, interval: 3600, target: self, selector: #selector(autoShowTabGroupingFeedbackWindow), userInfo: nil, repeats: true)
+        RunLoop.main.add(timer, forMode: .common)
+    }
 
+    @objc func autoShowTabGroupingFeedbackWindow() {
+        guard self.data.clusteringManager.tabGroupingUpdater.hasPagesGroup && windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
+        tabGroupingFeedbackWindow?.performClose(self)
+        tabGroupingFeedbackWindow = nil
+        showTabGroupingFeedbackWindow(self)
+    }
+
+    // MARK: - Network Monitor
     func setupNetworkMonitor() {
         networkMonitor.startListening()
         networkMonitor.networkStatusHandler.sink { [weak self] status in
@@ -588,7 +607,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var databasesWindow: DatabasesWindow?
     var tabGroupingWindow: TabGroupingWindow?
     var tabGroupingFeedbackWindow: TabGroupingFeedbackWindow?
-
     ///Should only be used to say that the full sync on quit is done
     ///Set to true to directly return .terminateNow in shouldTerminate
     var fullSyncOnQuitStatus: FullSyncOnQuitStatus = .notStarted
