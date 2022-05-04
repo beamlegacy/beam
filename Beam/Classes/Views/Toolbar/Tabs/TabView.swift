@@ -429,7 +429,7 @@ struct TabView_Previews: PreviewProvider {
     static var tabPlaying: BrowserTab = {
         let t = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .today, note: nil)
         t.title = "Playing Tab"
-        t.mediaPlayerController?.isPlaying = true
+        t.mediaPlayerController?.playState = .playing
         return t
     }()
     static var tabCopied: BrowserTab = {
