@@ -6,8 +6,15 @@ export class BeamSize {
   constructor(public width: number, public height: number) {}
 }
 
-export interface BeamMediaPlayState {
-  playing: boolean
+export enum MediaPlayState {
+  ready = "ready",
+  playing = "playing",
+  paused = "paused",
+  ended = "ended",
+}
+
+export interface BeamMediaState {
+  playState: MediaPlayState
   muted: boolean
   pipSupported: boolean
   isInPip: boolean

@@ -1,4 +1,4 @@
-import { BeamMediaPlayState } from "@beam/native-beamtypes"
+import { BeamMediaState } from "@beam/native-beamtypes"
 export interface MediaPlayerUI {
-  media_sendPlayStateChanged(state: BeamMediaPlayState): void
+  media_sendPlayStateChanged(state: BeamMediaState): void
 }

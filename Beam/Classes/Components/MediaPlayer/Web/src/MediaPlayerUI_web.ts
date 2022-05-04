@@ -41,7 +41,7 @@ export class MediaPlayerUI_web implements MediaPlayerUI {
     return instance
   }
 
-  media_sendPlayStateChanged(BeamMediaPlayState: any): void {
+  media_sendPlayStateChanged(BeamMediaState: any): void {
     throw new Error("Method not implemented.")
   }
 
