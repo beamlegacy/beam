@@ -66,6 +66,11 @@ class HtmlVisitor {
             switch element.tagName() {
             case "a":
                 let childElements: [BeamElement] = visitChildren(element)
+                // fallthrough when no child elements or no text
+                guard !childElements.isEmpty || element.hasText() else {
+                    fallthrough
+                }
+
                 let children = childElements.map({ child -> BeamElement in
                     // Trim whitespace from links
                     child.text = child.text.trimming(.whitespaces)
@@ -75,7 +80,13 @@ class HtmlVisitor {
                     }
                     let url: String = getUrl(href)
                     child.text.addAttributes([.link(url)], to: child.text.wholeRange)
-                    return convertElementToEmbed(child)
+
+                    // Only try to convert to embed if it's text content
+                    if child.kind.isText {
+                        return convertElementToEmbed(child)
+                    }
+
+                    return child
                 })
 
                 text.append(contentsOf: children)
@@ -195,7 +206,10 @@ class HtmlVisitor {
         } else {
             if let textNode = node as? SwiftSoup.TextNode {
                 let string = textNode.text().components(separatedBy: CharacterSet.controlCharacters).joined()
-                text.append(BeamElement(string))
+                // only append string if it's non empty
+                if !string.trimmingCharacters(in: .whitespaces).isEmpty {
+                    text.append(BeamElement(string))
+                }
             }
             let children: [BeamElement] = visitChildren(node)
             text.append(contentsOf: children)
