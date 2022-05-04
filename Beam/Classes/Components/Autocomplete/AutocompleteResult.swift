@@ -264,12 +264,13 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
     /// This is the main text to display.
     var displayText: String {
-        [.note, .createNote].contains(source) ? text :
-        (rawInfoPrefixScore > rawTextPrefixScore ? information ?? text : text)
+        [.note, .createNote, .searchEngine].contains(source) ? text :
+        (rawInfoPrefixScore > rawTextPrefixScore ? (information ?? text) : text)
     }
 
     /// This is the secondary text to display.
     var displayInformation: String? {
+        [.note, .createNote, .searchEngine].contains(source) ? information :
         rawInfoPrefixScore > rawTextPrefixScore ? text : information
     }
 
