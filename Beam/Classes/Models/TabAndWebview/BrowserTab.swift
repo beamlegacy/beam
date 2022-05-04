@@ -583,6 +583,7 @@ import Promises
         saveTree(grouped: true)
         sendTree(grouped: true)
     }
+
     func pin() {
         browsingTree.tabPin()
     }
