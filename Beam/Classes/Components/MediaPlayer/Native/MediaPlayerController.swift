@@ -7,11 +7,26 @@
 
 import Foundation
 
+enum MediaPlayState: String {
+    case ready
+    case playing
+    case paused
+    case ended
+}
+
 struct MediaPlayerController: WebPageRelated {
 
     private let JSObjectName = "MDPLR"
     weak var page: WebPage?
-    var isPlaying = false
+    var isPlaying: Bool {
+        switch playState {
+        case .playing, .paused:
+            return true
+        default:
+            return false
+        }
+    }
+    var playState: MediaPlayState?
     var isMuted = false
     var isPiPSupported = true
     var isInPiP = false

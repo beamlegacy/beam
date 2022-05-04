@@ -145,7 +145,8 @@ class CardViewEmbedsTests: BaseTest {
         }
        
         step("Then media button disappear"){
-            XCTAssertFalse(mediaPlayingButton.exists)
+            // Because we keep the webview alive when paused, we should still display the playing button
+            XCTAssertTrue(mediaPlayingButton.exists)
             XCTAssertFalse(mediaMutedButton.exists)
         }
 
