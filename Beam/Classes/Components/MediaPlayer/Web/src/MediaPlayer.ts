@@ -2,7 +2,8 @@ import {
   BeamElement,
   BeamLogCategory,
   BeamWebkitPresentationMode,
-  BeamWindow
+  BeamWindow,
+  MediaPlayState
 } from "@beam/native-beamtypes"
 import type { MediaPlayerUI as MediaPlayerUI } from "./MediaPlayerUI"
 import { BeamLogger } from "@beam/native-utils"
@@ -45,22 +46,64 @@ export class MediaPlayer<UI extends MediaPlayerUI> {
           const tag = tags[i]
           if (tag.addEventListener) {
               tag.addEventListener("playing", this.media_onPlaying.bind(this))
-              tag.addEventListener("pause", this.media_onStopPlaying.bind(this))
+              tag.addEventListener("pause", this.media_onPausePlaying.bind(this))
               tag.addEventListener("ended", this.media_onStopPlaying.bind(this))
           }
       }
   }
 
-  media_isAnyMediaPlaying() {
-      const tags = this.media_htmlMediaTags()
-      for (let i = 0; i < tags.length; i++) {
-          const tag = tags[i]
-          const isMutedByDefault = tag.muted && !this.media_isPageMuted
-          if (!tag.paused && !isMutedByDefault) {
-              return true
-          }
-      }
-      return false
+  /**
+   * Reduces all media element states into a single state.
+   *
+   * @return {*}  {MediaPlayState}
+   * @memberof MediaPlayer
+   */
+  getPlayStateFromAllTags(): MediaPlayState {
+    const tags = this.media_htmlMediaTags()
+    const states = []
+    for (let i = 0; i < tags.length; i++) {
+        states.push(this.getPlayStateFromTag(tags[i]))
+    }
+
+    if (states.includes(MediaPlayState.playing)) {
+      return MediaPlayState.playing
+    }
+
+    if (states.includes(MediaPlayState.paused)) {
+      return MediaPlayState.paused
+    }
+
+    if (states.includes(MediaPlayState.ended)) {
+      return MediaPlayState.ended
+    }
+
+    return MediaPlayState.ready
+  }
+
+  /**
+   * Returns playstate of html element
+   *
+   * @param {*} element
+   * @return {*}  {MediaPlayState}
+   * @memberof MediaPlayer
+   */
+  getPlayStateFromTag(element): MediaPlayState {
+    const {currentTime, paused, muted, ended} = element
+
+    if (ended) {
+      return MediaPlayState.ended
+    }
+
+    if (currentTime == 0 && paused) {
+      return MediaPlayState.ready
+    }
+
+    const isMutedByDefault = muted && !this.media_isPageMuted    
+    if (!paused && !isMutedByDefault) {
+      return MediaPlayState.playing
+    }
+    
+    return MediaPlayState.paused
   }
 
   media_toggleMute() {
@@ -102,18 +145,22 @@ export class MediaPlayer<UI extends MediaPlayerUI> {
       this.sendPlayState(event.target)
   }
 
+  media_onPausePlaying(event) {
+    this.sendPlayState(event.target)
+  }
+
   media_onStopPlaying(event) {
     this.sendPlayState(event.target)
   }
 
   sendPlayState(element: BeamElement) {
     const playState = {
-      playing: this.media_isAnyMediaPlaying(),
+      playState: this.getPlayStateFromAllTags(),
       muted: this.media_isPageMuted,
       "pipSupported": this.media_elemenSupportsPictureInPicture(element),
       "isInPip": this.media_elemenIsInPictureInPicture(element)
     }
-  this.ui.media_sendPlayStateChanged(playState)
+    this.ui.media_sendPlayStateChanged(playState)
   }
 
   toString(): string {

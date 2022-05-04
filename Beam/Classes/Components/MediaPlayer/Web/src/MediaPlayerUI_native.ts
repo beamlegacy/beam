@@ -1,7 +1,7 @@
 import { MediaPlayerUI } from "./MediaPlayerUI"
 import {
   BeamLogCategory,
-  BeamMediaPlayState,
+  BeamMediaState,
   BeamWindow,
   Native
 } from "@beam/native-beamtypes"
@@ -36,13 +36,13 @@ export class MediaPlayerUI_native implements MediaPlayerUI {
   }
 
   media_sendPlayStateChanged({
-    playing,
+    playState,
     muted,
     pipSupported,
     isInPip
-  }: BeamMediaPlayState): void {
+  }: BeamMediaState): void {
     this.native.sendMessage("media_playing_changed", {
-      playing,
+      playState,
       muted,
       pipSupported,
       isInPip
