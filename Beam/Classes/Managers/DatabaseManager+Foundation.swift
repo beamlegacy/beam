@@ -19,16 +19,16 @@ extension DatabaseManager {
                 }
 
                 let databaseStructs = databases.map { DatabaseStruct(database: $0) }
-                try self.saveOnBeamObjectsAPI(databaseStructs) { result in
-                    switch result {
-                    case .failure(let error):
-                        completion?(.failure(error))
-                    case .success(let savedDatabases):
+                Task {
+                    do {
+                        let savedDatabases = try await self.saveOnBeamObjectsAPI(databaseStructs)
                         guard savedDatabases.count == databases.count else {
                             completion?(.success(false))
                             return
                         }
                         completion?(.success(true))
+                    } catch {
+                        completion?(.failure(error))
                     }
                 }
             } catch {
@@ -43,17 +43,13 @@ extension DatabaseManager {
             return
         }
 
-        try self.fetchAllFromBeamObjectAPI { result in
-            switch result {
-            case .failure(let error):
+        Task {
+            do {
+                let databases = try await self.fetchAllFromBeamObjectAPI()
+                try self.receivedObjects(databases)
+                completion?(.success(true))
+            } catch {
                 completion?(.failure(error))
-            case .success(let databases):
-                do {
-                    try self.receivedObjects(databases)
-                    completion?(.success(true))
-                } catch {
-                    completion?(.failure(error))
-                }
             }
         }
     }
@@ -78,19 +74,14 @@ extension DatabaseManager {
             return
         }
 
-        do {
-            try self.deleteAllFromBeamObjectAPI { result in
-                switch result {
-                case .failure(let error):
-                    Logger.shared.logError(error.localizedDescription, category: .database)
-                    completion?(.failure(error))
-                case .success:
-                    completion?(.success(true))
-                }
+        Task {
+            do {
+                try await self.deleteAllFromBeamObjectAPI()
+                completion?(.success(true))
+            } catch {
+                Logger.shared.logError(error.localizedDescription, category: .database)
+                completion?(.failure(error))
             }
-        } catch {
-            Logger.shared.logError(error.localizedDescription, category: .database)
-            completion?(.failure(error))
         }
     }
 
@@ -152,7 +143,14 @@ extension DatabaseManager {
                     return
                 }
 
-                self.deleteWithBeamObjectAPI(database: databaseStruct, documents: documents, completion)
+                Task {
+                    do {
+                        try await self.deleteWithBeamObjectAPI(database: databaseStruct, documents: documents)
+                        completion(.success(true))
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .database)
                 completion(.failure(error))
@@ -162,52 +160,35 @@ extension DatabaseManager {
     }
 
     private func deleteWithBeamObjectAPI(database: DatabaseStruct,
-                                         documents: [DocumentStruct],
-                                         _ completion: @escaping ((Swift.Result<Bool, Error>) -> Void)) {
+                                         documents: [DocumentStruct]) async throws {
 
-        do {
+        var errors: [Error] = []
 
-            let group = DispatchGroup()
-            var errors: [Error] = []
-            let lock = DispatchSemaphore(value: 1)
-
-            // Delete database
-            group.enter()
-            try deleteFromBeamObjectAPI(object: database) { result in
-                switch result {
-                case .success: break
-                case .failure(let error):
-                    lock.wait()
-                    errors.append(error)
-                    lock.signal()
+        await withTaskGroup(of: Error?.self, body: { group in
+            group.addTask {
+                do {
+                    try await self.deleteFromBeamObjectAPI(object: database)
+                    return nil
+                } catch {
+                    return error
                 }
-                group.leave()
             }
-
-            let documentManager = DocumentManager()
-
-            group.enter()
-            try documentManager.deleteFromBeamObjectAPI(objects: documents) { result in
-                switch result {
-                case .success: break
-                case .failure(let error):
-                    lock.wait()
-                    errors.append(error)
-                    lock.signal()
+            group.addTask {
+                do {
+                    try await DocumentManager().deleteFromBeamObjectAPI(objects: documents)
+                    return nil
+                } catch {
+                    return error
                 }
-                group.leave()
             }
-
-            group.wait()
-
-            guard errors.isEmpty else {
-                completion(.failure(DatabaseManagerError.multipleErrors(errors)))
-                return
+            for await error in group {
+                if let error = error {
+                    errors += [error]
+                }
             }
-
-            completion(.success(true))
-        } catch {
-            completion(.failure(error))
+        })
+        guard errors.isEmpty else {
+            throw DatabaseManagerError.multipleErrors(errors)
         }
     }
 
@@ -224,29 +205,26 @@ extension DatabaseManager {
             throw APIRequestError.notAuthenticated
         }
 
-        try refreshFromBeamObjectAPI(databaseStruct, true) { result in
-            switch result {
-            case .failure(let error): completion?(.failure(error))
-            case .success(let remoteDatabaseStruct):
-                guard let remoteDatabaseStruct = remoteDatabaseStruct else {
-                    Logger.shared.logError("\(databaseStruct.title): Couldn't fetch the remote database",
-                                           category: .documentNetwork)
-                    completion?(.success(false))
-                    return
-                }
+        Task {
+            let remoteDatabaseStruct = try await refreshFromBeamObjectAPI(databaseStruct, true)
+            guard let remoteDatabaseStruct = remoteDatabaseStruct else {
+                Logger.shared.logError("\(databaseStruct.title): Couldn't fetch the remote database",
+                                       category: .documentNetwork)
+                completion?(.success(false))
+                return
+            }
 
-                // Saving the remote version locally
-                self.coreDataManager.persistentContainer.performBackgroundTask { context in
-                    let database = Database.rawFetchOrCreateWithId(context, databaseStruct.id)
+            // Saving the remote version locally
+            self.coreDataManager.persistentContainer.performBackgroundTask { context in
+                let database = Database.rawFetchOrCreateWithId(context, databaseStruct.id)
 
-                    do {
-                        database.update(remoteDatabaseStruct)
-                        let success = try Self.saveContext(context: context)
-                        completion?(.success(success))
-                    } catch {
-                        Logger.shared.logError("Error saving: \(error.localizedDescription)", category: .database)
-                        completion?(.failure(error))
-                    }
+                do {
+                    database.update(remoteDatabaseStruct)
+                    let success = try Self.saveContext(context: context)
+                    completion?(.success(success))
+                } catch {
+                    Logger.shared.logError("Error saving: \(error.localizedDescription)", category: .database)
+                    completion?(.failure(error))
                 }
             }
         }
@@ -360,16 +338,13 @@ extension DatabaseManager {
                     }
 
                     let updatedDatabaseStruct = DatabaseStruct(database: updatedDatabase)
-
-                    do {
-                        try self.saveOnBeamObjectAPI(updatedDatabaseStruct) { result in
-                            switch result {
-                            case .failure(let error): networkCompletion?(.failure(error))
-                            case .success: networkCompletion?(.success(true))
-                            }
+                    Task {
+                        do {
+                            _ = try await self.saveOnBeamObjectAPI(updatedDatabaseStruct)
+                            networkCompletion?(.success(true))
+                        } catch {
+                            networkCompletion?(.failure(error))
                         }
-                    } catch {
-                        networkCompletion?(.failure(error))
                     }
                 } else {
                     networkCompletion?(.failure(APIRequestError.notAuthenticated))
