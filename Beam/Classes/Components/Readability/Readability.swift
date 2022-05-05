@@ -5,11 +5,15 @@
 //  Created by Sebastien Metrot on 29/09/2020.
 //
 
-// swiftlint:disable file_length
 import Foundation
 import WebKit
 
 struct Readability: Codable, Equatable {
+    enum Error: Swift.Error {
+        case unknown
+        case javascript(Swift.Error)
+    }
+
     enum Direction: String, Codable {
         case ltr
         case rtl
@@ -24,9 +28,14 @@ struct Readability: Codable, Equatable {
     var excerpt: String = ""
     var byLine: String = ""
 
-    static func read(_ webView: WKWebView, _ getResults: @escaping (Result<Readability, Error>) -> Void) {
-        guard let readabilitySource = loadFile(from: "Readability", fileType: "js") else {
+    private static var readabilitySource: String?
+
+    static func read(_ webView: WKWebView, _ getResults: @escaping (Result<Readability?, Error>) -> Void) {
+        guard let readabilitySource = readabilitySource ?? loadFile(from: "Readability", fileType: "js") else {
             return
+        }
+        if Self.readabilitySource == nil {
+            Self.readabilitySource = readabilitySource
         }
 
         //let now= BeamDate.now
@@ -47,19 +56,22 @@ struct Readability: Codable, Equatable {
 
                 //let t1 = now.distance(to: BeamDate.now) - t0
                 //Logger.shared.logDebug("Extraction time: \(t0)s / indexing \(t1)s")
+            } else if res is NSNull {
+                // readability script sometimes doesn't find anything.
+                getResults(.success(nil))
             } else if let e = err {
-                getResults(.failure(e))
+                getResults(.failure(.javascript(e)))
+            } else {
+                getResults(.failure(.unknown))
             }
         }
     }
-}
 
-private func str(_ k: Any?) -> String {
-    return k as? String ?? ""
-}
+    private static func str(_ k: Any?) -> String {
+        k as? String ?? ""
+    }
 
-private func num(_ k: Any?) -> Int {
-    return k as? Int ?? 0
+    private static func num(_ k: Any?) -> Int {
+        k as? Int ?? 0
+    }
 }
-
-// swiftlint:enable file_length
