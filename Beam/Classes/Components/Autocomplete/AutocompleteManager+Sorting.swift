@@ -169,6 +169,8 @@ extension AutocompleteManager {
         let insertionIndex: Int
         if let lastPriority = finalResults.lastIndex(where: { $0.source > AutocompleteResult.Source.searchEngine }) {
             insertionIndex = lastPriority + 1
+        } else if let selectedIndex = autocompleteSelectedIndex {
+            insertionIndex = selectedIndex + 1
         } else {
             insertionIndex = 0
         }
