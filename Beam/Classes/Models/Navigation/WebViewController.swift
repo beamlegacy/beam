@@ -16,6 +16,7 @@ struct WebViewNavigationDescription {
     let isLinkActivation: Bool
     /// Last user requested URL, before any implicit redirection happened
     let requestedURL: URL?
+    let time: Date = BeamDate.now
 }
 
 protocol WebViewControllerDelegate: AnyObject {
@@ -76,6 +77,8 @@ class WebViewController {
 
     /// The URL before any website implicit redirection. (ex: gmail.com redirects to mail.google.com)
     private var requestedURL: URL?
+    private let maxTimeSinceLastNavigationForRedirection = 0.5 // seconds
+    private var lastNavigationFinished: WebViewNavigationDescription?
     private var lastNavigationWasTriggeredByBeamUI = false
 
     init(with webView: WKWebView) {
@@ -274,26 +277,34 @@ extension WebViewController: WebViewNavigationHandler {
     }
 
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {
-        guard let page = self.page else { return }
-
         // If the webview is loading, we should not index the content.
         // We will be called by the webView delegate at the end of the loading
-        guard !webView.isLoading else {
-            return
-        }
+        guard !webView.isLoading else { return }
 
         // Only register navigation if the page was successfully loaded
-        guard page.responseStatusCode == 200 else { return }
+        guard self.page?.responseStatusCode == 200 else { return }
 
+        var isJSPush = false
         var isLinkActivation = !lastNavigationWasTriggeredByBeamUI
         if case .javascript(let replacing) = source {
+            isJSPush = !replacing
             isLinkActivation = isLinkActivation && !replacing
         }
 
+        var requestedURL = self.requestedURL
+        // if we receive a navigation less than 500ms after the previous one,
+        // and it's not a user interaction (no requestedURL)
+        // then consider this as a redirect that the website was just too slow to trigger.
+        if requestedURL == nil, !isJSPush, let previousNav = lastNavigationFinished,
+           previousNav.time.timeIntervalSinceNow > -maxTimeSinceLastNavigationForRedirection {
+            requestedURL = previousNav.requestedURL
+        }
         let description = WebViewNavigationDescription(url: url, source: source, isLinkActivation: isLinkActivation,
                                                        requestedURL: requestedURL)
+        lastNavigationFinished = description
         lastNavigationWasTriggeredByBeamUI = false
-        requestedURL = nil
+        self.requestedURL = nil
+
         delegate?.webViewController(self, didFinishNavigatingToPage: description)
     }
 }
