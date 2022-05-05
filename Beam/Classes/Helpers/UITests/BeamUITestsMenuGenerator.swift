@@ -12,6 +12,7 @@ class BeamUITestsMenuGenerator {
         switch command {
         case .populateDBWithJournal: populateWithJournalNote(count: 10)
         case .populatePasswordsDB: populatePasswordsDB()
+        case .populateCreditCardsDB: populateCreditCardsDB()
         case .destroyDB: destroyDatabase()
         case .logout: logout()
         case .deleteLogs: deleteLogs()
@@ -48,6 +49,7 @@ class BeamUITestsMenuGenerator {
         case .showOnboarding: showOnboarding()
         case .resetCollectAlert: resetCollectAlert()
         case .clearPasswordsDB: clearPasswordsDatabase()
+        case .clearCreditCardsDB: clearCreditCardsDatabase()
         case .startMockHttpServer: startMockHttpServer()
         case .stopMockHttpServer: stopMockHttpServer()
         case .enableCreateJournalOnce: enableCreateJournalOnce()
@@ -147,6 +149,16 @@ class BeamUITestsMenuGenerator {
             try PasswordImporter.importPasswords(fromCSV: url)
         } catch {
             Logger.shared.logError(error.localizedDescription, category: .passwordManager)
+        }
+    }
+
+    private func populateCreditCardsDB() {
+        let creditCards = [
+            CreditCardEntry(cardDescription: "John's personal Visa", cardNumber: "4701234567890123", cardHolder: "John Appleseed", expirationMonth: 4, expirationYear: 2025),
+            CreditCardEntry(cardDescription: "Jane's company Amex", cardNumber: "374912345678912", cardHolder: "Jane Appleseed", expirationMonth: 8, expirationYear: 2024)
+        ]
+        for creditCard in creditCards {
+            CreditCardAutofillManager.shared.save(entry: creditCard)
         }
     }
 
@@ -263,6 +275,10 @@ class BeamUITestsMenuGenerator {
 
     private func clearPasswordsDatabase() {
         PasswordManager.shared.deleteAll(includedRemote: false)
+    }
+
+    private func clearCreditCardsDatabase() {
+        CreditCardAutofillManager.shared.deleteAll(includedRemote: false)
     }
 
     private func startMockHttpServer() {
