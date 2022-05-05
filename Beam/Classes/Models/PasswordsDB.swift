@@ -37,7 +37,7 @@ struct PasswordRecord {
 }
 
 extension PasswordRecord: BeamObjectProtocol {
-    static var beamObjectType = BeamObjectObjectType.password
+    static let beamObjectType = BeamObjectObjectType.password
 
     var beamObjectId: UUID {
         get { uuid }

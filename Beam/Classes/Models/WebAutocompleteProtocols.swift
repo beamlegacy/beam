@@ -77,17 +77,21 @@ protocol UserInformationsStore {
     func delete(id: UUID)
 }
 
-struct CreditCard {
-    var id = UUID()
+struct CreditCardEntry: Hashable {
     var cardDescription: String
-    var cardNumber: Int
+    var cardNumber: String
     var cardHolder: String
-    var cardDate: Date
+    var expirationMonth: Int
+    var expirationYear: Int
 }
 
-protocol CreditCardsStore {
-    func save(creditCard: CreditCard)
-    func fetchAll() -> [CreditCard]
-    func update(id: UUID, creditCard: CreditCard)
-    func delete(id: UUID)
+protocol CreditCardStore {
+    func fetchAll() throws -> [CreditCardRecord]
+    func allRecords(updatedSince: Date?) throws -> [CreditCardRecord]
+    @discardableResult func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
+    @discardableResult func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
+    @discardableResult func markUsed(record: CreditCardRecord) throws -> CreditCardRecord
+    @discardableResult func markDeleted(record: CreditCardRecord) throws -> CreditCardRecord
+    @discardableResult func markAllDeleted() throws -> [CreditCardRecord]
+    @discardableResult func deleteAll() throws -> [CreditCardRecord]
 }
