@@ -100,13 +100,11 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
 
     func testHTMLRedirection() {
         let expectation = expectation(description: "navigation_finished")
+        expectation.expectedFulfillmentCount = 2
         var receivedNavigationDescriptions = [WebViewNavigationDescription]()
-        let navigationExpectedCount = 2
         mockPage.onNavigationFinished = { navDescription in
             receivedNavigationDescriptions.append(navDescription)
-            if receivedNavigationDescriptions.count == navigationExpectedCount {
-                expectation.fulfill()
-            }
+            expectation.fulfill()
         }
 
         let initialURL = redirectURL(for: .html)
@@ -119,18 +117,16 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
-        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, nil)
+        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, initialURL)
     }
 
     func testJavascriptRedirection() {
         let expectation = expectation(description: "navigation_finished")
+        expectation.expectedFulfillmentCount = 2
         var receivedNavigationDescriptions = [WebViewNavigationDescription]()
-        let navigationExpectedCount = 2
         mockPage.onNavigationFinished = { navDescription in
             receivedNavigationDescriptions.append(navDescription)
-            if receivedNavigationDescriptions.count == navigationExpectedCount {
-                expectation.fulfill()
-            }
+            expectation.fulfill()
         }
 
         let initialURL = redirectURL(for: .javascript)
@@ -143,18 +139,41 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
+        // quick js navigation is detected as redirection of initialURL
+        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, initialURL)
+    }
+
+    func testJavascriptSlowRedirection() {
+        let expectation = expectation(description: "navigation_finished")
+        expectation.expectedFulfillmentCount = 2
+        var receivedNavigationDescriptions = [WebViewNavigationDescription]()
+        mockPage.onNavigationFinished = { navDescription in
+            receivedNavigationDescriptions.append(navDescription)
+            expectation.fulfill()
+        }
+
+        let initialURL = redirectURL(for: .javascriptSlow)
+        sut.webViewIsInstructedToLoadURLFromUI(initialURL)
+        webView.load(URLRequest(url: initialURL))
+
+        waitForExpectations(timeout: navigationTimeout, handler: nil)
+
+        XCTAssertEqual(webView.url, destinationURL)
+        XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
+        XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
+        XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
+        // slow js navigation is not detected as redirection of initialURL
         XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, nil)
     }
+    
 
     func testJavascriptReplaceRedirection() {
         let expectation = expectation(description: "navigation_finished")
+        expectation.expectedFulfillmentCount = 2
         var receivedNavigationDescriptions = [WebViewNavigationDescription]()
-        let navigationExpectedCount = 2
         mockPage.onNavigationFinished = { navDescription in
             receivedNavigationDescriptions.append(navDescription)
-            if receivedNavigationDescriptions.count == navigationExpectedCount {
-                expectation.fulfill()
-            }
+            expectation.fulfill()
         }
 
         let initialURL = redirectURL(for: .javascriptReplace)
@@ -167,7 +186,7 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
-        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, nil)
+        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, initialURL)
     }
 
 }
