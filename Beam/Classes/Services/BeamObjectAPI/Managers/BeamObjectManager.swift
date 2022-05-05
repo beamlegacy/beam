@@ -19,6 +19,7 @@ enum BeamObjectRequestUploadType {
 // Add your object type when saving over the beam object API
 enum BeamObjectObjectType: String {
     case password
+    case creditCard
     case link
     case database
     case browsingTree = "browsing_tree"

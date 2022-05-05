@@ -5,86 +5,95 @@
 //  Created by Frank Lefebvre on 31/05/2021.
 //
 import BeamCore
+@testable import Beam
 
-class MockCreditCardStore: CreditCardsStore {
+class MockCreditCardStore: CreditCardStore {
+
+    enum Error: Swift.Error {
+        case notFound
+    }
 
     static let shared = MockCreditCardStore()
-    private var creditCards: [CreditCard] = []
+    private var creditCards: [UUID: CreditCardRecord] = [:]
 
     init() {
-        creditCards.append(CreditCard(cardDescription: "Black Card", cardNumber: 000000000000000, cardHolder: "Jean-Louis Darmon", cardDate: BeamDate.now))
+        _ = addRecord(description: "Black Card", cardNumber: "000000000000000", holder: "Jean-Louis Darmon", expirationMonth: 6, expirationYear: 2022)
     }
 
-    func save(creditCard: CreditCard) {
-        creditCards.append(creditCard)
+    func fetchAll() -> [CreditCardRecord] {
+        creditCards.values.filter { $0.deletedAt != nil }
     }
 
-    func fetchAll() -> [CreditCard] {
-        return creditCards
-    }
-
-    func update(id: UUID, creditCard: CreditCard) {
-        var creditCardUpdated = creditCard
-        creditCardUpdated.id = id
-    }
-
-    func delete(id: UUID) {
-        if let index = creditCards.firstIndex(where: {$0.id == id}) {
-            creditCards.remove(at: index)
+    func allRecords(updatedSince: Date?) -> [CreditCardRecord] {
+        guard let updatedSince = updatedSince else {
+            return Array(creditCards.values)
         }
-    }
-}
-
-class MockUserInformationsStore: UserInformationsStore {
-
-    static let shared = MockUserInformationsStore()
-
-    private var userInformations: [UserInformations] = []
-
-    init() {
-        userInformations.append(UserInformations(country: 1,
-                                                 organization: "Beam",
-                                                 firstName: "John",
-                                                 lastName: "BeamBeam",
-                                                 adresses: "123 Rue de Beam",
-                                                 postalCode: "69001",
-                                                 city: "BeamCity",
-                                                 phone: "0628512605",
-                                                 email: "john@beamapp.co"))
+        return creditCards.values.filter { $0.updatedAt >= updatedSince }
     }
 
-    func save(userInfo: UserInformations) {
-        userInformations.append(userInfo)
+    @discardableResult
+    func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) -> CreditCardRecord {
+        var creditCard = CreditCardRecord(cardDescription: description, encryptedCardNumber: cardNumber, cardHolder: holder, expirationMonth: expirationMonth, expirationYear: expirationYear, createdAt: BeamDate.now, updatedAt: BeamDate.now, usedAt: BeamDate.now)
+        let uuid = UUID()
+        creditCard.uuid = uuid
+        creditCards[uuid] = creditCard
+        return creditCard
     }
 
-    func update(userInfoUUIDToUpdate: UUID, updatedUserInformations: UserInformations) {
-        var userInfoUpdated = updatedUserInformations
-        userInfoUpdated.id = userInfoUUIDToUpdate
-        // update userInfoUpdated
+    @discardableResult
+    func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord {
+        var updatedRecord = try creditCard(matching: record.uuid)
+        updatedRecord.cardDescription = description
+        updatedRecord.encryptedCardNumber = cardNumber
+        updatedRecord.cardHolder = holder
+        updatedRecord.expirationMonth = expirationMonth
+        updatedRecord.expirationYear = expirationYear
+        updatedRecord.updatedAt = BeamDate.now
+        updatedRecord.usedAt = BeamDate.now
+        creditCards[record.uuid] = updatedRecord
+        return updatedRecord
     }
 
-    func fetchAll() -> [UserInformations] {
-        return userInformations
+    @discardableResult
+    func markUsed(record: CreditCardRecord) throws -> CreditCardRecord {
+        var updatedRecord = try creditCard(matching: record.uuid)
+        updatedRecord.usedAt = BeamDate.now
+        creditCards[record.uuid] = updatedRecord
+        return updatedRecord
     }
 
-    func fetchFirst() -> UserInformations {
-        guard let userInfo = self.userInformations.first else {
-            return UserInformations(country: 1,
-                                    organization: "Beam",
-                                    firstName: "John",
-                                    lastName: "BeamBeam",
-                                    adresses: "123 Rue de Beam",
-                                    postalCode: "69001",
-                                    city: "BeamCity",
-                                    phone: "0628512605",
-                                    email: "john@beamapp.co")
+    @discardableResult
+    func markDeleted(record: CreditCardRecord) throws -> CreditCardRecord {
+        var updatedRecord = try creditCard(matching: record.uuid)
+        if updatedRecord.deletedAt == nil {
+            updatedRecord.deletedAt = BeamDate.now
+            creditCards[record.uuid] = updatedRecord
         }
-        return userInfo
+        return updatedRecord
     }
 
-    func delete(id: UUID) {
-        if let index = userInformations.firstIndex(where: {$0.id == id}) {
-            userInformations.remove(at: index)
+    @discardableResult
+    func markAllDeleted() throws -> [CreditCardRecord] {
+        creditCards = creditCards.mapValues { record in
+            var record = record
+            if record.deletedAt == nil {
+                record.deletedAt = BeamDate.now
+            }
+            return record
         }
+        return Array(creditCards.values)
+    }
+
+    @discardableResult
+    func deleteAll() throws -> [CreditCardRecord] {
+        creditCards.removeAll()
+        return []
+    }
+
+    private func creditCard(matching uuid: UUID) throws -> CreditCardRecord {
+        guard let creditCard = creditCards[uuid] else {
+            throw Error.notFound
+        }
+        return creditCard
     }
 }
