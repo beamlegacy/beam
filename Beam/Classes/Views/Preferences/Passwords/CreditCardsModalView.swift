@@ -70,10 +70,9 @@ struct CreditCardsModalView_Previews: PreviewProvider {
 }
 
 struct CreditCardsTableView: View {
-    var allCreditCards: [CreditCard]
+    var allCreditCards: [CreditCardTableViewItem]
     var onSelectionChanged: (IndexSet) -> Void
 
-    @State var allCreditCardsItem = [CreditCardTableViewItem]()
     var creditCardsColumns = [
         TableViewColumn(key: "cardDescription", title: "Card Description", type: TableViewColumn.ColumnType.IconAndText, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
         TableViewColumn(key: "cardInformations", title: "Card Informations", type: TableViewColumn.ColumnType.TwoTextField, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
@@ -82,25 +81,17 @@ struct CreditCardsTableView: View {
 
     var body: some View {
         TableView(customRowHeight: 48, hasSeparator: true, hasHeader: false, allowsMultipleSelection: false,
-                  items: allCreditCardsItem, columns: creditCardsColumns, creationRowTitle: nil) { (_, _) in
+                  items: allCreditCards, columns: creditCardsColumns, creationRowTitle: nil) { (_, _) in
 
         } onSelectionChanged: { idx in
             onSelectionChanged(idx)
-        }.onAppear {
-            refreshAllCreditCards()
         }.frame(width: 526)
-    }
-
-    private func refreshAllCreditCards() {
-        for creditCard in allCreditCards {
-            allCreditCardsItem.append(CreditCardTableViewItem(creditCard: creditCard))
-        }
     }
 }
 
 struct CreditCardsTableView_Previews: PreviewProvider {
     static var previews: some View {
-        CreditCardsTableView(allCreditCards: [CreditCard(cardDescription: "Black Card", cardNumber: 0000000000000000, cardHolder: "Jean-Louis Darmon", cardDate: BeamDate.now)], onSelectionChanged: {_ in})
+        CreditCardsTableView(allCreditCards: [CreditCardEntry(cardDescription: "Black Card", cardNumber: "0000000000000000", cardHolder: "Jean-Louis Darmon", expirationMonth: 3, expirationYear: 2025)].map(CreditCardTableViewItem.init), onSelectionChanged: {_ in})
     }
 }
 
@@ -113,17 +104,20 @@ struct CreditCardInformations {
 class CreditCardTableViewItem: TwoTextFieldViewItem {
     var cardDate: String
 
-    init(creditCard: CreditCard) {
-//        self.cardInformations = CreditCardInformations(cardNumber: String(creditCard.cardNumber), cardHolder: creditCard.cardHolder)
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MM/YY"
-        self.cardDate = dateFormatter.string(from: creditCard.cardDate)
+    init(creditCard: CreditCardEntry) {
+        let mm = String(format: "%02d", creditCard.expirationMonth)
+        let yy = String(format: "%02d", creditCard.expirationYear % 100)
+        self.cardDate = "\(mm)/\(yy)"
         super.init()
-        self.favIcon = NSImage(named: "preferences-credit-card")
+        self.favIcon = NSImage(named: "preferences-credit_card")
         self.text = creditCard.cardDescription
-        self.topTextFieldValue = String(creditCard.cardNumber)
+        self.topTextFieldValue = creditCard.cardNumber
         self.botTextFieldValue = creditCard.cardHolder
         self.topTextFieldPlaceholder = "Card Number"
         self.botTextFieldPlaceholder = "Cardholder"
+    }
+
+    override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
+        completion(NSImage(named: "preferences-credit_card")!)
     }
 }

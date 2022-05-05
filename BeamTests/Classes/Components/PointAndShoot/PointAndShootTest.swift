@@ -7,22 +7,6 @@ import Combine
 @testable import Beam
 @testable import BeamCore
 
-class MockUserInformationsStore: UserInformationsStore {
-
-    func save(userInfo: UserInformations) {}
-    func update(userInfoUUIDToUpdate: UUID, updatedUserInformations: UserInformations) {}
-
-    func fetchAll() -> [UserInformations] {
-        return [UserInformations( country: 2, organization: "Beam", firstName: "John", lastName: "Beam", adresses: "123 Rue de Beam", postalCode: "69001", city: "BeamCity", phone: "0606060606", email: "john@beamapp.co")]
-    }
-
-    func fetchFirst() -> UserInformations {
-        return UserInformations( country: 2, organization: "Beam", firstName: "John", lastName: "Beam", adresses: "123 Rue de Beam", postalCode: "69001", city: "BeamCity", phone: "0606060606", email: "john@beamapp.co")
-    }
-
-    func delete(id: UUID) {}
-}
-
 class BrowsingScorerMock: NSObject, WebPageRelated, BrowsingScorer {
     weak var page: WebPage?
     var debouncedUpdateScrollingScore = PassthroughSubject<WebFrames.FrameInfo, Never>()
