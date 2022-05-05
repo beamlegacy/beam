@@ -227,6 +227,7 @@ extension MockHttpServer {
         case http301
         case http302
         case javascript
+        case javascriptSlow // .javascript redirect but the redirection happens 1s after page load
         case javascriptReplace
         case none
         case navigation
@@ -317,9 +318,11 @@ extension MockHttpServer {
         case .html:
             renderStencil(request, response, "redirection/html_redirect", additionalParams: parameters)
             break
-        case .javascript, .javascriptReplace:
+        case .javascript, .javascriptSlow, .javascriptReplace:
             if type == .javascriptReplace {
                 parameters["replace"] = "true"
+            } else if type == .javascriptSlow {
+                parameters["delay"] = "1000"
             }
             renderStencil(request, response, "redirection/javascript_redirect", additionalParams: parameters)
             break
