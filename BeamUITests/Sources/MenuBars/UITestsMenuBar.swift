@@ -10,85 +10,65 @@ import XCTest
 
 class UITestsMenuBar: BaseMenuBar {
     
-    let menuBarTitle = "UITests"
-    
-    private func openUITestsMenu() {
-        menuBarItem(menuBarTitle).click()
-    }
+    let beeper: CrossTargetBeeper = CrossTargetNotificationCenterBeeper()
     
     @discardableResult
     func destroyDB() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem(UITestMenuAvailableCommands.destroyDB.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.destroyDB.rawValue)
         return self
     }
     
     @discardableResult
     func startMockHTTPServer() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem(UITestMenuGroup.mockHttpServer.rawValue).firstMatch.clickOnExistence()
-        menuItem(UITestMenuAvailableCommands.startMockHttpServer.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.startMockHttpServer.rawValue)
         return self
     }
     
     @discardableResult
     func stopMockHTTPServer() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem(UITestMenuGroup.mockHttpServer.rawValue).firstMatch.clickOnExistence()
-        menuItem(UITestMenuAvailableCommands.stopMockHttpServer.rawValue).clickOnExistence()
-        return self
-    }
-
-    @discardableResult
-    func deleteSFSymbolsFromDownloadFolder() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem("Clean SF-Symbols-3.dmg from Downloads").click()
+        beeper.beep(identifier: UITestMenuAvailableCommands.stopMockHttpServer.rawValue)
         return self
     }
     
     @discardableResult
     func signInApp() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem("Sign in with Test Account").click()
+        beeper.beep(identifier: UITestMenuAvailableCommands.signInWithTestAccount.rawValue)
         return self
     }
     
     @discardableResult
     func logout() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem(UITestMenuAvailableCommands.logout.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.logout.rawValue)
         return self
     }
     
     @discardableResult
     func populatePasswordsDB() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem(UITestMenuAvailableCommands.populatePasswordsDB.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.populatePasswordsDB.rawValue)
         return self
     }
     
     @discardableResult
     func clearPasswordsDB() -> UITestsMenuBar {
-        openUITestsMenu()
-        menuItem(UITestMenuAvailableCommands.clearPasswordsDB.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.clearPasswordsDB.rawValue)
         return self
     }
 
     @discardableResult
     func showWebViewCount() -> UITestsMenuBar {
-        menuItem(UITestMenuAvailableCommands.showWebViewCount.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.showWebViewCount.rawValue)
         return self
     }
     
     @discardableResult
     func deletePrivateKeys() -> UITestsMenuBar {
-        menuItem(UITestMenuAvailableCommands.deletePrivateKeys.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.deletePrivateKeys.rawValue)
         return self
     }
 
     @discardableResult
     func deleteAllRemoteObjects() -> UITestsMenuBar {
-        menuItem(UITestMenuAvailableCommands.deleteAllRemoteObjects.rawValue).clickOnExistence()
+        beeper.beep(identifier: UITestMenuAvailableCommands.deleteAllRemoteObjects.rawValue)
         return self
     }
 }
