@@ -1268,6 +1268,8 @@
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
+		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
+		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
 		DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */; };
@@ -3054,6 +3056,7 @@
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
 		D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread6.xctestplan"; sourceTree = "<group>"; };
+		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
 		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
@@ -4515,6 +4518,7 @@
 			children = (
 				5273C66C25DA857400B00EC3 /* BeamUITestsMenuGenerator.swift */,
 				52FC002225E4244200ABECB0 /* MenuAvailableCommands.swift */,
+				D77D4788282269640006847A /* CrossTargetBeeper.swift */,
 			);
 			path = UITests;
 			sourceTree = "<group>";
@@ -8329,6 +8333,7 @@
 				A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */,
 				872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */,
 				8A14E32927F6468600DDCCE3 /* GeolocationMessageHandler.swift in Sources */,
+				D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */,
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteListView.swift in Sources */,
@@ -9186,6 +9191,7 @@
 				B5DC1FC226B9608D00A4C94B /* DownloadTestView.swift in Sources */,
 				B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */,
 				B5056A8D26F88A0700FFD2A2 /* HelpAndFeedbackTests.swift in Sources */,
+				D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */,
 				B5EB9A7826C2A887004C798A /* OmniboxAutocompleteTests.swift in Sources */,
 				B5E38D5626EA20E700236FBD /* SearchOnWebTests.swift in Sources */,
 				B5DC1FC026B9607900A4C94B /* DownloadViewLocators.swift in Sources */,
