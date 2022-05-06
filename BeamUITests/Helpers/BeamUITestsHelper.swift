@@ -27,11 +27,16 @@ class BeamUITestsHelper {
         self.app = app
     }
 
-    func tapCommand(_ command: UITestMenuAvailableCommands) {
+    func tapCommand(_ command: UITestMenuAvailableCommands, autoTrigger: Bool = true) {
+        let beeper: CrossTargetBeeper = CrossTargetNotificationCenterBeeper()
         UITestMenuAvailableCommands.allCases.forEach {
             if $0 == command {
-                let menu = XCUIApplication().menuItems[$0.rawValue]
-                menu.tap()
+                if autoTrigger {
+                    beeper.beep(identifier: $0.rawValue)
+                } else {
+                    let menu = XCUIApplication().menuItems[$0.rawValue]
+                    menu.tap()
+                }
                 moveMouseOutOfTheWay()
                 return
             }
