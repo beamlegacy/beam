@@ -16,8 +16,7 @@ class BrowserTabViewTests: BaseTest {
         let webView = WebTestView()
         
         step("Given I open a web page"){
-            helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
-            
+            helper.openTestPage(page: .page1)
         }
         
         let uiTestPageLink = webView.staticText("new-tab-beam")
@@ -48,11 +47,11 @@ class BrowserTabViewTests: BaseTest {
         
         step("When I close tabs"){
             webView.closeTab()
-            XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
         }
 
         step("Then I'm redirected to Journal"){
             XCTAssertTrue(waitFor( PredicateFormat.exists.rawValue, journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)))
+            XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
 
         }
     }
