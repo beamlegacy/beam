@@ -5,7 +5,7 @@ import Atomics
 // swiftlint:disable file_length
 
 extension BeamObjectManager {
-    func syncAllFromAPI(force: Bool = false, delete: Bool = true, prepareBeforeSaveAll: (() -> Void)? = nil) async throws -> Bool {
+    func syncAllFromAPI(force: Bool = false, delete: Bool = true, prepareBeforeSaveAll: (() -> Void)? = nil) async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -19,46 +19,103 @@ extension BeamObjectManager {
         defer {
             // Reactivate sending object
             Self.disableSendingObjects = false
-
             Self.fullSyncRunning.store(false, ordering: .relaxed)
         }
 
-        // swiftlint:disable:next date_init
-        var localTimer = Date()
-
         Self.fullSyncRunning.store(true, ordering: .relaxed)
 
-        if try await fetchAllByChecksumsFromAPI(force: force) == false {
-            return false
-        }
+        try await fetchAllByChecksumsFromAPI(force: force)
 
-        do {
-            if let prepareBeforeSaveAll = prepareBeforeSaveAll {
-                Logger.shared.logDebug("syncAllFromAPI: calling prepareBeforeSaveAll",
-                                       category: .beamObjectNetwork)
-                prepareBeforeSaveAll()
-            }
-
-            // swiftlint:disable:next date_init
-            localTimer = Date()
-            Logger.shared.logDebug("syncAllFromAPI: calling saveAllToAPI",
+        if let prepareBeforeSaveAll = prepareBeforeSaveAll {
+            Logger.shared.logDebug("syncAllFromAPI: calling prepareBeforeSaveAll",
                                    category: .beamObjectNetwork)
-            let objectsCount = try self.saveAllToAPI(force: force)
-            Logger.shared.logDebug("syncAllFromAPI: Called saveAllToAPI, saved \(objectsCount) objects",
-                                   category: .beamObjectNetwork,
-                                   localTimer: localTimer)
-
-            return true
-        } catch {
-            throw error
+            prepareBeforeSaveAll()
         }
+
+        // swiftlint:disable:next date_init
+        let localTimer = Date()
+        Logger.shared.logDebug("syncAllFromAPI: calling asyncSaveAllToAPI",
+                               category: .beamObjectNetwork)
+        let objectsCount = try await self.asyncSaveAllToAPI(force: force)
+        Logger.shared.logDebug("syncAllFromAPI: Called asyncSaveAllToAPI, saved \(objectsCount) objects",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
     }
 
+    @discardableResult
+    // swiftlint:disable:next function_body_length
+    func asyncSaveAllToAPI(force: Bool = false) async throws -> Int {
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
+        var errors: [Error] = []
+        var savedObjects = 0
+        // Just a very old date as default (10 years)
+        var mostRecentUpdatedAt: Date = Persistence.Sync.BeamObjects.last_updated_at ?? (BeamDate.now.addingTimeInterval(-(60*60*24*31*12*10)))
+        var mostRecentUpdatedAtChanged = false
+
+        if let updatedAt = Persistence.Sync.BeamObjects.last_updated_at {
+            Logger.shared.logDebug("Using updatedAt for BeamObjects API call: \(updatedAt)", category: .beamObjectNetwork)
+        }
+
+        /*
+         IMPORTANT: We want to save in the order potentially needed by another device, which is the same as used
+         for parsing
+         */
+
+        await withTaskGroup(of: Swift.Result<(Int, Date?), Error>.self, body: { group in
+            for (_, manager) in Self.managerInstances {
+                group.addTask {
+                    // swiftlint:disable:next date_init
+                    let localTimer = Date()
+                    defer {
+                        Logger.shared.logDebug("saveAllToAPI using \(manager) done",
+                                               category: .beamObjectNetwork,
+                                               localTimer: localTimer)
+                    }
+                    do {
+                        Logger.shared.logDebug("saveAllToAPI using \(manager)",
+                                               category: .beamObjectNetwork)
+                        let result = try await manager.saveAllOnBeamObjectApi(force: force)
+                        return .success(result)
+                    } catch {
+                        return .failure(error)
+                    }
+                }
+            }
+            for await result in group {
+                switch result {
+                case .failure(let error):
+                    errors.append(error)
+                case .success(let countAndDate):
+                    savedObjects += countAndDate.0
+
+                    if let updatedAt = countAndDate.1, updatedAt > mostRecentUpdatedAt {
+                        mostRecentUpdatedAt = updatedAt
+                        mostRecentUpdatedAtChanged = true
+                    }
+                }
+            }
+        })
+
+        if mostRecentUpdatedAtChanged {
+            Logger.shared.logDebug("Updating last_updated_at from \(String(describing: Persistence.Sync.BeamObjects.last_updated_at)) to \(mostRecentUpdatedAt)",
+                                   category: .beamObjectNetwork)
+            Persistence.Sync.BeamObjects.last_updated_at = mostRecentUpdatedAt
+        }
+
+        guard errors.isEmpty else {
+            throw BeamObjectManagerError.multipleErrors(errors)
+        }
+
+        return savedObjects
+    }
     // Will fetch remote checksums for objects since `lastReceivedAt` and then fetch objects for which we have a different
     // checksum locally, and therefor must be fetched from the API. This allows for a faster fetch since most of the time
     // we might already have those object locally if they had been sent and updated from the same device
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func fetchAllByChecksumsFromAPI(force: Bool = false) async throws -> Bool {
+    func fetchAllByChecksumsFromAPI(force: Bool = false) async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -79,7 +136,8 @@ extension BeamObjectManager {
             Logger.shared.logDebug("No previous lastReceivedAt for BeamObjects API call, skip checksums",
                                    category: .beamObjectNetwork)
 
-            return try await self.fetchAllFromAPI()
+            try await self.fetchAllFromAPI()
+            return
         }
 
         // swiftlint:disable:next date_init
@@ -99,7 +157,7 @@ extension BeamObjectManager {
             Logger.shared.logDebug("fetchAllByChecksumsFromAPI: 0 beam object checksums fetched",
                                    category: .beamObjectNetwork,
                                    localTimer: localTimer)
-            return true
+            return
         }
 
         Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(beamObjects.count) beam object checksums fetched",
@@ -127,10 +185,10 @@ extension BeamObjectManager {
                                            category: .beamObjectNetwork,
                                            localTimer: localTimer)
                 }
-                return true
+                return
             }
 
-            return try await self.fetchAllFromAPI(ids: ids)
+            try await self.fetchAllFromAPI(ids: ids)
         } catch {
             let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
             Logger.shared.logError(message, category: .beamObject)
@@ -142,7 +200,7 @@ extension BeamObjectManager {
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
-    func fetchAllFromAPI() async throws -> Bool {
+    func fetchAllFromAPI() async throws {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw BeamObjectManagerError.notAuthenticated
         }
@@ -157,11 +215,11 @@ extension BeamObjectManager {
                                    category: .beamObjectNetwork)
         }
 
-        return try await fetchAllFromAPI(lastReceivedAt: lastReceivedAt)
+        try await fetchAllFromAPI(lastReceivedAt: lastReceivedAt)
     }
 
     private func fetchAllFromAPI(lastReceivedAt: Date? = nil,
-                                 ids: [UUID]? = nil) async throws -> Bool {
+                                 ids: [UUID]? = nil) async throws {
         let beamRequest = BeamObjectRequest()
 
         #if DEBUG
@@ -175,7 +233,7 @@ extension BeamObjectManager {
         // If not doing a delta sync, we don't as we want to update local document as `deleted`
         guard lastReceivedAt == nil || !beamObjects.isEmpty else {
             Logger.shared.logDebug("0 beam object fetched.", category: .beamObjectNetwork)
-            return true
+            return
         }
 
         if let mostRecentReceivedAt = beamObjects.compactMap({ $0.receivedAt }).sorted().last {
@@ -188,7 +246,7 @@ extension BeamObjectManager {
             try self.parseFilteredObjects(self.filteredObjects(beamObjects))
             // Note: you don't need to save checksum here, they are saved in `translators[object.beamObjectType]` callback
             // called by `parseFilteredObjects`
-            return true
+            return
         } catch {
             let message = "Error fetching objects from API: \(error.localizedDescription). This is not normal, check the logs and ask support."
             Logger.shared.logError(message, category: .beamObject)
