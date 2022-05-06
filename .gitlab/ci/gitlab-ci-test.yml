@@ -39,13 +39,14 @@ xctests:
     expire_in: 7d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - logs
       - scan_results
       - allure-report
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -82,13 +83,14 @@ UITestThread1:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -129,13 +131,14 @@ UITestThread2:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -176,13 +179,14 @@ UITestThread3:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -223,13 +227,14 @@ UITestThread4:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -270,13 +275,14 @@ UITestThread5:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -317,13 +323,14 @@ UITestThread6:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -364,13 +371,14 @@ UITestThread7:
     expire_in: 4d
     when: always
     paths:
-      - cobertura.xml
       - fastlane/test_output
       - screenshots
       - allure-report
       - logs
     reports:
-      cobertura: cobertura.xml
+      coverage_report:
+        coverage_format: cobertura
+        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
