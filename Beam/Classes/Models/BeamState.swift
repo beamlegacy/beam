@@ -691,11 +691,16 @@ import Sentry
     }
 
     func shouldAllowFirstResponderTakeOver(_ responder: NSResponder?) -> Bool {
-        if omniboxInfo.isFocused && responder is BeamWebView {
-            let currentEvent = NSApp.currentEvent
-            // prevent autofocus inputs from stealing the omnibox focus
-            // https://linear.app/beamapp/issue/BE-3557/page-loading-is-dismissing-omnibox
-            return currentEvent?.isKeyboardEvent != true && currentEvent?.isUserInteractionEvent == true
+        if omniboxInfo.isFocused, responder is BeamWebView {
+            // So here we have the webview asking the become first responder, while the omnibox is still focused.
+            // if the last event is a recent mouse down -> we allow it.
+            // otherwise, it's most likely the website trying to auto focus a field -> we refuse it.
+            // see more here: https://linear.app/beamapp/issue/BE-3557/page-loading-is-dismissing-omnibox
+            if let currentEvent = NSApp.currentEvent, currentEvent.isLeftClick {
+                let timeSinceEvent = ProcessInfo.processInfo.systemUptime - currentEvent.timestamp
+                return timeSinceEvent < 0.1 // left click older than 100ms are not related.
+            }
+            return false
         }
         return true
     }
