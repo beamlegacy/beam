@@ -7,6 +7,7 @@ import MockHttpServer
 import SwiftUI // Remove once we remove .testMeetingModal menu
 
 class BeamUITestsMenuGenerator {
+    static var beeper: CrossTargetBeeper?
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func executeCommand(_ command: UITestMenuAvailableCommands) {
         switch command {
