@@ -92,7 +92,7 @@ class BeamObjectManagerNetworkTests: QuickSpec {
                 }
 
                 it("fetches all objects") {
-                    let networkCalls = APIRequest.callsCount
+                    var networkCalls = APIRequest.callsCount
 
                     waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
                         do {
@@ -126,11 +126,19 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             }
 
             context("without content") {
-                it("calls managers but no network calls as it's all empty") {
+                asyncIt("calls managers but no network calls as it's all empty") {
                     let networkCalls = APIRequest.callsCount
 
                     do {
                         try sut.saveAllToAPI()
+                    } catch {
+                        fail(error.localizedDescription)
+                    }
+
+                    expect(APIRequest.callsCount - networkCalls) == 0
+
+                    do {
+                        try await sut.asyncSaveAllToAPI()
                     } catch {
                         fail(error.localizedDescription)
                     }

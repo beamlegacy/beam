@@ -217,46 +217,41 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
-        // With Vinyl and Network test recording, and this executing, it generates async network
-        // calls and randomly fails.
+        Task {
+            // With Vinyl and Network test recording, and this executing, it generates async network
+            // calls and randomly fails.
 
-        // My feeling is we should sync + trigger notification and only start network calls when
-        // this sync has finished.
+            // My feeling is we should sync + trigger notification and only start network calls when
+            // this sync has finished.
 
-        // swiftlint:disable:next date_init
-        let localTimer = Date()
+            // swiftlint:disable:next date_init
+            let localTimer = Date()
 
-        let initialDBs = Set(databaseManager.all())
-
-        do {
+            let initialDBs = Set(databaseManager.all())
+            var syncError: Error?
             Logger.shared.logInfo("syncAllFromAPI calling", category: .beamObjectNetwork)
-            try beamObjectManager.syncAllFromAPI(
-                force: force,
-                prepareBeforeSaveAll: {
+            do {
+                try await beamObjectManager.syncAllFromAPI(force: force,
+                                                           prepareBeforeSaveAll: {
                     self.prepareBeforeSaveAll(initialDBs: initialDBs)
-                }, { result in
-                    Logger.shared.logInfo("syncAllFromAPI called",
+                })
+            } catch {
+                syncError = error
+            }
+            Logger.shared.logInfo("syncAllFromAPI called",
+                                  category: .beamObjectNetwork,
+                                  localTimer: localTimer)
+            self.deleteEmptyDatabases(showAlert: showAlert) { _ in
+                if let error = syncError {
+                    Logger.shared.logInfo("syncAllFromAPI failed",
                                           category: .beamObjectNetwork,
                                           localTimer: localTimer)
-
-                    self.deleteEmptyDatabases(showAlert: showAlert) { _ in
-                        switch result {
-                        case .success:
-                            DatabaseManager.changeDefaultDatabaseIfNeeded()
-                            completionHandler?(.success(true))
-                        case .failure(let error):
-                            Logger.shared.logInfo("syncAllFromAPI failed",
-                                                  category: .beamObjectNetwork,
-                                                  localTimer: localTimer)
-                            completionHandler?(.failure(error))
-                        }
-                    }
-                })
-        } catch {
-            Logger.shared.logError("Couldn't sync beam objects: \(error.localizedDescription)",
-                                   category: .document,
-                                   localTimer: localTimer)
-            completionHandler?(.failure(error))
+                    completionHandler?(.failure(error))
+                } else {
+                    DatabaseManager.changeDefaultDatabaseIfNeeded()
+                    completionHandler?(.success(true))
+                }
+            }
         }
     }
 
