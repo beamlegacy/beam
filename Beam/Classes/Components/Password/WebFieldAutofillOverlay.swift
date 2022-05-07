@@ -24,14 +24,16 @@ final class WebFieldAutofillOverlay {
     private var menuViewModel: PasswordManagerMenuViewModel?
     private var creditCardViewModel: CreditCardsMenuViewModel?
     private var buttonPopover: WebAutofillPopoverContainer?
+    private let elementEdgeInsets: BeamEdgeInsets
     private let iconAction: (WKFrameInfo?) -> Void
 
-    init(page: WebPage?, scrollUpdater: PassthroughSubject<WebFrames.FrameInfo, Never>, frameInfo: WKFrameInfo?, elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, iconAction: @escaping (WKFrameInfo?) -> Void) {
+    init(page: WebPage?, scrollUpdater: PassthroughSubject<WebFrames.FrameInfo, Never>, frameInfo: WKFrameInfo?, elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, elementEdgeInsets: BeamEdgeInsets = .zero, iconAction: @escaping (WKFrameInfo?) -> Void) {
         self.page = page
         self.scrollUpdater = scrollUpdater
         self.frameInfo = frameInfo
         self.elementId = elementId
         self.autocompleteGroup = autocompleteGroup
+        self.elementEdgeInsets = elementEdgeInsets
         self.iconAction = iconAction
         (page as? BrowserTab)?.state?.$omniboxInfo
             .map(\.isFocused)
@@ -65,8 +67,9 @@ final class WebFieldAutofillOverlay {
         }
         guard buttonPopover == nil, let buttonWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, movable: false, storedInPresenter: true) else { return }
         buttonWindow.isMovableByWindowBackground = false
-        let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, fieldLocator: fieldLocator) { rect in
-            CGPoint(x: rect.maxX - 24 - 16, y: rect.midY + 12)
+        let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, fieldLocator: fieldLocator) { [elementEdgeInsets] rect in
+            let rect = rect.inset(by: elementEdgeInsets)
+            return CGPoint(x: rect.maxX - 24 - 16, y: rect.midY + 12)
         }
         let imageName: String
         switch autocompleteGroup.action {

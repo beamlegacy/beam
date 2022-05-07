@@ -9,7 +9,7 @@
 import Foundation
 import BeamCore
 
-enum WebAutocompleteAction {
+enum WebAutocompleteAction: String, Decodable {
     case login
     case createAccount
     case personalInfo
@@ -21,7 +21,7 @@ enum WebAutocompleteAction {
 }
 
 struct WebInputField {
-    enum Role {
+    enum Role: String, Decodable {
         case currentUsername
         case newUsername
         case currentPassword
