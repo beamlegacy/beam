@@ -116,7 +116,7 @@ class TestWebPage: WebPage {
         events.append("addContent \(sourceURL)")
     }
 
-    func closeTab() {
+    func tabWillClose() {
         events.append("closeTab")
     }
 

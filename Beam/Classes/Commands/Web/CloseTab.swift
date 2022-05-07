@@ -63,7 +63,7 @@ class CloseTab: WebCommand {
         }
 
         if !appIsClosing {
-            tab.closeTab()
+            tab.tabWillClose()
         }
         tab.cancelObservers()
 
