@@ -25,20 +25,21 @@ class ShareHelper {
     }
 
     func shareContent(_ html: String, originURL: URL?, service: ShareService) async {
-        guard let content = await getShareableContent(for: html) else { return }
+        guard let content = await getShareableContent(from: html) else { return }
         if service == .copy {
             await setContentToPasteboard(content)
-        } else if let text = content.text, let url = service.buildURL(with: text, url: originURL) {
+        } else if let url = service.buildURL(with: content.text, url: content.url ?? originURL) {
             await handleURL(url)
         }
     }
 
     private struct ReadShareableContent {
         var text: String?
+        var url: URL?
         var elements: [BeamElement]?
     }
 
-    private func getShareableContent(for html: String) async -> ReadShareableContent? {
+    private func getShareableContent(from html: String) async -> ReadShareableContent? {
         let elements: [BeamElement] = await withCheckedContinuation { continuation in
             htmlNoteAdapter.convert(html: html) { (beamElements: [BeamElement]) in
                 continuation.resume(returning: beamElements)
@@ -47,15 +48,20 @@ class ShareHelper {
 
         guard elements.count > 0 else { return nil }
         var texts: [String] = []
-
+        var url: URL?
         elements.forEach { el in
             if !el.text.text.isEmpty {
                 texts.append(el.text.text)
             }
         }
-
+        if texts.count == 1, let firstText = texts.first, firstText.mayBeWebURL, let onlyURL = URL(string: firstText) {
+            // - an embed -> only 1 link of text, that's it
+            // - a link only -> share that instead of the source but with the text
+            url = onlyURL
+            texts = []
+        }
         let text = texts.isEmpty ? nil : texts.joined(separator: .lineSeparator)
-        return ReadShareableContent(text: text, elements: elements)
+        return ReadShareableContent(text: text, url: url, elements: elements)
     }
 
     @MainActor private func setContentToPasteboard(_ content: ReadShareableContent) {
@@ -63,7 +69,7 @@ class ShareHelper {
         let pasteboard = pasteboard
         pasteboard.clearContents()
 
-        if let text = content.text {
+        if let text = content.text ?? content.url?.absoluteString {
             pasteboard.declareTypes([.string], owner: nil)
             pasteboard.setString(text, forType: .string)
         }
@@ -110,7 +116,9 @@ class ShareHelper {
                 let deeplinkHandler = ExternalDeeplinkHandler(request: urlRequest)
                 if deeplinkHandler.isDeeplink() {
                     if deeplinkHandler.shouldOpenDeeplink() {
-                        NSWorkspace.shared.open(url)
+                        DispatchQueue.main.async { // fixes the alert stealing the keywindow of the opened app
+                            NSWorkspace.shared.open(url)
+                        }
                     }
                 } else {
                     self.openWebURL(url)

@@ -13,6 +13,9 @@ class ExternalDeeplinkHandler {
         return schemes.union(NavigationRouter.customSchemes)
     }()
 
+    /// We remember the choice for the current session only. Until we have actual user preferences.
+    private static var allowedApplications = Set<String>()
+
     let request: URLRequest
 
     init(request: URLRequest) {
@@ -42,6 +45,9 @@ class ExternalDeeplinkHandler {
         let applicationName = NSWorkspace.shared.urlForApplication(toOpen: requestUrl)?.lastPathComponent
         if let applicationName = applicationName {
             deeplinkName = (applicationName as NSString).deletingPathExtension
+            if Self.allowedApplications.contains(applicationName) {
+                return true
+            }
         } else {
             return false
         }
@@ -51,6 +57,9 @@ class ExternalDeeplinkHandler {
         alert.addButton(withTitle: "Allow")
         alert.addButton(withTitle: "Cancel")
         if alert.runModal() == .alertFirstButtonReturn {
+            if let applicationName = applicationName {
+                Self.allowedApplications.insert(applicationName)
+            }
             return true
         }
         return false
@@ -58,7 +67,6 @@ class ExternalDeeplinkHandler {
 
     private func shouldPresentAlert() -> Bool {
         guard let requestUrl = request.url else { return false }
-
         switch requestUrl.scheme {
         case "mailto":
             return false
