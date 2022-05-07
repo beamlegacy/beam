@@ -161,9 +161,8 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         guard PreferencesManager.autofillUsernamePasswords else {
             return
         }
-        guard elementId != currentOverlay?.elementId else {
-            return
-        }
+        guard page?.webviewWindow?.firstResponder == page?.webView else { return }
+        guard elementId != currentOverlay?.elementId else { return }
         guard elementId != previouslyFocusedElementId || lastFocusOutTimestamp.timeIntervalSinceNow < -0.1 else {
             Logger.shared.logDebug("Focus in detected within 100ms after focus out on the same field, ignoring", category: .passwordManagerInternal)
             return
