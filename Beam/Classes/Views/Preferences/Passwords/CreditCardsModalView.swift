@@ -10,9 +10,12 @@ import SwiftUI
 import BeamCore
 
 struct CreditCardsModalView: View {
-    @Environment(\.presentationMode) var presentationMode
-    @State private var creditCardIsSelected = false
-    @State private var selectedEntries = IndexSet()
+    @ObservedObject var creditCardsViewModel: CreditCardListViewModel
+
+    @State private var showingEditSheet = false
+    @State private var showingRemoveAlert = false
+
+    @Environment(\.presentationMode) private var presentationMode
 
     var body: some View {
         VStack {
@@ -23,39 +26,65 @@ struct CreditCardsModalView: View {
                 Spacer()
             }.padding(20)
 
-            CreditCardsTableView(allCreditCards: [], onSelectionChanged: { idx in
-                DispatchQueue.main.async {
-                    self.creditCardIsSelected = idx.count > 0
-                    self.selectedEntries = idx
-                }
-            }).frame(width: 526, height: 242, alignment: .center)
+            CreditCardsTableView(allCreditCards: creditCardsViewModel.allCreditCardTableViewItems) { idx in
+                creditCardsViewModel.updateSelection(idx)
+            } onDoubleTap: { row in
+                creditCardsViewModel.editCreditCard(row: row)
+                showingEditSheet = true
+            }
+            .frame(width: 526, height: 242, alignment: .center)
             .border(BeamColor.Mercury.swiftUI, width: 1)
             .background(BeamColor.Generic.background.swiftUI)
 
             HStack {
-                Button {
-                } label: {
-                    Image("basicAdd")
-                        .renderingMode(.template)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                }.buttonStyle(BorderedButtonStyle())
-
-                Button {
-                } label: {
-                    Image("basicRemove")
-                        .renderingMode(.template)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                }.buttonStyle(BorderedButtonStyle())
-                .disabled(!self.creditCardIsSelected)
+                BeamControlGroup {
+                    Group {
+                        Button {
+                            creditCardsViewModel.editCreditCard(row: nil)
+                            showingEditSheet = true
+                        } label: {
+                            Image("basicAdd")
+                                .renderingMode(.template)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        }
+                        .buttonStyle(.bordered)
+                        Button {
+                            self.showingRemoveAlert = true
+                        } label: {
+                            Image("basicRemove")
+                                .renderingMode(.template)
+                                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        }
+                        .buttonStyle(.bordered)
+                        .disabled(creditCardsViewModel.disableRemoveButton)
+                    }
+                }
+                .fixedSize()
                 Spacer()
                 Button {
                     dismiss()
                 } label: {
                     Text("Done")
-                }.buttonStyle(BorderedButtonStyle())
-            }.padding(.vertical, 20)
+                }.buttonStyle(.bordered)
+            }
+            .padding(.vertical, 20)
             .frame(width: 526, alignment: .center)
-        }.frame(width: 568, height: 361, alignment: .center)
+        }
+        .frame(width: 568, height: 361, alignment: .center)
+        .sheet(isPresented: $showingEditSheet) {
+            CreditCardEditView(entry: creditCardsViewModel.editedCreditCard) { entry in
+                if let entry = entry {
+                    creditCardsViewModel.saveCreditCard(entry)
+                }
+            }
+        }
+        .alert(isPresented: $showingRemoveAlert) {
+            Alert(title: Text(creditCardsViewModel.alertMessageToDeleteSelectedEntries()),
+                  primaryButton: .destructive(Text("Remove"), action: {
+                creditCardsViewModel.deleteSelectedCreditCards()
+            }),
+                  secondaryButton: .cancel(Text("Cancel")))
+        }
     }
 
     private func dismiss() {
@@ -65,27 +94,25 @@ struct CreditCardsModalView: View {
 
 struct CreditCardsModalView_Previews: PreviewProvider {
     static var previews: some View {
-        CreditCardsModalView()
+        CreditCardsModalView(creditCardsViewModel: CreditCardListViewModel())
     }
 }
 
 struct CreditCardsTableView: View {
     var allCreditCards: [CreditCardTableViewItem]
     var onSelectionChanged: (IndexSet) -> Void
+    var onDoubleTap: ((Int) -> Void)?
 
-    var creditCardsColumns = [
+    static let creditCardsColumns = [
         TableViewColumn(key: "cardDescription", title: "Card Description", type: TableViewColumn.ColumnType.IconAndText, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
-        TableViewColumn(key: "cardInformations", title: "Card Informations", type: TableViewColumn.ColumnType.TwoTextField, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
+        TableViewColumn(key: "cardInformations", title: "Card Details", type: TableViewColumn.ColumnType.TwoTextField, editable: true, sortable: false, resizable: false, width: 200, fontSize: 11),
         TableViewColumn(key: "cardDate", title: "Card Date", type: TableViewColumn.ColumnType.Text, editable: true, sortable: false, resizable: false, width: 70, fontSize: 11)
     ]
 
     var body: some View {
-        TableView(customRowHeight: 48, hasSeparator: true, hasHeader: false, allowsMultipleSelection: false,
-                  items: allCreditCards, columns: creditCardsColumns, creationRowTitle: nil) { (_, _) in
-
-        } onSelectionChanged: { idx in
-            onSelectionChanged(idx)
-        }.frame(width: 526)
+        TableView(customRowHeight: 48, hasSeparator: true, hasHeader: false, allowsMultipleSelection: true,
+                  items: allCreditCards, columns: Self.creditCardsColumns, creationRowTitle: nil, onSelectionChanged: onSelectionChanged, onDoubleTap: onDoubleTap)
+        .frame(width: 526)
     }
 }
 
@@ -105,13 +132,10 @@ class CreditCardTableViewItem: TwoTextFieldViewItem {
     var cardDate: String
 
     init(creditCard: CreditCardEntry) {
-        let mm = String(format: "%02d", creditCard.expirationMonth)
-        let yy = String(format: "%02d", creditCard.expirationYear % 100)
-        self.cardDate = "\(mm)/\(yy)"
+        self.cardDate = creditCard.formattedDate
         super.init()
-        self.favIcon = NSImage(named: "preferences-credit_card")
         self.text = creditCard.cardDescription
-        self.topTextFieldValue = creditCard.cardNumber
+        self.topTextFieldValue = creditCard.formattedNumber // or obfuscated
         self.botTextFieldValue = creditCard.cardHolder
         self.topTextFieldPlaceholder = "Card Number"
         self.botTextFieldPlaceholder = "Cardholder"

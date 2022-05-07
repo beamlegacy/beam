@@ -173,6 +173,16 @@ class CreditCardsDB: CreditCardStore {
         try migrator.migrate(dbPool)
     }
 
+    func fetchRecord(uuid: UUID) throws -> CreditCardRecord? {
+        do {
+            return try dbPool.read { db in
+                return try CreditCardRecord.filter(CreditCardRecord.Columns.uuid == uuid).fetchOne(db)
+            }
+        } catch {
+            throw CreditCardsDBError.errorFetchingCreditCards(errorMsg: error.localizedDescription)
+        }
+    }
+
     func fetchAll() throws -> [CreditCardRecord] {
         do {
             return try dbPool.read { db in
