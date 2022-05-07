@@ -529,6 +529,8 @@
 		873528C127354295005E7CBC /* INI in Frameworks */ = {isa = PBXBuildFile; productRef = 873528C027354295005E7CBC /* INI */; };
 		873528C327354B96005E7CBC /* ChromiumHistoryImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */; };
 		873A9FFC27E3B4A20092A834 /* URLProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 873A9FFB27E3B4A20092A834 /* URLProvider.swift */; };
+		874111A22825894A0024C348 /* WebAutofillPositionModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */; };
+		874111A9282592D60024C348 /* autofill-display.json in Resources */ = {isa = PBXBuildFile; fileRef = 874111A8282592D60024C348 /* autofill-display.json */; };
 		8746CCA6266DFDCD00F44D41 /* PasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */; };
 		87572B9E27B26EB9003DACFB /* ChromiumImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */; };
 		8757CB7127FB616B00A611D6 /* WebFieldAutofillOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */; };
@@ -566,6 +568,7 @@
 		87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
 		87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */; };
+		87CF1CD528242A0300FB0530 /* CGRect+Insets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */; };
 		87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */; };
 		87CF1CBF28216BCE00FB0530 /* CreditCardAutofillBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */; };
 		87CF1CC32823CB2900FB0530 /* CreditCardEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */; };
@@ -2025,6 +2028,8 @@
 		873528BD2735335F005E7CBC /* FirefoxImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirefoxImporter.swift; sourceTree = "<group>"; };
 		873528C227354B96005E7CBC /* ChromiumHistoryImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumHistoryImporter.swift; sourceTree = "<group>"; };
 		873A9FFB27E3B4A20092A834 /* URLProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLProvider.swift; sourceTree = "<group>"; };
+		874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPositionModifier.swift; sourceTree = "<group>"; };
+		874111A8282592D60024C348 /* autofill-display.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "autofill-display.json"; sourceTree = "<group>"; };
 		8746CCA5266DFDCD00F44D41 /* PasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporter.swift; sourceTree = "<group>"; };
 		87572B9D27B26EB9003DACFB /* ChromiumImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumImporter.swift; sourceTree = "<group>"; };
 		8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillOverlay.swift; sourceTree = "<group>"; };
@@ -2062,6 +2067,7 @@
 		87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
 		87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSettingsCell.swift; sourceTree = "<group>"; };
+		87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+Insets.swift"; sourceTree = "<group>"; };
 		87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherCreditCardsModal.swift; sourceTree = "<group>"; };
 		87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutofillBuilder.swift; sourceTree = "<group>"; };
 		87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardEntryTests.swift; sourceTree = "<group>"; };
@@ -4868,6 +4874,7 @@
 			children = (
 				872F658827F1C29A005475B8 /* shared-credentials.json */,
 				872F658A27F1C36A005475B8 /* canonical-hostnames.json */,
+				874111A8282592D60024C348 /* autofill-display.json */,
 			);
 			path = PasswordQuirks;
 			sourceTree = "<group>";
@@ -6135,6 +6142,7 @@
 				370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */,
 				CE304C3C27DB566D005AE274 /* String+base64url.swift */,
 				DAF063F027D122D1000406DE /* Date+DayTruncated.swift */,
+				87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -6910,6 +6918,7 @@
 				8A27DC8D27EDC86A0044A9A2 /* Web */,
 				BAA670958C9BAC6322CDA80A /* PasswordOverlayController.swift */,
 				8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */,
+				874111A12825894A0024C348 /* WebAutofillPositionModifier.swift */,
 				87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */,
 				87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */,
 				BAA675B80B855A4B2886805B /* PasswordMessageHandler.swift */,
@@ -7831,6 +7840,7 @@
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8A27DCA427EDC8CA0044A9A2 /* PasswordManager_prod.js in Resources */,
 				8A27DCA327EDC8CA0044A9A2 /* EmbedNode_prod.js in Resources */,
+				874111A9282592D60024C348 /* autofill-display.json in Resources */,
 				A03B908D27BE99AC001FBE64 /* Capture.json in Resources */,
 				8AE3EA9627F36D5E0010A42C /* UITests-Media.html in Resources */,
 				8A14E32A27F6468600DDCCE3 /* Geolocation_prod.js in Resources */,
@@ -8184,6 +8194,7 @@
 				37B85B4527A2C21D003871F9 /* URL+AvailableFileURL.swift in Sources */,
 				DA8D947F27FF17D90073AD2D /* NoteScores.swift in Sources */,
 				DA52E967276B4430008D4990 /* BrowserType.swift in Sources */,
+				87CF1CD528242A0300FB0530 /* CGRect+Insets.swift in Sources */,
 				DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */,
 				DAEC880F2739953A0087FC18 /* BatchFrecencyUpdater.swift in Sources */,
 				A5208E27261F7419006193AF /* String+Calculations.swift in Sources */,
@@ -8345,6 +8356,7 @@
 				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
 				8AF4F7CF275A674B0081B6B5 /* EmbedContentStrategy.swift in Sources */,
 				DAF063EF27D10CAD000406DE /* DomainPath0ReadingDay.swift in Sources */,
+				874111A22825894A0024C348 /* WebAutofillPositionModifier.swift in Sources */,
 				A536DE0F269C6ABD003FAAF4 /* ToastTextIconView.swift in Sources */,
 				A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */,
 				03CA9A9725CC61BF00E7CFA2 /* ContentBlockingManager.swift in Sources */,
