@@ -27,8 +27,11 @@ enum PasswordSaveAction {
 class PasswordOverlayController: NSObject, WebPageRelated {
     private var scope = Set<AnyCancellable>()
     private let queue = DispatchQueue(label: "WebFieldAutofillOverlay")
+    private let passwordManager: PasswordManager
+    private let creditCardManager: CreditCardAutofillManager
     private let userInfoStore: UserInformationsStore
     private let credentialsBuilder: PasswordManagerCredentialsBuilder
+    private let creditCardBuilder: CreditCardAutofillBuilder
     private let scrollUpdater = PassthroughSubject<WebFrames.FrameInfo, Never>()
     private var currentOverlayInternal: WebFieldAutofillOverlay?
     private let encoder: JSONEncoder
@@ -59,14 +62,22 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         }
     }
 
-    init(userInfoStore: UserInformationsStore) {
+    init(passwordManager: PasswordManager = .shared, creditCardManager: CreditCardAutofillManager = .shared, userInfoStore: UserInformationsStore) {
+        self.passwordManager = passwordManager
+        self.creditCardManager = creditCardManager
         self.userInfoStore = userInfoStore
         credentialsBuilder = PasswordManagerCredentialsBuilder()
+        creditCardBuilder = CreditCardAutofillBuilder()
         encoder = JSONEncoder()
         decoder = BeamJSONDecoder()
         super.init()
         PreferencesManager.$autofillUsernamePasswords.sink { [weak self] autofill in
-            if !autofill {
+            if !autofill && self?.currentOverlay?.autocompleteGroup.action.isPasswordRelated != false {
+                self?.dismiss()
+            }
+        }.store(in: &scope)
+        PreferencesManager.$autofillCreditCards.sink { [weak self] autofill in
+            if !autofill && self?.currentOverlay?.autocompleteGroup.action == .payment {
                 self?.dismiss()
             }
         }.store(in: &scope)
@@ -74,6 +85,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     func prepareForLoading() {
         credentialsBuilder.enterPage(url: self.page?.url)
+        creditCardBuilder.enterPage(url: self.page?.url)
         fieldClassifiers?.clear()
         dismissPasswordManager()
         clearInputFocus()
@@ -87,6 +99,21 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private func nextFrameIdentifier() -> Int {
         currentFrameIdentifier += 1
         return currentFrameIdentifier
+    }
+
+    private func isAutofillEnabled(for action: WebAutocompleteAction) -> Bool {
+        switch action {
+        case .login, .createAccount:
+            return PreferencesManager.autofillUsernamePasswords
+        case .payment:
+            return PreferencesManager.autofillCreditCards
+        case .personalInfo:
+            return PreferencesManager.autofillAdresses
+        }
+    }
+
+    private func isSaveEnabled(for action: WebAutocompleteAction) -> Bool {
+        isAutofillEnabled(for: action)
     }
 
     func requestInputFields(frameInfo: WKFrameInfo?) {
@@ -112,10 +139,6 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             Logger.shared.logError(String(describing: error), category: .passwordManager)
             dismissPasswordManager()
             clearInputFocus()
-            return
-        }
-
-        guard PreferencesManager.autofillUsernamePasswords else {
             return
         }
 
@@ -158,16 +181,13 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 
     func inputFieldDidGainFocus(_ elementId: String, frameInfo: WKFrameInfo?, contents: String?) {
         Logger.shared.logDebug("Text field \(elementId) gained focus.", category: .passwordManagerInternal)
-        guard PreferencesManager.autofillUsernamePasswords else {
-            return
-        }
         guard page?.webviewWindow?.firstResponder == page?.webView else { return }
         guard elementId != currentOverlay?.elementId else { return }
         guard elementId != previouslyFocusedElementId || lastFocusOutTimestamp.timeIntervalSinceNow < -0.1 else {
             Logger.shared.logDebug("Focus in detected within 100ms after focus out on the same field, ignoring", category: .passwordManagerInternal)
             return
         }
-        guard let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo), autocompleteGroup.action.isPasswordRelated else {
+        guard let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo) else {
             dismissPasswordManager()
             clearInputFocus()
             return
@@ -189,13 +209,25 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func handleInputFieldFocus(elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?, contents: String?) {
-        guard menuOptions(for: elementId, emptyField: true, inGroup: autocompleteGroup) != nil else { return }
+        guard isAutofillEnabled(for: autocompleteGroup.action) else { return }
+        guard menuOptions(for: elementId, emptyField: true, inGroup: autocompleteGroup) != nil || autocompleteGroup.action == .payment else { return }
         let overlay = WebFieldAutofillOverlay(page: page, scrollUpdater: scrollUpdater, frameInfo: frameInfo, elementId: elementId, inGroup: autocompleteGroup) { frameInfo in
-            self.showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+            self.showWebFieldAutofillMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
         }
         overlay.showIcon(frameInfo: frameInfo)
         currentOverlay = overlay
         showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+    }
+
+    private func showWebFieldAutofillMenu(for elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?) {
+        switch autocompleteGroup.action {
+        case .login, .createAccount:
+            showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+        case .payment:
+            showCreditCardsMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+        default:
+            break
+        }
     }
 
     private func showPasswordManagerMenu(for elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?) {
@@ -205,6 +237,16 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             DispatchQueue.main.async {
                 self.currentOverlay?.showPasswordManagerMenu(frameInfo: frameInfo, viewModel: viewModel)
             }
+        }
+    }
+
+    private func showCreditCardsMenu(for elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?) {
+        let creditCards = creditCardManager.fetchAll()
+        guard !creditCards.isEmpty else { return }
+        let viewModel = CreditCardsMenuViewModel(entries: creditCards)
+        viewModel.delegate = self
+        DispatchQueue.main.async {
+            self.currentOverlay?.showCreditCardsMenu(frameInfo: frameInfo, viewModel: viewModel)
         }
     }
 
@@ -271,6 +313,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             guard let self = self else { return }
             if let values = dict ?? self.valuesOnFocusOut {
                 self.updateStoredValues(with: values, userInput: true, frameInfo: frameInfo)
+                self.saveCreditCardIfChanged()
                 self.saveCredentialsIfChanged(allowEmptyUsername: true)
             }
             self.fieldClassifiers?.clear()
@@ -333,14 +376,30 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func updateStoredValues(with values: [String: String], userInput: Bool, frameInfo: WKFrameInfo?) {
+        var fieldsWithContents = values.filter { !$0.value.isEmpty }
+        for elementId in fieldsWithContents.keys {
+            guard let autocompleteGroup = fieldClassifiers?.autocompleteGroup(for: elementId, frameInfo: frameInfo),
+                  let role = autocompleteGroup.relatedFields.first(where: { $0.id == elementId })?.role,
+                  let value = fieldsWithContents[elementId]
+            else { continue }
+            switch autocompleteGroup.action {
+            case .payment:
+                creditCardBuilder.update(value: value, forRole: role)
+                fieldsWithContents[elementId] = nil
+            default:
+                break
+            }
+        }
+        // all remaining fields can be considered for sign in / sign up.
         let (loginFieldIds, passwordFieldIds) = passwordFieldIdsForStorage(frameInfo: frameInfo)
-        let firstNonEmptyLogin = values.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
-        let firstNonEmptyPassword = values.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
+        let firstNonEmptyLogin = fieldsWithContents.valuesMatchingKeys(in: loginFieldIds).first { !$0.isEmpty }
+        let firstNonEmptyPassword = fieldsWithContents.valuesMatchingKeys(in: passwordFieldIds).first { !$0.isEmpty }
         credentialsBuilder.updateValues(username: firstNonEmptyLogin, password: firstNonEmptyPassword, userInput: userInput)
     }
 
     private func saveCredentialsIfChanged(allowEmptyUsername: Bool) {
-        guard let hostname = getPageHost(),
+        guard isSaveEnabled(for: .login),
+              let hostname = getPageHost(),
               let credentials = credentialsBuilder.unsavedCredentials(allowEmptyUsername: allowEmptyUsername),
               let saveAction = saveCredentialsAction(hostname: hostname, credentials: credentials)
         else { return }
@@ -361,12 +420,12 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             case .update:
                 savedHostname = hostname
             }
-            PasswordManager.shared.save(hostname: savedHostname, username: credentials.username ?? "", password: credentials.password)
+            self.passwordManager.save(hostname: savedHostname, username: credentials.username ?? "", password: credentials.password)
         }
     }
 
     private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
-        if let storedPassword = PasswordManager.shared.password(hostname: hostname, username: credentials.username ?? "") {
+        if let storedPassword = passwordManager.password(hostname: hostname, username: credentials.username ?? "") {
             guard credentials.password != storedPassword else { return nil }
             return .update
         }
@@ -392,6 +451,44 @@ class PasswordOverlayController: NSObject, WebPageRelated {
         let alert = NSAlert()
         alert.messageText = alertMessage
         alert.informativeText = "You can view and remove saved passwords in Beam Passwords preferences."
+        let saveButton = alert.addButton(withTitle: saveButtonTitle)
+        let cancelButton = alert.addButton(withTitle: "Not Now")
+        saveButton.tag = NSApplication.ModalResponse.OK.rawValue
+        cancelButton.tag = NSApplication.ModalResponse.cancel.rawValue
+        alert.beginSheetModal(for: window) { response in
+            onDismiss(response == .OK)
+        }
+    }
+
+    private func saveCreditCardIfChanged() {
+        guard isSaveEnabled(for: .payment), var creditCard = creditCardBuilder.unsavedCreditCard() else {
+            return
+        }
+        creditCardBuilder.markSaved()
+        if creditCard.databaseID == nil && creditCard.cardDescription.isEmpty {
+            creditCard.cardDescription = creditCard.cardHolder
+        }
+        confirmSaveCreditCard(update: creditCard.databaseID != nil, description: creditCard.cardDescription) { [weak self] save in
+            guard save else { return }
+            self?.creditCardManager.save(entry: creditCard)
+        }
+    }
+
+    private func confirmSaveCreditCard(update: Bool, description: String, onDismiss: @escaping (Bool) -> Void) {
+        guard let window = self.page?.webviewWindow else {
+            return onDismiss(false)
+        }
+        let alertMessage: String
+        let saveButtonTitle: String
+        if update {
+            alertMessage = "Would you like to update this credit card?"
+            saveButtonTitle = "Update Credit Card"
+        } else {
+            alertMessage = "Would you like to save this credit card?"
+            saveButtonTitle = "Save Credit Card"
+        }
+        let alert = NSAlert()
+        alert.messageText = alertMessage
         let saveButton = alert.addButton(withTitle: saveButtonTitle)
         let cancelButton = alert.addButton(withTitle: "Not Now")
         saveButton.tag = NSApplication.ModalResponse.OK.rawValue
@@ -429,7 +526,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
 extension PasswordOverlayController: PasswordManagerMenuDelegate {
     func deleteCredentials(_ entries: [PasswordManagerEntry]) {
         for entry in entries {
-            PasswordManager.shared.markDeleted(hostname: entry.minimizedHost, for: entry.username)
+            passwordManager.markDeleted(hostname: entry.minimizedHost, for: entry.username)
         }
     }
 
@@ -439,7 +536,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManager()
             return
         }
-        guard let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) else {
+        guard let password = passwordManager.password(hostname: entry.minimizedHost, username: entry.username) else {
             Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
             return
         }
@@ -553,6 +650,46 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .passwordManagerInternal)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
+        }
+    }
+}
+
+extension PasswordOverlayController: CreditCardsMenuDelegate {
+    func deleteCreditCards(_ entries: [CreditCardEntry]) {
+        for entry in entries {
+            creditCardManager.markDeleted(entry: entry)
+        }
+    }
+
+    func fillCreditCard(_ entry: CreditCardEntry) {
+        guard let autocompleteGroup = currentOverlay?.autocompleteGroup, autocompleteGroup.action == .payment else {
+            Logger.shared.logError("AutocompleteContext (payment) mismatch for id \(String(describing: currentOverlay?.elementId))", category: .passwordManager)
+            dismissPasswordManager()
+            return
+        }
+        currentOverlay?.revertMenuToDefault()
+        creditCardBuilder.autofill(creditCard: entry)
+        Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManagerInternal)
+        let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
+        let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
+            switch field.role {
+            case .cardNumber:
+                return WebFieldAutofill(id: field.id, value: entry.cardNumber, background: backgroundColor)
+            case .cardHolder:
+                return WebFieldAutofill(id: field.id, value: entry.cardHolder, background: backgroundColor)
+            case .cardExpirationDate:
+                return WebFieldAutofill(id: field.id, value: entry.formattedDate, background: backgroundColor)
+            case .cardExpirationMonth:
+                return WebFieldAutofill(id: field.id, value: entry.formattedMonth, background: backgroundColor)
+            case .cardExpirationYear:
+                return WebFieldAutofill(id: field.id, value: entry.formattedYear, background: backgroundColor)
+            default:
+                return nil
+            }
+        }
+        self.fillWebTextFields(autofill)
+        DispatchQueue.main.async {
+            self.dismissPasswordManager()
         }
     }
 }

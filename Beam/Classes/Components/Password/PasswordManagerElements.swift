@@ -65,6 +65,16 @@ enum DOMInputAutocomplete: String, Codable {
     case newPassword = "new-password"
     case currentPassword = "current-password"
     case tel = "tel"
+    case creditCardFullName = "cc-name"
+    case creditCardGivenName = "cc-given-name"
+    case creditCardAdditionalName = "cc-additional-name"
+    case creditCardFamilyName = "cc-family-name"
+    case creditCardNumber = "cc-number"
+    case creditCardExpirationDate = "cc-exp"
+    case creditCardExpirationMonth = "cc-exp-month"
+    case creditCardExpirationYear = "cc-exp-year"
+    case creditCardSecurityCode = "cc-csc"
+    case creditCardType = "cc-type"
 }
 
 struct DOMRect: Codable {

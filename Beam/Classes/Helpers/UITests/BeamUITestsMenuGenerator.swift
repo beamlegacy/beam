@@ -156,7 +156,7 @@ class BeamUITestsMenuGenerator {
     private func populateCreditCardsDB() {
         let creditCards = [
             CreditCardEntry(cardDescription: "John's personal Visa", cardNumber: "4701234567890123", cardHolder: "John Appleseed", expirationMonth: 4, expirationYear: 2025),
-            CreditCardEntry(cardDescription: "Jane's company Amex", cardNumber: "374912345678912", cardHolder: "Jane Appleseed", expirationMonth: 8, expirationYear: 2024)
+            CreditCardEntry(cardDescription: "Jane's company Amex", cardNumber: "374912345678910", cardHolder: "Jane Appleseed", expirationMonth: 8, expirationYear: 2024)
         ]
         for creditCard in creditCards {
             CreditCardAutofillManager.shared.save(entry: creditCard)

@@ -534,6 +534,7 @@
 		8757CB7127FB616B00A611D6 /* WebFieldAutofillOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */; };
 		8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */ = {isa = PBXBuildFile; fileRef = 8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */; };
 		8760F45926F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */; };
+		87640215281FD70300BE4073 /* CreditCardEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87640214281FD70300BE4073 /* CreditCardEditView.swift */; };
 		8768565D27709210002A8069 /* BrowserPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768565C27709210002A8069 /* BrowserPasswordImporter.swift */; };
 		8768566427709413002A8069 /* ChromiumPasswordImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8768566327709413002A8069 /* ChromiumPasswordImporter.swift */; };
 		876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */; };
@@ -553,7 +554,11 @@
 		8784956927C6D31F00195C62 /* WebFieldClassifiers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8784956827C6D31E00195C62 /* WebFieldClassifiers.swift */; };
 		87915730279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */; };
 		879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879157362799EECF00AE1040 /* BrowserImporter.swift */; };
+		879CA70F2819A1CF00D1C395 /* StoredCreditCardCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CA70E2819A1CF00D1C395 /* StoredCreditCardCell.swift */; };
+		879CA7162819BEC300D1C395 /* CreditCardsMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CA7152819BEC300D1C395 /* CreditCardsMenu.swift */; };
+		879CA7182819C9AF00D1C395 /* CreditCardsMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CA7172819C9AF00D1C395 /* CreditCardsMenuViewModel.swift */; };
 		879CA71B281A9A0800D1C395 /* CreditCardAutofillManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CA71A281A9A0800D1C395 /* CreditCardAutofillManager.swift */; };
+		879CA71D281AE05C00D1C395 /* CreditCardListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CA71C281AE05C00D1C395 /* CreditCardListViewModel.swift */; };
 		87A551C527ADA1F100D6A22D /* WebAutofillPopoverContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */; };
 		87A87CE426C2F620009D9EE2 /* PasswordExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */; };
 		87B7394426BD640C005D2DD6 /* PasswordListViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */; };
@@ -561,6 +566,10 @@
 		87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
 		87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */; };
+		87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */; };
+		87CF1CBF28216BCE00FB0530 /* CreditCardAutofillBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */; };
+		87CF1CC32823CB2900FB0530 /* CreditCardEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */; };
+		87CF1CCB282404CB00FB0530 /* BeamControlGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */; };
 		87DB0CD527EC5F5D0071A410 /* WebFieldLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */; };
 		87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */; };
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
@@ -2021,6 +2030,7 @@
 		8757CB7027FB616B00A611D6 /* WebFieldAutofillOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldAutofillOverlay.swift; sourceTree = "<group>"; };
 		8759677E26FB8BDA0097C3CC /* UITests-Passwords.csv */ = {isa = PBXFileReference; lastKnownFileType = text; path = "UITests-Passwords.csv"; sourceTree = "<group>"; };
 		8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerCredentialsBuilder.swift; sourceTree = "<group>"; };
+		87640214281FD70300BE4073 /* CreditCardEditView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardEditView.swift; sourceTree = "<group>"; };
 		8768565C27709210002A8069 /* BrowserPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPasswordImporter.swift; sourceTree = "<group>"; };
 		8768566327709413002A8069 /* ChromiumPasswordImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordImporter.swift; sourceTree = "<group>"; };
 		876856652770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChromiumPasswordDecryptionTests.swift; sourceTree = "<group>"; };
@@ -2040,7 +2050,11 @@
 		8784956827C6D31E00195C62 /* WebFieldClassifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldClassifiers.swift; sourceTree = "<group>"; };
 		8791572F279847A600AE1040 /* AppDelegate+BrowserImportErrors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BrowserImportErrors.swift"; sourceTree = "<group>"; };
 		879157362799EECF00AE1040 /* BrowserImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImporter.swift; sourceTree = "<group>"; };
+		879CA70E2819A1CF00D1C395 /* StoredCreditCardCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StoredCreditCardCell.swift; sourceTree = "<group>"; };
+		879CA7152819BEC300D1C395 /* CreditCardsMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardsMenu.swift; sourceTree = "<group>"; };
+		879CA7172819C9AF00D1C395 /* CreditCardsMenuViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardsMenuViewModel.swift; sourceTree = "<group>"; };
 		879CA71A281A9A0800D1C395 /* CreditCardAutofillManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutofillManager.swift; sourceTree = "<group>"; };
+		879CA71C281AE05C00D1C395 /* CreditCardListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardListViewModel.swift; sourceTree = "<group>"; };
 		87A551C427ADA1F100D6A22D /* WebAutofillPopoverContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutofillPopoverContainer.swift; sourceTree = "<group>"; };
 		87A87CE326C2F620009D9EE2 /* PasswordExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordExporterTests.swift; sourceTree = "<group>"; };
 		87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordListViewModel.swift; sourceTree = "<group>"; };
@@ -2048,6 +2062,10 @@
 		87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
 		87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSettingsCell.swift; sourceTree = "<group>"; };
+		87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherCreditCardsModal.swift; sourceTree = "<group>"; };
+		87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutofillBuilder.swift; sourceTree = "<group>"; };
+		87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardEntryTests.swift; sourceTree = "<group>"; };
+		87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamControlGroup.swift; sourceTree = "<group>"; };
 		87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldLocator.swift; sourceTree = "<group>"; };
 		87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteProtocols.swift; sourceTree = "<group>"; };
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
@@ -3395,6 +3413,7 @@
 				8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */,
 				375D83BD278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift */,
 				8714A3FA28118CB6007DDF4F /* PasswordGeneratorTests.swift */,
+				87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */,
 				877888DA269C977C00D703F0 /* PasswordImporterTest.swift */,
 				8768566C27723A6E002A8069 /* PasswordListViewModelTests.swift */,
 				872F658C27F204E4005475B8 /* HostnameCanonicalizerTests.swift */,
@@ -3802,6 +3821,7 @@
 				87F47CC82669415800D01960 /* WebFieldClassifier.swift */,
 				8784956827C6D31E00195C62 /* WebFieldClassifiers.swift */,
 				8760F45826F1DCA700864D9B /* PasswordManagerCredentialsBuilder.swift */,
+				87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */,
 				87F11BDA26655170003BE98E /* MockAutocompleteStores.swift */,
 				8714A3F5281074FA007DDF4F /* MockUserInformationStore.swift */,
 				87F11BD8266533C1003BE98E /* PasswordGenerator.swift */,
@@ -4889,15 +4909,20 @@
 			isa = PBXGroup;
 			children = (
 				872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */,
+				879CA7172819C9AF00D1C395 /* CreditCardsMenuViewModel.swift */,
 				8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */,
+				879CA7152819BEC300D1C395 /* CreditCardsMenu.swift */,
 				87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */,
 				8775C5F22613212C00A26CAC /* StoredPasswordCell.swift */,
+				879CA70E2819A1CF00D1C395 /* StoredCreditCardCell.swift */,
 				A0A84FE026371A4B008F0326 /* OtherPasswordsCell.swift */,
 				87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */,
 				87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */,
 				87C539B82616297300D51877 /* SearchPasswordsCell.swift */,
 				A0A84FEA26381B64008F0326 /* OtherPasswordsModal.swift */,
+				87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */,
 				87B7394326BD640C005D2DD6 /* PasswordListViewModel.swift */,
+				879CA71C281AE05C00D1C395 /* CreditCardListViewModel.swift */,
 				A0A84FF0263835D3008F0326 /* PasswordsTableView.swift */,
 				A08D739326413DEC00A9A604 /* UserProfileMenu.swift */,
 				8770E0CA2768D9E30078288E /* WebFieldAutofillButton.swift */,
@@ -6468,6 +6493,7 @@
 				A039B14C26960F21008A2E0B /* UserInformationsModalView.swift */,
 				A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */,
 				A0AEC24F27022ADA00BEE4F3 /* PasswordEditView.swift */,
+				87640214281FD70300BE4073 /* CreditCardEditView.swift */,
 			);
 			path = Passwords;
 			sourceTree = "<group>";
@@ -6569,6 +6595,7 @@
 				A5A2D53627394F55003D0925 /* ActionableButton+Gradient.swift */,
 				A5A2D52E27393730003D0925 /* AnimatedGradient.swift */,
 				A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */,
+				87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */,
 			);
 			path = UIElements;
 			sourceTree = "<group>";
@@ -8334,6 +8361,7 @@
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteListView.swift in Sources */,
+				87CF1CBF28216BCE00FB0530 /* CreditCardAutofillBuilder.swift in Sources */,
 				8AF4F7CD275A67190081B6B5 /* EmbedContentLocalStrategy.swift in Sources */,
 				5232182227CE340800B753EF /* APIRequest+REST+Foundation.swift in Sources */,
 				527C4F302719818A00772973 /* LoggerCategoryTableViewController.swift in Sources */,
@@ -8406,6 +8434,7 @@
 				A5DE141C26491F840023F753 /* WKWebview+Zoom.swift in Sources */,
 				CE304C3B27DB5501005AE274 /* URLSession+async.swift in Sources */,
 				876F942928095C5700231B4E /* CreditCardsDB.swift in Sources */,
+				879CA7182819C9AF00D1C395 /* CreditCardsMenuViewModel.swift in Sources */,
 				4181722A2581107C00317ED8 /* NSRect+Beam.swift in Sources */,
 				37DB5A0B27BB514400534760 /* EmbedAnimator.swift in Sources */,
 				3312203428097382006A5EA1 /* UpdatePanel.swift in Sources */,
@@ -8476,6 +8505,7 @@
 				CE304C2D27DB544B005AE274 /* GCPAuthenticationManager.swift in Sources */,
 				96FACC8A26079C7E0088DD67 /* InputText.swift in Sources */,
 				A5CD2343270C83E900240987 /* MeetingFormatterView.swift in Sources */,
+				879CA70F2819A1CF00D1C395 /* StoredCreditCardCell.swift in Sources */,
 				418172002581107C00317ED8 /* NotificationName+Beam.swift in Sources */,
 				8ADD060A27296E00004C3EC9 /* WebPositionsMessageHandler.swift in Sources */,
 				A0DB19F026829BF900956579 /* AllowListViewModel.swift in Sources */,
@@ -8562,6 +8592,7 @@
 				87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */,
 				A54A45312767970E00B9AE1B /* UserInfoRequest+Foundation.swift in Sources */,
 				96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */,
+				87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
 				370794DC27D7AB0E00D2768B /* WebContentDescription.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
@@ -8722,6 +8753,7 @@
 				418172382581107C00317ED8 /* TextNode.swift in Sources */,
 				418172502581107C00317ED8 /* NoteView.swift in Sources */,
 				A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */,
+				879CA7162819BEC300D1C395 /* CreditCardsMenu.swift in Sources */,
 				A0B8C44F26D550D300130FC7 /* Beam5ToBeam6MigrationPolicy.swift in Sources */,
 				414B989925A21BB0002E81A3 /* BeamTextEdit+Formatter.swift in Sources */,
 				4181725F2581107C00317ED8 /* DocumentManager.swift in Sources */,
@@ -8868,6 +8900,7 @@
 				418172372581107C00317ED8 /* TextEditOperations.swift in Sources */,
 				A0F558F126BD536A0024C47E /* PreferencesManager+EditorDebug.swift in Sources */,
 				333A0A20268C4EED004B7905 /* KeyEventHandlingView.swift in Sources */,
+				87CF1CCB282404CB00FB0530 /* BeamControlGroup.swift in Sources */,
 				A0A84FEB26381B64008F0326 /* OtherPasswordsModal.swift in Sources */,
 				A5BAD84E27BF520F00B9AFF3 /* SoundEffectPlayer.swift in Sources */,
 				A570D32E27591C27003B239D /* ReadSizeViewModifier.swift in Sources */,
@@ -8944,8 +8977,10 @@
 				37B85B7927A2C81B003871F9 /* DownloadListItem.swift in Sources */,
 				370794CF27D7AA0300D2768B /* PDFDocumentViewCoordinator.swift in Sources */,
 				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
+				879CA71D281AE05C00D1C395 /* CreditCardListViewModel.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
 				A5297F3A27AC3465006B3E1F /* SearchEngineAutocompleter.swift in Sources */,
+				87640215281FD70300BE4073 /* CreditCardEditView.swift in Sources */,
 				A0614EEC270B383000C38F82 /* GoogleEvent.swift in Sources */,
 				CE304C3127DB547C005AE274 /* Errors.swift in Sources */,
 				BAA67C5AEE52409E39DB25C8 /* BeamWebViewConfiguration.swift in Sources */,
@@ -9100,6 +9135,7 @@
 				A5EE8C5A27B8B67800800661 /* BeamNote+DocumentManagerTests.swift in Sources */,
 				52A7DE3826AED01A003E770E /* MyRemoteObjectManagerNetworkTests.swift in Sources */,
 				332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */,
+				87CF1CC32823CB2900FB0530 /* CreditCardEntryTests.swift in Sources */,
 				375D83BE278D64140064C246 /* LinkMouseOverMessageHandlerTests.swift in Sources */,
 				8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */,
 				87685676277371A7002A8069 /* MockPasswordsDB.swift in Sources */,
