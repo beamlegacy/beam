@@ -527,7 +527,7 @@ class ClusteringManager: ObservableObject {
         orphanedUrlManager.save()
     }
 
-    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL, correctedPages: [ClusteringManager.PageID: UUID]?) {
+    public func exportSession(sessionExporter: ClusteringSessionExporter, to: URL?, correctedPages: [ClusteringManager.PageID: UUID]?) {
         for group in self.clusteredPagesId.enumerated() {
             let notesInGroup = self.clusteredNotesId[group.offset]
             for noteId in notesInGroup {
@@ -544,7 +544,9 @@ class ClusteringManager: ObservableObject {
                 sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), tabColouringGroupId: tabColouringGroupId, userCorrectionGroupId: correctionGroupId ?? nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, id: urlId, parentId: informationForId.parentId))
             }
         }
-        sessionExporter.export(to: to, sessionId: self.sessionId)
+
+        let pathUrl: URL = to ?? URL(fileURLWithPath: NSTemporaryDirectory())
+        sessionExporter.export(to: pathUrl, sessionId: self.sessionId, keepFile: (to != nil))
         sessionExporter.urls = [AnyUrl]()
     }
 

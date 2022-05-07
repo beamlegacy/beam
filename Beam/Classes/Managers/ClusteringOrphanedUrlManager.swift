@@ -98,7 +98,7 @@ class ClusteringSessionExporter {
         urls.append(anyUrl)
     }
 
-    func export(to: URL, sessionId: UUID) {
+    func export(to: URL, sessionId: UUID, keepFile: Bool) {
         let destination = to.appendingPathComponent("beam_clustering_session-\(sessionId)-\(BeamDate.now).csv")
         let writer = CsvRowsWriter(header: AnyUrl.header, rows: self.urls)
         do {
@@ -109,7 +109,9 @@ class ClusteringSessionExporter {
                 Task {
                     do {
                         _ = try await gcsManager.uploadFile(filename: filename, path: destination)
-                        try fileManager.removeItem(atPath: destination.path)
+                        if !keepFile {
+                            try fileManager.removeItem(atPath: destination.path)
+                        }
                     } catch let err as GCSObjectManagerErrors where err == GCSObjectManagerErrors.disabledService {
                         Logger.shared.logWarning(err.localizedDescription, category: .general)
                     } catch let err {
