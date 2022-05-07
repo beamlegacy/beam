@@ -37,7 +37,7 @@ class CreditCardAutofillManager {
     private func creditCardEntries(for records: [CreditCardRecord]) throws -> [CreditCardEntry] {
         try records.map { record in
             let cardNumber = try record.decryptedCardNumber()
-            return CreditCardEntry(cardDescription: record.cardDescription, cardNumber: cardNumber, cardHolder: record.cardHolder, expirationMonth: record.expirationMonth, expirationYear: record.expirationYear)
+            return CreditCardEntry(databaseID: record.uuid, cardDescription: record.cardDescription, cardNumber: cardNumber, cardHolder: record.cardHolder, expirationMonth: record.expirationMonth, expirationYear: record.expirationYear)
         }
     }
 
@@ -56,9 +56,14 @@ class CreditCardAutofillManager {
     @discardableResult
     func save(entry: CreditCardEntry) -> CreditCardRecord? {
         do {
-            let creditCardRecord = try creditCardsDB.addRecord(description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear)
+            let savedRecord: CreditCardRecord
+            if let uuid = entry.databaseID, let updatedRecord = try creditCardsDB.fetchRecord(uuid: uuid) {
+                savedRecord = try creditCardsDB.update(record: updatedRecord, description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear)
+            } else {
+                savedRecord = try creditCardsDB.addRecord(description: entry.cardDescription, cardNumber: entry.cardNumber, holder: entry.cardHolder, expirationMonth: entry.expirationMonth, expirationYear: entry.expirationYear)
+            }
             changeSubject.send()
-            return creditCardRecord
+            return savedRecord
         } catch CreditCardsDBError.cantSave(let errorMsg) {
             Logger.shared.logError("Error while saving credit card \(entry.cardDescription): \(errorMsg)", category: .creditCardsDB)
         } catch CreditCardsDBError.cantEncryptCardNumber {
@@ -67,6 +72,19 @@ class CreditCardAutofillManager {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .creditCardsDB)
         }
         return nil
+    }
+
+    func markDeleted(entry: CreditCardEntry) {
+        do {
+            guard let uuid = entry.databaseID, let deletedRecord = try creditCardsDB.fetchRecord(uuid: uuid) else {
+                Logger.shared.logError("Credit card to be deleted cannot be found: \(entry.cardDescription)", category: .creditCardsDB)
+                return
+            }
+            try creditCardsDB.markDeleted(record: deletedRecord)
+            changeSubject.send()
+        } catch {
+            Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .creditCardsDB)
+        }
     }
 
     func markAllDeleted() {

@@ -20,6 +20,10 @@ class MockCreditCardStore: CreditCardStore {
         _ = addRecord(description: "Black Card", cardNumber: "000000000000000", holder: "Jean-Louis Darmon", expirationMonth: 6, expirationYear: 2022)
     }
 
+    func fetchRecord(uuid: UUID) -> CreditCardRecord? {
+        creditCards[uuid]
+    }
+
     func fetchAll() -> [CreditCardRecord] {
         creditCards.values.filter { $0.deletedAt != nil }
     }

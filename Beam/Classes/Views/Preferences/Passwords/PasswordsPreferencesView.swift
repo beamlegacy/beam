@@ -10,32 +10,35 @@ import Preferences
 import BeamCore
 
 let PasswordsPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .passwords, title: "Passwords", imageName: "preferences-passwords") {
-    PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel())
+    PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
 }
 
 struct PasswordsPreferencesView: View {
     private let contentWidth: Double = PreferencesManager.contentWidth
     var passwordsViewModel: PasswordListViewModel
+    var creditCardsViewModel: CreditCardListViewModel
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section(bottomDivider: true) {
                 Text("").labelsHidden()
             } content: {
-                Passwords(passwordsViewModel: passwordsViewModel)
+                VStack {
+                    Passwords(passwordsViewModel: passwordsViewModel)
+                }
             }
-//            Preferences.Section {
-//                Text("").labelsHidden()
-//            } content: {
-//                Webforms()
-//            }
+            Preferences.Section {
+                Text("").labelsHidden()
+            } content: {
+                Webforms(creditCardsViewModel: creditCardsViewModel)
+            }
         }
     }
 }
 
 struct PasswordsPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel())
+        PasswordsPreferencesView(passwordsViewModel: PasswordListViewModel(), creditCardsViewModel: CreditCardListViewModel())
     }
 }
 
@@ -101,29 +104,34 @@ struct Passwords: View {
                     Spacer()
                 }
                 HStack {
-                    Button {
-                        showingAddPasswordSheet = true
-                    } label: {
-                        Image("basicAdd")
-                            .renderingMode(.template)
-                    }.buttonStyle(BorderedButtonStyle())
-                        .sheet(isPresented: $showingAddPasswordSheet) {
-                            PasswordEditView(entry: nil, password: "", editType: .create)
-                                .frame(width: 400, height: 179, alignment: .center)
+                    Group {
+                        Group {
+                            Button {
+                                showingAddPasswordSheet = true
+                            } label: {
+                                Image("basicAdd")
+                                    .renderingMode(.template)
+                            }.buttonStyle(.bordered)
+                                .sheet(isPresented: $showingAddPasswordSheet) {
+                                    PasswordEditView(entry: nil, password: "", editType: .create)
+                                        .frame(width: 400, height: 179, alignment: .center)
+                                }
+                            Button {
+                                promptDeletePasswordsAlert()
+                            } label: {
+                                Image("basicRemove")
+                                    .renderingMode(.template)
+                            }.buttonStyle(.bordered)
+                                .disabled(passwordsViewModel.selectedEntries.count == 0)
                         }
-                    Button {
-                        promptDeletePasswordsAlert()
-                    } label: {
-                        Image("basicRemove")
-                            .renderingMode(.template)
-                    }.buttonStyle(BorderedButtonStyle())
-                        .disabled(passwordsViewModel.selectedEntries.count == 0)
+                    }
+                    .fixedSize()
 
                     Button {
                         showingEditPasswordSheet = true
                     } label: {
                         Text("Details…")
-                    }.buttonStyle(BorderedButtonStyle())
+                    }.buttonStyle(.bordered)
                         .sheet(isPresented: $showingEditPasswordSheet) {
                             if let entry = passwordsViewModel.selectedEntries.first,
                                let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
@@ -154,7 +162,7 @@ struct Passwords: View {
                         } label: {
                             Text("Export…")
                                 .font(BeamFont.regular(size: 13).swiftUI)
-                        }.buttonStyle(BorderedButtonStyle())
+                        }.buttonStyle(.bordered)
                     }
                 }
             }.frame(width: 682, alignment: .center)
@@ -242,8 +250,10 @@ struct Passwords: View {
 }
 
 struct Webforms: View {
-    @State var showingAdressesSheet: Bool = false
-    @State var showingCreditCardsSheet: Bool = false
+    var creditCardsViewModel: CreditCardListViewModel
+
+    @State private var showingAdressesSheet: Bool = false
+    @State private var showingCreditCardsSheet: Bool = false
 
     @State private var autofillAdresses = PreferencesManager.autofillAdresses
     @State private var autofillCreditCards = PreferencesManager.autofillCreditCards
@@ -254,47 +264,60 @@ struct Webforms: View {
             Text("Autofill webforms:")
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
-            VStack(alignment: .leading) {
-                Toggle(isOn: $autofillAdresses) {
-                    Text("Addresses")
-                }.toggleStyle(CheckboxToggleStyle())
+            VStack {
+                /* Uncomment when personal information autofill is implemented.
+                HStack(alignment: .firstTextBaseline) {
+                    Toggle(isOn: $autofillAdresses) {
+                        Text("Addresses")
+                    }
+                    .toggleStyle(CheckboxToggleStyle())
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .onReceive([autofillAdresses].publisher.first()) {
                         PreferencesManager.autofillAdresses = $0
                     }
-                Toggle(isOn: $autofillCreditCards) {
-                    Text("Credit cards")
-                }.toggleStyle(CheckboxToggleStyle())
+                    Spacer()
+                    Button {
+                        self.showingAdressesSheet.toggle()
+                    } label: {
+                        Text("Edit...")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                    }
+                    .buttonStyle(.bordered)
+                    .offset(y: 6)
+                    .sheet(isPresented: $showingAdressesSheet) {
+                        UserInformationsModalView(userInformations: [])
+                            .frame(width: 440, height: 361, alignment: .center)
+                    }
+                }
+                */
+                HStack(alignment: .firstTextBaseline) {
+                    Toggle(isOn: $autofillCreditCards) {
+                        Text("Credit cards")
+                    }
+                    .toggleStyle(CheckboxToggleStyle())
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .onReceive([autofillCreditCards].publisher.first()) {
                         PreferencesManager.autofillCreditCards = $0
                     }
-            }
-            Spacer()
-            VStack(alignment: .trailing) {
-                Button {
-                    self.showingAdressesSheet.toggle()
-                } label: {
-                    Text("Edit...")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                }.buttonStyle(BorderedButtonStyle())
-                .sheet(isPresented: $showingAdressesSheet) {
-                    UserInformationsModalView(userInformations: [])
-                        .frame(width: 440, height: 361, alignment: .center)
-                }
-                Button {
-                    self.showingCreditCardsSheet.toggle()
-                } label: {
-                    Text("Edit...")
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                }.buttonStyle(BorderedButtonStyle())
-                .sheet(isPresented: $showingCreditCardsSheet) {
-                    CreditCardsModalView()
-                        .frame(width: 568, height: 361, alignment: .center)
+                    Spacer()
+                    Button {
+                        self.showingCreditCardsSheet.toggle()
+                    } label: {
+                        Text("Edit...")
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                    }
+                    .buttonStyle(.bordered)
+                    .offset(y: 6)
+                    .sheet(isPresented: $showingCreditCardsSheet) {
+                        CreditCardsModalView(creditCardsViewModel: self.creditCardsViewModel)
+                            .frame(width: 568, height: 361, alignment: .center)
+                    }
                 }
             }
-        }.frame(width: 608, alignment: .trailing)
+            .frame(maxWidth: 400)
+        }
+        .frame(width: 608)
     }
 }

@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct WebFieldAutofillButton: View {
+    var imageName: String
     var action: () -> Void
 
     @State private var isHovering = false
@@ -18,7 +19,7 @@ struct WebFieldAutofillButton: View {
                 backgroundColor
                     .frame(width: 24, height: 24)
                     .cornerRadius(3)
-                Image("autofill-password")
+                Image(imageName)
                     .renderingMode(.template)
                     .foregroundColor(isHovering ? BeamColor.WebFieldAutofill.fieldButtonIconHovered.swiftUI : BeamColor.WebFieldAutofill.fieldButtonIcon.swiftUI)
             }
@@ -35,6 +36,6 @@ struct WebFieldAutofillButton: View {
 
 struct WebFieldAutofillButton_Previews: PreviewProvider {
     static var previews: some View {
-        WebFieldAutofillButton {}
+        WebFieldAutofillButton(imageName: "autofill-password") {}
     }
 }
