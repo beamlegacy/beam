@@ -22,6 +22,7 @@ final class WebFieldAutofillOverlay {
     private weak var currentFieldLocator: WebFieldLocator?
     private var passwordMenuPopover: WebAutofillPopoverContainer?
     private var menuViewModel: PasswordManagerMenuViewModel?
+    private var creditCardViewModel: CreditCardsMenuViewModel?
     private var buttonPopover: WebAutofillPopoverContainer?
     private let iconAction: (WKFrameInfo?) -> Void
 
@@ -67,7 +68,16 @@ final class WebFieldAutofillOverlay {
         let buttonPopover = WebAutofillPopoverContainer(window: buttonWindow, page: page, fieldLocator: fieldLocator) { rect in
             CGPoint(x: rect.maxX - 24 - 16, y: rect.midY + 12)
         }
-        let buttonView = WebFieldAutofillButton { [weak self] in
+        let imageName: String
+        switch autocompleteGroup.action {
+        case .login, .createAccount:
+            imageName = "autofill-password"
+        case .personalInfo:
+            imageName = "autofill-form"
+        case .payment:
+            imageName = "preferences-credit_card" // FIXME: add asset
+        }
+        let buttonView = WebFieldAutofillButton(imageName: imageName) { [weak self] in
             if let self = self, self.passwordMenuPopover == nil {
                 self.iconAction(self.frameInfo)
             }
@@ -96,6 +106,21 @@ final class WebFieldAutofillOverlay {
         passwordWindow.delegate = viewModel.passwordGeneratorViewModel
         self.passwordMenuPopover = passwordMenuPopover
         self.menuViewModel = viewModel
+    }
+
+    func showCreditCardsMenu(frameInfo: WKFrameInfo?, viewModel: CreditCardsMenuViewModel) {
+        guard let page = self.page else { return }
+        guard passwordMenuPopover == nil else { return }
+        showIcon(frameInfo: frameInfo) // make sure icon is always created before menu
+        let passwordManagerMenu = CreditCardsMenu(viewModel: viewModel)
+        guard let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
+        let passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, topEdgeHeight: 24, fieldLocator: fieldLocator) { rect in
+            CGPoint(x: rect.minX, y: rect.minY)
+        }
+        passwordWindow.setView(with: passwordManagerMenu, at: passwordMenuPopover.currentOrigin, fromTopLeft: true)
+//        passwordWindow.delegate = viewModel.passwordGeneratorViewModel
+        self.passwordMenuPopover = passwordMenuPopover
+        self.creditCardViewModel = viewModel
     }
 
     func revertMenuToDefault() {

@@ -28,6 +28,11 @@ struct WebInputField {
         case newPassword
         case email
         case tel
+        case cardNumber
+        case cardHolder
+        case cardExpirationDate
+        case cardExpirationMonth
+        case cardExpirationYear
 
         var isPassword: Bool {
             self == .currentPassword || self == .newPassword
@@ -280,6 +285,11 @@ final class WebFieldClassifier {
                 weightedRole.role == role ? weightedRole.match : nil
             }.sorted().last ?? .never
         }
+
+        func roleForAction(_ action: WebAutocompleteAction) -> WebInputField.Role? {
+            guard let weightedRole = evaluation[action], weightedRole.match != .never else { return nil }
+            return weightedRole.role
+        }
     }
 
     private var autocompleteRules: WebAutocompleteRules
@@ -320,6 +330,8 @@ final class WebFieldClassifier {
             score = bestUsernameAutocomplete == .username ? -10 : 0
         case .off:
             score = -10
+        default:
+            return nil
         }
         switch field.type {
         case .password:
@@ -348,6 +360,23 @@ final class WebFieldClassifier {
         return .init(role: expectedRole, match: .score(score + bias))
     }
 
+    private func evaluateForPayment(field: DOMInputElement) -> WeightedRole? {
+        switch field.decodedAutocomplete {
+        case .creditCardFullName, .creditCardFamilyName:
+            return .init(role: .cardHolder, match: .always)
+        case .creditCardNumber:
+            return .init(role: .cardNumber, match: .always)
+        case .creditCardExpirationDate:
+            return .init(role: .cardExpirationDate, match: .always)
+        case .creditCardExpirationMonth:
+            return .init(role: .cardExpirationMonth, match: .always)
+        case .creditCardExpirationYear:
+            return .init(role: .cardExpirationYear, match: .always)
+        default:
+            return nil
+        }
+    }
+
     private func evaluateFields(_ fields: [DOMInputElement], biasTowardLogin: Int, biasTowardAccountCreation: Int) -> [EvaluatedField] {
         let containsUsernameField = fields.contains(where: { $0.decodedAutocomplete == .username })
         let containsEmailField = fields.contains(where: { $0.decodedAutocomplete == .email })
@@ -360,6 +389,7 @@ final class WebFieldClassifier {
             var evaluation: [WebAutocompleteAction: WeightedRole] = [:]
             evaluation[.login] = evaluateForPassword(action: .login, field: field, bestUsernameAutocomplete: bestUsernameAutocomplete, bias: biasTowardLogin)
             evaluation[.createAccount] = evaluateForPassword(action: .createAccount, field: field, bestUsernameAutocomplete: bestUsernameAutocomplete, bias: biasTowardAccountCreation)
+            evaluation[.payment] = evaluateForPayment(field: field)
             return EvaluatedField(element: field, evaluation: evaluation)
         }
     }
@@ -471,6 +501,12 @@ final class WebFieldClassifier {
                 .map { WebInputField(id: $0.element.beamId, role: .newPassword) }
             relatedFields.append(WebInputField(id: field.element.beamId, role: .newUsername))
             return WebAutocompleteGroup(action: .createAccount, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
+        case .cardNumber, .cardHolder, .cardExpirationDate, .cardExpirationMonth, .cardExpirationYear:
+            let relatedFields = fields.compactMap { otherField -> WebInputField? in
+                guard let role = otherField.roleForAction(.payment) else { return nil }
+                return WebInputField(id: otherField.element.beamId, role: role)
+            }
+            return WebAutocompleteGroup(action: .payment, relatedFields: relatedFields)
         default:
             return nil
         }

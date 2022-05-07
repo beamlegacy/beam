@@ -36,6 +36,7 @@ public enum LogCategory: String, CaseIterable {
     case oauth
     case webSocket
     case creditCardsDB
+    case creditCardAutofill
     case passwordsDB
     case passwordManager
     case passwordManagerInternal
