@@ -60,6 +60,14 @@ struct SuggestPasswordCell: View {
     }
 }
 
+struct OtherCreditCardsCell: View {
+    var onChange: ((PasswordManagerMenuCellState) -> Void)?
+
+    var body: some View {
+        PasswordActionCell(label: "Other Credit Cards...", onChange: onChange)
+    }
+}
+
 struct OtherPasswordsCell_Previews: PreviewProvider {
     static var previews: some View {
         OtherPasswordsCell()
