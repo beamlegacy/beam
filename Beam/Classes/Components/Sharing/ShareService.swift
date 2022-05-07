@@ -60,7 +60,7 @@ enum ShareService: CaseIterable {
     private var twitterBeamUsername: String { "getonbeam" }
     private var facebookAppID: String { EnvironmentVariables.Oauth.Facebook.appID }
 
-    func buildURL(with textParam: String, url: URL?) -> URL? {
+    func buildURL(with textParam: String?, url: URL?) -> URL? {
         var baseURLString: String
         var urlText: String?
         if let absoluteURLString = url?.absoluteString, absoluteURLString.mayBeWebURL {
@@ -85,13 +85,19 @@ enum ShareService: CaseIterable {
             queryItems = ["url": urlText, "title": textParam]
         case .email:
             baseURLString = "mailto:"
-            queryItems["body"] = "\(textParam)\n\n\(urlText ?? "")"
+            var body = textParam ?? ""
+            if let urlText = urlText, !urlText.isEmpty {
+                body = "\(body)\(!body.isEmpty ? "\n\n" : "")\(urlText)"
+            }
+            queryItems["body"] = body
         case .messages:
-            // sms url needs a `&` before the body, so building the url manually here
-            let encodedContent = textParam.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? textParam
-            let encodedURL = urlText?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-            let lineBreak = "%0D%0A"
-            baseURLString = "sms:&body=\(encodedContent)\(lineBreak)\(lineBreak)\(encodedURL)"
+            baseURLString = "sms:"
+            var body = textParam ?? ""
+            if let urlText = urlText, !urlText.isEmpty {
+                body = "\(body)\(!body.isEmpty ? "\n\n" : "")\(urlText)"
+            }
+            queryItems["app"] = "beam" // not gonna appear, but somehow sms body doesn't work if it's the first query item
+            queryItems["body"] = body
         }
 
         var components = URLComponents(string: baseURLString)
