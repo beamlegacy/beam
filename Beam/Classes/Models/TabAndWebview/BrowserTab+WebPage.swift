@@ -115,13 +115,19 @@ extension BrowserTab: WebPage {
         return newWebView
     }
 
-    func closeTab() {
+    func tabWillClose() {
         isFromNoteSearch = false
         passwordOverlayController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
         saveTree()
         sendTree()
+        state?.webIndexingController?.tabDidClose(self)
+        if !(webviewWindow is BeamWindow) && webviewWindow?.styleMask.contains(.fullScreen) == true {
+            // Webview is in fullscreen, we need to manually dismiss it to prevent crash in WKFullScreenWindowController
+            // See https://linear.app/beamapp/issue/BE-1810/exc-bad-access-exception-1-code-47767648-subcode-8
+            webviewWindow?.windowController?.close()
+        }
     }
 
     func getMouseLocation() -> NSPoint {
