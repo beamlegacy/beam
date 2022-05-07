@@ -146,7 +146,7 @@ class RecentsManagerTests: QuickSpec {
                         }
                     }
 
-                    expect(recentsManager.recentNotes.count) == 5
+                    expect(recentsManager.recentNotes.count) == 4
                     expect(recentsManager.recentNotes.first { $0.id == note.id }).to(beNil())
                 }
             }
