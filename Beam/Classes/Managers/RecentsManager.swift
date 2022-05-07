@@ -34,8 +34,23 @@ class RecentsManager: ObservableObject {
             .store(in: &notesCancellables)
     }
 
+    private func shouldIncludeDocumentInRecents(_ doc: DocumentStruct) -> Bool {
+        !doc.isEmpty || doc.documentType != .journal
+    }
+
     private func fetchRecents() {
-        recentNotes = documentManager.loadAllWithLimit(maxNumberOfRecents, sortingKey: .updatedAt(false)).compactMap {
+        var docs: [DocumentStruct] = []
+        let scores = GRDBDatabase.shared.getTopNoteFrecencies(limit: maxNumberOfRecents * 2, paramKey: AutocompleteManager.noteFrecencyParamKey)
+        let docsWithFrecencies = documentManager.loadDocumentsById(ids: Array(scores.keys)).filter(shouldIncludeDocumentInRecents).prefix(maxNumberOfRecents)
+        docs.append(contentsOf: docsWithFrecencies)
+        if docs.count < maxNumberOfRecents {
+            // if we don't have much frecency scores let's use the recently updated notes.
+            let docsRecentlyUpdated = documentManager.loadAllWithLimit(maxNumberOfRecents * 2, sortingKey: .updatedAt(false))
+                .filter { !docs.contains($0) }
+                .filter(shouldIncludeDocumentInRecents)
+            docs.append(contentsOf: docsRecentlyUpdated.prefix(maxNumberOfRecents - docs.count))
+        }
+        recentNotes = docs.compactMap {
             // Maybe we could `instancateNote` automatically, to avoid refetching the CD object in `fetch`?
             // try? BeamNote.instanciateNote(documentManager, $0)
             BeamNote.fetch(id: $0.id, includeDeleted: false)
@@ -94,8 +109,10 @@ class RecentsManager: ObservableObject {
             }.store(in: &documentManagerCancellables)
 
         DocumentManager.documentDeleted.receive(on: DispatchQueue.main)
-            .sink { [weak self] _ in
-                self?.fetchRecents()
+            .sink { [weak self] docId in
+                if let index = self?.recentNotes.firstIndex(where: { $0.id == docId }) {
+                    self?.recentNotes.remove(at: index)
+                }
             }.store(in: &documentManagerCancellables)
 
     }
