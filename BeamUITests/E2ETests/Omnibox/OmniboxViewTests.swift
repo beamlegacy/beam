@@ -145,14 +145,13 @@ class OmniboxViewTests: BaseTest {
         }
 
         step("Then suggestions contains the correct actions"){
-            XCTAssertEqual(results.count, 6)
+            XCTAssertEqual(results.count, 5)
             XCTAssertEqual(results.element(boundBy: 0).label, noteATitle) // Note A moved up in the list of recents
             XCTAssertNotEqual(results.element(boundBy: 1).label, noteBTitle) // Note B is not suggested because we're already on it.
-            XCTAssertNotEqual(results.element(boundBy: 2).label, noteBTitle) // Note B is not suggested because we're already on it.
-            XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
-            XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
-            XCTAssertEqual(results.element(boundBy: 5).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
-            XCTAssertEqual(noteResults.count, 3)
+            XCTAssertEqual(results.element(boundBy: 2).label, OmniboxLocators.Labels.journal.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
+            XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
+            XCTAssertEqual(noteResults.count, 2)
             journalView.openRecentCardByName(noteATitle)
         }
 
