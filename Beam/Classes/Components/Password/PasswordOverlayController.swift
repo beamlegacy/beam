@@ -211,8 +211,14 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     private func handleInputFieldFocus(elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?, contents: String?) {
         guard isAutofillEnabled(for: autocompleteGroup.action) else { return }
         guard menuOptions(for: elementId, emptyField: true, inGroup: autocompleteGroup) != nil || autocompleteGroup.action == .payment else { return }
-        let overlay = WebFieldAutofillOverlay(page: page, scrollUpdater: scrollUpdater, frameInfo: frameInfo, elementId: elementId, inGroup: autocompleteGroup) { frameInfo in
-            self.showWebFieldAutofillMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+        let fieldEdgeInsets: BeamEdgeInsets
+        if let host = page?.url?.minimizedHost, let role = autocompleteGroup.field(id: elementId)?.role {
+            fieldEdgeInsets = WebAutofillPositionModifier.shared.inputFieldEdgeInsets(host: host, action: autocompleteGroup.action, role: role)
+        } else {
+            fieldEdgeInsets = .zero
+        }
+        let overlay = WebFieldAutofillOverlay(page: page, scrollUpdater: scrollUpdater, frameInfo: frameInfo, elementId: elementId, inGroup: autocompleteGroup, elementEdgeInsets: fieldEdgeInsets) { frameInfo in
+            self.showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
         }
         overlay.showIcon(frameInfo: frameInfo)
         currentOverlay = overlay
