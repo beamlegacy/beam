@@ -151,21 +151,25 @@ struct TabGroupingFeedbackContentView: View {
             HStack {
                 Spacer()
                 Button {
-                    let openPanel = NSOpenPanel()
-                    openPanel.canChooseDirectories = true
-                    openPanel.canCreateDirectories = true
-                    openPanel.canChooseFiles = false
-                    openPanel.showsTagField = false
-                    openPanel.begin { (result) in
-                        guard result == .OK, let url = openPanel.url else {
-                            openPanel.close()
+                    AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: nil, correctedPages: viewModel.correctedPages)
+                    AppDelegate.main.tabGroupingFeedbackWindow?.close()
+                } label: {
+                    Text("Send Feedback")
+                }.buttonStyle(.automatic)
+                Button {
+                    let savePanel = NSSavePanel()
+                    savePanel.canCreateDirectories = true
+                    savePanel.showsTagField = false
+                    savePanel.begin { (result) in
+                        guard result == .OK, let url = savePanel.url else {
+                            savePanel.close()
                             return
                         }
                         AppDelegate.main.data.clusteringManager.exportSession(sessionExporter: AppDelegate.main.data.sessionExporter, to: url, correctedPages: viewModel.correctedPages)
                         AppDelegate.main.tabGroupingFeedbackWindow?.close()
                     }
                 } label: {
-                    Text("Send Feedback")
+                    Text("Save and send Feedback")
                 }.buttonStyle(.automatic)
             }.frame(height: 50)
 
