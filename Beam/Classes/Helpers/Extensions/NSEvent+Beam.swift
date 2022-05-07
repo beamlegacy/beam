@@ -16,16 +16,9 @@ extension NSEvent {
         return rightClick || controlClick
     }
 
-    /// Event type indicates that the event is most likely coming from a direct user interaction (mouse click, gesture, etc.)
-    var isUserInteractionEvent: Bool {
-        let isSystemEvents = [.appKitDefined, .flagsChanged, .periodic, .pressure, .systemDefined, .mouseMoved].contains(self.type)
-        return !isSystemEvents
-    }
-
-    /// Event is pressing any keyboard key
-    var isKeyboardEvent: Bool {
-        let keyboardEvents = [.keyDown, .keyUp].contains(self.type)
-        return keyboardEvents
+    /// Event is any left mouse type
+    var isLeftClick: Bool {
+        [.leftMouseDown, .leftMouseUp, .leftMouseDragged].contains(self.type)
     }
 
 }
