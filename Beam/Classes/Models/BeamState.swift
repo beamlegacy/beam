@@ -408,8 +408,7 @@ import Sentry
             }
             return false
         }
-        guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }
-        webIndexingController?.tabDidClose(tab)
+        guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { return false }        
         return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self, needsToBeSaved: tab.url != nil)
     }
 
