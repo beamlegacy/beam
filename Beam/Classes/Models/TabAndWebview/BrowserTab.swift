@@ -160,7 +160,7 @@ import Promises
     }()
     var pointAndShootInstalled: Bool = true
     var pointAndShootEnabled: Bool {
-        contentType == .web && state?.omniboxInfo.isFocused != true
+        contentType == .web && state?.omniboxInfo.isFocused != true && state?.associatedWindow?.isKeyWindow == true
     }
     lazy var webFrames: WebFrames? = {
         let webFrames = WebFrames()
