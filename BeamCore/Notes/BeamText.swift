@@ -183,7 +183,7 @@ public struct BeamText: Codable {
 
         public var isEditable: Bool {
             switch self {
-            case .link, .internalLink, .source:
+            case .link, .internalLink:
                 return false
             case .decorated(let value):
                 return value.isEditable
