@@ -39,13 +39,8 @@ struct TabsListView: View {
         var lastTouchWasOnUnselectedTab: Bool = false
         var singleTabCenteringAdjustment: CGFloat = 0
         var singleTabCurrentFrame: CGRect?
-        var mouseMoveMonitor: Any?
-
-        deinit {
-            if let monitor = mouseMoveMonitor {
-                NSEvent.removeMonitor(monitor)
-            }
-        }
+        weak var mouseMoveMonitor: AnyObject?
+        weak var otherMouseDownMonitor: AnyObject?
     }
 
     private var isDraggingATab: Bool {
@@ -132,6 +127,7 @@ struct TabsListView: View {
                                                          removal: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
                                                             .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05))))
 
+    // swiftlint:disable function_body_length
     private func renderTab(_ tab: BrowserTab, index: Int, selectedIndex: Int, isSingle: Bool,
                            canScroll: Bool, widthProvider: TabsWidthProvider, centeringAdjustment: CGFloat = 0) -> some View {
         let selected = isSelected(tab)
@@ -279,9 +275,11 @@ struct TabsListView: View {
                     .onEnded { dragGestureOnEnded(gestureValue: $0) }
             )
             .onAppear {
+                startOtherMouseDownMonitor()
                 updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
             }
             .onDisappear {
+                removeMouseMonitors()
                 updateDraggableTabsAreas(with: nil, tabsSections: tabsSections)
             }
             .onPreferenceChange(CurrentTabGlobalFrameKey.self) { [weak state] newValue in
@@ -367,11 +365,32 @@ struct TabsListView: View {
                 viewModel.mouseMoveMonitor = nil
             }
             return $0
+        } as AnyObject?
+    }
+
+    private func startOtherMouseDownMonitor() {
+        guard viewModel.otherMouseDownMonitor == nil else { return }
+        viewModel.otherMouseDownMonitor = NSEvent.addLocalMonitorForEvents(matching: [.otherMouseDown]) { event in
+            guard let index = hoveredIndex else { return event }
+            if event.buttonNumber == 2 {
+                onTabClose(at: index)
+            }
+            return event
+        } as AnyObject?
+    }
+
+    private func removeMouseMonitors() {
+        if let mouseMoveMonitor = viewModel.mouseMoveMonitor {
+            NSEvent.removeMonitor(mouseMoveMonitor)
+        }
+
+        if let otherMouseDownMonitor = viewModel.otherMouseDownMonitor {
+            NSEvent.removeMonitor(otherMouseDownMonitor)
         }
     }
 
     private func onTabClose(at index: Int, fromContextMenu: Bool = false) {
-        state.closedTab(index, allowClosingPinned: fromContextMenu)
+        state.closeTab(index, allowClosingPinned: fromContextMenu)
     }
 
     private func onTabCopy(at index: Int) {
