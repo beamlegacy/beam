@@ -28,7 +28,7 @@ export class PasswordManagerHelper {
       return false
     }
     const elementType = element.getAttribute("type")
-    return elementType === "text" || elementType === "password" || elementType === "email" || elementType === "" || elementType === null
+    return elementType === "text" || elementType === "password" || elementType === "email" || elementType === "number" || elementType === "tel" || elementType === "" || elementType === null
   }
 
   /**
