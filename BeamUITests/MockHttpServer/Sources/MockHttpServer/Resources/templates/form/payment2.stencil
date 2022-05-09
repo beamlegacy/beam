@@ -8,9 +8,9 @@
 <body>
 <h1>Payment</h1>
 <form action="/view" method="POST">
-<div>Credit card number: <input type="text" autocomplete="cc-number" name="cc-number" id="cc-number"></input></div>
-<div>Expiration month: <input type="text" autocomplete="cc-exp-month" name="cc-exp-month" id="cc-exp-month"></input> year: <input type="text" autocomplete="cc-exp-year" name="cc-exp-year" id="cc-exp-year"></input></div>
-<div>Security code: <input type="text" autocomplete="cc-csc" name="cc-security" id="cc-security"></input></div>
+<div>Credit card number: <input type="tel" autocomplete="cc-number" name="cc-number" id="cc-number"></input></div>
+<div>Expiration month: <input type="number" autocomplete="cc-exp-month" name="cc-exp-month" id="cc-exp-month"></input> year: <input type="number" autocomplete="cc-exp-year" name="cc-exp-year" id="cc-exp-year"></input></div>
+<div>Security code: <input type="password" autocomplete="cc-csc" name="cc-security" id="cc-security"></input></div>
 <div>Name on card: <input type="text" autocomplete="cc-name" name="cc-name" id="cc-name"></input></div>
 <div><button type="submit">Continue</button></div>
 </form>
