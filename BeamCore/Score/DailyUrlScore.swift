@@ -175,15 +175,17 @@ public class DailyUrlScorer {
     public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5) -> [ScoredURL] {
         let scores = store.getScores(daysAgo: daysAgo)
         let links = LinkStore.shared.getLinks(for: Array(scores.keys))
+            .filter { (id, link) in id != Link.missing.id || link.url != Link.missing.url }
         let urlGroups = UrlGroups(links: links).regroup { $0.fragmentRemoved }
         let schemeGroups = urlGroups.groupHTTPSchemes
         let mostRecentTitle = schemeGroups.getMostRecentTitles(links: links)
         let aggregatedScores = schemeGroups.aggregate(scores: scores)
         return Array(
             aggregatedScores
-            .sorted { (lhs, rhs) in lhs.value.score > rhs.value.score }
-            .map { ScoredURL(url: $0.key, title: mostRecentTitle[$0.key], score: $0.value) }
-            .prefix(topN)
+                .filter { (_, score) in !score.isPinned }
+                .sorted { (lhs, rhs) in lhs.value.score > rhs.value.score }
+                .map { ScoredURL(url: $0.key, title: mostRecentTitle[$0.key], score: $0.value) }
+                .prefix(topN)
         )
     }
 }
