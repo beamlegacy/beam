@@ -12,6 +12,8 @@ enum DOMInputElementType: String, Codable {
     case text
     case email
     case password
+    case number
+    case tel
 }
 
 enum DOMInputMode: String, Codable {
@@ -53,7 +55,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
 
 extension DOMInputElement {
     var debugDescription: String {
-        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), visible: \(visible), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
+        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), visible: \(visible), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), inputmode: \(inputmode?.rawValue ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
     }
 }
 
