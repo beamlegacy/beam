@@ -439,7 +439,7 @@ final class WebFieldClassifier {
         guard inputElement.visible else { return false }
         guard let inputMode = inputElement.inputmode else { return true }
         switch inputMode {
-        case .text, .tel, .email:
+        case .text, .tel, .email, .numeric:
             return true
         default:
             return false
