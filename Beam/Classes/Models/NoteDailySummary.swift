@@ -53,10 +53,13 @@ class NoteDailySummary {
         let (start, end) = dayBounds(daysAgo: daysAgo)
         let updatedDocuments = try documentManager.fetchAllNotesUpdatedBetween(date0: start, date1: end)
         let scores = noteScorer.getLocalDailyScores(daysAgo: daysAgo)
-        let scoredDocuments = updatedDocuments.map {
-            ScoredDocument(noteId: $0.id, title: $0.title, createdAt: $0.created_at, updatedAt: $0.updated_at,
-                           created: $0.created_at > start, score: scores[$0.id]?.logScore,
-                           captureToCount: scores[$0.id]?.captureToCount ?? 0)
+        let scoredDocuments = updatedDocuments.compactMap { (doc) -> ScoredDocument? in
+            let created = doc.created_at > start
+            guard let score = scores[doc.id],
+                  (score.minToMaxDeltaWordCount != 0) || created else { return nil }
+            return ScoredDocument(noteId: doc.id, title: doc.title, createdAt: doc.created_at, updatedAt: doc.updated_at,
+                           created: created, score: score.logScore,
+                           captureToCount: score.captureToCount)
         }
         return scoredDocuments.sorted { (lhs, rhs) in lhs > rhs }
     }

@@ -155,7 +155,7 @@ class DailyUrlScorerTest: XCTestCase {
         XCTAssertEqual(mostRecentTitles[URL(string: "http://def.fr")!], "title 3")
     }
 
-    func testGetHightScores() {
+    func testGetHighScores() {
         class FakeDailyScoreStore: DailyUrlScoreStoreProtocol {
             let scores: [UUID: DailyURLScore]
             init(scores: [UUID: DailyURLScore]) {
@@ -167,19 +167,31 @@ class DailyUrlScorerTest: XCTestCase {
         let urlsAndTitles = [
             ("https://abc.com/#anchor", "title 1"),
             ("http://abc.com/", "title 2"),
-            ("https://def.com", "title 3")
+            ("https://def.com", "title 3"),
+            ("https://geh.com", "title 4"),
         ]
-        let urlIds: [UUID] = urlsAndTitles.map { LinkStore.shared.visit($0.0, title: $0.1, content: nil, destination: nil).id }
+        BeamDate.freeze("2001-01-01T00:01:00+000")
+        let urlIds: [UUID] = urlsAndTitles.map {
+            BeamDate.travel(1)
+            return LinkStore.shared.visit($0.0, title: $0.1, content: nil, destination: nil).id
+        }
         let score0 = DailyURLScore(urlId: urlIds[0], localDay: "2020-01-01")
         let score1 = DailyURLScore(urlId: urlIds[1], localDay: "2020-01-01")
-        let score2 = DailyURLScore(urlId: urlIds[1], localDay: "2020-01-01")
+        let score2 = DailyURLScore(urlId: urlIds[2], localDay: "2020-01-01")
+        let score3 = DailyURLScore(urlId: urlIds[3], localDay: "2020-01-01")
+
         score0.readingTimeToLastEvent = 1.5
         score1.readingTimeToLastEvent = 1.5
         score2.readingTimeToLastEvent = 2
+        score3.readingTimeToLastEvent = 10
+        score3.isPinned = true
+
         let scores = [
             urlIds[0]: score0,
             urlIds[1]: score1,
-            urlIds[2]: score2
+            urlIds[2]: score2,
+            urlIds[3]: score3
+
         ]
         let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores))
         let scoredUrls = scorer.getHighScoredUrls(daysAgo: 0, topN: 1)
@@ -187,5 +199,8 @@ class DailyUrlScorerTest: XCTestCase {
         //the 2 first url scores got aggregated and title was chosen as most recent.
         XCTAssertEqual(scoredUrls[0].url.absoluteString, "https://abc.com/")
         XCTAssertEqual(scoredUrls[0].title, "title 2")
+        //https://geh.com is not displayed as is pinned is true
+
+        BeamDate.reset()
     }
 }
