@@ -20,13 +20,18 @@ public class NoteScore: Codable {
     public init(noteId: UUID) {
         self.noteId = noteId
     }
+    public var firstToLastDeltaWordCount: Int {
+        lastWordCount - (firstWordCount ?? lastWordCount)
+    }
+    public var minToMaxDeltaWordCount: Int {
+        maxWordCount - (minWordCount ?? maxWordCount)
+    }
 
     public var logScore: Float {
-        let deltaWordCount = Float(lastWordCount - (firstWordCount ?? lastWordCount))
         return log(1 + Float(addedBidiLinkToCount))
             + log(1 + Float(captureToCount))
             + 0.5 * log(1 + Float(visitCount))
-            + log(1 + abs(deltaWordCount))
+            + log(1 + abs(Float(firstToLastDeltaWordCount)))
     }
 }
 
