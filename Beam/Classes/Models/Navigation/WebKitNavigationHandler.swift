@@ -240,17 +240,22 @@ extension WebKitNavigationHandler {
         return action.modifierFlags.contains(.command) || NSEvent.modifierFlags.contains(.command)
     }
 
+    private func isNavigationWithMiddleMouseDown(_ action: WKNavigationAction) -> Bool {
+        return action.buttonNumber == 4
+    }
+
     /// Handles opening the page in a new tab
     /// - Parameter navigationAction: The NavigationAction to decide if a new tab should be opened
     /// - Returns: True if a new tab is created, false if not
     func openNewTab(_ navigationAction: WKNavigationAction) -> Bool {
         if let page = page, let targetURL = navigationAction.request.url,
            navigationAction.navigationType == .linkActivated,
-           isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) {
+           isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) || isNavigationWithMiddleMouseDown(navigationAction) {
+            let setCurent = (isNavigationWithCommandKey(navigationAction) || isNavigationWithMiddleMouseDown(navigationAction)) ? false : true
             _ = page.createNewTab(
                 navigationAction.request,
                 nil,
-                setCurrent: !isNavigationWithCommandKey(navigationAction),
+                setCurrent: setCurent,
                 rect: page.frame
             )
             return true
