@@ -31,14 +31,14 @@ extension PreferencesManager {
     private static let browsingSessionCollectionIsOnDefault = true
     #endif
     private static let browsingSessionCollectionIsOnDefault = false
-    private static let showTabGrougpingMenuItemDefault = false
+    private static let showTabGrougpingMenuItemDefault = Configuration.branchType == .develop
     private static let showDebugSectionDefault = false
     private static let showOmniboxScoreSectionDefault = false
     private static let showPNSDefault = true
     private static let PnsJSIsOnDefault = true
     private static let collectFeedbackDefault = true
     private static let showsCollectFeedbackAlertDefault = true
-    private static let showTabsColoringDefault = false
+    private static let showTabsColoringDefault = Configuration.branchType == .develop
     private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = true
     static let includeHistoryContentsInOmniBoxDefault = false
