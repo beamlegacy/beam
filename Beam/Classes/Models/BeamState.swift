@@ -357,7 +357,8 @@ import Sentry
         browserTabsManager.addNewTabAndGroup(duplicatedTab, setCurrent: true, withURLRequest: URLRequest(url: url))
     }
 
-    func closedTab(_ index: Int, allowClosingPinned: Bool = false) {
+    func closeTab(_ index: Int, allowClosingPinned: Bool = false) {
+        guard self.browserTabsManager.tabs.count - 1 >= index else { return }
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let tab = self.browserTabsManager.tabs[index]
         closeTabIfPossible(tab, allowClosingPinned: allowClosingPinned)
