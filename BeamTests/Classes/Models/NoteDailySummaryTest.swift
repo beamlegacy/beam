@@ -48,17 +48,21 @@ class NoteDailySummaryTest: XCTestCase {
         BeamDate.freeze("2001-01-01T00:01:00+000")
         let now = BeamDate.now
         let dates = (0...2).map { cal.date(byAdding: .day, value: -$0, to: now)! }
-        var docStructs = (0...3).map { _ in helper.createDocumentStruct() }
+        var docStructs = (0...5).map { _ in helper.createDocumentStruct() }
         //updated 2 days ago
         docStructs[0].updatedAt = dates[2]
         //updated one day ago but created before
         docStructs[1].updatedAt = dates[1]
         docStructs[1].createdAt = dates[2]
+        docStructs[5].updatedAt = dates[1]
+        docStructs[5].createdAt = dates[2]
         //created one day ago
         docStructs[2].createdAt = dates[1]
         docStructs[2].updatedAt = dates[1]
+        docStructs[3].createdAt = dates[1]
+        docStructs[3].updatedAt = dates[1]
         //created today
-        docStructs[3].updatedAt = dates[0]
+        docStructs[4].updatedAt = dates[0]
 
         for doc in docStructs {
             let expectation = XCTestExpectation()
@@ -73,12 +77,25 @@ class NoteDailySummaryTest: XCTestCase {
         //adding a score for yesterday
         BeamDate.freeze("2000-12-31T00:01:00+000")
         scorer.incrementCaptureToCount(noteId: docStructs[2].id)
+        scorer.updateWordCount(noteId: docStructs[2].id, wordCount: 10)
+        scorer.updateWordCount(noteId: docStructs[2].id, wordCount: 11)
+
+        scorer.updateWordCount(noteId: docStructs[1].id, wordCount: 10)
+        scorer.updateWordCount(noteId: docStructs[1].id, wordCount: 11)
+
+        //stable wordcount but was created during period of interest
+        scorer.updateWordCount(noteId: docStructs[3].id, wordCount: 10)
+        scorer.updateWordCount(noteId: docStructs[3].id, wordCount: 10)
+
+        //stable wordcount only updated during period of interest wont appear
+        scorer.updateWordCount(noteId: docStructs[5].id, wordCount: 10)
+        scorer.updateWordCount(noteId: docStructs[5].id, wordCount: 10)
         let summary = NoteDailySummary(dailyScoreStore: store)
 
         //fetching scored docs today for the day before
         BeamDate.freeze("2001-01-01T00:01:00+000")
         let scoredDocuments = try summary.get()
-        XCTAssertEqual(scoredDocuments.count, 2)
+        XCTAssertEqual(scoredDocuments.count, 3)
 
         XCTAssertEqual(scoredDocuments[0].noteId, docStructs[2].id)
         XCTAssert(scoredDocuments[0].created)
@@ -87,8 +104,9 @@ class NoteDailySummaryTest: XCTestCase {
 
         XCTAssertEqual(scoredDocuments[1].noteId, docStructs[1].id)
         XCTAssertFalse(scoredDocuments[1].created)
-        XCTAssertNil(scoredDocuments[1].score)
+        XCTAssertNotNil(scoredDocuments[1].score)
         XCTAssertEqual(scoredDocuments[1].captureToCount, 0)
+
         BeamDate.reset()
     }
 }
