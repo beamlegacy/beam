@@ -218,11 +218,11 @@ class PasswordOverlayController: NSObject, WebPageRelated {
             fieldEdgeInsets = .zero
         }
         let overlay = WebFieldAutofillOverlay(page: page, scrollUpdater: scrollUpdater, frameInfo: frameInfo, elementId: elementId, inGroup: autocompleteGroup, elementEdgeInsets: fieldEdgeInsets) { frameInfo in
-            self.showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+            self.showWebFieldAutofillMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
         }
         overlay.showIcon(frameInfo: frameInfo)
         currentOverlay = overlay
-        showPasswordManagerMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
+        showWebFieldAutofillMenu(for: elementId, inGroup: autocompleteGroup, frameInfo: frameInfo)
     }
 
     private func showWebFieldAutofillMenu(for elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, frameInfo: WKFrameInfo?) {
