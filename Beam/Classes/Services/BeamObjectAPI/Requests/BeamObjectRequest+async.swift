@@ -104,6 +104,10 @@ extension BeamObjectRequest {
                                      category: .beamObjectNetwork)
         }
 
+        guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
+            throw BeamObjectManagerError.notAuthenticated
+        }
+
         var parameters = UpdateBeamObjects(beamObjects: saveBeamObjects, privateKey: nil)
 
         if EnvironmentVariables.beamObjectSendPrivateKey {
