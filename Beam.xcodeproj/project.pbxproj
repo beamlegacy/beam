@@ -550,6 +550,7 @@
 		8775C5FB261323EC00A26CAC /* PasswordManagerMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */; };
 		877888D9269C743F00D703F0 /* CSVParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888D1269C743F00D703F0 /* CSVParser.swift */; };
 		877888DB269C977C00D703F0 /* PasswordImporterTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877888DA269C977C00D703F0 /* PasswordImporterTest.swift */; };
+		877CA55A282AAFC000C81263 /* String+Escaping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 877CA559282AAFC000C81263 /* String+Escaping.swift */; };
 		878417BE276FB1FB005EB5B0 /* MockHttpServer in Frameworks */ = {isa = PBXBuildFile; productRef = 878417BD276FB1FB005EB5B0 /* MockHttpServer */; };
 		8784955F27C55E0200195C62 /* WebFrames.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8784955E27C55E0200195C62 /* WebFrames.swift */; };
 		8784956127C62D7500195C62 /* WebFramesTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8784956027C62D7500195C62 /* WebFramesTest.swift */; };
@@ -2049,6 +2050,7 @@
 		8775C5FA261323EC00A26CAC /* PasswordManagerMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenu.swift; sourceTree = "<group>"; };
 		877888D1269C743F00D703F0 /* CSVParser.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CSVParser.swift; sourceTree = "<group>"; };
 		877888DA269C977C00D703F0 /* PasswordImporterTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordImporterTest.swift; sourceTree = "<group>"; };
+		877CA559282AAFC000C81263 /* String+Escaping.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Escaping.swift"; sourceTree = "<group>"; };
 		878417BC276FB164005EB5B0 /* MockHttpServer */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = MockHttpServer; path = BeamUITests/MockHttpServer; sourceTree = "<group>"; };
 		8784955E27C55E0200195C62 /* WebFrames.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFrames.swift; sourceTree = "<group>"; };
 		8784956027C62D7500195C62 /* WebFramesTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFramesTest.swift; sourceTree = "<group>"; };
@@ -6141,6 +6143,7 @@
 				3719855127C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift */,
 				370794C027D7A79100D2768B /* WKWebViewConfiguration.swift */,
 				CE304C3C27DB566D005AE274 /* String+base64url.swift */,
+				877CA559282AAFC000C81263 /* String+Escaping.swift */,
 				DAF063F027D122D1000406DE /* Date+DayTruncated.swift */,
 				87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */,
 			);
@@ -8181,6 +8184,7 @@
 				96319D3E2616233E00D1CF31 /* String+c99.swift in Sources */,
 				96A5DADE27C0250D00746719 /* Array.swift in Sources */,
 				A0C4461C2811D926007B545D /* String+Formatting.swift in Sources */,
+				877CA55A282AAFC000C81263 /* String+Escaping.swift in Sources */,
 				3719855227C7618600CAEA5E /* WKNavigationResponse+ShouldPerformDownload.swift in Sources */,
 				9635C980276AABB300015575 /* SignPost.swift in Sources */,
 				370794C127D7A79100D2768B /* WKWebViewConfiguration.swift in Sources */,
