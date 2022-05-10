@@ -21,6 +21,9 @@ class WebIndexingController {
     private let signpost = SignPost("WebIndexingController")
     private var delayedReadOperations: [UUID: DelayedReadWebViewOperation] = [:]
 
+    /// the delay before re-reading the page for better content
+    var betterContentReadDelay: TimeInterval = 4
+
     weak var delegate: WebIndexControllerDelegate?
 
     init(clusteringManager: ClusteringManager) {
@@ -62,7 +65,7 @@ class WebIndexingController {
                                                           content: nil)
             }
         } catch {
-            Logger.shared.logError("unable to save history url \(tabInfo.url.string)", category: .search)
+            Logger.shared.logError("unable to save history url \(tabInfo.url.string)", category: .webIndexing)
         }
     }
 
@@ -71,6 +74,8 @@ class WebIndexingController {
 
         // Always update the browsingTree, event if we were not able to read the content
         let title = tabIndexingInfo.document.title
+        indexAliasURLIfNeeded(requestedURL: tabIndexingInfo.requestedURL, currentURL: url, title: title)
+
         browsingTree.navigateTo(url: url.absoluteString, title: title,
                                 startReading: startReading,
                                 isLinkActivation: isLinkActivation,
@@ -83,6 +88,8 @@ class WebIndexingController {
         tabIndexingInfo.tabTree = browsingTreeCopy
 
         if tabIndexingInfo.shouldBeIndexed {
+            Logger.shared.logInfo("Indexing navigation to: '\(tabIndexingInfo.url)', title: '\(tabIndexingInfo.document.title)'", category: .webIndexing)
+
             _ = LinkStore.shared.visit(tabIndexingInfo.url.string, title: tabIndexingInfo.document.title, content: tabIndexingInfo.textContent)
             appendToClustering(url: url, tabIndexingInfo: tabIndexingInfo, readabilityResult: read)
         }
@@ -92,15 +99,10 @@ class WebIndexingController {
     /// handle the case where a redirection happened and we never get a title for the original url
     ///
     /// Returns `true` if the requestedURL was indexed.
-    private func indexRedirectedURLIfNeeded(requestedURL: URL?, currentURL: URL, title: String?) -> Bool {
-        guard let requestedURL = requestedURL else { return false }
+    private func indexAliasURLIfNeeded(requestedURL: URL?, currentURL: URL, title: String?) {
+        guard let requestedURL = requestedURL, isRequestedURL(requestedURL, anAliasFor: currentURL) else { return }
 
-        // this checks in case last url redirected just contains a /
-        guard requestedURL != currentURL && currentURL.absoluteString.prefix(currentURL.absoluteString.count - 1) != requestedURL.absoluteString else {
-            return false
-        }
-
-        Logger.shared.logInfo("Mark original request of navigation as visited with resulting title \(requestedURL) - \(String(describing: title))")
+        Logger.shared.logInfo("Indexing alias '\(requestedURL)', redirecting to: '\(currentURL)', title: '\(title ?? "")'", category: .webIndexing)
         let urlToIndex = requestedURL.absoluteString
 
         // helps in notion case, when domain alias redirects to a sub page
@@ -110,7 +112,15 @@ class WebIndexingController {
         let link = LinkStore.shared.visit(urlToIndex, title: title, content: nil, destination: destinationURL.absoluteString)
         ExponentialFrecencyScorer(storage: LinkStoreFrecencyUrlStorage())
             .update(id: link.id, value: 1.0, eventType: .webDomainIncrement, date: BeamDate.now, paramKey: .webVisit30d0)
-        return true
+    }
+
+    private func isRequestedURL(_ requestedURL: URL?, anAliasFor url: URL) -> Bool {
+        // this checks in case last url redirected just contains a /
+        if  let requestedURL = requestedURL, requestedURL != url,
+            url.absoluteString.prefix(url.absoluteString.count - 1) != requestedURL.absoluteString {
+            return true
+        }
+        return false
     }
 
     /// Once we received some Readbility result from the webView, the tab indexing info can be more precise.
@@ -153,7 +163,7 @@ extension WebIndexingController {
         let startReading = tab == currentTab
         let browsingTree = tab.browsingTree
         let currentTabBrowsingTree = currentTab?.browsingTree.deepCopy()
-        let shouldIndexUserRequestedURL = indexRedirectedURLIfNeeded(requestedURL: originalRequestedURL, currentURL: url, title: fallbackTitle)
+        let shouldIndexUserRequestedURL = isRequestedURL(originalRequestedURL, anAliasFor: url)
 
         let indexDocument = IndexDocument(source: url.absoluteString, title: fallbackTitle ?? "", contents: "")
 
@@ -180,7 +190,7 @@ extension WebIndexingController {
         Readability.read(webView) { [weak self] result in
             switch result {
             case let .failure(error):
-                Logger.shared.logError("Error while indexing web page: \(error)", category: .web)
+                Logger.shared.logError("Error while indexing navigation: \(error)", category: .webIndexing)
                 finishBlock(nil)
             case let .success(read):
                 if !shouldWaitForBetterContent {
@@ -193,9 +203,10 @@ extension WebIndexingController {
                     // We put the 2nd content read in an async task to be performed after a delay.
                     // In the meantime, if the tab receives another navigation, or the webView changes URL,
                     // we cancel the task and just use whatever we had at first read.
-
-                    let delayedReadOperation = DelayedReadWebViewOperation(url: url, webView: webView, firstRead: read, finishBlock: finishBlock)
-                    self?.delayedReadOperations[tabID] = delayedReadOperation
+                    guard let self = self else { return }
+                    let delayedReadOperation = DelayedReadWebViewOperation(url: url, webView: webView, delay: self.betterContentReadDelay,
+                                                                           firstRead: read, finishBlock: finishBlock)
+                    self.delayedReadOperations[tabID] = delayedReadOperation
                     delayedReadOperation.start()
                 }
             }
@@ -230,17 +241,17 @@ private final class DelayedReadWebViewOperation: Operation {
     private let firstRead: Readability?
     private let finishBlock: (Readability?) -> Void
     private weak var webView: WKWebView?
+    private let delay: TimeInterval
 
-    /// Delay in seconds
-    private let delay = 4
     override var isAsynchronous: Bool {
         true
     }
 
-    init(url: URL, webView: WKWebView, firstRead: Readability?, finishBlock: @escaping (Readability?) -> Void) {
+    init(url: URL, webView: WKWebView, delay: TimeInterval, firstRead: Readability?, finishBlock: @escaping (Readability?) -> Void) {
         self.url = url
         self.firstRead = firstRead
         self.webView = webView
+        self.delay = delay
         self.finishBlock = finishBlock
         super.init()
     }
@@ -251,8 +262,7 @@ private final class DelayedReadWebViewOperation: Operation {
         hasFinishedAlready
     }
 
-    private func finish(with read: Readability?) {
-        guard !isFinished else { return }
+    private func callFinishBlock(with read: Readability?) {
         hasFinishedAlready = true
         finishBlock(read)
     }
@@ -260,33 +270,33 @@ private final class DelayedReadWebViewOperation: Operation {
     override func start() {
         let workItem = DispatchWorkItem(block: main)
         dispatchedMainWorkItem = workItem
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(delay), execute: workItem)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(Int(delay * 1000)), execute: workItem)
     }
 
     override func main() {
         guard !isFinished else { return }
         hasFinishedAlready = true
         guard !isCancelled, let webView = webView, webView.url == url else {
-            finish(with: firstRead)
+            callFinishBlock(with: firstRead)
             return
         }
         Readability.read(webView) { [weak self] result2 in
             var readabilityResultToUse = self?.firstRead
             switch result2 {
             case let .failure(error):
-                Logger.shared.logError("Error while indexing web page on 2nd read: \(error), fallback to first read", category: .web)
+                Logger.shared.logError("Error while indexing web page on 2nd read: \(error), fallback to first read", category: .webIndexing)
             case let .success(read2):
                 if read2 != self?.firstRead, let webViewURL = webView.url, webViewURL == self?.url {
                     readabilityResultToUse = read2
                 }
             }
-            self?.finish(with: readabilityResultToUse)
+            self?.callFinishBlock(with: readabilityResultToUse)
         }
     }
 
     func cancel(sendFirstRead: Bool) {
         if sendFirstRead && !isFinished {
-            finish(with: firstRead)
+            callFinishBlock(with: firstRead)
         }
         self.cancel()
     }

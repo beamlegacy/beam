@@ -35,6 +35,7 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         destinationURL = redirectURL(for: .none)
         sut = WebViewController(with: webView)
         mockPage = TestWebPageWithNavigation(webViewController: sut)
+        JSHandler.webPage = mockPage
     }
 
     private func redirectURL(for type: MockHttpServer.RedirectionType) -> URL {
@@ -120,7 +121,7 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, initialURL)
     }
 
-    func testJavascriptRedirection() {
+    func testJavascriptPushRedirection() {
         let expectation = expectation(description: "navigation_finished")
         expectation.expectedFulfillmentCount = 2
         var receivedNavigationDescriptions = [WebViewNavigationDescription]()
@@ -129,7 +130,29 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
             expectation.fulfill()
         }
 
-        let initialURL = redirectURL(for: .javascript)
+        let initialURL = redirectURL(for: .javascriptPush)
+        sut.webViewIsInstructedToLoadURLFromUI(initialURL)
+        webView.load(URLRequest(url: initialURL))
+
+        waitForExpectations(timeout: 4, handler: nil)
+
+        XCTAssertEqual(webView.url, destinationURL)
+        XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
+        XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
+        XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
+        XCTAssertNil(receivedNavigationDescriptions.last?.requestedURL)
+    }
+
+    func testJavascriptPushSlowRedirection() {
+        let expectation = expectation(description: "navigation_finished")
+        expectation.expectedFulfillmentCount = 2
+        var receivedNavigationDescriptions = [WebViewNavigationDescription]()
+        mockPage.onNavigationFinished = { navDescription in
+            receivedNavigationDescriptions.append(navDescription)
+            expectation.fulfill()
+        }
+
+        let initialURL = redirectURL(for: .javascriptPushSlow)
         sut.webViewIsInstructedToLoadURLFromUI(initialURL)
         webView.load(URLRequest(url: initialURL))
 
@@ -139,33 +162,8 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
-        // quick js navigation is detected as redirection of initialURL
-        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, initialURL)
+        XCTAssertNil(receivedNavigationDescriptions.last?.requestedURL)
     }
-
-    func testJavascriptSlowRedirection() {
-        let expectation = expectation(description: "navigation_finished")
-        expectation.expectedFulfillmentCount = 2
-        var receivedNavigationDescriptions = [WebViewNavigationDescription]()
-        mockPage.onNavigationFinished = { navDescription in
-            receivedNavigationDescriptions.append(navDescription)
-            expectation.fulfill()
-        }
-
-        let initialURL = redirectURL(for: .javascriptSlow)
-        sut.webViewIsInstructedToLoadURLFromUI(initialURL)
-        webView.load(URLRequest(url: initialURL))
-
-        waitForExpectations(timeout: navigationTimeout, handler: nil)
-
-        XCTAssertEqual(webView.url, destinationURL)
-        XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
-        XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
-        XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
-        // slow js navigation is not detected as redirection of initialURL
-        XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, nil)
-    }
-    
 
     func testJavascriptReplaceRedirection() {
         let expectation = expectation(description: "navigation_finished")
@@ -187,6 +185,29 @@ class WebViewControllerRedirectionHandlingTests: XCTestCase {
         XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
         XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
         XCTAssertEqual(receivedNavigationDescriptions.last?.requestedURL, initialURL)
+    }
+
+    func testJavascriptReplaceSlowRedirection() {
+        let expectation = expectation(description: "navigation_finished")
+        expectation.expectedFulfillmentCount = 2
+        var receivedNavigationDescriptions = [WebViewNavigationDescription]()
+        mockPage.onNavigationFinished = { navDescription in
+            receivedNavigationDescriptions.append(navDescription)
+            expectation.fulfill()
+        }
+
+        let initialURL = redirectURL(for: .javascriptReplaceSlow)
+        sut.webViewIsInstructedToLoadURLFromUI(initialURL)
+        webView.load(URLRequest(url: initialURL))
+
+        waitForExpectations(timeout: navigationTimeout, handler: nil)
+
+        XCTAssertEqual(webView.url, destinationURL)
+        XCTAssertEqual(receivedNavigationDescriptions.first?.url, initialURL)
+        XCTAssertEqual(receivedNavigationDescriptions.first?.requestedURL, initialURL)
+        XCTAssertEqual(receivedNavigationDescriptions.last?.url, destinationURL)
+        // a js replace happenning long after first load is not considered a redirection
+        XCTAssertNil(receivedNavigationDescriptions.last?.requestedURL)
     }
 
 }

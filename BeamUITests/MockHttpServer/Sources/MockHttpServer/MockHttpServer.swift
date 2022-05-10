@@ -169,14 +169,21 @@ public class MockHttpServer {
             .compactMap { $0.lastPathComponent.removingSuffix(".css") }
     }
 
-    fileprivate func renderStencil(_ request: RouterRequest, _ response: RouterResponse, _ stencilName: String, additionalParams: [String: String]? = nil) {
+    fileprivate func renderStencil(_ request: RouterRequest, _ response: RouterResponse, _ stencilName: String) {
+        renderStencil(request, response, stencilName, additionalParams: [String: String]())
+    }
+
+    fileprivate func renderStencil<T: Encodable>(_ request: RouterRequest, _ response: RouterResponse, _ stencilName: String, additionalParams: T? = nil) {
         guard stencilName != "form/custom" else {
             return renderCustomFieldsStencil(request, response)
         }
         do {
-            var parameters: [String: String] = additionalParams ?? [:]
-            let style = request.queryParameters["style"] ?? "default"
-            parameters["style"] = style
+            var parameters = additionalParams
+            if var stringDicParam = additionalParams as? [String:String] {
+                let style = request.queryParameters["style"] ?? "default"
+                stringDicParam["style"] = style
+                parameters = stringDicParam as? T ?? parameters
+            }
             try response.render("\(stencilName).stencil", with: parameters, forKey: "params")
         } catch {
             response.status(.notFound).send(String(describing: error))
@@ -226,9 +233,10 @@ extension MockHttpServer {
         case html
         case http301
         case http302
-        case javascript
-        case javascriptSlow // .javascript redirect but the redirection happens 1s after page load
+        case javascriptPush
+        case javascriptPushSlow // .javascriptPush redirect but the redirection happens 1s after page load
         case javascriptReplace
+        case javascriptReplaceSlow // .javascriptReplace redirect but the redirection happens 1s after page load
         case none
         case navigation
     }
@@ -272,6 +280,14 @@ extension MockHttpServer {
         router.get("/redirection/*", handler: redirectionPathHandler)
     }
 
+    struct RedirectionParameters: Encodable {
+        var destination: String
+        var redirections: [String]
+        var port: Int
+        var replace: String?
+        var delay: String?
+    }
+
     private func redirectionPathHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
         guard request.urlURL.pathComponents.contains("redirection") else {
             return listHandler(request: request, response: response, next: next)
@@ -283,11 +299,6 @@ extension MockHttpServer {
         do {
             if !page.isEmpty, redirectionNames.contains(page) {
                 let destinationURL = Self.redirectionURL(for: .none, port: request.port)
-                struct RedirectionParameters: Encodable {
-                    var destination: String
-                    var redirections: [String]
-                    var port: Int
-                }
                 let redirections = RedirectionType.allCases.map { $0.rawValue }
                 let parameters = RedirectionParameters(destination: destinationURL, redirections: redirections, port: request.port)
                 try response.render("redirection/\(page).stencil", with: parameters, forKey: "params")
@@ -306,7 +317,8 @@ extension MockHttpServer {
         }
 
         let destinationURL = Self.redirectionURL(for: .none, port: request.port)
-        var parameters = ["destination": destinationURL]
+        let redirections = RedirectionType.allCases.map { $0.rawValue }
+        var parameters = RedirectionParameters(destination: destinationURL, redirections: redirections, port: request.port)
         switch type {
         case .http301, .http302:
             var statusCode = HTTPStatusCode.OK
@@ -318,11 +330,12 @@ extension MockHttpServer {
         case .html:
             renderStencil(request, response, "redirection/html_redirect", additionalParams: parameters)
             break
-        case .javascript, .javascriptSlow, .javascriptReplace:
-            if type == .javascriptReplace {
-                parameters["replace"] = "true"
-            } else if type == .javascriptSlow {
-                parameters["delay"] = "1000"
+        case .javascriptPush, .javascriptPushSlow, .javascriptReplace, .javascriptReplaceSlow:
+            if type == .javascriptReplace || type == .javascriptReplaceSlow {
+                parameters.replace = "true"
+            }
+            if type == .javascriptPushSlow || type == .javascriptReplaceSlow {
+                parameters.delay = "700"
             }
             renderStencil(request, response, "redirection/javascript_redirect", additionalParams: parameters)
             break
