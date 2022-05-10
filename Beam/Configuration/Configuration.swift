@@ -43,6 +43,9 @@ struct Configuration {
     static private(set) var apiHostnameDefault = "https://api.prod.beamapp.co" // "http://api.beam.lvh.me"
     static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
+    static private(set) var apiHostnameDefaultStaging = "https://api.staging.beamapp.co"
+    static private(set) var publicHostnameDefaultStaging = "https://staging-beamwebclient.netlify.app"
+
     static private(set) var beamObjectsPageSizeDefault = 1000
 
     static private(set) var beamObjectDataOnSeparateCallDefault = true
@@ -219,6 +222,11 @@ struct Configuration {
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
         UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
         AccountManager.logout()
+    }
+
+    static func setAPIEndPointsToStaging() {
+        Self.apiHostname = apiHostnameDefaultStaging
+        Self.publicHostname = publicHostnameDefaultStaging
     }
 
     static private func value<T>(for key: String) -> T {

@@ -57,6 +57,8 @@ class BeamUITestsMenuGenerator {
         case .disableCreateJournalOnce: disableCreateJournalOnce()
         case .deletePrivateKeys: deletePrivateKeys()
         case .deleteAllRemoteObjects: deleteAllRemoteObjects()
+        case .resetAPIEndpoints: connectToProductionServer()
+        case .setAPIEndpointsToStaging: connectToStagingServer()
         default: break
         }
     }
@@ -321,6 +323,14 @@ class BeamUITestsMenuGenerator {
                 AppDelegate.main.deleteAllLocalData()
             }
         }
+    }
+
+    private func connectToStagingServer() {
+        Configuration.setAPIEndPointsToStaging()
+    }
+
+    private func connectToProductionServer() {
+        Configuration.reset()
     }
 
 }
