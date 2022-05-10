@@ -177,6 +177,35 @@ class HtmlVisitor {
                     }
                 }
 
+            case "svg":
+                let fileName = UUID().uuidString
+                let mimeType = "image/svg+xml"
+                // Get size from svg element
+                var size: CGSize = .zero
+                if let widthStr = try? element.attr("width"),
+                   let width = Int(widthStr),
+                   let heightStr = try? element.attr("height"),
+                   let height = Int(heightStr) {
+                    size = CGSize(width: width, height: height)
+                }
+
+                if let svgData = try? element.html().asData,
+                   let fileStorage = fileStorage,
+                   let fileId = HtmlVisitor.storeImageData(svgData, mimeType, fileName, fileStorage) {
+                    let imgElement = BeamElement()
+                    imgElement.kind = .image(
+                        fileId,
+                        origin: SourceMetadata(origin: .remote(self.urlBase)),
+                        displayInfos: MediaDisplayInfos(
+                            height: Int(size.height),
+                            width: Int(size.width),
+                            displayRatio: nil
+                        )
+                    )
+
+                    text.append(imgElement)
+                }
+
             case "iframe":
                 guard let src = getImageAttributes(element).src,
                       let url: URL = getUrl(src),
