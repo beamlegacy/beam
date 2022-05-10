@@ -24,6 +24,7 @@ public enum LogCategory: String, CaseIterable {
     case push
     case lexer
     case web
+    case webIndexing
     case search
     case javascript
     case noteEditor
