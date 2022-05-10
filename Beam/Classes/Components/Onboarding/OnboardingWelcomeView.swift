@@ -104,19 +104,16 @@ struct OnboardingWelcomeView: View {
     private func checkAccountExistence() {
         guard !email.isEmpty, email.mayBeEmail else { return }
         isCheckingForEmail = true
-        _ = try? userSessionRequest.accountExists(email: email) { result in
-            DispatchQueue.main.async {
+        Task { @MainActor in
+            do {
+                let response = try await userSessionRequest.accountExists(email: email)
                 isCheckingForEmail = false
-                switch result {
-                case .success(let response):
-                    onboardingManager.checkedEmail = (email, response.exists)
-                    finish(OnboardingStep(type: .emailConnect))
-                case .failure:
-                    guard error == nil else { return }
-                    error = .checkEmailFailed
-                    DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
-                        error = nil
-                    }
+                onboardingManager.checkedEmail = (email, response.exists)
+                finish(OnboardingStep(type: .emailConnect))
+            } catch {
+                self.error = .checkEmailFailed
+                DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3)) {
+                    self.error = nil
                 }
             }
         }

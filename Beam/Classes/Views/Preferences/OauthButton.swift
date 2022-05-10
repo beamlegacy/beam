@@ -57,8 +57,14 @@ struct OauthButton<Content: View>: View {
 
                 switch buttonType {
                 case .connect:
-                    IdentityRequest().create(credential.oauthToken, type).then { _ in
-                        onConnect?()
+                    Task {
+                        do {
+                            _ = try await IdentityRequest().create(credential.oauthToken, type)
+                            onConnect?()
+                        } catch {
+                            Logger.shared.logError(error.localizedDescription, category: .network)
+                            onFailure?()
+                        }
                     }
                 case .signin:
                     AccountManager().signInWithProvider(provider: type, accessToken: credential.oauthToken, runFirstSync: false) { _ in
