@@ -14,15 +14,19 @@ class KeychainDailyNoteScoreStore: InMemoryDailyNoteScoreStore {
     override init() {
         super.init()
         let decoder = JSONDecoder()
-        if let scoreData = Persistence.NoteScores.daily {
-            scores = (try? decoder.decode(DailyNoteScores.self, from: scoreData)) ?? DailyNoteScores()
+        Self.backgroundQueue.sync {
+            if let scoreData = Persistence.NoteScores.daily {
+                scores = (try? decoder.decode(DailyNoteScores.self, from: scoreData)) ?? DailyNoteScores()
+            }
         }
     }
 
     func save() {
         let encoder = JSONEncoder()
-        if let scoreData = try? encoder.encode(scores) {
-            Persistence.NoteScores.daily = scoreData
+        Self.backgroundQueue.sync {
+            if let scoreData = try? encoder.encode(scores) {
+                Persistence.NoteScores.daily = scoreData
+            }
         }
     }
 }

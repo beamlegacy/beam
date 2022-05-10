@@ -48,7 +48,7 @@ public protocol DailyNoteScoreStoreProtocol {
 
 open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
     public var scores = DailyNoteScores()
-    internal static var backgroundQueue: DispatchQueue = DispatchQueue(label: "InMemoryDailyNoteScoreStore backgroundQueue")
+    public static var backgroundQueue: DispatchQueue = DispatchQueue(label: "InMemoryDailyNoteScoreStore backgroundQueue")
 
     public init() {}
     public func apply(to noteId: UUID, changes: (NoteScore) -> Void) {
@@ -65,22 +65,30 @@ open class InMemoryDailyNoteScoreStore: DailyNoteScoreStoreProtocol {
         let existingDays =  scores.keys
         let daysToKeep = daysToKeep
         let bound = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysToKeep, to: BeamDate.now)?.localDayString() ?? "0000-00-00"
-        for day in existingDays where day <= bound {
-            scores[day] = nil
+        Self.backgroundQueue.sync {
+            for day in existingDays where day <= bound {
+                scores[day] = nil
+            }
         }
     }
     public func getScore(noteId: UUID, daysAgo: Int) -> NoteScore? {
         let day = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString()
         guard let day = day else { return nil }
-        return scores[day]?[noteId]
+        return Self.backgroundQueue.sync {
+            scores[day]?[noteId]
+        }
     }
     public func getScores(daysAgo: Int) -> [UUID: NoteScore] {
         let day = Calendar(identifier: .iso8601).date(byAdding: .day, value: -daysAgo, to: BeamDate.now)?.localDayString()
         guard let day = day else { return  [UUID: NoteScore]() }
-        return scores[day] ?? [UUID: NoteScore]()
+        return Self.backgroundQueue.sync {
+            scores[day] ?? [UUID: NoteScore]()
+        }
     }
     public func clear() {
-        scores = DailyNoteScores()
+        Self.backgroundQueue.sync {
+            scores = DailyNoteScores()
+        }
     }
 }
 
