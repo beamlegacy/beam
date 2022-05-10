@@ -8,17 +8,37 @@
         var replace = "{{ params.replace }}"
         setTimeout(function() {
             if (replace) {
-                window.location.replace("{{ params.destination }}");
+                window.history.replaceState(null, "", "{{ params.destination }}");
             } else {
-                window.location.href = "{{ params.destination }}";
+                window.history.pushState(null, "", "{{ params.destination }}");
             }
+            var title = "{{ params.destination }}".split('/').pop();
+            title = "Redirected to " + title;
+            document.title = title;
+            document.getElementById("title").innerHTML = title;
         }, {{ params.delay }});
     }
 </script>
 </head>
 
 <body onload="redirect()">
-<h1>Javascript Redirection</h1>
+    <h1 id="title">Javascript Redirection</h1>
+    <p>
+        Redirection type:
+         {% if params.replace %} replaceState {% else %} pushState {% endif %}
+        <br />
+        Delay: {% if params.delay %} {{ params.delay}} {% else %} no delay {% endif %}
+    </p>
+    <div>
+    <h2>Redirect Again</h2>
+    <ul>
+        {% for redirection in params.redirections %}
+        <li>
+        <a id="{{redirection}}" href="http://localhost:{{ params.port }}/redirection?type={{redirection}}">{{ redirection }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
 
 <ul>
 <li><a href="http://lvh.me:{{ params.port }}">Back to Root</a></li>

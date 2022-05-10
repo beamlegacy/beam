@@ -704,10 +704,12 @@ extension BrowserTab: WebViewControllerDelegate {
             shouldWaitForBetterContent = true
         }
 
-        state?.webIndexingController?.tabDidNavigate(self, toURL: url, originalRequestedURL: navigationDescription.requestedURL,
-                                                    shouldWaitForBetterContent: shouldWaitForBetterContent,
-                                                    isLinkActivation: isLinkActivation, currentTab: state?.browserTabsManager.currentTab)
-        state?.browserTabsManager.tabDidFinishNavigating(self, url: url)
+        if !BeamURL(url).isErrorPage {
+            state?.webIndexingController?.tabDidNavigate(self, toURL: url, originalRequestedURL: navigationDescription.requestedURL,
+                                                        shouldWaitForBetterContent: shouldWaitForBetterContent,
+                                                        isLinkActivation: isLinkActivation, currentTab: state?.browserTabsManager.currentTab)
+            state?.browserTabsManager.tabDidFinishNavigating(self, url: url)
+        }
     }
 
     func webViewController(_ controller: WebViewController, didChangeLoadedContentType contentDescription: BrowserContentDescription?) {
