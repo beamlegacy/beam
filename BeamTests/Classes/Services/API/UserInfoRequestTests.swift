@@ -41,29 +41,27 @@ class UserInfoRequestTests: QuickSpec {
         describe(".setUsername") {
             context("with Foundation") {
                 context("with available username") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.setUsername(username: availableUsername) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            let result = try await sut.setUsername(username: availableUsername)
+                            expect(result.errors).to(beEmpty())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }
 
                 context("with non-available username") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.setUsername(username: nonAvailableUsername) { result in
-                                expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    let errorable = UserInfoRequest.UpdateMe(
-                                        me: nil,
-                                        errors: [UserErrorData(message: "Username has already been taken", path: nil)]
-                                    )
-                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
-                                })
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            try await sut.setUsername(username: nonAvailableUsername)
+                            fail("Should not happen")
+                        } catch {
+                            let errorable = UserInfoRequest.UpdateMe(
+                                me: nil,
+                                errors: [UserErrorData(message: "Username has already been taken", path: nil)]
+                            )
+                            expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                         }
                     }
                 }
@@ -110,53 +108,49 @@ class UserInfoRequestTests: QuickSpec {
         describe(".updatePassword") {
             context("with Foundation") {
                 context("with validParameters") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.updatePassword(currentPassword: currentPassword, newPassword: newPassword) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            let result = try await sut.updatePassword(currentPassword: currentPassword, newPassword: newPassword)
+                            expect(result.success).to(beTrue())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
 
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.updatePassword(currentPassword: newPassword, newPassword: currentPassword) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
+                        do {
+                            let result = try await sut.updatePassword(currentPassword: newPassword, newPassword: currentPassword)
+                            expect(result.success).to(beTrue())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }
 
                 context("with invalid current password") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.updatePassword(currentPassword: "totally wrong password", newPassword: newPassword) { result in
-                                expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    let errorable = UserInfoRequest.UpdatePassword(
-                                        success: nil,
-                                        errors: [UserErrorData(message: "Invalid password", path: ["parameters", "password"], code: .passwordInvalid)]
-                                    )
-                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
-                                })
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            try await sut.updatePassword(currentPassword: "totally wrong password", newPassword: newPassword)
+                            fail("Should not happen")
+                        } catch {
+                            let errorable = UserInfoRequest.UpdatePassword(
+                                success: nil,
+                                errors: [UserErrorData(message: "Invalid password", path: ["parameters", "password"], code: .passwordInvalid)]
+                            )
+                            expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                         }
                     }
                 }
 
                 context("with invalid new password") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.updatePassword(currentPassword: currentPassword, newPassword: "t") { result in
-                                expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    let errorable = UserInfoRequest.UpdatePassword(
-                                        success:  nil,
-                                        errors: [UserErrorData(message: "Password is too short (minimum is 6 characters)", path: ["attribute", "password"])]
-                                    )
-                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
-                                })
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            try await sut.updatePassword(currentPassword: currentPassword, newPassword: "t")
+                            fail("Should not happen")
+                        } catch {
+                            let errorable = UserInfoRequest.UpdatePassword(
+                                success:  nil,
+                                errors: [UserErrorData(message: "Password is too short (minimum is 6 characters)", path: ["attribute", "password"])]
+                            )
+                            expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                         }
                     }
                 }

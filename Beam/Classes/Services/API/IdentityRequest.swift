@@ -27,30 +27,26 @@ class IdentityRequest: APIRequest {
 extension IdentityRequest {
     @discardableResult
     func create(_ accessToken: String,
-                _ provider: Provider,
-                _ completion: @escaping (Swift.Result<CreateIdentity, Error>) -> Void) throws -> URLSessionDataTask {
+                _ provider: Provider) async throws -> CreateIdentity {
         let identity = IdentityType(provider: provider.rawValue, accessToken: accessToken)
         let parameters = IdentityParameters(identity: identity)
         let bodyParamsRequest = GraphqlParameters(fileName: "create_identity", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 
-    @discardableResult
-    func delete(_ id: String,
-                _ completion: @escaping (Swift.Result<DeleteIdentity, Error>) -> Void) throws -> URLSessionDataTask {
+    func delete(_ id: String) async throws -> DeleteIdentity {
         let identity = IdentityType(id: id)
         let parameters = IdentityParameters(identity: identity)
         let bodyParamsRequest = GraphqlParameters(fileName: "delete_identity", variables: parameters)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 
-    @discardableResult
-    func fetchAll(_ completion: @escaping (Swift.Result<UserMe, Error>) -> Void) throws -> URLSessionDataTask {
+    func fetchAll() async throws -> UserMe {
         let bodyParamsRequest = GraphqlParameters(fileName: "identities", variables: EmptyVariable())
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completion)
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 }
 
