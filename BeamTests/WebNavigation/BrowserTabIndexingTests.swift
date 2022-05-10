@@ -21,6 +21,8 @@ class BrowserTabIndexingTests: XCTestCase {
     private var destinationURL: URL!
     private static let port: Int = 8080
 
+    private let destinationPageTitle = "Redirection Destination"
+    private let jsDestinationPageTitle = "Redirected to destination"
     private let defaultTimeout: TimeInterval = 2
 
     private var linkStore: LinkStore {
@@ -39,11 +41,11 @@ class BrowserTabIndexingTests: XCTestCase {
         linkStore.deleteAll(includedRemote: false, nil)
         webView = WKWebView()
 
-
         state = BeamState()
         state.data = BeamData()
         mockIndexingDelegate = MockWebIndexingDelegate()
         state.webIndexingController?.delegate = mockIndexingDelegate
+        state.webIndexingController?.betterContentReadDelay = 0.2
         tab = BrowserTab(state: state, browsingTreeOrigin: .searchBar(query: "http", referringRootId: nil), originMode: .web, note: nil)
 
         destinationURL = redirectURL(for: .none)
@@ -69,11 +71,14 @@ class BrowserTabIndexingTests: XCTestCase {
 
     }
 
-    func testHTTP302RedirectionIsStoredAsAlias() {
-
-        let initialURL = redirectURL(for: .http302)
+    private func performAndTestAliasRedirection(ofType type: MockHttpServer.RedirectionType,
+                                                expectedNumberOfIndexingCalls: Int,
+                                                initialURLShouldBeAlias: Bool = true,
+                                                destinationTitle: String) {
+        let initialURL = redirectURL(for: type)
 
         let expectation = expectation(description: "done_indexing")
+        expectation.expectedFulfillmentCount = expectedNumberOfIndexingCalls
         mockIndexingDelegate?.onIndexingFinished = { _ in
             expectation.fulfill()
         }
@@ -91,9 +96,38 @@ class BrowserTabIndexingTests: XCTestCase {
 
         let resultLinkForDestinationURL = linkStore.getLinks(matchingUrl: destinationURL.absoluteString).values.first
         XCTAssertEqual(resultLinkForDestinationURL?.url, destinationURL.absoluteString)
+        XCTAssertEqual(resultLinkForDestinationURL?.title, destinationTitle)
 
-        // the http redirection is stored as an alias of the destination
-        XCTAssertEqual(resultLinkForInitialURL?.destination, resultLinkForDestinationURL?.id)
+        if initialURLShouldBeAlias {
+            // the redirection is stored as an alias of the destination
+            XCTAssertEqual(resultLinkForInitialURL?.destination, resultLinkForDestinationURL?.id)
+        } else {
+            // the redirection is NOT stored as an alias of the destination
+            XCTAssertNil(resultLinkForInitialURL?.destination)
+        }
+        XCTAssertEqual(resultLinkForInitialURL?.title, destinationTitle)
+    }
+
+    func testHTTP301RedirectionIsStoredAsAlias() {
+        performAndTestAliasRedirection(ofType: .http301, expectedNumberOfIndexingCalls: 1, destinationTitle: destinationPageTitle)
+    }
+
+    func testHTTP302RedirectionIsStoredAsAlias() {
+        performAndTestAliasRedirection(ofType: .http302, expectedNumberOfIndexingCalls: 1, destinationTitle: destinationPageTitle)
+    }
+
+    func testHTMLRedirectionIsStoredAsAlias() {
+        performAndTestAliasRedirection(ofType: .html, expectedNumberOfIndexingCalls: 2, destinationTitle: destinationPageTitle)
+    }
+
+    func testJavascriptPushRedirectionIsNOTStoredAsAlias() {
+        performAndTestAliasRedirection(ofType: .javascriptPush, expectedNumberOfIndexingCalls: 2,
+                                       initialURLShouldBeAlias: false,
+                                       destinationTitle: jsDestinationPageTitle)
+    }
+
+    func testJavascriptReplaceRedirectionIsStoredAsAlias() {
+        performAndTestAliasRedirection(ofType: .javascriptReplace, expectedNumberOfIndexingCalls: 2, destinationTitle: jsDestinationPageTitle)
     }
 
     func testConsecutiveRedirectionsSeparatedByUILoads() {
@@ -124,11 +158,15 @@ class BrowserTabIndexingTests: XCTestCase {
         XCTAssertEqual(resultLinkForInitialURL2?.url, initialURL2.absoluteString)
 
         let resultLinkForDestinationURL = linkStore.getLinks(matchingUrl: destinationURL.absoluteString).values.first
+        XCTAssertEqual(resultLinkForDestinationURL?.title, destinationPageTitle)
         XCTAssertEqual(resultLinkForDestinationURL?.url, destinationURL.absoluteString)
 
         // the http redirections are stored as an alias of the destination
         XCTAssertEqual(resultLinkForInitialURL1?.destination, resultLinkForDestinationURL?.id)
+        XCTAssertEqual(resultLinkForInitialURL1?.title, destinationPageTitle)
         XCTAssertEqual(resultLinkForInitialURL2?.destination, resultLinkForDestinationURL?.id)
+        XCTAssertEqual(resultLinkForInitialURL1?.title, destinationPageTitle)
+
     }
 
     func testConsecutiveRedirectionsSeparatedByLinkClick() {
@@ -164,9 +202,11 @@ class BrowserTabIndexingTests: XCTestCase {
 
         let resultLinkForDestinationURL = linkStore.getLinks(matchingUrl: destinationURL.absoluteString).values.first
         XCTAssertEqual(resultLinkForDestinationURL?.url, destinationURL.absoluteString)
+        XCTAssertEqual(resultLinkForDestinationURL?.title, destinationPageTitle)
 
         // the http redirection is stored as an alias of the destination
         XCTAssertEqual(resultLinkForInitialURL1?.destination, resultLinkForDestinationURL?.id)
+        XCTAssertEqual(resultLinkForInitialURL1?.title, destinationPageTitle)
 
         // the second navigation is a click navigation, the webview goes directly to the destination so the intermediate is not indexed.
         let linkURL2 = redirectURL(for: linkType)
