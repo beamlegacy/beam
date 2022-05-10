@@ -135,6 +135,16 @@ extension DOMInputElement {
         decodedAutocomplete == nil && type != .password
     }
 
+    var isCompatibleWithPassword: Bool {
+        guard type == .password else { return false }
+        switch decodedAutocomplete {
+        case .currentPassword, .newPassword, .off, .on, .none:
+            return true
+        default:
+            return false
+        }
+    }
+
     var isAutocompleteOnField: Bool {
         switch decodedAutocomplete {
         case .on:
@@ -410,14 +420,14 @@ final class WebFieldClassifier {
     func classify(rawFields allRawFields: [DOMInputElement], on host: String?) -> ClassifierResult {
         autocompleteRules = autocompleteRules(for: host)
         let rawFields = allRawFields.filter(includedInEvaluation)
-        let pageContainsPasswordField = rawFields.contains { $0.type == .password }
+        let pageContainsPasswordField = rawFields.contains { $0.isCompatibleWithPassword }
         let pageContainsNonPasswordField = rawFields.contains { $0.type != .password }
         let fields = rawFields.compactMap { autocompleteRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField, nonPasswordField: pageContainsNonPasswordField) }
         let pageContainsTaggedField = fields.contains { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
         let allowedFields = fields.filter { autocompleteRules.allowField($0, pageContainsTaggedField: pageContainsTaggedField, pageContainsPasswordField: pageContainsPasswordField)}
         Logger.shared.logDebug("Candidates: \(allowedFields.map { $0.debugDescription })", category: .passwordManagerInternal)
 
-        let passwordFields = fields.filter { $0.type == .password }
+        let passwordFields = fields.filter { $0.isCompatibleWithPassword }
         let containsPasswordFieldsUsableForLogin = !passwordFields.isEmpty && !passwordFields.contains { $0.isNewPasswordField }
         let containsPasswordFieldsUsableForNewAccount = !passwordFields.isEmpty && !passwordFields.contains { $0.isCurrentPasswordField }
         let biasTowardLogin = containsPasswordFieldsUsableForLogin ? 4 : 1 // give a slight edge to login by default
