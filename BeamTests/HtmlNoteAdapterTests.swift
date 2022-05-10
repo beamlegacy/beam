@@ -676,5 +676,27 @@ class HtmlNoteAdapterTests: XCTestCase {
         }
         wait(for: [expectation], timeout: 10.0)
     }
-    // TODO: test adding a plain embed?
+
+    func testSVGHtml() {
+        let html = """
+        <svg width="24" height="18" viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg" class="sc-144c310-0 CFcff"><path d="M24 14.52c0 1.8-1.45 3.25-3.25 3.25-.57 0-2 0-5.94.03l-5.95.04A3.25 3.25 0 018 11.47a3.25 3.25 0 014-2.93 5.07 5.07 0 019.7 2.87c1.33.4 2.3 1.65 2.3 3.11zm-3.28-1.74a.75.75 0 01-.7-1.04 3.57 3.57 0 10-6.8-2.05c-.1.5-.67.76-1.11.5a1.72 1.72 0 00-.88-.24 1.75 1.75 0 00-1.72 2.03.75.75 0 01-.7.87 1.74 1.74 0 00.05 3.49l5.94-.04 5.95-.03a1.75 1.75 0 00.03-3.5h-.06zm-9.4-7.41a.75.75 0 11-.72 1.31 2.86 2.86 0 00-4.07 3.5.75.75 0 11-1.41.5 4.37 4.37 0 016.2-5.31zm-1.38-3a.75.75 0 11-1.5 0V.75a.75.75 0 011.5 0v1.62zM.75 9.94a.75.75 0 010-1.5h1.62a.75.75 0 110 1.5H.75zm1.94-6.19A.75.75 0 113.75 2.7L4.9 3.84a.75.75 0 01-1.07 1.05L2.7 3.75z" fill="currentColor"></path></svg>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://www.nos.nl")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 1, "expected one result, recieved \(results) instead")
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertTrue(firstEl.kind.isImage, "expected kind to be image, recieved \(firstEl.kind) instead")
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 1)
+                expectation.fulfill()
+            } else {
+                XCTFail("expected at least one element")
+            }
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
 }
