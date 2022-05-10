@@ -15,9 +15,11 @@ class AdvancedPasswordAutofillTests: BaseTest {
     let helper = PasswordManagerHelper()
     let passwordUsername = "somePass@0"
     let passwordEmail = "somePass@1"
+    let passwordEscape = "s.o'm\"e!P\\a&s?s@2/"
     let baseUrl = "http://form.lvh.me:8080/"
     let loginUsername = "signin.form"
     let loginEmail = "signin.form@email.beam"
+    let loginEscape = "signin.form@escape.co"
     let securedAutoCompletedPassword = "••••••••••"
 
     override func setUpWithError() throws {
@@ -284,6 +286,35 @@ class AdvancedPasswordAutofillTests: BaseTest {
             XCTAssertEqual(mockPage.getResultValue(label: "lastname"), testData)
             XCTAssertEqual(mockPage.getResultValue(label: "username"), loginUsername)
             XCTAssertEqual(mockPage.getResultValue(label: "password"), passwordUsername)
+        }
+    }
+
+    func testSignInPageWithPasswordContainingSpecialCharacters() {
+        let usernamePage = "signin"
+
+        step("Given I navigate to \(usernamePage)") {
+            OmniBoxTestView().searchInOmniBox(baseUrl + usernamePage, true)
+        }
+
+        step("When I click on Username field") {
+            mockPage.getUsernameFieldElement(title: "Username: ").clickOnExistence()
+        }
+
+        step("And I click on Other Passwords option") {
+            helper.getOtherPasswordsOptionElementFor(hostName: "form.lvh.me").clickOnExistence()
+        }
+
+        step("When I fill information") {
+            helper.clickPopupLoginText(login: loginEscape)
+        }
+
+        step("And I submit the form") {
+            mockPage.getContinueButtonElement().clickOnExistence()
+        }
+
+        step("Then the results page is populated with sign in data") {
+            XCTAssertEqual(mockPage.getResultValue(label: "username"), loginEscape)
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), passwordEscape)
         }
     }
 }
