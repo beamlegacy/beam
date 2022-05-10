@@ -28,12 +28,12 @@ class UserSessionRequestTests: QuickSpec {
         describe(".signIn()") {
             context("with Foundation") {
                 context("with good password") {
-                    it("authenticates") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.signIn(email: existingAccountEmail, password: password) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
+                    asyncIt("authenticates") {
+                        do {
+                            let result = try await sut.signIn(email: existingAccountEmail, password: password)
+                            expect(result.accessToken).notTo(beNil())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }
@@ -41,20 +41,18 @@ class UserSessionRequestTests: QuickSpec {
                 context("with wrong password") {
                     let password = "wrong password"
 
-                    it("doesn't authenticate") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.signIn(email: existingAccountEmail, password: password) { result in
-                                expect { try result.get() }.to(throwError { (error: APIRequestError) in
-                                    let errorable = UserSessionRequest.SignIn(
-                                        accessToken: nil,
-                                        refreshToken: nil,
-                                        errors: [UserErrorData(message: "Invalid password", path: ["arguments", "password"])]
-                                    )
+                    asyncIt("doesn't authenticate") {
+                        do {
+                            try await sut.signIn(email: existingAccountEmail, password: password)
+                            fail("Should not happen")
+                        } catch {
+                            let errorable = UserSessionRequest.SignIn(
+                                accessToken: nil,
+                                refreshToken: nil,
+                                errors: [UserErrorData(message: "Invalid password", path: ["arguments", "password"])]
+                            )
 
-                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
-                                })
-                                done()
-                            }
+                            expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
                         }
                     }
                 }
@@ -104,23 +102,23 @@ class UserSessionRequestTests: QuickSpec {
         describe(".forgotPassword") {
             context("with Foundation") {
                 context("with existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.forgotPassword(email: existingAccountEmail) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            let forgotPassword = try await sut.forgotPassword(email: existingAccountEmail)
+                            expect(forgotPassword.success).to(beTrue())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }
 
                 context("with non-existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.forgotPassword(email: nonExistingAccountEmail) { result in
-                                expect { try result.get() }.toNot(throwError())
-                                done()
-                            }
+                    asyncIt("returns") {
+                        do {
+                            let forgotPassword = try await sut.forgotPassword(email: nonExistingAccountEmail)
+                            expect(forgotPassword.success).to(beTrue())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }
@@ -162,23 +160,23 @@ class UserSessionRequestTests: QuickSpec {
         describe(".accountExists()") {
             context("with Foundation") {
                 context("with existing accounts") {
-                    it("returns true") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.accountExists(email: existingAccountEmail) { result in
-                                expect { try result.get().exists }.to(beTrue())
-                                done()
-                            }
+                    asyncIt("returns true") {
+                        do {
+                            let result = try await sut.accountExists(email: existingAccountEmail)
+                            expect(result.exists).to(beTrue())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }
 
                 context("with unknown account") {
-                    it("returns false") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let _: URLSessionDataTask? = try? sut.accountExists(email: nonExistingAccountEmail) { result in
-                                expect { try result.get().exists }.to(beFalse())
-                                done()
-                            }
+                    asyncIt("returns false") {
+                        do {
+                            let result = try await sut.accountExists(email: nonExistingAccountEmail)
+                            expect(result.exists).to(beFalse())
+                        } catch {
+                            fail(error.localizedDescription)
                         }
                     }
                 }

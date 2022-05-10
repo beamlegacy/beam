@@ -10,48 +10,34 @@ import Foundation
 extension UserInfoRequest {
 
     @discardableResult
-    func getUserInfos(completionHandler: @escaping (Result<UserInfos, Error>) -> Void) throws -> URLSessionDataTask {
+    func getUserInfos() async throws -> UserInfos {
 
         let bodyParamsRequest = GraphqlParameters(fileName: "user_infos", variables: EmptyVariable())
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, authenticatedCall: true, completionHandler: { (result: Result<UserInfos, Error>) in
-            completionHandler(result)
-        })
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest, authenticatedCall: true)
     }
 
     @discardableResult
-    func setUsername(username: String,
-                     completionHandler: @escaping (Result<UpdateMe, Error>) -> Void) throws -> URLSessionDataTask {
+    func setUsername(username: String) async throws -> UpdateMe {
 
         let variables = UpdateMeParameters(username: username)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "set_username", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<UpdateMe, Error>) in
-            completionHandler(result)
-        }
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 
     @discardableResult
     func updatePassword(currentPassword: String,
-                        newPassword: String,
-                        _ completionHandler: @escaping (Result<UpdatePassword, Error>) -> Void) throws -> URLSessionDataTask? {
+                        newPassword: String) async throws -> UpdatePassword {
         let variables = UpdatePasswordParameters(currentPassword: currentPassword, newPassword: newPassword)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "update_password", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, authenticatedCall: true) { (result: Result<UpdatePassword, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let updatePassword):
-                guard updatePassword.success == true else {
-                    completionHandler(.failure(UserSessionRequestError.updatePasswordFailed))
-                    return
-                }
-
-                completionHandler(.success(updatePassword))
-            }
+        let result: UpdatePassword = try await performRequest(bodyParamsRequest: bodyParamsRequest, authenticatedCall: true)
+        guard result.success == true else {
+            throw UserSessionRequestError.updatePasswordFailed
         }
+        return result
     }
 }

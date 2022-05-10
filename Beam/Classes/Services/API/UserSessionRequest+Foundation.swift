@@ -2,125 +2,88 @@ import Foundation
 
 extension UserSessionRequest {
     func signInWithProvider(provider: IdentityRequest.Provider,
-                            accessToken: String,
-                            _ completionHandler: @escaping (Result<SignInWithProvider, Error>) -> Void) throws -> URLSessionDataTask? {
+                            accessToken: String) async throws -> SignInWithProvider {
         let identity = IdentityType(id: nil, provider: provider.rawValue, accessToken: accessToken)
         let variables = SignInWithProviderParameters(identity: identity)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "sign_in_with_provider", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<SignInWithProvider, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let signIn):
-                guard signIn.accessToken != nil else {
-                    completionHandler(.failure(UserSessionRequestError.signInFailed))
-                    return
-                }
-
-                completionHandler(.success(signIn))
-            }
+        let signIn: SignInWithProvider = try await performRequest(bodyParamsRequest: bodyParamsRequest)
+        guard signIn.accessToken != nil else {
+            throw UserSessionRequestError.signInFailed
         }
+
+        return signIn
     }
 
+    @discardableResult
     func signIn(email: String,
-                password: String,
-                _ completionHandler: @escaping (Result<SignIn, Error>) -> Void) throws -> URLSessionDataTask? {
+                password: String) async throws -> SignIn {
         let variables = SignInParameters(email: email,
                                          password: password)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "sign_in", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<SignIn, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let signIn):
-                guard signIn.accessToken != nil else {
-                    completionHandler(.failure(UserSessionRequestError.signInFailed))
-                    return
-                }
-
-                completionHandler(.success(signIn))
-            }
+        let signIn: SignIn = try await performRequest(bodyParamsRequest: bodyParamsRequest)
+        guard signIn.accessToken != nil else {
+            throw UserSessionRequestError.signInFailed
         }
+
+        return signIn
     }
 
-    @discardableResult
     func signUp(_ email: String,
-                _ password: String,
-                _ completionHandler: @escaping (Result<SignUp, Error>) -> Void) throws -> URLSessionDataTask? {
+                _ password: String) async throws -> SignUp {
         let variables = SignUpParameters(email: email, password: password)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "sign_up", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 
     @discardableResult
-    func forgotPassword(email: String,
-                        _ completionHandler: @escaping (Result<ForgotPassword, Error>) -> Void) throws -> URLSessionDataTask? {
+    func forgotPassword(email: String) async throws -> ForgotPassword {
         let variables = ForgotPasswordParameters(email: email)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "forgot_password", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<ForgotPassword, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let forgotPassword):
-                guard forgotPassword.success == true else {
-                    completionHandler(.failure(UserSessionRequestError.forgotPasswordFailed))
-                    return
-                }
-
-                completionHandler(.success(forgotPassword))
-            }
+        let forgotPassword: ForgotPassword = try await performRequest(bodyParamsRequest: bodyParamsRequest)
+        guard forgotPassword.success == true else {
+            throw UserSessionRequestError.forgotPasswordFailed
         }
+
+        return forgotPassword
     }
 
     @discardableResult
-    func resendVerificationEmail(email: String,
-                                 _ completionHandler: @escaping (Result<ResendVerificationEmail, Error>) -> Void) throws -> URLSessionDataTask? {
+    func resendVerificationEmail(email: String) async throws -> ResendVerificationEmail {
         let variables = ResendVerificationEmailParameters(email: email)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "resend_verification_email", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest) { (result: Result<ResendVerificationEmail, Error>) in
-            switch result {
-            case .failure(let error):
-                completionHandler(.failure(error))
-            case .success(let result):
-                guard result.success == true else {
-                    completionHandler(.failure(UserSessionRequestError.resendVerificationEmailFailed))
-                    return
-                }
-
-                completionHandler(.success(result))
-            }
+        let result: ResendVerificationEmail = try await performRequest(bodyParamsRequest: bodyParamsRequest)
+        guard result.success == true else {
+            throw UserSessionRequestError.resendVerificationEmailFailed
         }
+
+        return result
     }
 
-    @discardableResult
     func refreshToken(accessToken: String,
-                      refreshToken: String,
-                      _ completionHandler: @escaping (Result<RenewCredentials, Error>) -> Void) throws -> URLSessionDataTask? {
+                      refreshToken: String) async throws -> RenewCredentials {
         let variables = RefreshTokenParameters(accessToken: accessToken, refreshToken: refreshToken)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "refresh_token", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 
-    @discardableResult
-    func accountExists(email: String,
-                       _ completionHandler: @escaping (Result<AccountExists, Error>) -> Void) throws -> URLSessionDataTask? {
+    func accountExists(email: String) async throws -> AccountExists {
         let variables = AccountExistsParameters(email: email)
 
         let bodyParamsRequest = GraphqlParameters(fileName: "account_exists", variables: variables)
 
-        return try performRequest(bodyParamsRequest: bodyParamsRequest, completionHandler: completionHandler)
+        return try await performRequest(bodyParamsRequest: bodyParamsRequest)
     }
 
 }
