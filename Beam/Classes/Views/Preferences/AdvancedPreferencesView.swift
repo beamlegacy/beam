@@ -90,6 +90,7 @@ struct AdvancedPreferencesView: View {
                         .lineLimit(1)
                         .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
                     ResetAPIEndpointsButton
+                    SetAPIEndPointsToStagingButton
                 }
                 Preferences.Section {
                     Text("Public endpoint")
@@ -680,9 +681,21 @@ struct AdvancedPreferencesView: View {
         Button(action: {
             Configuration.reset()
             apiHostname = Configuration.apiHostname
+            publicHostname = Configuration.publicHostname
         }, label: {
             // TODO: loc
             Text("Reset API Endpoints").frame(minWidth: 100)
+        })
+    }
+
+    private var SetAPIEndPointsToStagingButton: some View {
+        Button(action: {
+            Configuration.setAPIEndPointsToStaging()
+            apiHostname = Configuration.apiHostname
+            publicHostname = Configuration.publicHostname
+        }, label: {
+            // TODO: loc
+            Text("Set API Endpoints to staging server").frame(minWidth: 100)
         })
     }
 

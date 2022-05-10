@@ -76,6 +76,10 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case enableCreateJournalOnce = "Enable Create Journal once per window"
     case disableCreateJournalOnce = "Disable Create Journal once per window"
 
+    // Remote server
+    case resetAPIEndpoints = "Set API Endpoints to production server"
+    case setAPIEndpointsToStaging = "Set API Endpoints to staging server"
+
     var group: UITestMenuGroup? {
         switch self {
         case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia,
@@ -100,6 +104,8 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .omniboxSetup
         case .enableCreateJournalOnce, .disableCreateJournalOnce:
             return .journal
+        case .resetAPIEndpoints, .setAPIEndpointsToStaging:
+            return .remoteServer
         default:
             return nil
         }
@@ -124,4 +130,5 @@ public enum UITestMenuGroup: String, CaseIterable {
     case mockHttpServer = "Mock HTTP Server"
     case resizeWindow = "Resize Window"
     case journal = "Journal"
+    case remoteServer = "Remote server"
 }
