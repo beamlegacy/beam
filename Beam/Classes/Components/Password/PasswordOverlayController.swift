@@ -635,7 +635,7 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
     private func fillWebTextFields(_ params: [WebFieldAutofill]) {
         do {
             let data = try encoder.encode(params)
-            guard let jsonString = String(data: data, encoding: .utf8) else { return }
+            guard let jsonString = String(data: data, encoding: .utf8)?.javascriptEscaped() else { return }
             let script = "passwordHelper.setTextFieldValues('\(jsonString)')"
             self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .passwordManagerInternal).then { _ in
                 Logger.shared.logDebug("passwordOverlay text fields set.", category: .passwordManagerInternal)

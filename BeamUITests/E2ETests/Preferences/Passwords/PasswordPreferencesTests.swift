@@ -244,8 +244,9 @@ class PasswordPreferencesTests: BaseTest {
         step ("THEN password entries are correctly sorted"){
             XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(0)), hostnameLvh)
             XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(1)), hostnameLvh)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(2)), hostnameFacebook)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(3)), hostnameApple)
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(2)), hostnameLvh)
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(3)), hostnameFacebook)
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(4)), hostnameApple)
         }
         
         
@@ -258,6 +259,7 @@ class PasswordPreferencesTests: BaseTest {
             XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(1)), hostnameFacebook)
             XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(2)), hostnameLvh)
             XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(3)), hostnameLvh)
+            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(4)), hostnameLvh)
         }
         
     }
