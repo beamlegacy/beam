@@ -90,7 +90,8 @@ class AutocompleteManager: ObservableObject {
 
         var searchText = receivedQueryString
         let previousUnselectedText = getUnselectedText(for: searchQuery)?.lowercased() ?? searchQuery
-        let isRemovingCharacters = searchText.count < previousUnselectedText.count || searchText.lowercased() == previousUnselectedText
+        let isRemovingCharacters = searchText.count < previousUnselectedText.count
+        || (searchText.lowercased() == previousUnselectedText && searchQuerySelectedRange?.isEmpty == false)
         var selectionWasReset = false
         if let realText = replacedProposedText {
             searchText = realText
@@ -132,7 +133,8 @@ class AutocompleteManager: ObservableObject {
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.setAutocompleteResults(finalResults)
                 if !isRemovingCharacters {
-                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: selectionWasReset)
+                    let canResetText = selectionWasReset || finalResults.first?.text.lowercased() != self.searchQuery
+                    self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: canResetText)
                 }
             }.store(in: &searchRequestsCancellables)
     }
