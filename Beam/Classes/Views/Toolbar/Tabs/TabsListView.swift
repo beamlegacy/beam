@@ -8,20 +8,30 @@
 
 import SwiftUI
 import BeamCore
+import UniformTypeIdentifiers
+
+private class TabsListViewModel: ObservableObject {
+    var currentDragDidChangeCurrentTab = false
+    var lastTouchWasOnUnselectedTab: Bool = false
+    var singleTabCenteringAdjustment: CGFloat = 0
+    var singleTabCurrentFrame: CGRect?
+    weak var mouseMoveMonitor: AnyObject?
+    weak var otherMouseDownMonitor: AnyObject?
+}
 
 struct TabsListView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var windowInfo: BeamWindowInfo
+    @Environment(\.isMainWindow) private var isMainWindow
 
     @Binding var tabs: [BrowserTab]
     @Binding var currentTab: BrowserTab?
     var globalContainerGeometry: GeometryProxy?
 
     @ObservedObject private var dragModel = TabsDragModel()
-    @State private var firstDragGestureValue: DragGesture.Value?
+    @State private var firstDragGestureValue: TabGestureValue?
     @State private var disableAnimation: Bool = false
     @State private var isAnimatingDrop: Bool = false
-    private let dropAnimationDuration = 0.2
 
     @State private var hoveredIndex: Int?
     @State private var isChangingTabsCountWhileHovering: Bool = false
@@ -33,15 +43,8 @@ struct TabsListView: View {
         }
     }
 
-    @StateObject private var viewModel = ViewModel()
-    private class ViewModel: ObservableObject {
-        var currentDragDidChangeCurrentTab = false
-        var lastTouchWasOnUnselectedTab: Bool = false
-        var singleTabCenteringAdjustment: CGFloat = 0
-        var singleTabCurrentFrame: CGRect?
-        weak var mouseMoveMonitor: AnyObject?
-        weak var otherMouseDownMonitor: AnyObject?
-    }
+    @StateObject private var externalDragModel = TabsListExternalDragViewModel()
+    @StateObject private var viewModel = TabsListViewModel()
 
     private var isDraggingATab: Bool {
         dragModel.draggingOverIndex != nil
@@ -147,16 +150,13 @@ struct TabsListView: View {
             }
             TabView(tab: tab, isSelected: selected, isPinned: tab.isPinned, isSingleTab: isSingle, isDragging: isTheDraggedTab,
                     disableAnimations: isAnimatingDrop, disableHovering: isChangingTabsCountWhileHovering, hueTint: hueTint,
-                    onTouchDown: { onTabTouched(at: index) },
-                    onTap: { onTabTapped(at: index) },
-                    onClose: { onTabClose(at: index) },
-                    onCopy: { onTabCopy(at: index)},
+                    isInMainWindow: isMainWindow,
+                    onTouchDown: { onTabTouched(at: index) }, onTap: { onTabTapped(at: index) },
+                    onClose: { onTabClose(at: index) }, onCopy: { onTabCopy(at: index)},
                     onToggleMute: { onTabToggleMute(at: index) })
                 .frame(width: isTheDraggedTab ? 0 : max(0, widthProvider.widthForTab(selected: selected, pinned: tab.isPinned) - centeringAdjustment))
                 .opacity(isTheDraggedTab ? 0 : 1)
-                .onHover { h in
-                    if h { hoveredIndex = index }
-                }
+                .onHover { if $0 { hoveredIndex = index } }
                 .background(!selected ? nil : GeometryReader { prxy in
                     Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: index, frame: prxy.safeTopLeftGlobalFrame(in: nil).rounded()))
                 })
@@ -175,7 +175,7 @@ struct TabsListView: View {
         .id(id)
         .accessibilityElement(children: .contain)
         .accessibilityIdentifier(id)
-        .transition(tabTransition)
+        .transition(isAnimatingDrop ? .identity : tabTransition)
     }
 
     var body: some View {
@@ -201,10 +201,7 @@ struct TabsListView: View {
                                 .opacity(shouldShowSectionSeparator(tabsSections: tabsSections) ? 1 : 0)
                         }
                     }
-                    .if(isDraggingATab && dragModel.draggingOverPins) {
-                        $0.animation(BeamAnimation.easeInOut(duration: 0.2), value: dragModel.draggingOverIndex)
-                    }
-                    .animation(isAnimatingDrop ? nil : BeamAnimation.spring(stiffness: 400, damping: 30), value: tabsSections.pinnedTabs.count)
+                    .animation(isAnimatingDrop || isDraggingATab ? nil : BeamAnimation.spring(stiffness: 400, damping: 30), value: tabsSections.pinnedTabs.count)
                     // Scrollable Tabs
                     GeometryReader { scrollContainerProxy in
                         let singleTabCenteringAdjustment = hasSingleOtherTab ? calculateSingleTabAdjustment(scrollContainerProxy) : 0
@@ -233,10 +230,7 @@ struct TabsListView: View {
                                 .onChange(of: singleTabCenteringAdjustment) { newValue in
                                     viewModel.singleTabCenteringAdjustment = newValue
                                 }
-                                .if(isDraggingATab && !dragModel.draggingOverPins) {
-                                    $0.animation(BeamAnimation.easeInOut(duration: 0.2), value: dragModel.draggingOverIndex)
-                                }
-                                .animation(isAnimatingDrop ? nil : BeamAnimation.spring(stiffness: 400, damping: 30), value: tabsSections.otherTabs.count)
+                                .animation(isAnimatingDrop || isDraggingATab ? nil : BeamAnimation.spring(stiffness: 400, damping: 30), value: tabsSections.otherTabs.count)
                             }
                         }
                         .if(tabsShouldScroll) {
@@ -256,11 +250,11 @@ struct TabsListView: View {
                     TabView(tab: currentTab, isSelected: true,
                             isPinned: dragModel.draggingOverPins,
                             isSingleTab: !dragModel.draggingOverPins && tabsSections.otherTabs.count <= 1,
-                            isDragging: true)
-                        .offset(x: dragModel.offset.x, y: dragModel.offset.y)
+                            isDragging: true, disableHovering: externalDragModel.isDroppingAnExternalTab)
+                        .offset(x: dragModel.offset.x, y: 0)
                         .frame(width: dragModel.widthForDraggingTab)
                         .transition(.asymmetric(insertion: .scale(scale: 0.98).animation(BeamAnimation.easeInOut(duration: 0.08)), removal: .opacity.combined(with: .scale(scale: 0.98)).animation(BeamAnimation.easeInOut(duration: 0.08))))
-                        .animation(.interactiveSpring(), value: dragModel.offset)
+                        .opacity(externalDragModel.isDraggingTabOutside ? 0 : 1)
                         .zIndex(10)
                 }
             }
@@ -270,12 +264,22 @@ struct TabsListView: View {
                 Path(draggableContentPath(tabsSections: tabsSections, geometry: geometry))
             )
             .simultaneousGesture(
-                DragGesture(minimumDistance: 1)
-                    .onChanged { dragGestureOnChange(gestureValue: $0, containerGeometry: geometry) }
-                    .onEnded { dragGestureOnEnded(gestureValue: $0) }
+                // removing the drag gesture completely otherwise it is never stopped by the external drag
+                externalDragModel.isDraggingTabOutside || externalDragModel.isDroppingAnExternalTab ? nil :
+                    DragGesture(minimumDistance: 1)
+                    .onChanged {
+                        let gestureValue = TabGestureValue(startLocation: $0.startLocation, location: $0.location, time: $0.time)
+                        dragGestureOnChange(gestureValue: gestureValue, containerGeometry: geometry)
+                    }
+                    .onEnded {
+                        let gestureValue = TabGestureValue(startLocation: $0.startLocation, location: $0.location, time: $0.time)
+                        dragGestureOnEnded(gestureValue: gestureValue)
+                    }
             )
+            .onDrop(of: [UTType.beamBrowserTab], delegate: TabsExternalDropDelegate(withHandler: self, containerGeometry: geometry))
             .onAppear {
                 startOtherMouseDownMonitor()
+                externalDragModel.setup(withState: state, tabsMananger: state.browserTabsManager)
                 updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
             }
             .onDisappear {
@@ -348,7 +352,7 @@ struct TabsListView: View {
             return
         }
         viewModel.lastTouchWasOnUnselectedTab = true
-        state.browserTabsManager.setCurrenTab(at: index)
+        state.browserTabsManager.setCurrentTab(at: index)
     }
 
     private func onTabTapped(at index: Int) {
@@ -529,35 +533,8 @@ extension TabsListView {
     }
 }
 
-// MARK: - Drag & Drop
+// MARK: - After Drag methods
 extension TabsListView {
-
-    fileprivate func dragGestureOnChange(gestureValue: DragGesture.Value,
-                                         containerGeometry: GeometryProxy) {
-        guard let currentTab = currentTab else { return }
-
-        if dragModel.dragStartIndex == nil {
-            firstDragGestureValue = gestureValue
-            let currentTabIndex = index(of: currentTab)
-            let pinnedCount = pinnedTabs().count
-            let widthProvider = widthProvider(for: containerGeometry)
-            dragModel.prepareForDrag(gestureValue: gestureValue, scrollContentOffset: scrollOffset,
-                                     currentTabIndex: currentTabIndex, tabsCount: tabs.count, pinnedTabsCount: pinnedCount,
-                                     singleTabCenteringAdjustment: viewModel.singleTabCenteringAdjustment, widthProvider: widthProvider)
-            viewModel.currentDragDidChangeCurrentTab = false
-            if let newStartIndex = dragModel.dragStartIndex, newStartIndex != currentTabIndex {
-                viewModel.currentDragDidChangeCurrentTab = true
-                self.currentTab = tabs[newStartIndex]
-                return
-            } else {
-                viewModel.currentDragDidChangeCurrentTab = false
-            }
-        }
-        dragModel.dragGestureChanged(gestureValue: gestureValue,
-                                     scrollContentOffset: scrollOffset,
-                                     containerGeometry: containerGeometry)
-    }
-
     private func moveTabs(from currentIndex: Int, to index: Int, with tab: BrowserTab) {
         guard currentIndex != index else { return }
         // copying the array to trigger only one change
@@ -575,8 +552,46 @@ extension TabsListView {
             self.state.browserTabsManager.unpinTab(tab)
         }
     }
+}
 
-    fileprivate func dragGestureOnEnded(gestureValue: DragGesture.Value) {
+// MARK: - Drag Gesture Handler
+extension TabsListView {
+
+    fileprivate func dragGestureOnChange(gestureValue: TabGestureValue,
+                                         containerGeometry: GeometryProxy) {
+        guard let currentTab = currentTab else { return }
+        if dragModel.dragStartIndex == nil {
+
+            firstDragGestureValue = gestureValue
+            let currentTabIndex = index(of: currentTab)
+            let pinnedCount = pinnedTabs().count
+            let widthProvider = widthProvider(for: containerGeometry)
+            dragModel.prepareForDrag(gestureValue: gestureValue, scrollContentOffset: scrollOffset,
+                                     currentTabIndex: currentTabIndex, tabsCount: tabs.count, pinnedTabsCount: pinnedCount,
+                                     singleTabCenteringAdjustment: viewModel.singleTabCenteringAdjustment, widthProvider: widthProvider)
+            viewModel.currentDragDidChangeCurrentTab = false
+            defer {
+                externalDragModel.prepareExternalDraggingOfcurrentTab(atLocation: gestureValue.location)
+            }
+            if let newStartIndex = dragModel.dragStartIndex, newStartIndex != currentTabIndex {
+                viewModel.currentDragDidChangeCurrentTab = true
+                self.currentTab = tabs[newStartIndex]
+                return
+            }
+        }
+        dragModel.dragGestureChanged(gestureValue: gestureValue,
+                                     scrollContentOffset: scrollOffset,
+                                     containerGeometry: containerGeometry)
+        guard !externalDragModel.isDraggingTabOutside else { return }
+        let location = gestureValue.location
+        let horizontalThreshold: CGFloat = 30
+        if location.y < 0 || location.y > Toolbar.height ||
+            location.x < -horizontalThreshold || location.x > containerGeometry.size.width + horizontalThreshold {
+            startExternalDragging(atLocation: location)
+        }
+    }
+
+    fileprivate func dragGestureOnEnded(gestureValue: TabGestureValue) {
         guard let currentTab = currentTab,
               let dragStartIndex = self.dragModel.dragStartIndex,
               let firstGestureValue = firstDragGestureValue,
@@ -591,17 +606,79 @@ extension TabsListView {
         } else {
             let shouldBePinned = self.dragModel.draggingOverPins
             self.isAnimatingDrop = true
-            self.dragModel.dragGestureEnded(scrollContentOffset: scrollOffset)
+            let dropAnimationDuration = 0.2
+            withAnimation(.interactiveSpring()) {
+                self.dragModel.dragGestureEnded(scrollContentOffset: scrollOffset)
+            }
             DispatchQueue.main.asyncAfter(deadline: .now() + dropAnimationDuration) {
-                    self.moveTabs(from: dragStartIndex, to: draggingOverIndex, with: currentTab)
-                    self.updatePinTabAfterDrag(currentTab, shouldBePinned: shouldBePinned)
-                    self.dragModel.cleanAfterDrag()
+                self.moveTabs(from: dragStartIndex, to: draggingOverIndex, with: currentTab)
+                self.updatePinTabAfterDrag(currentTab, shouldBePinned: shouldBePinned)
+                self.dragModel.cleanAfterDrag()
                 DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) {
+                    self.externalDragModel.isDroppingAnExternalTab = false
                     self.isAnimatingDrop = false
                 }
             }
         }
     }
+}
+
+// MARK: - External Drop Handler
+extension TabsListView: TabsExternalDropDelegateHandler {
+
+    private func startExternalDragging(atLocation: CGPoint) {
+        externalDragModel.startExternalDraggingOfCurrentTab(atLocation: atLocation)
+        dragModel.cleanAfterDrag()
+    }
+
+    func onDropStarted(location: CGPoint, startLocation: CGPoint, containerGeometry: GeometryProxy) {
+        if let tab = state.data.currentDraggingSession?.draggedObject as? BrowserTab {
+            // Temporarily add the tab to the end of the tabs
+            // then ask the dragModel to calculate what would be the actual insert index
+            // then move the tab to the correct index and get the starting location
+            // then reset the dragModel to be correctly setup in the next drop gesture move.
+            tabs.append(tab)
+            currentTab = tab
+            let gestureValue = TabGestureValue(startLocation: startLocation, location: location, time: BeamDate.now)
+            let currentTabIndex = index(of: tab)
+            let pinnedCount = pinnedTabs().count
+            let widthProvider = widthProvider(for: containerGeometry)
+            dragModel.prepareForDrag(gestureValue: gestureValue, scrollContentOffset: scrollOffset,
+                                     currentTabIndex: currentTabIndex, tabsCount: tabs.count, pinnedTabsCount: pinnedCount,
+                                     singleTabCenteringAdjustment: viewModel.singleTabCenteringAdjustment, widthProvider: widthProvider)
+            let insertIndex = dragModel.dragStartIndex ?? 0
+
+            tabs.move(fromOffsets: [tabs.count - 1], toOffset: insertIndex)
+
+            var startLocation = startLocation
+            startLocation.x = dragModel.frameForTabAtIndex(insertIndex).midX
+            externalDragModel.dropOfExternalTabStarted(atLocation: startLocation)
+            dragModel.cleanAfterDrag()
+        }
+    }
+
+    func onDropUpdated(location: CGPoint, startLocation: CGPoint, containerGeometry: GeometryProxy) {
+        guard externalDragModel.isDroppingAnExternalTab else { return }
+        let startLocation = externalDragModel.dropStartLocation ?? startLocation
+        let gestureValue = TabGestureValue(startLocation: startLocation, location: location, time: BeamDate.now)
+        dragGestureOnChange(gestureValue: gestureValue, containerGeometry: containerGeometry)
+    }
+
+    func onDropEnded(location: CGPoint, startLocation: CGPoint, cancelled: Bool, containerGeometry: GeometryProxy) {
+        guard externalDragModel.isDroppingAnExternalTab else { return }
+        guard let tab = state.data.currentDraggingSession?.draggedObject as? BrowserTab else {
+            return
+        }
+
+        guard !cancelled else {
+            externalDragModel.dropOfExternalTabExitedWindow(tab: tab)
+            return
+        }
+        let startLocation = externalDragModel.dropStartLocation ?? startLocation
+        let gestureValue = TabGestureValue(startLocation: startLocation, location: location, time: BeamDate.now)
+        dragGestureOnEnded(gestureValue: gestureValue)
+    }
+
 }
 
 // MARK: - SwiftUI Preview

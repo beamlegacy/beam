@@ -493,6 +493,24 @@
 				</array>
 			</dict>
 		</dict>
+		<dict>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>public.content</string>
+				<string>public.data</string>
+			</array>
+			<key>UTTypeDescription</key>
+			<string>Beam Browser Tab</string>
+			<key>UTTypeIcons</key>
+			<dict>
+				<key>UTTypeIconBadgeName</key>
+				<string></string>
+			</dict>
+			<key>UTTypeIdentifier</key>
+			<string>co.beamapp.browsertab</string>
+			<key>UTTypeTagSpecification</key>
+			<dict/>
+		</dict>
 	</array>
 </dict>
 </plist>

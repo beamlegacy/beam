@@ -41,6 +41,7 @@ class BrowserTabsManager: ObservableObject {
             self.updateClusteringOpenPages()
         }
     }
+
     private var tabPinSuggester = TabPinSuggester(storage: DomainPath0TreeStatsStorage())
 
     /// Dictionary of `key`: BrowserTab.id, `value`: Group to which this tab belongs
@@ -187,11 +188,11 @@ extension BrowserTabsManager {
         currentTab = tabs[index]
     }
 
-    func setCurrenTab(at index: Int) {
+    func setCurrentTab(at index: Int) {
         currentTab = tabs[index]
     }
 
-    func setCurrenTab(_ tab: BrowserTab?) {
+    func setCurrentTab(_ tab: BrowserTab?) {
         currentTab = tab
     }
 
@@ -286,6 +287,25 @@ extension BrowserTabsManager {
 
     public func createNewGroup(for tabId: UUID, with tabs: [UUID] = []) {
         tabsGroup[tabId] = tabs
+    }
+
+    public func removeTab(tabId: UUID, suggestedNextCurrentTab: BrowserTab?) {
+        guard let index = tabs.firstIndex(where: { $0.id == tabId }) else { return }
+        tabs.remove(at: index)
+        let nextTabIdFromGroup = removeFromTabGroup(tabId: tabId)
+        let nextTabIndex = min(index, tabs.count - 1)
+
+        if currentTab?.id == tabId {
+            var newCurrentTab: BrowserTab?
+            if let suggestedNextCurrentTab = suggestedNextCurrentTab, nextTabIdFromGroup == nil {
+                newCurrentTab = suggestedNextCurrentTab
+            } else if let nextTabIdFromGroup = nextTabIdFromGroup {
+                newCurrentTab = tabs.first(where: {$0.id == nextTabIdFromGroup})
+            } else if nextTabIndex >= 0 {
+                newCurrentTab = tabs[nextTabIndex]
+            }
+            setCurrentTab(newCurrentTab)
+        }
     }
 
     @discardableResult
