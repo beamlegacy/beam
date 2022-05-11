@@ -174,6 +174,7 @@ public class Widget: NSAccessibilityElement, CALayerDelegate, MouseHandler {
             if c.parent != self {
                 c.parent = self
             }
+            c.contentsScale = contentsScale
             c.availableWidth = childAvailableWidth
             editor?.addToMainLayer(c.layer)
             for l in c.layers where l.value.layer.superlayer == nil {
