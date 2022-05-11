@@ -136,4 +136,12 @@ class URLBeamTest: XCTestCase {
         XCTAssertTrue(URL(string: "https://duckduckgo.com/?q=sevilla")!.isSearchEngineResultPage)
         XCTAssertFalse(URL(string: "https://duckduckgo.com/")!.isSearchEngineResultPage)
     }
+
+    func testShortString() {
+        let urlString = "http://www.awesome.site.co.uk/page?x=abcdef&y=ghijkl"
+        XCTAssertEqual(URL(string: urlString)!.shortString(), "awesome.s..&y=ghijkl")
+        XCTAssertEqual(URL(string: urlString)!.shortString(maxLength: 6), "aw..kl")
+        XCTAssertEqual(URL(string: urlString)!.shortString(maxLength: 2000), "awesome.site.co.uk/page?x=abcdef&y=ghijkl")
+
+    }
 }
