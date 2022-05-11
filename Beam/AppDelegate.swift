@@ -789,52 +789,10 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {
-        let url = URL(fileURLWithPath: filename)
-        if url.pathExtension == BeamDownloadDocument.fileExtension {
-            let documentURL = URL(fileURLWithPath: filename)
-            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
-                do {
-                    let doc = try BeamDownloadDocument(fileWrapper: wrapper)
-                    doc.fileURL = documentURL
-                    try self.data.downloadManager.downloadFile(from: doc)
-                } catch {
-                    Logger.shared.logError("Can't open Download Document from disk", category: .downloader)
-                    return false
-                }
-                return true
-            }
-        } else if url.pathExtension == BeamNoteDocumentWrapper.fileExtension {
-            let documentURL = URL(fileURLWithPath: filename)
-            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
-                do {
-                    let doc = try BeamNoteDocumentWrapper(fileWrapper: wrapper)
-                    doc.fileURL = documentURL
-                    try doc.importNote()
-                } catch {
-                    Logger.shared.logError("Can't import note document \(documentURL) from disk", category: .downloader)
-                    return false
-                }
-                return true
-            }
-
-        } else if url.pathExtension == BeamNoteCollectionWrapper.fileExtension {
-            let documentURL = URL(fileURLWithPath: filename)
-            if let wrapper = try? FileWrapper(url: documentURL, options: .immediate) {
-                do {
-                    let doc = try BeamNoteCollectionWrapper(fileWrapper: wrapper)
-                    doc.fileURL = documentURL
-                    try doc.importNotes()
-                } catch {
-                    Logger.shared.logError("Can't import note collection from disk \(documentURL)", category: .downloader)
-                    return false
-                }
-                return true
-            }
-        } else if ["html", "htm"].contains(url.pathExtension) {
-            return handleURL(URL(fileURLWithPath: filename))
+        guard !ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument) else {
+            return true
         }
-
-        return true
+        return handleOpenFileURL(URL(fileURLWithPath: filename))
     }
 
 }
