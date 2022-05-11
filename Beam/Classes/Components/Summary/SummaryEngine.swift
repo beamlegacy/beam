@@ -9,6 +9,8 @@ import Foundation
 import BeamCore
 
 class SummaryEngine {
+    static private let maxUrlDisplayLength: Int = 50
+
     static let shared = SummaryEngine()
     static let summaryDecoratedValue = AttributeDecoratedValueAttributedString(attributes: [.foregroundColor: BeamColor.LightStoneGray.nsColor],
                                                                                editable: false)
@@ -34,8 +36,7 @@ class SummaryEngine {
         guard !urlScores.isEmpty else { return hasNotes ? element : nil }
         var siteToContinueText: [BeamText] = []
         for urlScore in urlScores {
-            guard let title = urlScore.title else { continue }
-            siteToContinueText.append(BeamText(text: title, attributes: [.link(urlScore.url.absoluteString)]))
+            siteToContinueText.append(BeamText(text: urlScore.displayText(maxUrlLength: maxUrlDisplayLength), attributes: [.link(urlScore.url.absoluteString)]))
         }
         guard let joinedText = joined(sources: siteToContinueText, with: ", ") else { return element }
         if hasNotes {
@@ -124,8 +125,7 @@ class SummaryEngine {
         guard !urlScores.isEmpty else { return nil }
         var spentTimeOnSiteText: [BeamText] = []
         for urlScore in urlScores {
-            guard let title = urlScore.title else { continue }
-            spentTimeOnSiteText.append(BeamText(text: title, attributes: [.link(urlScore.url.absoluteString)]))
+            spentTimeOnSiteText.append(BeamText(text: urlScore.displayText(maxUrlLength: maxUrlDisplayLength), attributes: [.link(urlScore.url.absoluteString)]))
         }
 
         return joined(sources: spentTimeOnSiteText, with: ", ")

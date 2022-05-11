@@ -185,4 +185,10 @@ public extension URL {
         components.fragment = nil
         return components.url
     }
+    func shortString(maxLength: Int = 20) -> String {
+        let candidate = urlStringWithoutScheme
+        if candidate.count <= maxLength { return candidate }
+        let chunkLength: Int = (maxLength / 2) - 1
+        return candidate.prefix(chunkLength) + ".." + candidate.suffix(chunkLength)
+    }
 }

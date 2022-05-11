@@ -569,11 +569,11 @@
 		87C539BD26162C3400D51877 /* PasswordManagerMenuCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */; };
 		87C539C92617B35000D51877 /* PasswordGeneratorSuggestionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */; };
 		87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */; };
-		87CF1CD528242A0300FB0530 /* CGRect+Insets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */; };
 		87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */; };
 		87CF1CBF28216BCE00FB0530 /* CreditCardAutofillBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */; };
 		87CF1CC32823CB2900FB0530 /* CreditCardEntryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */; };
 		87CF1CCB282404CB00FB0530 /* BeamControlGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */; };
+		87CF1CD528242A0300FB0530 /* CGRect+Insets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */; };
 		87DB0CD527EC5F5D0071A410 /* WebFieldLocator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */; };
 		87F11BC3266524B2003BE98E /* WebAutocompleteProtocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */; };
 		87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F11BD8266533C1003BE98E /* PasswordGenerator.swift */; };
@@ -1332,6 +1332,7 @@
 		DABFD3B026FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */; };
 		DABFD3B726FCAC8300C1F7F0 /* Csv.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFD3B626FCAC8300C1F7F0 /* Csv.swift */; };
 		DABFF8072742731B00FAF364 /* BeamLinkDBTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */; };
+		DAD24628282BB9BE0051F681 /* LinkStoreTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD24627282BB9BE0051F681 /* LinkStoreTests.swift */; };
 		DAD4024A27908601005310DE /* BrowsingTree+Flatten.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAD4024927908601005310DE /* BrowsingTree+Flatten.swift */; };
 		DAEAAF3026D3CA4D00D17559 /* ExportAllNoteSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */; };
 		DAEC880F2739953A0087FC18 /* BatchFrecencyUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */; };
@@ -2069,11 +2070,11 @@
 		87C539BC26162C3400D51877 /* PasswordManagerMenuCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuCell.swift; sourceTree = "<group>"; };
 		87C539C82617B35000D51877 /* PasswordGeneratorSuggestionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSuggestionCell.swift; sourceTree = "<group>"; };
 		87C539CC2617B36500D51877 /* PasswordGeneratorSettingsCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGeneratorSettingsCell.swift; sourceTree = "<group>"; };
-		87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+Insets.swift"; sourceTree = "<group>"; };
 		87CF1CB728211DE800FB0530 /* OtherCreditCardsModal.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OtherCreditCardsModal.swift; sourceTree = "<group>"; };
 		87CF1CBE28216BCE00FB0530 /* CreditCardAutofillBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutofillBuilder.swift; sourceTree = "<group>"; };
 		87CF1CC22823CB2900FB0530 /* CreditCardEntryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardEntryTests.swift; sourceTree = "<group>"; };
 		87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamControlGroup.swift; sourceTree = "<group>"; };
+		87CF1CD428242A0200FB0530 /* CGRect+Insets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGRect+Insets.swift"; sourceTree = "<group>"; };
 		87DB0CD427EC5F5D0071A410 /* WebFieldLocator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldLocator.swift; sourceTree = "<group>"; };
 		87F11BC2266524B2003BE98E /* WebAutocompleteProtocols.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebAutocompleteProtocols.swift; sourceTree = "<group>"; };
 		87F11BD8266533C1003BE98E /* PasswordGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordGenerator.swift; sourceTree = "<group>"; };
@@ -3129,6 +3130,7 @@
 		DABFD3AF26FC974B00C1F7F0 /* ClusteringOrphanedUrlManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClusteringOrphanedUrlManager.swift; sourceTree = "<group>"; };
 		DABFD3B626FCAC8300C1F7F0 /* Csv.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Csv.swift; sourceTree = "<group>"; };
 		DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamLinkDBTest.swift; sourceTree = "<group>"; };
+		DAD24627282BB9BE0051F681 /* LinkStoreTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkStoreTests.swift; sourceTree = "<group>"; };
 		DAD4024927908601005310DE /* BrowsingTree+Flatten.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BrowsingTree+Flatten.swift"; sourceTree = "<group>"; };
 		DAEAAF2F26D3CA4D00D17559 /* ExportAllNoteSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportAllNoteSources.swift; sourceTree = "<group>"; };
 		DAEC880E2739953A0087FC18 /* BatchFrecencyUpdater.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchFrecencyUpdater.swift; sourceTree = "<group>"; };
@@ -6201,6 +6203,7 @@
 		96319D1D2616232700D1CF31 /* BeamCoreTests */ = {
 			isa = PBXGroup;
 			children = (
+				DAD24627282BB9BE0051F681 /* LinkStoreTests.swift */,
 				DA8AB369281A8AFD0001FC3D /* DailyUrlScorerTest.swift */,
 				DA8D948027FF37250073AD2D /* NoteScoreTest.swift */,
 				96A5DAE227C0251C00746719 /* MajimaTests */,
@@ -8242,6 +8245,7 @@
 				3719855027C7362700CAEA5E /* HTTPURLResponse+RequestsHTTPDownloadTests.swift in Sources */,
 				A06D5FA32683454C009D7C38 /* DeepCopyTests.swift in Sources */,
 				96A5DAEC27C0254300746719 /* ScalarMergeTests.swift in Sources */,
+				DAD24628282BB9BE0051F681 /* LinkStoreTests.swift in Sources */,
 				DA8D948127FF37250073AD2D /* NoteScoreTest.swift in Sources */,
 				8A50A53426E1035E0094BA97 /* BeamElementJoinTests.swift in Sources */,
 				DA8AB36A281A8AFD0001FC3D /* DailyUrlScorerTest.swift in Sources */,
