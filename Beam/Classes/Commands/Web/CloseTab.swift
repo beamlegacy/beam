@@ -80,23 +80,8 @@ class CloseTab: WebCommand {
                 tabParentToGo = context.browserTabsManager.tabs.first(where: {$0.browsingTree.rootId == referringRootId})
             default: break
             }
-
-            context.browserTabsManager.tabs.remove(at: i)
-            let nextTabIdFromGroup = context.browserTabsManager.removeFromTabGroup(tabId: tab.id)
-            let nextTabIndex = min(i, context.browserTabsManager.tabs.count - 1)
-
-            if context.browserTabsManager.currentTab === tab {
-                if let tabParentToGo = tabParentToGo, nextTabIdFromGroup == nil {
-                    context.browserTabsManager.setCurrenTab(tabParentToGo)
-                } else if let nextTabIdFromGroup = nextTabIdFromGroup {
-                    context.browserTabsManager.setCurrenTab(context.browserTabsManager.tabs.first(where: {$0.id == nextTabIdFromGroup}))
-                } else if nextTabIndex >= 0 {
-                    context.browserTabsManager.setCurrenTab(at: nextTabIndex)
-                } else {
-                    context.browserTabsManager.setCurrenTab(nil)
-                }
-                wasCurrentTab = true
-            }
+            wasCurrentTab = context.browserTabsManager.currentTab === tab
+            context.browserTabsManager.removeTab(tabId: tab.id, suggestedNextCurrentTab: tabParentToGo)
         }
         context.browserTabsManager.resetFirstResponderAfterClosingTab()
         return true
