@@ -1307,6 +1307,7 @@
 		DA547BA527107DA00085EEC1 /* BrowsingTreeRecordTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA547BA427107DA00085EEC1 /* BrowsingTreeRecordTests.swift */; };
 		DA5A16EA26F8EB4200226C89 /* BeamTextEditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF9C18826E61FCA00C350B5 /* BeamTextEditTests.swift */; };
 		DA5C63F1274D0873001F7CEF /* AppDelegate+LinkDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */; };
+		DA5D3949282409F400E6973C /* WebIndexingControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D3948282409F400E6973C /* WebIndexingControllerTests.swift */; };
 		DA5D4B8A2771DF0B00D3E80C /* BrowsingTreeStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA5D4B892771DF0B00D3E80C /* BrowsingTreeStoreTest.swift */; };
 		DA63D513267CF10800D7C756 /* FrecencyScorer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63D512267CF10800D7C756 /* FrecencyScorer.swift */; };
 		DA63D519267CF28800D7C756 /* FrecencyScorerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */; };
@@ -3106,6 +3107,7 @@
 		DA52E97F276CE026008D4990 /* BrowsingTreeProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeProcessor.swift; sourceTree = "<group>"; };
 		DA547BA427107DA00085EEC1 /* BrowsingTreeRecordTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeRecordTests.swift; path = BeamTests/Classes/Models/GRDB/BrowsingTreeRecordTests.swift; sourceTree = SOURCE_ROOT; };
 		DA5C63F0274D0873001F7CEF /* AppDelegate+LinkDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+LinkDB.swift"; sourceTree = "<group>"; };
+		DA5D3948282409F400E6973C /* WebIndexingControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = WebIndexingControllerTests.swift; path = BeamTests/Classes/Models/WebIndexingControllerTests.swift; sourceTree = SOURCE_ROOT; };
 		DA5D4B892771DF0B00D3E80C /* BrowsingTreeStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeStoreTest.swift; sourceTree = "<group>"; };
 		DA63D512267CF10800D7C756 /* FrecencyScorer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FrecencyScorer.swift; sourceTree = "<group>"; };
 		DA63D518267CF28800D7C756 /* FrecencyScorerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FrecencyScorerTest.swift; sourceTree = "<group>"; };
@@ -4842,6 +4844,7 @@
 		759442D426FCA85500CBFB7A /* Navigation */ = {
 			isa = PBXGroup;
 			children = (
+				DA5D3948282409F400E6973C /* WebIndexingControllerTests.swift */,
 				759442D526FCA85900CBFB7A /* Error */,
 			);
 			path = Navigation;
@@ -9081,6 +9084,7 @@
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				5227B2CF26DD12EF0006FA7D /* ZZZTests.swift in Sources */,
 				DAF063F927D25DA4000406DE /* BrowsingTreeStatsTest.swift in Sources */,
+				DA5D3949282409F400E6973C /* WebIndexingControllerTests.swift in Sources */,
 				DA23C75427F31816005508EB /* DailyUrlStorageTest.swift in Sources */,
 				8AD2632C26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift in Sources */,
 				A51F55612733333D002C5584 /* EmbedContentBuilderTests.swift in Sources */,

@@ -16,7 +16,7 @@ import BeamCore
 class WebIndexingController {
 
     private var indexingQueue = DispatchQueue(label: "WebIndexing", qos: .userInitiated)
-    private var clusteringManager: ClusteringManager
+    private var clusteringManager: ClusteringManagerProtocol
     private weak var previousTabBrowsingTree: BrowsingTree?
     private let signpost = SignPost("WebIndexingController")
     private var delayedReadOperations: [UUID: DelayedReadWebViewOperation] = [:]
@@ -26,7 +26,7 @@ class WebIndexingController {
 
     weak var delegate: WebIndexControllerDelegate?
 
-    init(clusteringManager: ClusteringManager) {
+    init(clusteringManager: ClusteringManagerProtocol) {
         self.clusteringManager = clusteringManager
     }
 
@@ -72,16 +72,11 @@ class WebIndexingController {
     private func indexNavigation(to url: URL, tabIndexingInfo: TabIndexingInfo, read: Readability? = nil,
                                  browsingTree: BrowsingTree, isLinkActivation: Bool, startReading: Bool) {
 
-        // Always update the browsingTree, event if we were not able to read the content
         let title = tabIndexingInfo.document.title
         indexAliasURLIfNeeded(requestedURL: tabIndexingInfo.requestedURL, currentURL: url, title: title)
 
-        browsingTree.navigateTo(url: url.absoluteString, title: title,
-                                startReading: startReading,
-                                isLinkActivation: isLinkActivation,
-                                readCount: tabIndexingInfo.textContent.count)
-
         guard let read = read else { return }
+        browsingTree.update(for: url.absoluteString, readCount: tabIndexingInfo.textContent.count)
 
         let browsingTreeCopy = browsingTree.deepCopy()
         var tabIndexingInfo = tabIndexingInfo
@@ -177,6 +172,7 @@ extension WebIndexingController {
                                               isPinnedTab: tab.isPinned)
 
         previousTabBrowsingTree = nil
+        browsingTree.navigateTo(url: url.absoluteString, title: indexDocument.title, startReading: startReading, isLinkActivation: isLinkActivation)
 
         let finishBlock: (Readability?) -> Void = { [weak self] readabilityResultToUse in
             tabIndexingInfo = self?.updateTabIndexingInfo(tabIndexingInfo, withReadabilityResult: readabilityResultToUse) ?? tabIndexingInfo

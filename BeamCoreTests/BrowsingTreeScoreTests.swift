@@ -33,9 +33,9 @@ class BrowsingTreeScoreTests: XCTestCase {
         //exit foreground
         tree.current.addEvent(ReadingEventType.closeTab, date: Date(timeIntervalSinceReferenceDate: 1001))
 
-        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false, readCount: 200)
+        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false)
 
-        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false, readCount: 300)
+        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false)
         //start foreground
         tree.current.addEvent(ReadingEventType.startReading, date: Date(timeIntervalSinceReferenceDate: 1003))
         //on foreground for 1 sec
@@ -51,18 +51,18 @@ class BrowsingTreeScoreTests: XCTestCase {
         let link = tree.current.link
         let date0 = tree.current.events[0].date
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date0)
-        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false, readCount: 400)
+        tree.navigateTo(url: "www.google.com", title: nil, startReading: false, isLinkActivation: false)
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date0)
-        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false, readCount: 500)
+        tree.navigateTo(url: "<???>", title: nil, startReading: false, isLinkActivation: false)
         let date1 = tree.current.events[0].date
         XCTAssertEqual(tree.scoreFor(link: link).lastCreationDate, date1)
     }
     func testVisitCount() throws {
         let tree = BrowsingTree(nil)
-        tree.navigateTo(url: "http://a.com", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://a.com", title: nil, startReading: false, isLinkActivation: false)
         let link = tree.current.link
-        tree.navigateTo(url: "http://b.com", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
-        tree.navigateTo(url: "http://a.com", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://b.com", title: nil, startReading: false, isLinkActivation: false)
+        tree.navigateTo(url: "http://a.com", title: nil, startReading: false, isLinkActivation: false)
         XCTAssertEqual(tree.scoreFor(link: link).visitCount, 2)
     }
 
@@ -101,7 +101,7 @@ class BrowsingTreeScoreTests: XCTestCase {
 
         func testRootChildVisitType(origin: BrowsingTreeOrigin, expected visitType: FrecencyEventType) {
             let tree = BrowsingTree(origin)
-            tree.navigateTo(url: "www.google.com?q=beam", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+            tree.navigateTo(url: "www.google.com?q=beam", title: nil, startReading: true, isLinkActivation: true)
             XCTAssertEqual(tree.current.visitType, visitType)
         }
 
@@ -114,8 +114,8 @@ class BrowsingTreeScoreTests: XCTestCase {
         //controls visitType value of a root grand child node
         func testAnyOtherNodeVisitType(isLinkActivation: Bool, expected visitType: FrecencyEventType) {
             let tree = BrowsingTree(nil)
-            tree.navigateTo(url: "www.somesite.com", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
-            tree.navigateTo(url: "www.someothersite.com", title: nil, startReading: true, isLinkActivation: isLinkActivation, readCount: 10)
+            tree.navigateTo(url: "www.somesite.com", title: nil, startReading: true, isLinkActivation: true)
+            tree.navigateTo(url: "www.someothersite.com", title: nil, startReading: true, isLinkActivation: isLinkActivation)
             XCTAssertEqual(tree.current.visitType, visitType)
         }
         //Third case: any other node
@@ -152,7 +152,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         let tree = BrowsingTree(BrowsingTreeOrigin.searchBar(query: "some weird keywords", referringRootId: nil), frecencyScorer: fakeScorer)
         let root = tree.root!
         let rootCreationDate = root.events[0].date
-        tree.navigateTo(url: "http://www.somesite.com/", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+        tree.navigateTo(url: "http://www.somesite.com/", title: nil, startReading: true, isLinkActivation: true)
         tree.switchToOtherTab()
         let child0 = tree.current!
         let childCreationDate0 = child0.events[0].date
@@ -160,7 +160,7 @@ class BrowsingTreeScoreTests: XCTestCase {
         let readEnd0 = child0.events[2].date
         let readDuration0 = Float(readEnd0.timeIntervalSince(readStart0))
 
-        tree.navigateTo(url: "http://www.somesite.com/abc", title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+        tree.navigateTo(url: "http://www.somesite.com/abc", title: nil, startReading: true, isLinkActivation: true)
         tree.switchToOtherTab()
         let child1 = tree.current!
         let domainLink = try XCTUnwrap(LinkStore.shared.getDomainId(id: child1.link))
