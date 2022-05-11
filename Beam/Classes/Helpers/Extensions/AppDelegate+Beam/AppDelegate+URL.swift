@@ -159,7 +159,7 @@ extension AppDelegate {
 
             if let (existingTab, tabWindow) = existingOpenedTab(for: url) {
                 window = tabWindow
-                tabWindow.state.browserTabsManager.setCurrenTab(existingTab)
+                tabWindow.state.browserTabsManager.setCurrentTab(existingTab)
                 tabWindow.state.mode = .web
             } else {
                 window.state.createTab(withURLRequest: URLRequest(url: url), originalQuery: url.absoluteString)

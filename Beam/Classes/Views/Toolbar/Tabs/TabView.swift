@@ -26,7 +26,9 @@ struct TabView: View {
     var isDragging: Bool = false
     var disableAnimations: Bool = false
     var disableHovering: Bool = false
+    var applyDraggingStyle: Bool = true
     var hueTint: Double?
+    var isInMainWindow = true
     var onTouchDown: (() -> Void)?
     var onTap: (() -> Void)?
     var onClose: (() -> Void)?
@@ -124,6 +126,7 @@ struct TabView: View {
     private var faviconView: some View {
         TabFaviconView(
             favIcon: faviconImage,
+            showGrayScale: !isInMainWindow,
             isLoading: tab.isLoading,
             estimatedLoadingProgress: tab.estimatedLoadingProgress,
             disableAnimations: isDragging
@@ -202,23 +205,19 @@ struct TabView: View {
                 .accessibility(identifier: "browserTabTitle")
                 .allowsHitTesting(false)
         }
-        .if(isSingleTab) {
-            $0.frame(minWidth: minWidth)
-        }
-        .if(!isSingleTab) {
-            $0.opacity(0).overlay(GeometryReader { proxy in
-                let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
-                let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
-                HStack(spacing: iconSpacing) {
-                    iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
-                        .opacity(shouldShowClose && !hasEnoughSpaceForClose ? 0 : 1)
-                    Text(tab.title)
-                        .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
-                        .allowsHitTesting(false)
-                        .accessibility(identifier: "browserTabTitle")
-                }
-            }, alignment: .leading)
-        }
+        .frame(minWidth: isSingleTab ? minWidth : 0)
+        .opacity(isSingleTab ? 1 : 0).overlay(isSingleTab ? nil : GeometryReader { proxy in
+            let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
+            let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
+            HStack(spacing: iconSpacing) {
+                iconNextToTitle(shouldShowSecurity: shouldShowSecurity)
+                    .opacity(shouldShowClose && !hasEnoughSpaceForClose ? 0 : 1)
+                Text(tab.title)
+                    .padding(.trailing, max(0, trailingViewsWidth - spaceAroundTitle))
+                    .allowsHitTesting(false)
+                    .accessibility(identifier: "browserTabTitle")
+            }
+        }, alignment: .leading)
     }
 
     private func centerViewForegroundHoverContent(shouldShowSecurity: Bool, shouldShowClose: Bool,
@@ -400,7 +399,7 @@ struct TabView: View {
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
                     })
-                    .if(isDragging) {
+                    .if(isDragging && applyDraggingStyle) {
                         $0.opacity(0.9).scaleEffect(1.07)
                             .shadow(color: .black.opacity(0.25), radius: 20, x: 0, y: 6)
                     }
