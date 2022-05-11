@@ -454,7 +454,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?, restoringTabs: Bool, isIncognito: Bool = false) -> BeamWindow? {
+    func createWindow(withTabs: [BrowserTab], at location: CGPoint) -> BeamWindow? {
+        guard let window = AppDelegate.main.createWindow(frame: nil, becomeMain: false) else {
+            return nil
+        }
+        let frameOrigin = CGPoint(x: max(0, location.x - (window.frame.width / 2)),
+                                  y: max(0, location.y - window.frame.height + (Toolbar.height / 2)))
+        window.setFrameOrigin(frameOrigin)
+
+        withTabs.forEach { tab in
+            window.state.browserTabsManager.addNewTabAndGroup(tab, setCurrent: true)
+        }
+        window.state.mode = .web
+        window.makeKeyAndOrderFront(nil)
+        return window
+    }
+
+    @discardableResult
+    func createWindow(frame: NSRect?, restoringTabs: Bool = false, isIncognito: Bool = false, becomeMain: Bool = true) -> BeamWindow? {
         guard !data.onboardingManager.needsToDisplayOnboard else {
             data.onboardingManager.delegate = self
             data.onboardingManager.presentOnboardingWindow()
@@ -474,7 +491,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 window.setFrameOrigin(origin)
             }
         }
-        window.makeKeyAndOrderFront(nil)
+        if becomeMain {
+            window.makeKeyAndOrderFront(nil)
+        }
         windows.append(window)
         subscribeToStateChanges(for: window.state)
         if PreferencesManager.restoreLastBeamSession, restoringTabs {

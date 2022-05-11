@@ -8,7 +8,7 @@
 import SwiftUI
 import BeamCore
 
-private final class TabItem: NSObject, Codable, Identifiable {
+private final class TabGroupingFeedbackItem: NSObject, Codable, Identifiable {
     var id = UUID().uuidString
     var tabId: UUID
 
@@ -17,7 +17,7 @@ private final class TabItem: NSObject, Codable, Identifiable {
     }
 }
 
-extension TabItem: NSItemProviderWriting {
+extension TabGroupingFeedbackItem: NSItemProviderWriting {
     static let typeIdentifier = "co.beamapp.clustering.tabitem"
 
     static var writableTypeIdentifiersForItemProvider: [String] {
@@ -41,14 +41,14 @@ extension TabItem: NSItemProviderWriting {
     }
 }
 
-extension TabItem: NSItemProviderReading {
+extension TabGroupingFeedbackItem: NSItemProviderReading {
     static var readableTypeIdentifiersForItemProvider: [String] {
         [Self.typeIdentifier]
     }
 
-    static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> TabItem {
+    static func object(withItemProviderData data: Data, typeIdentifier: String) throws -> TabGroupingFeedbackItem {
         let decoder = JSONDecoder()
-        return try decoder.decode(TabItem.self, from: data)
+        return try decoder.decode(TabGroupingFeedbackItem.self, from: data)
     }
 }
 
@@ -64,17 +64,17 @@ private struct TabDropDelegate: DropDelegate {
     }
 
     func performDrop(info: DropInfo) -> Bool {
-        guard info.hasItemsConforming(to: [TabItem.typeIdentifier]) else {
+        guard info.hasItemsConforming(to: [TabGroupingFeedbackItem.typeIdentifier]) else {
             return false
         }
 
-        let itemProviders = info.itemProviders(for: [TabItem.typeIdentifier])
+        let itemProviders = info.itemProviders(for: [TabGroupingFeedbackItem.typeIdentifier])
         guard let itemProvider = itemProviders.first else {
             return false
         }
 
-        itemProvider.loadObject(ofClass: TabItem.self) { tabItem, _ in
-            guard let tabItem = tabItem as? TabItem else {
+        itemProvider.loadObject(ofClass: TabGroupingFeedbackItem.self) { tabItem, _ in
+            guard let tabItem = tabItem as? TabGroupingFeedbackItem else {
                 return
             }
 
@@ -122,12 +122,12 @@ struct TabGroupingFeedbackContentView: View {
                                                    title: title,
                                                    color: Color(hue: tabGroup.hueTint, saturation: 0.6, brightness: 1, opacity: 0.25))
                                     .onDrag {
-                                        return NSItemProvider(object: TabItem(tabId: tabId))
+                                        return NSItemProvider(object: TabGroupingFeedbackItem(tabId: tabId))
                                     }
                             }
                         }
                     }.padding(.vertical, 16)
-                    .onDrop(of: [TabItem.typeIdentifier],
+                    .onDrop(of: [TabGroupingFeedbackItem.typeIdentifier],
                              delegate: TabDropDelegate(newGrpId: tabGroup.id, viewModel: viewModel))
                     Separator(horizontal: true, hairline: false, rounded: true, color: BeamColor.Generic.separator)
 
@@ -140,7 +140,7 @@ struct TabGroupingFeedbackContentView: View {
             }
             .frame(maxWidth: .infinity)
             .padding()
-            .onDrop(of: [TabItem.typeIdentifier],
+            .onDrop(of: [TabGroupingFeedbackItem.typeIdentifier],
                     delegate: TabDropDelegate(newGrpId: nil, viewModel: viewModel))
             .background(
                 RoundedRectangle(cornerRadius: 10)

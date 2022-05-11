@@ -28,6 +28,8 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     @Published var isFetching = false
     @Published var newDay: Bool = false
     @Published private(set) var pinnedTabs: [BrowserTab] = []
+    @Published var currentDraggingSession: ExternalDraggingSession?
+
     //swiftlint:disable:next large_tuple
     @Published var renamedNote: (noteId: UUID, previousName: String, newName: String) = (UUID.null, "", "")
     var noteAutoSaveService: NoteAutoSaveService
