@@ -62,18 +62,6 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(results[1].destinationURL, destinationLink.url)
     }
 
-    func testMissingLinkHandling() {
-        //when getting id for missing url, it retreives the link but doesn't save it in db
-        let createdLinkId: UUID = BeamLinkDB.shared.getOrCreateId(for: "<???>", title: nil, content: nil, destination: nil)
-        XCTAssertEqual(createdLinkId, Link.missing.id)
-        XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
-
-        //when visiting missing url, it retreives the link but doesn't save it in db
-        let visitedLinkId: UUID = BeamLinkDB.shared.visit("<???>", title: nil, content: nil, destination: nil).id
-        XCTAssertEqual(visitedLinkId, Link.missing.id)
-        XCTAssertNil(GRDBDatabase.shared.linkFor(url: "<???>"))
-    }
-
     func testMoveFrecencyToLinkDB() throws {
         BeamDate.freeze("2001-01-01T00:00:00+000")
         let creationDate = BeamDate.now
@@ -214,21 +202,6 @@ class BeamLinkDBTests: XCTestCase {
         BeamDate.reset()
     }
 
-    func testUrlNormalization() {
-        let nonStandardUrl = "http://lemonde.fr"
-        let standardUrl = "http://lemonde.fr/"
-        let id0 = BeamLinkDB.shared.getOrCreateId(for: nonStandardUrl, title: nil, content: nil, destination: nil)
-        let id1 = BeamLinkDB.shared.getOrCreateId(for: standardUrl, title: nil, content: nil, destination: nil)
-        XCTAssertEqual(id0, id1)
-
-        let link0 = BeamLinkDB.shared.visit(nonStandardUrl, title: nil, content: nil, destination: nil)
-        let link1 = BeamLinkDB.shared.visit(standardUrl, title: nil, content: nil, destination: nil)
-        XCTAssertEqual(link0.id, id0)
-        XCTAssertEqual(link1.id, id0)
-        XCTAssertEqual(link0.url, standardUrl)
-        XCTAssertEqual(link1.url, standardUrl)
-    }
-
     func testConflictManagement() throws {
         beforeNetworkTests()
         let beamObjectHelper = BeamObjectTestsHelper()
@@ -270,6 +243,19 @@ class BeamLinkDBTests: XCTestCase {
         XCTAssertEqual(postConflictLink.title, "Alphabet")
 
         stopNetworkTests()
+    }
+    func testTitleNotReplacedByEmpty() {
+        let db = GRDBDatabase.empty()
+        let linkstore = BeamLinkDB(db: db)
+
+        var link = linkstore.visit("http://site.cool/page", title: "A page", content: nil, destination: nil)
+        link = linkstore.visit("http://site.cool/page", title: nil, content: nil, destination: nil)
+        XCTAssertEqual(link.title, "A page")
+
+        link = linkstore.visit("http://site.cool/page2", title: "Another page", content: nil, destination: nil)
+        link = linkstore.visit("http://site.cool/page2", title: "", content: nil, destination: nil)
+        XCTAssertEqual(link.title, "Another page")
+
     }
 
     private func beforeNetworkTests() {

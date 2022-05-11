@@ -74,6 +74,13 @@ public struct ScoredURL {
     public let url: URL
     public var title: String?
     let score: AggregatedURLScore
+
+    public func displayText(maxUrlLength: Int) -> String {
+        guard let title = title, !title.isEmpty else {
+            return url.shortString(maxLength: maxUrlLength)
+        }
+        return title
+    }
 }
 
 private extension URL {

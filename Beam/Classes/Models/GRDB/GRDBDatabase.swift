@@ -1546,7 +1546,9 @@ extension GRDBDatabase {
         }
 
         // otherwise let's update the title and the updatedAt
-        link.title = title
+        if title?.isEmpty == false {
+            link.title = title
+        }
         link.content = content
         link.setDestination(destination)
         link.updatedAt = BeamDate.now

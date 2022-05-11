@@ -141,9 +141,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
         }
     }
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
-        guard url != Link.missing.url else { return Link.missing.id }
-        let normalizedUrl = normalized(url: url)
-        return db.getOrCreateId(for: normalizedUrl, title: title, content: content, destination: destination)
+        return db.getOrCreateId(for: url, title: title, content: content, destination: destination)
     }
 
     private func store(link: Link, shouldSaveOnNetwork: Bool, networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
@@ -177,7 +175,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
     public func insertOrIgnore(links: [Link]) {
         do {
-            try db.insertOrIgnore(links: links.filter { $0.id != Link.missing.id })
+            try db.insertOrIgnore(links: links)
         } catch {
             Logger.shared.logError("Couldn't insert links: \(error)", category: .linkDB)
         }
@@ -190,9 +188,7 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
 
     @discardableResult
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link {
-        guard url != Link.missing.url else { return Link.missing }
-        let normalizedUrl = normalized(url: url)
-        let link: Link = db.visit(url: normalizedUrl, title: title, content: content, destination: destination)
+        let link: Link = db.visit(url: url, title: title, content: content, destination: destination)
         saveOnNetwork(link)
         return link
     }
