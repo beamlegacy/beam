@@ -31,7 +31,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         //processing an internal browsingTree
         let processor = BrowsingTreeProcessor()
         let tree = BrowsingTree(.searchBar(query: "hot to get a ps5 before christmas", referringRootId: nil))
-        tree.navigateTo(url: "http://www.search.com/ps5", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://www.search.com/ps5", title: "search", startReading: true, isLinkActivation: false)
         BeamDate.travel(2)
         tree.switchToBackground()
         var longTermScores = store.getMany(urlIds: [tree.current.link])
@@ -60,7 +60,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
 
         //processing an imported browsingTree
         let importedTree = BrowsingTree(.historyImport(sourceBrowser: .chrome))
-        importedTree.navigateTo(url: "http://www.whatever.com/ps6", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        importedTree.navigateTo(url: "http://www.whatever.com/ps6", title: "search", startReading: true, isLinkActivation: false)
         importedTree.switchToBackground()
         longTermScores = store.getMany(urlIds: [importedTree.current.link])
         XCTAssertEqual(longTermScores.count, 0)
@@ -91,13 +91,13 @@ class BrowsingTreeProcessorTest: XCTestCase {
         let tree0 = BrowsingTree(.historyImport(sourceBrowser: .chrome))
         let tree1 = BrowsingTree(.historyImport(sourceBrowser: .chrome))
 
-        tree0.navigateTo(url: "http://www.search.com/ps5", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        tree0.navigateTo(url: "http://www.search.com/ps5", title: "search", startReading: true, isLinkActivation: false)
         let link0 = tree0.current.link
         BeamDate.travel(2)
-        tree1.navigateTo(url: "http://www.search.com/switch", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        tree1.navigateTo(url: "http://www.search.com/switch", title: "search", startReading: true, isLinkActivation: false)
         let t1 = BeamDate.now
         BeamDate.travel(2)
-        tree0.navigateTo(url: "http://www.search.com/xbox", title: "search", startReading: true, isLinkActivation: false, readCount: 0)
+        tree0.navigateTo(url: "http://www.search.com/xbox", title: "search", startReading: true, isLinkActivation: false)
         let link2 = tree0.current.link
         let t2 = BeamDate.now
 
@@ -124,7 +124,7 @@ class BrowsingTreeProcessorTest: XCTestCase {
         let tree = BrowsingTree(nil)
         let id0 = tree.current.link
         let creationDate0 = try XCTUnwrap(tree.current.events.first?.date)
-        tree.navigateTo(url: "https://fruit.org/orange", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "https://fruit.org/orange", title: nil, startReading: false, isLinkActivation: false)
         let id1 = tree.current.link
         let creationDate1 = try XCTUnwrap(tree.current.events.first?.date)
         let treeScore0 = tree.scoreFor(link: id0)

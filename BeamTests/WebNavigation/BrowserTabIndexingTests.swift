@@ -106,6 +106,14 @@ class BrowserTabIndexingTests: XCTestCase {
             XCTAssertNil(resultLinkForInitialURL?.destination)
         }
         XCTAssertEqual(resultLinkForInitialURL?.title, destinationTitle)
+
+        var currentNode = tab.browsingTree.root!
+        if expectedNumberOfIndexingCalls == 2 {
+            currentNode = currentNode.children[0]
+            XCTAssertEqual(currentNode.url, redirectURL(for: type).absoluteString) //intermediate node
+        }
+        currentNode = currentNode.children[0]
+        XCTAssertEqual(currentNode.url, redirectURL(for: .none).absoluteString)
     }
 
     func testHTTP301RedirectionIsStoredAsAlias() {
