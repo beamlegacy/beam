@@ -210,8 +210,7 @@ public class BrowsingNode: ObservableObject, Codable {
     @Published public var children = [BrowsingNode]()
     public var score: Score { tree.scoreFor(link: link) }
     public func scoreApply(changes: (UrlScoreProtocol) -> Void) {
-        tree.longTermScoreStore?.apply(to: link, changes: changes)
-        tree.dailyScoreStore?.apply(to: link, changes: changes)
+        tree.scoreApply(to: link, changes: changes)
     }
 
     public var title: String {
@@ -546,6 +545,11 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         root.tree = self
     }
 
+    public func scoreApply(to link: UUID, changes: (UrlScoreProtocol) -> Void) {
+        longTermScoreStore?.apply(to: link, changes: changes)
+        dailyScoreStore?.apply(to: link, changes: changes)
+    }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -598,7 +602,7 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         return current
     }
 
-    public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool, readCount: Int) {
+    public func navigateTo(url link: String, title: String?, startReading: Bool, isLinkActivation: Bool) {
         guard current.link != linkStore.getOrCreateId(for: link) else { return }
         Logger.shared.logInfo("navigateFrom \(currentLink) to \(link)", category: .web)
         let event = isLinkActivation ? ReadingEventType.navigateToLink : ReadingEventType.searchBarNavigation
@@ -609,9 +613,12 @@ public class BrowsingTree: ObservableObject, Codable, BrowsingSession {
         if startReading {
             current.addEvent(.startReading)
         }
-        current.score.textAmount = readCount
-        current.scoreApply { $0.textAmount = readCount }
         Logger.shared.logInfo("current now is \(currentLink)", category: .web)
+    }
+    public func update(for url: String, readCount: Int) {
+        let urlId = linkStore.getOrCreateId(for: url)
+        scoreFor(link: urlId).textAmount = readCount
+        scoreApply(to: urlId) { $0.textAmount = readCount }
     }
     //to use only in history import
     public func addChildToCurrent(url link: String, title: String?, date: Date) {

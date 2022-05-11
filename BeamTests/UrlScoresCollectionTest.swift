@@ -42,7 +42,8 @@ class UrlScoresCollectionTest: XCTestCase {
         let firstUrl = "www.poivre.com"
         let secondUrl = "www.sel.fr"
         let tree = BrowsingTree(nil, frecencyScorer: nil, longTermScoreStore: store, dailyScoreStore: dailyStore)
-        tree.navigateTo(url: firstUrl, title: nil, startReading: true, isLinkActivation: false, readCount: 50)
+        tree.navigateTo(url: firstUrl, title: nil, startReading: true, isLinkActivation: false)
+        tree.update(for: firstUrl, readCount: 50)
         let firstNode = try XCTUnwrap(tree.current)
         let firstLink = firstNode.link
         var score = try XCTUnwrap(store.data[firstLink])
@@ -67,8 +68,9 @@ class UrlScoresCollectionTest: XCTestCase {
         XCTAssertEqual(dailyScore.textAmount, 50)
         XCTAssertEqual(dailyScore.area, 0)
 
-        tree.navigateTo(url: secondUrl, title: nil, startReading: true, isLinkActivation: false, readCount: 0)
-        tree.navigateTo(url: firstUrl, title: nil, startReading: true, isLinkActivation: false, readCount: 100)
+        tree.navigateTo(url: secondUrl, title: nil, startReading: true, isLinkActivation: false)
+        tree.update(for: firstUrl, readCount: 100)
+        tree.navigateTo(url: firstUrl, title: nil, startReading: true, isLinkActivation: false)
         tree.switchToBackground()
 
         let secondNode = try XCTUnwrap(tree.current)
@@ -237,12 +239,12 @@ class UrlScoresCollectionTest: XCTestCase {
     func testDailyIsPinned() throws {
         let dailyStore = FakeDailyScoreStore()
         let tree = BrowsingTree(nil, frecencyScorer: nil, longTermScoreStore: nil, dailyScoreStore: dailyStore)
-        tree.navigateTo(url: "http://abc.com", title: "", startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://abc.com", title: "", startReading: false, isLinkActivation: false)
         let urlId0 = tree.current.link
-        tree.navigateTo(url: "http://def.com", title: "", startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://def.com", title: "", startReading: false, isLinkActivation: false)
         let urlId1 = tree.current.link
         tree.isPinned = true
-        tree.navigateTo(url: "http://ghi.com", title: "", startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://ghi.com", title: "", startReading: false, isLinkActivation: false)
         let urlId2 = tree.current.link
         tree.isPinned = false
 

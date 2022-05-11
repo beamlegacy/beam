@@ -12,8 +12,16 @@ import Combine
 import Clustering
 import Fakery
 
+protocol ClusteringManagerProtocol {
+    func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?)
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?)
+}
+extension ClusteringManagerProtocol {
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo? = nil, newContent: String? = nil) {}
+}
+
 // swiftlint:disable:next type_body_length
-class ClusteringManager: ObservableObject {
+class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
 
     public struct SummaryForNewDay: Codable {
         var notes: [Date: [UUID]]?
