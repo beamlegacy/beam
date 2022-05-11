@@ -72,6 +72,9 @@ extension LinkManager {
     public func normalized(url: String) -> String {
         URL(string: url)?.normalized.absoluteString ?? url
     }
+    public func preprocess(title: String?) -> String? {
+        title?.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
     public func isDomain(id: UUID) -> Bool {
         guard let link = linkFor(id: id), URL(string: link.url)?.isDomain ?? false else { return false }
         return true
@@ -108,9 +111,19 @@ public class LinkStore: LinkManager {
     public func getLinks(matchingUrl url: String) -> [UUID: Link] { linkManager.getLinks(matchingUrl: url) }
     public func getLinks(for ids: [UUID]) -> [UUID: Link] { linkManager.getLinks(for: ids) }
 
-    public func getOrCreateId(for url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> UUID { linkManager.getOrCreateId(for: url, title: title, content: content, destination: destination) }
+    public func getOrCreateId(for url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> UUID {
+        guard url != Link.missing.url else { return Link.missing.id }
+        let normalizedUrl = normalized(url: url)
+        let preprocessedTitle = preprocess(title: title)
+        return linkManager.getOrCreateId(for: normalizedUrl, title: preprocessedTitle, content: content, destination: destination)
+    }
     public func linkFor(id: UUID) -> Link? { linkManager.linkFor(id: id) }
-    public func visit(_ url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> Link { linkManager.visit(url, title: title, content: content, destination: destination) }
+    public func visit(_ url: String, title: String? = nil, content: String? = nil, destination: String? = nil) -> Link {
+        guard url != Link.missing.url else { return Link.missing }
+        let normalizedUrl = normalized(url: url)
+        let preprocessedTitle = preprocess(title: title)
+        return linkManager.visit(normalizedUrl, title: preprocessedTitle, content: content, destination: destination)
+    }
     public func isDomain(id: UUID) -> Bool { linkManager.isDomain(id: id) }
     public func getDomainId(id: UUID) -> UUID? { linkManager.getDomainId(id: id) }
     public func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)?) {
@@ -119,7 +132,7 @@ public class LinkStore: LinkManager {
         }
     }
     public func insertOrIgnore(links: [Link]) {
-        linkManager.insertOrIgnore(links: links)
+        linkManager.insertOrIgnore(links: links.filter { $0.id != Link.missing.id })
     }
     public static func linkFor(_ id: UUID) -> Link? {
         return shared.linkFor(id: id)
@@ -163,10 +176,8 @@ public class InMemoryLinkManager: LinkManager {
     }
 
     public func getOrCreateId(for url: String, title: String?, content: String?, destination: String?) -> UUID {
-        guard url != Link.missing.url else { return Link.missing.id}
-        let normalizedUrl = normalized(url: url)
-        if let existing = linksByUrl[normalizedUrl] { return existing.id }
-        let link = Link(url: normalizedUrl, title: title, content: content)
+        if let existing = linksByUrl[url] { return existing.id }
+        let link = Link(url: url, title: title, content: content)
         insert(link: link)
         return link.id
     }
@@ -176,16 +187,16 @@ public class InMemoryLinkManager: LinkManager {
     }
 
     public func visit(_ url: String, title: String?, content: String?, destination: String?) -> Link {
-        guard url != Link.missing.url else { return Link.missing }
-        let normalizedUrl = normalized(url: url)
         var link: Link
-        if let existing = linksByUrl[normalizedUrl] {
+        if let existing = linksByUrl[url] {
             link = existing
-            link.title = title
+            if title?.isEmpty == false {
+                link.title = title
+            }
             link.content = content
             link.updatedAt = BeamDate.now
         } else {
-            link = Link(url: normalizedUrl, title: title, content: content)
+            link = Link(url: url, title: title, content: content)
         }
         link.setDestination(destination)
         insert(link: link)
