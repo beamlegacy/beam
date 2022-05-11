@@ -957,6 +957,10 @@
 		A501B4CF2734397E00407F3E /* EmbedContentLocalStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */; };
 		A501B4D1273439C500407F3E /* EmbedContentAPIStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501B4D0273439C500407F3E /* EmbedContentAPIStrategyTests.swift */; };
 		A50241D426D8FA6600C93E1E /* GutterItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50241D326D8FA6600C93E1E /* GutterItemView.swift */; };
+		A5044308281C188D00C91204 /* TabsExternalDropDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5044307281C188D00C91204 /* TabsExternalDropDelegate.swift */; };
+		A504430F281C36A900C91204 /* View+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A504430E281C36A900C91204 /* View+Snapshot.swift */; };
+		A5044311281CA8A900C91204 /* TabsListExternalDragViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5044310281CA8A800C91204 /* TabsListExternalDragViewModel.swift */; };
+		A5044313281CB27900C91204 /* ExternalDragginSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5044312281CB27900C91204 /* ExternalDragginSession.swift */; };
 		A50612D626CC75200053AD37 /* Calendar+Additions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612D526CC75200053AD37 /* Calendar+Additions.swift */; };
 		A50612DF26CC75C70053AD37 /* Calendar+AdditionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */; };
 		A50B372425FA180E00E5D34F /* NSApperance+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */; };
@@ -1136,6 +1140,7 @@
 		A5ECC8FF2679EBB500D8A087 /* HoverVisibleModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */; };
 		A5EE8C5A27B8B67800800661 /* BeamNote+DocumentManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EE8C5927B8B67800800661 /* BeamNote+DocumentManagerTests.swift */; };
 		A5EE8C6427BB861D00800661 /* AutocompleteManager+DefaultActions.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5EE8C6327BB861D00800661 /* AutocompleteManager+DefaultActions.swift */; };
+		A5F1DC30280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1DC2F280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift */; };
 		A5F1F6262643EDA600D41505 /* BeamNoteSharingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */; };
 		A5F47EBB26F8AEB2004B7CDE /* Tooltip.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */; };
 		A5F47EC526F8D6A9004B7CDE /* LottieView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5F47EC426F8D6A9004B7CDE /* LottieView.swift */; };
@@ -2750,6 +2755,10 @@
 		A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentLocalStrategyTests.swift; sourceTree = "<group>"; };
 		A501B4D0273439C500407F3E /* EmbedContentAPIStrategyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentAPIStrategyTests.swift; sourceTree = "<group>"; };
 		A50241D326D8FA6600C93E1E /* GutterItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GutterItemView.swift; sourceTree = "<group>"; };
+		A5044307281C188D00C91204 /* TabsExternalDropDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsExternalDropDelegate.swift; sourceTree = "<group>"; };
+		A504430E281C36A900C91204 /* View+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = "View+Snapshot.swift"; path = "Beam/Classes/Helpers/UI/View+Snapshot.swift"; sourceTree = SOURCE_ROOT; };
+		A5044310281CA8A800C91204 /* TabsListExternalDragViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsListExternalDragViewModel.swift; sourceTree = "<group>"; };
+		A5044312281CB27900C91204 /* ExternalDragginSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalDragginSession.swift; sourceTree = "<group>"; };
 		A50612D526CC75200053AD37 /* Calendar+Additions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+Additions.swift"; sourceTree = "<group>"; };
 		A50612DE26CC75C70053AD37 /* Calendar+AdditionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+AdditionsTests.swift"; sourceTree = "<group>"; };
 		A50B372325FA180E00E5D34F /* NSApperance+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApperance+Beam.swift"; sourceTree = "<group>"; };
@@ -2928,6 +2937,7 @@
 		A5ECC8FE2679EBB500D8A087 /* HoverVisibleModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HoverVisibleModifier.swift; sourceTree = "<group>"; };
 		A5EE8C5927B8B67800800661 /* BeamNote+DocumentManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+DocumentManagerTests.swift"; sourceTree = "<group>"; };
 		A5EE8C6327BB861D00800661 /* AutocompleteManager+DefaultActions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AutocompleteManager+DefaultActions.swift"; sourceTree = "<group>"; };
+		A5F1DC2F280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TabsExternalDraggingSource.swift; sourceTree = "<group>"; };
 		A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamNoteSharingUtils.swift; sourceTree = "<group>"; };
 		A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tooltip.swift; sourceTree = "<group>"; };
 		A5F47EC426F8D6A9004B7CDE /* LottieView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LottieView.swift; sourceTree = "<group>"; };
@@ -3819,6 +3829,7 @@
 				96E4CF75258EC88300D6DE22 /* BeamTextTools.swift */,
 				A050047425DA918A009CFEB6 /* NoteAutoSaveService.swift */,
 				A572629725FFADC5004416C0 /* MouseInteraction.swift */,
+				A5044312281CB27900C91204 /* ExternalDragginSession.swift */,
 				8ADD05E927295A67004C3EC9 /* WebPositions */,
 				9691C2582644948200F70DA1 /* BeamFileDBManager.swift */,
 				A05ADF3E264D67D3002DF91A /* PasswordsDB.swift */,
@@ -4250,6 +4261,7 @@
 				A050049E25DAEE73009CFEB6 /* ProgressIndicator.swift */,
 				872644762619903B0070E83D /* StepperControl.swift */,
 				A0CB7E53268E66CD00D15AFD /* View+Beam.swift */,
+				A504430E281C36A900C91204 /* View+Snapshot.swift */,
 				37DB5A1527BB518300534760 /* AnimationHandler.swift */,
 				338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */,
 				333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */,
@@ -6887,6 +6899,9 @@
 				A5C2023A2761FDA2008BB2FB /* TabFaviconView.swift */,
 				A5C2024B27623A8C008BB2FB /* TabsWidthProvider.swift */,
 				A52B5021271DCB950078670C /* TabsDragModel.swift */,
+				A5044310281CA8A800C91204 /* TabsListExternalDragViewModel.swift */,
+				A5044307281C188D00C91204 /* TabsExternalDropDelegate.swift */,
+				A5F1DC2F280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift */,
 			);
 			path = Tabs;
 			sourceTree = "<group>";
@@ -8298,6 +8313,7 @@
 				87C539B92616297300D51877 /* SearchPasswordsCell.swift in Sources */,
 				417628A525B05DFB0082FFDF /* NSBezierPath+CGPath.swift in Sources */,
 				A5A6152526A808B600193C03 /* AutocompleteManager+Sorting.swift in Sources */,
+				A5044308281C188D00C91204 /* TabsExternalDropDelegate.swift in Sources */,
 				0DD0DACC2681C9630005339A /* GRDBDatabase.swift in Sources */,
 				032562A726051D3B006513E4 /* RBFilterManagerState.m in Sources */,
 				418172592581107C00317ED8 /* ContentView.swift in Sources */,
@@ -8582,6 +8598,7 @@
 				A0E3150525ED1ECB001A5E55 /* FormatText.swift in Sources */,
 				418171EC2581107C00317ED8 /* UserMe.swift in Sources */,
 				A0CB5AE8268B20C200D1EF02 /* BrowserPreferencesView.swift in Sources */,
+				A5044311281CA8A900C91204 /* TabsListExternalDragViewModel.swift in Sources */,
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */,
@@ -8602,11 +8619,13 @@
 				418171F02581107C00317ED8 /* APIResponse.swift in Sources */,
 				418172262581107C00317ED8 /* NSRange+Beam.swift in Sources */,
 				87C539CD2617B36500D51877 /* PasswordGeneratorSettingsCell.swift in Sources */,
+				A5F1DC30280EF6B0006C7FB8 /* TabsExternalDraggingSource.swift in Sources */,
 				A54A45312767970E00B9AE1B /* UserInfoRequest+Foundation.swift in Sources */,
 				96EBCE0A262A01160014D923 /* ExportAllBrowsingSessions.swift in Sources */,
 				87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
 				370794DC27D7AB0E00D2768B /* WebContentDescription.swift in Sources */,
+				A504430F281C36A900C91204 /* View+Snapshot.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				9635C96D276945CD00015575 /* OldJournalStackView.swift in Sources */,
 				5298EAFD26272CCC0033862C /* CoreDataMigrator.swift in Sources */,
@@ -8659,6 +8678,7 @@
 				37B85B7B27A2C81B003871F9 /* DownloadArtifact.swift in Sources */,
 				8AF4F7CB275A66FF0081B6B5 /* EmbedContentAPIStrategy.swift in Sources */,
 				333E4F8D270AE2B7005B72CD /* BeamTextEdit+Search.swift in Sources */,
+				A5044313281CB27900C91204 /* ExternalDragginSession.swift in Sources */,
 				5204FE3B25F128BD00FD22F8 /* DocumentStruct.swift in Sources */,
 				879157372799EECF00AE1040 /* BrowserImporter.swift in Sources */,
 				75FD7B6F2707006400BEFBA7 /* BeamSchemeHandler.swift in Sources */,
