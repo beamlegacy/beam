@@ -37,7 +37,7 @@ struct ToolbarCapsuleButton<Content: View>: View {
     }
 
     private var backgroundColor: Color {
-        guard isEnabled else { return .clear }
+        guard isEnabled else { return BeamColor.Nero.swiftUI.opacity(0) }
         if let hueTint = hueTint {
             return Color(hue: hueTint, saturation: 0.4, brightness: 1, opacity: 0.2)
         } else if isPressed {
@@ -52,7 +52,7 @@ struct ToolbarCapsuleButton<Content: View>: View {
 
     private var incognitoBackgroundColor: Color {
         guard isIncognito else { return backgroundColor }
-        guard isEnabled else { return .clear }
+        guard isEnabled else { return BeamColor.Nero.swiftUI.opacity(0) }
         if let hueTint = hueTint {
             return Color(hue: hueTint, saturation: 0.4, brightness: 1, opacity: 0.2)
         } else if isPressed {

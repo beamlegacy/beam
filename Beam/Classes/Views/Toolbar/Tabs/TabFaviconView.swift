@@ -9,9 +9,9 @@ import SwiftUI
 import Combine
 
 struct TabFaviconView: View {
-    @Environment(\.isMainWindow) private var isMainWindow
 
     var favIcon: NSImage?
+    var showGrayScale = false
     var isLoading: Bool
     var estimatedLoadingProgress: CGFloat
     var disableAnimations = false
@@ -50,7 +50,7 @@ struct TabFaviconView: View {
                     .cornerRadius(isLoading ? iconSize / 2 : 0)
                     .frame(width: iconSize, height: iconSize)
                     .blendMode(.normal)
-                    .if(!isMainWindow) {
+                    .if(showGrayScale) {
                         $0.grayscale(0.99)
                     }
             } else {
