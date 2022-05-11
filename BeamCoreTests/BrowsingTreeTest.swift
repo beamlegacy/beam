@@ -70,7 +70,7 @@ class BrowsingTreeTest: XCTestCase {
 
         //reading events separated by less than session duration bear the same sessionId
         BeamDate.travel(sessionDuration - 1)
-        tree.navigateTo(url: "www.google.com", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "www.google.com", title: nil, startReading: true, isLinkActivation: false)
         let sessionId1 = try XCTUnwrap(tree.current.events.last?.webSessionId)
         XCTAssertEqual(sessionId0, sessionId1)
 
@@ -100,13 +100,13 @@ class BrowsingTreeTest: XCTestCase {
 
         let tree = BrowsingTree(nil)
 
-        tree.navigateTo(url: "www.moon.com", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "www.moon.com", title: nil, startReading: true, isLinkActivation: false)
         let node0 = try XCTUnwrap(tree.current)
         tree.switchToBackground()
         tree.startReading()
 
         //node 0 will switch to a new page load id
-        tree.navigateTo(url: "www.sun.com", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "www.sun.com", title: nil, startReading: true, isLinkActivation: false)
         let node0NavigatedIndex = node0.events.count
 
         let node1 = try XCTUnwrap(tree.current)
@@ -154,7 +154,7 @@ class BrowsingTreeTest: XCTestCase {
     func testIdURLMapping() throws {
         let tree = BrowsingTree(nil)
         let root = tree.current!
-        tree.navigateTo(url: "www.chocolate.com", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "www.chocolate.com", title: nil, startReading: true, isLinkActivation: false)
         let current = tree.current!
         var mapping = [UUID: String]()
         mapping[root.link] = "<???>"
@@ -203,7 +203,7 @@ class BrowsingTreeTest: XCTestCase {
         //Checks that encode decode works properly for non legacy trees
         let currentTree = BrowsingTree(nil)
         let rootUrlId = currentTree.root.link
-        currentTree.navigateTo(url: "http://cool.cat", title: nil, startReading: true, isLinkActivation: false, readCount: 10)
+        currentTree.navigateTo(url: "http://cool.cat", title: nil, startReading: true, isLinkActivation: false)
         let childUrlId = currentTree.current.link
         XCTAssert(!currentTree.root.legacy)
         let currentJson = try XCTUnwrap(try? encoder.encode(currentTree))
@@ -271,15 +271,15 @@ class BrowsingTreeTest: XCTestCase {
             "http://greeeat.fr"
         ]
         let tree = BrowsingTree(nil)
-        tree.navigateTo(url: urls[0], title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: urls[0], title: nil, startReading: true, isLinkActivation: false)
         let node0 = try XCTUnwrap(tree.current)
-        tree.navigateTo(url: urls[1], title: nil, startReading: true, isLinkActivation: true, readCount: 5)
-        tree.navigateTo(url: urls[2], title: nil, startReading: true, isLinkActivation: true, readCount: 10)
+        tree.navigateTo(url: urls[1], title: nil, startReading: true, isLinkActivation: true)
+        tree.navigateTo(url: urls[2], title: nil, startReading: true, isLinkActivation: true)
         let node2 = try XCTUnwrap(tree.current)
         tree.goBack()
         let node1 = try XCTUnwrap(tree.current)
         tree.goBack()
-        tree.navigateTo(url: urls[3], title: nil, startReading: true, isLinkActivation: true, readCount: 20)
+        tree.navigateTo(url: urls[3], title: nil, startReading: true, isLinkActivation: true)
         let node3 = try XCTUnwrap(tree.current)
         //Tree stucture is
         //root--node0--node1--node2
@@ -391,7 +391,7 @@ class BrowsingTreeTest: XCTestCase {
         let date = BeamDate.now
         let storage = FakeDomainPath0TreeStatsStorage()
         let tree = BrowsingTree(nil, domainPath0TreeStatsStore: storage)
-        tree.navigateTo(url: "abc.com/path/to", title: "nil", startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "abc.com/path/to", title: "nil", startReading: true, isLinkActivation: false)
         BeamDate.travel(1)
         tree.closeTab()
 

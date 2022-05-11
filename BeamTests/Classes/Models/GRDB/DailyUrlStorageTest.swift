@@ -13,6 +13,9 @@ class DailyUrlStorageTest: XCTestCase {
 
 
     func testRecord() throws {
+        BeamDate.freeze("2001-01-01T00:01:00+000")
+        let t0 = BeamDate.now
+
         let db = GRDBDatabase.empty()
         let id = UUID()
         let day0 = "2020-01-01"
@@ -21,6 +24,8 @@ class DailyUrlStorageTest: XCTestCase {
         db.updateDailyUrlScore(urlId: id, day: day0) {
             $0.readingTimeToLastEvent += 5
         }
+        BeamDate.travel(1)
+        let t1 = BeamDate.now
         db.updateDailyUrlScore(urlId: id, day: day0) {
             $0.readingTimeToLastEvent += 5
         }
@@ -33,18 +38,25 @@ class DailyUrlStorageTest: XCTestCase {
         var record = try XCTUnwrap(records0[id])
         XCTAssertEqual(record.readingTimeToLastEvent, 10)
         XCTAssertFalse(record.isPinned)
+        XCTAssertEqual(record.createdAt, t0)
+        XCTAssertEqual(record.updatedAt, t1)
+
         var records1 = db.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
         record = try XCTUnwrap(records1[id])
         XCTAssertEqual(record.scrollRatioY, 0.5)
         XCTAssert(record.isPinned)
         try db.clearDailyUrlScores(toDay: "2020-01-01")
+        XCTAssertEqual(record.createdAt, t1)
+        XCTAssertEqual(record.updatedAt, t1)
 
         //clearing records older than 1 day
         records0 = db.getDailyUrlScores(day: day0)
         XCTAssertEqual(records0.count, 0)
         records1 = db.getDailyUrlScores(day: day1)
         XCTAssertEqual(records1.count, 1)
+
+        BeamDate.reset()
     }
     
     func testStorage() throws {

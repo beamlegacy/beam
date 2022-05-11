@@ -1888,6 +1888,7 @@ extension GRDBDatabase {
                     .fetchOne(db)
                 let score = fetched ?? DailyURLScore(urlId: urlId, localDay: day)
                 changes(score)
+                score.updatedAt = BeamDate.now
                 try score.save(db)
             }
         } catch {

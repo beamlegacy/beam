@@ -162,7 +162,7 @@ class BrowsingTreeSenderTest: XCTestCase {
         )
         let sender = try XCTUnwrap(BrowsingTreeSender(session: session, config: notAnonymousConfig, appSessionId: appSessionId))
         let tree = BrowsingTree(.searchBar(query: "hummus recipe", referringRootId: nil))
-        tree.navigateTo(url: "http://abc.fr/", title: nil, startReading: true, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://abc.fr/", title: nil, startReading: true, isLinkActivation: false)
         let urlId = try XCTUnwrap(tree.current.link)
         sender.send(browsingTree: tree)
         let unwrappedData = try sentData(session: session)

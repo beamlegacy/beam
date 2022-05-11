@@ -28,16 +28,16 @@ class BrowsingTreeStoreTest: XCTestCase {
         let store = BrowsingTreeStoreManager()
 
         let tree = BrowsingTree(nil)
-        tree.navigateTo(url: "http://hello", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        tree.navigateTo(url: "http://hello", title: nil, startReading: false, isLinkActivation: false)
         let record = try XCTUnwrap(tree.toRecord())
 
         let savedTree = BrowsingTree(nil)
-        savedTree.navigateTo(url: "http://world", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        savedTree.navigateTo(url: "http://world", title: nil, startReading: false, isLinkActivation: false)
         let savedRecord = try XCTUnwrap(savedTree.toRecord())
         try GRDBDatabase.shared.save(browsingTreeRecord: savedRecord)
 
         let alreadyProcessingTree = BrowsingTree(nil)
-        alreadyProcessingTree.navigateTo(url: "http://beam", title: nil, startReading: false, isLinkActivation: false, readCount: 0)
+        alreadyProcessingTree.navigateTo(url: "http://beam", title: nil, startReading: false, isLinkActivation: false)
         var alreadyProcessingRecord = try XCTUnwrap(alreadyProcessingTree.toRecord())
         alreadyProcessingRecord.processingStatus = .started
         try GRDBDatabase.shared.save(browsingTreeRecord: alreadyProcessingRecord)
