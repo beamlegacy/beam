@@ -35,6 +35,8 @@ extension APIWebSocketRequestError: LocalizedError {
  }
  */
 
+// swiftlint:disable file_length
+// swiftlint:disable:next type_body_length
 class APIWebSocketRequest: APIRequest {
     // Change API route from https?://api.beamapp.co/ to wss?://api.beamapp.co/cable
     static private var cableRoute: String {
@@ -54,6 +56,8 @@ class APIWebSocketRequest: APIRequest {
 
     private var subscribeHandlers: [UUID: ((Swift.Result<UUID, Error>) -> Void)] = [:]
     private var subscribeHandlersQueue = DispatchQueue(label: "APIWebSocketRequest_subscribeHandlers")
+
+    private var queryCommandHandlersQueue = DispatchQueue(label: "APIWebSocketRequest_queryCommandHandlers")
     private var queryCommandHandlers: [UUID: ((Swift.Result<String, Error>) -> Void)] = [:]
     private static var webSocketUploadedBytes: Int64 = 0
     private static var webSocketDownloadedBytes: Int64 = 0
@@ -172,7 +176,10 @@ class APIWebSocketRequest: APIRequest {
     }
 
     private func reset() {
-        queryCommandHandlers = [:]
+        queryCommandHandlersQueue.async {
+            self.queryCommandHandlers = [:]
+        }
+
         subscribeHandlersQueue.async {
             self.subscribeHandlers = [:]
         }
@@ -326,7 +333,11 @@ class APIWebSocketRequest: APIRequest {
             return
         }
 
-        guard let completionHandler = queryCommandHandlers[channelId] else {
+        var completionHandler: ((Swift.Result<String, Error>) -> Void)?
+        queryCommandHandlersQueue.sync {
+            completionHandler = queryCommandHandlers[channelId]
+        }
+        guard let completionHandler = completionHandler else {
             logDebug("Received result but no query handler: \(messageText)")
             return
         }
@@ -497,7 +508,10 @@ class APIWebSocketRequest: APIRequest {
         }
 
         let commandString = command(channelId, .unsubscribe)
-        queryCommandHandlers.removeValue(forKey: channelId)
+
+        _ = queryCommandHandlersQueue.sync {
+            queryCommandHandlers.removeValue(forKey: channelId)
+        }
 
         if let index = channelIds.firstIndex(of: channelId) {
             channelIds.remove(at: index)
