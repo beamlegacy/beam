@@ -28,7 +28,7 @@ public class DailyURLScore: Codable, UrlScoreProtocol {
     }
 
     public var score: Float {
-        return scrollRatioY
+        return min(scrollRatioY, 1) //temporary before scroll ratio fix
             + log(1 + Float(readingTimeToLastEvent))
             + log(1 + Float(textAmount))
             + log(1 + Float(textSelections))
