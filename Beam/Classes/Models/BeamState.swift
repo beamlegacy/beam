@@ -38,6 +38,7 @@ import Sentry
                 recentsManager.currentNoteChanged(note)
             }
             stopFocusOmnibox()
+            updateCurrentNoteTitleSubscription()
         }
     }
 
@@ -105,6 +106,8 @@ import Sentry
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
                 BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true)
             }
+
+            updateWindowTitle()
         }
     }
 
@@ -113,7 +116,12 @@ import Sentry
     @Published var journalScrollOffset: CGFloat = 0
     var lastScrollOffset = [UUID: CGFloat]()
 
-    @Published var currentPage: WindowPage?
+    @Published var currentPage: WindowPage? {
+        didSet {
+            updateWindowTitle()
+        }
+    }
+
     @Published var overlayViewModel: OverlayViewCenterViewModel = OverlayViewCenterViewModel()
 
     var shouldDisableLeadingGutterHover: Bool = false
@@ -629,6 +637,27 @@ import Sentry
     func generateTabs(_ number: Int = 100) {
         for _ in 0..<number {
             _ = createTab(withURLRequest: URLRequest(url: URL(string: "https://beamapp.co")!), originalQuery: "beamapp.co")
+        }
+    }
+
+    func updateWindowTitle() {
+        switch mode {
+        case .today:
+            associatedWindow?.title = "Journal"
+        case .page:
+            associatedWindow?.title = currentPage?.title ?? "Beam"
+        case .note:
+            associatedWindow?.title = currentNote?.title ?? "Beam"
+        case .web:
+            associatedWindow?.title = currentTab?.title ?? "Beam"
+        }
+    }
+
+    private var currentNoteTitleSubscription: AnyCancellable?
+
+    private func updateCurrentNoteTitleSubscription() {
+        currentNoteTitleSubscription = currentNote?.$title.sink { [weak self] title in
+            self?.associatedWindow?.title = title
         }
     }
 
