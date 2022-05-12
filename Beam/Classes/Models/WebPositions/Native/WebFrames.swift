@@ -15,11 +15,21 @@ final class WebFrames: ObservableObject {
     struct FrameInfo {
         var href: HREF
         var parentHref: ParentHREF
+        /// X position in WebView
         var x: CGFloat = 0
+        /// Y position in WebView
         var y: CGFloat = 0
+        /// Distance scrolled on X axis
         var scrollX: CGFloat = 0
+        /// Distance scrolled on Y axis
         var scrollY: CGFloat = 0
+        /// Maximum scroll distance on X axis
+        var scrollWidth: CGFloat = 0
+        /// Maximum scroll distance on Y axis
+        var scrollHeight: CGFloat = 0
+        /// Width of visible frame
         var width: CGFloat = -1
+        /// Height of visible frame
         var height: CGFloat = -1
         var isMain: Bool = false
     }
