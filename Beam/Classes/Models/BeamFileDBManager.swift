@@ -501,49 +501,38 @@ extension BeamFileDBManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ files: [BeamFileRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
                 // swiftlint:disable:next date_init
                 let localTimer = Date()
-                try self?.saveOnBeamObjectsAPI(files) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
-                                               category: .fileNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .fileNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectsAPI(files)
+                Logger.shared.logDebug("Saved \(files.count) files on the BeamObject API",
+                                       category: .fileNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logDebug("Error when saving the files on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .fileNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
 
     private func saveOnNetwork(_ file: BeamFileRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
                 // swiftlint:disable:next date_init
                 let localTimer = Date()
-                try self?.saveOnBeamObjectAPI(file) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",
-                                               category: .fileNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .fileNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectAPI(file)
+                Logger.shared.logDebug("Saved file \(file.name) on the BeamObject API",
+                                       category: .fileNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logDebug("Error when saving the file on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .fileNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }

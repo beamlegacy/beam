@@ -191,38 +191,27 @@ extension ContactsManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ contacts: [ContactRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectsAPI(contacts) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved contacts on the BeamObject API", category: .contactsDB)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the contacts on the BeamObject API", category: .contactsDB)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectsAPI(contacts)
+                Logger.shared.logDebug("Saved contacts on the BeamObject API", category: .contactsDB)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .contactsDB)
+                Logger.shared.logDebug("Error when saving the contacts on the BeamObject API", category: .contactsDB)
+                networkCompletion?(.failure(error))
             }
         }
     }
 
     private func saveOnNetwork(_ contact: ContactRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectAPI(contact) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved contact on the BeamObject API", category: .contactsDB)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the contact on the BeamObject API with error: \(error.localizedDescription)", category: .contactsDB)
-                        networkCompletion?(.failure(error))                    }
-                }
+                try await self?.saveOnBeamObjectAPI(contact)
+                Logger.shared.logDebug("Saved contact on the BeamObject API", category: .contactsDB)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .contactsDB)
+                Logger.shared.logDebug("Error when saving the contact on the BeamObject API with error: \(error.localizedDescription)", category: .contactsDB)
+                networkCompletion?(.failure(error))
             }
         }
     }

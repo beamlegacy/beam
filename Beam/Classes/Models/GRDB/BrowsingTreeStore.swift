@@ -299,49 +299,38 @@ extension BrowsingTreeStoreManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ record: BrowsingTreeRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
                 // swiftlint:disable:next date_init
                 let localTimer = Date()
-                try self?.saveOnBeamObjectAPI(record) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved tree \(record.rootId) on the BeamObject API",
-                                               category: .fileNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the tree on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .fileNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectAPI(record)
+                Logger.shared.logDebug("Saved tree \(record.rootId) on the BeamObject API",
+                                       category: .fileNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logDebug("Error when saving the tree on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .fileNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
 
     func saveAllOnNetwork(_ records: [BrowsingTreeRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
                 // swiftlint:disable:next date_init
                 let localTimer = Date()
-                try self?.saveOnBeamObjectsAPI(records) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved \(records.count) trees on the BeamObject API",
-                                               category: .fileNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the trees on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .fileNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectsAPI(records)
+                Logger.shared.logDebug("Saved \(records.count) trees on the BeamObject API",
+                                       category: .fileNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .fileNetwork)
+                Logger.shared.logDebug("Error when saving the trees on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .fileNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
