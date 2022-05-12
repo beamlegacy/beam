@@ -111,20 +111,14 @@ class PrivateKeySignatureManager: BeamObjectManagerDelegate {
     }
 
     func saveOnNetwork(_ signature: PrivateKeySignature, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectAPI(signature, force: true) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved signature on the BeamObject API", category: .privateKeySignature)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the signature on the BeamObject API", category: .privateKeySignature)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectAPI(signature, force: true)
+                Logger.shared.logDebug("Saved signature on the BeamObject API", category: .privateKeySignature)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .privateKeySignature)
+                Logger.shared.logDebug("Error when saving the signature on the BeamObject API", category: .privateKeySignature)
+                networkCompletion?(.failure(error))
             }
         }
     }

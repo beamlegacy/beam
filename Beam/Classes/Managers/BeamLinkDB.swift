@@ -261,26 +261,20 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        // swiftlint:disable:next date_init
-        let localTimer = Date()
 
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectsAPI(links) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
-                                               category: .linkNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the links on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .linkNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                // swiftlint:disable:next date_init
+                let localTimer = Date()
+                try await self?.saveOnBeamObjectsAPI(links)
+                Logger.shared.logDebug("Saved \(links.count) links on the BeamObject API",
+                                       category: .linkNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
+                Logger.shared.logDebug("Error when saving the links on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .linkNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
@@ -288,29 +282,22 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     private func saveOnNetwork(_ links: [Link], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
 
-        // swiftlint:disable:next date_init
-        let localTimer = Date()
-
         Logger.shared.logDebug("Will save links \(links) on the BeamObject API",
                                category: .linkNetwork)
 
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectsAPI(links) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved links \(links) on the BeamObject API",
-                                               category: .linkNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the link on the BeamObjects API with error: \(error.localizedDescription)",
-                                               category: .linkNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                // swiftlint:disable:next date_init
+                let localTimer = Date()
+                try await self?.saveOnBeamObjectsAPI(links)
+                Logger.shared.logDebug("Saved links \(links) on the BeamObject API",
+                                       category: .linkNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
+                Logger.shared.logDebug("Error when saving the link on the BeamObjects API with error: \(error.localizedDescription)",
+                                       category: .linkNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
@@ -318,28 +305,22 @@ public class BeamLinkDB: LinkManager, BeamObjectManagerDelegate {
     private func saveOnNetwork(_ link: Link, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else { return }
 
-        // swiftlint:disable:next date_init
-        let localTimer = Date()
-
         Logger.shared.logDebug("Will save link \(link.url) [\(link.id)] on the BeamObject API",
                                category: .linkNetwork)
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectAPI(link) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved link \(link.url) [\(link.id)] on the BeamObject API",
-                                               category: .linkNetwork,
-                                               localTimer: localTimer)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the link on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .linkNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                // swiftlint:disable:next date_init
+                let localTimer = Date()
+
+                try await self?.saveOnBeamObjectAPI(link)
+                Logger.shared.logDebug("Saved link \(link.url) [\(link.id)] on the BeamObject API",
+                                       category: .linkNetwork,
+                                       localTimer: localTimer)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .linkNetwork)
+                Logger.shared.logDebug("Error when saving the link on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .linkNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
