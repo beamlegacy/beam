@@ -10,11 +10,12 @@ import SwiftUI
 struct OtherPasswordModal: View {
     @Environment(\.presentationMode) var presentationMode
 
-    @State private var searchString: String = ""
-    @State private var isEditing: Bool = true
-    @State private var showingAlert: Bool = false
+    @State private var searchString = ""
+    @State private var isEditing = true
+    @State private var showingAlert = false
     @State private var selectedEntries = IndexSet()
-    @State private var showingEditPasswordSheetonDoubleTap: Bool = false
+    @State private var editedPassword: PasswordListViewModel.EditedPassword?
+    @State private var alertMessage: PasswordListViewModel.AlertMessage?
 
     @ObservedObject var viewModel: PasswordListViewModel
 
@@ -41,20 +42,24 @@ struct OtherPasswordModal: View {
             PasswordsTableView(passwordEntries: viewModel.filteredPasswordTableViewItems) { idx in
                 viewModel.updateSelection(idx)
             } onDoubleTap: { row in
-                viewModel.doubleTappedRow = row
-                showingEditPasswordSheetonDoubleTap = true
-            }   .frame(width: 528, height: 240, alignment: .center)
-                .border(BeamColor.Mercury.swiftUI, width: 1)
-                .background(BeamColor.Generic.background.swiftUI)
-                .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
-                    if let doubleTappedRow = viewModel.doubleTappedRow,
-                       let password = PasswordManager.shared.password(hostname: viewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: viewModel.filteredPasswordEntries[doubleTappedRow].username) {
-                        PasswordEditView(entry: viewModel.filteredPasswordEntries[doubleTappedRow],
-                                         password: password, editType: .update)
-                            .frame(width: 400, height: 179, alignment: .center)
-                    }
+                do {
+                    let entry = viewModel.filteredPasswordEntries[row]
+                    let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                    editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
+                } catch {
+                    alertMessage = .init(error: error)
                 }
-
+            }
+            .frame(width: 528, height: 240, alignment: .center)
+            .border(BeamColor.Mercury.swiftUI, width: 1)
+            .background(BeamColor.Generic.background.swiftUI)
+            .sheet(item: $editedPassword) {
+                PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
+                    .frame(width: 400, height: 179, alignment: .center)
+            }
+            .alert(item: $alertMessage) {
+                Alert(title: Text($0.message))
+            }
             Spacer()
             HStack {
                 OtherPasswordModalButton(title: "Remove", isDisabled: viewModel.disableRemoveButton) {
