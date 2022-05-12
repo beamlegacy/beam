@@ -431,7 +431,7 @@ class PasswordOverlayController: NSObject, WebPageRelated {
     }
 
     private func saveCredentialsAction(hostname: String, credentials: PasswordManagerCredentialsBuilder.StoredCredentials) -> PasswordSaveAction? {
-        if let storedPassword = passwordManager.password(hostname: hostname, username: credentials.username ?? "") {
+        if let storedPassword = try? passwordManager.password(hostname: hostname, username: credentials.username ?? "") {
             guard credentials.password != storedPassword else { return nil }
             return .update
         }
@@ -542,31 +542,33 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             dismissPasswordManager()
             return
         }
-        guard let password = passwordManager.password(hostname: entry.minimizedHost, username: entry.username) else {
-            Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
-            return
-        }
-        currentOverlay?.revertMenuToDefault()
-        credentialsBuilder.autofill(host: entry.minimizedHost, username: entry.username, password: password)
-        Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManagerInternal)
-        let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
-        let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
-            switch field.role {
-            case .currentUsername:
-                return WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor)
-            case .newUsername:
-                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor) : nil
-            case .currentPassword:
-                return WebFieldAutofill(id: field.id, value: password, background: backgroundColor)
-            case .newPassword:
-                return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: backgroundColor) : nil
-            default:
-                return nil
+        do {
+            let password = try passwordManager.password(hostname: entry.minimizedHost, username: entry.username)
+            currentOverlay?.revertMenuToDefault()
+            credentialsBuilder.autofill(host: entry.minimizedHost, username: entry.username, password: password)
+            Logger.shared.logDebug("Filling fields: \(String(describing: autocompleteGroup.relatedFields))", category: .passwordManagerInternal)
+            let backgroundColor = BeamColor.Autocomplete.clickedBackground.hexColor
+            let autofill = autocompleteGroup.relatedFields.compactMap { field -> WebFieldAutofill? in
+                switch field.role {
+                case .currentUsername:
+                    return WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor)
+                case .newUsername:
+                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: entry.username, background: backgroundColor) : nil
+                case .currentPassword:
+                    return WebFieldAutofill(id: field.id, value: password, background: backgroundColor)
+                case .newPassword:
+                    return autocompleteGroup.isAmbiguous ? WebFieldAutofill(id: field.id, value: password, background: backgroundColor) : nil
+                default:
+                    return nil
+                }
             }
-        }
-        self.fillWebTextFields(autofill)
-        DispatchQueue.main.async {
-            self.dismissPasswordManager()
+            self.fillWebTextFields(autofill)
+            DispatchQueue.main.async {
+                self.dismissPasswordManager()
+            }
+        } catch {
+            Logger.shared.logError("PasswordStore did not provide password for selected entry.", category: .passwordManager)
+            showAlert(error: error)
         }
     }
 
@@ -656,6 +658,27 @@ extension PasswordOverlayController: PasswordManagerMenuDelegate {
             self.page?.executeJS(script, objectName: JSObjectName, frameInfo: currentOverlay?.frameInfo, successLogCategory: .passwordManagerInternal)
         } catch {
             Logger.shared.logError("JSON encoding failure: \(error.localizedDescription))", category: .general)
+        }
+    }
+
+    private func showAlert(error: Error) {
+        DispatchQueue.main.async {
+            self.dismissPasswordManager()
+            if let error = error as? PasswordManager.Error {
+                let alert = NSAlert()
+                switch error {
+                case .databaseError(errorMsg: let message):
+                    alert.messageText = "Could not read password from database."
+                    alert.informativeText = message
+                case .decryptionError(errorMsg: let message):
+                    alert.messageText = "Could not decrypt password."
+                    alert.informativeText = message
+                }
+                alert.runModal()
+            } else {
+                let alert = NSAlert(error: error)
+                alert.runModal()
+            }
         }
     }
 }
