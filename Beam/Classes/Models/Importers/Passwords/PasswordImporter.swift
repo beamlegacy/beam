@@ -14,6 +14,11 @@ enum PasswordImporter {
         case headerNotFound
     }
 
+    struct PasswordExportResult {
+        var exportedItems: Int
+        var failedEntries: [PasswordManagerEntry]
+    }
+
     private struct Entry {
         var hostname: String
         var username: String
@@ -80,28 +85,27 @@ enum PasswordImporter {
         }
     }
 
-    static func exportPasswords(toCSV file: URL) throws {
+    static func exportPasswords(toCSV file: URL, completion: ((PasswordExportResult) -> Void)? = nil) throws {
         let serialQueue = DispatchQueue(label: "exportPasswordsQueue")
-        var allEntries: [PasswordManagerEntry] = []
-        var csvString = "\("URL"),\("Username"),\("Password")\n"
 
         serialQueue.async {
-            allEntries = PasswordManager.shared.fetchAll()
-        }
-        serialQueue.async {
+            let allEntries = PasswordManager.shared.fetchAll()
+            var csvString = "\("URL"),\("Username"),\("Password")\n"
+            var failedEntries: [PasswordManagerEntry] = []
             for entry in allEntries {
-                if let passwordStr = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
+                if let passwordStr = try? PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
                     let row = encodeToCSV(entry: entry, password: passwordStr)
                     csvString.append("\(row)\n")
+                } else {
+                    failedEntries.append(entry)
                 }
             }
-        }
-        serialQueue.async {
             do {
                 try csvString.write(to: file, atomically: true, encoding: .utf8)
             } catch {
                 Logger.shared.logError(error.localizedDescription, category: .general)
             }
+            completion?(PasswordExportResult(exportedItems: allEntries.count - failedEntries.count, failedEntries: failedEntries))
         }
     }
 

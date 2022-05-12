@@ -45,16 +45,16 @@ struct PasswordsPreferencesView_Previews: PreviewProvider {
 struct Passwords: View {
     @ObservedObject var passwordsViewModel: PasswordListViewModel
 
-    @State var searchString: String = ""
-    @State var isEditing: Bool = false
+    @State var searchString = ""
+    @State var isEditing = false
 
     @State private var selectedEntries = IndexSet()
-    @State private var passwordSelected: Bool = false
-    @State private var multipleSelection: Bool = false
+    @State private var passwordSelected = false
+    @State private var multipleSelection = false
 
-    @State private var showingAddPasswordSheet: Bool = false
-    @State private var showingEditPasswordSheet: Bool = false
-    @State private var showingEditPasswordSheetonDoubleTap: Bool = false
+    @State private var showingAddPasswordSheet = false
+    @State private var editedPassword: PasswordListViewModel.EditedPassword?
+    @State private var alertMessage: PasswordListViewModel.AlertMessage?
 
     @State private var autofillUsernamePasswords = PreferencesManager.autofillUsernamePasswords
 
@@ -87,20 +87,17 @@ struct Passwords: View {
                     PasswordsTableView(passwordEntries: passwordsViewModel.filteredPasswordTableViewItems) { idx in
                         passwordsViewModel.updateSelection(idx)
                     } onDoubleTap: { row in
-                        passwordsViewModel.doubleTappedRow = row
-                        showingEditPasswordSheetonDoubleTap = true
+                        let entry = passwordsViewModel.filteredPasswordEntries[row]
+                        do {
+                            let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                            editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
+                        } catch {
+                            alertMessage = .init(error: error)
+                        }
                     }
                     .frame(width: 682, height: 240, alignment: .center)
                     .border(BeamColor.Mercury.swiftUI, width: 1)
                     .background(BeamColor.Generic.background.swiftUI)
-                    .sheet(isPresented: $showingEditPasswordSheetonDoubleTap) {
-                        if let doubleTappedRow = passwordsViewModel.doubleTappedRow,
-                           let password = PasswordManager.shared.password(hostname: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].minimizedHost, username: passwordsViewModel.filteredPasswordEntries[doubleTappedRow].username) {
-                            PasswordEditView(entry: passwordsViewModel.filteredPasswordEntries[doubleTappedRow],
-                                             password: password, editType: .update)
-                                .frame(width: 400, height: 179, alignment: .center)
-                        }
-                    }
                     Spacer()
                 }
                 HStack {
@@ -128,15 +125,19 @@ struct Passwords: View {
                     .fixedSize()
 
                     Button {
-                        showingEditPasswordSheet = true
+                        if let entry = passwordsViewModel.selectedEntries.first {
+                            do {
+                                let password = try PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username)
+                                editedPassword = PasswordListViewModel.EditedPassword(entry: entry, password: password)
+                            } catch {
+                                alertMessage = .init(error: error)
+                            }
+                        }
                     } label: {
                         Text("Details…")
                     }.buttonStyle(.bordered)
-                        .sheet(isPresented: $showingEditPasswordSheet) {
-                            if let entry = passwordsViewModel.selectedEntries.first,
-                               let password = PasswordManager.shared.password(hostname: entry.minimizedHost, username: entry.username) {
-                                PasswordEditView(entry: entry, password: password, editType: .update)
-                            }
+                        .sheet(item: $editedPassword) {
+                            PasswordEditView(entry: $0.entry, password: $0.password, editType: .update)
                         }
                         .disabled(passwordsViewModel.selectedEntries.count == 0 || passwordsViewModel.selectedEntries.count > 1)
                     Spacer()
@@ -170,6 +171,9 @@ struct Passwords: View {
         }
         .onAppear {
             updateAvailableSources()
+        }
+        .alert(item: $alertMessage) {
+            Alert(title: Text($0.message))
         }
     }
 
@@ -240,7 +244,18 @@ struct Passwords: View {
                 return
             }
             do {
-                try PasswordImporter.exportPasswords(toCSV: url)
+                try PasswordImporter.exportPasswords(toCSV: url) { exportResult in
+                    DispatchQueue.main.async {
+                        let alert = NSAlert()
+                        alert.messageText = "Password export done."
+                        if exportResult.failedEntries.isEmpty {
+                            alert.informativeText = "\(exportResult.exportedItems) passwords were successfully exported."
+                        } else {
+                            alert.informativeText = "\(exportResult.exportedItems) passwords were successfully exported.\n\(exportResult.failedEntries.count) items could not be exported."
+                        }
+                        alert.runModal()
+                    }
+                }
             } catch {
                 Logger.shared.logError(String(describing: error), category: .general)
 

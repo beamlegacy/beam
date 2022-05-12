@@ -213,10 +213,10 @@ class PasswordsDBTests: XCTestCase {
         cleanupPasswordsAfterTest()
     }
 
-    func testGetPassword() {
+    func testGetPassword() throws {
         PasswordManager.shared.save(hostname: Self.host.minimizedHost!, username: Self.username, password: Self.password)
 
-        let password = PasswordManager.shared.password(hostname: Self.host.minimizedHost!, username: Self.username)
+        let password = try PasswordManager.shared.password(hostname: Self.host.minimizedHost!, username: Self.username)
         XCTAssertEqual(password, Self.password)
         cleanupPasswordsAfterTest()
     }
