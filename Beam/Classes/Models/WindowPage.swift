@@ -18,11 +18,13 @@ class WindowPage {
 
     let id: WindowPageID
     let title: String?
+    let displayTitle: String?
     var contentView: () -> AnyView
 
-    init(id: WindowPageID, title: String? = nil, @ViewBuilder contentView: @escaping () -> AnyView) {
+    init(id: WindowPageID, title: String? = nil, displayTitle: String? = nil, @ViewBuilder contentView: @escaping () -> AnyView) {
         self.id = id
         self.title = title
+        self.displayTitle = displayTitle
         self.contentView = contentView
     }
 
@@ -43,13 +45,13 @@ enum WindowPageID: String {
 
 extension WindowPage {
     static var allNotesWindowPage: WindowPage {
-        return WindowPage(id: .allNotes) {
+        return WindowPage(id: .allNotes, title: "All Notes") {
             AnyView(AllNotesPageContentView())
         }
     }
 
     static var shortcutsWindowPage: WindowPage {
-        return WindowPage(id: .shortcuts) {
+        return WindowPage(id: .shortcuts, title: "Shortcuts") {
             AnyView(DiscoverShortcutsView())
         }
     }
