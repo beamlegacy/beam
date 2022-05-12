@@ -1,0 +1,21 @@
+<html>
+
+<head>
+<title>Sign Up</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Create an account</h1>
+<form action="/view" method="POST">
+<div>Phone: <input type="tel" autocomplete="off" name="phone" id="phone-number"></input></div>
+<div>Email: <input type="email" autocomplete="email" name="email" id="email"></input></div>
+<div>Confirm Email: <input type="email" autocomplete="off" name="email_confirmation" id="email_confirmation" field="email_confirmation"></input></div>
+<div>Birthdate: <input type="tel" autocomplete="off" id="birthdate"></input></div>
+<div>Password: <input type="password" autocomplete="new-password" name="password" id="password" field="password"></input></div>
+
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>
