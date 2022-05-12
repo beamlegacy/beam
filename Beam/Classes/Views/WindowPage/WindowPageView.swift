@@ -12,9 +12,9 @@ struct WindowPageView: View {
 
     var body: some View {
         VStack(spacing: BeamSpacing._400) {
-            if let title = page.title {
+            if let displayTitle = page.displayTitle {
                 HStack {
-                    Text(title)
+                    Text(displayTitle)
                         .font(BeamFont.semibold(size: 26).swiftUI)
                     Spacer()
                 }
@@ -28,7 +28,7 @@ struct WindowPageView: View {
 
 struct WindowPageView_Previews: PreviewProvider {
     static var previews: some View {
-        WindowPageView(page: WindowPage(id: .allNotes, title: "Preview Page") {
+        WindowPageView(page: WindowPage(id: .allNotes, displayTitle: "Preview Page") {
             AnyView(Rectangle())
         })
     }
