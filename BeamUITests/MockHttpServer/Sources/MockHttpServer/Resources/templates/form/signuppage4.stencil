@@ -1,0 +1,22 @@
+<html>
+
+<head>
+<title>Sign Up</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Create an account</h1>
+<form action="/view" method="POST">
+<div>First Name: <input type="text" autocomplete="given-name" name="subscriptionFirstname" id="subscriptionFirstname"></input></div>
+<div>Last Name: <input type="text" autocomplete="family-name" name="subscriptionName" id="subscriptionName"></input></div>
+<div>Birthdate: <input type="text" autocomplete="date" id="subscriptionBirthdate"></input></div>
+<div>Email: <input type="email" autocomplete="email" name="subscriptionEmail" id="subscriptionEmail"></input></div>
+<div>Password: <input type="password" autocomplete="new-password" name="subscriptionPassword" id="subscriptionPassword"></input></div>
+<div>Confirm Password: <input type="password" autocomplete="new-password" name="subscriptionPasswordConfirmation" id="subscriptionPasswordConfirmation"></input></div>
+
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>
