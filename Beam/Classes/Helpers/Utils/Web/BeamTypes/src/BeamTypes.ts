@@ -551,6 +551,13 @@ export class FrameInfo {
   /**
    */
   bounds: BeamRect
+
+  scrollSize?: BeamFrameScrollSizing
+}
+
+export interface BeamFrameScrollSizing {
+  width: number
+  height: number
 }
 
 export enum BeamLogLevel {

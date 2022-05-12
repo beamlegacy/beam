@@ -43,8 +43,8 @@ class BrowsingTreeScorer: NSObject, WebPageRelated, BrowsingScorer {
     func updateScrollingScore(_ frame: WebFrames.FrameInfo) {
         if frame.width > 0, frame.height > 0 {
 
-            let currentScrollRatioX = frame.scrollX.isNaN ? 0 : Float(frame.scrollX / frame.width)
-            let currentScrollRatioY = frame.scrollY.isNaN ? 0 : Float(frame.scrollY / frame.height)
+            let currentScrollRatioX = frame.scrollWidth.isNaN ? 0 : Float(frame.scrollWidth / frame.width)
+            let currentScrollRatioY = frame.scrollHeight.isNaN ? 0 : Float(frame.scrollHeight / frame.height)
             let currentArea = Float(frame.width * frame.height)
 
             currentScore.scrollRatioX = max(currentScrollRatioX, currentScore.scrollRatioX)

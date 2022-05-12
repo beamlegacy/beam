@@ -156,8 +156,10 @@ class UrlScoresCollectionTest: XCTestCase {
             parentHref: "https://example.com",
             x: 0,
             y: 0,
-            scrollX: 2,
-            scrollY: 5,
+            scrollX: 0,
+            scrollY: 0,
+            scrollWidth: 2,
+            scrollHeight: 5,
             width: 10,
             height: 10
         )
@@ -191,8 +193,10 @@ class UrlScoresCollectionTest: XCTestCase {
             parentHref: "https://example.com",
             x: 0,
             y: 0,
-            scrollX: 8,
-            scrollY: 4,
+            scrollX: 0,
+            scrollY: 0,
+            scrollWidth: 8,
+            scrollHeight: 4,
             width: 20,
             height: 20
         )
@@ -225,8 +229,10 @@ class UrlScoresCollectionTest: XCTestCase {
             parentHref: "https://example.com",
             x: 0,
             y: 0,
-            scrollX: CGFloat.nan,
-            scrollY: CGFloat.nan,
+            scrollX: 0,
+            scrollY: 0,
+            scrollWidth: CGFloat.nan,
+            scrollHeight: CGFloat.nan,
             width: 20,
             height: 20
         )
