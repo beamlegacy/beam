@@ -3,20 +3,12 @@ import Combine
 import BeamCore
 import CryptoKit
 
-enum PasswordManagerError: Error, Equatable {
-    case localPasswordNotFound
-}
-
-extension PasswordManagerError: LocalizedError {
-    public var errorDescription: String? {
-        switch self {
-        case .localPasswordNotFound:
-            return "local Password not found"
-        }
-    }
-}
-
 class PasswordManager {
+    enum Error: Swift.Error {
+        case databaseError(errorMsg: String)
+        case decryptionError(errorMsg: String)
+    }
+
     static let shared = PasswordManager()
     static var passwordsDBPath: String { BeamData.dataFolder(fileName: "passwords.db") }
 
@@ -94,18 +86,22 @@ class PasswordManager {
         }
     }
 
-    func password(hostname: String, username: String) -> String? {
+    func password(hostname: String, username: String) throws -> String {
         do {
-            let password = try passwordsDB.password(hostname: hostname, username: username)
+            guard let password = try passwordsDB.password(hostname: hostname, username: username) else {
+                throw PasswordDBError.cantReadDB(errorMsg: "Database returned no entry")
+            }
             return password
         } catch PasswordDBError.cantDecryptPassword(let errorMsg) {
             Logger.shared.logError("Error while decrypting password for \(hostname) - \(username): \(errorMsg)", category: .encryption)
+            throw Error.decryptionError(errorMsg: errorMsg)
         } catch PasswordDBError.cantReadDB(let errorMsg) {
             Logger.shared.logError("Error while reading database for \(hostname) - \(username): \(errorMsg)", category: .passwordsDB)
+            throw Error.databaseError(errorMsg: errorMsg)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
+            throw Error.databaseError(errorMsg: error.localizedDescription)
         }
-        return nil
     }
 
     @discardableResult
@@ -114,7 +110,7 @@ class PasswordManager {
               username: String,
               password: String,
               uuid: UUID? = nil,
-              _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) -> PasswordRecord? {
+              _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) -> PasswordRecord? {
         do {
             let previousHostname: String
             let previousUsername: String
@@ -161,7 +157,7 @@ class PasswordManager {
         return []
     }
 
-    func markDeleted(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func markDeleted(hostname: String, for username: String, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
         do {
             let passwordRecord = try passwordsDB.markDeleted(hostname: hostname, username: username)
             changeSubject.send()
@@ -179,7 +175,7 @@ class PasswordManager {
         networkCompletion?(.success(false))
     }
 
-    func markAllDeleted(_ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func markAllDeleted(_ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
         do {
             let passwordsRecord = try passwordsDB.markAllDeleted()
             changeSubject.send()
@@ -197,7 +193,7 @@ class PasswordManager {
         networkCompletion?(.success(false))
     }
 
-    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) {
+    func deleteAll(includedRemote: Bool, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) {
         do {
             try passwordsDB.deleteAll()
             changeSubject.send()
@@ -255,7 +251,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
         try self.passwordsDB.allRecords(updatedSince)
     }
 
-    func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) throws {
         let encryptedsPasswords = passwords.map { password in
             reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
         }
@@ -274,7 +270,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
         }
     }
 
-    private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+    private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) throws {
         let encryptedPassword = reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
         Task.detached(priority: .userInitiated) { [weak self] in
             do {

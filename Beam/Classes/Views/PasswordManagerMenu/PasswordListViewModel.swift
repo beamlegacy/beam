@@ -10,6 +10,30 @@ import Combine
 import SwiftUI
 
 final class PasswordListViewModel: ObservableObject {
+    struct EditedPassword: Identifiable {
+        var entry: PasswordManagerEntry
+        var password: String
+        var id: String { entry.id }
+    }
+
+    struct AlertMessage: Identifiable {
+        var message: String
+        var id: String { message }
+
+        init(error: Error) {
+            if let error = error as? PasswordManager.Error {
+                switch error {
+                case .databaseError:
+                    message = "Could not read password from database."
+                case .decryptionError:
+                    message = "Could not decrypt password."
+                }
+            } else {
+                message = error.localizedDescription
+            }
+        }
+    }
+
     private var passwordManager: PasswordManager
     private var allPasswordEntries: [PasswordManagerEntry] = []
     private var allPasswordTableViewItems: [PasswordTableViewItem] = []
@@ -21,8 +45,6 @@ final class PasswordListViewModel: ObservableObject {
 
     @Published var disableFillButton = true
     @Published var disableRemoveButton = true
-
-    var doubleTappedRow: Int?
 
     var searchString = "" {
         didSet {
