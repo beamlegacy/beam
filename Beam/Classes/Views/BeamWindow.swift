@@ -95,6 +95,9 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         ])
 
         registerForDraggedTypes([.fileURL])
+
+        // Adding the window item to the app's windowsMenu
+        NSApp.addWindowsItem(self, title: "Beam", filename: false)
     }
 
     deinit {
@@ -135,7 +138,11 @@ class BeamWindow: NSWindow, NSDraggingDestination {
             }
             return window === self
         }
+
         super.close()
+
+        // Closing the window so removing its associated window item
+        NSApp.removeWindowsItem(self)
     }
 
     override func restoreState(with coder: NSCoder) {

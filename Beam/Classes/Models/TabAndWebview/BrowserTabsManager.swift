@@ -105,6 +105,9 @@ class BrowserTabsManager: ObservableObject {
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
             self.autoSave()
         }.store(in: &currentTabScope)
+        currentTab?.$title.receive(on: DispatchQueue.main).sink { [unowned self] _ in
+            self.state?.updateWindowTitle()
+        }.store(in: &currentTabScope)
     }
 
     private func updateClusteringOpenPages() {
