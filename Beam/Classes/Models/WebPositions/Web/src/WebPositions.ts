@@ -5,7 +5,8 @@ import {
   BeamNode,
   BeamResizeInfo,
   BeamWindow,
-  FrameInfo
+  FrameInfo,
+  BeamFrameScrollSizing
 } from "@beam/native-beamtypes"
 import { BeamLogger } from "@beam/native-utils"
 import debounce from "debounce"
@@ -142,20 +143,45 @@ export class WebPositions<UI extends WebPositionsUI> {
     }
 
     if (includeMainFrame) {
+      const scrollSize = this.getMainFrameScrollSizing()
       framesInfo.push({
         href: this.win.location.href,
         bounds: {
           x: 0,
           y: 0,
           width: this.win.innerWidth,
-          height: this.win.innerHeight
-        }
+          height: this.win.innerHeight,
+        },
+        scrollSize
       })
     }
     if (!isDeepEqual(framesInfo, this.framesInfo)) {
       this.framesInfo = framesInfo
       this.ui.setFramesInfo(framesInfo)
     }
+  }
+
+  /**
+   * Return maximum X and Y scroll distances of the Main Window Frame
+   *
+   * @return {*}  {BeamFrameScrollSizing}
+   * @memberof WebPositions
+   */
+  getMainFrameScrollSizing(): BeamFrameScrollSizing {
+    const doc = this.win.document
+    const body = doc.body
+    const documentEl = doc.documentElement
+    const width = Math.max(
+                body.scrollWidth, documentEl.scrollWidth,
+                body.offsetWidth, documentEl.offsetWidth,
+                body.clientWidth, documentEl.clientWidth
+      )
+    const height = Math.max(
+                body.scrollHeight, documentEl.scrollHeight,
+                body.offsetHeight, documentEl.offsetHeight,
+                body.clientHeight, documentEl.clientHeight
+    )
+    return { width, height }
   }
 
   onScroll(_ev?): void {
