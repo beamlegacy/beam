@@ -17,6 +17,18 @@
     {
       "skippedTests" : [
         "AdvancedPasswordAutofillTests",
+        "AdvancedSignInPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination1()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination2()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination3()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination4()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination5()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination6()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination7()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination8()",
+        "AdvancedSignInPasswordAutofillTests\/testSignInPageAuthCombination9()",
+        "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination2()",
+        "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination3()",
         "AllCardsDeleteTests",
         "AllCardsViewTests",
         "BaseTest",

@@ -1,5 +1,5 @@
 //
-//  AdvancedPasswordAutofillTests.swift
+//  AdvancedSignInPasswordAutofillTests.swift
 //  BeamUITests
 //
 //  Created by Frank Lefebvre on 11/04/2022.
@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class AdvancedPasswordAutofillTests: BaseTest {
+class AdvancedSignInPasswordAutofillTests: BaseTest {
 
     let uiMenu = UITestsMenuBar()
     let mockPage = MockHTTPWebPages()

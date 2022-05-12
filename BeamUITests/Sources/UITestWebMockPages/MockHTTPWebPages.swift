@@ -18,6 +18,10 @@ class MockHTTPWebPages: BaseView {
     func getPasswordFieldElement(title: String, inView viewAccessibility: String = "Sign In") -> XCUIElement {
         return app.windows.webViews[viewAccessibility].groups.containing(.staticText, identifier:title).children(matching: .secureTextField).element
     }
+    
+    func getPasswordElementWithValue(title: String, inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].groups.containing(.staticText, identifier:title).children(matching: .textField).element
+    }
 
     func getConfirmPasswordFieldElement() -> XCUIElement {
         return app.windows.webViews["Sign Up"].groups.containing(.staticText, identifier:"Confirm Password: ").children(matching: .secureTextField).element
@@ -39,6 +43,14 @@ class MockHTTPWebPages: BaseView {
         return app.windows.webViews[viewAccessibility].staticTexts["Next"]
     }
 
+    func getDropdownFieldElement(title: String, inView viewAccessibility: String = "Sign In") -> XCUIElement {
+        return app.windows.webViews[viewAccessibility].groups.containing(.staticText, identifier:title).children(matching: .popUpButton).element
+    }
+    
+    func setDropdownFieldElement(value: String, inView viewAccessibility: String = "Sign In") -> Void {
+        app.windows.menuItems[value].click()
+    }
+    
     func getResultValue(label: String) -> String? {
         let staticTexts = app.windows.webViews["Mock Form Server"].groups.containing(.staticText, identifier: label).children(matching: .staticText)
         guard staticTexts.count > 2 else { return nil }
