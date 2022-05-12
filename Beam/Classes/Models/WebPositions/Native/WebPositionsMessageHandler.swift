@@ -90,14 +90,18 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
         for jsFrameInfo in jsFramesInfo {
             let jsFrameInfo = jsFrameInfo as AnyObject
             let bounds = jsFrameInfo["bounds"] as AnyObject
+            let jsScrollSize = jsFrameInfo["scrollSize"] as AnyObject
             if let frameHref = jsFrameInfo["href"] as? String {
                 let rectArea = jsToRect(jsArea: bounds)
+                let size = jsToScrollSizing(jsSize: jsScrollSize)
 
                 let frame = WebFrames.FrameInfo(
                     href: frameHref,
                     parentHref: href,
                     x: rectArea.minX,
                     y: rectArea.minY,
+                    scrollWidth: size.width,
+                    scrollHeight: size.height,
                     width: rectArea.width,
                     height: rectArea.height,
                     isMain: isMain && frameHref == href
@@ -108,6 +112,14 @@ class WebPositionsMessageHandler: SimpleBeamMessageHandler {
         }
 
         frames.setFrames(framesInfo, isMain: isMain)
+    }
+
+    private func jsToScrollSizing(jsSize: AnyObject) -> NSSize {
+        guard let scrollWidth = jsSize["width"] as? CGFloat,
+              let scrollHeight = jsSize["height"] as? CGFloat else {
+            return .zero
+        }
+        return NSSize(width: scrollWidth, height: scrollHeight)
     }
 
     /**
