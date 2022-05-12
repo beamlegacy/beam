@@ -284,43 +284,31 @@ extension GRDBNoteFrecencyStorage: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ frecencies: [FrecencyNoteRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectsAPI(frecencies) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved note frecencies on the BeamObject API",
-                                               category: .frecencyNetwork)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving note frecencies on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .frecencyNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectsAPI(frecencies)
+                Logger.shared.logDebug("Saved note frecencies on the BeamObject API",
+                                       category: .frecencyNetwork)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .frecencyNetwork)
+                Logger.shared.logDebug("Error when saving note frecencies on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .frecencyNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
 
     private func saveOnNetwork(_ frecency: FrecencyNoteRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectAPI(frecency) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved note frecency on the BeamObject API",
-                                               category: .frecencyNetwork)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving note frecency on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .frecencyNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectAPI(frecency)
+                Logger.shared.logDebug("Saved note frecency on the BeamObject API",
+                                       category: .frecencyNetwork)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .frecencyNetwork)
+                Logger.shared.logDebug("Error when saving note frecency on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .frecencyNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
