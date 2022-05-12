@@ -1,0 +1,47 @@
+<html>
+
+<head>
+<title>Sign Up</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Create an account</h1>
+<form action="/view" method="POST">
+<div>First Name: <input type="text" autocomplete="given-name" name="firstName" id="usernamereg-firstName"></input></div>
+<div>Last Name: <input type="text" autocomplete="family-name" name="lastName" id="usernamereg-lastName"></input></div>
+
+<div>Email: <input type="email" autocomplete="email" name="email" id="username"></input></div>
+<div>Password: <input type="password" autocomplete="new-password" name="password" id="password"></input></div>
+
+<div>Phone: <input type="tel" name="phone" id="usernamereg-phone"></input></div>
+<div>Gender: <input type="text" name="freeformGender" id="usernamereg-freeformGender"></input></div>
+
+<div id="usernamereg-birthDate" class="pure-u-1-2 reg-month puree-dropdown dropdown">Month: 
+    <select name="mm" id="usernamereg-month" aria-required="true" data-rapid-tracking="true" data-ylk="elm:select;elmt:dob-month;slk:dob-month;">
+    <option value="" selected="" disabled="">Birth&nbsp;Month</option>
+    <option value="1">January</option>
+    <option value="2">February</option>
+    <option value="3">March</option>
+    <option value="4">April</option>
+    <option value="5">May</option>
+    <option value="6">June</option>
+    <option value="7">July</option>
+    <option value="8">August</option>
+    <option value="9">September</option>
+    <option value="10">October</option>
+    <option value="11">November</option>
+    <option value="12">December</option>
+    </select>
+    <div class="arrow"></div>
+</div>
+<div>Day: <input type="tel" pattern="[0-9-() ]*" id="usernamereg-day" name="dd" value="" role="textbox" placeholder="Day" aria-label="Birthday" minlength="1" maxlength="2">
+</div>
+<div>Year: <input type="tel" pattern="[0-9-() ]*" id="usernamereg-year" name="yyyy" value="" role="textbox" placeholder="Year" aria-label="Birthday" minlength="1" maxlength="4" >
+</div>
+
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>

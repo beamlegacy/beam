@@ -26,6 +26,8 @@
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination6()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination7()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination8()",
+        "AdvancedSignInPasswordAutofillTests",
+        "AdvancedSignUpPasswordAutofillTests",
         "AllCardsDeleteTests",
         "AllCardsViewTests",
         "BaseTest",
