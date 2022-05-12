@@ -256,48 +256,36 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
-        var encryptedsPasswords: [PasswordRecord] = []
-        for password in passwords {
-            encryptedsPasswords.append(reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey()))
+        let encryptedsPasswords = passwords.map { password in
+            reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
         }
-        Self.backgroundQueue.async { [weak self] in
+
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectsAPI(encryptedsPasswords) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved passwords on the BeamObject API",
-                                               category: .passwordNetwork)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the passwords on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .passwordNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectsAPI(encryptedsPasswords)
+                Logger.shared.logDebug("Saved passwords on the BeamObject API",
+                                       category: .passwordNetwork)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .passwordNetwork)
+                Logger.shared.logDebug("Error when saving the passwords on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .passwordNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
 
     private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
         let encryptedPassword = reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
-        Self.backgroundQueue.async { [weak self] in
+        Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try self?.saveOnBeamObjectAPI(encryptedPassword) { result in
-                    switch result {
-                    case .success:
-                        Logger.shared.logDebug("Saved password on the BeamObject API",
-                                               category: .passwordNetwork)
-                        networkCompletion?(.success(true))
-                    case .failure(let error):
-                        Logger.shared.logDebug("Error when saving the password on the BeamObject API with error: \(error.localizedDescription)",
-                                               category: .passwordNetwork)
-                        networkCompletion?(.failure(error))
-                    }
-                }
+                try await self?.saveOnBeamObjectAPI(encryptedPassword)
+                Logger.shared.logDebug("Saved password on the BeamObject API",
+                                       category: .passwordNetwork)
+                networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logError(error.localizedDescription, category: .passwordNetwork)
+                Logger.shared.logDebug("Error when saving the password on the BeamObject API with error: \(error.localizedDescription)",
+                                       category: .passwordNetwork)
+                networkCompletion?(.failure(error))
             }
         }
     }
