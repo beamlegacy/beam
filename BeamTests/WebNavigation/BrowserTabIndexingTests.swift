@@ -101,11 +101,12 @@ class BrowserTabIndexingTests: XCTestCase {
         if initialURLShouldBeAlias {
             // the redirection is stored as an alias of the destination
             XCTAssertEqual(resultLinkForInitialURL?.destination, resultLinkForDestinationURL?.id)
+            XCTAssertEqual(resultLinkForInitialURL?.title, destinationTitle)
         } else {
             // the redirection is NOT stored as an alias of the destination
             XCTAssertNil(resultLinkForInitialURL?.destination)
+            XCTAssertNotEqual(resultLinkForInitialURL?.title, destinationTitle)
         }
-        XCTAssertEqual(resultLinkForInitialURL?.title, destinationTitle)
 
         var currentNode = tab.browsingTree.root!
         if expectedNumberOfIndexingCalls == 2 {
