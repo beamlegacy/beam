@@ -213,7 +213,7 @@ extension BrowserTab: WebPage {
     func addTextToClusteringManager(_ text: String, url: URL) {
         let clusteringManager = state?.data.clusteringManager
         let id = browsingTree.current.link
-        clusteringManager?.addPage(id: id, parentId: nil, newContent: text)
+        clusteringManager?.addPage(id: id, parentId: nil, value: nil, newContent: text)
     }
 
     // MARK: Mouse Interactions
