@@ -144,7 +144,8 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         }
 
         // Dismiss group when we won't we creating or updating any ShootGroup
-        guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil else {
+        let hasContent = !target.html.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !text.isEmpty
+        guard (isAltKeyDown || activeShootGroup != nil), activePointGroup != nil, hasContent else {
             dismissShootGroup(id: groupId, href: href)
             return
         }
@@ -292,13 +293,18 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
     func addShootToNote(targetNote: BeamNote, withNote noteText: String? = nil, group: ShootGroup, withSourceBullet: Bool = true, completion: @escaping () -> Void) {
         guard let page = self.page, let sourceUrl = page.url else {
             Logger.shared.logError("Expected webpage to be defined when adding shoot to note", category: .pointAndShoot)
-            return
+            return completion()
         }
 
         // Make group mutable
         var shootGroup = group
         // Convert html to BeamText
         let html = shootGroup.html()
+        let hasContent = !html.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || !shootGroup.text.isEmpty
+        guard hasContent || shootGroup.fullPageCollect else {
+            Logger.shared.logError("Expected either html or text content to be defined when adding shoot to note", category: .pointAndShoot)
+            return completion()
+        }
         let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, self.page?.downloadManager, page.fileStorage)
         htmlNoteAdapter.convert(html: html) { [self] (beamElements: [BeamElement]) in
             // exit early when failing to collect correctly

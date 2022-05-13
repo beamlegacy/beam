@@ -159,6 +159,24 @@ test("test shootBounds payload", () => {
   expect(payload.html).toEqual("<p><b>MEAN</b> (<a href=\"/wiki/MongoDB\">MongoDB</a></p>")
 })
 
+test("exclude shootBounds payload with empty html and text", () => {
+  const { pnsNativeUI, native } = pointAndShootTestBed()
+
+  const block = new BeamHTMLElementMock("p")
+  block.offsetLeft = 11
+  block.offsetTop = 12
+  block.width = 100
+  block.height = 200
+  block.appendChild(new BeamTextMock(" "))
+
+  pnsNativeUI.shootBounds([{ id: "uuid", element: block }])
+  const events = native.events
+  expect(events.length).toEqual(2)
+  const event0 = events[0]
+  expect(event0.name).toEqual("sendMessage dismissShootGroup")
+  expect(event0.payload.shoot).toBeUndefined()
+})
+
 test("select event should return areas containing only x, y, width and height", () => {
   const { pnsNativeUI, native } = pointAndShootTestBed()
   // manually init selection with selection range

@@ -52,6 +52,37 @@ class PointAndShootPersistToJournalTest: PointAndShootTest {
         wait(for: [expectation], timeout: 10.0)
     }
 
+    func testShootToNoteEmptyHTML() throws {
+        guard let page = self.testPage else {
+            XCTFail("test page not found")
+            return
+        }
+        let paragraphTarget = PointAndShoot.Target(
+            id: UUID().uuidString,
+            rect: NSRect(x: 101, y: 102, width: 301, height: 302),
+            mouseLocation: NSPoint(x: 201, y: 202),
+            html: """
+
+            """,
+            animated: false
+        )
+
+        // Add shoot to note
+        let group2 = PointAndShoot.ShootGroup(
+            id: "id",
+            targets: [paragraphTarget],
+            text: "",
+            href: "https://welcometour.beamapp.co/capture/",
+            shapeCache: .init()
+        )
+        let expectation = XCTestExpectation(description: "point and shoot addShootToNote")
+        self.pns.addShootToNote(targetNote: page.activeNote, group: group2, completion: {
+            XCTAssertEqual(self.pns.collectedGroups.count, 0)
+            expectation.fulfill()
+        })
+        wait(for: [expectation], timeout: 10.0)
+    }
+
     // swiftlint:disable:next function_body_length
     func testTwoShootsToTwoDifferentCards() throws {
         guard let page = self.testPage else {
