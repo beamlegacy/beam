@@ -14,10 +14,8 @@ import Fakery
 
 protocol ClusteringManagerProtocol {
     func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?)
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?)
     func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?)
-}
-extension ClusteringManagerProtocol {
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo? = nil, newContent: String? = nil) {}
 }
 
 // swiftlint:disable:next type_body_length
@@ -265,8 +263,12 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         return (id, parentId)
     }
 
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?) {
+        addPage(id: id, parentId: parentId, value: value, newContent: nil)
+    }
+
     // swiftlint:disable:next cyclomatic_complexity function_body_length
-    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo? = nil, newContent: String? = nil) {
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) {
         var pageToAdd: Page?
         if let value = value {
             pageToAdd = Page(id: id, parentId: parentId, url: value.url, title: value.document.title, originalContent: value.cleanedTextContentForClustering)

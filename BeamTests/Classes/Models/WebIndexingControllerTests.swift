@@ -10,6 +10,8 @@ import XCTest
 
 private class FakeClusteringManager: ClusteringManagerProtocol {
     func getIdAndParent(tabToIndex: TabIndexingInfo) -> (UUID?, UUID?) { (nil, nil) }
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?) { }
+    func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) { }
 }
 
 private class FakeWebIndexControllerDelegate: WebIndexControllerDelegate {
