@@ -10,23 +10,18 @@ import Combine
 import SwiftUI
 import BeamCore
 
-class BeamHostingView<Content>: NSHostingView<Content> where Content: View {
-    required public init(rootView: Content) {
-        super.init(rootView: rootView)
-    }
-
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        assert(false)
-    }
-
-    public override var allowsVibrancy: Bool { false }
-}
-
 class BeamWindow: NSWindow, NSDraggingDestination {
     var state: BeamState
     var windowInfo: BeamWindowInfo = BeamWindowInfo()
     var data: BeamData
+
+    override var title: String {
+        didSet {
+            // Changing the title reset the standard window buttons
+            // https://linear.app/beamapp/issue/BE-4106/window-controls-change-their-position-when-going-to-the-web
+            self.setTrafficLightsLayout()
+        }
+    }
 
     // This is a hack to prevent a crash with swiftUI being dumb about the initialFirstResponder
     override var initialFirstResponder: NSView? {

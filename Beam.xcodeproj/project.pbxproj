@@ -1065,6 +1065,7 @@
 		A58768FD26F9D3F000E8CC93 /* BeamAnimation.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */; };
 		A587690426FA0E8200E8CC93 /* NoteHeaderPublishButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */; };
 		A58BD800266510390040A8C4 /* String+RegexTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58BD7FF266510390040A8C4 /* String+RegexTests.swift */; };
+		A58F0101282E58E000221DB0 /* BeamHostingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A58F0100282E58E000221DB0 /* BeamHostingView.swift */; };
 		A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */; };
 		A5919F6D268EA0A2009015C5 /* WebPageBaseImpl.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */; };
 		A5919F6F268EA499009015C5 /* EmbedNodeWebPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */; };
@@ -2868,6 +2869,7 @@
 		A58768FC26F9D3F000E8CC93 /* BeamAnimation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamAnimation.swift; sourceTree = "<group>"; };
 		A587690326FA0E8200E8CC93 /* NoteHeaderPublishButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteHeaderPublishButton.swift; sourceTree = "<group>"; };
 		A58BD7FF266510390040A8C4 /* String+RegexTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+RegexTests.swift"; sourceTree = "<group>"; };
+		A58F0100282E58E000221DB0 /* BeamHostingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamHostingView.swift; sourceTree = "<group>"; };
 		A5919F53268BE208009015C5 /* NoteMediaPlayingButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMediaPlayingButton.swift; sourceTree = "<group>"; };
 		A5919F6C268EA0A2009015C5 /* WebPageBaseImpl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPageBaseImpl.swift; sourceTree = "<group>"; };
 		A5919F6E268EA499009015C5 /* EmbedNodeWebPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedNodeWebPage.swift; sourceTree = "<group>"; };
@@ -4022,6 +4024,7 @@
 				370794C627D7AA0300D2768B /* PDFDocumentView */,
 				3312202D2809736D006A5EA1 /* Update */,
 				418171AE2581107C00317ED8 /* BeamWindow.swift */,
+				A58F0100282E58E000221DB0 /* BeamHostingView.swift */,
 				8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */,
 				52ECE01D272970260010E223 /* UserAlert.swift */,
 				370794BE27D7A21A00D2768B /* FloatingToolbar.swift */,
@@ -9025,6 +9028,7 @@
 				A5B532432703525D007FC8B8 /* MeetingModalView.swift in Sources */,
 				879CA71D281AE05C00D1C395 /* CreditCardListViewModel.swift in Sources */,
 				BAA679FFB80537CB6DE74025 /* BeamMessageHandler.swift in Sources */,
+				A58F0101282E58E000221DB0 /* BeamHostingView.swift in Sources */,
 				A5297F3A27AC3465006B3E1F /* SearchEngineAutocompleter.swift in Sources */,
 				87640215281FD70300BE4073 /* CreditCardEditView.swift in Sources */,
 				A0614EEC270B383000C38F82 /* GoogleEvent.swift in Sources */,
