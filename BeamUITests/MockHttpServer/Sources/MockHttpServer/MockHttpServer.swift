@@ -230,13 +230,18 @@ public class MockHttpServer {
 extension MockHttpServer {
 
     public enum RedirectionType: String, CaseIterable {
+        /// Performs a redirection with html meta tag
         case html
         case http301
         case http302
+        /// Performs a javascript history.pushState 200ms after page load
         case javascriptPush
-        case javascriptPushSlow // .javascriptPush redirect but the redirection happens 1s after page load
+        /// .javascriptPush redirect but the redirection happens 700ms after page load
+        case javascriptPushSlow
+        /// Performs a javascript history.replaceState on page load
         case javascriptReplace
-        case javascriptReplaceSlow // .javascriptReplace redirect but the redirection happens 1s after page load
+        /// .javascriptReplace redirect but the redirection happens 700mss after page load
+        case javascriptReplaceSlow
         case none
         case navigation
     }
@@ -336,6 +341,8 @@ extension MockHttpServer {
             }
             if type == .javascriptPushSlow || type == .javascriptReplaceSlow {
                 parameters.delay = "700"
+            } else if type == .javascriptPush {
+                parameters.delay = "200" //
             }
             renderStencil(request, response, "redirection/javascript_redirect", additionalParams: parameters)
             break
