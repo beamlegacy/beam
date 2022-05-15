@@ -65,4 +65,14 @@ extension PreferencesManager {
             PreferencesManager.filterChanged(enabled: newValue)
         }
     }
+
+    static var isCrossSiteTrackingEnabled: Bool {
+        get {
+            WKWebsiteDataStore.default()._resourceLoadStatisticsEnabled()
+        }
+        set {
+            WKWebsiteDataStore.nonPersistent()._setResourceLoadStatisticsEnabled(newValue)
+            WKWebsiteDataStore.default()._setResourceLoadStatisticsEnabled(newValue)
+        }
+    }
 }
