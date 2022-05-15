@@ -18,6 +18,15 @@ struct PrivacyPreferencesView: View {
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
             Preferences.Section {
+                Text("Website tracking:")
+                    .font(BeamFont.regular(size: 13).swiftUI)
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 250, alignment: .trailing)
+            } content: {
+                CrossSiteTrackingSection()
+            }
+
+            Preferences.Section {
                 Text("Ads:")
                     .font(BeamFont.regular(size: 13).swiftUI)
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -90,6 +99,21 @@ struct AdsSection: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onChange(of: isAdsFilterEnabled) { newValue in
                 PreferencesManager.isAdsFilterEnabled = newValue
+            }
+    }
+}
+
+struct CrossSiteTrackingSection: View {
+    @State private var isCrossSiteTrackingEnabled = PreferencesManager.isCrossSiteTrackingEnabled
+
+    var body: some View {
+        Toggle(isOn: $isCrossSiteTrackingEnabled) {
+            Text("Prevent cross-site tracking")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onChange(of: isCrossSiteTrackingEnabled) { newValue in
+                PreferencesManager.isCrossSiteTrackingEnabled = newValue
             }
     }
 }

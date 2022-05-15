@@ -26,6 +26,14 @@
 -(void)_setAutomaticallyAdjustsContentInsets:(BOOL)enabled;
 @end
 
+@interface WKWebsiteDataStore ()
+// Enable or disable Intelligent Tracking Prevention (ITP). When ITP is enabled resource load statistics
+// are collected and used to decide whether to allow or block third-party cookies and prevent user tracking.
+// An example of this is blocking `www.youtube.com` cookies on `youtube.com` urls (BE-3846)
+- (BOOL)_resourceLoadStatisticsEnabled;
+- (void)_setResourceLoadStatisticsEnabled:(BOOL)enabled;
+@end
+
 typedef NS_OPTIONS(NSUInteger, _WKCaptureDevices) {
     _WKCaptureDeviceMicrophone = 1 << 0,
     _WKCaptureDeviceCamera = 1 << 1,
