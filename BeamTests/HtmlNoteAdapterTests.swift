@@ -672,14 +672,55 @@ class HtmlNoteAdapterTests: XCTestCase {
                 expectation.fulfill()
             } else {
                 XCTFail("expected at least one element")
+                expectation.fulfill()
             }
         }
         wait(for: [expectation], timeout: 10.0)
     }
 
-    func testSVGHtml() {
+    func testPartialSVGHtml() {
+        let html = "<g class=\"style-scope yt-icon\">\n <path d=\"M12,3c3.31,0,6,2.69,6,6c0,3.83-4.25,9.36-6,11.47C9.82,17.86,6,12.54,6,9C6,5.69,8.69,3,12,3 M12,2C8.13,2,5,5.13,5,9 c0,5.25,7,13,7,13s7-7.75,7-13C19,5.13,15.87,2,12,2L12,2z M12,7c1.1,0,2,0.9,2,2s-0.9,2-2,2s-2-0.9-2-2S10.9,7,12,7 M12,6 c-1.66,0-3,1.34-3,3s1.34,3,3,3s3-1.34,3-3S13.66,6,12,6L12,6z\" class=\"style-scope yt-icon\"></path>\n</g>"
+        let htmlNoteAdapter = setupTestMocks("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 0, "expected one result, recieved \(results) instead")
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
+    func testSVGviewBoxHtml() {
         let html = """
-        <svg width="24" height="18" viewBox="0 0 24 18" xmlns="http://www.w3.org/2000/svg" class="sc-144c310-0 CFcff"><path d="M24 14.52c0 1.8-1.45 3.25-3.25 3.25-.57 0-2 0-5.94.03l-5.95.04A3.25 3.25 0 018 11.47a3.25 3.25 0 014-2.93 5.07 5.07 0 019.7 2.87c1.33.4 2.3 1.65 2.3 3.11zm-3.28-1.74a.75.75 0 01-.7-1.04 3.57 3.57 0 10-6.8-2.05c-.1.5-.67.76-1.11.5a1.72 1.72 0 00-.88-.24 1.75 1.75 0 00-1.72 2.03.75.75 0 01-.7.87 1.74 1.74 0 00.05 3.49l5.94-.04 5.95-.03a1.75 1.75 0 00.03-3.5h-.06zm-9.4-7.41a.75.75 0 11-.72 1.31 2.86 2.86 0 00-4.07 3.5.75.75 0 11-1.41.5 4.37 4.37 0 016.2-5.31zm-1.38-3a.75.75 0 11-1.5 0V.75a.75.75 0 011.5 0v1.62zM.75 9.94a.75.75 0 010-1.5h1.62a.75.75 0 110 1.5H.75zm1.94-6.19A.75.75 0 113.75 2.7L4.9 3.84a.75.75 0 01-1.07 1.05L2.7 3.75z" fill="currentColor"></path></svg>
+        <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;" class="style-scope yt-icon"><g class="style-scope yt-icon"><path d="M12.7,12l6.6,6.6l-0.7,0.7L12,12.7l-6.6,6.6l-0.7-0.7l6.6-6.6L4.6,5.4l0.7-0.7l6.6,6.6l6.6-6.6l0.7,0.7L12.7,12z" class="style-scope yt-icon"></path></g></svg>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 1, "expected one result, recieved \(results) instead")
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertTrue(firstEl.kind.isImage, "expected kind to be image, recieved \(firstEl.kind) instead")
+                if case let .image(uuid, origin, displayInfos) = firstEl.kind {
+                    XCTAssertNotNil(uuid)
+                    XCTAssertNotNil(origin)
+                    XCTAssertEqual(displayInfos, MediaDisplayInfos(height: 24, width: 24, displayRatio: nil))
+                }
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 1)
+            } else {
+                XCTFail("expected at least one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
+
+    func testSVGWidthHeightHtml() {
+        let html = """
+        <svg width="24" height="18" xmlns="http://www.w3.org/2000/svg" class="sc-144c310-0 CFcff"><path d="M24 14.52c0 1.8-1.45 3.25-3.25 3.25-.57 0-2 0-5.94.03l-5.95.04A3.25 3.25 0 018 11.47a3.25 3.25 0 014-2.93 5.07 5.07 0 019.7 2.87c1.33.4 2.3 1.65 2.3 3.11zm-3.28-1.74a.75.75 0 01-.7-1.04 3.57 3.57 0 10-6.8-2.05c-.1.5-.67.76-1.11.5a1.72 1.72 0 00-.88-.24 1.75 1.75 0 00-1.72 2.03.75.75 0 01-.7.87 1.74 1.74 0 00.05 3.49l5.94-.04 5.95-.03a1.75 1.75 0 00.03-3.5h-.06zm-9.4-7.41a.75.75 0 11-.72 1.31 2.86 2.86 0 00-4.07 3.5.75.75 0 11-1.41.5 4.37 4.37 0 016.2-5.31zm-1.38-3a.75.75 0 11-1.5 0V.75a.75.75 0 011.5 0v1.62zM.75 9.94a.75.75 0 010-1.5h1.62a.75.75 0 110 1.5H.75zm1.94-6.19A.75.75 0 113.75 2.7L4.9 3.84a.75.75 0 01-1.07 1.05L2.7 3.75z" fill="currentColor"></path></svg>
         """
         let htmlNoteAdapter = setupTestMocks("https://www.nos.nl")
         let expectation = XCTestExpectation(description: "convert html to BeamElements")
@@ -689,14 +730,62 @@ class HtmlNoteAdapterTests: XCTestCase {
                let testFileStorage = self.testFileStorage,
                let firstEl = results.first {
                 XCTAssertTrue(firstEl.kind.isImage, "expected kind to be image, recieved \(firstEl.kind) instead")
+                if case let .image(uuid, origin, displayInfos) = firstEl.kind {
+                    XCTAssertNotNil(uuid)
+                    XCTAssertNotNil(origin)
+                    XCTAssertEqual(displayInfos, MediaDisplayInfos(height: 18, width: 24, displayRatio: nil))
+                }
                 XCTAssertEqual(results.count, 1)
                 XCTAssertEqual(testDownloadManager.events.count, 0)
                 XCTAssertEqual(testFileStorage.events.count, 1)
-                expectation.fulfill()
             } else {
                 XCTFail("expected at least one element")
             }
+            expectation.fulfill()
         }
         wait(for: [expectation], timeout: 10.0)
     }
+
+    func testSVGWidthHeightPixelsHtml() {
+        let html = """
+        <svg width="24px" height="18px" xmlns="http://www.w3.org/2000/svg" class="sc-144c310-0 CFcff"><path d="M24 14.52c0 1.8-1.45 3.25-3.25 3.25-.57 0-2 0-5.94.03l-5.95.04A3.25 3.25 0 018 11.47a3.25 3.25 0 014-2.93 5.07 5.07 0 019.7 2.87c1.33.4 2.3 1.65 2.3 3.11zm-3.28-1.74a.75.75 0 01-.7-1.04 3.57 3.57 0 10-6.8-2.05c-.1.5-.67.76-1.11.5a1.72 1.72 0 00-.88-.24 1.75 1.75 0 00-1.72 2.03.75.75 0 01-.7.87 1.74 1.74 0 00.05 3.49l5.94-.04 5.95-.03a1.75 1.75 0 00.03-3.5h-.06zm-9.4-7.41a.75.75 0 11-.72 1.31 2.86 2.86 0 00-4.07 3.5.75.75 0 11-1.41.5 4.37 4.37 0 016.2-5.31zm-1.38-3a.75.75 0 11-1.5 0V.75a.75.75 0 011.5 0v1.62zM.75 9.94a.75.75 0 010-1.5h1.62a.75.75 0 110 1.5H.75zm1.94-6.19A.75.75 0 113.75 2.7L4.9 3.84a.75.75 0 01-1.07 1.05L2.7 3.75z" fill="currentColor"></path></svg>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://www.nos.nl")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 1, "expected one result, recieved \(results) instead")
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertTrue(firstEl.kind.isImage, "expected kind to be image, recieved \(firstEl.kind) instead")
+                if case let .image(uuid, origin, displayInfos) = firstEl.kind {
+                    XCTAssertNotNil(uuid)
+                    XCTAssertNotNil(origin)
+                    XCTAssertEqual(displayInfos, MediaDisplayInfos(height: 18, width: 24, displayRatio: nil))
+                }
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 1)
+            } else {
+                XCTFail("expected at least one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
+
+    func testSVGNoSizeHtml() {
+        let html = """
+        <svg preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 100%; height: 100%;" class="style-scope yt-icon"><g class="style-scope yt-icon"><path d="M12.7,12l6.6,6.6l-0.7,0.7L12,12.7l-6.6,6.6l-0.7-0.7l6.6-6.6L4.6,5.4l0.7-0.7l6.6,6.6l6.6-6.6l0.7,0.7L12.7,12z" class="style-scope yt-icon"></path></g></svg>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            XCTAssertEqual(results.count, 0, "expected zero results, recieved \(results) instead")
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
 }

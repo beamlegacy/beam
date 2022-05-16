@@ -181,15 +181,11 @@ class HtmlVisitor {
                 let fileName = UUID().uuidString
                 let mimeType = "image/svg+xml"
                 // Get size from svg element
-                var size: CGSize = .zero
-                if let widthStr = try? element.attr("width"),
-                   let width = Int(widthStr),
-                   let heightStr = try? element.attr("height"),
-                   let height = Int(heightStr) {
-                    size = CGSize(width: width, height: height)
-                }
 
-                if let svgData = try? element.html().asData,
+                if let size = getSVGSize(element),
+                   size.width != .zero,
+                   size.height != .zero,
+                   let svgData = try? element.html().asData,
                    let fileStorage = fileStorage,
                    let fileId = HtmlVisitor.storeImageData(svgData, mimeType, fileName, fileStorage) {
                     let imgElement = BeamElement()
