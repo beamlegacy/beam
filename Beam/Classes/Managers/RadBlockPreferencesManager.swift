@@ -48,7 +48,14 @@ enum SynchronizeInterval: String, CaseIterable {
 class RadBlockPreferencesManager {
     var activatedFiltersGroup: [String] = []
 
-    init() {}
+    init() {
+        if FilterManager.default.synchronizeAutomatically {
+            // We disable the automatic sync provided by RadBlock's timer because it used to cause crashes.
+            // Instead, we sync if needed when the app becomes active.
+            // see https://linear.app/beamapp/issue/BE-4065
+            FilterManager.default.synchronizeAutomatically = false
+        }
+    }
 
     // MARK: - Synchronization
 
@@ -66,14 +73,8 @@ class RadBlockPreferencesManager {
             SynchronizeInterval.from(radBlockInterval: FilterManager.State.shared.synchronizeInterval)
         }
         set {
-            FilterManager.default.synchronizeAutomatically = true
+            FilterManager.default.synchronizeAutomatically = false
             FilterManager.default.state.synchronizeInterval = newValue.radBlockInterval
-        }
-    }
-
-    func synchronizeNow() {
-        if !FilterManager.default.isSynchronizing {
-            ContentBlockingManager.shared.synchronize()
         }
     }
 
