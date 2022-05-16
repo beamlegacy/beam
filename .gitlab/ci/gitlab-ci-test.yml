@@ -43,6 +43,7 @@ xctests:
       - logs
       - scan_results
       - allure-report
+      - cobertura.xml
     reports:
       coverage_report:
         coverage_format: cobertura
@@ -88,9 +89,6 @@ UITestThread1:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -136,9 +134,6 @@ UITestThread2:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -184,9 +179,6 @@ UITestThread3:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -232,9 +224,6 @@ UITestThread4:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -280,9 +269,6 @@ UITestThread5:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -328,9 +314,6 @@ UITestThread6:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
@@ -376,9 +359,6 @@ UITestThread7:
       - allure-report
       - logs
     reports:
-      coverage_report:
-        coverage_format: cobertura
-        path: cobertura.xml
       junit: fastlane/test_output/tests.xml
   coverage: '/Test Coverage\: \d+(?:\.\d*)?\%/'
   rules:
