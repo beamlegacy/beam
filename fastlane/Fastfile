@@ -155,7 +155,30 @@ platform :mac do
         output_files: "tests.xml",
         use_system_scm: true,
         result_bundle: true,
+        skip_build: false,
         fail_build: true,
+        code_coverage: true,
+        derived_data_path: "derived_data",
+      )
+      slather(
+        build_directory: "derived_data",
+        binary_basename: "Beam",
+        scheme: "Beam",
+        workspace: "Beam.xcworkspace",
+        proj: "Beam.xcodeproj",
+        cobertura_xml: true,
+        ignore: ["Extern/*", "derived_data/SourcePackages/*"],
+        configuration: "Debug"
+      )
+      slather(
+        build_directory: "derived_data",
+        binary_basename: "Beam",
+        scheme: "Beam",
+        workspace: "Beam.xcworkspace",
+        proj: "Beam.xcodeproj",
+        simple_output: true,
+        ignore: ["Extern/*", "derived_data/SourcePackages/*"],
+        configuration: "Debug"
       )
     ensure
       generate_allure_report
