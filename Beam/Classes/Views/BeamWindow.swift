@@ -40,7 +40,7 @@ class BeamWindow: NSWindow, NSDraggingDestination {
     private var trafficLightLeftMargin: CGFloat = 20
 
     // swiftlint:disable:next function_body_length
-    init(contentRect: NSRect, data: BeamData, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
+    init(contentRect: NSRect, data: BeamData, title: String? = nil, isIncognito: Bool = false, minimumSize: CGSize? = nil) {
         self.data = data
         state = BeamState(incognito: isIncognito)
 
@@ -91,8 +91,8 @@ class BeamWindow: NSWindow, NSDraggingDestination {
 
         registerForDraggedTypes([.fileURL])
 
-        // Adding the window item to the app's windowsMenu
-        NSApp.addWindowsItem(self, title: "Beam", filename: false)
+        // Adding the window item to the app's windowsMenu with prefilled title if any
+        NSApp.addWindowsItem(self, title: title ?? "Beam", filename: false)
     }
 
     deinit {
