@@ -628,6 +628,8 @@
 		8AA6D91D27FAF9AB00F42FAB /* BrowserOpenModalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6D91C27FAF9AB00F42FAB /* BrowserOpenModalTests.swift */; };
 		8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA6D92327FB4E3400F42FAB /* UITestPageBrowserWindow.swift */; };
 		8AA9EEB72678ACF6009D6B31 /* WebFieldClassifierTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AA9EEB62678ACF6009D6B31 /* WebFieldClassifierTests.swift */; };
+		8AAC70A5282D7738005B630F /* SVGViewBox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AAC70A4282D7738005B630F /* SVGViewBox.swift */; };
+		8AAC70A7282D7755005B630F /* SVGViewBoxTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AAC70A6282D7755005B630F /* SVGViewBoxTests.swift */; };
 		8AB44AAC267CD3AB00D18B65 /* String+Slice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */; };
 		8AB7DFA526AAEDB30033C747 /* PointAndShootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB7DFA426AAEDB30033C747 /* PointAndShootView.swift */; };
 		8AB94F632769EFEF00F62241 /* HtmlVisitor+Helpers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8AB94F622769EFEF00F62241 /* HtmlVisitor+Helpers.swift */; };
@@ -2364,6 +2366,8 @@
 		8AA6D91C27FAF9AB00F42FAB /* BrowserOpenModalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserOpenModalTests.swift; sourceTree = "<group>"; };
 		8AA6D92327FB4E3400F42FAB /* UITestPageBrowserWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestPageBrowserWindow.swift; sourceTree = "<group>"; };
 		8AA9EEB62678ACF6009D6B31 /* WebFieldClassifierTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebFieldClassifierTests.swift; sourceTree = "<group>"; };
+		8AAC70A4282D7738005B630F /* SVGViewBox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGViewBox.swift; sourceTree = "<group>"; };
+		8AAC70A6282D7755005B630F /* SVGViewBoxTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SVGViewBoxTests.swift; sourceTree = "<group>"; };
 		8AB44AAB267CD3AB00D18B65 /* String+Slice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Slice.swift"; sourceTree = "<group>"; };
 		8AB7DFA426AAEDB30033C747 /* PointAndShootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PointAndShootView.swift; sourceTree = "<group>"; };
 		8AB94F622769EFEF00F62241 /* HtmlVisitor+Helpers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "HtmlVisitor+Helpers.swift"; sourceTree = "<group>"; };
@@ -5654,6 +5658,7 @@
 				418171752581107C00317ED8 /* HtmlNoteAdapter.swift */,
 				8AA2431726E63C0D002A553A /* HtmlVisitor.swift */,
 				8AB94F622769EFEF00F62241 /* HtmlVisitor+Helpers.swift */,
+				8AAC70A4282D7738005B630F /* SVGViewBox.swift */,
 			);
 			path = HtmlConverter;
 			sourceTree = "<group>";
@@ -6331,6 +6336,7 @@
 				96E1356E2546F03900133A24 /* TextNodeTests.swift */,
 				8AD2632226F485190074D673 /* HtmlVisitorTests.swift */,
 				967B2684255465C5003F40E3 /* HtmlNoteAdapterTests.swift */,
+				8AAC70A6282D7755005B630F /* SVGViewBoxTests.swift */,
 				8AD2632926F489160074D673 /* HtmlNoteAdapterPerformanceTests.swift */,
 				8AD2632B26F48C9A0074D673 /* HtmlNoteAdapterLargeDOMPerformanceTests.swift */,
 				96E4CEF8258D7E8200D6DE22 /* BeamTextTests.swift */,
@@ -8983,6 +8989,7 @@
 				A52FCB632666514000BCD38A /* TextLinesDecorationLayer.swift in Sources */,
 				8AEF14C527F1D17400A27C1B /* MediaPlayerController.swift in Sources */,
 				A062DD33275FC5EE0033DB6E /* ContactsManager.swift in Sources */,
+				8AAC70A5282D7738005B630F /* SVGViewBox.swift in Sources */,
 				BAA67C4B9FEFA984D58B802F /* PointAndShootMessageHandler.swift in Sources */,
 				BAA677E962485A7EDFAF72AC /* PointAndShoot.swift in Sources */,
 				37B85B8427A2C81B003871F9 /* DownloadItemDelegate.swift in Sources */,
@@ -9149,6 +9156,7 @@
 				A0689E7125DE6B8700B19CBB /* CommandsTextTests.swift in Sources */,
 				A5153EE7260DDC9D00C84902 /* RecentsManagerTests.swift in Sources */,
 				4E9F4C8326F8C75D00420DED /* ClusteringManagerTests.swift in Sources */,
+				8AAC70A7282D7755005B630F /* SVGViewBoxTests.swift in Sources */,
 				524CF6D725F28F97007312F0 /* EncryptionManagerTests.swift in Sources */,
 				8714A3F428103BCC007DDF4F /* MockAutocompleteStores.swift in Sources */,
 				8A7F948326A8576100270A74 /* PointAndShootHandleMouseClickTest.swift in Sources */,
