@@ -454,15 +454,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @discardableResult
-    func createWindow(withTabs: [BrowserTab], at location: CGPoint) -> BeamWindow? {
-        guard let window = AppDelegate.main.createWindow(frame: nil, becomeMain: false) else {
+    func createWindow(withTabs tabs: [BrowserTab], at location: CGPoint) -> BeamWindow? {
+        guard let window = AppDelegate.main.createWindow(frame: nil, title: tabs.first?.title, becomeMain: false) else {
             return nil
         }
         let frameOrigin = CGPoint(x: max(0, location.x - (window.frame.width / 2)),
                                   y: max(0, location.y - window.frame.height + (Toolbar.height / 2)))
         window.setFrameOrigin(frameOrigin)
 
-        withTabs.forEach { tab in
+        tabs.forEach { tab in
             window.state.browserTabsManager.addNewTabAndGroup(tab, setCurrent: true)
         }
         window.state.mode = .web
@@ -471,17 +471,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     @discardableResult
-    func createWindow(frame: NSRect?, restoringTabs: Bool = false, isIncognito: Bool = false, becomeMain: Bool = true) -> BeamWindow? {
+    func createWindow(frame: NSRect?, title: String? = nil, restoringTabs: Bool = false, isIncognito: Bool = false, becomeMain: Bool = true) -> BeamWindow? {
         guard !data.onboardingManager.needsToDisplayOnboard else {
             data.onboardingManager.delegate = self
             data.onboardingManager.presentOnboardingWindow()
             return nil
         }
         // Create the window and set the content view.
-        let window = BeamWindow(contentRect: frame ?? CGRect(origin: .zero, size: Self.defaultWindowSize),
-                                data: data,
-                                isIncognito: isIncognito,
-                                minimumSize: frame?.size ?? Self.defaultWindowMinimumSize)
+        let window = BeamWindow(
+            contentRect: frame ?? CGRect(origin: .zero, size: Self.defaultWindowSize),
+            data: data,
+            title: title,
+            isIncognito: isIncognito,
+            minimumSize: frame?.size ?? Self.defaultWindowMinimumSize)
         if frame == nil && windows.count == 0 {
             window.center()
         } else {
