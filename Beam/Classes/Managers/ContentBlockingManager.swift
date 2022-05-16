@@ -28,10 +28,29 @@ class ContentBlockingManager {
     }
 
     func setup() {
-        // Setup RadBlock
-        synchronize()
+        let synchronizeTriggered = synchronizeIfNeeded()
+        if !synchronizeTriggered {
+            updateCompileLists()
+        }
     }
 
+    /// Starts synchronizing filter sources if the synchronize interval has been reached
+    /// - Returns: true if a synchronization happened
+    func synchronizeIfNeeded() -> Bool {
+        guard radBlockPreferences.synchronizeInterval != .disabled else { return false }
+        if FilterManager.default.state.lastSynchronizeDate == nil {
+            Logger.shared.logInfo("Radblock never synced, starting synchronization", category: .contentBlocking)
+            synchronize()
+            return true
+        } else if let nextSchedulingDate = FilterManager.default.state.nextSynchronizeDate, nextSchedulingDate.timeIntervalSinceNow < 0 {
+            Logger.shared.logInfo("Radblock sync interval reached, starting synchronization", category: .contentBlocking)
+            synchronize()
+            return true
+        }
+        return false
+    }
+
+    /// Starts synchronizing filter sources now
     func synchronize() {
         FilterManager.default.synchronize(with: .rescheduleOnError) { [weak self] (error) in
             if let error = error {
@@ -39,11 +58,7 @@ class ContentBlockingManager {
                 return
             }
 
-            let state = FilterManager.default.state
-            let groups = state.filterGroups
-            let allowList = RadBlockDatabase.shared
-            let blockers = groups.map { RBContentBlocker(filterGroup: $0, allowList: allowList) }
-            self?.compileLists(blockers: blockers)
+            self?.updateCompileLists()
             Logger.shared.logInfo("Radblock filters are synchronized", category: .contentBlocking)
         }
     }
@@ -77,7 +92,11 @@ class ContentBlockingManager {
         }
     }
 
-    private func compileLists(blockers: [RBContentBlocker]) {
+    private func updateCompileLists() {
+        let state = FilterManager.default.state
+        let groups = state.filterGroups
+        let allowList = RadBlockDatabase.shared
+        let blockers = groups.map { RBContentBlocker(filterGroup: $0, allowList: allowList) }
         blockers.forEach { blocker in
             blocker.writeRules { _, _ in
                 self.loadBlocker(blocker)
