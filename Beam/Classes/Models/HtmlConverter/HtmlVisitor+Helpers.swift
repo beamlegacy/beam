@@ -179,4 +179,19 @@ extension HtmlVisitor {
             return CGSize(width: rep.pixelsWide, height: rep.pixelsHigh)
         }
     }
+
+    func getSVGSize(_ element: Element) -> CGSize? {
+        if let viewBoxAttr = try? element.attr("viewBox"), let box = SVGViewBox(viewBoxAttr) {
+            return box.size
+        }
+
+        if let width = try? element.attr("width"),
+           let height = try? element.attr("height"),
+           let box = SVGViewBox(width: width, height: height) {
+            return box.size
+        }
+
+        return nil
+    }
 }
+
