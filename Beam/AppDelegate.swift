@@ -129,7 +129,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             AccountManager.logout()
         }
         #endif
-        
+
         if Configuration.branchType == .develop {
             self.autoAskTagGroupingFeedback()
         }
@@ -798,6 +798,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard window.state.mode == .web else { continue }
             window.state.browserTabsManager.currentTab?.tabDidAppear(withState: window.state)
         }
+        ContentBlockingManager.shared.synchronizeIfNeeded()
     }
 
     func applicationWillResignActive(_ notification: Notification) {
