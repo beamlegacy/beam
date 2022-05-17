@@ -80,7 +80,6 @@ struct PasswordEditView: View {
                             saveAndDismiss()
                         } label: {
                             Text(editType == PasswordEditType.create ? "Add Password" : "Done")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
                         }
                         .buttonStyle(.bordered)
                         .disabled(hostname.isEmpty || username.isEmpty || newPassword.isEmpty || urlIsNotValid)
