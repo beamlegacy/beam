@@ -132,10 +132,10 @@ extension BeamColor {
         static let subtitleText = BeamColor.LightStoneGray
         static let newCardSubtitle = BeamColor.combining(lightColor: .Beam, lightAlpha: 0.7,
                                                          darkColor: .Beam)
-        static let selectedBackground = BeamColor.combining(lightColor: Bluetiful, lightAlpha: 0.1, darkColor: Bluetiful, darkAlpha: 0.14)
-        static let clickedBackground = BeamColor.combining(lightColor: Bluetiful, lightAlpha: 0.16, darkColor: Bluetiful, darkAlpha: 0.22)
-        static let selectedCardBackground = BeamColor.combining(lightColor: Beam, lightAlpha: 0.1, darkColor: Beam, darkAlpha: 0.14)
-        static let clickedCardBackground = BeamColor.combining(lightColor: Beam, lightAlpha: 0.16, darkColor: Beam, darkAlpha: 0.22)
+        static let selectedBackground = BeamColor.combining(lightColor: Bluetiful, lightAlpha: 0.14, darkColor: Bluetiful, darkAlpha: 0.24)
+        static let clickedBackground = BeamColor.combining(lightColor: Bluetiful, lightAlpha: 0.2, darkColor: Bluetiful, darkAlpha: 0.34)
+        static let selectedCardBackground = BeamColor.combining(lightColor: Beam, lightAlpha: 0.1, darkColor: Beam, darkAlpha: 0.24)
+        static let clickedCardBackground = BeamColor.combining(lightColor: Beam, lightAlpha: 0.16, darkColor: Beam, darkAlpha: 0.34)
         static let focusedBackground = BeamColor.combining(lightColor: .From(color: .white), darkColor: .Nero)
         static let focusedShadow = BeamColor.combining(lightColor: .Niobium, lightAlpha: 0.15,
                                                        darkColor: .From(color: .black), darkAlpha: 0.6)
