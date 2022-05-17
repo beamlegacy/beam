@@ -72,7 +72,7 @@ struct AccountsView: View {
     // MARK: - Preferences Sections
     private func getAccountViewSections() -> [Preferences.Section] {
         var sections = [accountSection, spacerSection, calendarSection]
-        if viewModel.isloggedIn {
+        if viewModel.isloggedIn && Persistence.Authentication.email != nil {
             sections.append(contentsOf: [encryptionKeySection, manageAccountSection])
         }
         return sections
