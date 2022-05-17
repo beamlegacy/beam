@@ -53,6 +53,16 @@ class CreditCardAutofillManager {
         return []
     }
 
+    func find(cardNumber: String) -> [CreditCardEntry] {
+        do {
+            let records = try creditCardsDB.find(cardNumber: cardNumber)
+            return try creditCardEntries(for: records)
+        } catch {
+            Logger.shared.logError("Error while fetching credit cards by number: \(error.localizedDescription)", category: .creditCardsDB)
+        }
+        return []
+    }
+
     @discardableResult
     func save(entry: CreditCardEntry) -> CreditCardRecord? {
         do {
