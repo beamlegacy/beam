@@ -37,4 +37,9 @@ class UserInfoRequest: APIRequest {
         let success: Bool?
         let errors: [UserErrorData]?
     }
+
+    struct DeleteAccount: Decodable, Errorable {
+        let success: Bool
+        let errors: [UserErrorData]?
+    }
 }
