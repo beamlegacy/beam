@@ -59,6 +59,7 @@ class BeamUITestsMenuGenerator {
         case .deleteAllRemoteObjects: deleteAllRemoteObjects()
         case .resetAPIEndpoints: connectToProductionServer()
         case .setAPIEndpointsToStaging: connectToStagingServer()
+        case .deleteRemoteAccount: deleteRemoteAccount()
         default: break
         }
     }
@@ -331,6 +332,17 @@ class BeamUITestsMenuGenerator {
 
     private func connectToProductionServer() {
         Configuration.reset()
+    }
+
+    private func deleteRemoteAccount() {
+        AccountManager().deleteAccount { result in
+            switch result {
+            case .failure(let error):
+                Logger.shared.logError("Error while deleting account: \(error)", category: .accountManager)
+            case .success:
+                Logger.shared.logDebug("Account deleted", category: .accountManager)
+            }
+        }
     }
 
 }

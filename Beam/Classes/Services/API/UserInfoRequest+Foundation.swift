@@ -40,4 +40,16 @@ extension UserInfoRequest {
         }
         return result
     }
+
+    @discardableResult
+    func deleteAccount() async throws -> DeleteAccount {
+        let bodyParamsRequest = GraphqlParameters(fileName: "delete_account", variables: EmptyVariable())
+
+        let deleteAccount: DeleteAccount = try await performRequest(bodyParamsRequest: bodyParamsRequest)
+        guard deleteAccount.success == true else {
+            throw UserSessionRequestError.deleteAccountFailed
+        }
+
+        return deleteAccount
+    }
 }

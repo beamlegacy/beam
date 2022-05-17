@@ -1,0 +1,6 @@
+mutation DeleteAccount {
+  deleteAccount(input: {}) {
+    success
+    errors { path message }
+  }
+}
