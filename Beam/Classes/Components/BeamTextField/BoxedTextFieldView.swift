@@ -14,6 +14,7 @@ struct BoxedTextFieldView: View {
     @Binding var text: String
     @Binding var isEditing: Bool
     var foregroundColor: BeamColor = BeamColor.Generic.text
+    var textWillChange: ((_ proposedText: String) -> (String, Range<Int>?)?)?
     var onCommit: (() -> Void)?
     var onBackspace: (() -> Void)?
     var onEscape: (() -> Void)?
@@ -27,6 +28,7 @@ struct BoxedTextFieldView: View {
                           font: BeamFont.regular(size: 12).nsFont,
                           textColor: foregroundColor.nsColor,
                           placeholderColor: BeamColor.AlphaGray.nsColor,
+                          textWillChange: textWillChange,
                           onCommit: { _ in onCommit?() },
                           onEscape: onEscape,
                           onBackspace: onBackspace,
