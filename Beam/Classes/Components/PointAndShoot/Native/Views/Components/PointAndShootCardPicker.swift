@@ -449,6 +449,7 @@ extension PointAndShootCardPicker {
     private var copyShareView: some View {
         VStack(spacing: 0) {
             Separator(horizontal: true)
+                .blendModeLightMultiplyDarkScreen()
             HStack {
                 ButtonLabel(justCopied ? loc("Copied") : loc("Copy"),
                             icon: justCopied ? "collect-generic" : "editor-url_copy_16") {
@@ -469,6 +470,7 @@ extension PointAndShootCardPicker {
                 }
             }
             .padding(BeamSpacing._80)
+            .blendModeLightMultiplyDarkScreen()
         }
     }
 }

@@ -37,8 +37,11 @@ struct FormatterViewBackgroundV2<Content: View>: View {
         ZStack {
             RoundedRectangle(cornerRadius: boxCornerRadius)
                 .stroke(strokeColor.swiftUI, lineWidth: 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
+            VisualEffectView(material: .headerView)
+                .cornerRadius(boxCornerRadius)
+                .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
             RoundedRectangle(cornerRadius: boxCornerRadius)
-                .fill(backgroundColor.swiftUI)
+                .fill(backgroundColor.swiftUI.opacity(0.3))
                 .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
             content()
                 .cornerRadius(boxCornerRadius)
