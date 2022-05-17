@@ -79,6 +79,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     // Remote server
     case resetAPIEndpoints = "Set API Endpoints to production server"
     case setAPIEndpointsToStaging = "Set API Endpoints to staging server"
+    case deleteRemoteAccount = "Delete remote account"
 
     var group: UITestMenuGroup? {
         switch self {
@@ -104,7 +105,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
             return .omniboxSetup
         case .enableCreateJournalOnce, .disableCreateJournalOnce:
             return .journal
-        case .resetAPIEndpoints, .setAPIEndpointsToStaging:
+        case .resetAPIEndpoints, .setAPIEndpointsToStaging, .deleteRemoteAccount:
             return .remoteServer
         default:
             return nil
