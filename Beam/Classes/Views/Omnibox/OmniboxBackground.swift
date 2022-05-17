@@ -46,9 +46,11 @@ extension Omnibox {
             ZStack(alignment: alignment) {
                 RoundedRectangle(cornerRadius: boxCornerRadius)
                     .stroke(strokeColor, lineWidth: isLow ? 2 : 1) // 1pt centered stroke, makes it a 0.5pt outer stroke.
-                RoundedRectangle(cornerRadius: boxCornerRadius)
-                    .fill(backgroundColor)
+                VisualEffectView(material: .headerView)
+                    .cornerRadius(boxCornerRadius)
                     .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
+                RoundedRectangle(cornerRadius: boxCornerRadius)
+                    .fill(backgroundColor.opacity(0.4))
                 content()
                     .cornerRadius(boxCornerRadius)
                     .clipped()
