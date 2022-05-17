@@ -34,7 +34,7 @@ struct Toolbar: View {
             if isMainWindow {
                 if state.mode == .web {
                     ZStack {
-                        BeamColor.AlphaGray.swiftUI.opacity(0.425)
+                        BeamColor.Mercury.swiftUI.opacity(0.4)
                         BeamColor.Generic.background.swiftUI.opacity(overlayOpacity)
                     }
                     .transition(webOverlayTransition)
@@ -61,7 +61,7 @@ struct Toolbar: View {
                 state.associatedWindow?.zoom(nil)
             }))
             .background(
-                VisualEffectView(material: .headerView)
+                VisualEffectView(material: .popover)
                     .overlay(blurOverlay)
                     .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
             )
