@@ -68,30 +68,32 @@ final class CreditCardAutofillBuilder {
         Logger.shared.logDebug("CreditCardAutofillBuilder: Checking unsaved status: dirty = \(isDirty)", category: .creditCardAutofill)
         guard isDirty else { return nil }
         let canonicalCardNumber = String(cardNumber.unicodeScalars.filter { CharacterSet.decimalDigits.contains($0) })
-        if canonicalCardNumber.isEmpty && cardHolder.isEmpty && expirationMonth == nil && expirationYear == nil {
+        guard !canonicalCardNumber.isEmpty, !cardHolder.isEmpty, let expirationMonth = expirationMonth, let expirationYear = expirationYear else {
             return nil
         }
         if var updatedCard = autofilledCreditCard {
             var changed = false
-            if !canonicalCardNumber.isEmpty && updatedCard.cardNumber != canonicalCardNumber {
+            if updatedCard.cardNumber != canonicalCardNumber {
                 updatedCard.cardNumber = canonicalCardNumber
                 changed = true
             }
-            if !cardHolder.isEmpty && updatedCard.cardHolder != cardHolder {
+            if updatedCard.cardHolder != cardHolder {
                 updatedCard.cardHolder = cardHolder
                 changed = true
             }
-            if let expirationMonth = expirationMonth, let expirationYear = expirationYear, updatedCard.expirationMonth != expirationMonth || updatedCard.expirationYear != expirationYear {
+            if updatedCard.expirationMonth != expirationMonth || updatedCard.expirationYear != expirationYear {
                 updatedCard.expirationMonth = expirationMonth
                 updatedCard.expirationYear = expirationYear
                 changed = true
             }
             return changed ? updatedCard : nil
+        } else {
+            let matchingCards = creditCardManager.find(cardNumber: canonicalCardNumber)
+            if matchingCards.contains(where: { $0.expirationMonth == expirationMonth && $0.expirationYear == expirationYear }) {
+                return nil // the card is already in the database
+            }
         }
-        guard !cardNumber.isEmpty, let expirationMonth = expirationMonth, let expirationYear = expirationYear else {
-            return nil
-        }
-        return CreditCardEntry(cardDescription: "", cardNumber: cardNumber, cardHolder: cardHolder, expirationMonth: expirationMonth, expirationYear: expirationYear)
+        return CreditCardEntry(cardDescription: "", cardNumber: canonicalCardNumber, cardHolder: cardHolder, expirationMonth: expirationMonth, expirationYear: expirationYear)
     }
 
     func markSaved() {

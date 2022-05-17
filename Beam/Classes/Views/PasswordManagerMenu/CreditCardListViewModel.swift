@@ -73,7 +73,7 @@ final class CreditCardListViewModel: ObservableObject {
         }
     }
 
-    private func refresh() {
+    func refresh() {
         let savedSelection = Set(selectedEntries)
         let entries = creditCardManager.fetchAll()
         allCreditCardEntries = entries

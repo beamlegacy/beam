@@ -7,6 +7,47 @@
 
 import SwiftUI
 
+fileprivate extension CharacterSet {
+    static let charactersInCardHolderName = CharacterSet.alphanumerics.union(.whitespaces)
+    static let charactersInCardNumber = CharacterSet(charactersIn: "0123456789 ")
+    static let charactersInExpirationDate = CharacterSet(charactersIn: "0123456789/")
+}
+
+fileprivate extension String {
+    func filteredAsCardHolderName() -> String {
+        String(unicodeScalars.filter { CharacterSet.charactersInCardHolderName.contains($0) })
+    }
+
+    func filteredAsCardNumber() -> String {
+        String(unicodeScalars.filter { CharacterSet.charactersInCardNumber.contains($0) }).truncatedToSignificantLength(19)
+    }
+
+    func filteredAsExpirationDate() -> String {
+        String(unicodeScalars.filter { CharacterSet.charactersInExpirationDate.contains($0) }).truncatedToSignificantLength(7)
+    }
+
+    func filteredAsCanonicalCardNumber() -> String {
+        String(unicodeScalars.filter { CharacterSet.decimalDigits.contains($0) })
+    }
+
+    private static let digitsAndSpaces = CharacterSet.decimalDigits.union(.whitespaces)
+
+    private func truncatedToSignificantLength(_ maxLength: Int) -> String {
+        var characters = Substring(self).unicodeScalars
+        repeat {
+            let significantCount = characters
+                .filter { !CharacterSet.whitespaces.contains($0) }
+                .count
+            let dropCount = significantCount - maxLength
+            if dropCount <= 0 {
+                break
+            }
+            characters = characters.dropLast(dropCount)
+        } while true
+        return String(characters)
+    }
+}
+
 struct CreditCardEditView: View {
     let entry: CreditCardEntry?
     let onSubmit: (CreditCardEntry?) -> Void
@@ -14,6 +55,10 @@ struct CreditCardEditView: View {
     @State private var editedEntry = CreditCardEntry(cardDescription: "", cardNumber: "", cardHolder: "", expirationMonth: 0, expirationYear: 0)
     @State private var cardNumber = ""
     @State private var expirationDate = ""
+    @State private var editingCardDescription = false
+    @State private var editingCardHolder = false
+    @State private var editingCardNumber = false
+    @State private var editingExpirationDate = false
 
     @Environment(\.presentationMode) private var presentationMode
 
@@ -26,7 +71,7 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        TextField("", text: $editedEntry.cardDescription)
+                        BoxedTextFieldView(title: "", text: $editedEntry.cardDescription, isEditing: $editingCardDescription, onEscape: dismiss)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                             .frame(width: 286, height: 19, alignment: .center)
                     }
@@ -36,9 +81,11 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        TextField("", text: $editedEntry.cardHolder)
-                            .foregroundColor(BeamColor.Generic.text.swiftUI)
-                            .frame(width: 286, height: 19, alignment: .center)
+                        BoxedTextFieldView(title: "", text: $editedEntry.cardHolder, isEditing: $editingCardHolder, textWillChange: { proposedText in
+                            (proposedText.filteredAsCardHolderName(), nil)
+                        }, onEscape: dismiss)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        .frame(width: 286, height: 19, alignment: .center)
                     }
                     .padding(.bottom, 10)
                     HStack {
@@ -46,13 +93,18 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        TextField("", text: $cardNumber, onCommit: {
-                            cardNumber = editedEntry.formattedNumber
-                        })
+                        BoxedTextFieldView(title: "", text: $cardNumber, isEditing: $editingCardNumber, textWillChange: { proposedText in
+                            (proposedText.filteredAsCardNumber(), nil)
+                        }, onEscape: dismiss)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 210, height: 19, alignment: .center)
                         .onChange(of: cardNumber) { newValue in
-                            editedEntry.cardNumber = String(newValue.unicodeScalars.filter { CharacterSet.decimalDigits.contains($0) })
+                            editedEntry.cardNumber = newValue.filteredAsCanonicalCardNumber()
+                        }
+                        .onChange(of: editingCardNumber) { editing in
+                            if !editing {
+                                cardNumber = editedEntry.formattedNumber
+                            }
                         }
                         Image(systemName: editedEntry.isValidNumber ? "checkmark.circle" : "exclamationmark.circle")
                             .font(BeamFont.regular(size: 12).swiftUI)
@@ -68,9 +120,9 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        TextField("", text: $expirationDate, onCommit: {
-                            expirationDate = editedEntry.formattedDate
-                        })
+                        BoxedTextFieldView(title: "", text: $expirationDate, isEditing: $editingExpirationDate, textWillChange: { proposedText in
+                            (proposedText.filteredAsExpirationDate(), nil)
+                        }, onEscape: dismiss)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                         .frame(width: 80, height: 19, alignment: .center)
                         .onChange(of: expirationDate) { _ in
@@ -79,11 +131,15 @@ struct CreditCardEditView: View {
                                 editedEntry.expirationYear = year
                             }
                         }
+                        .onChange(of: editingExpirationDate) { editing in
+                            if !editing {
+                                expirationDate = editedEntry.formattedDate
+                            }
+                        }
                         Image(systemName: decodedExpirationDate != nil ? "checkmark.circle" : "exclamationmark.circle")
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                     }
-                    .padding(.bottom, 10)
                     .padding(.bottom, 12)
                     HStack {
                         Spacer()
@@ -99,16 +155,16 @@ struct CreditCardEditView: View {
                             saveAndDismiss()
                         } label: {
                             Text(entry == nil ? "Add Card" : "Done")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
                         }
                         .buttonStyle(.bordered)
-                        .disabled(editedEntry.cardHolder.isEmpty || cardNumber.isEmpty)
+                        .disabled(editedEntry.cardHolder.isEmpty || cardNumber.value.isEmpty || decodedExpirationDate == nil)
                         .keyboardShortcut(.defaultAction)
                     }
                 }
                 .padding(20)
             }
         }
+        .fixedSize()
         .onAppear {
             if let entry = entry {
                 editedEntry = entry
