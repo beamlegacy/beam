@@ -71,6 +71,9 @@ struct CreditCardsModalView: View {
             .frame(width: 526, alignment: .center)
         }
         .frame(width: 568, height: 361, alignment: .center)
+        .onAppear {
+            creditCardsViewModel.refresh()
+        }
         .sheet(isPresented: $showingEditSheet) {
             CreditCardEditView(entry: creditCardsViewModel.editedCreditCard) { entry in
                 if let entry = entry {
@@ -135,13 +138,15 @@ class CreditCardTableViewItem: TwoTextFieldViewItem {
         self.cardDate = creditCard.formattedDate
         super.init()
         self.text = creditCard.cardDescription
-        self.topTextFieldValue = creditCard.formattedNumber // or obfuscated
+        self.topTextFieldValue = creditCard.obfuscatedNumber
         self.botTextFieldValue = creditCard.cardHolder
         self.topTextFieldPlaceholder = "Card Number"
         self.botTextFieldPlaceholder = "Cardholder"
     }
 
     override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
-        completion(NSImage(named: "preferences-credit_card")!)
+        let icon = NSImage(named: "preferences-credit_card")!
+        icon.isTemplate = true
+        completion(icon)
     }
 }
