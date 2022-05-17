@@ -242,6 +242,7 @@ protocol CreditCardStore {
     func fetchRecord(uuid: UUID) throws -> CreditCardRecord?
     func fetchAll() throws -> [CreditCardRecord]
     func allRecords(updatedSince: Date?) throws -> [CreditCardRecord]
+    func find(cardNumber: String) throws -> [CreditCardRecord]
     @discardableResult func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
     @discardableResult func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
     @discardableResult func markUsed(record: CreditCardRecord) throws -> CreditCardRecord

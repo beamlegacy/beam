@@ -220,6 +220,19 @@ class CreditCardsDB: CreditCardStore {
         }
     }
 
+    func find(cardNumber: String) throws -> [CreditCardRecord] {
+        let searchString = String(cardNumber.unicodeScalars.filter { CharacterSet.decimalDigits.contains($0) })
+        do {
+            return try dbPool.read { db in
+                return try CreditCardRecord
+                    .filter(CreditCardRecord.Columns.cardNumber == searchString && CreditCardRecord.Columns.deletedAt == nil)
+                    .fetchAll(db)
+            }
+        } catch {
+            throw CreditCardsDBError.errorSearchingCreditCards(errorMsg: error.localizedDescription)
+        }
+    }
+
     @discardableResult
     func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord {
         do {

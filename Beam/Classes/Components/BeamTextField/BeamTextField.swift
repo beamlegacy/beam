@@ -29,7 +29,7 @@ struct BeamTextField: NSViewRepresentable {
 
     var onTextChanged: (String) -> Void = { _ in }
     // Return a replacement text and selection
-    var textWillChange: ((_ proposedText: String) -> (String, Range<Int>)?)?
+    var textWillChange: ((_ proposedText: String) -> (String, Range<Int>?)?)?
 
     var onCommit: (_ modifierFlags: NSEvent.ModifierFlags?) -> Void = { _ in }
     var onEscape: (() -> Void)?
@@ -246,15 +246,18 @@ struct BeamTextField: NSViewRepresentable {
             var finalText = textField.stringValue
 
             if let (newText, newRange) = parent.textWillChange?(finalText),
-               let textView = textField.currentEditor() as? BeamTextFieldViewFieldEditor {
-                textView.disableAutomaticScrollOnType = true
+               let textView = textField.currentEditor() {
+                let beamTextView = textView as? BeamTextFieldViewFieldEditor
+                beamTextView?.disableAutomaticScrollOnType = true
                 // Changing the replacement text here instantaneously, faster than waiting for SwiftUI update
                 (textField as? BeamNSTextFieldProtocol)?.setText(newText, font: parent.font, icon: nil, skipGuards: true)
-                parent.updateSelectedRange(textField, range: newRange, in: newText)
+                if let newRange = newRange {
+                    parent.updateSelectedRange(textField, range: newRange, in: newText)
+                }
                 finalText = newText
 
-                let block = DispatchWorkItem { [weak textView] in
-                    textView?.disableAutomaticScrollOnType = false
+                let block = DispatchWorkItem { [weak beamTextView] in
+                    beamTextView?.disableAutomaticScrollOnType = false
                 }
                 automaticScrollSetterBlock?.cancel()
                 automaticScrollSetterBlock = block
