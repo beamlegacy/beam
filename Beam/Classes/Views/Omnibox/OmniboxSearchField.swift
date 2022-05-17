@@ -110,6 +110,7 @@ struct OmniboxSearchField: View {
                     .transition(.identity)
             } else if let iconName = leadingIconName(for: autocompleteManager.mode) {
                 Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                    .blendModeLightMultiplyDarkScreen()
                     .transition(.identity)
             }
             ZStack(alignment: .leading) {
@@ -165,7 +166,7 @@ struct OmniboxSearchField: View {
                     .lineLimit(1)
                 }
             }
-
+            .blendModeLightMultiplyDarkScreen()
         }
         // UITests on BigSur fails when setting textfield opacity to zero.
         .opacity(autocompleteManager.animatingToMode != nil ? 0.01 : 1)
