@@ -185,6 +185,28 @@ extension AccountManager {
         }
     }
 
+    func deleteAccount(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
+        Task {
+            do {
+                guard AuthenticationManager.shared.isAuthenticated else {
+                    completionHandler?(.failure(APIRequestError.notAuthenticated))
+                    return
+                }
+
+                try await userInfoRequest.deleteAccount()
+
+                Logger.shared.logInfo("Delete account succeeded", category: .accountManager)
+                DispatchQueue.main.async {
+                    Self.logout()
+                }
+                completionHandler?(.success(true))
+            } catch {
+                Logger.shared.logInfo("Could not delete account: \(error.localizedDescription)", category: .accountManager)
+                completionHandler?(.failure(error))
+            }
+        }
+    }
+
     static func logout() {
         Persistence.cleanUp()
         AppDelegate.main.data.calendarManager.disconnectAll()

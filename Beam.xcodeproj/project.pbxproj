@@ -51,6 +51,8 @@
 		051710DE27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 051710DD27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql */; };
 		051710E527EAF93500E3C7A2 /* page_info_fragment.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 051710E427EAF93500E3C7A2 /* page_info_fragment.graphql */; };
 		051710E727EB5C4900E3C7A2 /* PaginatedBeamObjects.swift in Sources */ = {isa = PBXBuildFile; fileRef = 051710E627EB5C4900E3C7A2 /* PaginatedBeamObjects.swift */; };
+		0521EB24282BFC9800A922CE /* delete_account.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0521EB23282BFC9800A922CE /* delete_account.graphql */; };
+		0521EB2B282CCA4800A922CE /* AccountManager+DeleteAccountTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0521EB2A282CCA4800A922CE /* AccountManager+DeleteAccountTests.swift */; };
 		0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 0564B1B127D20BAE00B74BBD /* update_password.graphql */; };
 		0564F51327E8BC6600F969CA /* JJLISO8601DateFormatter in Frameworks */ = {isa = PBXBuildFile; productRef = 0564F51227E8BC6600F969CA /* JJLISO8601DateFormatter */; };
 		056F9BD427F3701600302709 /* paginated_beam_objects_with_import_error.graphql in Resources */ = {isa = PBXBuildFile; fileRef = 056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */; };
@@ -1551,6 +1553,8 @@
 		051710DD27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects.graphql; sourceTree = "<group>"; };
 		051710E427EAF93500E3C7A2 /* page_info_fragment.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = page_info_fragment.graphql; sourceTree = "<group>"; };
 		051710E627EB5C4900E3C7A2 /* PaginatedBeamObjects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaginatedBeamObjects.swift; sourceTree = "<group>"; };
+		0521EB23282BFC9800A922CE /* delete_account.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = delete_account.graphql; sourceTree = "<group>"; };
+		0521EB2A282CCA4800A922CE /* AccountManager+DeleteAccountTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AccountManager+DeleteAccountTests.swift"; sourceTree = "<group>"; };
 		0564B1B127D20BAE00B74BBD /* update_password.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = update_password.graphql; sourceTree = "<group>"; };
 		056F9BD327F3701600302709 /* paginated_beam_objects_with_import_error.graphql */ = {isa = PBXFileReference; lastKnownFileType = text; path = paginated_beam_objects_with_import_error.graphql; sourceTree = "<group>"; };
 		0570082828166F53007CD5F4 /* BeamObjectRequest+async.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamObjectRequest+async.swift"; sourceTree = "<group>"; };
@@ -3810,6 +3814,7 @@
 				A54A452927677F9A00B9AE1B /* set_username.graphql */,
 				0564B1B127D20BAE00B74BBD /* update_password.graphql */,
 				05A3D59D27DF970A004CC7F1 /* account_exists.graphql */,
+				0521EB23282BFC9800A922CE /* delete_account.graphql */,
 			);
 			path = UserSession;
 			sourceTree = "<group>";
@@ -4583,6 +4588,7 @@
 				DABFF8062742731B00FAF364 /* BeamLinkDBTest.swift */,
 				5281B07A25C9987100DF66D9 /* Fixtures */,
 				524425F025C832110095422A /* AccountManagerTests.swift */,
+				0521EB2A282CCA4800A922CE /* AccountManager+DeleteAccountTests.swift */,
 				963DBB3C2698655C00080928 /* BeamElementLinksTests.swift */,
 				DA693059268DB375008EF756 /* BrowsingTreeSenderTest.swift */,
 				52DEF1C9252B259700561493 /* CoreDataManagerTests.swift */,
@@ -7928,6 +7934,7 @@
 				8759678526FB903C0097C3CC /* UITests-Passwords.csv in Resources */,
 				A52A559327592E9A002D0C99 /* Inter-Bold.otf in Resources */,
 				33BBA505274423E200FE92DB /* editor-embed_collapse.json in Resources */,
+				0521EB24282BFC9800A922CE /* delete_account.graphql in Resources */,
 				A5347A6A2763B53A006EEF8C /* nav-pivot_web.json in Resources */,
 				52F78D2827872F55007A9F53 /* prepare_beam_objects.graphql in Resources */,
 				A07B03EF279AF1D200D14C45 /* Inter-BoldItalic.otf in Resources */,
@@ -9129,6 +9136,7 @@
 				872F658D27F204E4005475B8 /* HostnameCanonicalizerTests.swift in Sources */,
 				876856662770D90B002A8069 /* ChromiumPasswordDecryptionTests.swift in Sources */,
 				37B85B9027A2C83B003871F9 /* DownloadItemDelegateMock.swift in Sources */,
+				0521EB2B282CCA4800A922CE /* AccountManager+DeleteAccountTests.swift in Sources */,
 				5281B06425C98D2600DF66D9 /* PersistenceTests.swift in Sources */,
 				9674080625F237B2000AC2B8 /* String+URLTests.swift in Sources */,
 				524B110226283F2D00E3C61B /* DatabaseManagerNetworkTests.swift in Sources */,
