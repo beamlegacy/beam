@@ -100,8 +100,10 @@ export class PasswordManager<UI extends PasswordManagerUI> {
   }
 
   sendTextFields(frameIdentifier) {
-    this.passwordHelper.setFrameIdentifier(frameIdentifier)
-    this.setupObserver()
+	if (frameIdentifier !== null) {
+      this.passwordHelper.setFrameIdentifier(frameIdentifier)
+      this.setupObserver()
+	}
     this.handleTextFields()
   }
 

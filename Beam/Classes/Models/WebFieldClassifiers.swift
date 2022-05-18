@@ -31,6 +31,7 @@ final class WebFieldClassifiers {
         classifierResultsByFrame.removeAll()
     }
 
+    @discardableResult
     func classify(fields: [DOMInputElement], host: String?, frameInfo: WKFrameInfo?) -> [String] {
         guard let frameHref = frameInfo?.request.url?.absoluteString else {
             return []
