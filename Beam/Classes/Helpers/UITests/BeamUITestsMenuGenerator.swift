@@ -121,7 +121,8 @@ class BeamUITestsMenuGenerator {
     }
 
     private func destroyDatabase() {
-        PasswordManager.shared.deleteAll(includedRemote: false)
+        clearPasswordsDatabase()
+        clearCreditCardsDatabase()
         DocumentManager().deleteAll { _ in }
         DatabaseManager().deleteAll { _ in }
         let data = AppDelegate.main.window?.state.data
