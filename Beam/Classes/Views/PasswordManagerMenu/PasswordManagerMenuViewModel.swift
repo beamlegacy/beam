@@ -286,6 +286,7 @@ class PasswordGeneratorViewModel: NSObject, ObservableObject {
 extension PasswordGeneratorViewModel: NSWindowDelegate {
     func windowWillClose(_ notification: Notification) {
         if !isDismissed && hasPendingSuggestion {
+            isDismissed = true
             dontUsePassword()
         }
     }
