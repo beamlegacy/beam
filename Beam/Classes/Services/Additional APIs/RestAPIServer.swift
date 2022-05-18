@@ -33,11 +33,11 @@ class RestAPIServer {
         var baseURL: URL {
             switch self {
             case .publishNote, .unpublishNote:
-                return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
+                return URL(string: Configuration.publicAPIpublishServer)!
             case .embed:
-                return URL(string: EnvironmentVariables.PublicAPI.embed)!
+                return URL(string: Configuration.publicAPIembed)!
             case .providers:
-                return URL(string: EnvironmentVariables.PublicAPI.embed)!
+                return URL(string: Configuration.publicAPIembed)!
             }
         }
 

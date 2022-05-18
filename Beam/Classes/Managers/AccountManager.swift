@@ -2,8 +2,6 @@ import Foundation
 import BeamCore
 
 class AccountManager {
-//    let safariDomains: [CFString] = [Configuration.publicHostnameDefault as CFString]
-
     let userSessionRequest = UserSessionRequest()
     let userInfoRequest = UserInfoRequest()
 
