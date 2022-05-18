@@ -36,6 +36,7 @@ class ContentBlockingManager {
 
     /// Starts synchronizing filter sources if the synchronize interval has been reached
     /// - Returns: true if a synchronization happened
+    @discardableResult
     func synchronizeIfNeeded() -> Bool {
         guard radBlockPreferences.synchronizeInterval != .disabled else { return false }
         if FilterManager.default.state.lastSynchronizeDate == nil {
