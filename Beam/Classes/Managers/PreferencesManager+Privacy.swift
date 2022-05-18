@@ -12,6 +12,7 @@ extension PreferencesManager {
     static let adsFilterKey = "adsFilter"
     static let privacyFilterKey = "privacyFilter"
     static let annoyanceFilterKey = "annoyanceFilter"
+    static let crossSiteTrackingKey = "crossSiteTracking"
 }
 
 // MARK: - Default Values
@@ -19,6 +20,7 @@ extension PreferencesManager {
     static let adsFilterDefault = true
     static let privacyFilterDefault = true
     static let annoyanceFilterDefault = true
+    static let crossSiteTrackingDefault = true
 }
 
 extension PreferencesManager {
@@ -66,13 +68,11 @@ extension PreferencesManager {
         }
     }
 
+    @UserDefault(key: crossSiteTrackingKey, defaultValue: crossSiteTrackingDefault, suiteName: BeamUserDefaults.privacyPreferences.suiteName)
     static var isCrossSiteTrackingEnabled: Bool {
-        get {
-            WKWebsiteDataStore.default()._resourceLoadStatisticsEnabled()
-        }
-        set {
-            WKWebsiteDataStore.nonPersistent()._setResourceLoadStatisticsEnabled(newValue)
-            WKWebsiteDataStore.default()._setResourceLoadStatisticsEnabled(newValue)
+        didSet {
+            WKWebsiteDataStore.nonPersistent()._setResourceLoadStatisticsEnabled(PreferencesManager.isCrossSiteTrackingEnabled)
+            WKWebsiteDataStore.default()._setResourceLoadStatisticsEnabled(PreferencesManager.isCrossSiteTrackingEnabled)
         }
     }
 }
