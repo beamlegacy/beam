@@ -120,9 +120,14 @@ extension AppDelegate {
                 Configuration.apiHostname = apiHostname
             }
 
-            if let publicHostname = params.first(where: { $0.name == "publicHostname" })?.value {
-                Logger.shared.logDebug("Found publicHostname: \(publicHostname)", category: .general)
-                Configuration.publicHostname = publicHostname
+            if let publicAPIpublishServer = params.first(where: { $0.name == "publicAPIpublishServer" })?.value {
+                Logger.shared.logDebug("Found publicAPIpublishServer: \(publicAPIpublishServer)", category: .general)
+                Configuration.publicAPIpublishServer = publicAPIpublishServer
+            }
+
+            if let publicAPIembed = params.first(where: { $0.name == "publicAPIembed" })?.value {
+                Logger.shared.logDebug("Found publicAPIembed: \(publicAPIembed)", category: .general)
+                Configuration.publicAPIembed = publicAPIembed
             }
 
             return
@@ -144,8 +149,7 @@ extension AppDelegate {
             createWindow(frame: nil, restoringTabs: false)
         }
 
-        let isPublicHostname = components.host == Configuration.publicHostname
-        let canProcessWebURL = !isPublicHostname && components.url != nil
+        let canProcessWebURL = components.url != nil
 
         guard var window = window ?? windows.first else {
             Logger.shared.logDebug("Window not ready to open url. Waiting for it", category: .general)
@@ -154,7 +158,7 @@ extension AppDelegate {
         }
 
         // Open external url when Beam is used as default browser.
-        if !isPublicHostname, let url = components.url {
+        if let url = components.url {
             Logger.shared.logDebug("Opened external URL: \(url.absoluteString)", category: .general)
 
             if let (existingTab, tabWindow) = existingOpenedTab(for: url) {
@@ -172,11 +176,6 @@ extension AppDelegate {
             window.makeKeyAndOrderFront(nil)
 
             return true
-        }
-
-        guard isPublicHostname else {
-            Logger.shared.logDebug("components: \(components), host is different from Configuration: \(Configuration.publicHostname)", category: .general)
-            return false
         }
 
 //        switch urlPath.dropFirst() {

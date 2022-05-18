@@ -13,7 +13,8 @@ var AdvancedPreferencesViewController: PreferencePane = PreferencesPaneBuilder.b
 //swiftlint:disable:next function_body_length type_body_length
 struct AdvancedPreferencesView: View {
     @State private var apiHostname: String = Configuration.apiHostname
-    @State private var publicHostname: String = Configuration.publicHostname
+    @State private var publicAPIpublishServer: String = Configuration.publicAPIpublishServer
+    @State private var publicAPIembed: String = Configuration.publicAPIembed
     @State private var bundleIdentifier: String = Configuration.bundleIdentifier
     @State private var env: String = Configuration.env.rawValue
     @State private var autoUpdate: Bool = Configuration.autoUpdate
@@ -63,6 +64,22 @@ struct AdvancedPreferencesView: View {
             Configuration.apiHostname = cleanValue
         })
 
+        let publicAPIpublishServerBinding = Binding<String>(get: {
+            self.publicAPIpublishServer
+        }, set: {
+            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.publicAPIpublishServer = cleanValue
+            Configuration.publicAPIpublishServer = cleanValue
+        })
+
+        let publicAPIembedBinding = Binding<String>(get: {
+            self.publicAPIembed
+        }, set: {
+            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.publicAPIembed = cleanValue
+            Configuration.publicAPIembed = cleanValue
+        })
+
         ScrollView(.vertical, showsIndicators: false) {
             Preferences.Container(contentWidth: contentWidth) {
                 Preferences.Section {
@@ -89,15 +106,30 @@ struct AdvancedPreferencesView: View {
                     TextField("api hostname", text: apiHostnameBinding)
                         .lineLimit(1)
                         .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
-                    ResetAPIEndpointsButton
-                    SetAPIEndPointsToStagingButton
                 }
                 Preferences.Section {
-                    Text("Public endpoint")
+                    Text("Public API publish server:")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
-                    Text(publicHostname)
+                    TextField("public api publish server", text: publicAPIpublishServerBinding)
+                        .lineLimit(1)
+                        .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+                }
+                Preferences.Section {
+                    Text("Public API embed server:")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    TextField("public api embed server", text: publicAPIembedBinding)
+                        .lineLimit(1)
+                        .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 400)
+                }
+                Preferences.Section {
+                    Text("")
+                } content: {
+                    ResetAPIEndpointsButton
+                    SetAPIEndPointsToStagingButton
                 }
                 Preferences.Section(title: "Network") {
                     NetworkEnabled
@@ -681,7 +713,8 @@ struct AdvancedPreferencesView: View {
         Button(action: {
             Configuration.reset()
             apiHostname = Configuration.apiHostname
-            publicHostname = Configuration.publicHostname
+            publicAPIpublishServer = Configuration.publicAPIpublishServer
+            publicAPIembed = Configuration.publicAPIembed
         }, label: {
             // TODO: loc
             Text("Reset API Endpoints").frame(minWidth: 100)
@@ -692,7 +725,8 @@ struct AdvancedPreferencesView: View {
         Button(action: {
             Configuration.setAPIEndPointsToStaging()
             apiHostname = Configuration.apiHostname
-            publicHostname = Configuration.publicHostname
+            publicAPIpublishServer = Configuration.publicAPIpublishServer
+            publicAPIembed = Configuration.publicAPIembed
         }, label: {
             // TODO: loc
             Text("Set API Endpoints to staging server").frame(minWidth: 100)
