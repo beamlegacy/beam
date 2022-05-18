@@ -947,6 +947,11 @@
 		A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A311436C280D2ADE00BB74F4 /* DialogTestView.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
 		A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850F27707C870051EECE /* TextEditorContextTestView.swift */; };
+		A315D570282B98F000579362 /* CreditCardsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D56F282B98F000579362 /* CreditCardsTests.swift */; };
+		A315D57A282BFE1D00579362 /* CreditCardsTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D579282BFE1D00579362 /* CreditCardsTestTable.swift */; };
+		A315D57F282C1B5100579362 /* CreditCardTableLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D57E282C1B5100579362 /* CreditCardTableLocators.swift */; };
+		A315D58228316F2600579362 /* Rowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D58128316F2600579362 /* Rowable.swift */; };
+		A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3539E2328326EA100035A21 /* CreditCardTestView.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
 		A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */; };
 		A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */; };
@@ -2753,6 +2758,11 @@
 		A311436C280D2ADE00BB74F4 /* DialogTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogTestView.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
 		A312850F27707C870051EECE /* TextEditorContextTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextTestView.swift; sourceTree = "<group>"; };
+		A315D56F282B98F000579362 /* CreditCardsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardsTests.swift; sourceTree = "<group>"; };
+		A315D579282BFE1D00579362 /* CreditCardsTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardsTestTable.swift; sourceTree = "<group>"; };
+		A315D57E282C1B5100579362 /* CreditCardTableLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardTableLocators.swift; sourceTree = "<group>"; };
+		A315D58128316F2600579362 /* Rowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rowable.swift; sourceTree = "<group>"; };
+		A3539E2328326EA100035A21 /* CreditCardTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardTestView.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
 		A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureCopyShareTests.swift; sourceTree = "<group>"; };
 		A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFFilesBrowserViewTests.swift; sourceTree = "<group>"; };
@@ -6590,6 +6600,23 @@
 			path = Card;
 			sourceTree = "<group>";
 		};
+		A315D578282BFDFB00579362 /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				A315D579282BFE1D00579362 /* CreditCardsTestTable.swift */,
+				A315D58128316F2600579362 /* Rowable.swift */,
+			);
+			path = Tables;
+			sourceTree = "<group>";
+		};
+		A315D57D282C1B2F00579362 /* Tables */ = {
+			isa = PBXGroup;
+			children = (
+				A315D57E282C1B5100579362 /* CreditCardTableLocators.swift */,
+			);
+			path = Tables;
+			sourceTree = "<group>";
+		};
 		A3E7B4AD27AC16C70074C9BB /* Popups */ = {
 			isa = PBXGroup;
 			children = (
@@ -7122,6 +7149,7 @@
 				8718E151280483C900CFF53D /* AdvancedSignInPasswordAutofillTests.swift */,
 				8714A3E328100767007DDF4F /* OneFieldAutofillTests.swift */,
 				D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */,
+				A315D56F282B98F000579362 /* CreditCardsTests.swift */,
 			);
 			path = PasswordManager;
 			sourceTree = "<group>";
@@ -7161,6 +7189,7 @@
 		B57A9B3226AB0761002C954D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				A315D578282BFDFB00579362 /* Tables */,
 				A3E7B4AD27AC16C70074C9BB /* Popups */,
 				B5C71D512716F3F50028D495 /* UITestWebMockPages */,
 				B5BA078726AF3E1200D31FED /* MenuBars */,
@@ -7173,6 +7202,7 @@
 		B57A9B3326AB076C002C954D /* Locators */ = {
 			isa = PBXGroup;
 			children = (
+				A315D57D282C1B2F00579362 /* Tables */,
 				A3E7B4B327AC16E40074C9BB /* Popups */,
 				B5AD2A7A2760A73800A6A3C5 /* Card */,
 				B5CDFF3B274EC84F00742CC9 /* Onboarding */,
@@ -7269,6 +7299,7 @@
 				B5FAE303270EE16800EAC8A3 /* AccountTestView.swift */,
 				D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */,
 				B52C147E27FF05D700D67EE5 /* AboutPreferencesTestView.swift */,
+				A3539E2328326EA100035A21 /* CreditCardTestView.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -9303,6 +9334,7 @@
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				B51DC76C26F44F990074ACCA /* PnSAddToCardTests.swift in Sources */,
 				B557155A26FA259000F6C9D4 /* UpdateViewLocators.swift in Sources */,
+				A315D57F282C1B5100579362 /* CreditCardTableLocators.swift in Sources */,
 				B5A76EB227FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift in Sources */,
 				A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */,
 				B5FAE2DB270C842700EAC8A3 /* CardPublishTests.swift in Sources */,
@@ -9323,6 +9355,7 @@
 				A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */,
 				B5FAE306270EE17800EAC8A3 /* AccountViewLocators.swift in Sources */,
 				A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */,
+				A315D57A282BFE1D00579362 /* CreditCardsTestTable.swift in Sources */,
 				B5E8010A26AEA1E100C8BD61 /* JournalTestView.swift in Sources */,
 				B5FAE2E7270DDD6C00EAC8A3 /* AlertTestView.swift in Sources */,
 				B51DC76E26F44FE00074ACCA /* PnSViewLocators.swift in Sources */,
@@ -9342,9 +9375,11 @@
 				B507CB32275F8C3800DFF11A /* DatePickerTestView.swift in Sources */,
 				B551F3C326BD100300B72D27 /* WebsiteAuthPopupViewLocators.swift in Sources */,
 				B5DC1F8A26B19C8700A4C94B /* OmniBoxTestView.swift in Sources */,
+				A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */,
 				B50E1C9926FCC8AD00E767AE /* PasswordManagerHelper.swift in Sources */,
 				A53C8F532644B22B003A5DF8 /* OmniBoxUITestsHelper.swift in Sources */,
 				B5CDFF3D274EC8B300742CC9 /* OnboardingUsernameViewLocators.swift in Sources */,
+				A315D58228316F2600579362 /* Rowable.swift in Sources */,
 				B5056A9126F88CFD00FFD2A2 /* HelpViewLocators.swift in Sources */,
 				B52C148127FF068000D67EE5 /* AboutPreferencesViewLocators.swift in Sources */,
 				B57535F026BD5F690053CE2D /* NoteEditorTests.swift in Sources */,
@@ -9368,6 +9403,7 @@
 				B5E8011026AEA64E00C8BD61 /* WebViewLocators.swift in Sources */,
 				A3E7B4C027AC462E0074C9BB /* PasswordPreferencesTests.swift in Sources */,
 				B5FB3A1E27E8C18400037FD5 /* SignInTests.swift in Sources */,
+				A315D570282B98F000579362 /* CreditCardsTests.swift in Sources */,
 				B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */,
 				B5FAE304270EE16800EAC8A3 /* AccountTestView.swift in Sources */,
 				B5984C9227031D7A00192B5F /* SignUpAutocompleteTests.swift in Sources */,
