@@ -75,6 +75,8 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
         preferences._setAllowsPicture(inPictureMediaPlayback: true)
         preferences._setFullScreenEnabled(true)
         preferences._setBackspaceKeyNavigationEnabled(false)
+        WKWebsiteDataStore.nonPersistent()._setResourceLoadStatisticsEnabled(PreferencesManager.isCrossSiteTrackingEnabled)
+        WKWebsiteDataStore.default()._setResourceLoadStatisticsEnabled(PreferencesManager.isCrossSiteTrackingEnabled)
         #endif
     }
 
