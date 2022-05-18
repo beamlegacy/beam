@@ -44,13 +44,6 @@ final class WebFieldAutofillOverlay {
             }.store(in: &scope)
     }
 
-    deinit {
-        dismissPasswordManagerMenu()
-        menuViewModel?.close()
-        menuViewModel = nil
-        clearIcon()
-    }
-
     private var fieldLocator: WebFieldLocator {
         if let currentFieldLocator = currentFieldLocator {
             return currentFieldLocator
@@ -58,6 +51,13 @@ final class WebFieldAutofillOverlay {
         let newFieldLocator = WebFieldLocator(page: page, elementId: elementId, frameInfo: frameInfo, scrollUpdater: scrollUpdater)
         currentFieldLocator = newFieldLocator
         return newFieldLocator
+    }
+
+    func dismiss() {
+        menuViewModel?.close()
+        menuViewModel = nil
+        dismissPasswordManagerMenu()
+        clearIcon()
     }
 
     func showIcon(frameInfo: WKFrameInfo?) {
