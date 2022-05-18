@@ -71,4 +71,16 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.deleteAllRemoteObjects.rawValue)
         return self
     }
+    
+    @discardableResult
+    func populateCreditCardsDB() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.populateCreditCardsDB.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func clearCreditCardsDB() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.clearCreditCardsDB.rawValue)
+        return self
+    }
 }

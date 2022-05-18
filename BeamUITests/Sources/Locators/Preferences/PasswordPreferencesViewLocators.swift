@@ -16,7 +16,11 @@ enum PasswordPreferencesViewLocators {
         case exportButton = "Export…"
         case cancelButton = "Cancel"
         case addPasswordButton = "Add Password"
+        case addCardButton = "Add Card"
         case doneButton = "Done"
+        case editButton = "Edit..."
+        case addCreditCardButton = "addCreditCard"
+        case removeCreditCardButton = "removeCreditCard"
     }
 
     enum Pickers: String, CaseIterable, UIElement {
@@ -33,5 +37,9 @@ enum PasswordPreferencesViewLocators {
     
     enum StaticTexts: String, CaseIterable, UIElement {
         case siteError = "Website URL is invalid"
+    }
+    
+    enum Other: String, CaseIterable, UIElement {
+        case creditCards = "Credit Cards"
     }
 }

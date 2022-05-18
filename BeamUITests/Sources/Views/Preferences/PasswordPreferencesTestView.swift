@@ -132,10 +132,15 @@ class PasswordPreferencesTestView: PreferencesBaseView {
         return app.windows[passwordsColumnTitle].sheets.children(matching: .textField).element(boundBy: field.rawValue)
     }
     
+    @discardableResult
+    func clickEditCreditCardButton() -> CreditCardTestView {
+        button(PasswordPreferencesViewLocators.Buttons.editButton.accessibilityIdentifier).clickOnExistence()
+        return CreditCardTestView()
+    }
+    
     enum PasswordFieldToFill: Int, CaseIterable {
         case site = 0
         case username = 1
         case password = 2
-    }
-    
+    }    
 }
