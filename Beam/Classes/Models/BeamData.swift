@@ -114,14 +114,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
         noteAutoSaveService = NoteAutoSaveService()
         cookieManager = CookiesManager()
-
-        let enableUpdateAutoCheck = ![.debug, .test].contains(Configuration.env)
-
-        if let feed = URL(string: Configuration.updateFeedURL) {
-            self.versionChecker = VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
-        } else {
-            self.versionChecker = VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: enableUpdateAutoCheck)
-        }
+        versionChecker = Self.createVersionChecker()
 
         let treeConfig = BrowsingTreeSenderConfig(
             dataStoreUrl: EnvironmentVariables.BrowsingTree.url,
@@ -354,7 +347,33 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         if newDay { newDay.toggle() }
     }
 
-    // MARK: - Calendar
+    public func clearCookiesAndCache() {
+        self.cookieManager.clearCookiesAndCache()
+    }
+
+    func setup(webView: WKWebView) {
+        cookieManager.setupCookies(for: webView)
+    }
+
+    ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
+    private func backup() {
+        let fileManager = FileManager.default
+
+        guard PreferencesManager.isDataBackupOnUpdateOn else { return }
+
+        let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!
+        var archiveName = "Beam data archive"
+
+        if let name = Information.appName, let version = Information.appVersion, let build = Information.appBuild {
+            archiveName = "\(name) v.\(version)_\(build) data backup"
+        }
+
+        try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
+    }
+}
+
+// MARK: - Calendar
+extension BeamData {
     private func observeCalendarManager(_ calendarManager: CalendarManager) {
         calendarManager.$updated.sink { [weak self] updated in
             guard let self = self else { return }
@@ -384,29 +403,19 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             }
         }
     }
+}
 
-    public func clearCookiesAndCache() {
-        self.cookieManager.clearCookiesAndCache()
-    }
-
-    func setup(webView: WKWebView) {
-        cookieManager.setupCookies(for: webView)
-    }
-
-    ///Create a .zip backup of all the content of the BeamData folder in Beam sandbox
-    private func backup() {
-        let fileManager = FileManager.default
-
-        guard PreferencesManager.isDataBackupOnUpdateOn else { return }
-
-        let downloadFolder = fileManager.urls(for: .downloadsDirectory, in: .userDomainMask).first!
-        var archiveName = "Beam data archive"
-
-        if let name = Information.appName, let version = Information.appVersion, let build = Information.appBuild {
-            archiveName = "\(name) v.\(version)_\(build) data backup"
+// MARK: - AutoUpdate
+extension BeamData {
+    private static func createVersionChecker() -> VersionChecker {
+        // We disable AutoUpdate own auto check system for now.
+        // due to suspicious timer crash reports. See https://linear.app/beamapp/issue/BE-4065
+        let enableUpdateAutoCheck = false // ![.debug, .test].contains(Configuration.env)
+        if let feed = URL(string: Configuration.updateFeedURL) {
+            return VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
+        } else {
+            return VersionChecker(mockedReleases: AppRelease.mockedReleases(), autocheckEnabled: enableUpdateAutoCheck)
         }
-
-        try? fileManager.zipItem(at: URL(fileURLWithPath: Self.dataFolder(fileName: "")), to: downloadFolder.appendingPathComponent("\(archiveName).zip"), compressionMethod: .deflate)
     }
 
     private func configureAutoUpdate() {
@@ -432,7 +441,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         // Only trigger the startup alert for the beta builds
         guard Configuration.branchType == .beta else { return }
 
-        if versionChecker.autocheckEnabled {
+        if PreferencesManager.isAutoUpdateOn {
             checkForUpdateCancellable = versionChecker.$state.sink { [weak self] state in
                 guard let self = self else { return }
                 switch state {
@@ -456,6 +465,17 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         }
     }
 
+    /// Check for update if enough time has passed since last check.
+    func checkForAutoUpdateIfNeeded() {
+        guard PreferencesManager.isAutoUpdateOn, ![.debug, .test].contains(Configuration.env) else { return }
+        guard let lastCheck = versionChecker.lastCheck, lastCheck.timeIntervalSinceNow > -versionChecker.autocheckTimeInterval else {
+            // either we never checked, or enough time has passed.
+            versionChecker.checkForUpdates()
+            return
+        }
+    }
+
+    /// Check for updates right away.
     func checkForUpdate() {
         versionChecker.areAnyUpdatesAvailable { checkResult in
             self.showUpdateAlert(onStartUp: false, availableRelease: checkResult)
