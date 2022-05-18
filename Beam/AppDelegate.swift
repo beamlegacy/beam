@@ -130,10 +130,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         #endif
 
-        if Configuration.branchType == .develop {
-            self.autoAskTagGroupingFeedback()
-        }
-
         setupNetworkMonitor()
 
         // We sync data *after* we potentially connected to websocket, to make sure we don't miss any data
@@ -157,22 +153,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         }
         preferencesWindowController.close()
         openedPrefPanelOnce = true
-    }
-
-    // MARK: - TabGrouping Feedback
-    func autoAskTagGroupingFeedback() {
-        let now =  BeamDate.now
-        let cal = Calendar.current
-        guard let next = cal.date(byAdding: DateComponents(hour: 1), to: now) else { return }
-        let timer = Timer(fireAt: next, interval: 3600, target: self, selector: #selector(autoShowTabGroupingFeedbackWindow), userInfo: nil, repeats: true)
-        RunLoop.main.add(timer, forMode: .common)
-    }
-
-    @objc func autoShowTabGroupingFeedbackWindow() {
-        guard self.data.clusteringManager.tabGroupingUpdater.hasPagesGroup && windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
-        tabGroupingFeedbackWindow?.performClose(self)
-        tabGroupingFeedbackWindow = nil
-        showTabGroupingFeedbackWindow(self)
     }
 
     // MARK: - Network Monitor
@@ -800,7 +780,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             guard window.state.mode == .web else { continue }
             window.state.browserTabsManager.currentTab?.tabDidAppear(withState: window.state)
         }
+        data.checkForAutoUpdateIfNeeded()
         ContentBlockingManager.shared.synchronizeIfNeeded()
+        showTagGroupingFeedbackIfNeeded()
     }
 
     func applicationWillResignActive(_ notification: Notification) {

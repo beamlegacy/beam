@@ -6,8 +6,31 @@
 //
 
 import Foundation
+import BeamCore
 
 extension AppDelegate {
+
+    static private var lastTabGroupingFeedback: Date?
+    static private let tabGroupingFeedbackInterval: TimeInterval = 3600
+
+    func showTagGroupingFeedbackIfNeeded() {
+        guard Configuration.branchType == .develop, PreferencesManager.showTabsColoring else { return }
+        guard let lastTabGroupingFeedback = Self.lastTabGroupingFeedback else {
+            Self.lastTabGroupingFeedback = BeamDate.now
+            return
+        }
+        if lastTabGroupingFeedback.timeIntervalSinceNow < -Self.tabGroupingFeedbackInterval {
+            autoShowTabGroupingFeedbackWindow()
+        }
+    }
+
+    private func autoShowTabGroupingFeedbackWindow() {
+        Self.lastTabGroupingFeedback = BeamDate.now
+        guard self.data.clusteringManager.tabGroupingUpdater.hasPagesGroup && windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
+        tabGroupingFeedbackWindow?.performClose(self)
+        tabGroupingFeedbackWindow = nil
+        showTabGroupingFeedbackWindow(self)
+    }
 
     @IBAction func showTabGroupingWindow(_ sender: Any) {
         if let tabGroupingWindow = tabGroupingWindow {
@@ -29,6 +52,7 @@ extension AppDelegate {
     }
 
     @IBAction func showTabGroupingFeedbackWindow(_ sender: Any) {
+        Self.lastTabGroupingFeedback = BeamDate.now
         if let tabGroupingFeedbackWindow = tabGroupingFeedbackWindow {
             tabGroupingFeedbackWindow.makeKeyAndOrderFront(window)
             return
