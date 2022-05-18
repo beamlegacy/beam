@@ -48,6 +48,7 @@ struct CreditCardsModalView: View {
                                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                         }
                         .buttonStyle(.bordered)
+                        .accessibilityIdentifier("addCreditCard")
                         Button {
                             self.showingRemoveAlert = true
                         } label: {
@@ -56,6 +57,7 @@ struct CreditCardsModalView: View {
                                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                         }
                         .buttonStyle(.bordered)
+                        .accessibilityIdentifier("removeCreditCard")
                         .disabled(creditCardsViewModel.disableRemoveButton)
                     }
                 }

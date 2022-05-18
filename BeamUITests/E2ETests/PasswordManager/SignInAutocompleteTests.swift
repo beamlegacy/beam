@@ -56,6 +56,7 @@ class SignInAutocompleteTests: BaseTest {
         step("When I click on password field"){
             mockPage.getPasswordFieldElement(false).clickOnExistence()
         }
+        
         step("Then the key icon is visible"){
             XCTAssertTrue(helper.getKeyIconElement().exists)
         }
@@ -63,6 +64,7 @@ class SignInAutocompleteTests: BaseTest {
         step("When I show the omnibox"){
             ShortcutsHelper().shortcutActionInvoke(action: .showOmnibox)
         }
+        
         step("Then the key icon is hidden"){
             XCTAssertFalse(helper.getKeyIconElement().exists)
         }
@@ -70,6 +72,7 @@ class SignInAutocompleteTests: BaseTest {
         step("When I dismiss the omnibox"){
             helper.typeKeyboardKey(.escape)
         }
+        
         step("Then the key icon is visible again"){
             XCTAssertTrue(helper.getKeyIconElement().exists)
         }
@@ -85,6 +88,7 @@ class SignInAutocompleteTests: BaseTest {
         step("When I click on password field"){
             mockPage.getPasswordFieldElement(false).clickOnExistence()
         }
+        
         step("Then the key icon is visible"){
             XCTAssertTrue(helper.getKeyIconElement().exists)
         }
