@@ -43,6 +43,7 @@
         "BrowserOpenModalTests",
         "CaptureCopyShareTests",
         "CardEditTests",
+        "CreditCardsTests",
         "EditorShortcutsTests",
         "HelpAndFeedbackTests",
         "IncognitoModeTests",

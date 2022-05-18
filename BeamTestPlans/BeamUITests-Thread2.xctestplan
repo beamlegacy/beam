@@ -51,6 +51,7 @@
         "CardPublishTests",
         "CardViewEmbedsTests",
         "CardViewTests",
+        "CreditCardsTests",
         "DeleteNotesTests",
         "DownloadsTest",
         "EditorShortcutsTests",
