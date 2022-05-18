@@ -41,10 +41,8 @@ struct Configuration {
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
     static private(set) var apiHostnameDefault = "https://api.prod.beamapp.co" // "http://api.beam.lvh.me"
-    static private(set) var publicHostnameDefault = "https://app.beamapp.co"
 
     static private(set) var apiHostnameDefaultStaging = "https://api.staging.beamapp.co"
-    static private(set) var publicHostnameDefaultStaging = "https://staging-beamwebclient.netlify.app"
 
     static private(set) var beamObjectsPageSizeDefault = 1000
 
@@ -170,15 +168,26 @@ struct Configuration {
         return []
     }()
 
-    static private var publicHostnameKey = "publicHostname"
-    static var publicHostname: String {
+    static private var publicAPIpublishServerKey = "publicAPIpublishServerKey"
+    static var publicAPIpublishServer: String {
         get {
-            UserDefaults.standard.string(forKey: publicHostnameKey) ?? publicHostnameDefault
+            UserDefaults.standard.string(forKey: publicAPIpublishServerKey) ?? EnvironmentVariables.PublicAPI.publishServer
         }
         set {
-            if newValue != publicHostname {
-                UserDefaults.standard.set(newValue, forKey: publicHostnameKey)
-                AccountManager.logout()
+            if newValue != publicAPIpublishServer && newValue != EnvironmentVariables.PublicAPI.publishServer {
+                UserDefaults.standard.set(newValue, forKey: publicAPIpublishServerKey)
+            }
+        }
+    }
+
+    static private var publicAPIembedKey = "publicAPIembedKey"
+    static var publicAPIembed: String {
+        get {
+            UserDefaults.standard.string(forKey: publicAPIembedKey) ?? EnvironmentVariables.PublicAPI.embed
+        }
+        set {
+            if newValue != publicAPIembed && newValue != EnvironmentVariables.PublicAPI.embed {
+                UserDefaults.standard.set(newValue, forKey: publicAPIembedKey)
             }
         }
     }
@@ -218,7 +227,8 @@ struct Configuration {
     }
 
     static func reset() {
-        UserDefaults.standard.removeObject(forKey: publicHostnameKey)
+        UserDefaults.standard.removeObject(forKey: publicAPIpublishServerKey)
+        UserDefaults.standard.removeObject(forKey: publicAPIembedKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
         UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
         AccountManager.logout()
@@ -226,7 +236,8 @@ struct Configuration {
 
     static func setAPIEndPointsToStaging() {
         Self.apiHostname = apiHostnameDefaultStaging
-        Self.publicHostname = publicHostnameDefaultStaging
+        Self.publicAPIpublishServer = "https://staging-web-server.ew.r.appspot.com"
+        Self.publicAPIembed = "https://staging-proxy-api.netlify.app/.netlify/functions/embed"
     }
 
     static private func value<T>(for key: String) -> T {
