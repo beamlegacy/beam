@@ -1,0 +1,19 @@
+<html>
+
+<head>
+<title>Sign Up</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Create an account</h1>
+<form action="/view" method="POST">
+<div>Name: <input type="text" autocomplete="name" name="name" id="name"></input></div>
+<div>Email: <input type="email" name="email" inputmode="email" id="email"></input></div>
+<div>Password: <input type="password" name="password" id="password" autocomplete="new-password"></input></div>
+
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>
