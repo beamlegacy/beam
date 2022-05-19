@@ -1,0 +1,17 @@
+<html>
+
+<head>
+<title>Sign Up</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Create an account</h1>
+<form action="/signuppage5-2" method="POST">
+<div>Email: <input type="email" autocomplete="email" name="email" ></input></div>
+
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>

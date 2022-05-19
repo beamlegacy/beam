@@ -49,6 +49,8 @@ public class MockHttpServer {
         router.post("/signinstep2", handler: step2Handler)
         router.all("/signinpage9-2", middleware: BodyParser())
         router.post("/signinpage9-2", handler: step2Handler)
+        router.all("/signuppage5-2", middleware: BodyParser())
+        router.post("/signuppage5-2", handler: signupStep2Handler)
 
         Kitura.addHTTPServer(onPort: port, with: router)
     }
@@ -150,6 +152,16 @@ public class MockHttpServer {
         }
         response.headers.append("Set-Cookie", value: "username=\(username)")
         renderStencil(request, response, "form/signinstep2")
+        next()
+    }
+    
+    private func signupStep2Handler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        guard let formParams = request.body?.asURLEncoded, let email = formParams["email"] else {
+            response.status(.badRequest)
+            return next()
+        }
+        response.headers.append("Set-Cookie", value: "email=\(email)")
+        renderStencil(request, response, "form/signuppage5-2")
         next()
     }
 

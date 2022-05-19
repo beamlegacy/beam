@@ -37,6 +37,8 @@
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination1()",
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination3()",
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination4()",
+        "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination5()",
+        "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination6()",
         "AllCardsDeleteTests",
         "BaseTest",
         "BrowserFancyUrlTests",
