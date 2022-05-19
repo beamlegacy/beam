@@ -61,7 +61,7 @@ struct Toolbar: View {
                 state.associatedWindow?.zoom(nil)
             }))
             .background(
-                VisualEffectView(material: .popover)
+                VisualEffectView(material: state.mode == .web ? .popover : .headerView)
                     .overlay(blurOverlay)
                     .opacity(!isMainWindow || !viewModel.allowTransparentBackground || isAboveContent ? 1 : 0)
             )
