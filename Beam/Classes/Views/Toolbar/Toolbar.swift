@@ -5,6 +5,7 @@
 //  Created by Remi Santos on 25/11/2021.
 //
 
+import BeamCore
 import SwiftUI
 
 struct Toolbar: View {
@@ -52,13 +53,14 @@ struct Toolbar: View {
             }
         }
     }
+
     var body: some View {
         let mode = state.mode
         ToolbarContentView(downloadList: state.data.downloadManager.downloadList)
             .environmentObject(state.autocompleteManager)
             .zIndex(11)
             .background(ClickCatchingView(onTap: { _ in }, onDoubleTap: { _ in
-                state.associatedWindow?.zoom(nil)
+                state.associatedWindow?.zoomOrMiniaturize(nil)
             }))
             .background(
                 VisualEffectView(material: state.mode == .web ? .popover : .headerView)
@@ -101,4 +103,29 @@ struct Toolbar_Previews: PreviewProvider {
     static var previews: some View {
         Toolbar()
     }
+}
+
+// MARK: Helpers
+
+private extension NSWindow {
+
+    private static var actionOnDoubleClickKey: String { "AppleActionOnDoubleClick" }
+    private static var zoomActionOnDoubleClickValue: String { "Maximize" }
+    private static var miniaturizeActionOnDoubleClickValue: String { "Minimize" }
+
+    func zoomOrMiniaturize(_ sender: Any?) {
+        @UserDefault(key: Self.actionOnDoubleClickKey, defaultValue: Self.zoomActionOnDoubleClickValue)
+        var actionOnDoubleClickValue: String
+
+        switch actionOnDoubleClickValue {
+        case Self.zoomActionOnDoubleClickValue:
+            zoom(sender)
+        case Self.miniaturizeActionOnDoubleClickValue:
+            miniaturize(sender)
+        default:
+            Logger.shared.logWarning("Unknown \(Self.actionOnDoubleClickKey) user default value", category: .general)
+            zoom(sender) // Defaulting to zoom if value is unknown (macOS update ? user-defined value ?)
+        }
+    }
+
 }
