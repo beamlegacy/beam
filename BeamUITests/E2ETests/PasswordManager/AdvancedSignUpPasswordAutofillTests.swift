@@ -194,5 +194,50 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
         }
     }
     
+    func testSignUpPageCombination5() {
+        let signUpPage = "signuppage5-1"
+        
+        step("Given I navigate to \(signUpPage)") {
+            OmniBoxTestView().searchInOmniBox(baseUrl + signUpPage, true)
+        }
+        
+        fillDataWithoutPwManager(field: "Email: ", data: loginEmail)
+        mockPage.getContinueButtonElement(inView: view).clickOnExistence()
+        verifyPwManagerNotDisplayedTextField(field: "Username: ", data: firstName)
+        fillPasswordFieldWithSuggestedPassword()
+        
+        step("When I submit the form") {
+            mockPage.getContinueButtonElement(inView: view).clickOnExistence()
+        }
+        
+        step("Then the result page is populated with sign up data") {
+            alertView.notNowClick() // will fail if pop up is not displayed
+            XCTAssertEqual(mockPage.getResultValue(label: "email"), loginEmail)
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), generatedPassword)
+        }
+    }
+    
+    func testSignUpPageCombination6() {
+        let signUpPage = "signuppage6"
+        
+        step("Given I navigate to \(signUpPage)") {
+            OmniBoxTestView().searchInOmniBox(baseUrl + signUpPage, true)
+        }
+        
+        verifyPwManagerNotDisplayedTextField(field: "Name: ", data: firstName)
+        fillDataWithoutPwManager(field: "Email: ", data: loginEmail)
+        fillPasswordFieldWithSuggestedPassword()
+        
+        step("When I submit the form") {
+            mockPage.getContinueButtonElement(inView: view).clickOnExistence()
+        }
+        
+        step("Then the result page is populated with sign up data") {
+            alertView.notNowClick() // will fail if pop up is not displayed
+            XCTAssertEqual(mockPage.getResultValue(label: "email"), loginEmail)
+            XCTAssertEqual(mockPage.getResultValue(label: "password"), generatedPassword)
+        }
+    }
+    
 }
         
