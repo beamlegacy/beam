@@ -251,7 +251,7 @@ final class CollapsedContentLayer: ButtonLayer {
 
             let styleAttributes: [NSAttributedString.Key: Any] = [
                 .foregroundColor: state.beamColor.cgColor,
-                .font: BeamFont.medium(size: 14).nsFont
+                .font: BeamFont.regular(size: 14).nsFont
             ]
 
             return builder.build(config: config).addAttributes(styleAttributes)

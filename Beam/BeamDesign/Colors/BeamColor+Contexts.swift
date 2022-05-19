@@ -38,14 +38,14 @@ extension BeamColor {
         static let searchHover = BeamColor.Bluetiful
         static let searchClicked = BeamColor.Custom(named: "EditorSearchClicked")
         static let bidirectionalLink = BeamColor.Beam
-        static let bidirectionalLinkBackground = BeamColor.Beam.alpha(0.08)
-        static let bidirectionalLinkHighlightedBackground = BeamColor.Beam.alpha(0.24)
+        static let bidirectionalLinkBackground = BeamColor.combining(lightColor: .Beam.alpha(0.05), darkColor: .Beam.alpha(0.10))
+        static let bidirectionalLinkHighlightedBackground = BeamColor.combining(lightColor: .Beam.alpha(0.15), darkColor: .Beam.alpha(0.18))
         static let bidirectionalUnderline = BeamColor.Beam.alpha(0.25)
         static let control = BeamColor.Custom(named: "EditorControlColor")
         static let link = BeamColor.Niobium
         static let linkActive = BeamColor.Bluetiful
-        static let linkActiveBackground = BeamColor.Bluetiful.alpha(0.1)
-        static let linkActiveHighlightedBackground = BeamColor.Bluetiful.alpha(0.24)
+        static let linkActiveBackground = BeamColor.combining(lightColor: .Bluetiful.alpha(0.05), darkColor: .Bluetiful.alpha(0.08))
+        static let linkActiveHighlightedBackground = BeamColor.combining(lightColor: .Bluetiful.alpha(0.15), darkColor: .Bluetiful.alpha(0.15))
         static var linkDecoration = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray)
         static let syntax = BeamColor.Custom(named: "EditorSyntaxColor")
         static let indentBackground = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.5, darkColor: .Mercury)
@@ -66,7 +66,7 @@ extension BeamColor {
         static let collapseExpandButton = BeamColor.LightStoneGray
         static let collapseExpandButtonHover = BeamColor.Bluetiful
         static let collapseExpandButtonClicked = BeamColor.Custom(named: "EditorSearchClicked")
-        static let tokenNoLinkActiveBackground = BeamColor.combining(lightColor: .Mercury, darkColor: .AlphaGray, darkAlpha: 0.5)
+        static let tokenNoLinkActiveBackground = BeamColor.combining(lightColor: .Mercury, lightAlpha: 0.5, darkColor: .AlphaGray, darkAlpha: 0.5)
     }
 }
 
