@@ -15,6 +15,7 @@ class SlashMenuTests: BaseTest {
     let dayToSelect = "11"
     let monthToSelect = "June"
     let yearToSelect = "2025"
+    let textToFormat = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat."
     
     func testDatePickerCardCreation() {
         let localDateFormat = "\(dayToSelect) \(monthToSelect) \(yearToSelect)"
@@ -130,6 +131,29 @@ class SlashMenuTests: BaseTest {
             XCTAssertTrue(cardTestView.getCheckboxAtTextNote(2).exists)
             XCTAssertFalse(cardTestView.getCheckboxAtTextNote(3).exists)
             XCTAssertFalse(cardTestView.getCheckboxAtTextNote(4).exists)
+        }
+    }
+    
+    func testSlashMenuTextFormatShortcutsApplying() {
+        
+        step("GIVEN I type text in first note") {
+            cardTestView = launchAppAndOpenFirstCard()
+            cardTestView.app.typeText(textToFormat)
+        }
+        
+        step("THEN Text content remains same after applying text format") {
+            for item in CardTestView.TextFormat.allCases {
+            
+            cardTestView.nodeLineFormatChange(item)
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), textToFormat)
+            
+            if item == .heading1 || item == .heading2 {
+                cardTestView.shortcutsHelper.shortcutActionInvoke(action: .undo)
+            }
+            else {
+                cardTestView.shortcutsHelper.shortcutActionInvokeRepeatedly(action: .undo, numberOfTimes: 3)
+                }
+            }
         }
     }
 }
