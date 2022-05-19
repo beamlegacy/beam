@@ -80,6 +80,7 @@
         "SignInTests",
         "SignUpAutocompleteTests",
         "SigninTests",
+        "SlashMenuTests",
         "TextEditorContextViewTests",
         "UpdateViewTests\/testUpdateAvailableEverywhereInCardView()",
         "WaitHelper",

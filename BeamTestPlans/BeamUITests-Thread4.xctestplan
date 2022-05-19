@@ -92,7 +92,9 @@
         "SearchOnWebTests",
         "SignInTests",
         "SlashMenuTests",
+        "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
         "SlashMenuTests\/testDatePickerCardCreation()",
+        "SlashMenuTests\/testNoteDividerCreation()",
         "UpdateViewTests\/testUpdateViewAppearance()",
         "WaitHelper",
         "dummytests"
