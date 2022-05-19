@@ -73,6 +73,9 @@
         "SignUpAutocompleteTests",
         "SigninTests",
         "SlashMenuTests",
+        "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
+        "SlashMenuTests\/testDatePickerCardCreation()",
+        "SlashMenuTests\/testNoteDividerCreation()",
         "TextEditorContextViewTests",
         "UpdateViewTests",
         "WebsiteAuthTest"
