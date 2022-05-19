@@ -182,7 +182,7 @@ struct BeamTextAttributedStringBuilder {
             if let url = URL(string: link) ?? link.toEncodedURL {
                 stringAttributes[.link] = url as NSURL
             }
-            stringAttributes[.font] = BeamFont.medium(size: config.fontSize).nsFont
+            stringAttributes[.font] = BeamFont.regular(size: config.fontSize).nsFont
             if isCursorCloseToRange {
                 stringAttributes[.foregroundColor] = BeamColor.Editor.linkActive.staticColor
                 stringAttributes[.boxBackgroundColor] = isCursorInsideRange ?
@@ -191,8 +191,8 @@ struct BeamTextAttributedStringBuilder {
             } else {
                 stringAttributes[.foregroundColor] = BeamColor.Editor.link.staticColor
                 stringAttributes[.underlineStyle] = NSUnderlineStyle.single.rawValue
-                stringAttributes[.underlineColor] = NSColor.clear
-                stringAttributes[.hoverUnderlineColor] = BeamColor.Editor.linkDecoration.cgColor
+                stringAttributes[.underlineColor] = BeamColor.AlphaGray.alpha(0.8).cgColor
+                stringAttributes[.hoverUnderlineColor] = BeamColor.Niobium.cgColor
             }
         } else if let link = internalLink {
             stringAttributes[.link] = link
