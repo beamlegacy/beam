@@ -394,4 +394,41 @@ class CardTestView: BaseView {
         typeInCardNoteByIndex(noteIndex: index, text: checkboxShortcut, needsActivation: true)
         return getTextNodeByIndex(nodeIndex: index)
     }
+    
+    func nodeLineFormatChange(_ format: TextFormat) {
+        switch format {
+        case .bold:
+            self.nodeLineFormatTrigger("**")
+        case .italic:
+            self.nodeLineFormatTrigger("*")
+        case .strikethrough:
+            self.nodeLineFormatTrigger("~~")
+        case .underline:
+            self.nodeLineFormatTrigger("_")
+        case .heading1:
+            shortcutsHelper.shortcutActionInvoke(action: .beginOfNote)
+            self.app.typeText("#")
+            self.typeKeyboardKey(.space)
+        case .heading2:
+            shortcutsHelper.shortcutActionInvoke(action: .beginOfNote)
+            self.app.typeText("##")
+            self.typeKeyboardKey(.space)
+        }
+    }
+    
+    private func nodeLineFormatTrigger(_ key: String) {
+        shortcutsHelper.shortcutActionInvoke(action: .beginOfNote)
+        app.typeText(key)
+        shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
+        app.typeText(key)
+    }
+    
+    enum TextFormat: CaseIterable {
+        case bold
+        case italic
+        case strikethrough
+        case underline
+        case heading1
+        case heading2
+    }
 }
