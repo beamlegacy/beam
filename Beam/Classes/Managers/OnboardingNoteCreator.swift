@@ -73,6 +73,7 @@ class OnboardingNoteCreator {
                     return
                 }
 
+                newNote.title = BeamDate.journalNoteTitle(for: forceDate)
                 newNote.creationDate = forceDate
                 newNote.updateDate = forceDate
                 newNote.type = .journalForDate(forceDate)
