@@ -2,7 +2,6 @@ import Foundation
 import Quick
 import Nimble
 import Combine
-import Promises
 
 @testable import Beam
 class CoreDataContextObserverTests: QuickSpec {
@@ -55,7 +54,7 @@ class CoreDataContextObserverTests: QuickSpec {
                 expect(receivedIds.contains(doc3.id)) == true
             }
 
-            it("can observe inserted documents") {
+            asyncIt("can observe inserted documents") {
                 var receivedIds: Set<UUID> = []
 
                 let doc1 = helper.createDocumentStruct()
@@ -63,23 +62,29 @@ class CoreDataContextObserverTests: QuickSpec {
                 let doc3 = helper.createDocumentStruct()
 
                 var cancellable: AnyCancellable!
-                waitUntil(timeout: .seconds(5)) { done in
-                    cancellable = observer
-                        .publisher(for: .insertedDocuments)
-                        .sink { ids in
-                            ids?.forEach { receivedIds.insert($0) }
-                        }
-
-                    let promises: [Promises.Promise<Bool>] = [
-                        documentManager.save(doc1),
-                        documentManager.save(doc2),
-                        documentManager.save(doc3)
-                    ]
-                    Promises.all(promises).then { _ in
-                        cancellable.cancel()
-                        done()
+                cancellable = observer
+                    .publisher(for: .insertedDocuments)
+                    .sink { ids in
+                        ids?.forEach { receivedIds.insert($0) }
                     }
+
+                await withCheckedContinuation { continuation in
+                    documentManager.save(doc1, completion:  { _ in
+                        continuation.resume()
+                    })
+
                 }
+                await withCheckedContinuation { continuation in
+                    documentManager.save(doc2, completion:  { _ in
+                        continuation.resume()
+                    })
+                }
+                await withCheckedContinuation { continuation in
+                    documentManager.save(doc3, completion:  { _ in
+                        continuation.resume()
+                    })
+                }
+                cancellable.cancel()
                 expect(receivedIds) == Set([doc1.id, doc2.id, doc3.id])
             }
         }
