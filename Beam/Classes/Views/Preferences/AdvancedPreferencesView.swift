@@ -715,6 +715,7 @@ struct AdvancedPreferencesView: View {
             apiHostname = Configuration.apiHostname
             publicAPIpublishServer = Configuration.publicAPIpublishServer
             publicAPIembed = Configuration.publicAPIembed
+            promptEraseAllDataAlert()
         }, label: {
             // TODO: loc
             Text("Reset API Endpoints").frame(minWidth: 100)
@@ -727,6 +728,7 @@ struct AdvancedPreferencesView: View {
             apiHostname = Configuration.apiHostname
             publicAPIpublishServer = Configuration.publicAPIpublishServer
             publicAPIembed = Configuration.publicAPIembed
+            promptEraseAllDataAlert()
         }, label: {
             // TODO: loc
             Text("Set API Endpoints to staging server").frame(minWidth: 100)
@@ -1063,6 +1065,24 @@ struct AdvancedPreferencesView: View {
             .onReceive([enableDailySummary].publisher.first()) {
                 PreferencesManager.enableDailySummary = $0
             }
+    }
+
+    private func promptEraseAllDataAlert() {
+        let alert = NSAlert()
+        alert.messageText = "Do you want to erase all local data?"
+        let customView = NSView(frame: NSRect(x: 0, y: 0, width: 252, height: 16))
+        alert.accessoryView = customView
+        alert.addButton(withTitle: "Erase all data")
+        alert.addButton(withTitle: "Close")
+        alert.alertStyle = .warning
+        guard let window = AdvancedPreferencesViewController.view.window else { return }
+        alert.beginSheetModal(for: window) { response in
+            guard response == .alertFirstButtonReturn else { return }
+            for window in AppDelegate.main.windows {
+                window.state.closeAllTabs(closePinnedTabs: true)
+            }
+            AppDelegate.main.deleteAllLocalData()
+        }
     }
 }
 
