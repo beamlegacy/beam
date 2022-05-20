@@ -35,10 +35,6 @@ class MockCreditCardStore: CreditCardStore {
         return creditCards.values.filter { $0.updatedAt >= updatedSince }
     }
 
-    func find(cardNumber: String) throws -> [CreditCardRecord] {
-        creditCards.values.filter { $0.encryptedCardNumber == cardNumber && $0.deletedAt == nil }
-    }
-
     @discardableResult
     func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) -> CreditCardRecord {
         var creditCard = CreditCardRecord(cardDescription: description, encryptedCardNumber: cardNumber, cardHolder: holder, expirationMonth: expirationMonth, expirationYear: expirationYear, createdAt: BeamDate.now, updatedAt: BeamDate.now, usedAt: BeamDate.now)
