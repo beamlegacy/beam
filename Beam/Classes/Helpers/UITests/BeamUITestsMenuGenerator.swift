@@ -68,7 +68,11 @@ class BeamUITestsMenuGenerator {
     var googleCalendarService = GoogleCalendarService(accessToken: nil, refreshToken: nil)
 
     private func logout() {
+        for window in AppDelegate.main.windows {
+            window.state.closeAllTabs(closePinnedTabs: true)
+        }
         AccountManager.logout()
+        AppDelegate.main.deleteAllLocalData()
     }
 
     private func deleteLogs() {
@@ -328,11 +332,19 @@ class BeamUITestsMenuGenerator {
     }
 
     private func connectToStagingServer() {
+        for window in AppDelegate.main.windows {
+            window.state.closeAllTabs(closePinnedTabs: true)
+        }
         Configuration.setAPIEndPointsToStaging()
+        AppDelegate.main.deleteAllLocalData()
     }
 
     private func connectToProductionServer() {
+        for window in AppDelegate.main.windows {
+            window.state.closeAllTabs(closePinnedTabs: true)
+        }
         Configuration.reset()
+        AppDelegate.main.deleteAllLocalData()
     }
 
     private func deleteRemoteAccount() {
