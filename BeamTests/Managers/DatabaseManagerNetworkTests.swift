@@ -6,7 +6,6 @@ import Fakery
 import Quick
 import Nimble
 import Combine
-import Promises
 
 @testable import Beam
 @testable import BeamCore
@@ -265,21 +264,6 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         expect(remoteObject) == dbStruct
                     }
                 }
-                context("Promises") {
-                    it("saves as beamObject") {
-                        let promise: Promises.Promise<DatabaseStruct> = sut.saveOnBeamObjectAPI(dbStruct)
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.then { receivedDbStruct in
-                                expect(receivedDbStruct) == dbStruct
-                                done()
-                            }.catch { fail("Should not be called: \($0)"); done() }
-                        }
-
-                        let remoteObject: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
-                        expect(remoteObject) == dbStruct
-                    }
-                }
             }
 
             describe("saveOnBeamObjectsAPI()") {
@@ -321,25 +305,6 @@ class DatabaseManagerNetworkTests: QuickSpec {
                         expect(remoteObject2) == dbStruct2
                     }
                 }
-                context("Promises") {
-                    it("saves as beamObjects") {
-                        let objects: [DatabaseStruct] = [dbStruct, dbStruct2]
-                        let promise: Promises.Promise<[DatabaseStruct]> = sut.saveOnBeamObjectsAPI(objects)
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.then { receivedObjects in
-                                expect(receivedObjects) == objects
-                                done()
-                            }.catch { fail("Should not be called: \($0)"); done() }
-                        }
-
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
-                        expect(remoteObject1) == dbStruct
-
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
-                        expect(remoteObject2) == dbStruct2
-                    }
-                }
             }
 
             describe("saveAllOnBeamObjectApi()") {
@@ -372,24 +337,6 @@ class DatabaseManagerNetworkTests: QuickSpec {
                             } catch {
                                 fail(error.localizedDescription)
                             }
-                        }
-
-                        let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
-                        expect(remoteObject1) == dbStruct
-
-                        let remoteObject2: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct2)
-                        expect(remoteObject2) == dbStruct2
-                    }
-                }
-                context("Promises") {
-                    it("saves as beamObjects") {
-                        let promise: Promises.Promise<[DatabaseStruct]> = sut.saveAllOnBeamObjectApi()
-
-                        waitUntil(timeout: .seconds(10)) { done in
-                            promise.then { documents in
-                                expect(documents).to(haveCount(2))
-                                done()
-                            }.catch { fail("Should not be called: \($0)"); done() }
                         }
 
                         let remoteObject1: DatabaseStruct? = try? beamObjectHelper.fetchOnAPI(dbStruct)
