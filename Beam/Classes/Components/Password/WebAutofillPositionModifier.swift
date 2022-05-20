@@ -10,7 +10,7 @@ import CloudKit
 
 final class WebAutofillPositionModifier {
     struct DisplayRule: Decodable {
-        var actions: [WebAutocompleteAction]?
+        var actions: [WebAutofillAction]?
         var roles: [WebInputField.Role]?
         var iconInsets: BeamEdgeInsets
     }
@@ -32,14 +32,14 @@ final class WebAutofillPositionModifier {
         }
     }
 
-    func inputFieldEdgeInsets(host: String, action: WebAutocompleteAction, role: WebInputField.Role) -> BeamEdgeInsets {
+    func inputFieldEdgeInsets(host: String, action: WebAutofillAction, role: WebInputField.Role) -> BeamEdgeInsets {
         guard let rule = displayRules[host]?.first(where: { rule in
             isEnabled(action: action, in: rule) && isEnabled(role: role, in: rule)
         }) else { return .zero }
         return rule.iconInsets
     }
 
-    private func isEnabled(action: WebAutocompleteAction, in rule: DisplayRule) -> Bool {
+    private func isEnabled(action: WebAutofillAction, in rule: DisplayRule) -> Bool {
         guard let actions = rule.actions else { return true }
         return actions.contains(action)
     }

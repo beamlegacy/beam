@@ -13,8 +13,8 @@ import Promises
     @Published var isLoading: Bool = false {
         didSet {
             if !isLoading, let url = url {
-                Logger.shared.logDebug("BrowserTab finished loading \(url.absoluteString)", category: .passwordManagerInternal)
-                passwordOverlayController?.webViewFinishedLoading()
+                Logger.shared.logDebug("BrowserTab finished loading \(url.absoluteString)", category: .webAutofillInternal)
+                webAutofillController?.webViewFinishedLoading()
             }
         }
     }
@@ -84,7 +84,7 @@ import Promises
         if !isIncognito {
             handlers.append(contentsOf: [
                 LoggingMessageHandler(),
-                PasswordMessageHandler()
+                WebAutofillMessageHandler()
             ])
         }
         return handlers
@@ -141,8 +141,8 @@ import Promises
         webViewController
     }
 
-    lazy var passwordOverlayController: PasswordOverlayController? = {
-        let controller = PasswordOverlayController(userInfoStore: MockUserInformationsStore.shared)
+    lazy var webAutofillController: WebAutofillController? = {
+        let controller = WebAutofillController(userInfoStore: MockUserInformationsStore.shared)
         controller.page = self
         return controller
     }()
@@ -435,8 +435,8 @@ import Promises
             webView.load(request)
         }
 
-        Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .passwordManagerInternal)
-        passwordOverlayController?.prepareForLoading()
+        Logger.shared.logDebug("BrowserTab load \(url.absoluteString)", category: .webAutofillInternal)
+        webAutofillController?.prepareForLoading()
     }
 
     /// Called when doing CMD+Shift+T to create a tab that has been closed and when
@@ -530,17 +530,17 @@ import Promises
     }
 
     func switchToCard() {
-        passwordOverlayController?.dismiss()
+        webAutofillController?.dismiss()
         browsingTree.switchToCard()
     }
 
     func switchToJournal() {
-        passwordOverlayController?.dismiss()
+        webAutofillController?.dismiss()
         browsingTree.switchToJournal()
     }
 
     func switchToOtherTab() {
-        passwordOverlayController?.dismiss()
+        webAutofillController?.dismiss()
         browsingTree.switchToOtherTab()
     }
 
@@ -570,7 +570,7 @@ import Promises
     }
 
     func respondToEscapeKey() {
-        passwordOverlayController?.dismiss()
+        webAutofillController?.dismiss()
     }
 
     func passwordManagerToast(saved: Bool) {
@@ -578,7 +578,7 @@ import Promises
     }
 
     func appWillClose() {
-        passwordOverlayController?.dismiss()
+        webAutofillController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeApp()
         saveTree(grouped: true)
@@ -653,7 +653,7 @@ extension BrowserTab: WebPositionsDelegate {
     /// Callback will be called very often. Take care of your own debouncing or throttling
     /// - Parameter frame: WebPage frame coordinates and positions
     func webPositionsDidUpdateScroll(with frame: WebFrames.FrameInfo) {
-        passwordOverlayController?.updateScrollPosition(for: frame)
+        webAutofillController?.updateScrollPosition(for: frame)
         guard let scorer = browsingScorer else { return }
         scorer.debouncedUpdateScrollingScore.send(frame)
     }
@@ -662,7 +662,7 @@ extension BrowserTab: WebPositionsDelegate {
     /// Callback will be called very often. Take care of your own debouncing or throttling
     /// - Parameter frame: WebPage frame coordinates and positions
     func webPositionsDidUpdateSize(with frame: WebFrames.FrameInfo) {
-        passwordOverlayController?.updateScrollPosition(for: frame)
+        webAutofillController?.updateScrollPosition(for: frame)
     }
 }
 

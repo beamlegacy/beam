@@ -81,7 +81,7 @@ class NoteScoreTriggerTests: XCTestCase {
         var pointAndShoot: PointAndShoot?
         var browsingScorer: BrowsingScorer?
         var webViewNavigationHandler: WebViewNavigationHandler?
-        var passwordOverlayController: PasswordOverlayController?
+        var webAutofillController: WebAutofillController?
         var mediaPlayerController: MediaPlayerController?
         var score: Float = 0
         var contentDescription: BrowserContentDescription?

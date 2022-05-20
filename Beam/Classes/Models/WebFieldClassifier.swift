@@ -9,7 +9,7 @@
 import Foundation
 import BeamCore
 
-enum WebAutocompleteAction: String, Decodable {
+enum WebAutofillAction: String, Decodable {
     case login
     case createAccount
     case personalInfo
@@ -43,8 +43,8 @@ struct WebInputField {
     let role: Role
 }
 
-struct WebAutocompleteGroup {
-    var action: WebAutocompleteAction
+struct WebAutofillGroup {
+    var action: WebAutofillAction
     var relatedFields: [WebInputField]
     var isAmbiguous = false // can be part of either login or account creation, must be determined by context
 
@@ -53,7 +53,7 @@ struct WebAutocompleteGroup {
     }
 }
 
-struct WebAutocompleteRules {
+struct WebAutofillRules {
     enum Condition {
         case never
         case always
@@ -194,7 +194,7 @@ extension DOMInputElement {
 }
 
 extension WebInputField {
-    init(_ inputField: DOMInputElement, role: Role? = nil, action: WebAutocompleteAction? = nil) {
+    init(_ inputField: DOMInputElement, role: Role? = nil, action: WebAutofillAction? = nil) {
         self.id = inputField.beamId
         if let role = role {
             self.role = role
@@ -225,13 +225,13 @@ extension WebInputField {
 final class WebFieldClassifier {
 
     struct ClassifierResult {
-        let autocompleteGroups: [String: WebAutocompleteGroup]
+        let autofillGroups: [String: WebAutofillGroup]
         let activeFields: [String]
 
-        static let empty = ClassifierResult(autocompleteGroups: [:], activeFields: [])
+        static let empty = ClassifierResult(autofillGroups: [:], activeFields: [])
 
         var allInputFields: [WebInputField] {
-            let fields = autocompleteGroups.values.flatMap(\.relatedFields)
+            let fields = autofillGroups.values.flatMap(\.relatedFields)
             // Deduplicate fields by id.
             // This could be replaced with an ordered set if we choose to include the Collections package.
             var fieldIds = Set<String>()
@@ -258,14 +258,14 @@ final class WebFieldClassifier {
 
     fileprivate struct RoleInContext {
         var role: WebInputField.Role
-        var action: WebAutocompleteAction
+        var action: WebAutofillAction
     }
 
     fileprivate struct EvaluatedField {
         var element: DOMInputElement
-        var evaluation: [WebAutocompleteAction: WeightedRole]
+        var evaluation: [WebAutofillAction: WeightedRole]
 
-        func bestMatch(thresholds: [WebAutocompleteAction: Match]) -> RoleInContext? {
+        func bestMatch(thresholds: [WebAutofillAction: Match]) -> RoleInContext? {
             let candidates = evaluation.filter { $0.value.match != .never }
             let perfectMatches = candidates.filter { $0.value.match == .always }
             if let perfectMatch = perfectMatches.first {
@@ -296,19 +296,19 @@ final class WebFieldClassifier {
             }.sorted().last ?? .never
         }
 
-        func roleForAction(_ action: WebAutocompleteAction) -> WebInputField.Role? {
+        func roleForAction(_ action: WebAutofillAction) -> WebInputField.Role? {
             guard let weightedRole = evaluation[action], weightedRole.match != .never else { return nil }
             return weightedRole.role
         }
     }
 
-    private var autocompleteRules: WebAutocompleteRules
+    private var autofillRules: WebAutofillRules
 
     init() {
-        self.autocompleteRules = .default
+        self.autofillRules = .default
     }
 
-    private func evaluateForPassword(action: WebAutocompleteAction, field: DOMInputElement, bestUsernameAutocomplete: DOMInputAutocomplete?, bias: Int) -> WeightedRole? {
+    private func evaluateForPassword(action: WebAutofillAction, field: DOMInputElement, bestUsernameAutocomplete: DOMInputAutocomplete?, bias: Int) -> WeightedRole? {
         let usernameRole: WebInputField.Role
         let passwordRole: WebInputField.Role
         switch action {
@@ -396,7 +396,7 @@ final class WebFieldClassifier {
         let bestUsernameAutocomplete: DOMInputAutocomplete? = containsUsernameField ? .username : containsEmailField ? .email : containsTelephoneField ? .tel : containsAutocompleteOnField ? .on : containsUntaggedLoginField ? nil : .off
 
         return fields.compactMap { field in
-            var evaluation: [WebAutocompleteAction: WeightedRole] = [:]
+            var evaluation: [WebAutofillAction: WeightedRole] = [:]
             evaluation[.login] = evaluateForPassword(action: .login, field: field, bestUsernameAutocomplete: bestUsernameAutocomplete, bias: biasTowardLogin)
             evaluation[.createAccount] = evaluateForPassword(action: .createAccount, field: field, bestUsernameAutocomplete: bestUsernameAutocomplete, bias: biasTowardAccountCreation)
             evaluation[.payment] = evaluateForPayment(field: field)
@@ -406,39 +406,39 @@ final class WebFieldClassifier {
 
     // Minimal implementation for now.
     // If more special cases arise it could make sense to define rules in a plist file and create a separate class.
-    private func autocompleteRules(for host: String?) -> WebAutocompleteRules {
+    private func autofillRules(for host: String?) -> WebAutofillRules {
         switch host {
         case "app.beamapp.co":
-            return WebAutocompleteRules(ignorePasswordAutocompleteOff: .never, ignoreUntaggedPasswordFieldAlone: true)
+            return WebAutofillRules(ignorePasswordAutocompleteOff: .never, ignoreUntaggedPasswordFieldAlone: true)
         case "pinterest.com", "netflix.com", "maderasbarber.com":
-            return WebAutocompleteRules(discardAutocompleteAttribute: .whenPasswordField)
+            return WebAutofillRules(discardAutocompleteAttribute: .whenPasswordField)
         default:
             return .default
         }
     }
 
     func classify(rawFields allRawFields: [DOMInputElement], on host: String?) -> ClassifierResult {
-        autocompleteRules = autocompleteRules(for: host)
+        autofillRules = autofillRules(for: host)
         let rawFields = allRawFields.filter(includedInEvaluation)
         let pageContainsPasswordField = rawFields.contains { $0.isCompatibleWithPassword }
         let pageContainsNonPasswordField = rawFields.contains { $0.type != .password }
-        let fields = rawFields.compactMap { autocompleteRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField, nonPasswordField: pageContainsNonPasswordField) }
+        let fields = rawFields.compactMap { autofillRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField, nonPasswordField: pageContainsNonPasswordField) }
         let pageContainsTaggedField = fields.contains { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
-        let allowedFields = fields.filter { autocompleteRules.allowField($0, pageContainsTaggedField: pageContainsTaggedField, pageContainsPasswordField: pageContainsPasswordField)}
-        Logger.shared.logDebug("Candidates: \(allowedFields.map { $0.debugDescription })", category: .passwordManagerInternal)
+        let allowedFields = fields.filter { autofillRules.allowField($0, pageContainsTaggedField: pageContainsTaggedField, pageContainsPasswordField: pageContainsPasswordField)}
+        Logger.shared.logDebug("Candidates: \(allowedFields.map { $0.debugDescription })", category: .webAutofillInternal)
 
         let passwordFields = fields.filter { $0.isCompatibleWithPassword }
         let containsPasswordFieldsUsableForLogin = !passwordFields.isEmpty && !passwordFields.contains { $0.isNewPasswordField }
         let containsPasswordFieldsUsableForNewAccount = !passwordFields.isEmpty && !passwordFields.contains { $0.isCurrentPasswordField }
         let biasTowardLogin = containsPasswordFieldsUsableForLogin ? 4 : 1 // give a slight edge to login by default
         let biasTowardAccountCreation = (containsPasswordFieldsUsableForNewAccount ? 3 : 0) + (passwordFields.count >= 2 ? 2 : 0)
-        Logger.shared.logDebug("Biases: login = \(biasTowardLogin), account creation = \(biasTowardAccountCreation)", category: .passwordManagerInternal)
+        Logger.shared.logDebug("Biases: login = \(biasTowardLogin), account creation = \(biasTowardAccountCreation)", category: .webAutofillInternal)
 
         let evaluatedFields = evaluateFields(allowedFields, biasTowardLogin: biasTowardLogin, biasTowardAccountCreation: biasTowardAccountCreation)
         let ambiguousPasswordAction = containsPasswordFieldsUsableForLogin && containsPasswordFieldsUsableForNewAccount
         let minimumLoginMatch = evaluatedFields.bestMatch(forRole: .currentUsername)
         let minimiumCreateAccountMatch = evaluatedFields.bestMatch(forRole: .newUsername)
-        let thresholds: [WebAutocompleteAction: Match] = [
+        let thresholds: [WebAutofillAction: Match] = [
             .login: max(minimumLoginMatch, containsPasswordFieldsUsableForLogin ? .score(0) : .score(900)),
             .createAccount: max(minimiumCreateAccountMatch, containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900))
         ]
@@ -456,24 +456,24 @@ final class WebFieldClassifier {
         }
     }
 
-    private func makeClassifierResult(fields: [EvaluatedField], thresholds: [WebAutocompleteAction: Match], ambiguousPasswordAction: Bool) -> ClassifierResult {
-        Logger.shared.logDebug("Making classifier results for: \(fields)", category: .passwordManagerInternal)
-        var groups: [String: WebAutocompleteGroup] = [:]
+    private func makeClassifierResult(fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool) -> ClassifierResult {
+        Logger.shared.logDebug("Making classifier results for: \(fields)", category: .webAutofillInternal)
+        var groups: [String: WebAutofillGroup] = [:]
         var activeFields: [String] = []
         for field in fields {
-            if let group = makeAutocompleteGroup(from: field, in: fields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction) {
+            if let group = makeAutofillGroup(from: field, in: fields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction) {
                 let id = field.element.beamId
                 groups[id] = group
                 activeFields.append(id)
             }
         }
-        Logger.shared.logDebug("Autocomplete groups: \(groups)", category: .passwordManagerInternal)
-        return ClassifierResult(autocompleteGroups: groups, activeFields: activeFields)
+        Logger.shared.logDebug("Autocomplete groups: \(groups)", category: .webAutofillInternal)
+        return ClassifierResult(autofillGroups: groups, activeFields: activeFields)
     }
 
-    private func makeAutocompleteGroup(from field: EvaluatedField, in fields: [EvaluatedField], thresholds: [WebAutocompleteAction: Match], ambiguousPasswordAction: Bool) -> WebAutocompleteGroup? {
+    private func makeAutofillGroup(from field: EvaluatedField, in fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool) -> WebAutofillGroup? {
         guard let best = field.bestMatch(thresholds: thresholds) else { return nil }
-        Logger.shared.logDebug("Best match for: \(field): \(best)", category: .passwordManagerInternal)
+        Logger.shared.logDebug("Best match for: \(field): \(best)", category: .webAutofillInternal)
         switch best.role {
         case .currentPassword:
             var relatedFields = fields
@@ -486,7 +486,7 @@ final class WebFieldClassifier {
             if let usernameField = usernameField {
                 relatedFields.append(WebInputField(id: usernameField.element.beamId, role: .currentUsername))
             }
-            return WebAutocompleteGroup(action: .login, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
+            return WebAutofillGroup(action: .login, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
         case .newPassword:
             var relatedFields = fields
                 .filter { $0.compatibleWithRole(.newPassword) }
@@ -498,25 +498,25 @@ final class WebFieldClassifier {
             if let usernameField = usernameField {
                 relatedFields.append(WebInputField(id: usernameField.element.beamId, role: .newUsername))
             }
-            return WebAutocompleteGroup(action: .createAccount, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
+            return WebAutofillGroup(action: .createAccount, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
         case .currentUsername:
             var relatedFields = fields
                 .filter { $0.compatibleWithRole(.currentPassword) }
                 .map { WebInputField(id: $0.element.beamId, role: .currentPassword) }
             relatedFields.append(WebInputField(id: field.element.beamId, role: .currentUsername))
-            return WebAutocompleteGroup(action: .login, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
+            return WebAutofillGroup(action: .login, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
         case .newUsername:
             var relatedFields = fields
                 .filter { $0.compatibleWithRole(.newPassword) }
                 .map { WebInputField(id: $0.element.beamId, role: .newPassword) }
             relatedFields.append(WebInputField(id: field.element.beamId, role: .newUsername))
-            return WebAutocompleteGroup(action: .createAccount, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
+            return WebAutofillGroup(action: .createAccount, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
         case .cardNumber, .cardHolder, .cardExpirationDate, .cardExpirationMonth, .cardExpirationYear:
             let relatedFields = fields.compactMap { otherField -> WebInputField? in
                 guard let role = otherField.roleForAction(.payment) else { return nil }
                 return WebInputField(id: otherField.element.beamId, role: role)
             }
-            return WebAutocompleteGroup(action: .payment, relatedFields: relatedFields)
+            return WebAutofillGroup(action: .payment, relatedFields: relatedFields)
         default:
             return nil
         }
