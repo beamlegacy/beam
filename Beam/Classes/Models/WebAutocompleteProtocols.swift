@@ -106,6 +106,12 @@ extension CreditCardEntry {
         case unknown
     }
 
+    enum ExpirationDateStatus {
+        case invalid
+        case valid
+        case expired
+    }
+
     var cardType: CardType {
         switch cardNumber.first {
         case "2", "5":
@@ -144,6 +150,12 @@ extension CreditCardEntry {
         case .unknown:
             return cardNumber.count >= 13 && cardNumber.count <= 19
         }
+    }
+
+    func expirationDateStatus(currentMonth: Int, currentYear: Int) -> ExpirationDateStatus {
+        guard expirationMonth >= 1, expirationMonth <= 12, expirationYear >= 2000 else { return .invalid }
+        guard expirationYear * 12 + expirationMonth >= currentYear * 12 + currentMonth else { return .expired }
+        return .valid
     }
 }
 
@@ -196,11 +208,11 @@ extension CreditCardEntry {
     }
 
     var formattedYear: String {
-        String(format: "%02d", expirationYear % 100)
+        String(format: "%04d", expirationYear)
     }
 
     var formattedDate: String {
-        "\(formattedMonth)/\(formattedYear)"
+        expirationMonth > 0 && expirationYear > 0 ? "\(formattedMonth)/\(formattedYear)" : ""
     }
 
     private func formatted(number: String, separator: String = " ") -> String {
@@ -242,7 +254,6 @@ protocol CreditCardStore {
     func fetchRecord(uuid: UUID) throws -> CreditCardRecord?
     func fetchAll() throws -> [CreditCardRecord]
     func allRecords(updatedSince: Date?) throws -> [CreditCardRecord]
-    func find(cardNumber: String) throws -> [CreditCardRecord]
     @discardableResult func addRecord(description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
     @discardableResult func update(record: CreditCardRecord, description: String, cardNumber: String, holder: String, expirationMonth: Int, expirationYear: Int) throws -> CreditCardRecord
     @discardableResult func markUsed(record: CreditCardRecord) throws -> CreditCardRecord
