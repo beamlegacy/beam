@@ -99,7 +99,7 @@ class CardViewEmbedsTests: BaseTest {
         step("And right click on it to show as embed"){
             let textNode = cardView!.getTextNodeByIndex(nodeIndex: 0)
             textNode.rightClick()
-            ContextMenuTestView(key: NoteViewLocators.Groups.contextMenu.accessibilityIdentifier).clickItem(item: .asEmbed)
+            CardTestView().menuItem(NoteViewLocators.RightClickMenuItems.showAsEmbed.accessibilityIdentifier).tapInTheMiddle()
         }
         
         let youtubeButtons = cardView!.app.webViews.buttons

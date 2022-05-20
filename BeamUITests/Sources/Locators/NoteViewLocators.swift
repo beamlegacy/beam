@@ -36,5 +36,13 @@ enum NoteViewLocators {
     enum Others: String, CaseIterable, UIElement {
         case beginningPartOfContextItem = "ContextMenuItem-"
     }
+    
+    enum RightClickMenuItems: String, CaseIterable, UIElement {
+        case openLink = "Open Link"
+        case copyLink = "Copy Link"
+        case showAsEmbed = "Show as Embed"
+        case editLink = "Edit Link..."
+        case removeLink = "Remove Link"
+    }
 
 }
