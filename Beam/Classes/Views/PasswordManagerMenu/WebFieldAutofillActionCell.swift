@@ -1,5 +1,5 @@
 //
-//  OtherPasswordsCell.swift
+//  WebFieldAutofillActionCell.swift
 //  Beam
 //
 //  Created by Jean-Louis Darmon on 26/04/2021.
@@ -7,16 +7,16 @@
 
 import SwiftUI
 
-struct PasswordActionCell: View {
+struct WebFieldAutofillActionCell: View {
     var label: String
-    var onChange: ((PasswordManagerMenuCellState) -> Void)?
+    var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var highlightState: PasswordManagerMenuCellState = .idle
+    @State private var highlightState: WebFieldAutofillMenuCellState = .idle
 
     var body: some View {
-        PasswordManagerMenuCell(type: .action, height: 35, onChange: updateHighlightState) {
+        WebFieldAutofillMenuCell(type: .action, height: 35, onChange: updateHighlightState) {
             VStack(alignment: .leading, spacing: 0) {
                 Text(label)
                     .font(BeamFont.medium(size: 12).swiftUI)
@@ -37,7 +37,7 @@ struct PasswordActionCell: View {
         }
     }
 
-    private func updateHighlightState(_ newState: PasswordManagerMenuCellState) {
+    private func updateHighlightState(_ newState: WebFieldAutofillMenuCellState) {
         highlightState = newState
         onChange?(newState)
     }
@@ -45,26 +45,26 @@ struct PasswordActionCell: View {
 
 struct OtherPasswordsCell: View {
     var host: String?
-    var onChange: ((PasswordManagerMenuCellState) -> Void)?
+    var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        PasswordActionCell(label: host != nil ? "Other Passwords for \(host!)" : "Other Passwords...", onChange: onChange)
+        WebFieldAutofillActionCell(label: host != nil ? "Other Passwords for \(host!)" : "Other Passwords...", onChange: onChange)
     }
 }
 
 struct SuggestPasswordCell: View {
-    var onChange: ((PasswordManagerMenuCellState) -> Void)?
+    var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        PasswordActionCell(label: "Suggest new password", onChange: onChange)
+        WebFieldAutofillActionCell(label: "Suggest new password", onChange: onChange)
     }
 }
 
 struct OtherCreditCardsCell: View {
-    var onChange: ((PasswordManagerMenuCellState) -> Void)?
+    var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        PasswordActionCell(label: "Other Credit Cards...", onChange: onChange)
+        WebFieldAutofillActionCell(label: "Other Credit Cards...", onChange: onChange)
     }
 }
 

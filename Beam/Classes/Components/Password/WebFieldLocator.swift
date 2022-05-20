@@ -90,7 +90,7 @@ final class WebFieldLocator {
                 offset = .zero
             }
             let scale = self.page?.webView.zoomLevel() ?? 1
-            Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .passwordManagerInternal)
+            Logger.shared.logDebug("Frame for \(elementId): \(rect), with offset \(offset), scale: \(scale)", category: .webAutofillInternal)
             let frame = CGRect(x: (rect.minX + offset.x) * scale, y: (rect.minY + offset.y) * scale, width: rect.width * scale, height: rect.height * scale)
             completion(frame)
         }

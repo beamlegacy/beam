@@ -63,14 +63,14 @@ final class PasswordManagerCredentialsBuilder {
     func autofill(host: String, username: String, password: String) {
         autofilledHost = host == currentHost ? nil : host
         isDirty = false
-        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing autofill for \(host) (current: \(currentHost ?? "nil")): dirty = \(isDirty)", category: .passwordManagerInternal)
+        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing autofill for \(host) (current: \(currentHost ?? "nil")): dirty = \(isDirty)", category: .webAutofillInternal)
         usernameField = .autofilled(username)
         passwordField = .autofilled(password)
     }
 
     func updateValues(username: String?, password: String?, userInput: Bool) {
         if let username = username, !username.isEmpty, username != usernameField.value {
-            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing new username from submit: \(username)", category: .passwordManagerInternal)
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing new username from submit: \(username)", category: .webAutofillInternal)
             if userInput {
                 usernameField = .userInput(username)
                 isDirty = true
@@ -79,7 +79,7 @@ final class PasswordManagerCredentialsBuilder {
             }
         }
         if let password = password, !password.isEmpty, password != passwordField.value {
-            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing new password from submit", category: .passwordManagerInternal)
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Storing new password from submit", category: .webAutofillInternal)
             if userInput {
                 passwordField = .userInput(password)
                 isDirty = true
@@ -95,11 +95,11 @@ final class PasswordManagerCredentialsBuilder {
         else { return nil }
         switch usernameField {
         case .autofilled:
-            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entry: \(username) on \(minimizedHost)", category: .passwordManagerInternal)
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entry: \(username) on \(minimizedHost)", category: .webAutofillInternal)
             return PasswordManagerEntry(minimizedHost: minimizedHost, username: username)
         default:
             let matchingEntries = passwordManager.bestMatchingEntries(hostname: minimizedHost, username: username)
-            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entries: \(matchingEntries)", category: .passwordManagerInternal)
+            Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Suggested entries: \(matchingEntries)", category: .webAutofillInternal)
             return matchingEntries.first
         }
     }
@@ -110,7 +110,7 @@ final class PasswordManagerCredentialsBuilder {
     }
 
     func unsavedCredentials(allowEmptyUsername: Bool) -> StoredCredentials? {
-        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Checking unsaved status: dirty = \(isDirty), has password = \(passwordField.value != nil)", category: .passwordManagerInternal)
+        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Checking unsaved status: dirty = \(isDirty), has password = \(passwordField.value != nil)", category: .webAutofillInternal)
         guard isDirty else { return nil }
         guard let password = passwordField.value, !password.isEmpty else { return nil }
         guard allowEmptyUsername || !(usernameField.value?.isEmpty ?? true) else { return nil }
@@ -119,7 +119,7 @@ final class PasswordManagerCredentialsBuilder {
     }
 
     func markSaved() {
-        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Saved", category: .passwordManagerInternal)
+        Logger.shared.logDebug("PasswordManagerCredentialsBuilder: Saved", category: .webAutofillInternal)
         isDirty = false
     }
 
