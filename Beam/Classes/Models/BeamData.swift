@@ -408,9 +408,7 @@ extension BeamData {
 // MARK: - AutoUpdate
 extension BeamData {
     private static func createVersionChecker() -> VersionChecker {
-        // We disable AutoUpdate own auto check system for now.
-        // due to suspicious timer crash reports. See https://linear.app/beamapp/issue/BE-4065
-        let enableUpdateAutoCheck = false // ![.debug, .test].contains(Configuration.env)
+        let enableUpdateAutoCheck = ![.debug, .test].contains(Configuration.env)
         if let feed = URL(string: Configuration.updateFeedURL) {
             return VersionChecker(feedURL: feed, autocheckEnabled: enableUpdateAutoCheck)
         } else {
@@ -441,7 +439,7 @@ extension BeamData {
         // Only trigger the startup alert for the beta builds
         guard Configuration.branchType == .beta else { return }
 
-        if PreferencesManager.isAutoUpdateOn {
+        if versionChecker.autocheckEnabled {
             checkForUpdateCancellable = versionChecker.$state.sink { [weak self] state in
                 guard let self = self else { return }
                 switch state {
@@ -462,16 +460,6 @@ extension BeamData {
                 }
             }
             versionChecker.checkForUpdates()
-        }
-    }
-
-    /// Check for update if enough time has passed since last check.
-    func checkForAutoUpdateIfNeeded() {
-        guard PreferencesManager.isAutoUpdateOn, ![.debug, .test].contains(Configuration.env) else { return }
-        guard let lastCheck = versionChecker.lastCheck, lastCheck.timeIntervalSinceNow > -versionChecker.autocheckTimeInterval else {
-            // either we never checked, or enough time has passed.
-            versionChecker.checkForUpdates()
-            return
         }
     }
 
