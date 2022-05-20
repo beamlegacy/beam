@@ -25,7 +25,7 @@ class TestWebPage: WebPage {
     var webPositions: WebPositions?
     var browsingScorer: BrowsingScorer?
     var storage: BeamFileStorage?
-    var passwordOverlayController: PasswordOverlayController?
+    var webAutofillController: WebAutofillController?
     var errorPageManager: ErrorPageManager?
     private(set) var webviewWindow: NSWindow?
     private(set) var frame: NSRect = NSRect(x: 0, y: 0, width: 600, height: 800)
@@ -52,10 +52,10 @@ class TestWebPage: WebPage {
     var searchViewModel: SearchViewModel?
     var mouseHoveringLocation: MouseHoveringLocation = .none
 
-    init(browsingScorer: BrowsingScorer?, passwordOverlayController: PasswordOverlayController?, pns: PointAndShoot?,
+    init(browsingScorer: BrowsingScorer?, passwordOverlayController: WebAutofillController?, pns: PointAndShoot?,
          fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationHandler: WebViewNavigationHandler?) {
         self.browsingScorer = browsingScorer
-        self.passwordOverlayController = passwordOverlayController
+        self.webAutofillController = passwordOverlayController
         pointAndShoot = pns
         storage = fileStorage
         self.downloadManager = downloadManager
@@ -77,13 +77,13 @@ class TestWebPage: WebPage {
 
     func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage? {
         events.append("createNewTab \(request.url) \(setCurrent))")
-        return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
+        return TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: webAutofillController, pns: pointAndShoot,
                            fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
     }
 
     func createNewWindow(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, windowFeatures: WKWindowFeatures, setCurrent: Bool) -> BeamWebView {
         events.append("createNewWindow \(request.url) \(setCurrent))")
-        let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: passwordOverlayController, pns: pointAndShoot,
+        let webPage = TestWebPage(browsingScorer: browsingScorer, passwordOverlayController: webAutofillController, pns: pointAndShoot,
                                   fileStorage: storage, downloadManager: downloadManager, navigationHandler: webViewNavigationHandler)
 
         return webPage.webView

@@ -17,7 +17,7 @@ final class WebFieldClassifiers {
     init(webFrames: WebFrames) {
         classifier = WebFieldClassifier()
         webFrames.removedFrames.sink { href in
-            Logger.shared.logDebug("Removing classifier for frame \(href)", category: .passwordManagerInternal)
+            Logger.shared.logDebug("Removing classifier for frame \(href)", category: .webAutofillInternal)
             self.classifierResultsByFrame[href] = nil
         }
         .store(in: &cancellables)
@@ -41,12 +41,12 @@ final class WebFieldClassifiers {
         return result.activeFields
     }
 
-    func autocompleteGroup(for elementId: String, frameInfo: WKFrameInfo?) -> WebAutocompleteGroup? {
+    func autofillGroup(for elementId: String, frameInfo: WKFrameInfo?) -> WebAutofillGroup? {
         guard let frameHref = frameInfo?.request.url?.absoluteString else {
             Logger.shared.logWarning("No classifier for input element \(elementId) in frame \(frameInfo?.request.url?.absoluteString ?? "nil")", category: .passwordManager)
             return nil
         }
-        return classifierResultsByFrame[frameHref]?.autocompleteGroups[elementId]
+        return classifierResultsByFrame[frameHref]?.autofillGroups[elementId]
     }
 
     func allInputFields(frameInfo: WKFrameInfo?) -> [WebInputField] {

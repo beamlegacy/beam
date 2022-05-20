@@ -576,7 +576,7 @@ export enum BeamLogCategory {
   navigation = "navigation",
   native = "native",
   passwordManager = "passwordManager",
-  passwordManagerInternal = "passwordManagerInternal"
+  webAutofillInternal = "webAutofillInternal"
 }
 
 export class BeamHTMLCollection<E extends BeamElement = BeamElement> /*implements HTMLCollection*/ {

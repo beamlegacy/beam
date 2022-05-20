@@ -42,7 +42,7 @@ class WebPageBaseImpl: WebPage {
     var webViewNavigationHandler: WebViewNavigationHandler?
     var errorPageManager: ErrorPageManager?
     var browsingScorer: BrowsingScorer?
-    var passwordOverlayController: PasswordOverlayController?
+    var webAutofillController: WebAutofillController?
     var mediaPlayerController: MediaPlayerController?
     var score: Float = 0
 

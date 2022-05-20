@@ -110,7 +110,7 @@ class PointAndShootTest: XCTestCase {
 
     func initTestBed() {
         let userInfoStore = MockUserInformationsStore()
-        let testPasswordOverlayController = PasswordOverlayController(userInfoStore: userInfoStore)
+        let testPasswordOverlayController = WebAutofillController(userInfoStore: userInfoStore)
         let testBrowsingScorer = BrowsingScorerMock()
 
         let testFileStorage = FileStorageMock()
@@ -123,7 +123,7 @@ class PointAndShootTest: XCTestCase {
                                navigationHandler: navigationHandler)
         testPage = page
         page.browsingScorer?.page = page
-        page.passwordOverlayController?.page = page
+        page.webAutofillController?.page = page
         page.pointAndShoot?.page = page
     }
 

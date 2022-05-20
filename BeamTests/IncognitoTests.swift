@@ -42,7 +42,7 @@ class IncognitoTests: XCTestCase {
         })
 
         let passwordHandlers = configIncognitoTab.handlers.filter({ element in
-            element is PasswordMessageHandler
+            element is WebAutofillMessageHandler
         })
 
         XCTAssertEqual(incognitoConfig.handlers.count, configIncognitoTab.handlers.count)
