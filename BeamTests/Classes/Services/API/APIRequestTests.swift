@@ -2,7 +2,6 @@ import Foundation
 import XCTest
 import Quick
 import Nimble
-import Promises
 
 @testable import Beam
 @testable import BeamCore
@@ -76,53 +75,6 @@ class APIRequestTests: QuickSpec {
                                 expect { try result.get() }.to(throwError { (error: NSError) in
                                     expect(error.code) == NSURLErrorCannotFindHost
                                 })
-                                done()
-                            }
-                        }
-                    }
-                }
-            }
-
-            context("with Promises") {
-                context("with good api hostname") {
-                    beforeEach {
-                        beamHelper.beginNetworkRecording()
-                    }
-
-                    it("sends a request") {
-                        waitUntil(timeout: .seconds(30)) { [unowned self] done in
-                            let promise: Promises.Promise<ForgotPassword> = self.sut
-                                .performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                authenticatedCall: false)
-                            promise.then { (forgotPassword: ForgotPassword) in
-                                expect(forgotPassword.success).to(beTrue())
-                                done()
-                            }
-                            .catch { _ in }
-                        }
-                    }
-                }
-
-                context("with wrong api hostname") {
-                    beforeEach {
-                        Configuration.apiHostname = "http://localhost2"
-                        beamHelper.disableNetworkRecording()
-                        BeamURLSession.shouldNotBeVinyled = true
-                    }
-                    afterEach {
-                        BeamURLSession.shouldNotBeVinyled = false
-                    }
-
-                    it("manages errors") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<ForgotPassword> = self.sut
-                                .performRequest(bodyParamsRequest: bodyParamsRequest,
-                                                authenticatedCall: false)
-                            promise.then { (forgotPassword: ForgotPassword) in
-                                fail("shouldn't be called")
-                            }
-                            .catch { error in
-                                expect((error as NSError).code) == NSURLErrorCannotFindHost
                                 done()
                             }
                         }

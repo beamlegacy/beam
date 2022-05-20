@@ -66,43 +66,6 @@ class UserInfoRequestTests: QuickSpec {
                     }
                 }
             }
-
-            context("with Promises") {
-                context("with available username") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<UserInfoRequest.UpdateMe> = sut
-                                .setUsername(username: availableUsername)
-
-                            promise.then { result in
-                                expect(result.me?.username).toNot(beEmpty())
-                                done()
-                            }
-                            .catch { fail("Couldn't set username: \(availableUsername) - \($0)"); done() }
-                        }
-                    }
-                }
-
-                context("with non-existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<UserInfoRequest.UpdateMe> = sut
-                                .setUsername(username: nonAvailableUsername)
-
-                            promise.then { _ in }
-                            .catch { error in
-                                expect(error).to(beAnInstanceOf(APIRequestError.self))
-                                let errorable = UserInfoRequest.UpdateMe(
-                                    me: nil,
-                                    errors: [UserErrorData(message: "Username has already been taken", path: nil)]
-                                )
-                                expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
-                                done()
-                            }
-                        }
-                    }
-                }
-            }
         }
 
         describe(".updatePassword") {
