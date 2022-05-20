@@ -12,8 +12,8 @@ class CreditCardsTests: BaseTest {
     
     let expectedCardDescription = "TestDescription"
     let expectedCardHolder = "TestHolder"
-    let expectedCardNumber = "1234 5678 1234 5678"
-    let expectedCardDueDate = "01/27"
+    let expectedCardNumber = "1234 5678 1234 5670"
+    let expectedCardDueDate = "01/2027"
 
     var creditCardsTable: CreditCardsTestTable!
     var passwordPreferencesView: PasswordPreferencesTestView!
@@ -47,15 +47,15 @@ class CreditCardsTests: BaseTest {
         creditCardView.getCardTextFieldElement(.cardNumber).tapInTheMiddle()
         creditCardView.shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
         creditCardView.typeKeyboardKey(.delete, 4)
-        creditCardView.app.typeSlowly("0000", everyNChar: 2)
+        creditCardView.app.typeSlowly("0008", everyNChar: 2)
         
         creditCardView.getCardTextFieldElement(.expirationDate).tapInTheMiddle()
         creditCardView.shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
-        creditCardView.typeKeyboardKey(.leftArrow, 3)
+        creditCardView.typeKeyboardKey(.leftArrow, 5)
         creditCardView.typeKeyboardKey(.delete)
         creditCardView.app.typeText("9")
         
-        return CreditCardsTestTable.Row("test", "John Appleseededited", "xxxx-xxxx-xxxx-0000", "09/25")
+        return CreditCardsTestTable.Row("test", "John Appleseededited", "xxxx-xxxx-xxxx-0008", "09/2025")
 
     }
     
@@ -74,7 +74,7 @@ class CreditCardsTests: BaseTest {
         }
         
         step("Then it is successfully displayed in Credit cards table") {
-            let expectedCreditCardRow = CreditCardsTestTable.Row(expectedCardDescription, expectedCardHolder, "xxxx-xxxx-xxxx-5678", expectedCardDueDate)
+            let expectedCreditCardRow = CreditCardsTestTable.Row(expectedCardDescription, expectedCardHolder, "xxxx-xxxx-xxxx-5670", expectedCardDueDate)
             let comparisonResult = CreditCardsTestTable().compareRows(expectedCreditCardRow, 0)
             XCTAssertTrue(comparisonResult.0, comparisonResult.1)
         }
