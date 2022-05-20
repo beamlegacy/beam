@@ -436,6 +436,100 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(passwordGroup.relatedFields.contains { $0.id == "id-email" })
         XCTAssertTrue(passwordGroup.relatedFields.contains { $0.id == "id-password" })
     }
+
+    func testPaymentFieldsWithAutocomplete() throws {
+        let inputs = [
+            DOMInputElement(type: .text, beamId: "id-cardnumber", autocomplete: "cc-number", name: "card number", visible: true),
+            DOMInputElement(type: .text, beamId: "id-cardholder", autocomplete: "cc-name", name: "card holder name", visible: true),
+            DOMInputElement(type: .text, beamId: "id-expirationdate", autocomplete: "cc-exp", name: "expiration date", visible: true),
+            DOMInputElement(type: .text, beamId: "id-csc", autocomplete: "cc-csc", name: "security code", visible: true),
+        ]
+
+        let results = classifier.classify(rawFields: inputs, on: "example.com")
+
+        XCTAssertTrue(results.activeFields.contains("id-cardnumber"))
+        XCTAssertTrue(results.activeFields.contains("id-cardholder"))
+        XCTAssertTrue(results.activeFields.contains("id-expirationdate"))
+        XCTAssertFalse(results.activeFields.contains("id-csc"))
+        XCTAssertEqual(results.activeFields.count, 3)
+
+        let ids = results.allInputFieldIds
+        XCTAssertTrue(ids.contains("id-cardnumber"))
+        XCTAssertTrue(ids.contains("id-cardholder"))
+        XCTAssertTrue(ids.contains("id-expirationdate"))
+        XCTAssertFalse(ids.contains("id-csc"))
+        XCTAssertEqual(ids.count, 3)
+
+        XCTAssertNil(results.autofillGroups["id-csc"])
+
+        let cardNumberGroup = try XCTUnwrap(results.autofillGroups["id-cardnumber"])
+        XCTAssertEqual(cardNumberGroup.action, .payment)
+        XCTAssertEqual(cardNumberGroup.relatedFields.count, 3)
+        XCTAssertTrue(cardNumberGroup.relatedFields.contains { $0.id == "id-cardnumber" })
+        XCTAssertTrue(cardNumberGroup.relatedFields.contains { $0.id == "id-cardholder" })
+        XCTAssertTrue(cardNumberGroup.relatedFields.contains { $0.id == "id-expirationdate" })
+
+        let cardHolderGroup = try XCTUnwrap(results.autofillGroups["id-cardholder"])
+        XCTAssertEqual(cardHolderGroup.action, .payment)
+        XCTAssertEqual(cardHolderGroup.relatedFields.count, 3)
+        XCTAssertTrue(cardHolderGroup.relatedFields.contains { $0.id == "id-cardnumber" })
+        XCTAssertTrue(cardHolderGroup.relatedFields.contains { $0.id == "id-cardholder" })
+        XCTAssertTrue(cardHolderGroup.relatedFields.contains { $0.id == "id-expirationdate" })
+
+        let cardExpirationGroup = try XCTUnwrap(results.autofillGroups["id-expirationdate"])
+        XCTAssertEqual(cardExpirationGroup.action, .payment)
+        XCTAssertEqual(cardExpirationGroup.relatedFields.count, 3)
+        XCTAssertTrue(cardExpirationGroup.relatedFields.contains { $0.id == "id-cardnumber" })
+        XCTAssertTrue(cardExpirationGroup.relatedFields.contains { $0.id == "id-cardholder" })
+        XCTAssertTrue(cardExpirationGroup.relatedFields.contains { $0.id == "id-expirationdate" })
+    }
+
+    func testPaymentFieldsWithoutAutocomplete() throws {
+        let inputs = [
+            DOMInputElement(type: .text, beamId: "id-cardnumber", autocomplete: nil, name: "card number", visible: true),
+            DOMInputElement(type: .text, beamId: "id-cardholder", autocomplete: nil, name: "card holder name", visible: true),
+            DOMInputElement(type: .text, beamId: "id-expirationdate", autocomplete: nil, name: "expiration date", visible: true),
+            DOMInputElement(type: .text, beamId: "id-csc", autocomplete: nil, name: "security code", visible: true),
+        ]
+
+        let results = classifier.classify(rawFields: inputs, on: "example.com")
+
+        XCTAssertTrue(results.activeFields.contains("id-cardnumber"))
+        XCTAssertTrue(results.activeFields.contains("id-cardholder"))
+        XCTAssertTrue(results.activeFields.contains("id-expirationdate"))
+        XCTAssertFalse(results.activeFields.contains("id-csc"))
+        XCTAssertEqual(results.activeFields.count, 3)
+
+        let ids = results.allInputFieldIds
+        XCTAssertTrue(ids.contains("id-cardnumber"))
+        XCTAssertTrue(ids.contains("id-cardholder"))
+        XCTAssertTrue(ids.contains("id-expirationdate"))
+        XCTAssertFalse(ids.contains("id-csc"))
+        XCTAssertEqual(ids.count, 3)
+
+        XCTAssertNil(results.autofillGroups["id-csc"])
+
+        let cardNumberGroup = try XCTUnwrap(results.autofillGroups["id-cardnumber"])
+        XCTAssertEqual(cardNumberGroup.action, .payment)
+        XCTAssertEqual(cardNumberGroup.relatedFields.count, 3)
+        XCTAssertTrue(cardNumberGroup.relatedFields.contains { $0.id == "id-cardnumber" })
+        XCTAssertTrue(cardNumberGroup.relatedFields.contains { $0.id == "id-cardholder" })
+        XCTAssertTrue(cardNumberGroup.relatedFields.contains { $0.id == "id-expirationdate" })
+
+        let cardHolderGroup = try XCTUnwrap(results.autofillGroups["id-cardholder"])
+        XCTAssertEqual(cardHolderGroup.action, .payment)
+        XCTAssertEqual(cardHolderGroup.relatedFields.count, 3)
+        XCTAssertTrue(cardHolderGroup.relatedFields.contains { $0.id == "id-cardnumber" })
+        XCTAssertTrue(cardHolderGroup.relatedFields.contains { $0.id == "id-cardholder" })
+        XCTAssertTrue(cardHolderGroup.relatedFields.contains { $0.id == "id-expirationdate" })
+
+        let cardExpirationGroup = try XCTUnwrap(results.autofillGroups["id-expirationdate"])
+        XCTAssertEqual(cardExpirationGroup.action, .payment)
+        XCTAssertEqual(cardExpirationGroup.relatedFields.count, 3)
+        XCTAssertTrue(cardExpirationGroup.relatedFields.contains { $0.id == "id-cardnumber" })
+        XCTAssertTrue(cardExpirationGroup.relatedFields.contains { $0.id == "id-cardholder" })
+        XCTAssertTrue(cardExpirationGroup.relatedFields.contains { $0.id == "id-expirationdate" })
+    }
 }
 
 fileprivate extension WebFieldClassifier.ClassifierResult {

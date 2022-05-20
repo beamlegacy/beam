@@ -383,7 +383,23 @@ final class WebFieldClassifier {
         case .creditCardExpirationYear:
             return .init(role: .cardExpirationYear, match: .always)
         default:
-            return nil
+            var result: WeightedRole?
+            var components = field.elementClass?.components(separatedBy: .whitespaces) ?? []
+            if let name = field.name {
+                components.append(name)
+            }
+            components
+                .map { String($0.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }).lowercased() }
+                .forEach { value in
+                    if value.contains("cardnum") {
+                        result = .init(role: .cardNumber, match: .score(800))
+                    } else if value.contains("cardholder") || value.contains("holdername") {
+                        result = .init(role: .cardHolder, match: .score(800))
+                    } else if value.contains("cardexpiry") || value.contains("cardexpiration") || value.contains("expirationdate") {
+                        result = .init(role: .cardExpirationDate, match: .score(800))
+                    }
+                }
+            return result
         }
     }
 
@@ -438,9 +454,11 @@ final class WebFieldClassifier {
         let ambiguousPasswordAction = containsPasswordFieldsUsableForLogin && containsPasswordFieldsUsableForNewAccount
         let minimumLoginMatch = evaluatedFields.bestMatch(forRole: .currentUsername)
         let minimiumCreateAccountMatch = evaluatedFields.bestMatch(forRole: .newUsername)
+        let pageContainsCardNumberField = evaluatedFields.contains { $0.compatibleWithRole(.cardNumber) }
         let thresholds: [WebAutofillAction: Match] = [
             .login: max(minimumLoginMatch, containsPasswordFieldsUsableForLogin ? .score(0) : .score(900)),
-            .createAccount: max(minimiumCreateAccountMatch, containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900))
+            .createAccount: max(minimiumCreateAccountMatch, containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900)),
+            .payment: pageContainsCardNumberField ? .score(0) : .always // This can be changed to `.payment: .always` to disable heuristics based on `class` and `name` attributes.
         ]
         return makeClassifierResult(fields: evaluatedFields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction)
     }
