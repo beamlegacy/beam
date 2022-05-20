@@ -561,6 +561,10 @@ extension TextRoot {
             return
         }
 
+        defer {
+            unmarkText()
+        }
+
         var range = cursorPosition..<cursorPosition
         if let r = replacementRange {
             range = r
@@ -575,7 +579,13 @@ extension TextRoot {
         range = extendRangeWithUneditableRanges(range, in: node)
 
         var hasCmdGroup = false
+
         if !range.isEmpty {
+            if !text.links.isEmpty && text.ranges.count == 1 {
+                insertLinkIntoText(range: range, in: node, linkText: text)
+                return
+            }
+
             hasCmdGroup = true
             focusedCmdManager.beginGroup(with: "Insert replacing")
             focusedCmdManager.deleteText(in: node, for: range)
@@ -585,7 +595,19 @@ extension TextRoot {
         if hasCmdGroup {
             focusedCmdManager.endGroup()
         }
-        unmarkText()
+    }
+
+    private func insertLinkIntoText(range: Range<Int>, in node: TextNode, linkText: BeamText) {
+        guard !node.text.rangeAt(position: range.startIndex).attributes.contains(where: { $0.isLink }) else {
+            return
+        }
+        if let linkStr = linkText.links.first {
+            let savedText = node.element.text.extract(range: range)
+            let attributes = [BeamText.Attribute.link(linkStr)]
+
+            let newBeamText = BeamText(text: savedText, attributes: attributes)
+            focusedCmdManager.replaceText(in: node, for: range, with: newBeamText)
+        }
     }
 
     public func firstRect(forCharacterRange range: Range<Int>) -> (NSRect, Range<Int>) {
