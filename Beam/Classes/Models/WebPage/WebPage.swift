@@ -29,7 +29,7 @@ protocol WebPage: AnyObject, Scorable {
     var downloadManager: DownloadManager? { get }
     var webViewNavigationHandler: WebViewNavigationHandler? { get }
     var browsingScorer: BrowsingScorer? { get }
-    var passwordOverlayController: PasswordOverlayController? { get }
+    var webAutofillController: WebAutofillController? { get }
     var mediaPlayerController: MediaPlayerController? { get set }
 
     var pointAndShootInstalled: Bool { get }
@@ -143,7 +143,7 @@ extension WebPage {
     func allowsMouseMoved(with event: NSEvent) -> Bool { true }
 
     func handleFormSubmit(frameInfo: WKFrameInfo) {
-        passwordOverlayController?.handleWebFormSubmit(with: "", frameInfo: frameInfo)
+        webAutofillController?.handleWebFormSubmit(with: "", frameInfo: frameInfo)
     }
 }
 

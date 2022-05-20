@@ -9,13 +9,11 @@ import Foundation
 import Combine
 import BeamCore
 
-protocol PasswordManagerMenuDelegate: AnyObject {
+protocol PasswordManagerMenuDelegate: WebAutofillMenuDelegate {
     func fillCredentials(_ entry: PasswordManagerEntry)
     func fillNewPassword(_ password: String, dismiss: Bool)
     func deleteCredentials(_ entries: [PasswordManagerEntry])
     func emptyPasswordField()
-    func dismissMenu()
-    func dismiss()
 }
 
 struct PasswordManagerMenuOptions: Equatable {
@@ -129,7 +127,7 @@ class PasswordManagerMenuViewModel: ObservableObject {
         childWindow.makeKeyAndOrderFront(nil)
     }
 
-    func onSuggestNewPassword(state: PasswordManagerMenuCellState) {
+    func onSuggestNewPassword(state: WebFieldAutofillMenuCellState) {
         guard state == .clicked else { return }
         showPasswordGenerator = true
         updateDisplay()
