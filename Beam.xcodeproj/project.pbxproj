@@ -498,6 +498,7 @@
 		562A8B7925B6ED03004D3D8A /* CoreMLTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */; };
 		56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3025CC680E00ED7C50 /* url.stopwords */; };
 		56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3625CCAFA400ED7C50 /* english.stopwords */; };
+		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		7521342B26F4A00D00BBBD6D /* GenericErrorPage.html in Resources */ = {isa = PBXBuildFile; fileRef = 7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */; };
 		759442D726FCA86E00CBFB7A /* ErrorPageManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */; };
 		75A1E5B52719A7DA000824B1 /* topdomains_v0.1.txt in Resources */ = {isa = PBXBuildFile; fileRef = 75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */; };
@@ -2010,6 +2011,7 @@
 		562A8B7825B6ED03004D3D8A /* CoreMLTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreMLTests.swift; sourceTree = "<group>"; };
 		56A5BD3025CC680E00ED7C50 /* url.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = url.stopwords; sourceTree = "<group>"; };
 		56A5BD3625CCAFA400ED7C50 /* english.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = english.stopwords; sourceTree = "<group>"; };
+		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		7521342A26F4A00D00BBBD6D /* GenericErrorPage.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = GenericErrorPage.html; sourceTree = "<group>"; };
 		759442D626FCA86E00CBFB7A /* ErrorPageManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPageManagerTests.swift; sourceTree = "<group>"; };
 		75A1E5B42719A7DA000824B1 /* topdomains_v0.1.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = topdomains_v0.1.txt; sourceTree = "<group>"; };
@@ -4003,6 +4005,7 @@
 				8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */,
 				37520B0E27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift */,
 				3779AC5E27FC5503006A6473 /* AnimationView+Beam.swift */,
+				66D77CA028351612004D03E9 /* NSMenu+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -8451,6 +8454,7 @@
 				4181723A2581107C00317ED8 /* Parser.swift in Sources */,
 				DA905D50277B0BC500307146 /* FrecencyNoteScore.swift in Sources */,
 				524520A425C8234500AC0007 /* BeamElement+Merge.swift in Sources */,
+				66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */,
 				A599F8D327849AF200657CD5 /* AppDelegate+Onboarding.swift in Sources */,
 				A0C5D85B263C638A00FA6F6E /* CredentialsConfirmationToast.swift in Sources */,
 				A5208D76261D07E9006193AF /* BeamColor.swift in Sources */,

@@ -26,6 +26,10 @@ class FormatterView: NSView {
         return .zero
     }
 
+    var extraPadding: CGSize {
+        return .zero
+    }
+
     var handlesTyping: Bool {
         false
     }

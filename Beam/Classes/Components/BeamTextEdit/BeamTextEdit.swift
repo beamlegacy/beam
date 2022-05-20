@@ -175,7 +175,9 @@ public extension CALayer {
     private var noteCancellables = [AnyCancellable]()
 
     // Formatter properties
+    internal var displayedInlineFormatterKind: FormatterKind = .none
     internal var inlineFormatter: FormatterView?
+
     internal var formatterTargetRange: Range<Int>?
     internal var formatterTargetNode: TextNode?
     internal var isInlineFormatterHidden = true

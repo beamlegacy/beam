@@ -86,7 +86,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 
     // MARK: Private methods
     private func dismissHyperlinkView() {
-        guard let view = inlineFormatter as? HyperlinkFormatterView else { return }
+        guard case .custom = displayedInlineFormatterKind, let view = inlineFormatter as? HyperlinkFormatterView else { return }
 
         let shouldDismiss = !view.hasEditedUrl()
         if shouldDismiss {
@@ -146,7 +146,6 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     }
 
     private func showHyperlinkContextMenu(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?, url: URL?, linkTitle: String?, fromPaste: Bool) {
-
         guard inlineFormatter?.isMouseInsideView != true else { return }
         clearDebounceTimer()
         guard let frame = frame,
@@ -155,26 +154,33 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
               isInlineFormatterHidden else { return }
         let atPoint = CGPoint(x: frame.origin.x + node.offsetInDocument.x - 10, y: frame.maxY + node.offsetInDocument.y + 7)
 
-        var items: [ContextMenuItem]
         if fromPaste {
-            items = self.getPasteMenuItemsForLink(for: node, range: targetRange)
-        } else {
-            items = self.getDefaultItemsForLink(for: node, link: link)
-        }
-        let menuView = ContextMenuFormatterView(key: "HyperlinkContextMenu", items: items, defaultSelectedIndex: fromPaste ? 0 : nil)
-        inlineFormatter = menuView
-        prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
+            let items: [ContextMenuItem] = self.getPasteMenuItemsForLink(for: node, range: targetRange)
 
-        formatterTargetRange = targetRange
-        formatterTargetNode = targetNode
-        DispatchQueue.main.async {
-            self.showInlineFormatter()
+            let menuView = ContextMenuFormatterView(key: "HyperlinkContextMenu", items: items, defaultSelectedIndex: fromPaste ? 0 : nil)
+            inlineFormatter = menuView
+            prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
+
+            formatterTargetRange = targetRange
+            formatterTargetNode = targetNode
+
+            DispatchQueue.main.async {
+                self.showInlineFormatter()
+            }
+        } else {
+            let items: [ContextMenuItem] = self.getDefaultItemsForLink(for: node, link: link)
+
+            let menu = NSMenu()
+            items.forEach { menu.addItem($0.toNSMenuItem) }
+            menu.popUp(positioning: nil, at: atPoint, in: self)
+
+            displayedInlineFormatterKind = .native
         }
+
     }
 
     private func showHyperlinkFormatter(for targetNode: TextNode?, targetRange: Range<Int>, frame: NSRect?,
                                         url: URL?, linkTitle: String?, debounce: Bool = true) {
-
         guard inlineFormatter?.isMouseInsideView != true else { return }
         if let currentHyperlinkView = inlineFormatter as? HyperlinkFormatterView {
             if !currentHyperlinkView.hasEditedUrl() && targetRange != formatterTargetRange {
@@ -296,5 +302,31 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
             updateLink(in: node, at: editingRange, newTitle: newTitle, newUrl: newUrl, originalUrl: originalUrl)
         }
         self.hideInlineFormatter()
+    }
+
+    internal func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, copyingURL: String) {
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(copyingURL, forType: .string)
+
+        SoundEffectPlayer.shared.playSound(.beginRecord)
+    }
+}
+
+// MARK: Helpers
+
+private extension ContextMenuItem {
+    var toNSMenuItem: NSMenuItem {
+        switch type {
+        case .item:
+            return HandlerMenuItem(title: title) { _ in
+                guard let action = action else {
+                    Logger.shared.logError("No action provided for this NSMenuItem", category: .general); return
+                }
+                action()
+            }
+        case .separator:
+            return NSMenuItem.separator()
+        }
     }
 }

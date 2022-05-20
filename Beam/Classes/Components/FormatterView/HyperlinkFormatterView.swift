@@ -21,24 +21,78 @@ private class HyperlinkEditorViewModel: BaseFormatterViewViewModel, ObservableOb
 }
 
 private struct HyperlinkEditorView: View {
+    static let idealSize = CGSize(width: 240, height: sectionHeight * 2 + Separator.height)
+
+    static var extraPadding: CGSize {
+        CGSize(width: 40, height: 40)
+    }
+
     private static let sectionHeight: CGFloat = 40
     private static let containerVerticalPadding = BeamSpacing._20
-    static let idealSize = CGSize(width: 240, height: sectionHeight * 2 + Separator.height)
+
     @ObservedObject var viewModel: HyperlinkEditorViewModel = HyperlinkEditorViewModel()
 
     var onFinishEditing : ((_ canceled: Bool) -> Void)?
+    var onCopy: (() -> Void)?
 
-    @State private var isEditingUrl = false
     @State private var isEditingTitle = false
+    @State private var isEditingUrl = false
+
+    @State private var isHoveringURLCopyIcon = false
+    @State private var showOverlayForCopyIcon: Bool = false
 
     private var titleTextColor: NSColor {
-        return isEditingTitle ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
+        isEditingTitle ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
     }
     private var urlTextColor: NSColor {
-        return isEditingUrl ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
+        isEditingUrl ? BeamColor.Generic.text.nsColor : BeamColor.Generic.placeholder.nsColor
     }
 
-    func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
+    var body: some View {
+        FormatterViewBackground(showBorder: true) {
+            VStack(spacing: 0) {
+                HStack(alignment: .center, spacing: 4) {
+                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
+                    Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
+                        .opacity(isEditingTitle ? 1 : 0)
+                        .padding(BeamSpacing._20)
+                        .onTapGesture {
+                            onFinishEditing?(false)
+                        }
+                }
+                .frame(height: Self.sectionHeight)
+
+                Separator(horizontal: true)
+
+                HStack(alignment: .center, spacing: 4) {
+                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL")
+                    urlIcon
+                        .padding(BeamSpacing._20)
+                }
+                .frame(height: Self.sectionHeight)
+            }
+            .animation(nil)
+            .padding(.horizontal, BeamSpacing._100)
+        }
+        .frame(width: Self.idealSize.width, height: Self.idealSize.height)
+        .overlay(!showOverlayForCopyIcon ? nil : Tooltip(title: "Link Copied")
+            .fixedSize()
+            .offset(x: Self.idealSize.width - BeamSpacing._100 + BeamSpacing._40, y: Self.sectionHeight / 2.0)
+            .transition(Tooltip.defaultTransition), alignment: .leading)
+        .formatterViewBackgroundAnimation(with: viewModel)
+        .onReceive(Publishers.Zip(
+            viewModel.$visible,
+            viewModel.$shouldFocusOnAppear
+        ), perform: { visible, shouldFocusOnAppear in
+            if visible && shouldFocusOnAppear {
+                DispatchQueue.main.async {
+                    isEditingUrl = true
+                }
+            }
+        })
+    }
+
+    private func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
         return BeamTextField(text: textBinding,
                              isEditing: editingBinding,
                              placeholder: placeholder,
@@ -53,47 +107,24 @@ private struct HyperlinkEditorView: View {
             .frame(height: Self.sectionHeight)
     }
 
-    var body: some View {
-        FormatterViewBackground {
-            VStack(spacing: 0) {
-                HStack(alignment: .center, spacing: 4) {
-                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
-                    Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
-                        .opacity(isEditingTitle ? 1 : 0)
-                        .padding(BeamSpacing._20)
-                        .onTapGesture {
-                            onFinishEditing?(false)
-                        }
-                }
-                .frame(height: Self.sectionHeight)
-                Separator(horizontal: true)
-                HStack(alignment: .center, spacing: 4) {
-                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL")
-                    Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
-                        .opacity(isEditingUrl ? 1 : 0)
-                        .padding(BeamSpacing._20)
-                        .onTapGesture {
-                            onFinishEditing?(false)
-                        }
+    private var urlIconCopyColor: Color {
+        isHoveringURLCopyIcon ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI
+    }
 
+    @ViewBuilder
+    private var urlIcon: some View {
+        if isEditingUrl {
+            Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
+                .onTapGesture {
+                    onFinishEditing?(false)
                 }
-                .frame(height: Self.sectionHeight)
-            }
-            .animation(nil)
-            .padding(.horizontal, BeamSpacing._100)
+        } else {
+            Icon(name: "editor-url_copy", width: 12, color: urlIconCopyColor)
+                .onHover { isHoveringURLCopyIcon = $0 }
+                .onTapGestureToggle($showOverlayForCopyIcon, scheduler: DispatchQueue.main, delay: 2.0) {
+                    onCopy?()
+                }
         }
-        .frame(width: Self.idealSize.width, height: Self.idealSize.height)
-        .formatterViewBackgroundAnimation(with: viewModel)
-        .onReceive(Publishers.Zip(
-            viewModel.$visible,
-            viewModel.$shouldFocusOnAppear
-        ), perform: { visible, shouldFocusOnAppear in
-            if visible && shouldFocusOnAppear {
-                DispatchQueue.main.async {
-                    isEditingUrl = true
-                }
-            }
-        })
     }
 }
 
@@ -116,6 +147,7 @@ protocol HyperlinkFormatterViewDelegate: AnyObject {
                                 didFinishEditing newUrl: String?,
                                 newTitle: String?,
                                 originalUrl: String?)
+    func hyperlinkFormatterView(_ hyperlinkFormatterView: HyperlinkFormatterView, copyingURL: String)
 }
 
 class HyperlinkFormatterView: FormatterView {
@@ -129,6 +161,10 @@ class HyperlinkFormatterView: FormatterView {
 
     override var idealSize: CGSize {
         HyperlinkEditorView.idealSize
+    }
+
+    override var extraPadding: CGSize {
+        HyperlinkEditorView.extraPadding
     }
 
     override var canBecomeKeyView: Bool {
@@ -167,8 +203,10 @@ class HyperlinkFormatterView: FormatterView {
         }, set: {
             self.editingTitle = $0
         })
-        let rootView = HyperlinkEditorView(viewModel: subviewModel) { canceled in
-            self.sendFinishWithLinkEditing(canceled: canceled)
+        let rootView = HyperlinkEditorView(viewModel: subviewModel) { [weak self] canceled in
+            self?.sendFinishWithLinkEditing(canceled: canceled)
+        } onCopy: { [weak self] in
+            self?.sendCopyingURL()
         }
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
@@ -185,6 +223,11 @@ class HyperlinkFormatterView: FormatterView {
         delegate?.hyperlinkFormatterView(self, didFinishEditing: newUrl,
                                          newTitle: newTitle,
                                          originalUrl: originalUrlValue)
+    }
+
+    private func sendCopyingURL() {
+        let url = originalUrlValue ?? editingUrl
+        delegate?.hyperlinkFormatterView(self, copyingURL: url)
     }
 }
 
@@ -210,6 +253,27 @@ extension HyperlinkFormatterView {
     func startEditingUrl() {
         self.window?.makeKey()
         subviewModel.shouldFocusOnAppear = true
+    }
+
+}
+
+// MARK: - Helpers
+
+private extension View {
+
+    func onTapGestureToggle<S: Scheduler>(
+        _ binding: Binding<Bool>,
+        scheduler: S,
+        delay: S.SchedulerTimeType.Stride,
+        completion: (() -> Void)? = nil
+    ) -> some View {
+        onTapGesture {
+            binding.wrappedValue.toggle()
+            scheduler.schedule(after: scheduler.now.advanced(by: delay)) {
+                binding.wrappedValue.toggle()
+            }
+            completion?()
+        }
     }
 
 }

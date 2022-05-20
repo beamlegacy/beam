@@ -7,12 +7,16 @@
 
 import Foundation
 
-class CustomPopoverPresenter {
-    static var shared = CustomPopoverPresenter()
-    static let windowViewPadding: CGFloat = 50
+final class CustomPopoverPresenter {
+    static let shared = CustomPopoverPresenter()
+
+    static let windowViewPadding: CGFloat = 50 + 100
 
     private var presentedFormatterViews: [FormatterView] = []
     private var presentedUnknownWindows: [PopoverWindow] = []
+
+    private init() {
+    }
 
     /// Will dismiss all presented popovers for a given key, or all of them.
     ///
@@ -58,7 +62,10 @@ class CustomPopoverPresenter {
                                                withShadow: false, movable: false, storedInPresenter: false)
         let position = fromView?.convert(atPoint, to: nil) ?? atPoint
         let idealSize = view.idealSize
-        var rect = CGRect(origin: position, size: idealSize).insetBy(dx: -Self.windowViewPadding, dy: -Self.windowViewPadding) // give some space for shadow
+        let xPadding = Self.windowViewPadding + view.extraPadding.width
+        let yPadding = Self.windowViewPadding + view.extraPadding.height
+        var rect = CGRect(origin: position, size: idealSize)
+            .insetBy(dx: -xPadding, dy: -yPadding) // give some space for shadow + possible extra content outside
         rect.origin.y -= idealSize.height
         let container = NSView(frame: CGRect(origin: .zero, size: rect.size))
         container.autoresizingMask = [.width, .height]
@@ -70,6 +77,9 @@ class CustomPopoverPresenter {
         presentedFormatterViews.append(view)
         if animated {
             DispatchQueue.main.async { view.animateOnAppear() }
+        }
+        if view.canBecomeKeyView {
+            window?.makeKeyAndOrderFront(nil)
         }
         return window
     }
