@@ -53,8 +53,16 @@ final class CreditCardListViewModel: ObservableObject {
         }
     }
 
-    func saveCreditCard(_ entry: CreditCardEntry) {
+    func saveCreditCard(_ entry: CreditCardEntry) -> Bool {
+        var matchingCards = creditCardManager.find(cardNumber: entry.cardNumber)
+        if let databaseID = entry.databaseID {
+            matchingCards.removeAll { $0.databaseID == databaseID }
+        }
+        guard !matchingCards.contains(where: { $0.expirationMonth == entry.expirationMonth && $0.expirationYear == entry.expirationYear }) else {
+            return false // the card is already in the database
+        }
         creditCardManager.save(entry: entry)
+        return true
     }
 
     func deleteSelectedCreditCards() {
