@@ -26,7 +26,7 @@ export class PasswordManager<UI extends PasswordManagerUI> {
    */
   constructor(win: BeamWindow<any>, protected ui: UI) {
     this.win = win
-    this.logger = new BeamLogger(win, BeamLogCategory.passwordManagerInternal)
+    this.logger = new BeamLogger(win, BeamLogCategory.webAutofillInternal)
     this.passwordHelper = new PasswordManagerHelper(win)
     this.win.addEventListener("load", this.onLoad.bind(this))
   }

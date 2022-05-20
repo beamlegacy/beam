@@ -10,12 +10,12 @@ import SwiftUI
 struct StoredCreditCardCell: View {
     let cardDescription: String
     let obfuscatedNumber: String
-    let onChange: (PasswordManagerMenuCellState) -> Void
+    let onChange: (WebFieldAutofillMenuCellState) -> Void
 
     @Environment(\.colorScheme) private var colorScheme
 
     var body: some View {
-        PasswordManagerMenuCell(type: .autofill, height: 56, onChange: onChange) {
+        WebFieldAutofillMenuCell(type: .autofill, height: 56, onChange: onChange) {
             HStack(spacing: 12) {
                 Image("preferences-credit_card") // FIXME: add asset
                     .renderingMode(.template)

@@ -74,10 +74,10 @@ struct UserProfileCell_Previews: PreviewProvider {
 }
 
 struct EditUserInfoCell: View {
-    var onChange: ((PasswordManagerMenuCellState) -> Void)?
+    var onChange: ((WebFieldAutofillMenuCellState) -> Void)?
 
     var body: some View {
-        PasswordManagerMenuCell(type: .action, height: 35, onChange: onChange) {
+        WebFieldAutofillMenuCell(type: .action, height: 35, onChange: onChange) {
             VStack(alignment: .leading) {
                 Separator(horizontal: true)
                 Text("Edit Adresses...")

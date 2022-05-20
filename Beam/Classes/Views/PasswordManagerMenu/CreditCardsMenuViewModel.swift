@@ -9,11 +9,9 @@ import Foundation
 import Combine
 import BeamCore
 
-protocol CreditCardsMenuDelegate: AnyObject {
+protocol CreditCardsMenuDelegate: WebAutofillMenuDelegate {
     func fillCreditCard(_ entry: CreditCardEntry)
     func deleteCreditCards(_ entries: [CreditCardEntry])
-    func dismissMenu()
-    func dismiss()
 }
 
 final class CreditCardsMenuViewModel: ObservableObject {

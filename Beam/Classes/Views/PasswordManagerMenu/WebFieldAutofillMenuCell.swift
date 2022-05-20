@@ -1,5 +1,5 @@
 //
-//  PasswordManagerMenuCell.swift
+//  WebFieldAutofillMenuCell.swift
 //  Beam
 //
 //  Created by Frank Lefebvre on 31/03/2021.
@@ -7,14 +7,14 @@
 
 import SwiftUI
 
-enum PasswordManagerMenuCellState {
+enum WebFieldAutofillMenuCellState {
     case idle
     case hovering
     case down
     case clicked
 }
 
-struct PasswordManagerMenuCell<Content: View>: View {
+struct WebFieldAutofillMenuCell<Content: View>: View {
     enum CellType {
         case autofill
         case action
@@ -22,7 +22,7 @@ struct PasswordManagerMenuCell<Content: View>: View {
 
     let type: CellType
     let height: CGFloat
-    let onChange: ((PasswordManagerMenuCellState) -> Void)?
+    let onChange: ((WebFieldAutofillMenuCellState) -> Void)?
     let content: () -> Content
 
     private let highlightCornerRadius: CGFloat = 6
@@ -30,7 +30,7 @@ struct PasswordManagerMenuCell<Content: View>: View {
 
     @Environment(\.colorScheme) private var colorScheme
 
-    @State private var highlightState: PasswordManagerMenuCellState = .idle
+    @State private var highlightState: WebFieldAutofillMenuCellState = .idle
     @State private var hoveringState = false
     @State private var mouseDownState = false
 
@@ -99,7 +99,7 @@ struct PasswordManagerMenuCell<Content: View>: View {
     }
 
     private func updateHighlightState() {
-        let newHighlightState: PasswordManagerMenuCellState
+        let newHighlightState: WebFieldAutofillMenuCellState
         if mouseDownState {
             newHighlightState = .down
         } else if hoveringState {

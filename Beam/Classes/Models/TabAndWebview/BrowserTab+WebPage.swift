@@ -117,7 +117,7 @@ extension BrowserTab: WebPage {
 
     func tabWillClose() {
         isFromNoteSearch = false
-        passwordOverlayController?.dismiss()
+        webAutofillController?.dismiss()
         authenticationViewModel?.cancel()
         browsingTree.closeTab()
         saveTree()
