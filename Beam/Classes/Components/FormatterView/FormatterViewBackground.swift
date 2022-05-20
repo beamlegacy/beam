@@ -11,8 +11,12 @@ struct FormatterViewBackground<Content: View>: View {
 
     var boxCornerRadius: CGFloat = 6
     var shadowOpacity: Double? = 1
+    var showBorder: Bool = false
     var content: (() -> Content)?
 
+    private var strokeColor: Color {
+        BeamColor.Formatter.border.swiftUI
+    }
     private var backgroundColor: Color {
         BeamColor.Formatter.background.swiftUI
     }
@@ -30,6 +34,10 @@ struct FormatterViewBackground<Content: View>: View {
 
     var body: some View {
         ZStack {
+            if showBorder {
+                RoundedRectangle(cornerRadius: boxCornerRadius)
+                    .stroke(strokeColor, lineWidth: 1)
+            }
             RoundedRectangle(cornerRadius: boxCornerRadius)
                 .fill(backgroundColor)
                 .shadow(color: shadowColor, radius: shadowRadius, x: 0.0, y: shadowOffsetY)
