@@ -10,6 +10,14 @@ import Cocoa
 import BeamCore
 
 extension BeamTextEdit {
+    enum FormatterKind {
+        case none
+        case custom
+        case native
+    }
+}
+
+extension BeamTextEdit {
 
     // MARK: - Properties
     private static let bottomConstraint: CGFloat = -55
@@ -124,7 +132,8 @@ extension BeamTextEdit {
 
         if isPresent {
             DispatchQueue.main.async {
-                formatterView.animateOnAppear {
+                formatterView.animateOnAppear { [weak self] in
+                    self?.displayedInlineFormatterKind = .custom
                     completionHandler?()
                 }
             }
@@ -132,6 +141,7 @@ extension BeamTextEdit {
             formatterView.animateOnDisappear { [weak self] in
                 (formatterView.window as? PopoverWindow)?.close()
                 self?.window?.makeKey()
+                self?.displayedInlineFormatterKind = .none
                 completionHandler?()
             }
             dismissFormatterView(formatterView, removeView: isDragged, animated: false)
