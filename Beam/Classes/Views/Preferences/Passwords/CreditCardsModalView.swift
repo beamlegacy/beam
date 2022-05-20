@@ -78,9 +78,10 @@ struct CreditCardsModalView: View {
         }
         .sheet(isPresented: $showingEditSheet) {
             CreditCardEditView(entry: creditCardsViewModel.editedCreditCard) { entry in
-                if let entry = entry {
-                    creditCardsViewModel.saveCreditCard(entry)
+                guard let entry = entry else {
+                    return true
                 }
+                return creditCardsViewModel.saveCreditCard(entry)
             }
         }
         .alert(isPresented: $showingRemoveAlert) {
