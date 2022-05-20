@@ -57,46 +57,6 @@ class UserSessionRequestTests: QuickSpec {
                     }
                 }
             }
-
-            context("With Promises") {
-                context("with good password") {
-                    it("authenticates") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            sut
-                                .signIn(email: existingAccountEmail, password: password)
-                                .then { signIn in
-                                    expect(signIn.accessToken).toNot(beEmpty())
-                                    done()
-                                }
-                                .catch { _ in }
-                        }
-                    }
-                }
-
-                context("with wrong password") {
-                    let password = "wrong password"
-
-                    it("doesn't authenticate") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            sut
-                                .signIn(email: existingAccountEmail, password: password)
-                                .then { _ in }
-                                .catch { error in
-                                    expect(error).to(beAnInstanceOf(APIRequestError.self))
-
-                                    let errorable = UserSessionRequest.SignIn(
-                                        accessToken: nil,
-                                        refreshToken: nil,
-                                        errors: [UserErrorData(message: "Invalid password", path: ["arguments", "password"])]
-                                    )
-
-                                    expect(error).to(matchError(APIRequestError.apiErrors(errorable)))
-                                    done()
-                                }
-                        }
-                    }
-                }
-            }
         }
 
         describe(".forgotPassword") {
@@ -119,38 +79,6 @@ class UserSessionRequestTests: QuickSpec {
                             expect(forgotPassword.success).to(beTrue())
                         } catch {
                             fail(error.localizedDescription)
-                        }
-                    }
-                }
-            }
-
-            context("with Promises") {
-                context("with existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(30)) { done in
-                            let promise: Promises.Promise<UserSessionRequest.ForgotPassword> = sut
-                                .forgotPassword(email: existingAccountEmail)
-
-                            promise.then { forgotPassword in
-                                expect(forgotPassword.success).to(beTrue())
-                                done()
-                            }
-                            .catch { _ in }
-                        }
-                    }
-                }
-
-                context("with non-existing account") {
-                    it("returns") {
-                        waitUntil(timeout: .seconds(10)) { done in
-                            let promise: Promises.Promise<UserSessionRequest.ForgotPassword> = sut
-                                .forgotPassword(email: existingAccountEmail)
-
-                            promise.then { forgotPassword in
-                                expect(forgotPassword.success).to(beTrue())
-                                done()
-                            }
-                            .catch { _ in }
                         }
                     }
                 }
