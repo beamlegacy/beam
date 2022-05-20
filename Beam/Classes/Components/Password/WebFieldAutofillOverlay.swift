@@ -12,27 +12,54 @@ import Combine
 /// Embeds password manager child windows and frame info for the currently focused input field.
 /// Lifecycle: created when field gets focus, destroyed when field loses focus.
 final class WebFieldAutofillOverlay {
+    private enum MenuViewModel {
+        case none
+        case password(PasswordManagerMenuViewModel)
+        case creditCard(CreditCardsMenuViewModel)
+
+        func revert() {
+            switch self {
+            case .none:
+                break
+            case .password(let viewModel):
+                viewModel.revertToFirstItem()
+            case .creditCard(let viewModel):
+                viewModel.revertToFirstItem()
+            }
+        }
+
+        func close() {
+            switch self {
+            case .none:
+                break
+            case .password(let viewModel):
+                viewModel.close()
+            case .creditCard(let viewModel):
+                viewModel.close()
+            }
+        }
+    }
+
     private(set) var frameInfo: WKFrameInfo? // used in menu delegate, needs to be kept around
     let elementId: String
-    let autocompleteGroup: WebAutocompleteGroup
+    let autofillGroup: WebAutofillGroup
 
     private var scope = Set<AnyCancellable>()
     private weak var page: WebPage?
     private var scrollUpdater: PassthroughSubject<WebFrames.FrameInfo, Never>
     private weak var currentFieldLocator: WebFieldLocator?
-    private var passwordMenuPopover: WebAutofillPopoverContainer?
-    private var menuViewModel: PasswordManagerMenuViewModel?
-    private var creditCardViewModel: CreditCardsMenuViewModel?
+    private var menuPopover: WebAutofillPopoverContainer?
+    private var menuViewModel: MenuViewModel = .none
     private var buttonPopover: WebAutofillPopoverContainer?
     private let elementEdgeInsets: BeamEdgeInsets
     private let iconAction: (WKFrameInfo?) -> Void
 
-    init(page: WebPage?, scrollUpdater: PassthroughSubject<WebFrames.FrameInfo, Never>, frameInfo: WKFrameInfo?, elementId: String, inGroup autocompleteGroup: WebAutocompleteGroup, elementEdgeInsets: BeamEdgeInsets = .zero, iconAction: @escaping (WKFrameInfo?) -> Void) {
+    init(page: WebPage?, scrollUpdater: PassthroughSubject<WebFrames.FrameInfo, Never>, frameInfo: WKFrameInfo?, elementId: String, inGroup autofillGroup: WebAutofillGroup, elementEdgeInsets: BeamEdgeInsets = .zero, iconAction: @escaping (WKFrameInfo?) -> Void) {
         self.page = page
         self.scrollUpdater = scrollUpdater
         self.frameInfo = frameInfo
         self.elementId = elementId
-        self.autocompleteGroup = autocompleteGroup
+        self.autofillGroup = autofillGroup
         self.elementEdgeInsets = elementEdgeInsets
         self.iconAction = iconAction
         (page as? BrowserTab)?.state?.$omniboxInfo
@@ -54,9 +81,9 @@ final class WebFieldAutofillOverlay {
     }
 
     func dismiss() {
-        menuViewModel?.close()
-        menuViewModel = nil
-        dismissPasswordManagerMenu()
+        menuViewModel.close()
+        menuViewModel = .none
+        dismissMenu()
         clearIcon()
     }
 
@@ -72,7 +99,7 @@ final class WebFieldAutofillOverlay {
             return CGPoint(x: rect.maxX - 24 - 16, y: rect.midY + 12)
         }
         let imageName: String
-        switch autocompleteGroup.action {
+        switch autofillGroup.action {
         case .login, .createAccount:
             imageName = "autofill-password"
         case .personalInfo:
@@ -81,7 +108,7 @@ final class WebFieldAutofillOverlay {
             imageName = "preferences-credit_card" // FIXME: add asset
         }
         let buttonView = WebFieldAutofillButton(imageName: imageName) { [weak self] in
-            if let self = self, self.passwordMenuPopover == nil {
+            if let self = self, self.menuPopover == nil {
                 self.iconAction(self.frameInfo)
             }
         }
@@ -96,57 +123,63 @@ final class WebFieldAutofillOverlay {
         buttonPopover = nil
     }
 
-    func showPasswordManagerMenu(frameInfo: WKFrameInfo?, viewModel: PasswordManagerMenuViewModel) {
+    private func showMenu(frameInfo: WKFrameInfo?, viewModel: MenuViewModel) {
         guard let page = self.page else { return }
-        guard passwordMenuPopover == nil else { return }
+        guard menuPopover == nil else { return }
         showIcon(frameInfo: frameInfo) // make sure icon is always created before menu
-        let passwordManagerMenu = PasswordManagerMenu(viewModel: viewModel)
-        guard let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
-        let passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, topEdgeHeight: 24, fieldLocator: fieldLocator) { rect in
+        guard let popoverWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
+        let menuPopover = WebAutofillPopoverContainer(window: popoverWindow, page: page, topEdgeHeight: 24, fieldLocator: fieldLocator) { rect in
             CGPoint(x: rect.minX, y: rect.minY)
         }
-        passwordWindow.setView(with: passwordManagerMenu, at: passwordMenuPopover.currentOrigin, fromTopLeft: true)
-        passwordWindow.delegate = viewModel.passwordGeneratorViewModel
-        self.passwordMenuPopover = passwordMenuPopover
+        switch viewModel {
+        case .none:
+            break
+        case .password(let viewModel):
+            let menuView = PasswordManagerMenu(viewModel: viewModel)
+            popoverWindow.setView(with: menuView, at: menuPopover.currentOrigin, fromTopLeft: true)
+            popoverWindow.delegate = viewModel.passwordGeneratorViewModel
+        case .creditCard(let viewModel):
+            let menuView = CreditCardsMenu(viewModel: viewModel)
+            popoverWindow.setView(with: menuView, at: menuPopover.currentOrigin, fromTopLeft: true)
+        }
+        self.menuPopover = menuPopover
         self.menuViewModel = viewModel
     }
 
+    func showPasswordManagerMenu(frameInfo: WKFrameInfo?, viewModel: PasswordManagerMenuViewModel) {
+        showMenu(frameInfo: frameInfo, viewModel: .password(viewModel))
+    }
+
     func showCreditCardsMenu(frameInfo: WKFrameInfo?, viewModel: CreditCardsMenuViewModel) {
-        guard let page = self.page else { return }
-        guard passwordMenuPopover == nil else { return }
-        showIcon(frameInfo: frameInfo) // make sure icon is always created before menu
-        let passwordManagerMenu = CreditCardsMenu(viewModel: viewModel)
-        guard let passwordWindow = CustomPopoverPresenter.shared.presentPopoverChildWindow(canBecomeKey: false, canBecomeMain: false, withShadow: false, useBeamShadow: true, lightBeamShadow: true, storedInPresenter: true) else { return }
-        let passwordMenuPopover = WebAutofillPopoverContainer(window: passwordWindow, page: page, topEdgeHeight: 24, fieldLocator: fieldLocator) { rect in
-            CGPoint(x: rect.minX, y: rect.minY)
-        }
-        passwordWindow.setView(with: passwordManagerMenu, at: passwordMenuPopover.currentOrigin, fromTopLeft: true)
-//        passwordWindow.delegate = viewModel.passwordGeneratorViewModel
-        self.passwordMenuPopover = passwordMenuPopover
-        self.creditCardViewModel = viewModel
+        showMenu(frameInfo: frameInfo, viewModel: .creditCard(viewModel))
     }
 
     func revertMenuToDefault() {
-        menuViewModel?.revertToFirstItem()
+        menuViewModel.revert()
     }
 
-    func dismissPasswordManagerMenu() {
-        if let popoverWindow = passwordMenuPopover?.window {
+    func dismissMenu() {
+        if let popoverWindow = menuPopover?.window {
             CustomPopoverPresenter.shared.dismissPopoverWindow(popoverWindow)
         }
-        passwordMenuPopover = nil
+        menuPopover = nil
     }
 
     private func updateOmniboxState(visible: Bool) {
         if visible {
             // omnibox is visible: remove child windows
-            dismissPasswordManagerMenu()
+            dismissMenu()
             clearIcon()
         } else if page?.isActiveTab() ?? false {
             // omnibox is hidden, and the field still has focus: show icon and menu if exists
             showIcon(frameInfo: nil)
-            if let menuViewModel = menuViewModel {
-                showPasswordManagerMenu(frameInfo: nil, viewModel: menuViewModel)
+            switch menuViewModel {
+            case .none:
+                break
+            case .password(let viewModel):
+                showPasswordManagerMenu(frameInfo: nil, viewModel: viewModel)
+            case .creditCard(let viewModel):
+                showCreditCardsMenu(frameInfo: nil, viewModel: viewModel)
             }
         }
     }

@@ -13,7 +13,7 @@ enum PasswordMessages: String, CaseIterable {
 /**
  Handles password messages sent from web page's javascript.
  */
-class PasswordMessageHandler: SimpleBeamMessageHandler {
+class WebAutofillMessageHandler: SimpleBeamMessageHandler {
 
     init() {
         let messages = PasswordMessages.self.allCases.map { $0.rawValue }
@@ -26,12 +26,12 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
             Logger.shared.logError("Unsupported message \(messageName) for password message handler", category: .web)
             return
         }
-        guard let passwordOverlayController = webPage.passwordOverlayController else { return }
+        guard let autofillController = webPage.webAutofillController else { return }
         switch messageKey {
 
         case .PasswordManager_loaded:
-            Logger.shared.logDebug("JavaScript loaded for frame \(messageBody as? String ?? "<no url>")", category: .passwordManagerInternal)
-            passwordOverlayController.requestInputFields(frameInfo: frameInfo)
+            Logger.shared.logDebug("JavaScript loaded for frame \(messageBody as? String ?? "<no url>")", category: .webAutofillInternal)
+            autofillController.requestInputFields(frameInfo: frameInfo)
 
         case .PasswordManager_textInputFields:
             guard let dict = messageBody as? [String: Any],
@@ -39,7 +39,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.updateInputFields(with: jsonString, frameInfo: frameInfo)
+            autofillController.updateInputFields(with: jsonString, frameInfo: frameInfo)
 
         case .PasswordManager_textInputFocusIn:
             guard let dict = messageBody as? [String: Any],
@@ -49,7 +49,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
                 return
             }
             let text = dict["text"] as? String
-            passwordOverlayController.inputFieldDidGainFocus(elementId, frameInfo: frameInfo, contents: text)
+            autofillController.inputFieldDidGainFocus(elementId, frameInfo: frameInfo, contents: text)
 
         case .PasswordManager_textInputFocusOut:
             guard let dict = messageBody as? [String: Any],
@@ -57,7 +57,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.inputFieldDidLoseFocus(elementId, frameInfo: frameInfo)
+            autofillController.inputFieldDidLoseFocus(elementId, frameInfo: frameInfo)
 
         case .PasswordManager_formSubmit:
             guard let dict = messageBody as? [String: Any],
@@ -65,7 +65,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
                 Logger.shared.logError("Ignoring message as body is not a String", category: .web)
                 return
             }
-            passwordOverlayController.handleWebFormSubmit(with: elementId, frameInfo: frameInfo)
+            autofillController.handleWebFormSubmit(with: elementId, frameInfo: frameInfo)
 
         case .PasswordManager_resize:
             let passwordBody = messageBody as? [String: Any]
@@ -76,7 +76,7 @@ class PasswordMessageHandler: SimpleBeamMessageHandler {
                 Logger.shared.logError("Password controller ignored resize: \(String(describing: messageBody))", category: .web)
                 return
             }
-            passwordOverlayController.updateViewSize(width: width, height: height)
+            autofillController.updateViewSize(width: width, height: height)
         }
     }
 }

@@ -43,7 +43,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-email"]
+        let group = results.autofillGroups["id-email"]
         XCTAssertNotNil(group)
         XCTAssertEqual(group!.action, .login)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -76,7 +76,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-email"]
+        let group = results.autofillGroups["id-email"]
         XCTAssertNotNil(group)
         XCTAssertEqual(group!.action, .login)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -109,7 +109,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-email"]
+        let group = results.autofillGroups["id-email"]
         XCTAssertNotNil(group)
         XCTAssertEqual(group!.action, .login)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -149,7 +149,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-email"]
+        let group = results.autofillGroups["id-email"]
         XCTAssertNotNil(group)
         XCTAssertEqual(group!.action, .login)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -174,7 +174,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password"))
         XCTAssertEqual(ids.count, 1)
 
-        let group = results.autocompleteGroups["id-password"]
+        let group = results.autofillGroups["id-password"]
         XCTAssertNotNil(group)
         XCTAssertEqual(group!.action, .login)
         XCTAssertEqual(group!.relatedFields.count, 1)
@@ -207,7 +207,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password2"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-password1"]
+        let group = results.autofillGroups["id-password1"]
         XCTAssertNotNil(group)
         XCTAssertEqual(group!.action, .createAccount)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -244,7 +244,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-login-password"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-login-password"]
+        let group = results.autofillGroups["id-login-password"]
         XCTAssertNotNil(group)
         XCTAssertTrue(group!.isAmbiguous)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -286,7 +286,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-login-password"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = results.autocompleteGroups["id-login-password"]
+        let group = results.autofillGroups["id-login-password"]
         XCTAssertNotNil(group)
         XCTAssertTrue(group!.isAmbiguous)
         XCTAssertEqual(group!.relatedFields.count, 2)
@@ -311,7 +311,7 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password-1"))
         XCTAssertEqual(ids.count, 2)
 
-        let group = try XCTUnwrap(results.autocompleteGroups["id-login-1"])
+        let group = try XCTUnwrap(results.autofillGroups["id-login-1"])
         XCTAssertTrue(group.isAmbiguous)
         XCTAssertEqual(group.relatedFields.count, 2)
         XCTAssertTrue(group.relatedFields.contains { $0.id == "id-login-1" })
@@ -339,21 +339,21 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password-2"))
         XCTAssertEqual(ids.count, 3)
 
-        let loginGroup = try XCTUnwrap(results.autocompleteGroups["id-login-1"])
+        let loginGroup = try XCTUnwrap(results.autofillGroups["id-login-1"])
         XCTAssertTrue(loginGroup.isAmbiguous)
         XCTAssertEqual(loginGroup.relatedFields.count, 3)
         XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-login-1" })
         XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-password-1" })
         XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-password-2" })
 
-        let passwordGroup1 = try XCTUnwrap(results.autocompleteGroups["id-password-1"])
+        let passwordGroup1 = try XCTUnwrap(results.autofillGroups["id-password-1"])
         XCTAssertTrue(passwordGroup1.isAmbiguous)
         XCTAssertEqual(passwordGroup1.relatedFields.count, 3)
         XCTAssertTrue(passwordGroup1.relatedFields.contains { $0.id == "id-login-1" })
         XCTAssertTrue(passwordGroup1.relatedFields.contains { $0.id == "id-password-1" })
         XCTAssertTrue(passwordGroup1.relatedFields.contains { $0.id == "id-password-2" })
 
-        let passwordGroup2 = try XCTUnwrap(results.autocompleteGroups["id-password-2"])
+        let passwordGroup2 = try XCTUnwrap(results.autofillGroups["id-password-2"])
         XCTAssertTrue(passwordGroup2.isAmbiguous)
         XCTAssertEqual(passwordGroup2.relatedFields.count, 3)
         XCTAssertTrue(passwordGroup2.relatedFields.contains { $0.id == "id-login-1" })
@@ -382,15 +382,15 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password-1"))
         XCTAssertEqual(ids.count, 2)
 
-        XCTAssertNil(results.autocompleteGroups["id-login-1"])
+        XCTAssertNil(results.autofillGroups["id-login-1"])
 
-        let loginGroup2 = try XCTUnwrap(results.autocompleteGroups["id-login-2"])
+        let loginGroup2 = try XCTUnwrap(results.autofillGroups["id-login-2"])
         XCTAssertFalse(loginGroup2.isAmbiguous)
         XCTAssertEqual(loginGroup2.relatedFields.count, 2)
         XCTAssertTrue(loginGroup2.relatedFields.contains { $0.id == "id-login-2" })
         XCTAssertTrue(loginGroup2.relatedFields.contains { $0.id == "id-password-1" })
 
-        let passwordGroup1 = try XCTUnwrap(results.autocompleteGroups["id-password-1"])
+        let passwordGroup1 = try XCTUnwrap(results.autofillGroups["id-password-1"])
         XCTAssertFalse(passwordGroup1.isAmbiguous)
         XCTAssertEqual(passwordGroup1.relatedFields.count, 2)
         XCTAssertTrue(passwordGroup1.relatedFields.contains { $0.id == "id-login-2" })
@@ -421,16 +421,16 @@ class WebFieldClassifierTests: XCTestCase {
         XCTAssertTrue(ids.contains("id-password"))
         XCTAssertEqual(ids.count, 2)
 
-        XCTAssertNil(results.autocompleteGroups["id-firstname"])
-        XCTAssertNil(results.autocompleteGroups["id-lastname"])
+        XCTAssertNil(results.autofillGroups["id-firstname"])
+        XCTAssertNil(results.autofillGroups["id-lastname"])
 
-        let loginGroup = try XCTUnwrap(results.autocompleteGroups["id-email"])
+        let loginGroup = try XCTUnwrap(results.autofillGroups["id-email"])
         XCTAssertTrue(loginGroup.isAmbiguous)
         XCTAssertEqual(loginGroup.relatedFields.count, 2)
         XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-email" })
         XCTAssertTrue(loginGroup.relatedFields.contains { $0.id == "id-password" })
 
-        let passwordGroup = try XCTUnwrap(results.autocompleteGroups["id-password"])
+        let passwordGroup = try XCTUnwrap(results.autofillGroups["id-password"])
         XCTAssertTrue(passwordGroup.isAmbiguous)
         XCTAssertEqual(passwordGroup.relatedFields.count, 2)
         XCTAssertTrue(passwordGroup.relatedFields.contains { $0.id == "id-email" })
