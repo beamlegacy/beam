@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import BeamCore
 
 fileprivate extension CharacterSet {
     static let charactersInCardHolderName = CharacterSet.alphanumerics.union(.whitespaces)
@@ -50,7 +51,7 @@ fileprivate extension String {
 
 struct CreditCardEditView: View {
     let entry: CreditCardEntry?
-    let onSubmit: (CreditCardEntry?) -> Void
+    let onSubmit: (CreditCardEntry?) -> Bool
 
     @State private var editedEntry = CreditCardEntry(cardDescription: "", cardNumber: "", cardHolder: "", expirationMonth: 0, expirationYear: 0)
     @State private var cardNumber = ""
@@ -59,6 +60,9 @@ struct CreditCardEditView: View {
     @State private var editingCardHolder = false
     @State private var editingCardNumber = false
     @State private var editingExpirationDate = false
+    @State private var currentMonth = 0
+    @State private var currentYear = 0
+    @State private var showingDuplicateAlert = false
 
     @Environment(\.presentationMode) private var presentationMode
 
@@ -120,7 +124,7 @@ struct CreditCardEditView: View {
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
                             .frame(width: 96, alignment: .trailing)
-                        BoxedTextFieldView(title: "", text: $expirationDate, isEditing: $editingExpirationDate, textWillChange: { proposedText in
+                        BoxedTextFieldView(title: "MM/YYYY", text: $expirationDate, isEditing: $editingExpirationDate, textWillChange: { proposedText in
                             (proposedText.filteredAsExpirationDate(), nil)
                         }, onEscape: dismiss)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
@@ -129,6 +133,9 @@ struct CreditCardEditView: View {
                             if let (month, year) = decodedExpirationDate {
                                 editedEntry.expirationMonth = month
                                 editedEntry.expirationYear = year
+                            } else {
+                                editedEntry.expirationMonth = 0
+                                editedEntry.expirationYear = 0
                             }
                         }
                         .onChange(of: editingExpirationDate) { editing in
@@ -139,6 +146,10 @@ struct CreditCardEditView: View {
                         Image(systemName: decodedExpirationDate != nil ? "checkmark.circle" : "exclamationmark.circle")
                             .font(BeamFont.regular(size: 12).swiftUI)
                             .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                        Text(editedEntry.expirationDateStatus(currentMonth: currentMonth, currentYear: currentYear) == .expired ? "Expired" : "")
+                            .font(BeamFont.regular(size: 12).swiftUI)
+                            .foregroundColor(BeamColor.Generic.subtitle.swiftUI)
+                            .frame(alignment: .leading)
                     }
                     .padding(.bottom, 12)
                     HStack {
@@ -157,7 +168,7 @@ struct CreditCardEditView: View {
                             Text(entry == nil ? "Add Card" : "Done")
                         }
                         .buttonStyle(.bordered)
-                        .disabled(editedEntry.cardHolder.isEmpty || cardNumber.value.isEmpty || decodedExpirationDate == nil)
+                        .disabled(editedEntry.cardHolder.isEmpty || !editedEntry.isValidNumber || editedEntry.expirationDateStatus(currentMonth: currentMonth, currentYear: currentYear) != .valid)
                         .keyboardShortcut(.defaultAction)
                     }
                 }
@@ -165,11 +176,20 @@ struct CreditCardEditView: View {
             }
         }
         .fixedSize()
+        .alert(isPresented: $showingDuplicateAlert) {
+            Alert(title: Text("There is already a credit card with the same number and expiration date."))
+        }
         .onAppear {
             if let entry = entry {
                 editedEntry = entry
                 cardNumber = entry.formattedNumber
                 expirationDate = entry.formattedDate
+            }
+            let calendar = Calendar(identifier: .gregorian) // We are dealing with credit card expiration dates, best to use Gregorian calendar regardless of locale.
+            let components = calendar.dateComponents(in: .current, from: BeamDate.now)
+            if let month = components.month, let year = components.year {
+                currentMonth = month
+                currentYear = year
             }
         }
     }
@@ -185,7 +205,7 @@ struct CreditCardEditView: View {
                 year += 2000
             }
         }
-        if year < 2022 { return nil }
+        if year < 2000 { return nil }
         return (month, year)
     }
 
@@ -209,8 +229,11 @@ struct CreditCardEditView: View {
     }
 
     private func saveAndDismiss() {
-        onSubmit(editedEntry)
-        dismiss()
+        if onSubmit(editedEntry) {
+            dismiss()
+        } else {
+            showingDuplicateAlert = true
+        }
     }
 
     private func dismiss() {

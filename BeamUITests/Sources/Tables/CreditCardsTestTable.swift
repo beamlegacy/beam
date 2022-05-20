@@ -62,7 +62,7 @@ class CreditCardsTestTable: BaseView, Rowable {
     
     func getVisibleRows() {
         getNumberOfVisibleItems()
-        for index in 0...numberOfVisibleItems-1 {
+        for index in 0..<numberOfVisibleItems {
             rows.append(getVisibleRow(index))
         }
     }

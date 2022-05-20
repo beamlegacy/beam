@@ -54,13 +54,8 @@ class CreditCardAutofillManager {
     }
 
     func find(cardNumber: String) -> [CreditCardEntry] {
-        do {
-            let records = try creditCardsDB.find(cardNumber: cardNumber)
-            return try creditCardEntries(for: records)
-        } catch {
-            Logger.shared.logError("Error while fetching credit cards by number: \(error.localizedDescription)", category: .creditCardsDB)
-        }
-        return []
+        // Can't make a database query for card number because the column is encrypted.
+        fetchAll().filter { $0.cardNumber == cardNumber }
     }
 
     @discardableResult
