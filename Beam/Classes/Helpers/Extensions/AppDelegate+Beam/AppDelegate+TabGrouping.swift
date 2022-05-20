@@ -27,8 +27,7 @@ extension AppDelegate {
     private func autoShowTabGroupingFeedbackWindow() {
         Self.lastTabGroupingFeedback = BeamDate.now
         guard self.data.clusteringManager.tabGroupingUpdater.hasPagesGroup && windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
-        tabGroupingFeedbackWindow?.performClose(self)
-        tabGroupingFeedbackWindow = nil
+        tabGroupingFeedbackWindow?.close()
         showTabGroupingFeedbackWindow(self)
     }
 
@@ -57,8 +56,9 @@ extension AppDelegate {
             tabGroupingFeedbackWindow.makeKeyAndOrderFront(window)
             return
         }
-        tabGroupingFeedbackWindow = TabGroupingFeedbackWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: self.data.clusteringManager)
-        tabGroupingFeedbackWindow?.center()
-        tabGroupingFeedbackWindow?.makeKeyAndOrderFront(window)
+        let newWindow = TabGroupingFeedbackWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: self.data.clusteringManager)
+        newWindow.center()
+        newWindow.makeKeyAndOrderFront(window)
+        tabGroupingFeedbackWindow = newWindow
     }
 }

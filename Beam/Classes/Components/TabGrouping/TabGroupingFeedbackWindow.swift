@@ -93,10 +93,12 @@ class TabGroupingFeedbackWindow: NSWindow, NSWindowDelegate {
         contentView = BeamHostingView(rootView: tabGroupingContentView)
         isMovableByWindowBackground = false
         delegate = self
+        isReleasedWhenClosed = false
     }
 
-    deinit {
+    override func close() {
         AppDelegate.main.data.clusteringManager.tabGroupingUpdater.hueGenerator.taken = Array(Set(AppDelegate.main.data.clusteringManager.tabGroupingUpdater.builtPagesGroups.map { $0.value.hueTint }))
         AppDelegate.main.tabGroupingFeedbackWindow = nil
+        super.close()
     }
 }
