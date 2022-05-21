@@ -31,6 +31,7 @@ class AllNotesPageContextualMenu {
         self.onFinishBlock = onFinish
     }
 
+    // swiftlint:disable function_body_length
     func presentMenuForNotes(at: CGPoint, allowImports: Bool = false) {
         guard let window = AppDelegate.main.window else { return }
         let menu = NSMenu()
@@ -57,7 +58,26 @@ class AllNotesPageContextualMenu {
                     keyEquivalent: ""
                 ))
             }
+
+            if selectedNotes.allSatisfy({ !$0.publicationStatus.isOnPublicProfile && $0.publicationStatus.isPublic }) {
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(NSMenuItem(
+                    title: "Publish\(countSuffix) on Profile",
+                    action: #selector(publishOnProfile),
+                    keyEquivalent: ""
+                ))
+            }
+
+            if selectedNotes.allSatisfy({ $0.publicationStatus.isOnPublicProfile }) {
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(NSMenuItem(
+                    title: "Unpublish\(countSuffix) from Profile",
+                    action: #selector(unpublishFromProfile),
+                    keyEquivalent: ""
+                ))
+            }
             menu.addItem(NSMenuItem.separator())
+
         }
 
         if allowImports {
@@ -190,35 +210,74 @@ class AllNotesPageContextualMenu {
         }
     }
 
+    @objc
+    private func publishOnProfile() {
+        Task { @MainActor in
+            await updateProfileGroup(publish: true)
+            self.onFinishBlock?(true)
+        }
+    }
+
+    @objc
+    private func unpublishFromProfile() {
+        Task { @MainActor in
+            await updateProfileGroup(publish: false)
+            self.onFinishBlock?(true)
+        }
+    }
+
+    private func updateProfileGroup(publish: Bool) async {
+        await withTaskGroup(of: Void.self, body: { group in
+            for note in selectedNotes where note.publicationStatus.isPublic {
+                group.addTask {
+                    await withCheckedContinuation { continuation in
+
+                        var publicationGroups = note.publicationStatus.publicationGroups ?? []
+                        if note.publicationStatus.isOnPublicProfile {
+                            guard let idx = publicationGroups.firstIndex(where: { $0 == "profile" }) else { return }
+                            publicationGroups.remove(at: idx)
+                        } else {
+                            publicationGroups.append("profile")
+                        }
+
+                        BeamNoteSharingUtils.updatePublicationGroup(note, group: publicationGroups) { _ in
+                            continuation.resume()
+                        }
+                    }
+                }
+            }
+        })
+    }
+
     @objc private func makePublic() {
         guard delegate?.contextualMenuShouldPublishNote() != false else {
             return
         }
-        makeNotes(isPublic: true).then { _ in
+        Task { @MainActor in
+            await makeNotes(isPublic: true)
             self.onFinishBlock?(true)
         }
     }
 
     @objc private func makePrivate() {
-        makeNotes(isPublic: false).then { _ in
+        Task { @MainActor in
+            await makeNotes(isPublic: false)
             self.onFinishBlock?(true)
         }
     }
 
-    private func makeNotes(isPublic: Bool) -> Promises.Promise<[Bool]> {
-        let promises: [Promises.Promise<Bool>] = selectedNotes.map { note in
-            return Promises.Promise { (done, error) in
-                BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic) { result in
-                    switch result {
-                    case .failure(let e):
-                        error(e)
-                    case .success(let success):
-                        done(success)
+    private func makeNotes(isPublic: Bool) async {
+        await withTaskGroup(of: Void.self, body: { group in
+            _ = selectedNotes.map { note in
+                group.addTask {
+                    await withCheckedContinuation { continuation in
+                        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: isPublic) { _ in
+                            continuation.resume()
+                        }
                     }
                 }
             }
-        }
-        return Promises.all(promises)
+        })
     }
 
     @objc private func deleteNotes() {

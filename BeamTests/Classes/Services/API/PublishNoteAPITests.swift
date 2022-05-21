@@ -103,6 +103,75 @@ class PublishNoteAPITests: XCTestCase {
         XCTAssertNil(unpubLink)
     }
 
+    func testNotePublicationUpdatePublicationGroupUnpublication() {
+
+        guard let note = testNote else { fatalError("We should have a test note in setUp") }
+
+        AuthenticationManager.shared.username = "Test user"
+
+        let publish = expectation(description: "note publish")
+        BeamNoteSharingUtils.makeNotePublic(note,
+                                            becomePublic: true,
+                                            completion: { result in
+            switch result {
+            case .success(let published):
+                XCTAssertTrue(published)
+            case .failure(let error):
+                XCTFail("Note publication loggedIn with username should succeed :\(error)")
+            }
+            publish.fulfill()
+        })
+        waitForExpectations(timeout: 10, handler: nil)
+
+        let pubLink = BeamNoteSharingUtils.getPublicLink(for: note)
+        XCTAssertNotNil(pubLink)
+
+        let publicationGroupUpdatedToProfile = expectation(description: "note publication group updated")
+        let profilePublicationGroups = ["profile"]
+        BeamNoteSharingUtils.updatePublicationGroup(note, group: profilePublicationGroups) { result in
+            switch result {
+            case .success:
+                XCTAssertTrue(true)
+            case .failure(let error):
+                print(error)
+                XCTFail("\(error)")
+
+            }
+            publicationGroupUpdatedToProfile.fulfill()
+        }
+        waitForExpectations(timeout: 20, handler: nil)
+
+        let publicationGroupUpdatedToEmpty = expectation(description: "note publication group updated")
+        let emptyPublicationGroups: [String] = []
+        BeamNoteSharingUtils.updatePublicationGroup(note, group: emptyPublicationGroups) { result in
+            switch result {
+            case .success:
+                XCTAssertTrue(true)
+            case .failure(let error):
+                print(error)
+                XCTFail("\(error)")
+
+            }
+            publicationGroupUpdatedToEmpty.fulfill()
+        }
+        waitForExpectations(timeout: 20, handler: nil)
+
+        let unpublish = expectation(description: "note unpublish")
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: false, completion: { result in
+            switch result {
+            case .success(let published):
+                XCTAssertFalse(published)
+            case .failure(let error):
+                XCTFail("Note publication loggedIn with username should \(error)")
+            }
+            unpublish.fulfill()
+        })
+        waitForExpectations(timeout: 20, handler: nil)
+
+        let unpubLink = BeamNoteSharingUtils.getPublicLink(for: note)
+        XCTAssertNil(unpubLink)
+    }
+
     func testNotePublicationNotLogged() {
 
         guard let note = testNote else { fatalError("We should have a test note in setUp") }

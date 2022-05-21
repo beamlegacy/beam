@@ -82,6 +82,7 @@ class CheckBoxTableHeaderCell: TableHeaderCell {
 
     override var isHovering: Bool {
         didSet {
+            checkBoxLayer.isHidden = !isHovering
             checkBoxLayer.isHovering = isHovering
             checkBoxLayer.setNeedsLayout()
         }
@@ -89,6 +90,7 @@ class CheckBoxTableHeaderCell: TableHeaderCell {
 
     override init(textCell: String) {
         checkBoxLayer = BeamCheckboxCALayer()
+        checkBoxLayer.isHidden = true
         super.init(textCell: textCell)
 
         drawsBottomBorder = false

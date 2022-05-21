@@ -14,26 +14,30 @@ class RestAPIServer {
     enum Request {
         case publishNote(note: BeamNote)
         case unpublishNote(noteId: UUID)
+        case updatePublicationGroup(note: BeamNote, groups: [String])
         case embed(url: URL)
         case providers
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
             case .publishNote(let note):
-                return createBody(for: note)
+                return createBody(for: note, and: nil)
             case .unpublishNote:
                 return nil
             case .embed:
                 return nil
             case .providers:
                 return nil
+            case .updatePublicationGroup(let note, let groups):
+                return createBody(for: note, and: groups)
             }
         }
 
         var baseURL: URL {
             switch self {
-            case .publishNote, .unpublishNote:
-                return URL(string: Configuration.publicAPIpublishServer)!
+            case .publishNote, .unpublishNote, .updatePublicationGroup:
+               return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
+                // return URL(string: "https://develop-web-server.oa.r.appspot.com")!
             case .embed:
                 return URL(string: Configuration.publicAPIembed)!
             case .providers:
@@ -43,7 +47,7 @@ class RestAPIServer {
 
         var route: String {
             switch self {
-            case .publishNote:
+            case .publishNote, .updatePublicationGroup:
                 return "/note"
             case .unpublishNote(let noteId):
                 return "/note/\(noteId)"
@@ -56,7 +60,7 @@ class RestAPIServer {
 
         var queryParameters: [String: String]? {
             switch self {
-            case .publishNote, .unpublishNote, .providers:
+            case .publishNote, .unpublishNote, .updatePublicationGroup, .providers:
                 return nil
             case .embed(let url):
                 let content = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? url.absoluteString
@@ -76,7 +80,7 @@ class RestAPIServer {
 
         var httpMethod: String {
             switch self {
-            case .publishNote:
+            case .publishNote, .updatePublicationGroup:
                 return "POST"
             case .unpublishNote:
                 return "DELETE"
@@ -105,7 +109,7 @@ class RestAPIServer {
             }
         }
 
-        private func createBody(for note: BeamNote) -> (Data, String)? {
+        private func createBody(for note: BeamNote, and groups: [String]?) -> (Data, String)? {
             let richContent = note.richContent
 
             let publicNote = PublicNote(note: note)
@@ -113,15 +117,15 @@ class RestAPIServer {
             encoder.dateEncodingStrategy = .iso8601
             guard let encodedNote = try? encoder.encode(publicNote) else { return nil }
 
-            if richContent.isEmpty {
+            if richContent.isEmpty && groups == nil {
                 return (encodedNote, "application/json")
             } else {
-                guard let data = multipart(encodedPublicNote: encodedNote, richContent: richContent) else { return nil }
+                guard let data = multipart(encodedPublicNote: encodedNote, richContent: richContent, groups: groups) else { return nil }
                 return (data, "multipart/form-data; boundary=\(RestAPIServer.multipartBoundary)")
             }
         }
 
-        private func multipart(encodedPublicNote: Data, richContent: [BeamElement]) -> Data? {
+        private func multipart(encodedPublicNote: Data, richContent: [BeamElement], groups: [String]?) -> Data? {
             let boundary = RestAPIServer.multipartBoundary
             let lineBreak = "\r\n"
 
@@ -143,6 +147,17 @@ class RestAPIServer {
                     break
                 }
             }
+
+            if let groups = groups {
+                let encoder = JSONEncoder()
+                encoder.dateEncodingStrategy = .iso8601
+                guard let encodedGroups = try? encoder.encode(["publicationGroups": groups]) else { return nil }
+
+                let groupsPart = createMultipartBody(data: encodedGroups, documentName: "options", fileNameAndExtension: nil, mimetype: "application/json")
+                body.appendString(lineBreak)
+                body.append(groupsPart)
+            }
+
             body.appendString(lineBreak)
             body.appendString("--\(boundary)--\(lineBreak)")
 

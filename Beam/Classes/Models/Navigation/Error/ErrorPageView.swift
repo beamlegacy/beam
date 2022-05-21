@@ -10,7 +10,7 @@ import SwiftUI
 struct ErrorPageView: View {
     let errorManager: ErrorPageManager
     let onReloadTab: () -> Void?
-    
+
     var errorImage: some View {
         Image(errorManager.error == .radblock ? "error-page_adblock" : "error-page")
             .renderingMode(.template)

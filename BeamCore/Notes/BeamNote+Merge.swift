@@ -71,6 +71,7 @@ public extension BeamNote {
 }
 
 fileprivate extension BeamElement {
+    // swiftlint:disable function_body_length cyclomatic_complexity
     func mergeChildren(other: BeamElement, alreadyPlaced: inout Set<UUID>, otherElements: [UUID: BeamElement]) {
 
         var index = 0
