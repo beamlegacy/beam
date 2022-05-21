@@ -18,6 +18,8 @@ class BeamNSTableView: NSTableView {
 
     weak var additionalDelegate: BeamNSTableViewDelegate?
 
+    var onHoverTableView: ((_ hovering: Bool) -> Void)?
+
     init() {
         super.init(frame: .zero)
         self.target = self
@@ -57,6 +59,19 @@ class BeamNSTableView: NSTableView {
         }
         guard shouldPropagate else { return }
         super.mouseDown(with: event)
+    }
+
+    override func mouseEntered(with event: NSEvent) {
+        super.mouseEntered(with: event)
+        onHoverTableView?(true)
+    }
+
+    override func mouseExited(with event: NSEvent) {
+        super.mouseExited(with: event)
+        guard rowAndColumngForWindowLocation(event.locationInWindow) != nil else {
+            onHoverTableView?(false)
+            return
+        }
     }
 
     @objc func didDoubleSelectRow() {

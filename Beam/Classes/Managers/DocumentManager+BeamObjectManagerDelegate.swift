@@ -221,7 +221,7 @@ extension DocumentManager: BeamObjectManagerDelegate {
         var doc = document
         if let localDocument = localDocument {
             if localDocument.deletedAt != nil {
-                delete(document: localDocument) { result in
+                delete(document: localDocument) { _ in
                     Logger.shared.logDebug("Deleted already softdeleted \(localDocument.titleAndId) (there is a new one comming from the sync)",
                                            category: .document)
                 }

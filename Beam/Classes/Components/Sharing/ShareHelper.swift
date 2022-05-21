@@ -11,13 +11,13 @@ import Combine
 
 class ShareHelper {
 
-    private let baseURL: URL
-    private let htmlNoteAdapter: HtmlNoteAdapter
+    private let baseURL: URL?
+    private let htmlNoteAdapter: HtmlNoteAdapter?
     private let openWebURL: (URL) -> Void
     private var imageCancellables = Set<AnyCancellable>()
     private let pasteboard: NSPasteboard
 
-    init(_ baseURL: URL, htmlNoteAdapter: HtmlNoteAdapter, pasteboard: NSPasteboard = .general, handleOpenURL: @escaping (URL) -> Void) {
+    init(_ baseURL: URL? = nil, htmlNoteAdapter: HtmlNoteAdapter? = nil, pasteboard: NSPasteboard = .general, handleOpenURL: @escaping (URL) -> Void) {
         self.baseURL = baseURL
         self.htmlNoteAdapter = htmlNoteAdapter
         self.openWebURL = handleOpenURL
@@ -33,6 +33,11 @@ class ShareHelper {
         }
     }
 
+    func share(link: URL, of noteTitle: String?, to service: ShareService) async {
+        guard let url = service.buildURL(with: noteTitle ?? "", url: link) else { return }
+        await handleURL(url)
+    }
+
     private struct ReadShareableContent {
         var text: String?
         var url: URL?
@@ -41,6 +46,10 @@ class ShareHelper {
 
     private func getShareableContent(from html: String) async -> ReadShareableContent? {
         let elements: [BeamElement] = await withCheckedContinuation { continuation in
+            guard let htmlNoteAdapter = htmlNoteAdapter else {
+                continuation.resume(returning: [])
+                return
+            }
             htmlNoteAdapter.convert(html: html) { (beamElements: [BeamElement]) in
                 continuation.resume(returning: beamElements)
             }
@@ -100,8 +109,8 @@ class ShareHelper {
     }
 
     private func getImageFromElementKind(_ elementKind: ElementKind) -> NSImage? {
-        guard case let .image(imageID, _, _) = elementKind,
-           let imageRecord = try? self.htmlNoteAdapter.visitor.fileStorage?.fetch(uid: imageID) else {
+        guard case let .image(imageID, _, _) = elementKind, let htmlNoteAdapter = htmlNoteAdapter,
+           let imageRecord = try? htmlNoteAdapter.visitor.fileStorage?.fetch(uid: imageID) else {
             return nil
         }
         return NSImage(data: imageRecord.data)

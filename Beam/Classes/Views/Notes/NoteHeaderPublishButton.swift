@@ -39,22 +39,25 @@ struct NoteHeaderPublishButton: View {
     var justCopiedLink = false
     var error: ErrorMessage?
 //    var enableAnimations: Bool = true
+    var forceHovering: Bool = false
+    var customButtonLabelStyle: ButtonLabelStyle
     var action: () -> Void
 
     @State private var hovering = false
     @State private var title: String?
 
-    private let customButtonLabelStyle = ButtonLabelStyle(disableAnimations: false)
     var isWaitingChanges: Bool {
         [.publishing, .unpublishing].contains(publishState)
     }
     var body: some View {
         let justPublishedOrCopied = justCopiedLink || publishState == .justPublished
-        let displayTitle = justPublishedOrCopied || hovering || isWaitingChanges
+        let displayTitle = justPublishedOrCopied || hovering || isWaitingChanges || forceHovering
+
         var publishTitle: String?
         var displayCheckIcon = false
         let isPublic = publishState == .isPublic || publishState == .unpublishing
-        let animateLottie = hovering && !isWaitingChanges
+        let animateLottie = hovering && !isWaitingChanges || forceHovering && !isWaitingChanges
+
         if displayTitle {
             if publishState == .justPublished || justCopiedLink {
                 publishTitle = "Published"
@@ -64,7 +67,7 @@ struct NoteHeaderPublishButton: View {
             } else if publishState == .unpublishing {
                 publishTitle = "Unpublishing…"
             } else {
-                publishTitle = isPublic ? "Unpublish" : "Publish"
+                publishTitle = isPublic ? "Published" : "Publish"
             }
         }
         let springAnimation = BeamAnimation.spring(stiffness: 480, damping: 30)
@@ -83,17 +86,12 @@ struct NoteHeaderPublishButton: View {
                 AnyView(
                     HStack(spacing: BeamSpacing._20) {
                         ZStack {
-                            // Using a ZStack with opacity to better animate alongside the spring text
-                            Icon(name: "collect-generic", color: BeamColor.Niobium.swiftUI)
-                                .opacity(displayCheckIcon ? 1 : 0)
                             LottieView(name: "editor-publish", playing: animateLottie,
                                        color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
                                        loopMode: .loop, speed: 1)
-                                .opacity(displayCheckIcon || isPublic ? 0 : 1)
-                            LottieView(name: "editor-unpublish", playing: animateLottie,
-                                       color: displayTitle ? BeamColor.Niobium.nsColor : BeamColor.LightStoneGray.nsColor,
-                                       loopMode: .loop, speed: 1)
-                                .opacity(displayCheckIcon || !isPublic ? 0 : 1)
+                                .opacity(isPublic ? 0 : 1)
+                            Icon(name: "editor-url_link", color: displayTitle ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                .opacity(isPublic ? 1 : 0)
                         }
                         .frame(width: 16, height: 16)
                         if let title = publishTitle {
@@ -110,7 +108,9 @@ struct NoteHeaderPublishButton: View {
                     .animation(springAnimation, value: publishTitle)
                     .animation(nil)
                 )
-            }, state: displayTitle ? .clicked : .normal, customStyle: customButtonLabelStyle, action: action)
+            }, state: displayTitle ? (publishState != .isPublic ? .clicked : .hovered) : .normal,
+                        customStyle: customButtonLabelStyle,
+                        action: action)
             .animation(containerAnimation, value: displayCheckIcon)
             .animation(containerAnimation, value: isPublic)
             .animation(containerAnimation, value: publishTitle)

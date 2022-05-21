@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import Combine
 
 // MARK: - NSView Container
 class ContextMenuFormatterView: FormatterView {
@@ -13,11 +14,16 @@ class ContextMenuFormatterView: FormatterView {
     private var hostView: NSHostingView<ContextMenuView>?
     private var items: [ContextMenuItem] = []
     private var displayedItems: [ContextMenuItem] = []
-    private var subviewModel = ContextMenuViewModel()
+    private var subviewModel: ContextMenuViewModel
     private var direction: Edge = .bottom
     private var defaultSelectedIndex: Int?
     private var sizeToFit: Bool = false
     private var onSelectMenuItem: (() -> Void)?
+    private var onClosing: (() -> Void)?
+    var origin: CGPoint?
+    private var canBecomeKey: Bool
+
+    private var cancellables = Set<AnyCancellable>()
 
     private var sizeUpdateDispatchedBlock: DispatchWorkItem?
     private var lastComputedSize: CGSize = .zero
@@ -33,26 +39,42 @@ class ContextMenuFormatterView: FormatterView {
     var typingPrefix = 1
 
     init(key: String,
+         subviewModel: ContextMenuViewModel? = nil,
          items: [ContextMenuItem],
          direction: Edge = .bottom,
          handlesTyping: Bool = false,
          defaultSelectedIndex: Int? = nil,
          sizeToFit: Bool = false,
-         onSelectHandler: (() -> Void)? = nil) {
+         origin: NSPoint? = nil, canBecomeKey: Bool = false,
+         onSelectHandler: (() -> Void)? = nil, onClosing: (() -> Void)? = nil) {
 
+        self.subviewModel = subviewModel ?? ContextMenuViewModel()
         self.items = items
         self.displayedItems = items
         self.direction = direction
         self.defaultSelectedIndex = defaultSelectedIndex
         self.sizeToFit = sizeToFit
         self.onSelectMenuItem = onSelectHandler
+        self.onClosing = onClosing
         self._handlesTyping = handlesTyping
         self.lastComputedSize = ContextMenuView.idealSizeForItems(items)
+        self.origin = origin
+        self.canBecomeKey = canBecomeKey
         super.init(key: key, viewType: .inline)
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    override func didClose() {
+        subviewModel.visible = false
+        subviewModel.hideSubMenu?()
+        onClosing?()
+    }
+
+    override var canBecomeKeyView: Bool {
+        canBecomeKey
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {
@@ -65,7 +87,7 @@ class ContextMenuFormatterView: FormatterView {
 
     override func animateOnDisappear(completionHandler: (() -> Void)? = nil) {
         super.animateOnDisappear()
-        subviewModel.visible = false
+        didClose()
         DispatchQueue.main.asyncAfter(deadline: .now() + FormatterView.disappearAnimationDuration) {
             completionHandler?()
         }
@@ -79,7 +101,20 @@ class ContextMenuFormatterView: FormatterView {
         subviewModel.sizeToFit = sizeToFit
         subviewModel.onSelectMenuItem = onSelectMenuItem
         subviewModel.containerSize = idealSize
-        let rootView = ContextMenuView(viewModel: subviewModel)
+        subviewModel.hideSubMenu = { [weak self] in
+            self?.hideSubMenu()
+        }
+
+        subviewModel.$updateSize.sink { [weak self] updateSize in
+            guard let self = self else { return }
+            if updateSize {
+                self.invalidateLayout()
+            }
+        }.store(in: &cancellables)
+
+        let rootView = ContextMenuView(viewModel: subviewModel) { item in
+            self.presentSubMenu(item: item)
+        }
         let hostingView = NSHostingView(rootView: rootView)
         hostingView.autoresizingMask = [.width, .height]
         hostingView.frame = self.bounds
@@ -114,6 +149,10 @@ class ContextMenuFormatterView: FormatterView {
             subviewModel.containerSize = newSize
             hostView?.frame = newFrame
         }
+    }
+
+    func invalidateLayout() {
+        updateSize()
     }
 
     private func updateItemsForSearchText(_ text: String) {
@@ -181,5 +220,39 @@ class ContextMenuFormatterView: FormatterView {
               else { return false }
         updateItemsForSearchText(String(searchText))
         return true
+    }
+
+    // MARK: - SubMenu Presentation
+    private var subMenuIdentifier: String = "SubMenu-\(UUID())"
+    private var horizontalPadding: CGFloat = 2.5
+
+    private func presentSubMenu(item: ContextMenuItem) {
+        guard item.type == .itemWithDisclosure,
+              let subMenuModel = item.subMenuModel,
+                let window = self.window else { return }
+
+        var origin = self.origin ?? CGPoint.zero
+        origin.x += (self.hostView?.frame.width ?? 0) + horizontalPadding
+        var idealSize = CGSize.zero
+        if let idx = self.items.firstIndex(where: {$0.id == item.id}) {
+            let slice = self.items.prefix(upTo: idx)
+            idealSize = ContextMenuView.idealSizeForItems(Array(slice))
+        }
+        origin.y -= idealSize.height
+
+        CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
+
+        let menuView = ContextMenuFormatterView(key: self.subMenuIdentifier, subviewModel: subMenuModel, items: subMenuModel.items, direction: .bottom, sizeToFit: subMenuModel.sizeToFit, origin: origin, canBecomeKey: false, onSelectHandler: {
+            CustomPopoverPresenter.shared.dismissPopovers(key: self.subMenuIdentifier)
+            self.onSelectMenuItem?()
+        })
+
+        CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: origin, in: window)
+        subviewModel.subMenuIsShown = true
+    }
+
+    func hideSubMenu() {
+        CustomPopoverPresenter.shared.dismissPopovers(key: self.subMenuIdentifier)
+        subviewModel.subMenuIsShown = false
     }
 }

@@ -33,7 +33,9 @@ extension NoteHeaderView {
 
         // publishing
         @Published var publishState: NoteHeaderPublishButton.PublishButtonState = .isPrivate
+        @Published var isOnUserProfile: Bool = false
         @Published var justCopiedLinkFrom: NoteHeaderView.CopyLinkSource?
+        var profileLink: URL?
         private var publishingDispatchItem: DispatchWorkItem?
         private var copyLinkDispatchItem: DispatchWorkItem?
         private var noteObservers = Set<AnyCancellable>()
@@ -53,6 +55,7 @@ extension NoteHeaderView {
                 note.$publicationStatus.dropFirst().removeDuplicates().sink { [weak self] newValue in
                     guard self?.publishState == .isPublic || self?.publishState == .isPrivate else { return }
                     self?.publishState = newValue.isPublic ? .isPublic : .isPrivate
+                    self?.isOnUserProfile = newValue.isOnPublicProfile
                 }.store(in: &noteObservers)
                 note.$title.dropFirst().sink { [weak self] newTitle in
                     guard self?.isEditingTitle != true && self?.titleText != newTitle else { return }
@@ -61,6 +64,7 @@ extension NoteHeaderView {
             }
             self.titleText = note?.title ?? ""
             self.publishState = note?.publicationStatus.isPublic == true ? .isPublic : .isPrivate
+            self.isOnUserProfile = note?.publicationStatus.isOnPublicProfile ?? false
         }
 
         func textFieldDidChange(_ text: String) {
@@ -117,6 +121,11 @@ extension NoteHeaderView {
         }
 
         // MARK: Link
+        func getLink() -> URL? {
+            guard let note = note else { return nil }
+            return BeamNoteSharingUtils.getPublicLink(for: note)
+        }
+
         func copyLink(source: NoteHeaderView.CopyLinkSource) {
             guard let note = note else { return }
             BeamNoteSharingUtils.copyLinkToClipboard(for: note) { [weak self] _ in
@@ -128,6 +137,35 @@ extension NoteHeaderView {
                 self?.copyLinkDispatchItem = workItem
                 DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .seconds(2)), execute: workItem)
             }
+        }
+
+        func getProfileLink() -> URL? {
+            BeamNoteSharingUtils.getProfileLink()
+        }
+
+        // MARK: - Publication Groups
+        func togglePublishOnProfile(completion: @escaping ((Result<Bool, Error>) -> Void)) {
+            let missingRequirement: Result<Bool, Error> = Result.failure(BeamNoteSharingUtilsError.missingRequirement)
+
+            guard let note = note, note.publicationStatus.isPublic,
+                  var publicationGroups = note.publicationStatus.publicationGroups else {
+                completion(missingRequirement)
+                return
+            }
+
+            if note.publicationStatus.isOnPublicProfile {
+                guard let idx = publicationGroups.firstIndex(where: { $0 == "profile" }) else { return }
+                publicationGroups.remove(at: idx)
+            } else {
+                publicationGroups.append("profile")
+            }
+
+            BeamNoteSharingUtils.updatePublicationGroup(note, group: publicationGroups) { result in
+                DispatchQueue.main.async {
+                    completion(result)
+                }
+            }
+            return
         }
 
         // MARK: Publishing

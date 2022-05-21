@@ -308,6 +308,7 @@ final class WebFieldClassifier {
         self.autofillRules = .default
     }
 
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func evaluateForPassword(action: WebAutofillAction, field: DOMInputElement, bestUsernameAutocomplete: DOMInputAutocomplete?, bias: Int) -> WeightedRole? {
         let usernameRole: WebInputField.Role
         let passwordRole: WebInputField.Role
