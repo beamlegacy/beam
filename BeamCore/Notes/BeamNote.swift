@@ -41,7 +41,7 @@ public struct BeamNoteReference: Codable, Equatable, Hashable {
 
 public enum PublicationStatus: Codable, Equatable {
     case unpublished
-    case published(URL, URL?, Date)
+    case published(URL, URL?, Date, [String])
 
     public var isPublic: Bool {
         switch self {
@@ -52,17 +52,37 @@ public enum PublicationStatus: Codable, Equatable {
         }
     }
 
+    public var isOnPublicProfile: Bool {
+        switch self {
+        case .published(_, _, _, let publicationGroups):
+            return publicationGroups.contains(where: {$0 == "profile"})
+        default:
+            return false
+        }
+    }
+
+    public var publicationGroups: [String]? {
+        guard self.isPublic else { return nil }
+        switch self {
+        case .published(_, _, _, let publicationGroups):
+            return publicationGroups
+        default:
+            return nil
+        }
+    }
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
         switch self {
         case .unpublished:
             try container.encode(PublicationState.unpublished, forKey: .status)
-        case .published(let publicationURL, let publicationUrlShort, let publicationDate):
+        case .published(let publicationURL, let publicationUrlShort, let publicationDate, let publicationGroups):
             try container.encode(PublicationState.published, forKey: .status)
             try container.encode(publicationURL, forKey: .publicationUrl)
             try container.encode(publicationDate, forKey: .publicationDate)
             try container.encode(publicationUrlShort, forKey: .publicationUrlShort)
+            try container.encode(publicationGroups, forKey: .publicationGroups)
         }
     }
 
@@ -77,7 +97,8 @@ public enum PublicationStatus: Codable, Equatable {
             let publicationDate = try container.decode(Date.self, forKey: .publicationDate)
             let publicationURL = try container.decode(URL.self, forKey: .publicationUrl)
             let publicationUrlShort = try container.decodeIfPresent(URL.self, forKey: .publicationUrlShort)
-            self = .published(publicationURL, publicationUrlShort, publicationDate)
+            let publicationGroups = try container.decodeIfPresent([String].self, forKey: .publicationGroups)
+            self = .published(publicationURL, publicationUrlShort, publicationDate, publicationGroups ?? [])
         }
     }
 
@@ -86,6 +107,7 @@ public enum PublicationStatus: Codable, Equatable {
         case publicationUrl
         case publicationUrlShort
         case publicationDate
+        case publicationGroups
     }
 
     private enum PublicationState: String, Codable {
@@ -463,7 +485,7 @@ public class BeamNote: BeamElement {
     }
 
     public var shouldUpdatePublishedVersion: Bool {
-        guard case .published(_, _, let publicationDate) = publicationStatus else { return false }
+        guard case .published(_, _, let publicationDate, _) = publicationStatus else { return false }
         let timeInterval = self.updateDate.timeIntervalSince(publicationDate)
         return timeInterval > 2
     }

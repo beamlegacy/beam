@@ -318,7 +318,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
 private extension ContextMenuItem {
     var toNSMenuItem: NSMenuItem {
         switch type {
-        case .item:
+        case .item, .itemWithDisclosure, .itemWithToggle:
             return HandlerMenuItem(title: title) { _ in
                 guard let action = action else {
                     Logger.shared.logError("No action provided for this NSMenuItem", category: .general); return

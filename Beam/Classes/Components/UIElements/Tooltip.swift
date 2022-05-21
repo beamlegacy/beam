@@ -166,3 +166,16 @@ struct Tooltip_Previews: PreviewProvider {
         }
     }
 }
+
+struct ToolTipFormatter: View {
+    var text: String
+    var size: CGSize
+
+    var body: some View {
+        FormatterViewBackground(boxCornerRadius: 4, shadowOpacity: 0) {
+            Tooltip(title: text)
+                .background(Color.clear)
+                .frame(width: size.width, height: size.height, alignment: .center)
+        }
+    }
+}

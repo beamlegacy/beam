@@ -31,7 +31,7 @@ class TabGroupingUpdater {
     var hasPagesGroup: Bool {
         return !builtPagesGroups.isEmpty
     }
-    
+
     @Published private(set) var builtPagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
 
     func removeClosedPages(urlGroups: [[ClusteringManager.PageID]], openPages: [ClusteringManager.PageID?]) -> [[ClusteringManager.PageID]] {

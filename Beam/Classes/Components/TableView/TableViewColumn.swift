@@ -14,6 +14,7 @@ struct TableViewColumn {
         case IconAndText
         case CheckBox
         case TwoTextField
+        case IconButton
     }
 
     let key: String
