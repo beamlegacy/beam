@@ -135,7 +135,20 @@ class DeleteDocument: DocumentCommand {
     private func unpublishNotes(in docs: [DocumentStruct]) {
         let toUnpublish = docs.filter({ $0.isPublic })
         toUnpublish.forEach { doc in
-            BeamNoteSharingUtils.unpublishNote(with: doc.id, completion: { _ in })
+            if let note = BeamNote.getFetchedNote(doc.id) {
+                if note.publicationStatus.isOnPublicProfile {
+                    BeamNoteSharingUtils.removeFromProfile(note) { result in
+                        switch result {
+                        case .success:
+                            BeamNoteSharingUtils.unpublishNote(with: doc.id, completion: { _ in })
+                        case .failure:
+                            break
+                        }
+                    }
+                }
+            } else {
+                BeamNoteSharingUtils.unpublishNote(with: doc.id, completion: { _ in })
+            }
         }
     }
 

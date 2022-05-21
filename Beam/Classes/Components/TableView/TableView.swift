@@ -12,6 +12,17 @@ class TableViewItem: NSObject {
     var placeholder: String?
 }
 
+class IconButtonTableViewItem: TableViewItem {
+    var iconName: String?
+    var hasPopover: Bool = false
+    var popoverAlignment: Edge = .top
+    var buttonAction: ((NSPoint?) -> Void)?
+
+    override init() {
+        super.init()
+    }
+}
+
 class IconAndTextTableViewItem: TableViewItem {
     var favIcon: NSImage?
     var text: String?
@@ -74,6 +85,9 @@ struct TableView: NSViewRepresentable {
         view.columnAutoresizingStyle = .reverseSequentialColumnAutoresizingStyle
         view.intercellSpacing = .zero
         view.style = .plain
+        view.onHoverTableView = { isHovering in
+            context.coordinator.tableView(isHovered: isHovering)
+        }
 
         scrollView.documentView = view
         context.coordinator.tableView = view
@@ -268,6 +282,14 @@ class TableViewCoordinator: NSObject {
         }
         parent.onHover?(nil, nil)
     }
+
+    func tableView(isHovered: Bool) {
+        guard let columns = tableView?.tableColumns, !columns.isEmpty else { return }
+        let tableColumn = tableView?.tableColumns[0]
+        if let headerCell = tableColumn?.headerCell as? TableHeaderCell {
+            headerCell.isHovering = isHovered
+        }
+    }
 }
 
 extension TableViewCoordinator: NSTableViewDataSource {
@@ -399,6 +421,8 @@ extension TableViewCoordinator: NSTableViewDelegate {
             return setupIconAndTextCell(tableView, at: row, column: column)
         case .TwoTextField:
             return setupTwoTextFieldViewCell(tableView, at: row, column: column)
+        case .IconButton:
+            return setupIconButtonCell(tableView, at: row, column: column)
         }
     }
 
@@ -473,6 +497,24 @@ extension TableViewCoordinator: NSTableViewDelegate {
         twoTextFieldViewCell.topTextField.textColor = column.foregroundColor
         twoTextFieldViewCell.botTextField.textColor = column.foregroundColor
         return twoTextFieldViewCell
+    }
+
+    private func setupIconButtonCell(_ tableView: NSTableView, at row: Int, column: TableViewColumn) -> BeamTableCellIconButtonView? {
+        let item = sortedData[row] as? IconButtonTableViewItem
+
+        if let iconName = item?.iconName, let action = item?.buttonAction {
+            let iconButtonViewCell = BeamTableCellIconButtonView()
+
+            iconButtonViewCell.iconButton.image = NSImage(named: iconName)?.fill(color: BeamColor.AlphaGray.nsColor)
+            iconButtonViewCell.iconButton.contentTintColor = BeamColor.AlphaGray.nsColor
+            iconButtonViewCell.hasPopover = item?.hasPopover ?? false
+            iconButtonViewCell.popoverAlignment = item?.popoverAlignment ?? .bottom
+            iconButtonViewCell.buttonAction = action
+
+            return iconButtonViewCell
+        }
+
+        return nil
     }
 
     func tableView(_ tableView: NSTableView, heightOfRow row: Int) -> CGFloat {

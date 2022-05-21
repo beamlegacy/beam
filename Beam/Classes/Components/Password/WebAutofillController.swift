@@ -24,6 +24,7 @@ enum PasswordSaveAction {
     case saveSilently
 }
 
+// swiftlint:disable type_body_length
 class WebAutofillController: NSObject, WebPageRelated {
     private var scope = Set<AnyCancellable>()
     private let passwordManager: PasswordManager

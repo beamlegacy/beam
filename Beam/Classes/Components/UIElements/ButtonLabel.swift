@@ -34,6 +34,7 @@ struct ButtonLabelStyle {
     var activeBackgroundColor: Color = BeamColor.Button.activeBackground.swiftUI
     var disableAnimations = true // Should be replaced by the parent view disabling animations with .animation(nil) when needed.
     var backgroundCornerRadius: CGFloat = 4
+    var radiusCorners = RectCorner.allCorners
     var leadingPaddingAdjustment: CGFloat = 0
 }
 
@@ -135,7 +136,7 @@ struct ButtonLabel: View {
         .if(style.disableAnimations) {
             $0.animation(nil)
         }
-        .cornerRadius(style.backgroundCornerRadius)
+        .roundedCorners(radius: style.backgroundCornerRadius, corners: style.radiusCorners)
         .onHover { hovering in
             guard defaultState != .disabled else { return }
             isHovering = hovering
@@ -185,6 +186,30 @@ extension ButtonLabelStyle {
         style.activeForegroundColor = BeamColor.Niobium.swiftUI
         style.hoveredBackgroundColor = BeamColor.Mercury.swiftUI
         style.activeBackgroundColor = BeamColor.AlphaGray.swiftUI
+        return style
+    }()
+}
+
+extension ButtonLabelStyle {
+    static let leftFilledStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle()
+        style.backgroundColor = BeamColor.Mercury.swiftUI
+        style.foregroundColor = BeamColor.LightStoneGray.swiftUI
+        style.activeForegroundColor = BeamColor.Niobium.swiftUI
+        style.hoveredBackgroundColor = BeamColor.Mercury.swiftUI
+        style.activeBackgroundColor = BeamColor.AlphaGray.swiftUI
+        style.radiusCorners = [.topLeft, .bottomLeft]
+        return style
+    }()
+
+    static let rightFilledStyle: ButtonLabelStyle = {
+        var style = ButtonLabelStyle()
+        style.backgroundColor = BeamColor.Mercury.swiftUI
+        style.foregroundColor = BeamColor.LightStoneGray.swiftUI
+        style.activeForegroundColor = BeamColor.Niobium.swiftUI
+        style.hoveredBackgroundColor = BeamColor.Mercury.swiftUI
+        style.activeBackgroundColor = BeamColor.AlphaGray.swiftUI
+        style.radiusCorners = [.topRight, .bottomRight]
         return style
     }()
 }

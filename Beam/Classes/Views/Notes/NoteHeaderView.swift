@@ -25,28 +25,6 @@ struct NoteHeaderView: View {
     @State private var publishShowError: NoteHeaderPublishButton.ErrorMessage?
     @State private var hoveringLinkButton = false
 
-    private var copyLinkView: some View {
-        let justCopiedLink = model.justCopiedLinkFrom == .fromLinkIcon
-        return ButtonLabel(icon: "editor-url_link", customStyle: .tinyIconStyle) {
-            model.copyLink(source: .fromLinkIcon)
-        }
-        .overlay(
-            ZStack {
-                if justCopiedLink {
-                    Tooltip(title: "Link Copied")
-                        .fixedSize().offset(x: -22, y: 0)
-                        .transition(Tooltip.defaultTransition)
-                } else if hoveringLinkButton {
-                    Tooltip(title: "Copy Link")
-                        .fixedSize().offset(x: -22, y: 0)
-                        .transition(Tooltip.defaultTransition)
-                }
-            }, alignment: .trailing)
-        .onHover { hoveringLinkButton = $0 }
-        .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
-        .offset(x: -30, y: 0)
-    }
-
     private var titleView: some View {
         ZStack(alignment: .leading) {
             // TODO: Support multiline editing
@@ -132,29 +110,60 @@ struct NoteHeaderView: View {
         }
     }
 
+    @State private var forceHovering: Bool = false
     private var actionsView: some View {
-        HStack(spacing: BeamSpacing._100) {
-            NoteHeaderPublishButton(publishState: model.publishState,
-                                    justCopiedLink: model.justCopiedLinkFrom == .fromPublishButton,
-                                    error: publishShowError,
-                                    action: {
-                                        let canPerform = model.togglePublish { result in
-                                            switch result {
-                                            case .success:
-                                                break
-                                            case .failure(let error):
-                                                handlePublicationError(error: error)
-                                            }
-                                        }
-                                        if !canPerform {
-                                            showConnectWindow()
-                                        }
-                                    })
-//            Feature not available yet.
-//            ButtonLabel(icon: "editor-sources", state: .disabled)
+        var style = model.publishState == .isPublic ? ButtonLabelStyle.leftFilledStyle : ButtonLabelStyle(disableAnimations: false)
+        if model.publishState == .isPublic {
+            style.horizontalPadding = 7
+        }
+
+        return HStack(spacing: BeamSpacing._120) {
+            ZStack {
+                if model.publishState == .isPublic {
+                    HStack(spacing: BeamSpacing._20) {
+                        notePublishButton(style: style, forceHovering: forceHovering)
+                        DropDownButton(parentWindow: AppDelegate.main.window, items: publishedContextItems, customStyle: .rightFilledStyle)
+                    }.offset(x: -7, y: 0)
+                    .onHover {
+                        forceHovering = $0
+                    }
+                } else {
+                    notePublishButton(style: ButtonLabelStyle(disableAnimations: false))
+                }
+            }
+            .transition(.asymmetric(insertion: .opacity, removal: .slide))
+            .animation(BeamAnimation.easeInOut(duration: 0.15))
+            //            Feature not available yet.
+            //            ButtonLabel(icon: "editor-sources", state: .disabled)
+            Separator(horizontal: false, hairline: false, rounded: true, color: BeamColor.Generic.separator)
+                .frame(height: 16)
             AnimatedActionButton(iconName: "editor-delete", lottieName: "editor-delete", disable: model.note?.isTodaysNote ?? false, action: model.promptConfirmDelete)
                 .offset(x: 0, y: -1) // alignment adjustment for the eye
         }
+    }
+
+    private func notePublishButton(style: ButtonLabelStyle, forceHovering: Bool = false) -> some View {
+        return NoteHeaderPublishButton(publishState: model.publishState,
+                                justCopiedLink: model.justCopiedLinkFrom == .fromPublishButton,
+                                       error: publishShowError, forceHovering: forceHovering, customButtonLabelStyle: style,
+                                action: {
+            if model.publishState == .isPrivate {
+                let canPerform = model.togglePublish { result in
+                    switch result {
+                    case .success:
+                        break
+                    case .failure(let error):
+                        handlePublicationError(error: error)
+                    }
+                }
+                if !canPerform {
+                    showConnectWindow()
+                }
+            }
+            if model.publishState == .isPublic {
+                model.copyLink(source: .fromPublishButton)
+            }
+        })
     }
 
     private func handlePublicationError(error: Error) {
@@ -193,6 +202,22 @@ struct NoteHeaderView: View {
         }
     }
 
+    private var publishedContextItems: [ContextMenuItem] {
+        [
+            ContextMenuItem(title: "Add to profile",
+                            subtitleButton: model.getProfileLink()?.urlStringWithoutScheme, showSubtitleButton: model.isOnUserProfile,
+                            type: .itemWithToggle, action: nil, isToggleOn: model.isOnUserProfile, toggleAction: { _ in
+                model.togglePublishOnProfile() { _ in }
+            }),
+            ContextMenuItem(title: "Share", icon: "editor-arrow_right", iconPlacement: ContextMenuItem.IconPlacement.trailing, iconSize: 16, iconColor: BeamColor.AlphaGray, type: .itemWithDisclosure, action: { }, subMenuModel: SocialShareContextMenu(urlToShare: model.getLink(), of: model.note?.title).socialShareMenuViewModel),
+            ContextMenuItem.separator(),
+            ContextMenuItem(title: "Unpublish", action: {
+                CustomPopoverPresenter.shared.dismissPopovers(animated: false)
+                _ = model.togglePublish { _ in }
+            })
+        ]
+    }
+
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: BeamSpacing._40) {
@@ -201,7 +226,6 @@ struct NoteHeaderView: View {
                     .offset(x: 1, y: 0) // compensate for different font size leading alignment
                 HStack {
                     titleView
-                        .overlay(model.publishState != .isPublic ? nil : copyLinkView, alignment: .leading)
                     Spacer()
                     actionsView
                 }

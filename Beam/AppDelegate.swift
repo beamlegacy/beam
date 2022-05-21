@@ -413,8 +413,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var minimalistWebWindow: NSWindow?
     @discardableResult
-    func openMinimalistWebWindow(url: URL, title: String?) -> NSWindow {
-        let minWindow = minimalistWebWindow as? MinimalistWebViewWindow ?? MinimalistWebViewWindow(contentRect: NSRect(x: 0, y: 0, width: 450, height: 500))
+    func openMinimalistWebWindow(url: URL, title: String?, rect: CGRect? = nil) -> NSWindow {
+        let minWindow = minimalistWebWindow as? MinimalistWebViewWindow ?? MinimalistWebViewWindow(contentRect: rect ?? NSRect(x: 0, y: 0, width: 450, height: 500))
         if let title = title {
             minWindow.title = title
         }

@@ -124,9 +124,9 @@ private struct MeetingFormatterContainerView: View {
         let finalPoint = window?.parent?.convertPoint(fromScreen: window?.convertPoint(toScreen: at) ?? .zero) ?? at
         let subMenuIdentifier = "CalendarSubMenu"
         CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
-        let menuView = ContextMenuFormatterView(key: "CalendarSubMenu", items: items, direction: .bottom, sizeToFit: true) {
+        let menuView = ContextMenuFormatterView(key: "CalendarSubMenu", items: items, direction: .bottom, sizeToFit: true, onSelectHandler: {
             CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
-        }
+        })
         CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: finalPoint)
     }
 }

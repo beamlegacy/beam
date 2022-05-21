@@ -57,9 +57,9 @@ final class CustomPopoverPresenter {
 
     @discardableResult
     func presentFormatterView(_ view: FormatterView, atPoint: CGPoint,
-                              from fromView: NSView? = nil, animated: Bool = true) -> NSWindow? {
+                              from fromView: NSView? = nil, animated: Bool = true, in window: NSWindow? = nil) -> NSWindow? {
         let window = presentPopoverChildWindow(canBecomeKey: view.canBecomeKeyView, canBecomeMain: false,
-                                               withShadow: false, movable: false, storedInPresenter: false)
+                                               withShadow: false, movable: false, storedInPresenter: false, in: window)
         let position = fromView?.convert(atPoint, to: nil) ?? atPoint
         let idealSize = view.idealSize
         let xPadding = Self.windowViewPadding + view.extraPadding.width
@@ -73,8 +73,8 @@ final class CustomPopoverPresenter {
         view.frame = CGRect(origin: CGPoint(x: Self.windowViewPadding, y: Self.windowViewPadding), size: idealSize)
         window?.setView(with: container, at: rect.origin)
         window?.setContentSize(rect.size)
-
         presentedFormatterViews.append(view)
+
         if animated {
             DispatchQueue.main.async { view.animateOnAppear() }
         }
@@ -85,9 +85,7 @@ final class CustomPopoverPresenter {
     }
 
     func presentPopoverChildWindow(canBecomeKey: Bool = true, canBecomeMain: Bool = true,
-                                   withShadow: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false, movable: Bool = true, autocloseIfNotMoved: Bool = true, storedInPresenter: Bool = false) -> PopoverWindow? {
-
-        guard let mainWindow = AppDelegate.main.window else { return nil }
+                                   withShadow: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false, movable: Bool = true, autocloseIfNotMoved: Bool = true, storedInPresenter: Bool = false, in parentMenuWindow: NSWindow? = nil) -> PopoverWindow? {
 
         let window = PopoverWindow(canBecomeMain: canBecomeMain, canBecomeKey: canBecomeKey, useBeamShadow: useBeamShadow, lightBeamShadow: lightBeamShadow, autocloseIfNotMoved: autocloseIfNotMoved)
         window.isReleasedWhenClosed = false
@@ -96,7 +94,12 @@ final class CustomPopoverPresenter {
         window.hasShadow = withShadow
         window.isMovable = movable
 
-        mainWindow.addChildWindow(window, ordered: .above)
+        if let parentMenuWindow = parentMenuWindow {
+            parentMenuWindow.highestParent().addChildWindow(window, ordered: .above)
+        } else {
+            guard let mainWindow = AppDelegate.main.window else { return nil }
+            mainWindow.addChildWindow(window, ordered: .above)
+        }
 
         if storedInPresenter {
             presentedUnknownWindows.append(window)
