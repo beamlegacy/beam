@@ -12,17 +12,11 @@ import Combine
 struct AllNotesPageContentView: View {
     @EnvironmentObject var state: BeamState
     @EnvironmentObject var data: BeamData
+    @EnvironmentObject var windowInfo: BeamWindowInfo
     @Environment(\.undoManager) var undoManager
 
     private var currentNotesList: [NoteTableViewItem] {
-        switch listType {
-        case .publicNotes:
-            return model.publicNotesItems
-        case .privateNotes:
-            return model.privateNotesItems
-        default:
-            return model.allNotesItems
-        }
+        return model.getCurrentNotesList(for: listType)
     }
 
     @StateObject private var model = AllNotesPageViewModel()
@@ -42,7 +36,7 @@ struct AllNotesPageContentView: View {
         return intValue >= 0 ? "\(intValue)" : "--"
     }
 
-    static private let secondaryCellFont = BeamFont.regular(size: 10).nsFont
+    static private let secondaryCellFont = BeamFont.regular(size: 11).nsFont
     static private let secondaryCellTextColor = BeamColor.AlphaGray.nsColor
     static private let secondaryCellSelectedColor = BeamColor.combining(lightColor: .AlphaGray, darkColor: .LightStoneGray).nsColor
     private let columns = [
@@ -50,25 +44,19 @@ struct AllNotesPageContentView: View {
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
         TableViewColumn(key: ColumnID.title.rawValue, title: loc("Title"),
                         editable: true, isLink: true,
-                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 200),
+                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 370, font: BeamFont.light(size: 13).nsFont),
+        TableViewColumn(key: ColumnID.url.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: false, resizable: false,
+                        width: 43, font: Self.secondaryCellFont, foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
         TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"),
-                        width: 70, font: secondaryCellFont,
+                        width: 58, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: ColumnID.mentions.rawValue, title: loc("Links"),
-                        width: 80, font: secondaryCellFont,
+                        width: 50, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
-        TableViewColumn(key: ColumnID.createdAt.rawValue, title: loc("Created"), font: secondaryCellFont,
-                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
-                        stringFromKeyValue: { value in
-            if let date = value as? Date {
-                return AllNotesPageContentView.dateFormatter.string(from: date)
-            }
-            return ""
-        }),
         TableViewColumn(key: ColumnID.updatedAt.rawValue, title: loc("Updated"),
-                        isInitialSortDescriptor: true, font: secondaryCellFont,
+                        isInitialSortDescriptor: true, width: 95, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -78,29 +66,24 @@ struct AllNotesPageContentView: View {
         })
     ]
 
-    private enum ListType {
+    enum ListType {
         case allNotes
         case privateNotes
         case publicNotes
+        case onProfileNotes
     }
     @State private var listType: ListType = .allNotes
 
     private var cardsFilters: some View {
-        HStack(alignment: .center, spacing: BeamSpacing._20) {
-            ButtonLabel("All (\(model.allNotesItems.count))", state: listType == .allNotes ? .active : .normal) {
-                listType = .allNotes
-            }
-            Separator()
-                .frame(height: 16)
-            ButtonLabel("Published (\(model.publicNotesItems.count))", state: listType == .publicNotes ? .active : .normal) {
-                listType = .publicNotes
-            }
-            Separator()
-                .frame(height: 16)
-            ButtonLabel("Private (\(model.privateNotesItems.count))",
-                        state: listType == .privateNotes ? .active : .normal) {
-                listType = .privateNotes
-            }
+        switch self.listType {
+        case .allNotes:
+            return Text("All (\(model.getCurrentNotesList(for: .allNotes).count))")
+        case .privateNotes:
+            return Text("Private (\(model.getCurrentNotesList(for: .privateNotes).count))")
+        case .publicNotes:
+            return Text("Published (\(model.getCurrentNotesList(for: .publicNotes).count))")
+        case .onProfileNotes:
+            return Text("On Profile (\(model.getCurrentNotesList(for: .onProfileNotes).count))")
         }
     }
 
@@ -115,34 +98,70 @@ struct AllNotesPageContentView: View {
         if let publishingNoteTitle = model.publishingNoteTitle {
             return loc("Publishing '\(publishingNoteTitle)'...")
         }
-        return listType == .publicNotes ? loc("New Published Note") : loc("New Private Note")
+
+        if listType == .publicNotes {
+            return model.publicNotesItems.count == 0 ? loc("You haven’t published any note yet. Start today!") : loc("New Published Note")
+        }
+
+        if listType == .onProfileNotes {
+            return model.onProfileNotesItems.count == 0 ? loc("You haven’t published any note to your profile yet. Start today!") : loc("New Published on Profile Note")
+        }
+
+        return loc("New Private Note")
     }
 
+    private var compactWindowWidth: Bool {
+        return windowInfo.windowFrame.size.width < 1024
+    }
+
+    @State private var justCopiedLink = false
     var body: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 35) {
             HStack(alignment: .center, spacing: BeamSpacing._20) {
-                HStack(spacing: BeamSpacing._20) {
-                    Text(pageTitle)
-                        .font(BeamFont.medium(size: PreferencesManager.editorFontSizeHeadingOne).swiftUI)
-                        .foregroundColor(BeamColor.Generic.text.swiftUI)
-                        .padding(.leading, 35)
-                    Icon(name: "editor-breadcrumb_down", width: 12, color: BeamColor.LightStoneGray.swiftUI)
-                }
-                .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
-                    showGlobalContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil), allowImports: true)
-                }))
-                Spacer()
-                if model.isAuthenticated {
-                    cardsFilters
-                } else {
-                    ButtonLabel(loc("Connect to Beam to publish your notes")) {
-                        model.showConnectWindow(withConfirmationAlert: false)
+                VStack(alignment: .leading, spacing: 8) {
+                    HStack(spacing: BeamSpacing._80) {
+                        Text(pageTitle)
+                            .font(BeamFont.regular(size: 24).swiftUI)
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                        Icon(name: "editor-options", width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                    }
+                    .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
+                        showGlobalContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil), allowImports: true)
+                    }))
+
+                    HStack {
+                        if let profileLink = BeamNoteSharingUtils.getProfileLink() {
+                            MinimalUnderlineButton(text: profileLink.urlStringWithoutScheme, font: BeamFont.regular(size: 12).swiftUI, foregroundColor: BeamColor.LightStoneGray.swiftUI) {
+                                if let state = AppDelegate.main.windows.first?.state {
+                                    state.mode = .web
+                                    _ = state.createTab(withURLRequest: URLRequest(url: profileLink), originalQuery: nil)
+                                }
+                            }
+                        } else {
+                            ButtonLabel(loc("Connect to Beam to publish your notes")) {
+                                model.showConnectWindow(withConfirmationAlert: false)
+                            }
+                        }
+
+                        Spacer()
+
+                        HStack(spacing: BeamSpacing._20) {
+                            Text("View:")
+                                .font(BeamFont.regular(size: 12).swiftUI)
+                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                            cardsFilters
+                                .font(BeamFont.regular(size: 12).swiftUI)
+                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
+                            Icon(name: "editor-breadcrumb_down", width: 8, color: BeamColor.LightStoneGray.swiftUI)
+                        }
+                        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
+                            showFiltersContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil))
+                        }))
                     }
                 }
             }
             .frame(height: 22)
-            .padding(.top, 85)
-            .padding(.trailing, 20)
+            .padding(.top, 97)
             TableView(hasSeparator: false, items: currentNotesList, columns: columns,
                       creationRowTitle: creationRowPlaceholder,
                       isCreationRowLoading: model.publishingNoteTitle != nil,
@@ -178,6 +197,7 @@ struct AllNotesPageContentView: View {
                     .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                 }
             )
+            .padding(.leading, -34)
             .disabled(model.publishingNoteTitle != nil)
             .frame(maxHeight: .infinity)
             .background(Color.clear
@@ -189,8 +209,8 @@ struct AllNotesPageContentView: View {
                     .padding(.leading, -32) // shifted for hover options menu 
             )
         }
-        .padding(.horizontal, 140)
-        .frame(maxWidth: .infinity)
+        .frame(minWidth: 600, maxWidth: 900)
+        .padding(.horizontal, compactWindowWidth == true ? 100 : 214)
         .id(model.id)
         .onAppear {
             model.data = data
@@ -237,6 +257,19 @@ struct AllNotesPageContentView: View {
         handler.presentMenuForNotes(at: at, allowImports: allowImports)
     }
 
+    func showFiltersContextualMenu(at origin: NSPoint) {
+        var notes: [BeamNote] = []
+        for item in currentNotesList {
+            guard let note = item.note ?? item.getNote() else { continue }
+            notes.append(note)
+        }
+
+        let menu = AllNotesPageFiltersContextualMenu(viewModel: model, selectedListType: listType) { newlySelectedListType in
+            self.listType = newlySelectedListType
+        }
+        menu.presentMenu(at: origin)
+    }
+
     private func onEditingText(_ text: String?, row: Int, in notesList: [NoteTableViewItem]) {
         guard let title = text, !title.isEmpty else {
             return
@@ -244,9 +277,10 @@ struct AllNotesPageContentView: View {
         if row >= notesList.count {
             let newNote = state.fetchOrCreateNoteForQuery(title)
             let isPublic = listType == .publicNotes
+            let publishOnProfile = listType == .onProfileNotes
 
             //If we create a public note, publish it right after creation, else just save it
-            if isPublic {
+            if isPublic || publishOnProfile {
                 model.publishingNoteTitle = newNote.title
                 BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true) { result in
                     DispatchQueue.main.async {
@@ -259,7 +293,13 @@ struct AllNotesPageContentView: View {
                             newNote.save()
                             listType = .privateNotes
                         case .success:
-                            model.refreshAllNotes()
+                            if publishOnProfile {
+                                BeamNoteSharingUtils.updatePublicationGroup(newNote, group: ["profile"]) { _ in
+                                    model.refreshAllNotes()
+                                }
+                            } else {
+                                model.refreshAllNotes()
+                            }
                         }
                     }
                 }
@@ -290,6 +330,7 @@ struct AllNotesPageContentView_Previews: PreviewProvider {
 private enum ColumnID: String {
     case checkbox
     case title
+    case url
     case words
     case mentions
     case createdAt

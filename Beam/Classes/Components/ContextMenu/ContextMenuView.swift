@@ -10,6 +10,8 @@ import SwiftUI
 struct ContextMenuItem: Identifiable {
     enum ContextMenuItemType {
         case item
+        case itemWithToggle
+        case itemWithDisclosure
         case separator
     }
     enum IconPlacement {
@@ -20,6 +22,8 @@ struct ContextMenuItem: Identifiable {
     let id = UUID()
     let title: String
     var subtitle: String?
+    var subtitleButton: String?
+    var showSubtitleButton: Bool = false
     var icon: String?
     var iconPlacement: IconPlacement = .leading
     var iconSize: CGFloat = 16
@@ -27,6 +31,9 @@ struct ContextMenuItem: Identifiable {
     private(set) var type = ContextMenuItemType.item
     let action: (() -> Void)?
     var iconAction: (() -> Void)?
+    var isToggleOn: Bool = false
+    var toggleAction: ((Bool) -> Void)?
+    var subMenuModel: ContextMenuViewModel?
 
     static func separator() -> ContextMenuItem {
         ContextMenuItem(title: "", type: ContextMenuItemType.separator, action: nil)
@@ -35,9 +42,12 @@ struct ContextMenuItem: Identifiable {
 
 struct ContextMenuItemView: View {
 
+    @ObservedObject var viewModel: ContextMenuViewModel
     @Environment(\.isEnabled) private var isEnabled: Bool
     var item: ContextMenuItem
     var highlight = false
+    @State var toggleSwitched: Bool = false
+    @State var showSubtitleButton: Bool = false
 
     var iconView: some View {
         Group {
@@ -56,25 +66,60 @@ struct ContextMenuItemView: View {
             RoundedRectangle(cornerRadius: 3)
                 .fill(BeamColor.ContextMenu.hover.swiftUI.opacity(highlight ? 1.0 : 0.0))
                 .animation(nil)
-            HStack(spacing: BeamSpacing._60) {
-                if item.iconPlacement == .leading {
-                    iconView
+            VStack(alignment: .leading) {
+                HStack(spacing: BeamSpacing._60) {
+                    if item.iconPlacement == .leading {
+                        iconView
+                    }
+                    if item.type == .itemWithToggle {
+                        VStack(alignment: .leading) {
+                            HStack {
+                                Text(item.title)
+                                    .font(BeamFont.regular(size: 13).swiftUI)
+                                Spacer()
+                                ToggleView(isOn: $toggleSwitched)
+                                    .frame(width: 26, height: 16, alignment: .trailing)
+                                    .onChange(of: toggleSwitched) { _isOn in
+                                        item.toggleAction?(_isOn)
+                                        withAnimation {
+                                            if item.subtitleButton != nil {
+                                                showSubtitleButton = _isOn
+                                                viewModel.updateSize = true
+                                            }
+                                        }
+                                    }.frame(alignment: .trailing)
+                            }
+                        }
+                    } else {
+                        Text(item.title)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(isEnabled ? BeamColor.Generic.text.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                    }
+                    if let subtitle = item.subtitle, item.type != .itemWithToggle {
+                        Spacer()
+                        Text(subtitle)
+                            .font(BeamFont.regular(size: 13).swiftUI)
+                            .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                    }
+                    if item.iconPlacement == .trailing {
+                        Spacer()
+                        iconView
+                    }
                 }
-                Text(item.title)
-                    .font(BeamFont.regular(size: 13).swiftUI)
-                    .foregroundColor(isEnabled ? BeamColor.Generic.text.swiftUI : BeamColor.LightStoneGray.swiftUI)
-                if let subtitle = item.subtitle {
-                    Spacer()
-                    Text(subtitle)
-                        .font(BeamFont.regular(size: 13).swiftUI)
-                        .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                if let subtitleButton = item.subtitleButton, showSubtitleButton {
+                    MinimalUnderlineButton(customTextView: (Text(subtitleButton) + Text(Image("editor-url").renderingMode(.template))),
+                                           font: BeamFont.regular(size: 11).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI) {
+                        if let url = URL(string: subtitleButton), let state = AppDelegate.main.windows.first?.state {
+                            state.mode = .web
+                            _ = state.createTab(withURLRequest: URLRequest(url: url.urlWithScheme), originalQuery: nil)
+                        }
+                    }.frame(height: 13)
+                    .transition(.move(edge: .top))
+                    .transition(.opacity)
+                    .animation(BeamAnimation.easeInOut(duration: 0.30))
                 }
-                if item.iconPlacement == .trailing {
-                    Spacer()
-                    iconView
-                }
-            }
-            .padding(.vertical, BeamSpacing._40)
+
+            }.padding(.vertical, BeamSpacing._40)
             .padding(.horizontal, BeamSpacing._50)
         }
         .frame(maxWidth: .infinity)
@@ -91,12 +136,17 @@ class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
     @Published var sizeToFit: Bool = false
     @Published var containerSize: CGSize = .zero
     var onSelectMenuItem: (() -> Void)?
+    @Published var updateSize: Bool = false
+    // SubMenu
+    var hideSubMenu: (() -> Void)?
+    var subMenuIsShown: Bool = false
 }
 
 struct ContextMenuView: View {
 
     @ObservedObject var viewModel: ContextMenuViewModel
-    static let itemHeight: CGFloat = 24
+    static let standardItemHeight: CGFloat = 24
+    static let subtitleButtonItemHeight: CGFloat = 47
     static let defaultWidth: CGFloat = 160
     static let largeWidth: CGFloat = 240
 
@@ -108,14 +158,18 @@ struct ContextMenuView: View {
             if item.type == .separator {
                 return result + Separator.height + spacing
             }
-            itemsNeedLargeWidth = itemsNeedLargeWidth || item.subtitle != nil || item.icon != nil
-            return result + ContextMenuView.itemHeight + spacing
+            if item.subtitleButton != nil, item.showSubtitleButton {
+                return result + ContextMenuView.subtitleButtonItemHeight + spacing
+            }
+            itemsNeedLargeWidth = itemsNeedLargeWidth || item.subtitle != nil || item.icon != nil && item.type != .itemWithDisclosure
+            return result + ContextMenuView.standardItemHeight + spacing
         }
         let width = itemsNeedLargeWidth ? self.largeWidth : self.defaultWidth
         return CGSize(width: width, height: height)
     }
 
     @State private var hoveringIndex: Int?
+    var onHoverSubMenu: ((ContextMenuItem) -> Void)?
 
     var body: some View {
         let computedSize = Self.idealSizeForItems(viewModel.items)
@@ -127,18 +181,32 @@ struct ContextMenuView: View {
                         if item.type == .separator {
                             Separator(horizontal: true)
                         } else {
-                            ContextMenuItemView(item: item, highlight: isSelected)
-                                .frame(height: ContextMenuView.itemHeight)
-                                .disabled(item.action == nil)
-                                .onTapGesture {
-                                    item.action?()
-                                    viewModel.onSelectMenuItem?()
-                                }
+                            ContextMenuItemView(viewModel: viewModel, item: item, highlight: isSelected, toggleSwitched: item.isToggleOn, showSubtitleButton: item.showSubtitleButton)
+                                .if(item.type != .itemWithToggle && item.type != .itemWithDisclosure, transform: { view in
+                                    view
+                                        .disabled(item.action == nil)
+                                        .onTapGesture {
+                                            item.action?()
+                                            viewModel.onSelectMenuItem?()
+                                        }
+                                })
                                 .onHoverOnceVisible { hovering in
                                     if isSelected && !hovering && hoveringIndex == index {
                                         viewModel.selectedIndex = nil
-                                    } else if hovering && item.action != nil {
-                                        viewModel.selectedIndex = index
+                                    } else if hovering {
+                                        if item.action != nil {
+                                            viewModel.selectedIndex = index
+                                        }
+                                        // SubMenu Handling
+                                        if item.type == .itemWithDisclosure,
+                                            item.subMenuModel != nil,
+                                            !viewModel.subMenuIsShown {
+                                            self.onHoverSubMenu?(item)
+                                        }
+                                        if item.type != .itemWithDisclosure,
+                                           viewModel.subMenuIsShown {
+                                            viewModel.hideSubMenu?()
+                                        }
                                     }
                                     hoveringIndex = hovering ? index : nil
                                 }
@@ -168,8 +236,11 @@ struct ContextMenuView_Previews: PreviewProvider {
         ContextMenuItem.separator(),
         ContextMenuItem(title: "Copy Link", action: { }),
         ContextMenuItem(title: "Edit Link...", action: nil),
-        ContextMenuItem(title: "Remove Link", action: { })
+        ContextMenuItem(title: "Remove Link", action: { }),
+        ContextMenuItem(title: "Toggle", subtitle: "switch", type: .itemWithToggle, action: nil, isToggleOn: false, toggleAction: { _ in }),
+        ContextMenuItem(title: "Disclosure", icon: "editor-arrow_right", iconPlacement: ContextMenuItem.IconPlacement.trailing, iconSize: 16, iconColor: BeamColor.AlphaGray, type: .itemWithDisclosure, action: nil, subMenuModel: subModel)
     ]
+
     private static var model: ContextMenuViewModel {
         let model = ContextMenuViewModel()
         model.items = Self.items
@@ -178,6 +249,18 @@ struct ContextMenuView_Previews: PreviewProvider {
         model.containerSize = CGSize(width: 200, height: 200)
         return model
     }
+
+    private static var subModel: ContextMenuViewModel {
+        let model = ContextMenuViewModel()
+        model.items = [ContextMenuItem(title: "Open Link", action: { }),
+                               ContextMenuItem.separator(),
+                               ContextMenuItem(title: "Copy Link", action: { })]
+        model.visible = true
+        model.sizeToFit = true
+        model.containerSize = CGSize(width: 200, height: 200)
+        return model
+    }
+
     static var previews: some View {
         ZStack {
             ContextMenuView(viewModel: model)
