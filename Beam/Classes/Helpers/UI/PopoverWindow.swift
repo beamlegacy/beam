@@ -36,6 +36,16 @@ class PopoverWindow: NSWindow {
         super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
     }
 
+    deinit {
+        if let contentView = self.contentView {
+            for subview in contentView.subviews {
+                guard let formatterView = subview as? FormatterView else { continue }
+                formatterView.didClose()
+            }
+        }
+        self.contentView?.subviews.removeAll()
+    }
+
     func setOrigin(_ point: CGPoint, fromTopLeft: Bool = false) {
         if var originScreen = self.parent?.convertPoint(toScreen: point) {
             if _useBeamShadow {

@@ -60,8 +60,7 @@ class JournalSimpleStackView: NSView, BeamTextEditContainer {
         state.$journalNoteToFocus.sink { [weak self] focusedNote in
             guard let self = self else { return }
             self.setNotes(self.notes, focussingOn: focusedNote, force: true)
-        }
-
+        }.store(in: &scope)
     }
 
     required init?(coder: NSCoder) {

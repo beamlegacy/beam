@@ -86,7 +86,7 @@ struct CalendarPickerView: View {
         let items = getMonthsContextItems()
         var atPoint = geometryProxy.safeTopLeftGlobalFrame(in: parentWindow).origin
         let currentMonth = model.calendar.component(.month, from: model.baseDate)
-        atPoint.y -= CGFloat(currentMonth + 2) * ContextMenuView.itemHeight
+        atPoint.y -= CGFloat(currentMonth + 2) * ContextMenuView.standardItemHeight
         self.onPresentSubmenu?(items, atPoint)
     }
 
@@ -105,7 +105,7 @@ struct CalendarPickerView: View {
         let frame = geometryProxy.safeTopLeftGlobalFrame(in: parentWindow)
         var atPoint = frame.origin
         atPoint.x = frame.maxX - 60
-        atPoint.y -= (CGFloat(items.count/2) + 1.5) * ContextMenuView.itemHeight
+        atPoint.y -= (CGFloat(items.count/2) + 1.5) * ContextMenuView.standardItemHeight
         self.onPresentSubmenu?(items, atPoint)
     }
 }

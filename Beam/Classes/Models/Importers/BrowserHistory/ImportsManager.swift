@@ -129,6 +129,7 @@ public class ImportsManager: NSObject, ObservableObject {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     private func sendError(_ error: Swift.Error, action: ImportAction, importer: BrowserImporter) {
         let decodedError: ErrorType
         let cocoaError = error as NSError

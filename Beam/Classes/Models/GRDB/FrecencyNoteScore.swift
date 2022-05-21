@@ -168,7 +168,6 @@ public class GRDBNoteFrecencyStorage: FrecencyStorage {
         return Dictionary(uniqueKeysWithValues: keyValues)
     }
 
-
     private func createOrUpdate(record: FrecencyNoteRecord?, score: FrecencyScore, paramKey: FrecencyParamKey) -> FrecencyNoteRecord {
         if var updatedRecord = record {
             updatedRecord.lastAccessAt = score.lastTimestamp

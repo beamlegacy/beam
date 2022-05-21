@@ -47,6 +47,9 @@ class FormatterView: NSView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    func didClose() {
+    }
+
     func setupUI() {
         self.wantsLayer = true
     }

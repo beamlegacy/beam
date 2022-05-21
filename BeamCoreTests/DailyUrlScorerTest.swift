@@ -168,7 +168,7 @@ class DailyUrlScorerTest: XCTestCase {
             ("https://abc.com/#anchor", "title 1"),
             ("http://abc.com/", "title 2"),
             ("https://def.com", "title 3"),
-            ("https://geh.com", "title 4"),
+            ("https://geh.com", "title 4")
         ]
         BeamDate.freeze("2001-01-01T00:01:00+000")
         let urlIds: [UUID] = urlsAndTitles.map {
