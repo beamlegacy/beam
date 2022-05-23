@@ -227,8 +227,9 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         guard let window = hyperlinkView.window as? PopoverWindow else { return }
         let origin = CGPoint(x: frame.maxX + node.offsetInDocument.x - linkViewSize.width / 2,
                              y: frame.minY + node.offsetInDocument.y - linkViewSize.height - 4)
-        let inset = CustomPopoverPresenter.windowViewPadding
-        var rect = CGRect(origin: self.convert(origin, to: nil), size: linkViewSize).insetBy(dx: -inset, dy: -inset)
+        let inset = CustomPopoverPresenter.padding(for: hyperlinkView)
+        var rect = CGRect(origin: self.convert(origin, to: nil), size: linkViewSize)
+            .insetBy(dx: -inset.width, dy: -inset.height)
         rect.origin.y -= linkViewSize.height
         window.setContentSize(rect.size)
         window.setOrigin(rect.origin)
