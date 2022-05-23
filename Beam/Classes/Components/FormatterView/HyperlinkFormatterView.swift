@@ -24,7 +24,7 @@ private struct HyperlinkEditorView: View {
     static let idealSize = CGSize(width: 240, height: sectionHeight * 2 + Separator.height)
 
     static var extraPadding: CGSize {
-        CGSize(width: 40, height: 40)
+        CGSize(width: 40, height: .zero)
     }
 
     private static let sectionHeight: CGFloat = 40
