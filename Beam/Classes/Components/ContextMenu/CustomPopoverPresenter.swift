@@ -10,7 +10,12 @@ import Foundation
 final class CustomPopoverPresenter {
     static let shared = CustomPopoverPresenter()
 
-    static let windowViewPadding: CGFloat = 50 + 100
+    static func padding(for view: FormatterView? = nil) -> CGSize {
+        let extraPadding = view?.extraPadding ?? .zero
+        return .init(width: windowViewPadding + extraPadding.width, height: windowViewPadding + extraPadding.height)
+    }
+
+    private static let windowViewPadding: CGFloat = 50
 
     private var presentedFormatterViews: [FormatterView] = []
     private var presentedUnknownWindows: [PopoverWindow] = []
@@ -62,15 +67,13 @@ final class CustomPopoverPresenter {
                                                withShadow: false, movable: false, storedInPresenter: false, in: window)
         let position = fromView?.convert(atPoint, to: nil) ?? atPoint
         let idealSize = view.idealSize
-        let xPadding = Self.windowViewPadding + view.extraPadding.width
-        let yPadding = Self.windowViewPadding + view.extraPadding.height
-        var rect = CGRect(origin: position, size: idealSize)
-            .insetBy(dx: -xPadding, dy: -yPadding) // give some space for shadow + possible extra content outside
+        let viewPadding = Self.padding(for: view) // give some space for shadow + possible extra content outside
+        var rect = CGRect(origin: position, size: idealSize).insetBy(dx: -viewPadding.width, dy: -viewPadding.height)
         rect.origin.y -= idealSize.height
         let container = NSView(frame: CGRect(origin: .zero, size: rect.size))
         container.autoresizingMask = [.width, .height]
         container.addSubview(view)
-        view.frame = CGRect(origin: CGPoint(x: Self.windowViewPadding, y: Self.windowViewPadding), size: idealSize)
+        view.frame = CGRect(origin: CGPoint(x: viewPadding.width, y: viewPadding.height), size: idealSize)
         window?.setView(with: container, at: rect.origin)
         window?.setContentSize(rect.size)
         presentedFormatterViews.append(view)

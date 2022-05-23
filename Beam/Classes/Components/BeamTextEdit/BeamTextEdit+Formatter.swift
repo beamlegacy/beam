@@ -343,8 +343,8 @@ extension BeamTextEdit {
               let view = inlineFormatter else { return }
         let idealSize = view.idealSize
         let origin = self.convert(containedFormatterPosition(in: node, formatter: view, below: below), to: nil)
-        let inset = CustomPopoverPresenter.windowViewPadding
-        var rect = CGRect(origin: origin, size: idealSize).insetBy(dx: -inset, dy: -inset)
+        let inset = CustomPopoverPresenter.padding()
+        var rect = CGRect(origin: origin, size: idealSize).insetBy(dx: -inset.width, dy: -inset.height)
         rect.origin.y -= idealSize.height
         view.window?.setContentSize(rect.size)
         (view.window as? PopoverWindow)?.setOrigin(rect.origin)

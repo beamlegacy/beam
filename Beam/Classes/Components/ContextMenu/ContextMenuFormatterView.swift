@@ -131,7 +131,7 @@ class ContextMenuFormatterView: FormatterView {
             let updateWindowSizeBlock = DispatchWorkItem { [weak self] in
                 self?.lastComputedSize = newSize
                 self?.subviewModel.containerSize = newSize
-                newWindowFrame.size.height = newSize.height + CustomPopoverPresenter.windowViewPadding * 2
+                newWindowFrame.size.height = newSize.height + CustomPopoverPresenter.padding().height * 2
                 self?.hostView?.frame.size.height = newSize.height
                 window.setContentSize(newWindowFrame.size)
             }
