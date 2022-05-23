@@ -36,7 +36,8 @@ class PopoverWindow: NSWindow {
         super.init(contentRect: .zero, styleMask: [.fullSizeContentView, .borderless], backing: .buffered, defer: false)
     }
 
-    deinit {
+    override func close() {
+        super.close()
         if let contentView = self.contentView {
             for subview in contentView.subviews {
                 guard let formatterView = subview as? FormatterView else { continue }
