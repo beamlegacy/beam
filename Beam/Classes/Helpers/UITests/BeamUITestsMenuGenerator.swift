@@ -30,6 +30,7 @@ class BeamUITestsMenuGenerator {
         case .loadUITestPagePlayground: loadUITestsPage(identifier: "Playground")
         case .loadUITestPageAlerts: loadUITestsPage(identifier: "Alerts")
         case .loadUITestPageMedia: loadUITestsPage(identifier: "Media")
+        case .loadUITestSVG: loadUITestsPage(identifier: "SVG")
         case .insertTextInCurrentNote: insertTextInCurrentNote()
         case .create100Notes: Self.createNotes(count: 100, journalRatio: 0.2, futureRatio: 0.1)
         case .create100NormalNotes: Self.createNotes(count: 100, journalRatio: 0.0, futureRatio: 0.0)

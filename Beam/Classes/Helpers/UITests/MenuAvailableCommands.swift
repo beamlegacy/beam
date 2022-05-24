@@ -33,6 +33,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case loadUITestPagePlayground = "Load HTML playground"
     case loadUITestPageAlerts = "Load JS/Native alert panels"
     case loadUITestPageMedia = "Load Media test page"
+    case loadUITestSVG = "Load UITests SVG"
 
     // Notes
     case populateDBWithJournal = "Populate Journal"
@@ -83,7 +84,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
 
     var group: UITestMenuGroup? {
         switch self {
-        case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia,
+        case .loadUITestPage1, .loadUITestPage2, .loadUITestPage3, .loadUITestPage4, .loadUITestPageMedia, .loadUITestSVG,
              .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground:
             return .loadHTMLPage
         case .populateDBWithJournal, .insertTextInCurrentNote,

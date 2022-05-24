@@ -49,7 +49,8 @@ class PnSTestView: BaseView {
         app.windows.children(matching: .other).matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
     }
     
-    func addToTodayCard(_ elementToAdd: XCUIElement) {
+    @discardableResult
+    func addToTodayCard(_ elementToAdd: XCUIElement) -> PnSTestView {
         XCUIElement.perform(withKeyModifiers: .option) {
             let elementMiddle = elementToAdd.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             // click at middle of element1 to make sure the page has focus
@@ -61,12 +62,17 @@ class PnSTestView: BaseView {
             typeKeyboardKey(.delete)
             destinationCard.typeText("\r")
         }
+        return self
     }
     
     @discardableResult
     func passFailedToCollectPopUpAlert() -> PnSTestView {
-        button("Send Bug Report").clickOnExistence()
+        getSendBugReportButtonElement().clickOnExistence()
         return self
+    }
+    
+    func getSendBugReportButtonElement() -> XCUIElement {
+        return button("Send Bug Report")
     }
     
     func pressOptionButtonFor(seconds: UInt32) {
