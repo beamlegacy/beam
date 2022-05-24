@@ -160,7 +160,7 @@ extension NoteHeaderView {
                 publicationGroups.append("profile")
             }
 
-            BeamNoteSharingUtils.updatePublicationGroup(note, group: publicationGroups) { result in
+            BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups) { result in
                 DispatchQueue.main.async {
                     completion(result)
                 }

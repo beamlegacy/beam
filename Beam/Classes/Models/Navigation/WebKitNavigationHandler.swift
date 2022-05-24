@@ -132,7 +132,7 @@ extension WebKitNavigationHandler {
         case NSURLAuthenticationMethodDefault,
             NSURLAuthenticationMethodHTTPBasic,
             NSURLAuthenticationMethodHTTPDigest:
-            let viewModel  = AuthenticationViewModel(challenge: challenge, onValidate: { [weak self] username, password, savePassword in
+            let viewModel = AuthenticationViewModel(challenge: challenge, onValidate: { [weak self] username, password, savePassword in
                 NSApp.mainWindow?.makeFirstResponder(nil)
                 let credential = URLCredential(user: username, password: password, persistence: .forSession)
                 completionHandler(.useCredential, credential)

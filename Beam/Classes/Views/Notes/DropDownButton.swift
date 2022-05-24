@@ -16,12 +16,16 @@ struct DropDownButton: View {
     var items: [ContextMenuItem]
     var customStyle: ButtonLabelStyle?
     var anchorPoint: Edge.Set = [.bottom, .trailing]
+    var menuForcedWidth: CGFloat?
+    var forceMenuToAppear: Bool = false
 
-    init(parentWindow: NSWindow?, items: [ContextMenuItem], customStyle: ButtonLabelStyle?) {
+    init(parentWindow: NSWindow?, items: [ContextMenuItem], customStyle: ButtonLabelStyle?, menuForcedWidth: CGFloat? = nil, forceMenuToAppear: Bool = false) {
         self.parentWindow = parentWindow
         self.items = items
         self.customStyle = customStyle
         self.customStyle?.horizontalPadding = 1
+        self.menuForcedWidth = menuForcedWidth
+        self.forceMenuToAppear = forceMenuToAppear
     }
 
     var body: some View {
@@ -29,10 +33,15 @@ struct DropDownButton: View {
             GeometryReader { proxy in
                 HStack {
                     ButtonLabel(icon: "editor-arrow_down", state: forceClickedState ? .clicked : .normal, customStyle: customStyle ?? ButtonLabelStyle()) {
-                        forceClickedState = true
                         showDropDownContextMenu(geometryProxy: proxy, with: items)
                     }
-                }.frame(width: proxy.size.width, height: proxy.size.height)
+                }
+                .frame(width: proxy.size.width, height: proxy.size.height)
+                .onAppear {
+                    if forceMenuToAppear {
+                        showDropDownContextMenu(geometryProxy: proxy, with: items)
+                    }
+                }
             }
         ).frame(width: 18, height: 22)
     }
@@ -44,7 +53,7 @@ struct DropDownButton: View {
         var finalPoint: CGPoint = window.parent?.convertPoint(fromScreen: window.convertPoint(toScreen: point) ) ?? point
 
         CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier)
-        let menuView = ContextMenuFormatterView(key: Self.dropDownMenuIdentifier, items: items, direction: .bottom, sizeToFit: false, origin: finalPoint, canBecomeKey: true) {
+        let menuView = ContextMenuFormatterView(key: Self.dropDownMenuIdentifier, items: items, direction: .bottom, sizeToFit: false, forcedWidth: menuForcedWidth, origin: finalPoint, canBecomeKey: true) {
             CustomPopoverPresenter.shared.dismissPopovers(key: Self.dropDownMenuIdentifier)
         } onClosing: {
             forceClickedState = false
@@ -60,10 +69,11 @@ struct DropDownButton: View {
         }
 
         if anchorPoint.contains(.trailing) {
-            finalPoint.x -= menuView.idealSize.width - geometryProxy.size.width
+            finalPoint.x -= (menuForcedWidth ?? menuView.idealSize.width) - geometryProxy.size.width
         }
 
         menuView.origin = finalPoint
+        forceClickedState = true
         CustomPopoverPresenter.shared.presentFormatterView(menuView, atPoint: finalPoint)
     }
 }

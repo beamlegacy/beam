@@ -12,24 +12,24 @@ import BeamCore
 class RestAPIServer {
 
     enum Request {
-        case publishNote(note: BeamNote)
+        case publishNote(note: BeamNote, publicationGroups: [String]?)
         case unpublishNote(noteId: UUID)
-        case updatePublicationGroup(note: BeamNote, groups: [String])
+        case updatePublicationGroup(note: BeamNote, publicationGroups: [String])
         case embed(url: URL)
         case providers
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
-            case .publishNote(let note):
-                return createBody(for: note, and: nil)
+            case .publishNote(let note, let publicationGroups):
+                return createBody(for: note, and: publicationGroups)
             case .unpublishNote:
                 return nil
             case .embed:
                 return nil
             case .providers:
                 return nil
-            case .updatePublicationGroup(let note, let groups):
-                return createBody(for: note, and: groups)
+            case .updatePublicationGroup(let note, let publicationGroups):
+                return createBody(for: note, and: publicationGroups)
             }
         }
 
@@ -37,7 +37,6 @@ class RestAPIServer {
             switch self {
             case .publishNote, .unpublishNote, .updatePublicationGroup:
                return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
-                // return URL(string: "https://develop-web-server.oa.r.appspot.com")!
             case .embed:
                 return URL(string: Configuration.publicAPIembed)!
             case .providers:
@@ -109,7 +108,7 @@ class RestAPIServer {
             }
         }
 
-        private func createBody(for note: BeamNote, and groups: [String]?) -> (Data, String)? {
+        private func createBody(for note: BeamNote, and publicationGroups: [String]?) -> (Data, String)? {
             let richContent = note.richContent
 
             let publicNote = PublicNote(note: note)
@@ -117,15 +116,15 @@ class RestAPIServer {
             encoder.dateEncodingStrategy = .iso8601
             guard let encodedNote = try? encoder.encode(publicNote) else { return nil }
 
-            if richContent.isEmpty && groups == nil {
+            if richContent.isEmpty && publicationGroups == nil {
                 return (encodedNote, "application/json")
             } else {
-                guard let data = multipart(encodedPublicNote: encodedNote, richContent: richContent, groups: groups) else { return nil }
+                guard let data = multipart(encodedPublicNote: encodedNote, richContent: richContent, publicationGroups: publicationGroups) else { return nil }
                 return (data, "multipart/form-data; boundary=\(RestAPIServer.multipartBoundary)")
             }
         }
 
-        private func multipart(encodedPublicNote: Data, richContent: [BeamElement], groups: [String]?) -> Data? {
+        private func multipart(encodedPublicNote: Data, richContent: [BeamElement], publicationGroups: [String]?) -> Data? {
             let boundary = RestAPIServer.multipartBoundary
             let lineBreak = "\r\n"
 
@@ -148,10 +147,10 @@ class RestAPIServer {
                 }
             }
 
-            if let groups = groups {
+            if let publicationGroups = publicationGroups {
                 let encoder = JSONEncoder()
                 encoder.dateEncodingStrategy = .iso8601
-                guard let encodedGroups = try? encoder.encode(["publicationGroups": groups]) else { return nil }
+                guard let encodedGroups = try? encoder.encode(["publicationGroups": publicationGroups]) else { return nil }
 
                 let groupsPart = createMultipartBody(data: encodedGroups, documentName: "options", fileNameAndExtension: nil, mimetype: "application/json")
                 body.appendString(lineBreak)

@@ -110,7 +110,6 @@ struct OmniboxSearchField: View {
                     .transition(.identity)
             } else if let iconName = leadingIconName(for: autocompleteManager.mode) {
                 Icon(name: iconName, width: 16, color: BeamColor.LightStoneGray.swiftUI)
-                    .blendModeLightMultiplyDarkScreen()
                     .transition(.identity)
             }
             ZStack(alignment: .leading) {

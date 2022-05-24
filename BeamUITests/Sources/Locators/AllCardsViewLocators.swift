@@ -37,6 +37,6 @@ enum AllCardsViewLocators {
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {
-        case publishInstruction = "Connect to Beam to publish your notes"
+        case publishInstruction = "signUpToPublishBtn"
     }
 }
