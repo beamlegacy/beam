@@ -21,9 +21,12 @@ class BeamTableCellIconButtonView: NSTableCellView {
         _contentView.translatesAutoresizingMaskIntoConstraints = false
 
         iconButton = NSButton()
+        iconButton.wantsLayer = true
         iconButton.isBordered = false
         iconButton.bezelStyle = .shadowlessSquare
         iconButton.imagePosition = .imageOnly
+
+        iconButton.layer?.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
 
         super.init(frame: frameRect)
 
@@ -59,6 +62,11 @@ class BeamTableCellIconButtonView: NSTableCellView {
         ])
     }
 
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        iconButton.layer?.compositingFilter = NSApp.effectiveAppearance.isDarkMode ? "screenBlendMode" : "multiplyBlendMode"
+    }
+
     override func updateTrackingAreas() {
         super.updateTrackingAreas()
         self.trackingAreas.forEach { self.removeTrackingArea($0) }
@@ -70,17 +78,20 @@ class BeamTableCellIconButtonView: NSTableCellView {
         self.addTrackingArea(newArea)
     }
 
-    private var previousTintColor: NSColor?
     override func mouseEntered(with event: NSEvent) {
         super.mouseEntered(with: event)
-        previousTintColor = iconButton.contentTintColor
-        iconButton.contentTintColor = BeamColor.Niobium.alpha(0.8).nsColor
 
+        let newImage = iconButton.image?.fill(color: BeamColor.Niobium.nsColor)
+        iconButton.image = newImage
+        newImage?.isTemplate = false
     }
 
     override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
-        iconButton.contentTintColor = previousTintColor
+
+        let newImage = iconButton.image?.fill(color: BeamColor.AlphaGray.nsColor)
+        iconButton.image = newImage
+        newImage?.isTemplate = false
     }
 
     @objc

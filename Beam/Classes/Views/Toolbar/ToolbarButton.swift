@@ -39,7 +39,6 @@ struct ToolbarButton: View {
 
     var body: some View {
         Icon(name: icon, size: customIconSize ?? CGSize(width: 24, height: 24), color: foregroundColor)
-            .blendModeLightMultiplyDarkScreen()
             .accessibilityElement()
             .accessibilityAddTraits(.isButton)
             .frame(width: customContainerSize?.width ?? 28, height: customContainerSize?.height ?? 28)

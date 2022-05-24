@@ -884,7 +884,7 @@
 		A08D739426413DEC00A9A604 /* UserProfileMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08D739326413DEC00A9A604 /* UserProfileMenu.swift */; };
 		A08DE20D26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift in Sources */ = {isa = PBXBuildFile; fileRef = A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */; };
 		A09F26112833A06600543C3E /* AllNotesPageFiltersContextualMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09F26102833A06600543C3E /* AllNotesPageFiltersContextualMenu.swift */; };
-		A09F261828341C5700543C3E /* MinimalUnderlineButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09F261728341C5700543C3E /* MinimalUnderlineButton.swift */; };
+		A09F261828341C5700543C3E /* MinimalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09F261728341C5700543C3E /* MinimalButton.swift */; };
 		A09FBA612705AD44009E44F7 /* CheckboxButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */; };
 		A0A026772696614E00B94227 /* UserInformationsEditModalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */; };
 		A0A0FED1268F05CC0080EAEF /* PreferencesManager+Passwords.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */; };
@@ -2708,7 +2708,7 @@
 		A08D739326413DEC00A9A604 /* UserProfileMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProfileMenu.swift; sourceTree = "<group>"; };
 		A08DE20C26160DC800F8ABB4 /* BeamTextEdit+CopyPaste.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+CopyPaste.swift"; sourceTree = "<group>"; };
 		A09F26102833A06600543C3E /* AllNotesPageFiltersContextualMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPageFiltersContextualMenu.swift; sourceTree = "<group>"; };
-		A09F261728341C5700543C3E /* MinimalUnderlineButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimalUnderlineButton.swift; sourceTree = "<group>"; };
+		A09F261728341C5700543C3E /* MinimalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimalButton.swift; sourceTree = "<group>"; };
 		A09FBA602705AD44009E44F7 /* CheckboxButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CheckboxButtonStyle.swift; sourceTree = "<group>"; };
 		A0A026762696614E00B94227 /* UserInformationsEditModalView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserInformationsEditModalView.swift; sourceTree = "<group>"; };
 		A0A0FED0268F05CC0080EAEF /* PreferencesManager+Passwords.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Passwords.swift"; sourceTree = "<group>"; };
@@ -6704,7 +6704,7 @@
 				A5F47EBA26F8AEB2004B7CDE /* Tooltip.swift */,
 				A0440E51282DC7AE00464AAC /* ToggleView.swift */,
 				87CF1CCA282404CB00FB0530 /* BeamControlGroup.swift */,
-				A09F261728341C5700543C3E /* MinimalUnderlineButton.swift */,
+				A09F261728341C5700543C3E /* MinimalButton.swift */,
 			);
 			path = UIElements;
 			sourceTree = "<group>";
@@ -8419,7 +8419,7 @@
 				370794D527D7AAF900D2768B /* NavigationRouter.swift in Sources */,
 				525C5472261F619D00378FAA /* Binding+onChange.swift in Sources */,
 				52C5A40926DFAB2D00CD559F /* DocumentStruct+Debug.swift in Sources */,
-				A09F261828341C5700543C3E /* MinimalUnderlineButton.swift in Sources */,
+				A09F261828341C5700543C3E /* MinimalButton.swift in Sources */,
 				0D3DD8F32681CBA4009F2DF0 /* IndexDocument.swift in Sources */,
 				418173B6258124D500317ED8 /* NSAttributedString+Beam.swift in Sources */,
 				96E4505825995CA200BFF36F /* BreadCrumb.swift in Sources */,

@@ -57,8 +57,9 @@ class BeamNoteSharingUtils {
     /// - Parameters:
     ///   - note: The note to publish or unpublish
     ///   - becomePublic: If we should publish or unpublish
+    ///   - publicationGroups: The publication groups the note belongs to
     ///   - completion: The callback with the result (is note public) or the error
-    static func makeNotePublic(_ note: BeamNote, becomePublic: Bool, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    static func makeNotePublic(_ note: BeamNote, becomePublic: Bool, publicationGroups: [String]? = nil, completion: ((Result<Bool, Error>) -> Void)? = nil) {
 
         guard note.ongoingPublicationOperation == false else {
             completion?(.failure(BeamNoteSharingUtilsError.ongoingOperation))
@@ -75,7 +76,7 @@ class BeamNoteSharingUtils {
         note.ongoingPublicationOperation = true
 
         if becomePublic {
-            publishNote(note) { result in
+            publishNote(note, publicationGroups: publicationGroups) { result in
                 makeNotePublicHandler(note, becomePublic, result, completion)
             }
         } else {
@@ -121,6 +122,21 @@ class BeamNoteSharingUtils {
         }
     }
 
+    // MARK: - Publish on Profile
+
+    static func addToProfile(_ note: BeamNote, completion: ((Result<Bool, Error>) -> Void)? = nil) {
+        guard note.publicationStatus.isPublic,
+              var publicationGroups = note.publicationStatus.publicationGroups else {
+            completion?(.failure(BeamNoteSharingUtilsError.missingRequirement))
+            return
+        }
+
+        if !publicationGroups.contains("profile") {
+            publicationGroups.append("profile")
+        }
+        Self.updatePublicationGroup(note, publicationGroups: publicationGroups, completion: completion)
+    }
+
     static func removeFromProfile(_ note: BeamNote, completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard note.publicationStatus.isPublic,
               var publicationGroups = note.publicationStatus.publicationGroups,
@@ -130,10 +146,12 @@ class BeamNoteSharingUtils {
         }
         publicationGroups.remove(at: idx)
 
-        Self.updatePublicationGroup(note, group: publicationGroups, completion: completion)
+        Self.updatePublicationGroup(note, publicationGroups: publicationGroups, completion: completion)
     }
 
-    static func updatePublicationGroup(_ note: BeamNote, group: [String], completion: ((Result<Bool, Error>) -> Void)? = nil) {
+    // MARK: - Update Publication Groups
+
+    static func updatePublicationGroup(_ note: BeamNote, publicationGroups: [String], completion: ((Result<Bool, Error>) -> Void)? = nil) {
         guard note.publicationStatus.isPublic else {
             completion?(.failure(BeamNoteSharingUtilsError.cantUpdatePublicationGroup))
             return
@@ -153,7 +171,7 @@ class BeamNoteSharingUtils {
 
         note.ongoingPublicationOperation = true
 
-        updatePublicationGroup(for: note, with: group, completion: { result in
+        updatePublicationGroup(for: note, with: publicationGroups, completion: { result in
 
             DispatchQueue.main.async {
                 switch result {
@@ -182,10 +200,10 @@ class BeamNoteSharingUtils {
     /// This method DOESN'T update the note with the PublicationStatus
     /// - Parameters:
     ///   - note: The note to publish
-    ///   - username: The current user username, or if not set it's email
+    ///   - publicationGroups: The publication groups the note belongs to
     ///   - completion: The callback with the resulted PublicationStatus or error
-    static func publishNote(_ note: BeamNote, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        Self.publicServer.request(serverRequest: .publishNote(note: note), completion: { completion($0) })
+    static func publishNote(_ note: BeamNote, publicationGroups: [String]?, completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
+        Self.publicServer.request(serverRequest: .publishNote(note: note, publicationGroups: publicationGroups), completion: { completion($0) })
     }
 
     /// Unpublish a note from the Public Server.
@@ -197,8 +215,13 @@ class BeamNoteSharingUtils {
         BeamNoteSharingUtils.publicServer.request(serverRequest: .unpublishNote(noteId: noteId), completion: { completion($0) })
     }
 
-    private static func updatePublicationGroup(for note: BeamNote, with publicationGroup: [String], completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
-        Self.publicServer.request(serverRequest: .updatePublicationGroup(note: note, groups: publicationGroup), completion: { completion($0) })
-
+    /// Update a note publication group to the Public Server.
+    /// This method DOESN'T update the note with the PublicationStatus
+    /// - Parameters:
+    ///   - note: The note to updates its publcationGroups
+    ///   - publicationGroups: The publication groups the note belongs to
+    ///   - completion: The callback with the resulted PublicationStatus or error
+    private static func updatePublicationGroup(for note: BeamNote, with publicationGroups: [String], completion: @escaping ((Result<PublicationStatus, Error>) -> Void)) {
+        Self.publicServer.request(serverRequest: .updatePublicationGroup(note: note, publicationGroups: publicationGroups), completion: { completion($0) })
     }
 }
