@@ -47,6 +47,7 @@ class BeamUITestsMenuGenerator {
         case .omniboxEnableSearchInHistoryContent: omniboxEnableSearchInHistoryContent()
         case .omniboxDisableSearchInHistoryContent: omniboxDisableSearchInHistoryContent()
         case .signInWithTestAccount: signInWithTestAccount()
+        case .signUpWithRandomTestAccount: signUpWithRandomTestAccount()
         case .showWebViewCount: showWebViewCount()
         case .showOnboarding: showOnboarding()
         case .resetCollectAlert: resetCollectAlert()
@@ -259,6 +260,50 @@ class BeamUITestsMenuGenerator {
                 fatalError(error.localizedDescription)
             }
         })
+    }
+
+    private func signUpWithRandomTestAccount() {
+        guard !AuthenticationManager.shared.isAuthenticated else {
+            let alert = NSAlert()
+            alert.messageText = "Already authenticated"
+            alert.informativeText = "You are already authenticated"
+            alert.addButton(withTitle: "Dismiss Alert")
+            alert.runModal()
+            return
+        }
+
+        let accountManager = AccountManager()
+        let emailComponents = Configuration.testAccountEmail.split(separator: "@")
+        let email = "\(emailComponents[0])_\(UUID())@\(emailComponents[1])"
+        let password = Configuration.testAccountPassword
+
+        accountManager.signUp(email, password) { result in
+            if case .failure(let error) = result {
+                DispatchQueue.main.async {
+                    let alert = NSAlert()
+                    alert.messageText = "Cannot sign up"
+                    alert.informativeText = "Cannot sign up with \(email): \(error.localizedDescription)"
+                    alert.addButton(withTitle: "Dismiss Alert")
+                    alert.runModal()
+                }
+                return
+            }
+            accountManager.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
+                if case .failure(let error) = result {
+                    DispatchQueue.main.async {
+                        let alert = NSAlert()
+                        alert.messageText = "Cannot sign in"
+                        alert.informativeText = "Cannot sign in with \(email): \(error.localizedDescription)"
+                        alert.addButton(withTitle: "Dismiss Alert")
+                        alert.runModal()
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        accountManager.runFirstSync(useBuiltinPrivateKeyUI: false)
+                    }
+                }
+            })
+        }
     }
 
     private func showWebViewCount() {
