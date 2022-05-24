@@ -44,7 +44,7 @@ struct OnboardingSaveEncryptionView: View {
                     .overlay(
                         ZStack(alignment: .trailing) {
                             if encryptionKeyIsCopied {
-                                Tooltip(title: "Encryption Key Copied !")
+                                Tooltip(title: "Encryption Key Copied!")
                                     .fixedSize()
                                     .offset(x: 0, y: -35)
                                     .transition(Tooltip.defaultTransition)
