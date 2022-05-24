@@ -89,7 +89,7 @@ struct NoteView: View {
             let (_, change) = changed
             guard change != .meta else { return }
             guard note.publicationStatus != .unpublished else { return }
-            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true)
+            BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, publicationGroups: note.publicationStatus.publicationGroups)
         }
     }
 

@@ -49,6 +49,13 @@ struct ContextMenuItemView: View {
     @State var toggleSwitched: Bool = false
     @State var showSubtitleButton: Bool = false
 
+    private var transitionInOutHiddenView: AnyTransition {
+        let transitionIn = AnyTransition.move(edge: .top).animation(BeamAnimation.easeIn(duration: 0.20)).combined(with: .opacity.animation(BeamAnimation.easeIn(duration: 0.20)))
+        let transitionOut = AnyTransition.move(edge: .top).animation(BeamAnimation.easeIn(duration: 0.20)).combined(with: .opacity.animation(BeamAnimation.easeIn(duration: 0.15)))
+
+        return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
+    }
+
     var iconView: some View {
         Group {
             if let icon = item.icon {
@@ -107,16 +114,14 @@ struct ContextMenuItemView: View {
                     }
                 }
                 if let subtitleButton = item.subtitleButton, showSubtitleButton {
-                    MinimalUnderlineButton(customTextView: (Text(subtitleButton) + Text(Image("editor-url").renderingMode(.template))),
-                                           font: BeamFont.regular(size: 11).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI) {
+                    MinimalButton(customTextView: (Text(subtitleButton) + Text(Image("editor-url").renderingMode(.template))), hoverUnderline: true,
+                                           font: BeamFont.regular(size: 11).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, secondaryColor: BeamColor.Niobium.swiftUI) {
                         if let url = URL(string: subtitleButton), let state = AppDelegate.main.windows.first?.state {
                             state.mode = .web
                             _ = state.createTab(withURLRequest: URLRequest(url: url.urlWithScheme), originalQuery: nil)
                         }
                     }.frame(height: 13)
-                    .transition(.move(edge: .top))
-                    .transition(.opacity)
-                    .animation(BeamAnimation.easeInOut(duration: 0.30))
+                        .transition(transitionInOutHiddenView)
                 }
 
             }.padding(.vertical, BeamSpacing._40)
@@ -135,6 +140,7 @@ class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
     @Published var selectedIndex: Int?
     @Published var sizeToFit: Bool = false
     @Published var containerSize: CGSize = .zero
+    @Published var forcedWidth: CGFloat?
     var onSelectMenuItem: (() -> Void)?
     @Published var updateSize: Bool = false
     // SubMenu
@@ -172,7 +178,10 @@ struct ContextMenuView: View {
     var onHoverSubMenu: ((ContextMenuItem) -> Void)?
 
     var body: some View {
-        let computedSize = Self.idealSizeForItems(viewModel.items)
+        var computedSize = Self.idealSizeForItems(viewModel.items)
+        if let forcedWidth = viewModel.forcedWidth, !viewModel.sizeToFit {
+            computedSize.width = forcedWidth
+        }
         return ZStack {
             FormatterViewBackground {
                 VStack(alignment: .leading, spacing: 5) {

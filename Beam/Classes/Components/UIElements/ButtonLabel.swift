@@ -177,6 +177,19 @@ struct ButtonLabel_Previews: PreviewProvider {
 }
 
 extension ButtonLabelStyle {
+    static let minimalButtonLabel: ButtonLabelStyle = {
+        var style = ButtonLabelStyle()
+        style.font = BeamFont.medium(size: 12).swiftUI
+        style.spacing = 0
+        style.foregroundColor = BeamColor.LightStoneGray.swiftUI
+        style.activeForegroundColor = BeamColor.Niobium.swiftUI
+        style.backgroundColor = Color.clear
+        style.hoveredBackgroundColor = Color.clear
+        style.activeBackgroundColor = Color.clear
+        style.leadingPaddingAdjustment = 0
+        return style
+    }()
+
     static let tinyIconStyle: ButtonLabelStyle = {
         var style = ButtonLabelStyle()
         style.iconSize = 16

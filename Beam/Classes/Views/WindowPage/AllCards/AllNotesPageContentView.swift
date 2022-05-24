@@ -46,7 +46,8 @@ struct AllNotesPageContentView: View {
                         editable: true, isLink: true,
                         sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 370, font: BeamFont.light(size: 13).nsFont),
         TableViewColumn(key: ColumnID.url.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: false, resizable: false,
-                        width: 43, font: Self.secondaryCellFont, foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
+                        width: 43, font: Self.secondaryCellFont,
+                        foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
         TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"),
                         width: 58, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
@@ -114,6 +115,21 @@ struct AllNotesPageContentView: View {
         return windowInfo.windowFrame.size.width < 1024
     }
 
+    @State private var buttonFrameInGlobalCoordinates: CGRect?
+    private struct FramePreferenceKey: PreferenceKey {
+        static var defaultValue: CGRect?
+        static func reduce(value: inout Value, nextValue: () -> Value) {
+            value = value ?? nextValue()
+        }
+    }
+
+    private var geometryReaderView: some View {
+        GeometryReader { proxy in
+            let frame = proxy.frame(in: .global)
+            Color.clear.preference(key: FramePreferenceKey.self, value: frame)
+        }
+    }
+
     @State private var justCopiedLink = false
     var body: some View {
         VStack(spacing: 35) {
@@ -124,6 +140,7 @@ struct AllNotesPageContentView: View {
                             .font(BeamFont.regular(size: 24).swiftUI)
                             .foregroundColor(BeamColor.Generic.text.swiftUI)
                         Icon(name: "editor-options", width: 16, color: BeamColor.LightStoneGray.swiftUI)
+                            .padding(.top, 4)
                     }
                     .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
                         showGlobalContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil), allowImports: true)
@@ -131,32 +148,39 @@ struct AllNotesPageContentView: View {
 
                     HStack {
                         if let profileLink = BeamNoteSharingUtils.getProfileLink() {
-                            MinimalUnderlineButton(text: profileLink.urlStringWithoutScheme, font: BeamFont.regular(size: 12).swiftUI, foregroundColor: BeamColor.LightStoneGray.swiftUI) {
+                            MinimalButton(text: profileLink.urlStringWithoutScheme, hoverUnderline: true, font: BeamFont.regular(size: 12).swiftUI, foregroundColor: BeamColor.LightStoneGray.swiftUI, secondaryColor: BeamColor.Niobium.swiftUI) {
                                 if let state = AppDelegate.main.windows.first?.state {
                                     state.mode = .web
                                     _ = state.createTab(withURLRequest: URLRequest(url: profileLink), originalQuery: nil)
                                 }
                             }
                         } else {
-                            ButtonLabel(loc("Connect to Beam to publish your notes")) {
+                            MinimalButton(text: "Sign up to publish your notes", font: BeamFont.regular(size: 12).swiftUI, foregroundColor: BeamColor.LightStoneGray.swiftUI, secondaryColor: BeamColor.Niobium.swiftUI) {
                                 model.showConnectWindow(withConfirmationAlert: false)
-                            }
-                        }
+                            }.accessibilityIdentifier("signUpToPublishBtn")
 
+                        }
                         Spacer()
 
-                        HStack(spacing: BeamSpacing._20) {
-                            Text("View:")
-                                .font(BeamFont.regular(size: 12).swiftUI)
-                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                            cardsFilters
-                                .font(BeamFont.regular(size: 12).swiftUI)
-                                .foregroundColor(BeamColor.LightStoneGray.swiftUI)
-                            Icon(name: "editor-breadcrumb_down", width: 8, color: BeamColor.LightStoneGray.swiftUI)
+                        ButtonLabel(customView: { hovered, _ in
+                            AnyView(
+                                HStack(spacing: BeamSpacing._20) {
+                                    Text("View:")
+                                        .font(BeamFont.regular(size: 12).swiftUI)
+                                        .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                    cardsFilters
+                                        .font(BeamFont.regular(size: 12).swiftUI)
+                                        .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                    Icon(name: "editor-breadcrumb_down", width: 8, color: hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                }
+                            )
+                        }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
+                            showFiltersContextualMenu()
+                        })
+                        .background(geometryReaderView)
+                        .onPreferenceChange(FramePreferenceKey.self) { frame in
+                            buttonFrameInGlobalCoordinates = frame
                         }
-                        .gesture(DragGesture(minimumDistance: 0, coordinateSpace: .global).onEnded({ v in
-                            showFiltersContextualMenu(at: v.location.swiftUISafeTopLeftPoint(in: nil))
-                        }))
                     }
                 }
             }
@@ -190,11 +214,13 @@ struct AllNotesPageContentView: View {
             }
             .overlay(
                 GeometryReader { geo in
-                    ButtonLabel(icon: "editor-options") {
-                        showContextualMenuForHoveredRow(tableViewGeometry: geo)
+                    if selectedRowsIndexes.contains(hoveredRowIndex ?? 0) || selectedRowsIndexes.isEmpty {
+                        ButtonLabel(icon: "editor-options") {
+                            showContextualMenuForHoveredRow(tableViewGeometry: geo)
+                        }
+                        .opacity(hoveredRowIndex != nil && hoveredRowFrame != nil ? 1.0 : 0.0)
+                        .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                     }
-                    .opacity(hoveredRowIndex != nil && hoveredRowFrame != nil ? 1.0 : 0.0)
-                    .offset(x: -32, y: (hoveredRowFrame?.minY ?? 0) - geo.safeTopLeftGlobalFrame(in: nil).minY + 3)
                 }
             )
             .padding(.leading, -34)
@@ -206,7 +232,7 @@ struct AllNotesPageContentView: View {
                             hoveredRowIndex = nil
                         }
                     }
-                    .padding(.leading, -32) // shifted for hover options menu 
+                    .padding(.leading, -64) // shifted for hover options menu
             )
         }
         .frame(minWidth: 600, maxWidth: 900)
@@ -257,7 +283,10 @@ struct AllNotesPageContentView: View {
         handler.presentMenuForNotes(at: at, allowImports: allowImports)
     }
 
-    func showFiltersContextualMenu(at origin: NSPoint) {
+    private func showFiltersContextualMenu() {
+        guard let window = AppDelegate.main.window,
+              let buttonFrame = buttonFrameInGlobalCoordinates?.swiftUISafeTopLeftGlobalFrame(in: window) else { return }
+
         var notes: [BeamNote] = []
         for item in currentNotesList {
             guard let note = item.note ?? item.getNote() else { continue }
@@ -267,7 +296,7 @@ struct AllNotesPageContentView: View {
         let menu = AllNotesPageFiltersContextualMenu(viewModel: model, selectedListType: listType) { newlySelectedListType in
             self.listType = newlySelectedListType
         }
-        menu.presentMenu(at: origin)
+        menu.presentMenu(at: CGPoint(x: buttonFrame.origin.x, y: buttonFrame.maxY + 6))
     }
 
     private func onEditingText(_ text: String?, row: Int, in notesList: [NoteTableViewItem]) {
@@ -282,7 +311,7 @@ struct AllNotesPageContentView: View {
             //If we create a public note, publish it right after creation, else just save it
             if isPublic || publishOnProfile {
                 model.publishingNoteTitle = newNote.title
-                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true) { result in
+                BeamNoteSharingUtils.makeNotePublic(newNote, becomePublic: true, publicationGroups: publishOnProfile ? ["profile"] : nil) { result in
                     DispatchQueue.main.async {
                         model.publishingNoteTitle = nil
                         switch result {
@@ -293,13 +322,7 @@ struct AllNotesPageContentView: View {
                             newNote.save()
                             listType = .privateNotes
                         case .success:
-                            if publishOnProfile {
-                                BeamNoteSharingUtils.updatePublicationGroup(newNote, group: ["profile"]) { _ in
-                                    model.refreshAllNotes()
-                                }
-                            } else {
-                                model.refreshAllNotes()
-                            }
+                            model.refreshAllNotes()
                         }
                     }
                 }
