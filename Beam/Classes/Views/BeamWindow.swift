@@ -95,6 +95,19 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         NSApp.addWindowsItem(self, title: title ?? "Beam", filename: false)
     }
 
+    // This is an imperfect way to try making the sidebar more simple to display and dismiss using a two finger swipe
+    override func scrollWheel(with event: NSEvent) {
+        guard state.useSidebar else {
+            super.scrollWheel(with: event)
+            return
+        }
+        if event.deltaX > 3 {
+            state.showSidebar = true
+        } else if event.deltaX < -3 {
+            state.showSidebar = false
+        }
+    }
+
     deinit {
         state.cachedJournalScrollView = nil
         state.cachedJournalStackView = nil
@@ -302,7 +315,6 @@ extension BeamWindow: NSWindowDelegate {
     func windowDidDeminiaturize(_ notification: Notification) {
         if isMainWindow { state.browserTabsManager.currentTab?.tabDidAppear(withState: state) }
     }
-
 }
 
 // MARK: - Custom Field Editor
@@ -355,6 +367,8 @@ extension BeamWindow {
         frame = frame.insetBy(dx: 0, dy: (frame.height - minHeight) / 2)
         return searchField.convert(frame, to: nil)
     }
+
+    static var windowControlsWidth: CGFloat { 72.0 }
 
     private func setupWindowButtons() {
         trafficLights = [
