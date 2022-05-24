@@ -110,6 +110,7 @@ struct NoteHeaderView: View {
         }
     }
 
+    @State private var forceDropDownMenu: Bool = false
     @State private var forceHovering: Bool = false
     private var actionsView: some View {
         var style = model.publishState == .isPublic ? ButtonLabelStyle.leftFilledStyle : ButtonLabelStyle(disableAnimations: false)
@@ -120,10 +121,16 @@ struct NoteHeaderView: View {
         return HStack(spacing: BeamSpacing._120) {
             ZStack {
                 if model.publishState == .isPublic {
-                    HStack(spacing: BeamSpacing._20) {
+                    HStack(spacing: BeamSpacing._10) {
                         notePublishButton(style: style, forceHovering: forceHovering)
-                        DropDownButton(parentWindow: AppDelegate.main.window, items: publishedContextItems, customStyle: .rightFilledStyle)
-                    }.offset(x: -7, y: 0)
+                        DropDownButton(parentWindow: AppDelegate.main.window, items: publishedContextItems, customStyle: .rightFilledStyle, menuForcedWidth: 180, forceMenuToAppear: forceDropDownMenu)
+                    }
+                    .offset(x: -7, y: 0)
+                    .onAppear {
+                        if forceDropDownMenu {
+                            forceDropDownMenu = false
+                        }
+                    }
                     .onHover {
                         forceHovering = $0
                     }
@@ -151,7 +158,7 @@ struct NoteHeaderView: View {
                 let canPerform = model.togglePublish { result in
                     switch result {
                     case .success:
-                        break
+                        self.forceDropDownMenu = true
                     case .failure(let error):
                         handlePublicationError(error: error)
                     }

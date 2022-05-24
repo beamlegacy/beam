@@ -116,6 +116,6 @@ class AllCardsTestView: BaseView {
     }
     
     func getPublishInstructionsLabel() -> XCUIElement {
-        return staticText(AllCardsViewLocators.StaticTexts.publishInstruction.accessibilityIdentifier)
+        return button(AllCardsViewLocators.StaticTexts.publishInstruction.accessibilityIdentifier)
     }
 }
