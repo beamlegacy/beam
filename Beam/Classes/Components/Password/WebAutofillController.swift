@@ -296,8 +296,6 @@ class WebAutofillController: NSObject, WebPageRelated {
                 self.updateStoredValues(with: dict, userInput: true, frameInfo: frameInfo)
             }
         }
-        lastFocusOutTimestamp = BeamDate.now
-        previouslyFocusedElementId = elementId
         clearInputFocus()
     }
 
@@ -327,7 +325,10 @@ class WebAutofillController: NSObject, WebPageRelated {
     }
 
     private func clearInputFocus() {
-        currentOverlay?.dismiss()
+        guard let overlay = currentOverlay else { return }
+        previouslyFocusedElementId = overlay.elementId
+        overlay.dismiss()
+        lastFocusOutTimestamp = BeamDate.now
         currentOverlay = nil
     }
 
