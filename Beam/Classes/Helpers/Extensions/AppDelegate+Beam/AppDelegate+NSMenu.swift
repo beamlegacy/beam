@@ -20,6 +20,7 @@ private enum MenuEnablingConditionTag: Int {
     case hasTabGroupingWindowPrefOn = 1011
     case hasTabGroupingColoringPrefOn = 1101
     case isDebugMode = 1111
+    case sidebarEnabled = 2000
 }
 
 extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
@@ -55,6 +56,8 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             item.isHidden = !visible
             if item.tag == -MenuEnablingConditionTag.isDebugMode.rawValue || item.tag == -MenuEnablingConditionTag.hasTabGroupingColoringPrefOn.rawValue {
                 item.isHidden = Configuration.branchType != .develop
+            } else if item.tag == -MenuEnablingConditionTag.sidebarEnabled.rawValue {
+                item.isHidden = Configuration.branchType != .develop
             }
         }
     }
@@ -79,6 +82,8 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             return true
         } else if tagEnum == .hasTabGroupingColoringPrefOn {
             return PreferencesManager.showTabsColoring
+        } else if tagEnum == .sidebarEnabled {
+            return state?.useSidebar ?? false
         }
         return false
     }

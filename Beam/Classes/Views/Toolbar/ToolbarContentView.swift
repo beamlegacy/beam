@@ -16,8 +16,6 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     @Environment(\.isMainWindow) private var isMainWindow: Bool
     @Environment(\.colorScheme) private var colorScheme
 
-    private let windowControlsWidth: CGFloat = 72
-
     private var showPivotButton: Bool {
         state.hasBrowserTabs
     }
@@ -39,10 +37,12 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
 
     private func cardSwitcherView(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(containerGeometry: containerGeometry) {
-            CardSwitcher(currentNote: state.currentNote)
-                .frame(maxHeight: .infinity)
-                .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
-                .environmentObject(state.recentsManager)
+            if !state.useSidebar {
+                CardSwitcher(currentNote: state.currentNote)
+                    .frame(maxHeight: .infinity)
+                    .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
+                    .environmentObject(state.recentsManager)
+            }
         }
         .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.08))
                                     .combined(with: .animatableOffset(offset: CGSize(width: 0, height: 8))
@@ -69,12 +69,14 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     }
 
     private var leftFieldActions: some View {
-        HStack(spacing: 1) {
-            if state.mode != .today {
+        HStack(spacing: state.useSidebar ? 6 : 1) {
+            if state.mode != .today && !state.useSidebar {
                 ToolbarButton(icon: "nav-journal", action: goToJournal)
                     .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.description)
                     .accessibilityIdentifier("journal")
                     .animation(nil)
+            } else {
+                Spacer().frame(width: 28, height: 28) // Spacer to ensure no overlap between sidebar buttons and chevrons
             }
             ToolbarChevrons()
                 .animation(nil)
@@ -117,14 +119,14 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
                 leftFieldActions
                 if state.mode == .web {
                     tabs(containerGeometry: containerGeometry)
-                        .padding(.horizontal, BeamSpacing._100)
+                        .padding(.horizontal, state.useSidebar ? BeamSpacing._140 : BeamSpacing._100)
                 } else {
                     cardSwitcherView(containerGeometry: containerGeometry)
                         .padding(.horizontal, BeamSpacing._140)
                 }
                 rightActionsView(containerGeometry: containerGeometry)
             }
-            .padding(.leading, 15 + (state.isFullScreen ? 0 : windowControlsWidth))
+            .padding(.leading, (state.useSidebar ? 10 : 15) + (state.isFullScreen ? 0 : BeamWindow.windowControlsWidth))
             .frame(height: Toolbar.height, alignment: .top)
         }
         .frame(height: Toolbar.height, alignment: .top)
@@ -134,6 +136,10 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
 
     func goToJournal() {
         state.navigateToJournal(note: nil, clearNavigation: true)
+    }
+
+    func toggleSidebar() {
+        state.showSidebar.toggle()
     }
 
     func toggleMode() {

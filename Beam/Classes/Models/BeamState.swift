@@ -82,6 +82,10 @@ import Sentry
     @Published var omniboxInfo = OmniboxLayoutInformation()
 
     @Published var showHelpAndFeedback = false
+    @Published var showSidebar = false
+    var useSidebar: Bool {
+        Configuration.branchType == .develop && Configuration.env != .test
+    }
 
     @Published var destinationCardIsFocused = false
     @Published var destinationCardName: String = ""
@@ -108,6 +112,7 @@ import Sentry
             }
 
             updateWindowTitle()
+            showSidebar = false
         }
     }
 
@@ -131,7 +136,7 @@ import Sentry
         overlayViewModel.modalView == nil
     }
     var editorShouldAllowMouseHoverEvents: Bool {
-        !omniboxInfo.isFocused
+        !omniboxInfo.isFocused && !showSidebar
     }
     var isShowingOnboarding: Bool {
         data.onboardingManager.needsToDisplayOnboard
