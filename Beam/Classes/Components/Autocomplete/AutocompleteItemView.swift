@@ -139,7 +139,6 @@ struct AutocompleteItemView: View {
                         .frame(maxWidth: 16, maxHeight: 16)
                 } else {
                     Icon(name: item.icon, color: secondaryTextColor)
-                        .blendModeLightMultiplyDarkScreen()
                 }
             }
             HStack(alignment: .firstTextBaseline, spacing: 0) {

@@ -104,7 +104,7 @@ import Sentry
             }
 
             if let leavingNote = currentNote, leavingNote.publicationStatus.isPublic, leavingNote.shouldUpdatePublishedVersion {
-                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true)
+                BeamNoteSharingUtils.makeNotePublic(leavingNote, becomePublic: true, publicationGroups: leavingNote.publicationStatus.publicationGroups)
             }
 
             updateWindowTitle()

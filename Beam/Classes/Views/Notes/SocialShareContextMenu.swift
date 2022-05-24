@@ -41,8 +41,9 @@ struct SocialShareContextMenu {
 
         socialShareMenuViewModel = SocialShareContextMenuViewModel()
         socialShareMenuViewModel.items = items
-        socialShareMenuViewModel.sizeToFit = true
-        socialShareMenuViewModel.containerSize = CGSize(width: 200, height: 208)
+        socialShareMenuViewModel.sizeToFit = false
+        socialShareMenuViewModel.containerSize = CGSize(width: 120, height: 208)
+        socialShareMenuViewModel.forcedWidth = 120
         socialShareMenuViewModel.urlToShare = urlToShare
     }
 

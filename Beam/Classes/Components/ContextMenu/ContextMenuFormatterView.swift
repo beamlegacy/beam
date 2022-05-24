@@ -18,6 +18,7 @@ class ContextMenuFormatterView: FormatterView {
     private var direction: Edge = .bottom
     private var defaultSelectedIndex: Int?
     private var sizeToFit: Bool = false
+    private var forcedWidth: CGFloat?
     private var onSelectMenuItem: (() -> Void)?
     private var onClosing: (() -> Void)?
     var origin: CGPoint?
@@ -44,7 +45,7 @@ class ContextMenuFormatterView: FormatterView {
          direction: Edge = .bottom,
          handlesTyping: Bool = false,
          defaultSelectedIndex: Int? = nil,
-         sizeToFit: Bool = false,
+         sizeToFit: Bool = false, forcedWidth: CGFloat? = nil,
          origin: NSPoint? = nil, canBecomeKey: Bool = false,
          onSelectHandler: (() -> Void)? = nil, onClosing: (() -> Void)? = nil) {
 
@@ -54,6 +55,7 @@ class ContextMenuFormatterView: FormatterView {
         self.direction = direction
         self.defaultSelectedIndex = defaultSelectedIndex
         self.sizeToFit = sizeToFit
+        self.forcedWidth = forcedWidth
         self.onSelectMenuItem = onSelectHandler
         self.onClosing = onClosing
         self._handlesTyping = handlesTyping
@@ -68,6 +70,7 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     override func didClose() {
+        super.didClose()
         subviewModel.visible = false
         subviewModel.hideSubMenu?()
         onClosing?()
@@ -99,6 +102,7 @@ class ContextMenuFormatterView: FormatterView {
         subviewModel.selectedIndex = defaultSelectedIndex ?? (handlesTyping ? 0 : nil)
         subviewModel.animationDirection = direction
         subviewModel.sizeToFit = sizeToFit
+        subviewModel.forcedWidth = forcedWidth
         subviewModel.onSelectMenuItem = onSelectMenuItem
         subviewModel.containerSize = idealSize
         subviewModel.hideSubMenu = { [weak self] in
@@ -232,7 +236,7 @@ class ContextMenuFormatterView: FormatterView {
                 let window = self.window else { return }
 
         var origin = self.origin ?? CGPoint.zero
-        origin.x += (self.hostView?.frame.width ?? 0) + horizontalPadding
+        origin.x += (self.forcedWidth ?? self.hostView?.frame.width ?? 0) + horizontalPadding
         var idealSize = CGSize.zero
         if let idx = self.items.firstIndex(where: {$0.id == item.id}) {
             let slice = self.items.prefix(upTo: idx)
@@ -242,7 +246,7 @@ class ContextMenuFormatterView: FormatterView {
 
         CustomPopoverPresenter.shared.dismissPopovers(key: subMenuIdentifier)
 
-        let menuView = ContextMenuFormatterView(key: self.subMenuIdentifier, subviewModel: subMenuModel, items: subMenuModel.items, direction: .bottom, sizeToFit: subMenuModel.sizeToFit, origin: origin, canBecomeKey: false, onSelectHandler: {
+        let menuView = ContextMenuFormatterView(key: self.subMenuIdentifier, subviewModel: subMenuModel, items: subMenuModel.items, direction: .bottom, sizeToFit: subMenuModel.sizeToFit, forcedWidth: subMenuModel.forcedWidth, origin: origin, canBecomeKey: false, onSelectHandler: {
             CustomPopoverPresenter.shared.dismissPopovers(key: self.subMenuIdentifier)
             self.onSelectMenuItem?()
         })

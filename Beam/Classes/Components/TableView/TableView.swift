@@ -505,7 +505,9 @@ extension TableViewCoordinator: NSTableViewDelegate {
         if let iconName = item?.iconName, let action = item?.buttonAction {
             let iconButtonViewCell = BeamTableCellIconButtonView()
 
-            iconButtonViewCell.iconButton.image = NSImage(named: iconName)?.fill(color: BeamColor.AlphaGray.nsColor)
+            let iconImage = NSImage(named: iconName)?.fill(color: BeamColor.AlphaGray.nsColor)
+            iconButtonViewCell.iconButton.image = iconImage
+            iconImage?.isTemplate = false
             iconButtonViewCell.iconButton.contentTintColor = BeamColor.AlphaGray.nsColor
             iconButtonViewCell.hasPopover = item?.hasPopover ?? false
             iconButtonViewCell.popoverAlignment = item?.popoverAlignment ?? .bottom
