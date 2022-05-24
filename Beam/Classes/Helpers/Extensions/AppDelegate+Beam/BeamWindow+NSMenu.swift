@@ -18,6 +18,12 @@ extension BeamWindow {
         state.data.checkForUpdate()
     }
 
+    @IBAction func toggleSidebar(_ sender: Any?) {
+        if state.useSidebar {
+            state.showSidebar.toggle()
+        }
+    }
+
     @IBAction func showPreviousTab(_ sender: Any?) {
         state.showPreviousTab()
     }

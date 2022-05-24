@@ -267,37 +267,9 @@ extension NoteHeaderView {
         }
 
         // MARK: Delete
-        private func confirmedDelete() {
-            guard let note = note else { return }
-
-            // To prevent complex interactions with the state and notifications it receives, let's apply the state changes before we delete the note:
-            if let state = state {
-                if state.canGoBackForward.back {
-                    state.goBack()
-                } else {
-                    state.navigateToJournal(note: nil)
-                }
-                state.backForwardList.clearForward()
-                state.updateCanGoBackForward()
-            }
-
-            let cmdManager = CommandManagerAsync<DocumentManager>()
-            cmdManager.deleteDocuments(ids: [note.id], in: DocumentManager())
-        }
-
-        func promptConfirmDelete() {
-            guard let note = note else { return }
-            let alert = NSAlert()
-            alert.messageText = "Are you sure you want to delete the note \"\(note.title)\"?"
-            alert.informativeText = "This cannot be undone."
-            alert.addButton(withTitle: "Delete")
-            alert.addButton(withTitle: "Cancel")
-            alert.alertStyle = .warning
-            guard let window = AppDelegate.main.window else { return }
-            alert.beginSheetModal(for: window) { [weak self] response in
-                guard response == .alertFirstButtonReturn, let self = self else { return }
-                self.confirmedDelete()
-            }
+        func deleteNote() {
+            guard let note = note, let state = state else { return }
+            note.promptConfirmDelete(for: state)
         }
     }
 }
