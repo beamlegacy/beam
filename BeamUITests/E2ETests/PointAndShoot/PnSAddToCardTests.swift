@@ -223,7 +223,7 @@ class PnSAddToCardTests: BaseTest {
 
         step ("Then the note is still empty"){
             cardNotes = CardTestView().getCardNotesForVisiblePart()
-            XCTAssertEqual(cardNotes.count, 2)
+            XCTAssertEqual(cardNotes.count, 1)
             XCTAssertTrue(cardView.getElementStringValue(element: cardNotes[0]) == emptyString || cardView.getElementStringValue(element: cardNotes[0]) == "Media Player Test Page") //CI specific issue handling
         }
 
@@ -250,7 +250,7 @@ class PnSAddToCardTests: BaseTest {
             cardView = CardTestView()
             cardNotes = cardView.getCardNotesForVisiblePart()
             //To be refactored once BE-2117 merged
-            XCTAssertEqual(cardNotes.count, 2)
+            XCTAssertEqual(cardNotes.count, 1)
             XCTAssertEqual(cardView.getElementStringValue(element: cardNotes[0]), expectedNoteText)
         }
 
@@ -489,7 +489,7 @@ class PnSAddToCardTests: BaseTest {
         helper.showJournal()
         let title3Predicate = NSPredicate(format: "value = %@", prefix + linkText)
         XCTAssertTrue(journalChildren.element(matching: title3Predicate).waitForExistence(timeout: 4))
-        XCTAssertEqual(journalChildren.count, 3)
+        XCTAssertEqual(journalChildren.count, 2)
         // tap on collected sublink (end of new bullet)
         let linkWord = journalChildren.element(matching: title3Predicate).buttons[linkText]
         XCTAssertTrue(linkWord.waitForExistence(timeout: 5))
