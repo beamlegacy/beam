@@ -377,13 +377,20 @@ platform :mac do
   end
 
   lane :notarize_build do
-    # https://blog.zeplin.io/dev-journal-automate-notarizing-macos-apps-94b0b144ba9d
+
+    api_key = app_store_connect_api_key(
+      key_id: ENV["APP_STORE_NOTARIZE_API_KEY_ID"],
+      issuer_id: ENV["APP_STORE_NOTARIZE_API_KEY_ISSUER_ID"],
+      key_content: ENV["APP_STORE_NOTARIZE_API_KEY"]
+    )
+    
     notarize(
       package: "builds/Beam.app",
       verbose: true,
       print_log: true,
       bundle_id: ENV["APP_IDENTIFIER"],
-      asc_provider: ENV["TEAM_ID"]
+      asc_provider: ENV["TEAM_ID"],
+      api_key: api_key
     )
   end
 
