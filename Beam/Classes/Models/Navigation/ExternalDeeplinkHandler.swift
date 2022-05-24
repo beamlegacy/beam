@@ -53,7 +53,7 @@ class ExternalDeeplinkHandler {
         }
 
         let alert = NSAlert()
-        alert.messageText = "Do you want to allow this page to open \(deeplinkName) ?"
+        alert.messageText = "Do you want to allow this page to open \(deeplinkName)?"
         alert.addButton(withTitle: "Allow")
         alert.addButton(withTitle: "Cancel")
         if alert.runModal() == .alertFirstButtonReturn {
