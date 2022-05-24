@@ -168,7 +168,9 @@ class DailyUrlScorerTest: XCTestCase {
             ("https://abc.com/#anchor", "title 1"),
             ("http://abc.com/", "title 2"),
             ("https://def.com", "title 3"),
-            ("https://geh.com", "title 4")
+            ("https://geh.com", "title 4"), //filtered out because pinned
+            ("https://www.google.com/search?q=query", "Google - query"), //filtered out because search query
+            ("https://ijk.com", "title 5") //filtered out because low reading time
         ]
         BeamDate.freeze("2001-01-01T00:01:00+000")
         let urlIds: [UUID] = urlsAndTitles.map {
@@ -179,21 +181,28 @@ class DailyUrlScorerTest: XCTestCase {
         let score1 = DailyURLScore(urlId: urlIds[1], localDay: "2020-01-01")
         let score2 = DailyURLScore(urlId: urlIds[2], localDay: "2020-01-01")
         let score3 = DailyURLScore(urlId: urlIds[3], localDay: "2020-01-01")
+        let score4 = DailyURLScore(urlId: urlIds[4], localDay: "2020-01-01")
+        let score5 = DailyURLScore(urlId: urlIds[5], localDay: "2020-01-01")
 
         score0.readingTimeToLastEvent = 1.5
         score1.readingTimeToLastEvent = 1.5
         score2.readingTimeToLastEvent = 2
         score3.readingTimeToLastEvent = 10
         score3.isPinned = true
+        score4.readingTimeToLastEvent = 100
+        score5.readingTimeToLastEvent = 0.5
+        score5.textAmount = 10_000
 
         let scores = [
             urlIds[0]: score0,
             urlIds[1]: score1,
             urlIds[2]: score2,
-            urlIds[3]: score3
+            urlIds[3]: score3,
+            urlIds[4]: score4,
+            urlIds[5]: score5
 
         ]
-        let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores))
+        let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores), minReadingTime: 1)
         let scoredUrls = scorer.getHighScoredUrls(daysAgo: 0, topN: 1)
         XCTAssertEqual(scoredUrls.count, 1)
         //the 2 first url scores got aggregated and title was chosen as most recent.
