@@ -223,11 +223,7 @@ public class TextRoot: ElementNode {
             element.addChild(BeamElement())
         }
 
-        if let note = self.note, note.fastLinksAndReferences.isEmpty,
-            note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
-            let first = children.first as? TextNode
-            first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
-        }
+        setPlaceholder()
 
         referencesSection?.open = false
 
@@ -334,13 +330,25 @@ public class TextRoot: ElementNode {
         node.cmdManager.focus(newElement, in: node)
     }
 
-    // MARK: - Summary Engine
     override func didMoveToWindow(_ window: NSWindow?) {
         super.didMoveToWindow(window)
         if let note = note, note.isTodaysNote {
+            self.setPlaceholder()
             self.updateSummary()
         }
     }
+
+    // MARK: - Placeholder
+
+    private func setPlaceholder() {
+        if let note = self.note, note.fastLinksAndReferences.isEmpty,
+            note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
+            let first = children.first as? TextNode
+            first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
+        }
+    }
+
+    // MARK: - Summary Engine
 
     private func createSummary() {
         if PreferencesManager.enableDailySummary {
