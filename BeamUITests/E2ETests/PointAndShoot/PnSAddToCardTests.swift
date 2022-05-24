@@ -195,6 +195,33 @@ class PnSAddToCardTests: BaseTest {
             }
         }
     }
+    
+    func testCollectSVG() throws {
+        
+        let helper = BeamUITestsHelper(launchApp().app)
+        helper.openTestPage(page: .svg)
+        
+        step ("THEN SVG image is succeffully captured"){
+            let itemToCollect = webView.image("svgimage")
+            pnsView.addToTodayCard(itemToCollect)
+            cardView = webView.openDestinationCard()
+            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
+        }
+        //Blocked by https://linear.app/beamapp/issue/BE-4180/empty-node-item-is-added-to-a-note-when-capturing-svg-with-no-height
+        /*step ("THEN SVG image without weight and height is succeffully captured"){
+            let itemToCollect = webView.image("nowidthheightsvgimage")
+            pnsView.addToTodayCard(itemToCollect)
+            cardView = webView.openDestinationCard()
+            XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
+        }*/
+        
+        step ("THEN partially SVG image is failed to be captured"){
+            shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            let itemToCollect = webView.image("partialsvgimage")
+            _ = itemToCollect.waitForExistence(timeout: pnsView.minimumWaitTimeout)
+            XCTAssertTrue(pnsView.addToTodayCard(itemToCollect).getSendBugReportButtonElement().waitForExistence(timeout: pnsView.minimumWaitTimeout))
+        }
+    }
 
     func testFailedToCollect() throws {
         // If this test is flakey, make sure browsing collect is disabled first
