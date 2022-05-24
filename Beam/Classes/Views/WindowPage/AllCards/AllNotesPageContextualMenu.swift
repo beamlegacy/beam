@@ -240,7 +240,7 @@ class AllNotesPageContextualMenu {
                             publicationGroups.append("profile")
                         }
 
-                        BeamNoteSharingUtils.updatePublicationGroup(note, group: publicationGroups) { _ in
+                        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: publicationGroups) { _ in
                             continuation.resume()
                         }
                     }

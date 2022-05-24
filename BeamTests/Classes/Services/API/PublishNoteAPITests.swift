@@ -128,7 +128,7 @@ class PublishNoteAPITests: XCTestCase {
 
         let publicationGroupUpdatedToProfile = expectation(description: "note publication group updated")
         let profilePublicationGroups = ["profile"]
-        BeamNoteSharingUtils.updatePublicationGroup(note, group: profilePublicationGroups) { result in
+        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: profilePublicationGroups) { result in
             switch result {
             case .success:
                 XCTAssertTrue(true)
@@ -143,7 +143,7 @@ class PublishNoteAPITests: XCTestCase {
 
         let publicationGroupUpdatedToEmpty = expectation(description: "note publication group updated")
         let emptyPublicationGroups: [String] = []
-        BeamNoteSharingUtils.updatePublicationGroup(note, group: emptyPublicationGroups) { result in
+        BeamNoteSharingUtils.updatePublicationGroup(note, publicationGroups: emptyPublicationGroups) { result in
             switch result {
             case .success:
                 XCTAssertTrue(true)
