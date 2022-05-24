@@ -350,3 +350,9 @@ extension BeamColor {
         static let background = BeamColor.combining(lightColor: .Nero, darkColor: .Nero, darkAlpha: 0.3)
     }
 }
+
+extension BeamColor {
+    enum Sidebar {
+        static let background = BeamColor.Nero.alpha(0.4)
+    }
+}
