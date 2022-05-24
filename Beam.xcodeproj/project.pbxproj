@@ -127,6 +127,12 @@
 		33793AD1265CFEC50041E1B8 /* SwiftSoup in Frameworks */ = {isa = PBXBuildFile; productRef = 9631C746251CE997009B40C4 /* SwiftSoup */; };
 		33793AD2265CFEC50041E1B8 /* FavIcon in Frameworks */ = {isa = PBXBuildFile; productRef = 96474E3E254D9ADB00A920B3 /* FavIcon */; };
 		33793AD7265CFEC50041E1B8 /* KeychainAccess in Frameworks */ = {isa = PBXBuildFile; productRef = 524CF6D225F276D1007312F0 /* KeychainAccess */; };
+		337F31B028352845002854BC /* SidebarListSectionTitle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31AF28352845002854BC /* SidebarListSectionTitle.swift */; };
+		337F31B728357CB3002854BC /* UsernameBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31B628357CB3002854BC /* UsernameBadgeView.swift */; };
+		337F31B928358770002854BC /* SidebarFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31B828358770002854BC /* SidebarFooterView.swift */; };
+		337F31C62837E4ED002854BC /* SidebarListNoteButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31C52837E4ED002854BC /* SidebarListNoteButton.swift */; };
+		337F31C82837E5B3002854BC /* SidebarListBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31C72837E5B3002854BC /* SidebarListBackground.swift */; };
+		337F31CA2837EB4B002854BC /* BeamNote+Deletion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 337F31C92837EB4B002854BC /* BeamNote+Deletion.swift */; };
 		338981C12795B9BD00477941 /* Bundle+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338981C02795B9BD00477941 /* Bundle+Beam.swift */; };
 		338A66A0268DC26000B056EB /* LayerRemoverAnimationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */; };
 		338A66C2268E053C00B056EB /* BeamDownloadDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */; };
@@ -136,6 +142,8 @@
 		33AA4ED2270DD43900B74868 /* String+SearchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4ED1270DD43900B74868 /* String+SearchTests.swift */; };
 		33AA4EDF270DF5D200B74868 /* ResizableNode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EDE270DF5D200B74868 /* ResizableNode.swift */; };
 		33AA4EF2270F515900B74868 /* BeamPropertyWrappers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */; };
+		33AA68542833DB4600DB5747 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA68532833DB4600DB5747 /* SidebarView.swift */; };
+		33AA68562833F58A00DB5747 /* SidebarListPageButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AA68552833F58A00DB5747 /* SidebarListPageButton.swift */; };
 		33AC9D8E26AF482E004E7EF4 /* EnhancedWebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */; };
 		33AC9D9826AFF453004E7EF4 /* FocusableTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */; };
 		33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */; };
@@ -1628,6 +1636,12 @@
 		3355997326CBDDC900F52C23 /* SearchInContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchInContentView.swift; sourceTree = "<group>"; };
 		3355997526CBE0AE00F52C23 /* SearchViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchViewModel.swift; sourceTree = "<group>"; };
 		335CBA9027CF617A005FE658 /* MouseCursorManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MouseCursorManager.swift; sourceTree = "<group>"; };
+		337F31AF28352845002854BC /* SidebarListSectionTitle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarListSectionTitle.swift; sourceTree = "<group>"; };
+		337F31B628357CB3002854BC /* UsernameBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsernameBadgeView.swift; sourceTree = "<group>"; };
+		337F31B828358770002854BC /* SidebarFooterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarFooterView.swift; sourceTree = "<group>"; };
+		337F31C52837E4ED002854BC /* SidebarListNoteButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarListNoteButton.swift; sourceTree = "<group>"; };
+		337F31C72837E5B3002854BC /* SidebarListBackground.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarListBackground.swift; sourceTree = "<group>"; };
+		337F31C92837EB4B002854BC /* BeamNote+Deletion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamNote+Deletion.swift"; sourceTree = "<group>"; };
 		338981C02795B9BD00477941 /* Bundle+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Bundle+Beam.swift"; sourceTree = "<group>"; };
 		338A669F268DC26000B056EB /* LayerRemoverAnimationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LayerRemoverAnimationDelegate.swift; sourceTree = "<group>"; };
 		338A66C1268E053C00B056EB /* BeamDownloadDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamDownloadDocument.swift; sourceTree = "<group>"; };
@@ -1638,6 +1652,8 @@
 		33AA4ED1270DD43900B74868 /* String+SearchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+SearchTests.swift"; sourceTree = "<group>"; };
 		33AA4EDE270DF5D200B74868 /* ResizableNode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResizableNode.swift; sourceTree = "<group>"; };
 		33AA4EF1270F515800B74868 /* BeamPropertyWrappers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamPropertyWrappers.swift; sourceTree = "<group>"; };
+		33AA68532833DB4600DB5747 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		33AA68552833F58A00DB5747 /* SidebarListPageButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarListPageButton.swift; sourceTree = "<group>"; };
 		33AC9D8D26AF482E004E7EF4 /* EnhancedWebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EnhancedWebView.swift; sourceTree = "<group>"; };
 		33AC9D9726AFF453004E7EF4 /* FocusableTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FocusableTextField.swift; sourceTree = "<group>"; };
 		33AC9D9926B01A60004E7EF4 /* AuthenticationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationViewModel.swift; sourceTree = "<group>"; };
@@ -3556,6 +3572,20 @@
 			path = Authentication;
 			sourceTree = "<group>";
 		};
+		33AA684D2833DB1D00DB5747 /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				33AA68532833DB4600DB5747 /* SidebarView.swift */,
+				337F31C72837E5B3002854BC /* SidebarListBackground.swift */,
+				33AA68552833F58A00DB5747 /* SidebarListPageButton.swift */,
+				337F31C52837E4ED002854BC /* SidebarListNoteButton.swift */,
+				337F31AF28352845002854BC /* SidebarListSectionTitle.swift */,
+				337F31B628357CB3002854BC /* UsernameBadgeView.swift */,
+				337F31B828358770002854BC /* SidebarFooterView.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
 		33AC9D9626AFF43E004E7EF4 /* FocusableTextField */ = {
 			isa = PBXGroup;
 			children = (
@@ -3858,6 +3888,7 @@
 				A5C9F004261353420096380F /* WindowPage.swift */,
 				524520A325C8234500AC0007 /* BeamElement+Merge.swift */,
 				A03CE0EB25F954CB00D767B0 /* BeamNoteDataHolder.swift */,
+				337F31C92837EB4B002854BC /* BeamNote+Deletion.swift */,
 				96319C6D26160AB400D1CF31 /* BeamNote+DocumentManager.swift */,
 				96319C8526160E4A00D1CF31 /* BeamNote+LinkDetection.swift */,
 				A5F1F6252643EDA600D41505 /* BeamNoteSharingUtils.swift */,
@@ -4050,6 +4081,7 @@
 				418173F7258128A500317ED8 /* Journal */,
 				A5C1F04A276BEF7400EF750D /* Omnibox */,
 				A5B7184B274B929D0010FE8E /* Toolbar */,
+				33AA684D2833DB1D00DB5747 /* Sidebar */,
 				A54936B0260B71FE00EF7622 /* BottomToolbar */,
 				370794C627D7AA0300D2768B /* PDFDocumentView */,
 				3312202D2809736D006A5EA1 /* Update */,
@@ -8486,6 +8518,7 @@
 				8A14E32927F6468600DDCCE3 /* GeolocationMessageHandler.swift in Sources */,
 				D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */,
 				5298EB2D26274D530033862C /* BeamToBeam2MigrationPolicy.swift in Sources */,
+				33AA68542833DB4600DB5747 /* SidebarView.swift in Sources */,
 				33CCBFA626A61C15004B6236 /* PopoverWindow.swift in Sources */,
 				4181722C2581107C00317ED8 /* AutocompleteListView.swift in Sources */,
 				87CF1CBF28216BCE00FB0530 /* CreditCardAutofillBuilder.swift in Sources */,
@@ -8535,6 +8568,7 @@
 				CE304C3927DB54EC005AE274 /* GCSObjectManager.swift in Sources */,
 				418171EE2581107C00317ED8 /* GraphqlParametersProtocol.swift in Sources */,
 				33353ED626F3675000063078 /* ShortcutKey.swift in Sources */,
+				337F31B928358770002854BC /* SidebarFooterView.swift in Sources */,
 				37520B0927EAA40000A1C20B /* MediaContentGeometryDescription.swift in Sources */,
 				524CF6CE25F27609007312F0 /* KeychainStorable.swift in Sources */,
 				52019A6326DE2CC9005E8278 /* BeamObjectManager+Foundation.swift in Sources */,
@@ -8698,6 +8732,7 @@
 				A0CB5AE8268B20C200D1EF02 /* BrowserPreferencesView.swift in Sources */,
 				A5044311281CA8A900C91204 /* TabsListExternalDragViewModel.swift in Sources */,
 				A52BFDF72608D6710028D3F3 /* BeamFont.swift in Sources */,
+				337F31B728357CB3002854BC /* UsernameBadgeView.swift in Sources */,
 				96319D6D26163AAD00D1CF31 /* BeamNote+CommandManager.swift in Sources */,
 				5291CEE8268B5969001645A2 /* PasswordManager.swift in Sources */,
 				4E0556E127B4004E00B4A42F /* TabGroupingUpdater.swift in Sources */,
@@ -8840,6 +8875,7 @@
 				A0CFFA4926D9304F004FC8C1 /* JournalDateConverter.swift in Sources */,
 				418171FF2581107C00317ED8 /* CoreDataManager.swift in Sources */,
 				DA8D949128008C0A0073AD2D /* KeychainDailyNoteScoreStore.swift in Sources */,
+				337F31C82837E5B3002854BC /* SidebarListBackground.swift in Sources */,
 				8AA2431626E63A5F002A553A /* SwiftSoup+Beam.swift in Sources */,
 				8A4801A426A1EB66008F33FE /* PointAndShoot+DrawRules.swift in Sources */,
 				529599F7272718CD00F3F843 /* APIRequest+Foundation.swift in Sources */,
@@ -8849,6 +8885,7 @@
 				A0AA693325C41C9B0038F9A3 /* MouseHandler.swift in Sources */,
 				A5D21FD026974BA500250A6A /* CalendarPickerViewModel.swift in Sources */,
 				A0C63A6825FA249700FB4CCE /* BeamTextHolder.swift in Sources */,
+				337F31CA2837EB4B002854BC /* BeamNote+Deletion.swift in Sources */,
 				418171F22581107C00317ED8 /* APIRequest.swift in Sources */,
 				529E1AD425D45CFA00DD25B8 /* APIRequestError.swift in Sources */,
 				A5919F54268BE208009015C5 /* NoteMediaPlayingButton.swift in Sources */,
@@ -9017,6 +9054,7 @@
 				032562AA26051D3B006513E4 /* RBClient.m in Sources */,
 				A545D2FB25F7B1D800E68F94 /* DestinationNoteAutocompleteList.swift in Sources */,
 				52842D462715B2610099602C /* AppDelegate+File.swift in Sources */,
+				33AA68562833F58A00DB5747 /* SidebarListPageButton.swift in Sources */,
 				37C41325278553AF00954FD7 /* PreferredSearchEngine.swift in Sources */,
 				A5FDFA1C27DA44510066A670 /* FormatterViewBackgroundV2.swift in Sources */,
 				5285672A26275A8D00DDBE45 /* BeamToBeam2Migration.xcmappingmodel in Sources */,
@@ -9052,6 +9090,7 @@
 				A5FE96CD2612469C002A2B73 /* AutocompleteManager.swift in Sources */,
 				52B17AB0262441D600CB4728 /* DatabasesWindow.swift in Sources */,
 				A0ECC88A2788B95100E72E61 /* BetaPreferencesView.swift in Sources */,
+				337F31C62837E4ED002854BC /* SidebarListNoteButton.swift in Sources */,
 				BAA67192B5EB78981741C311 /* WebPage.swift in Sources */,
 				8A9B1A9626DD321E00B3B5FA /* PointAndShoot+ShootGroup.swift in Sources */,
 				A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */,
@@ -9076,6 +9115,7 @@
 				9691C28B2645369100F70DA1 /* ElementNode.swift in Sources */,
 				A5EBF14A26D7BE3100597A1C /* GutterContainerView.swift in Sources */,
 				37C4132F278554A100954FD7 /* Ecosia.swift in Sources */,
+				337F31B028352845002854BC /* SidebarListSectionTitle.swift in Sources */,
 				9691C2BC2645F93100F70DA1 /* EmbedNode.swift in Sources */,
 				334559B02800729200B4BF57 /* OmniboxIncognitoExplanation.swift in Sources */,
 				3355997626CBE0AE00F52C23 /* SearchViewModel.swift in Sources */,

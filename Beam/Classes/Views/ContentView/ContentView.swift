@@ -28,6 +28,25 @@ struct ContentView: View {
                     OmniboxContainer(containerGeometry: geometry).environmentObject(state.autocompleteManager),
                     alignment: .top
                 )
+                .overlay(sidebar, alignment: .leading)
+                .overlay(sidebarIcon, alignment: .topLeading)
+        }
+    }
+
+    @ViewBuilder var sidebarIcon: some View {
+        if state.useSidebar {
+            ToolbarButton(icon: "nav-sidebar") {
+                state.showSidebar.toggle()
+            }
+            .tooltipOnHover(state.showSidebar ? "Hide sidebar" : "Show sidebar")
+            .padding(.leading, 10 + (state.isFullScreen ? 0 : BeamWindow.windowControlsWidth))
+            .padding(.top, 12)
+        }
+    }
+
+    @ViewBuilder var sidebar: some View {
+        if state.useSidebar && state.showSidebar {
+            SidebarView()
         }
     }
 
@@ -42,6 +61,7 @@ struct ContentView: View {
             OverlayViewCenter(viewModel: state.overlayViewModel)
                 .edgesIgnoringSafeArea(.top)
                 .zIndex(1)
+
         }
         .environment(\.isMainWindow, windowInfo.windowIsMain)
         .environment(\.windowFrame, windowInfo.windowFrame)
