@@ -5,6 +5,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     // Clean up
     case destroyDB = "Destroy Databases"
     case signInWithTestAccount = "Sign in with Test Account"
+    case signUpWithRandomTestAccount = "Sign up with Random Test Account"
     case logout = "Logout"
     case deleteLogs = "Delete Logs"
     case deletePrivateKeys = "Delete Private Keys"
