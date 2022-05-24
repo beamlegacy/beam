@@ -960,8 +960,10 @@
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
 		A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */; };
 		A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */; };
+		A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3A89D942837CD2E00A47B2E /* test_SVG.svg */; };
 		A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */; };
 		A3D289922808715900FA0D3A /* OnboardingLostPKViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */; };
+		A3D421322837B0F0002DB9A4 /* UITests-SVG.html in Resources */ = {isa = PBXBuildFile; fileRef = A3D421312837B0F0002DB9A4 /* UITests-SVG.html */; };
 		A3DA64E327706FCB0086C142 /* TextEditorContextViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */; };
 		A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */; };
 		A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */; };
@@ -2775,9 +2777,11 @@
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
 		A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureCopyShareTests.swift; sourceTree = "<group>"; };
 		A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFFilesBrowserViewTests.swift; sourceTree = "<group>"; };
+		A3A89D942837CD2E00A47B2E /* test_SVG.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test_SVG.svg; sourceTree = "<group>"; };
 		A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKTestView.swift; sourceTree = "<group>"; };
 		A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKViewLocators.swift; sourceTree = "<group>"; };
 		A3D2BB2D2812F1BD00CCCE40 /* BeamUITests-Thread7.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread7.xctestplan"; sourceTree = "<group>"; };
+		A3D421312837B0F0002DB9A4 /* UITests-SVG.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = "UITests-SVG.html"; sourceTree = "<group>"; };
 		A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewTests.swift; sourceTree = "<group>"; };
 		A3E7B4B427AC17170074C9BB /* PasswordSuggestionPopupTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupTestView.swift; sourceTree = "<group>"; };
 		A3E7B4B627AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordSuggestionPopupViewLocators.swift; sourceTree = "<group>"; };
@@ -5740,6 +5744,7 @@
 		8ABCB0E627EC84690091B396 /* Fixtures */ = {
 			isa = PBXGroup;
 			children = (
+				A3A89D942837CD2E00A47B2E /* test_SVG.svg */,
 				8ABCB0E727EC84690091B396 /* UITests-Alerts.html */,
 				8ABCB0E827EC84690091B396 /* UITests-2.html */,
 				8ABCB0E927EC84690091B396 /* UITests-3.html */,
@@ -5752,6 +5757,7 @@
 				8ABCB0F027EC84690091B396 /* UITests-Playground.html */,
 				8ABCB0F127EC84690091B396 /* beam-logo-test.png */,
 				8ABCB0F227EC84690091B396 /* UITests-1.html */,
+				A3D421312837B0F0002DB9A4 /* UITests-SVG.html */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -7942,6 +7948,7 @@
 				8A27DCA427EDC8CA0044A9A2 /* PasswordManager_prod.js in Resources */,
 				8A27DCA327EDC8CA0044A9A2 /* EmbedNode_prod.js in Resources */,
 				874111A9282592D60024C348 /* autofill-display.json in Resources */,
+				A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */,
 				A03B908D27BE99AC001FBE64 /* Capture.json in Resources */,
 				8AE3EA9627F36D5E0010A42C /* UITests-Media.html in Resources */,
 				8A14E32A27F6468600DDCCE3 /* Geolocation_prod.js in Resources */,
@@ -7968,6 +7975,7 @@
 				8AE3EA9327F36D5E0010A42C /* UITests-4.html in Resources */,
 				A54A452A27677F9A00B9AE1B /* set_username.graphql in Resources */,
 				0564B1B227D20BAE00B74BBD /* update_password.graphql in Resources */,
+				A3D421322837B0F0002DB9A4 /* UITests-SVG.html in Resources */,
 				52F4E4B42641844E0067B017 /* delete_identity.graphql in Resources */,
 				418171F62581107C00317ED8 /* sign_in.graphql in Resources */,
 				8AE3EA9A27F36D5E0010A42C /* UITests-Playground.html in Resources */,
