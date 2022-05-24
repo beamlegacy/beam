@@ -524,6 +524,7 @@ import Promises
     }
 
     func makeFirstResponder() {
+        guard webView.window?.isMainWindow == true else { return }
         webView.window?.makeFirstResponder(webView)
         guard !isLoading && contentDescription != nil else { return }
         webView.page?.executeJS("refocusLastElement()", objectName: "WebViewFocus")
