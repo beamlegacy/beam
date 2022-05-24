@@ -174,10 +174,12 @@ public class UrlGroups {
 }
 
 public class DailyUrlScorer {
+    let minReadingTime: Double
     let store: DailyUrlScoreStoreProtocol
 
-    public init(store: DailyUrlScoreStoreProtocol) {
+    public init(store: DailyUrlScoreStoreProtocol, minReadingTime: Double = 30) {
         self.store = store
+        self.minReadingTime = minReadingTime
     }
     public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5) -> [ScoredURL] {
         let scores = store.getScores(daysAgo: daysAgo)
@@ -189,7 +191,7 @@ public class DailyUrlScorer {
         let aggregatedScores = schemeGroups.aggregate(scores: scores)
         return Array(
             aggregatedScores
-                .filter { (_, score) in !score.isPinned }
+                .filter { (url, score) in !(score.isPinned || url.isSearchEngineResultPage || score.readingTimeToLastEvent < minReadingTime) }
                 .sorted { (lhs, rhs) in lhs.value.score > rhs.value.score }
                 .map { ScoredURL(url: $0.key, title: mostRecentTitle[$0.key], score: $0.value) }
                 .prefix(topN)
