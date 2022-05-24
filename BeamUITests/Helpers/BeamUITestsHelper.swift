@@ -55,6 +55,7 @@ class BeamUITestsHelper {
         case password
         case alerts
         case media
+        case svg
     }
 
     func openTestPage(page: UITestsPageCommand) {
@@ -73,6 +74,8 @@ class BeamUITestsHelper {
             tapCommand(.loadUITestPageAlerts)
         case .media:
             tapCommand(.loadUITestPageMedia)
+        case .svg:
+            tapCommand(.loadUITestSVG)
         }
         
         let centerOfPage = self.app.webViews.element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
