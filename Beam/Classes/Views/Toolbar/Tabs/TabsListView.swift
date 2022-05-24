@@ -280,7 +280,7 @@ struct TabsListView: View {
             .onAppear {
                 startOtherMouseDownMonitor()
                 externalDragModel.setup(withState: state, tabsMananger: state.browserTabsManager)
-                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections)
+                updateDraggableTabsAreas(with: geometry, tabsSections: tabsSections, singleTabFrame: viewModel.singleTabCurrentFrame)
             }
             .onDisappear {
                 removeMouseMonitors()
