@@ -181,6 +181,8 @@ extension ButtonLabelStyle {
         var style = ButtonLabelStyle()
         style.font = BeamFont.medium(size: 12).swiftUI
         style.spacing = 0
+        style.verticalPadding = 0
+        style.horizontalPadding = 0
         style.foregroundColor = BeamColor.LightStoneGray.swiftUI
         style.activeForegroundColor = BeamColor.Niobium.swiftUI
         style.backgroundColor = Color.clear
