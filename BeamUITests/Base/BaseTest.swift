@@ -26,6 +26,8 @@ class BaseTest: XCTestCase {
     let incorrectPassword = "Incorrect1"
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
+    let mockBaseUrl = "http://form.lvh.me:8080/"
+
 
     override func tearDownWithError() throws {
         super.tearDown()

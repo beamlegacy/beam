@@ -28,7 +28,8 @@ enum PasswordPreferencesViewLocators {
     }
 
     enum CheckboxTexts: String, CaseIterable, UIElement {
-        case windowTitle = "Autofill usernames and passwords"
+        case autofillPasswords = "Autofill usernames and passwords"
+        case autofillCC = "Credit cards"
     }
     
     enum TextFields: String, CaseIterable, UIElement {
