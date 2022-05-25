@@ -16,6 +16,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedCreditCardsTests",
         "AdvancedPasswordAutofillTests",
         "AdvancedPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination1()",
@@ -51,6 +52,8 @@
         "CardPublishTests",
         "CardViewEmbedsTests",
         "CardViewTests",
+        "CreditCardAutocompleteTests",
+        "CreditCardSaveTests\/testSaveCC()",
         "CreditCardsTests",
         "DeleteNotesTests",
         "DownloadsTest",
