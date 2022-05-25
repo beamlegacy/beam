@@ -34,7 +34,7 @@ class CreditCardsTestTable: BaseView, Rowable {
         getVisibleRows()
     }
     
-    func compareRows(_ externalRow: Row, _ currentRowIndex: Int ) -> (Bool, String) {
+    func compareRows(_ externalRow: Row, _ currentRowIndex: Int) -> (Bool, String) {
         let currentRow = getVisibleRow(currentRowIndex) //rows[currentRowIndex]
         var errorMessage = ""
         let result = (externalRow.description == currentRow.description &&
@@ -48,12 +48,12 @@ class CreditCardsTestTable: BaseView, Rowable {
     }
     
     private func getTextFieldValueByRow(rowNumber: Int, field:  CreditCardTableLocators.TextFields) -> String {
-        return getElementStringValue(element:app.windows.textFields.matching(identifier: field.accessibilityIdentifier).element(boundBy: rowNumber))
+        return getElementStringValue(element:app.tables.containing(.tableColumn, identifier: CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).textFields[field.accessibilityIdentifier])
     }
     
     func getVisibleRow(_ rowNumber: Int) -> CreditCardsTestTable.Row {
         //To be replaced once https://gitlab.com/beamgroup/beam/-/merge_requests/2840 is merged
-        let description = getElementStringValue(element:app.windows["Passwords"].sheets.tables.children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:"preferences credit card").children(matching: .textField).element)
+        let description = getElementStringValue(element:app.tables.containing(.tableColumn, identifier:CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:CreditCardTableLocators.TextFields.descriptionTextField.accessibilityIdentifier).children(matching: .textField).element)
         let cardHolder = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardHolderTextField)
         let cardNumber = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardNumberTextField)
         let expirationDate = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardDateTextField)
@@ -85,6 +85,6 @@ class CreditCardsTestTable: BaseView, Rowable {
     }
     
     private func getCardIconElement(index: Int) -> XCUIElement {
-        return app.windows.images.matching(identifier: CreditCardTableLocators.TextFields.descriptionTextField.accessibilityIdentifier).allElementsBoundByIndex[index]
+        return app.images.matching(identifier: CreditCardTableLocators.TextFields.descriptionTextField.accessibilityIdentifier).allElementsBoundByIndex[index]
     }
 }
