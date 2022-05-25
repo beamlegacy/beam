@@ -138,8 +138,6 @@ struct NoteHeaderView: View {
                     notePublishButton(style: ButtonLabelStyle(disableAnimations: false))
                 }
             }
-            .transition(.asymmetric(insertion: .opacity, removal: .slide))
-            .animation(BeamAnimation.easeInOut(duration: 0.15))
             //            Feature not available yet.
             //            ButtonLabel(icon: "editor-sources", state: .disabled)
             Separator(horizontal: false, hairline: false, rounded: true, color: BeamColor.Generic.separator)
