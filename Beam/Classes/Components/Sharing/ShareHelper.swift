@@ -34,8 +34,11 @@ class ShareHelper {
     }
 
     func share(link: URL, of noteTitle: String?, to service: ShareService) async {
-        guard let url = service.buildURL(with: noteTitle ?? "", url: link) else { return }
-        await handleURL(url)
+        if service == .copy {
+            await setContentToPasteboard(ReadShareableContent(url: link))
+        } else if let url = service.buildURL(with: noteTitle ?? "", url: link) {
+            await handleURL(url)
+        }
     }
 
     private struct ReadShareableContent {
