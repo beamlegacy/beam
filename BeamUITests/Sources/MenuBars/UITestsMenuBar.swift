@@ -83,4 +83,10 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.clearCreditCardsDB.rawValue)
         return self
     }
+    
+    @discardableResult
+    func resetCollectAllert() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.resetCollectAlert.rawValue)
+        return self
+    }
 }
