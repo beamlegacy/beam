@@ -1461,9 +1461,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@beam/native-linkmouseover@workspace:Beam/Classes/Models/TabAndWebview/LinkMouseOver/Web":
+"@beam/native-mediaplayer@workspace:Beam/Classes/Components/MediaPlayer/Web":
   version: 0.0.0-use.local
-  resolution: "@beam/native-linkmouseover@workspace:Beam/Classes/Models/TabAndWebview/LinkMouseOver/Web"
+  resolution: "@beam/native-mediaplayer@workspace:Beam/Classes/Components/MediaPlayer/Web"
   dependencies:
     "@beam/native-beamtypes": 1.0.0
     "@beam/native-testmock": 1.0.0
@@ -1495,9 +1495,9 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@beam/native-mediaplayer@workspace:Beam/Classes/Components/MediaPlayer/Web":
+"@beam/native-mouseoverandselection@workspace:Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web":
   version: 0.0.0-use.local
-  resolution: "@beam/native-mediaplayer@workspace:Beam/Classes/Components/MediaPlayer/Web"
+  resolution: "@beam/native-mouseoverandselection@workspace:Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web"
   dependencies:
     "@beam/native-beamtypes": 1.0.0
     "@beam/native-testmock": 1.0.0
