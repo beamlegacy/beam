@@ -58,13 +58,13 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     
     @discardableResult
     func clickAutofillPassword() -> PasswordPreferencesTestView {
-        checkBox(PasswordPreferencesViewLocators.CheckboxTexts.windowTitle.accessibilityIdentifier).clickOnExistence()
+        checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier).clickOnExistence()
         return PasswordPreferencesTestView()
     }
     
     @discardableResult
     func isAutofillPasswordEnabled() -> Bool {
-        let enabled = (checkBox(PasswordPreferencesViewLocators.CheckboxTexts.windowTitle.accessibilityIdentifier).value as? Int == 1) ? true : false
+        let enabled = (checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier).value as? Int == 1)
         return enabled
     }
     
@@ -136,6 +136,18 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     func clickEditCreditCardButton() -> CreditCardTestView {
         button(PasswordPreferencesViewLocators.Buttons.editButton.accessibilityIdentifier).clickOnExistence()
         return CreditCardTestView()
+    }
+    
+    @discardableResult
+    func clickAutofillCC() -> PasswordPreferencesTestView {
+        checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillCC.accessibilityIdentifier).clickOnExistence()
+        return PasswordPreferencesTestView()
+    }
+    
+    @discardableResult
+    func isAutofillCCEnabled() -> Bool {
+        let enabled = (checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillCC.accessibilityIdentifier).value as? Int == 1)
+        return enabled
     }
     
     enum PasswordFieldToFill: Int, CaseIterable {

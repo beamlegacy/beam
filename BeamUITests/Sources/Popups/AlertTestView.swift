@@ -62,6 +62,15 @@ class AlertTestView: BaseView {
     }
     
     @discardableResult
+    func saveCreditCard(waitForAlertToDisappear: Bool) -> BaseView {
+        let saveCCButton = button(AlertViewLocators.Buttons.saveCCButton.accessibilityIdentifier).clickOnExistence()
+        if waitForAlertToDisappear {
+            waitForDoesntExist(saveCCButton)
+        }
+        return self
+    }
+    
+    @discardableResult
     func notNowClick() -> BaseView {
         let notNowButton = button(AlertViewLocators.Buttons.notNowButton.accessibilityIdentifier).clickOnExistence()
         waitForDoesntExist(notNowButton)

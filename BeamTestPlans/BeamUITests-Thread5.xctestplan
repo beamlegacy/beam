@@ -16,6 +16,9 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdvancedCreditCardsTests\/testValidateAutoFillDataCC()",
+        "AdvancedCreditCardsTests\/testValidateNoAutoFillCC()",
+        "AdvancedCreditCardsTests\/testValidateOtherCCLessThan4()",
         "AdvancedPasswordAutofillTests",
         "AdvancedPasswordAutofillTests\/testHiddenFieldsAreIgnored()",
         "AdvancedPasswordAutofillTests\/testSignInPageAuthCombination1()",
@@ -44,6 +47,10 @@
         "CardPublishTests",
         "CardViewEmbedsTests",
         "CardViewTests",
+        "CreditCardAutocompleteTests\/testValidateAutoFillDataCC()",
+        "CreditCardAutocompleteTests\/testValidateNoAutoFillCC()",
+        "CreditCardAutocompleteTests\/testValidateOtherCCLessThan4()",
+        "CreditCardSaveTests",
         "CreditCardsTests",
         "DeleteNotesTests",
         "DownloadsTest",

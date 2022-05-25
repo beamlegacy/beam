@@ -14,6 +14,7 @@ enum CreditCardTableLocators {
         case cardHolderTextField = "Cardholder"
         case cardNumberTextField = "Card Number"
         case cardDateTextField = "Card Date"
+        case cardDescription = "cardDescription"
     }
     
     enum Buttons: String, CaseIterable, UIElement {
