@@ -148,17 +148,32 @@ struct AllNotesPageContentView: View {
 
                     HStack {
                         if let profileLink = BeamNoteSharingUtils.getProfileLink() {
-                            MinimalButton(text: profileLink.urlStringWithoutScheme, hoverUnderline: true, font: BeamFont.regular(size: 12).swiftUI, foregroundColor: BeamColor.LightStoneGray.swiftUI, secondaryColor: BeamColor.Niobium.swiftUI) {
+                            ButtonLabel(customView: { hovered, _ in
+                                AnyView(
+                                    Text(profileLink.urlStringWithoutScheme)
+                                        .underline(hovered, color: BeamColor.Niobium.swiftUI)
+                                        .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                        .cursorOverride(hovered ? .pointingHand : .arrow)
+                                )
+                            }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
                                 if let state = AppDelegate.main.windows.first?.state {
                                     state.mode = .web
                                     _ = state.createTab(withURLRequest: URLRequest(url: profileLink), originalQuery: nil)
                                 }
-                            }
+                            })
+                            .frame(height: 13)
+                            .cursorOverride(.pointingHand)
                         } else {
-                            MinimalButton(text: "Sign up to publish your notes", font: BeamFont.regular(size: 12).swiftUI, foregroundColor: BeamColor.LightStoneGray.swiftUI, secondaryColor: BeamColor.Niobium.swiftUI) {
+                            ButtonLabel(customView: { hovered, _ in
+                                AnyView(
+                                    Text("Sign up to publish your notes")
+                                        .underline(hovered, color: BeamColor.Niobium.swiftUI)
+                                        .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                )
+                            }, state: .normal, customStyle: ButtonLabelStyle.minimalButtonLabel, action: {
                                 model.showConnectWindow(withConfirmationAlert: false)
-                            }.accessibilityIdentifier("signUpToPublishBtn")
-
+                            })
+                            .accessibilityIdentifier("signUpToPublishBtn")
                         }
                         Spacer()
 

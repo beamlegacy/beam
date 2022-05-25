@@ -68,7 +68,7 @@ class BeamNSTableView: NSTableView {
 
     override func mouseExited(with event: NSEvent) {
         super.mouseExited(with: event)
-        guard rowAndColumngForWindowLocation(event.locationInWindow) != nil else {
+        guard rowAndColumngForWindowLocation(event.locationInWindow) != nil || self.isMousePoint(event.locationInWindow, in: self.frame)  else {
             onHoverTableView?(false)
             return
         }
