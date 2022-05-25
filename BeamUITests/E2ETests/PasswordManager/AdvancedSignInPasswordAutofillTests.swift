@@ -16,7 +16,6 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     let passwordUsername = "somePass@0"
     let passwordEmail = "somePass@1"
     let passwordEscape = "s.o'm\"e!P\\a&s?s@2/"
-    let baseUrl = "http://form.lvh.me:8080/"
     let loginUsername = "signin.form"
     let loginEmail = "signin.form@email.beam"
     let loginEscape = "signin.form@escape.co"
@@ -30,7 +29,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
 
     func testHiddenFieldsAreIgnored() {
-        let url = baseUrl + "visibility"
+        let url = mockBaseUrl + "visibility"
 
         step("Given I navigate to visibility test page") {
             OmniBoxTestView().searchInOmniBox(url, true)
@@ -71,7 +70,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     private func validateClassicSignInPage(page: String, login: String, password: String, autocomplete: Bool = true) {
         
         step("Given I navigate to \(page)") {
-            OmniBoxTestView().searchInOmniBox(baseUrl + page, true)
+            OmniBoxTestView().searchInOmniBox(mockBaseUrl + page, true)
         }
         
         step("When I click on password field") {
@@ -111,7 +110,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     private func validateTwoStepsSignInPage(usernamePage: String, passwordPage: String, login: String, password: String) {
         
         step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(baseUrl + usernamePage, true)
+            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
         }
         
         step("When I click on username field") {
@@ -134,7 +133,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         step("Then Sign in Step 2 is displayed") {
             ShortcutsHelper().shortcutActionInvoke(action: .openLocation)
             let url = OmniBoxTestView().getSearchFieldValue()
-            XCTAssertTrue(url.contains(baseUrl + passwordPage))
+            XCTAssertTrue(url.contains(mockBaseUrl + passwordPage))
         }
         
         step("When I click on password field") {
@@ -142,7 +141,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password suggestion is proposed with correct login") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(login: login))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: login))
         }
         
         step("When I click on pop-up suggestion") {
@@ -183,7 +182,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         let usernamePage = "signinpage5"
         
         step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(baseUrl + usernamePage, true)
+            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
         }
         
         step("When I click on username field") {
@@ -191,7 +190,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(login: loginEmail))
+            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginEmail))
             XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
         }
         
@@ -205,7 +204,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(login: loginEmail))
+            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginEmail))
             XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
         }
     }
@@ -231,7 +230,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         let testData = "test"
         
         step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(baseUrl + usernamePage, true)
+            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
         }
         
         step("When I click on Name field") {
@@ -239,7 +238,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(login: loginEmail))
+            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginEmail))
             XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
             mockPage.getUsernameFieldElement(title: "Name: ").clickClearAndType(testData)
             mockPage.typeKeyboardKey(.escape) // Do not choose autocomplete
@@ -250,7 +249,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(login: loginUsername))
+            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginUsername))
             XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
             mockPage.getUsernameFieldElement(title: "Lastname: ").clickClearAndType(testData)
             mockPage.typeKeyboardKey(.escape) // Do not choose autocomplete
@@ -261,7 +260,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(login: loginUsername))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: loginUsername))
             XCTAssertTrue(helper.doesSuggestNewPasswordExist())
         }
         
@@ -270,7 +269,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(login: loginUsername))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: loginUsername))
         }
         
         step("When I fill information") {
@@ -293,7 +292,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         let usernamePage = "signin"
 
         step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(baseUrl + usernamePage, true)
+            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
         }
 
         step("When I click on Username field") {
