@@ -461,17 +461,18 @@ import Sentry
         }
     }
 
-    private func urlFor(query: String) -> URL? {
+    private func urlFor(query: String) -> (URL?, Bool) {
         guard let url = query.toEncodedURL else {
-            return searchEngine.searchURL(forQuery: query)
+            return (searchEngine.searchURL(forQuery: query), true)
         }
-        return url.urlWithScheme
+        return (url.urlWithScheme, false)
     }
 
     func startQuery(_ node: TextNode, animated: Bool) {
         EventsTracker.logBreadcrumb(message: "startQuery \(node)", category: "BeamState")
         let query = node.currentSelectionWithFullSentences()
-        guard !query.isEmpty, let url = urlFor(query: query) else { return }
+        let (url, _) = urlFor(query: query)
+        guard !query.isEmpty, let url = url else { return }
         self.createTabFromNode(node, withURL: url)
         self.mode = .web
     }
@@ -496,7 +497,8 @@ import Sentry
 
         case .history, .url, .topDomain, .mnemonic:
             let urlWithScheme = result.url?.urlWithScheme
-            guard let url = urlWithScheme ?? urlFor(query: result.text) else {
+            let (urlFromText, _) = urlFor(query: result.text)
+            guard let url = urlWithScheme ?? urlFromText else {
                 Logger.shared.logError("autocomplete result without correct url \(result.text)", category: .search)
                 return
             }
@@ -535,17 +537,22 @@ import Sentry
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
-        if let result = autocompleteManager.autocompleteResult(at: selectingNewIndex ?? autocompleteManager.autocompleteSelectedIndex) {
+        let index = selectingNewIndex ?? autocompleteManager.autocompleteSelectedIndex
+        if let result = autocompleteManager.autocompleteResult(at: index) {
+            autocompleteManager.recordItemSelection(index: index, source: result.source)
             selectAutocompleteResult(result)
             return
         }
-        stopFocusOmnibox()
+        stopFocusOmnibox(sendAnalyticsEvent: false)
 
-        guard let url: URL = urlFor(query: queryString) else {
+        let (url, isSearchUrl) = urlFor(query: queryString)
+        guard let url: URL = url else {
             Logger.shared.logError("Couldn't build search url from: \(queryString)", category: .search)
             return
         }
 
+        autocompleteManager.recordNoSelection(isSearch: isSearchUrl)
+        sendOmniboxAnalyticsEvent()
         // Logger.shared.logDebug("Start query: \(url)")
 
         if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
@@ -687,6 +694,7 @@ import Sentry
 
     func startFocusOmnibox(fromTab: Bool = false, updateResults: Bool = true, autocompleteMode: AutocompleteManager.Mode = .general) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
+        autocompleteManager.resetAnalyticsEvent()
         omniboxInfo.wasFocusedFromTab = fromTab && mode == .web
         omniboxInfo.wasFocusedFromJournalTop = mode == .today && omniboxInfo.isShownInJournal
         guard updateResults else {
@@ -712,8 +720,16 @@ import Sentry
         }
     }
 
-    func stopFocusOmnibox() {
+    private func sendOmniboxAnalyticsEvent() {
+        if let event = autocompleteManager.analyticsEvent, !isIncognito {
+            data.analyticsCollector.record(event: event)
+            autocompleteManager.resetAnalyticsEvent()
+        }
+    }
+
+    func stopFocusOmnibox(sendAnalyticsEvent: Bool = true) {
         guard omniboxInfo.isFocused else { return }
+        if sendAnalyticsEvent { sendOmniboxAnalyticsEvent() }
         omniboxInfo.isFocused = false
         if omniboxInfo.isShownInJournal {
             autocompleteManager.resetQuery()

@@ -44,6 +44,7 @@ class AutocompleteManager: ObservableObject {
     }
     private var scope = Set<AnyCancellable>()
     var searchRequestsCancellables = Set<AnyCancellable>()
+    var analyticsEvent: OmniboxQueryAnalyticsEvent?
 
     init(searchEngine: SearchEngineDescription, beamState: BeamState?) {
         searchEngineCompleter = SearchEngineAutocompleter(searchEngine: searchEngine)
@@ -129,9 +130,9 @@ class AutocompleteManager: ObservableObject {
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText,
                                                                            expectSearchEngineResultsLater: self.mode == .general && !searchText.isEmpty)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
-
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.setAutocompleteResults(finalResults)
+                self.recordResultCount()
                 if !isRemovingCharacters {
                     let canResetText = selectionWasReset || finalResults.first?.text.lowercased() != self.searchQuery
                     self.automaticallySelectFirstResultIfNeeded(withResults: finalResults, searchText: searchText, canResetText: canResetText)
@@ -346,7 +347,7 @@ extension AutocompleteManager {
     // while keeping the same visual state
     func replacementTextForProposedText(_ proposedText: String) -> (String, Range<Int>)? {
         let currentText = searchQuery
-
+        recordTypedQueryLength(proposedText.count)
         guard let selectedText = getSelectedText(for: currentText),
               let selectedRange = searchQuerySelectedRange,
               !selectedRange.isEmpty else { return nil }
