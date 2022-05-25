@@ -2,10 +2,10 @@ import {
   BeamLogCategory,
   BeamWindow
 } from "@beam/native-beamtypes"
-import type { LinkMouseOverUI as LinkMouseOverUI } from "./LinkMouseOverUI"
+import type { MouseOverAndSelectionUI as MouseOverAndSelectionUI } from "./MouseOverAndSelectionUI"
 import { BeamLogger } from "@beam/native-utils"
 
-export class LinkMouseOver<UI extends LinkMouseOverUI> {
+export class MouseOverAndSelection<UI extends MouseOverAndSelectionUI> {
   win: BeamWindow
   logger: BeamLogger
   mouseOverAnchorElement = false
@@ -13,13 +13,13 @@ export class LinkMouseOver<UI extends LinkMouseOverUI> {
   /**
    * Singleton
    *
-   * @type LinkMouseOver
+   * @type MouseOverAndSelection
    */
-  static instance: LinkMouseOver<any>
+  static instance: MouseOverAndSelection<any>
 
   /**
    * @param win {(BeamWindow)}
-   * @param ui {LinkMouseOverUI}
+   * @param ui {MouseOverAndSelectionUI}
    */
   constructor(win: BeamWindow<any>, protected ui: UI) {
     this.win = win
@@ -30,6 +30,7 @@ export class LinkMouseOver<UI extends LinkMouseOverUI> {
   registerEventListeners(): void {
     this.win.addEventListener("mouseover", this.mouseover.bind(this))
     this.win.addEventListener("mouseout", this.mouseout.bind(this))
+    this.win.document.addEventListener("selectionchange", this.selectionchange.bind(this))
   }
 
   mouseover(event) {
@@ -54,6 +55,12 @@ export class LinkMouseOver<UI extends LinkMouseOverUI> {
     }
     this.mouseOverAnchorElement = false
     this.ui.sendLinkMouseOut({})
+  }
+
+  selectionchange() {
+    var selection = document.getSelection().toString()
+    const message = { selection: selection }
+    this.ui.sendSelectionChange(message)
   }
 
   findParentAnchorElement(element) {

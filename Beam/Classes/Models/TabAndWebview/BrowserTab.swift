@@ -79,7 +79,7 @@ import Promises
             GeolocationMessageHandler(),
             WebSearchMessageHandler(),
             WebViewFocusMessageHandler(),
-            LinkMouseOverMessageHandler()
+            MouseOverAndSelectionMessageHandler()
         ]
         if !isIncognito {
             handlers.append(contentsOf: [
@@ -116,6 +116,7 @@ import Promises
     @Published var authenticationViewModel: AuthenticationViewModel?
     @Published var searchViewModel: SearchViewModel?
     @Published var mouseHoveringLocation: MouseHoveringLocation = .none
+    @Published var textSelection: String?
     @Published var responseStatusCode: Int = 200
     @Published var mediaPlayerController: MediaPlayerController?
     @Published var hasError: Bool = false {
