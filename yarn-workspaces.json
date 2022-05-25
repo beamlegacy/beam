@@ -40,8 +40,8 @@
     "name": "@beam/native-navigation"
   },
   {
-    "location": "Beam/Classes/Models/TabAndWebview/LinkMouseOver/Web",
-    "name": "@beam/native-linkmouseover"
+    "location": "Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web",
+    "name": "@beam/native-mouseoverandselection"
   },
   {
     "location": "Beam/Classes/Models/TabAndWebview/WebViewFocus/Web",

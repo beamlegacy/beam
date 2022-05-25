@@ -121,6 +121,11 @@ class BeamWebView: WKWebView {
             return
         }
 
+        if let keyCode = KeyCode(rawValue: event.keyCode), keyCode == .enter, event.modifierFlags.contains(.command) {
+            page?.quickSearchQueryWithSelection()
+            return
+        }
+
         super.keyDown(with: event)
     }
 

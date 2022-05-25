@@ -1,7 +1,7 @@
 import { EventsMock } from "@beam/native-testmock"
-import { LinkMouseOverUI } from "../src/LinkMouseOverUI"
+import { MouseOverAndSelectionUI } from "../src/MouseOverAndSelectionUI"
 
-export class LinkMouseOverUIMock extends EventsMock implements LinkMouseOverUI {
+export class MouseOverAndSelectionUIMock extends EventsMock implements MouseOverAndSelectionUI {
   sendLinkMouseOut(arg0: {}) {
     throw new Error("Method not implemented.")
   }

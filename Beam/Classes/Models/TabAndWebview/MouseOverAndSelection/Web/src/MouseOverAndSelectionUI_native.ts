@@ -1,4 +1,4 @@
-import { LinkMouseOverUI } from "./LinkMouseOverUI"
+import { MouseOverAndSelectionUI } from "./MouseOverAndSelectionUI"
 import {
   BeamLogCategory,
   BeamWindow,
@@ -6,7 +6,7 @@ import {
 } from "@beam/native-beamtypes"
 import { BeamLogger } from "@beam/native-utils"
 
-export class LinkMouseOverUI_native implements LinkMouseOverUI {
+export class MouseOverAndSelectionUI_native implements MouseOverAndSelectionUI {
   logger: BeamLogger
   /**
    * @param native {Native}
@@ -19,13 +19,13 @@ export class LinkMouseOverUI_native implements LinkMouseOverUI {
   /**
    *
    * @param win {BeamWindow}
-   * @returns {LinkMouseOverUI_native}
+   * @returns {MouseOverAndSelectionUI_native}
    */
-  static getInstance(win: BeamWindow): LinkMouseOverUI_native {
+  static getInstance(win: BeamWindow): MouseOverAndSelectionUI_native {
     let instance
     try {
-      const native = Native.getInstance(win, "LinkMouseOver")
-      instance = new LinkMouseOverUI_native(native)
+      const native = Native.getInstance(win, "MouseOverAndSelection")
+      instance = new MouseOverAndSelectionUI_native(native)
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e)
@@ -40,6 +40,15 @@ export class LinkMouseOverUI_native implements LinkMouseOverUI {
 
   sendLinkMouseOver(message: { url: any; target: any }) {
     this.native.sendMessage("linkMouseOver", message)
+  }
+
+  private selectionChangePayload: string = ""
+
+  sendSelectionChange(message: { selection: string }) {
+    if (message.selection != this.selectionChangePayload) {
+      this.selectionChangePayload = message.selection
+      this.native.sendMessage("selectionChange", message)
+    }
   }
 
   toString(): string {
