@@ -89,6 +89,7 @@ class NoteScoreTriggerTests: XCTestCase {
         var searchViewModel: SearchViewModel?
         var errorPageManager: ErrorPageManager?
         var mouseHoveringLocation: MouseHoveringLocation = .none
+        var textSelection: String?
 
         func getNote(fromTitle: String) -> BeamNote? {
             if fromTitle == pnsNoteTitle {

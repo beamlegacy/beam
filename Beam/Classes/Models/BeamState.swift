@@ -461,7 +461,7 @@ import Sentry
         }
     }
 
-    private func urlFor(query: String) -> (URL?, Bool) {
+    func urlFor(query: String) -> (URL?, Bool) {
         guard let url = query.toEncodedURL else {
             return (searchEngine.searchURL(forQuery: query), true)
         }
