@@ -56,6 +56,13 @@ struct ContextMenuItemView: View {
         return AnyTransition.asymmetric(insertion: transitionIn, removal: transitionOut)
     }
 
+    private var customMinimalButtonStyle: ButtonLabelStyle {
+        var style = ButtonLabelStyle.minimalButtonLabel
+        style.font = BeamFont.regular(size: 11).swiftUI
+        style.foregroundColor = BeamColor.Corduroy.swiftUI
+        return style
+    }
+
     var iconView: some View {
         Group {
             if let icon = item.icon {
@@ -114,14 +121,22 @@ struct ContextMenuItemView: View {
                     }
                 }
                 if let subtitleButton = item.subtitleButton, showSubtitleButton {
-                    MinimalButton(customTextView: (Text(subtitleButton) + Text(Image("editor-url").renderingMode(.template))), hoverUnderline: true,
-                                           font: BeamFont.regular(size: 11).swiftUI, foregroundColor: BeamColor.Corduroy.swiftUI, secondaryColor: BeamColor.Niobium.swiftUI) {
+                    ButtonLabel(customView: { hovered, _ in
+                        AnyView(
+                            (Text(subtitleButton) + Text(Image("editor-url").renderingMode(.template)))
+                                .underline(hovered, color: BeamColor.Niobium.swiftUI)
+                                .foregroundColor(hovered ? BeamColor.Niobium.swiftUI : BeamColor.LightStoneGray.swiftUI)
+                                .transition(transitionInOutHiddenView)
+                                .cursorOverride(hovered ? .pointingHand : .arrow)
+                        )
+                    }, state: .normal, customStyle: customMinimalButtonStyle, action: {
                         if let url = URL(string: subtitleButton), let state = AppDelegate.main.windows.first?.state {
                             state.mode = .web
                             _ = state.createTab(withURLRequest: URLRequest(url: url.urlWithScheme), originalQuery: nil)
                         }
-                    }.frame(height: 13)
-                        .transition(transitionInOutHiddenView)
+                    })
+                    .frame(height: 13)
+                    .cursorOverride(.pointingHand)
                 }
 
             }.padding(.vertical, BeamSpacing._40)
@@ -132,7 +147,6 @@ struct ContextMenuItemView: View {
         .accessibility(addTraits: highlight ? [.isSelected, .isStaticText] : .isStaticText)
         .accessibility(identifier: "ContextMenuItem-\(item.title.lowercased())")
     }
-
 }
 
 class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
