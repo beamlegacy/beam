@@ -200,6 +200,7 @@ class PnSAddToCardTests: BaseTest {
         
         let helper = BeamUITestsHelper(launchApp().app)
         helper.openTestPage(page: .svg)
+        UITestsMenuBar().resetCollectAllert()
         
         step ("THEN SVG image is succeffully captured"){
             let itemToCollect = webView.image("svgimage")
