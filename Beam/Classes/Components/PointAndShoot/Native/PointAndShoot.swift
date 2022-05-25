@@ -375,7 +375,7 @@ class PointAndShoot: NSObject, WebPageRelated, ObservableObject {
         Task { @MainActor in
             let htmlNoteAdapter = HtmlNoteAdapter(sourceUrl, page.downloadManager, page.fileStorage)
             let helper = ShareHelper(sourceUrl, htmlNoteAdapter: htmlNoteAdapter) { [weak self] url in
-                let webView = self?.page?.createNewWindow(URLRequest(url: url), nil, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
+                let webView = self?.page?.createNewWindow(URLRequest(url: url), page.webView.configuration, windowFeatures: ShareWindowFeatures(for: service), setCurrent: true)
                 webView?.load(URLRequest(url: url))
             }
             await helper.shareContent(group.html(), originURL: sourceUrl, service: service)
