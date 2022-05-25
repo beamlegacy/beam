@@ -26,6 +26,7 @@ struct AdvancedPreferencesView: View {
     @State private var privateKeys = [String: String]()
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loading: Bool = false
+    @State private var showPrivateKeysSection = false
 
     @State var showPNSView = PreferencesManager.showPNSView
     @State var pnsJSIsOn = PreferencesManager.PnsJSIsOn
@@ -361,22 +362,25 @@ struct AdvancedPreferencesView: View {
                                     migrateOldPrivateKeyToCurrentAccount()
                                 }
                             } else {
-                                ForEach(privateKeys.sorted(by: >), id: \.key) { key, value in
+                                Button(showPrivateKeysSection ? "Hide private keys" : "Show private keys") {
+                                    showPrivateKeysSection = !showPrivateKeysSection
+                                }
+                                if showPrivateKeysSection {
+                                    ForEach(privateKeys.sorted(by: >), id: \.key) { key, value in
                                     VStack(alignment: .leading) {
                                         HStack(alignment: .firstTextBaseline) {
                                             Text(key)
                                             Spacer()
-
-                                            Button("Verify") {
-                                                verifyPrivateKey(forAccount: key)
-                                            }
-                                            Button("Delete") {
-                                                deletePrivateKey(forAccount: key)
-                                            }.foregroundColor(Color.red)
-                                            Button("Reset") {
-                                                resetPrivateKey(forAccount: key)
-                                            }.foregroundColor(Color.red)
                                         }
+                                        Button("Verify") {
+                                            verifyPrivateKey(forAccount: key)
+                                        }
+                                        Button("Delete") {
+                                            deletePrivateKey(forAccount: key)
+                                        }.foregroundColor(Color.red)
+                                        Button("Reset") {
+                                            resetPrivateKey(forAccount: key)
+                                        }.foregroundColor(Color.red)
                                         TextField("\(key):", text: Binding<String>(get: {
                                             EncryptionManager.shared.readPrivateKey(for: key)?.asString() ?? "No private key"
                                         }, set: { value, _ in
@@ -387,9 +391,10 @@ struct AdvancedPreferencesView: View {
                                     }.frame(width: 450)
                                 }
 
-                                Button("Delete all private keys") {
-                                    deleteAllPrivateKeys()
-                                }.foregroundColor(Color.red)
+                                    Button("Delete all private keys") {
+                                        deleteAllPrivateKeys()
+                                    }.foregroundColor(Color.red)
+                                }
                             }
                         } else {
                             Text("You are not Authenticated")
@@ -534,6 +539,7 @@ struct AdvancedPreferencesView: View {
             }.onAppear {
                 startObservers()
                 if AuthenticationManager.shared.isAuthenticated {
+                    showPrivateKeysSection = false
                     updateKeys()
                 }
             }.onDisappear {
