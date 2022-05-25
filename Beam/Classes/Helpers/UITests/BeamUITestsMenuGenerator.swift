@@ -262,48 +262,70 @@ class BeamUITestsMenuGenerator {
         })
     }
 
+    // swiftlint:disable:next function_body_length
     private func signUpWithRandomTestAccount() {
         guard !AuthenticationManager.shared.isAuthenticated else {
-            let alert = NSAlert()
-            alert.messageText = "Already authenticated"
-            alert.informativeText = "You are already authenticated"
-            alert.addButton(withTitle: "Dismiss Alert")
-            alert.runModal()
+            showAlert("Already authenticated", "You are already authenticated")
             return
         }
 
         let accountManager = AccountManager()
+        let randomString = UUID()
         let emailComponents = Configuration.testAccountEmail.split(separator: "@")
-        let email = "\(emailComponents[0])_\(UUID())@\(emailComponents[1])"
+        let email = "\(emailComponents[0])_\(randomString)@\(emailComponents[1])"
+        let username = "\(emailComponents[0])_\(randomString)".replacingOccurrences(of: "+", with: "_").substring(from: 0, to: 30)
         let password = Configuration.testAccountPassword
 
         accountManager.signUp(email, password) { result in
             if case .failure(let error) = result {
                 DispatchQueue.main.async {
-                    let alert = NSAlert()
-                    alert.messageText = "Cannot sign up"
-                    alert.informativeText = "Cannot sign up with \(email): \(error.localizedDescription)"
-                    alert.addButton(withTitle: "Dismiss Alert")
-                    alert.runModal()
+                    self.showAlert("Cannot sign up", "Cannot sign up with \(email): \(error.localizedDescription)")
                 }
                 return
             }
             accountManager.signIn(email: email, password: password, runFirstSync: false, completionHandler: { result in
                 if case .failure(let error) = result {
                     DispatchQueue.main.async {
-                        let alert = NSAlert()
-                        alert.messageText = "Cannot sign in"
-                        alert.informativeText = "Cannot sign in with \(email): \(error.localizedDescription)"
-                        alert.addButton(withTitle: "Dismiss Alert")
-                        alert.runModal()
+                        self.showAlert("Cannot sign in", "Cannot sign in with \(email): \(error.localizedDescription)")
                     }
                 } else {
-                    DispatchQueue.main.async {
-                        accountManager.runFirstSync(useBuiltinPrivateKeyUI: false)
+                    accountManager.setUsername(username: username) { result in
+                        DispatchQueue.main.async {
+                            switch result {
+                            case .failure(let error):
+                                let errorMessage: String?
+                                if case APIRequestError.apiErrors(let errorable) = error, let firstError = errorable.errors?.first {
+                                    errorMessage = firstError.message
+                                } else {
+                                    errorMessage = error.localizedDescription
+                                }
+                                if let errorMessage = errorMessage {
+                                    self.showAlert("Cannot set username \(username)", errorMessage)
+                                }
+                            case .success:
+                                if AppDelegate.main.data.onboardingManager.needsToDisplayOnboard {
+                                    AppDelegate.main.data.onboardingManager.userDidSignUp = true
+                                    AppDelegate.main.data.onboardingManager.advanceToNextStep(OnboardingStep(type: .imports))
+                                    AppDelegate.main.data.onboardingManager.advanceToNextStep()
+                                }
+                                NSPasteboard.general.clearContents()
+                                NSPasteboard.general.setString(email, forType: .string)
+
+                                accountManager.runFirstSync(useBuiltinPrivateKeyUI: false)
+                            }
+                        }
                     }
                 }
             })
         }
+    }
+
+    private func showAlert(_ title: String, _ content: String) {
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = content
+        alert.addButton(withTitle: "Dismiss Alert")
+        alert.runModal()
     }
 
     private func showWebViewCount() {
