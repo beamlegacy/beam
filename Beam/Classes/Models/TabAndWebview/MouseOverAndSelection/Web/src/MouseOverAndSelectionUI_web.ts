@@ -1,11 +1,11 @@
-import { LinkMouseOverUI } from "./LinkMouseOverUI"
+import { MouseOverAndSelectionUI } from "./MouseOverAndSelectionUI"
 import {
   BeamLogCategory,
   BeamWindow
 } from "@beam/native-beamtypes"
 import { BeamLogger } from "@beam/native-utils"
 
-export class LinkMouseOverUI_web implements LinkMouseOverUI {
+export class MouseOverAndSelectionUI_web implements MouseOverAndSelectionUI {
   protected prefix = "__ID__"
 
   protected readonly lang: string
@@ -27,12 +27,12 @@ export class LinkMouseOverUI_web implements LinkMouseOverUI {
   /**
    *
    * @param win {BeamWindow}
-   * @returns {LinkMouseOverUI_native}
+   * @returns {MouseOverAndSelectionUI_native}
    */
   static getInstance(win: BeamWindow) {
     let instance
     try {
-      instance = new LinkMouseOverUI_web(win)
+      instance = new MouseOverAndSelectionUI_web(win)
     } catch (e) {
       // eslint-disable-next-line no-console
       console.error(e)
@@ -44,6 +44,8 @@ export class LinkMouseOverUI_web implements LinkMouseOverUI {
   sendLinkMouseOut(arg0: {}) {}
 
   sendLinkMouseOver(message: { url: any; target: any }) {}
+
+  sendSelectionChange(message: { selection: string }) {}
 
   toString() {
     return this.constructor.name

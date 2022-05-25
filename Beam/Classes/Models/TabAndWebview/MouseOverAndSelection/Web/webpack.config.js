@@ -80,8 +80,8 @@ function config(name, mode) {
 module.exports = (env, argv) => {
   const isDebugOrTest = process.env.ENV == "debug" || process.env.ENV == "test"
   if (isDebugOrTest) {
-    return config("LinkMouseOver", "development")
+    return config("MouseOverAndSelection", "development")
   } else {
-    return config("LinkMouseOver", "production")
+    return config("MouseOverAndSelection", "production")
   }
 }

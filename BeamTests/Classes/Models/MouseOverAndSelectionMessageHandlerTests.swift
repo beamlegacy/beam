@@ -1,9 +1,9 @@
 import XCTest
 @testable import Beam
 
-class LinkMouseOverMessageHandlerTests: XCTestCase {
+class MouseOverAndSelectionMessageHandlerTests: XCTestCase {
 
-    private var messageHandler: LinkMouseOverMessageHandler!
+    private var messageHandler: MouseOverAndSelectionMessageHandler!
     private var webPage: TestWebPage!
     private var browserTabConfiguration: BeamWebViewConfigurationBase!
 
@@ -17,7 +17,7 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
             navigationHandler: nil
         )
 
-        messageHandler = LinkMouseOverMessageHandler()
+        messageHandler = MouseOverAndSelectionMessageHandler()
         browserTabConfiguration = BeamWebViewConfigurationBase(handlers: [messageHandler])
     }
 
@@ -28,7 +28,7 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
         ]
 
         messageHandler.onMessage(
-            messageName: LinkMouseOverMessage.LinkMouseOver_linkMouseOver.rawValue,
+            messageName: MouseOverAndSelectionMessage.MouseOverAndSelection_linkMouseOver.rawValue,
             messageBody:
                 body, from:
                 webPage, frameInfo: nil
@@ -50,7 +50,7 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
         ]
 
         messageHandler.onMessage(
-            messageName: LinkMouseOverMessage.LinkMouseOver_linkMouseOver.rawValue,
+            messageName: MouseOverAndSelectionMessage.MouseOverAndSelection_linkMouseOver.rawValue,
             messageBody:
                 body, from:
                 webPage, frameInfo: nil
@@ -67,7 +67,7 @@ class LinkMouseOverMessageHandlerTests: XCTestCase {
 
     func testMouseOut() {
         messageHandler.onMessage(
-            messageName: LinkMouseOverMessage.LinkMouseOver_linkMouseOver.rawValue,
+            messageName: MouseOverAndSelectionMessage.MouseOverAndSelection_linkMouseOver.rawValue,
             messageBody: [],
             from: webPage,
             frameInfo: nil)
