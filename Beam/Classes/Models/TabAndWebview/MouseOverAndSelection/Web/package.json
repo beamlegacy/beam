@@ -1,10 +1,10 @@
 {
-  "name": "@beam/native-linkmouseover",
+  "name": "@beam/native-mouseoverandselection",
   "private": true,
   "version": "0.1.0",
-  "description": "Beam JS LinkMouseOver handler",
-  "main": "dist/src/LinkMouseOver",
-  "types": "dist/src/LinkMouseOver",
+  "description": "Beam JS MouseOverAndSelection handler",
+  "main": "dist/src/MouseOverAndSelection",
+  "types": "dist/src/MouseOverAndSelection",
   "author": "frontend@beam.co",
   "scripts": {
     "build": "webpack",

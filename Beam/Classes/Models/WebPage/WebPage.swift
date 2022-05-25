@@ -41,6 +41,7 @@ protocol WebPage: AnyObject, Scorable {
     var authenticationViewModel: AuthenticationViewModel? { get set }
     var searchViewModel: SearchViewModel? { get set }
     var mouseHoveringLocation: MouseHoveringLocation { get set }
+    var textSelection: String? { get set }
 
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory) -> Promise<Any?>
@@ -153,6 +154,10 @@ extension WebPage {
         contentDescription?.type ?? .web
     }
 
+}
+
+extension WebPage {
+
     func searchInContent(fromSelection: Bool = false) {
         guard self.searchViewModel == nil else {
             self.searchViewModel?.isEditing = true
@@ -211,6 +216,18 @@ extension WebPage {
     private func find(_ search: String, using function: String) {
         let escaped = search.replacingOccurrences(of: "//", with: "///").replacingOccurrences(of: "\"", with: "\\\"")
         self.executeJS("\(function)(\"\(escaped)\")", objectName: "SearchWebPage")
+    }
+
+}
+
+extension WebPage {
+
+    func quickSearchQueryWithSelection() {
+        let state = AppDelegate.main.window?.state
+        guard let query = textSelection, let tuple = state?.urlFor(query: query), let url = tuple.0 else {
+            return
+        }
+        state?.createTab(withURLRequest: URLRequest(url: url))
     }
 
 }
