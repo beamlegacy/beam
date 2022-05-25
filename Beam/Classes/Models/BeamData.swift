@@ -57,6 +57,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var onboardingManager = OnboardingManager()
     private var pinnedTabsManager = PinnedBrowserTabsManager()
     let signpost = SignPost("BeamData")
+    var analyticsCollector = AnalyticsCollector()
 
     static func dataFolder(fileName: String) -> String {
         let paths = NSSearchPathForDirectoriesInDomains(.applicationSupportDirectory, .userDomainMask, true)
@@ -144,6 +145,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         setupSubscribers()
         resetPinnedTabs()
         configureAutoUpdate()
+        if Configuration.branchType == .develop {
+            analyticsCollector.add(backend: FirebaseAnalyticsBackend())
+        }
     }
 
     // swiftlint:disable:next function_body_length cyclomatic_complexity
