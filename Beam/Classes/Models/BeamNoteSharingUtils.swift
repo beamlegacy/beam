@@ -47,7 +47,7 @@ class BeamNoteSharingUtils {
 
     static func getProfileLink() -> URL? {
         guard AuthenticationManager.shared.isAuthenticated, let username = AuthenticationManager.shared.username else { return nil }
-        var profileURL = URL(string: EnvironmentVariables.PublicAPI.publishServer)
+        var profileURL = URL(string: Configuration.publicAPIpublishServer)
         profileURL?.appendPathComponent(username)
 
         return profileURL
