@@ -36,7 +36,7 @@ class RestAPIServer {
         var baseURL: URL {
             switch self {
             case .publishNote, .unpublishNote, .updatePublicationGroup:
-               return URL(string: EnvironmentVariables.PublicAPI.publishServer)!
+                return URL(string: Configuration.publicAPIpublishServer)!
             case .embed:
                 return URL(string: Configuration.publicAPIembed)!
             case .providers:
@@ -198,6 +198,8 @@ class RestAPIServer {
                 completion(.failure(error))
                 return
             }
+
+            Logger.shared.logDebug("Sending request to \(serverRequest.baseURL)", category: .notePublishing)
 
             let task = BeamURLSession.shared.dataTask(with: urlRequest) { data, urlResponse, error in
                 guard error == nil else {
