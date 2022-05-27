@@ -977,6 +977,7 @@
 		A315D57A282BFE1D00579362 /* CreditCardsTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D579282BFE1D00579362 /* CreditCardsTestTable.swift */; };
 		A315D57F282C1B5100579362 /* CreditCardTableLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D57E282C1B5100579362 /* CreditCardTableLocators.swift */; };
 		A315D58228316F2600579362 /* Rowable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A315D58128316F2600579362 /* Rowable.swift */; };
+		A3372E2F283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3372E2E283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift */; };
 		A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3539E2328326EA100035A21 /* CreditCardTestView.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
 		A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */; };
@@ -2809,6 +2810,7 @@
 		A315D579282BFE1D00579362 /* CreditCardsTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardsTestTable.swift; sourceTree = "<group>"; };
 		A315D57E282C1B5100579362 /* CreditCardTableLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardTableLocators.swift; sourceTree = "<group>"; };
 		A315D58128316F2600579362 /* Rowable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rowable.swift; sourceTree = "<group>"; };
+		A3372E2E283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotesNavigationHistoryTests.swift; sourceTree = "<group>"; };
 		A3539E2328326EA100035A21 /* CreditCardTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardTestView.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
 		A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureCopyShareTests.swift; sourceTree = "<group>"; };
@@ -7231,6 +7233,7 @@
 			children = (
 				B57535EF26BD5F690053CE2D /* NoteEditorTests.swift */,
 				B507CB33275F8CB800DFF11A /* SlashMenuTests.swift */,
+				A3372E2E283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -9479,6 +9482,7 @@
 				A315D57F282C1B5100579362 /* CreditCardTableLocators.swift in Sources */,
 				B5A76EB227FB3D4100964340 /* OnboardingSignupWithEmailTestView.swift in Sources */,
 				A3E7B4B527AC17170074C9BB /* PasswordSuggestionPopupTestView.swift in Sources */,
+				A3372E2F283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift in Sources */,
 				B5FAE2DB270C842700EAC8A3 /* CardPublishTests.swift in Sources */,
 				8718E152280483C900CFF53D /* AdvancedSignInPasswordAutofillTests.swift in Sources */,
 				B5FAE300270ED94300EAC8A3 /* GeneralPreferenceTestView.swift in Sources */,
