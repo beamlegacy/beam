@@ -190,6 +190,7 @@ class HyperlinkFormatterView: FormatterView {
     // MARK: Private Methods
     private var editingUrl: String = "testing"
     private var editingTitle: String = "testing title"
+
     override func setupUI() {
         super.setupUI()
 

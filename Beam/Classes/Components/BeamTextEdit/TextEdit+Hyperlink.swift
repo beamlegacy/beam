@@ -206,13 +206,17 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         guard let hyperlinkView = inlineFormatter as? HyperlinkFormatterView,
               let node = targetNode, let frame = frame,
               isInlineFormatterHidden else { return }
+
         prepareInlineFormatterWindowBeforeShowing(hyperlinkView, atPoint: .zero)
+
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
+
         hyperlinkView.setInitialValues(url: url?.absoluteString, title: linkTitle)
-        if url == nil, let linkTitle = linkTitle, let guessedUrl = URL(string: linkTitle) {
+        if url == nil, let linkTitle = linkTitle, linkTitle.mayBeURL, let guessedUrl = URL(string: linkTitle) {
             hyperlinkView.setEditedValues(url: guessedUrl.absoluteString, title: linkTitle)
         }
+
         updateLinkFormatterWindow(hyperlinkView: hyperlinkView, frame: frame, in: node)
 
         if debounce {
