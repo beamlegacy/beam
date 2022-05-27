@@ -13,6 +13,7 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     let usernameColumnTitle = "Username"
     let sitesColumnTitle = "Sites"
     let passwordsColumnTitle = "Passwords"
+    let timeout = TimeInterval(0.5)
     
     var passwordTables : XCUIElementQuery {
             get {
@@ -114,12 +115,12 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     func isFormToFillPasswordDisplayed( _ update: Bool = false) -> Bool {
-        let mainButton = (update) ? button(PasswordPreferencesViewLocators.Buttons.doneButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) : button(PasswordPreferencesViewLocators.Buttons.addPasswordButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        let mainButton = (update) ? button(PasswordPreferencesViewLocators.Buttons.doneButton.accessibilityIdentifier).waitForExistence(timeout: timeout) : button(PasswordPreferencesViewLocators.Buttons.addPasswordButton.accessibilityIdentifier).waitForExistence(timeout: timeout)
         return (
-                button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-                && getPasswordFieldToFill(PasswordFieldToFill.site).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-                && getPasswordFieldToFill(PasswordFieldToFill.username).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-                && getPasswordFieldToFill(PasswordFieldToFill.password).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+                button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier).waitForExistence(timeout: timeout)
+                && getPasswordFieldToFill(PasswordFieldToFill.site).waitForExistence(timeout: timeout)
+                && getPasswordFieldToFill(PasswordFieldToFill.username).waitForExistence(timeout: timeout)
+                && getPasswordFieldToFill(PasswordFieldToFill.password).waitForExistence(timeout: timeout)
                 && mainButton
         )
     }

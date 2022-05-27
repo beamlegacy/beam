@@ -79,10 +79,15 @@ extension XCUIElement: WaitHelper {
     }
     
     @discardableResult
-    public func clickClearAndType(_ text: String) -> XCUIElement {
+    public func clickClearAndType(_ text: String, _ typeSlowly: Bool = false) -> XCUIElement {
         self.tapInTheMiddle()
         self.clear()
-        self.typeText(text)
+        //reduces flakiness for Big Sur card number typing
+        if typeSlowly {
+            self.typeSlowly(text, everyNChar: 3)
+        } else {
+            self.typeText(text)
+        }
         return self
     }
 
