@@ -108,4 +108,16 @@ class RadBlockPreferencesManager {
         ContentBlockingManager.shared.synchronize()
         completion()
     }
+
+    func removeAllEntries(completion: @escaping (() -> Void)) {
+        RadBlockDatabase.shared.allowlistEntryEnumerator(forGroup: nil, domain: nil, sortOrder: .createDate) { [weak self] entries, _ in
+            guard let self = self, let entries = entries?.allObjects as? [RBAllowlistEntry] else {
+                completion()
+                return
+            }
+            self.remove(entries: entries) {
+                completion()
+            }
+        }
+    }
 }
