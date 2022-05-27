@@ -60,6 +60,7 @@
         "LinksTests",
         "LoginTest",
         "NoteEditorTests",
+        "NotesNavigationHistoryTests",
         "OmniboxAutocompleteTests",
         "OmniboxViewTests",
         "OnboardingTests",

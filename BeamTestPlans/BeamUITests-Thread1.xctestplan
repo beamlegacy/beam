@@ -64,6 +64,7 @@
         "LoginPasswordAutocompleteTests",
         "LoginTest",
         "NoteEditorTests",
+        "NotesNavigationHistoryTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
         "OmniboxViewTests",
