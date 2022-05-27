@@ -38,9 +38,9 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func addPassword(_ siteValue: String, _ usernameValue: String, _ passwordValue: String) {
-        passwordsWindow.getPasswordFieldToFill(.site).clickAndType(siteValue)
-        passwordsWindow.getPasswordFieldToFill(.username).clickAndType(usernameValue)
-        passwordsWindow.getPasswordFieldToFill(.password).clickAndType(passwordValue)
+        passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(siteValue, true)
+        passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType(usernameValue, true)
+        passwordsWindow.getPasswordFieldToFill(.password).clickClearAndType(passwordValue, true)
         passwordsWindow.clickAddPassword()
         waitForDoesntExist(passwordsWindow.getPasswordFieldToFill(.site))
     }
@@ -80,7 +80,7 @@ class PasswordPreferencesTests: BaseTest {
         }
 
         step ("WHEN I populate hostname '\(hostnameGoogle)' only"){
-            passwordsWindow.getPasswordFieldToFill(.site).clickAndType(hostnameGoogle)
+            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle, true)
         }
 
         step ("AND I click on Add Password"){
@@ -93,7 +93,7 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("WHEN I populate hostname '\(hostnameGoogle)' and username '\(usernameExample)' only"){
-            passwordsWindow.getPasswordFieldToFill(.username).clickAndType(usernameExample)
+            passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType(usernameExample, true)
         }
 
         step ("AND I click on Add Password"){
@@ -106,8 +106,8 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("WHEN I populate wrong hostname '\(badHostname)' with all information"){
-            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(badHostname)
-            passwordsWindow.getPasswordFieldToFill(.password).clickAndType(usernameExample)
+            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(badHostname, true)
+            passwordsWindow.getPasswordFieldToFill(.password).clickClearAndType(usernameExample, true)
         }
         
         step ("AND I click on Add Password"){
@@ -122,7 +122,7 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN password item is successfully added when correct hostname format is typed"){
-            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle)
+            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle, true)
             XCTAssertFalse(passwordsWindow.isErrorDisplayed())
             verifyPasswordPopUpDisplay(hostnameGoogle,usernameExample,passwordExample)
             passwordsWindow.clickAddPassword()
@@ -188,7 +188,7 @@ class PasswordPreferencesTests: BaseTest {
         step ("WHEN I update username of \(hostnameApple)"){
             passwordsWindow.selectPassword(hostnameApple)
             passwordsWindow.clickDetails()
-            passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType("user1Update")
+            passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType("user1Update", true)
             passwordsWindow.clickDone()
         }
         
