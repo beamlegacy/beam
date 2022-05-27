@@ -60,6 +60,7 @@
         "EditorShortcutsTests",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
+        "NotesNavigationHistoryTests",
         "OmniboxViewTests",
         "OmniboxViewTests\/testOmniBoxSearchField()",
         "OmniboxViewTests\/testOmniboxCreateNoteMode()",

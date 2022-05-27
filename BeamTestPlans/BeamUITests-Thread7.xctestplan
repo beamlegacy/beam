@@ -68,6 +68,7 @@
         "LinksTests",
         "LoginTest",
         "NoteEditorTests",
+        "NotesNavigationHistoryTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
         "OneFieldAutofillTests",
