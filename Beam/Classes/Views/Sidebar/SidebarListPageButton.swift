@@ -24,7 +24,7 @@ struct SidebarListPageButton: View {
             Spacer()
         }
         .foregroundColor(foregroundColor)
-        .font(BeamFont.regular(size: 12).swiftUI)
+        .font(textFont)
         .padding(.horizontal, 8)
         .frame(width: 220, height: 30)
         .background(SidebarListBackground(isSelected: isSelected, isHovering: isHovering, isPressed: isPressed))
@@ -40,6 +40,10 @@ struct SidebarListPageButton: View {
                 action?()
             })
         }
+    }
+
+    private var textFont: Font {
+        isSelected ? BeamFont.medium(size: 12).swiftUI : BeamFont.regular(size: 12).swiftUI
     }
 
     private var foregroundColor: Color {
