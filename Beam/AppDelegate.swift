@@ -33,7 +33,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     var skipTerminateMethods = false
     var window: BeamWindow? {
-        (NSApplication.shared.keyWindow ?? NSApplication.shared.mainWindow) as? BeamWindow
+        (NSApplication.shared.keyWindow as? BeamWindow) ?? (NSApplication.shared.mainWindow as? BeamWindow)
     }
     var windows: [BeamWindow] = [] {
         didSet {
@@ -443,7 +443,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         window.setFrameOrigin(frameOrigin)
 
         tabs.forEach { tab in
-            window.state.browserTabsManager.addNewTabAndGroup(tab, setCurrent: true)
+            window.state.browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: true)
         }
         window.state.mode = .web
         window.makeKeyAndOrderFront(nil)
@@ -601,7 +601,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var omniboxContentDebuggerWindow: OmniboxContentDebuggerWindow?
     var filesWindow: FilesWindow?
     var databasesWindow: DatabasesWindow?
-    var tabGroupingWindow: TabGroupingWindow?
+    var tabGroupingWindow: TabGroupingSettingsWindow?
     weak var tabGroupingFeedbackWindow: TabGroupingFeedbackWindow?
     ///Should only be used to say that the full sync on quit is done
     ///Set to true to directly return .terminateNow in shouldTerminate

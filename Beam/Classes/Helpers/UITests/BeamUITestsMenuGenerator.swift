@@ -1,5 +1,4 @@
 import Foundation
-import Fakery
 import BeamCore
 import AutoUpdate
 import MockHttpServer

@@ -154,7 +154,7 @@ extension TabExternalDraggingSource: NSDraggingSource {
                                       y: max(0, screenPoint.y - window.frame.height + (Toolbar.height / 2)))
             window.setFrameOrigin(frameOrigin)
 
-            window.state.browserTabsManager.addNewTabAndGroup(tab, setCurrent: true)
+            window.state.browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: true)
             window.state.mode = .web
             window.makeKeyAndOrderFront(nil)
         } else {

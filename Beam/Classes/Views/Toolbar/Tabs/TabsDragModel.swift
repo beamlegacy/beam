@@ -19,159 +19,203 @@ class TabsDragModel: ObservableObject {
     @Published var offset = CGPoint.zero
     @Published var draggingOverIndex: Int?
     @Published var dragStartIndex: Int?
+    @Published var draggingOverGroup: TabClusteringGroup?
     @Published var draggingOverPins: Bool = false {
         didSet {
-            guard (draggingOverPins != oldValue || defaultTabWidth == 0) && widthProvider != nil else { return }
-            defaultTabWidth = tabWidth(selected: false, pinned: false) + spaceBetweenTabs
-            activeTabWidth = tabWidth(selected: true, pinned: false) + spaceBetweenTabs
-            pinnedTabWidth = tabWidth(selected: false, pinned: true) + spaceBetweenTabs
+            guard (draggingOverPins != oldValue || activeItemWidth == 0), let widthProvider = widthProvider else { return }
+            activeItemWidth = widthProvider.width(forItem: nil, selected: true, pinned: false) + spaceBetweenItems
+            pinnedItemWidth = widthProvider.width(forItem: nil, selected: false, pinned: true) + spaceBetweenItems
         }
     }
 
     private var dragStartScrollOffset: CGFloat = 0
-    private var widthProvider: TabsWidthProvider?
-    private var defaultTabWidth: CGFloat = 0
-    private var activeTabWidth: CGFloat = 0
-    private var pinnedTabWidth: CGFloat = 0
-    private var spaceBetweenTabs: CGFloat = 0
+    private var dragStartItemOrigin: CGFloat = 0
+    private var widthProvider: TabsListWidthProvider?
+    private var activeItemWidth: CGFloat = 0
+    private var pinnedItemWidth: CGFloat = 0
+    private var spaceBetweenItems: CGFloat = 0
     private var spaceBetweenSections: CGFloat = 0
-    private var tabsCount: Int = 0
-    private var pinnedTabsCount: Int = 0
+    private var allItems: [TabsListItem] = []
+    private var itemsCount: Int = 0
+    private var initialPinnedItemsCount: Int = 0
     private var singleTabCenteringAdjustment: CGFloat = 0
 
-    var unpinnedTabsCount: Int {
-        tabsCount - pinnedTabsCount
+    var unpinnedItemsCount: Int {
+        itemsCount - initialPinnedItemsCount
     }
-    var widthForDraggingTab: CGFloat {
-        (draggingOverPins ? pinnedTabWidth : activeTabWidth) - spaceBetweenTabs
+    var widthForDraggedItem: CGFloat {
+        (draggingOverPins ? pinnedItemWidth : activeItemWidth) - spaceBetweenItems
     }
     var widthForDraggingSpacer: CGFloat {
-        widthForDraggingTab - (draggingOverPins ? 0 : 0)
+        widthForDraggedItem
     }
-    var dragStartedFromPinnedTab: Bool {
+    var dragStartedFromPinnedItem: Bool {
         guard let dragStartIndex = dragStartIndex else { return false }
-        return dragStartIndex < pinnedTabsCount
+        return dragStartIndex < initialPinnedItemsCount
+    }
+
+    private var pinnedItemsCountDuringDrag: Int {
+        var count = initialPinnedItemsCount
+        if dragStartedFromPinnedItem && !draggingOverPins {
+            count -= 1
+        } else if !dragStartedFromPinnedItem && draggingOverPins {
+            count += 1
+        }
+        return count
     }
 
     private var pinnedSectionMaxX: CGFloat {
-        guard pinnedTabsCount > 0 else { return 0 }
-        return (CGFloat(pinnedTabsCount) * pinnedTabWidth) + spaceBetweenSections
+        guard initialPinnedItemsCount > 0 else { return 0 }
+        return (CGFloat(initialPinnedItemsCount) * pinnedItemWidth) + spaceBetweenSections
+    }
+
+    private func itemIndex(atLocation: CGFloat, activeItemIndex: Int) -> Int {
+        let pinnedSectionMaxX = pinnedSectionMaxX
+        guard atLocation > pinnedSectionMaxX else {
+            return Int((atLocation / pinnedItemWidth).rounded(.down))
+        }
+        guard let widthProvider = widthProvider else {
+            assertionFailure("Tabs Drag model should have a width provider")
+            return 0
+        }
+
+        let locationInUnpinnedItems = atLocation - pinnedSectionMaxX
+
+        var index = initialPinnedItemsCount - 1
+        var itemMaxX: CGFloat = 0
+        while itemMaxX < locationInUnpinnedItems {
+            index += 1
+            itemMaxX += widthProvider.width(forItemAtIndex: index, selected: index == activeItemIndex, pinned: false) + spaceBetweenItems
+        }
+        return index
     }
 
     func prepareForDrag(gestureValue: TabGestureValue, scrollContentOffset: CGFloat,
-                        currentTabIndex: Int, tabsCount: Int, pinnedTabsCount: Int, singleTabCenteringAdjustment: CGFloat = 0,
-                        widthProvider: TabsWidthProvider) {
+                        currentItemIndex: Int, sections: TabsListItemsSections, singleTabCenteringAdjustment: CGFloat = 0,
+                        widthProvider: TabsListWidthProvider) {
 
-        self.tabsCount = tabsCount
-        self.pinnedTabsCount = pinnedTabsCount
+        self.allItems = sections.allItems
+        self.itemsCount = sections.allItems.count
+        self.initialPinnedItemsCount = sections.pinnedItems.count
         self.widthProvider = widthProvider
-        self.pinnedTabWidth = tabWidth(selected: false, pinned: true)
-        self.spaceBetweenTabs = widthProvider.separatorWidth
-        self.spaceBetweenSections = widthProvider.separatorBetweenPinnedAndOther - self.spaceBetweenTabs
+        self.pinnedItemWidth = widthProvider.width(forItem: nil, selected: false, pinned: true)
+        self.spaceBetweenItems = widthProvider.separatorWidth
+        self.spaceBetweenSections = widthProvider.separatorBetweenPinnedAndOther - self.spaceBetweenItems
         self.dragStartScrollOffset = scrollContentOffset
         self.singleTabCenteringAdjustment = singleTabCenteringAdjustment
 
         var locationX = gestureValue.startLocation.x
-        let pinnedTabsMaxX = pinnedSectionMaxX
-        self.draggingOverPins = locationX < pinnedTabsMaxX
+        let pinnedItemsMaxX = pinnedSectionMaxX
+        self.draggingOverPins = locationX < pinnedItemsMaxX
 
-        var tabIndex: Int // guess start index
-        if draggingOverPins {
-            tabIndex = Int((locationX / pinnedTabWidth).rounded(.down))
-        } else {
+        if !draggingOverPins {
             locationX += scrollContentOffset
-            let locationXInUnpinnedTabs = locationX - pinnedTabsMaxX
-            tabIndex = Int((locationXInUnpinnedTabs / defaultTabWidth).rounded(.down)) + pinnedTabsCount
-            if tabIndex > currentTabIndex && currentTabIndex >= pinnedTabsCount {
-                if locationXInUnpinnedTabs > defaultTabWidth * CGFloat(currentTabIndex - pinnedTabsCount) + activeTabWidth {
-                    tabIndex = Int(((locationXInUnpinnedTabs - (activeTabWidth - defaultTabWidth)) / defaultTabWidth).rounded(.down)) + pinnedTabsCount
-                } else {
-                    tabIndex = currentTabIndex
-                }
-            }
         }
-        self.dragStartIndex = tabIndex.clamp(0, tabsCount - 1)
+        var targetIndex = itemIndex(atLocation: locationX, activeItemIndex: currentItemIndex) // guessed start index
+        targetIndex = targetIndex.clamp(0, itemsCount - 1)
+        dragStartItemOrigin = itemMinX(atIndex: targetIndex)
+        self.dragStartIndex = targetIndex
     }
 
-    func frameForTabAtIndex(_ index: Int) -> CGRect {
-        if index < pinnedTabsCount {
-            let x = pinnedTabMinXDuringDrag(pinnedTabIndex: index)
-            return CGRect(x: x, y: 0, width: pinnedTabWidth, height: 0)
-        } else {
-            let x = unpinnedTabMinXDuringDrag(tabIndex: index)
-            return CGRect(x: x, y: 0, width: defaultTabWidth, height: 0)
-        }
+    func frameForItemAtIndex(_ index: Int) -> CGRect {
+        let width = widthProvider?.width(forItemAtIndex: index, selected: false, pinned: index < initialPinnedItemsCount) ?? 0
+        let x = itemMinX(atIndex: index)
+        return CGRect(x: x, y: 0, width: width + spaceBetweenItems, height: 0)
     }
 
     func cleanAfterDrag() {
         offset = .zero
         widthProvider = nil
-        defaultTabWidth = 0
-        activeTabWidth = 0
-        pinnedTabWidth = 0
+        activeItemWidth = 0
+        pinnedItemWidth = 0
         draggingOverPins = false
         draggingOverIndex = nil
         dragStartIndex = nil
         dragStartScrollOffset = 0
-        tabsCount = 0
-        pinnedTabsCount = 0
+        allItems = []
+        itemsCount = 0
+        initialPinnedItemsCount = 0
     }
 
-    private func tabWidth(selected: Bool, pinned: Bool) -> CGFloat {
-        widthProvider?.widthForTab(selected: selected, pinned: pinned) ?? 0
-    }
-
-    private func pinnedTabsCountDuringDrag() -> CGFloat {
-        guard let dragStartIndex = dragStartIndex else { return 0 }
-        return CGFloat(pinnedTabsCount - (dragStartIndex < pinnedTabsCount ? 1 : 0))
-    }
-
-    private func pinnedTabMinXDuringDrag(pinnedTabIndex: Int) -> CGFloat {
-        CGFloat(pinnedTabIndex) * pinnedTabWidth
-    }
-
-    private func unpinnedTabMinXDuringDrag(tabIndex: Int) -> CGFloat {
-        let pinnedTabsCountDuringDrag = pinnedTabsCountDuringDrag()
-        return (pinnedTabsCountDuringDrag * pinnedTabWidth)
-            + (pinnedTabsCountDuringDrag > 0 ? spaceBetweenSections : 0)
-            + (CGFloat(tabIndex) - pinnedTabsCountDuringDrag) * defaultTabWidth
-            - (unpinnedTabsCount == 1 ? singleTabCenteringAdjustment / 2 : 0)
+    private func itemMinX(atIndex: Int, ignoringItemAtIndex: Int? = nil) -> CGFloat {
+        guard let widthProvider = widthProvider else { return 0 }
+        let pinnedItemsCount = pinnedItemsCountDuringDrag
+        guard atIndex >= pinnedItemsCount else {
+            return pinnedItemWidth * CGFloat(atIndex)
+        }
+        var minX: CGFloat = pinnedSectionMaxX
+        var endIndex = atIndex
+        if let ignoringItemAtIndex = ignoringItemAtIndex, ignoringItemAtIndex < atIndex {
+            endIndex += 1
+        }
+        for i in pinnedItemsCount..<endIndex {
+            guard i != ignoringItemAtIndex else { continue }
+            minX += widthProvider.width(forItemAtIndex: i, selected: false, pinned: false) + spaceBetweenItems
+        }
+        if unpinnedItemsCount == 1 {
+            minX -= singleTabCenteringAdjustment / 2
+        }
+        return minX
     }
 
     private func calculateNewOffsetXOnDrag(fromGesture gestureValue: TabGestureValue, scrollContentOffset: CGFloat) -> (x: CGFloat, isNowOverPins: Bool) {
-        guard let dragStartIndex = dragStartIndex else { return (0, false) }
         let locationX = gestureValue.location.x
         let startLocationX = gestureValue.startLocation.x
-        let pinnedTabsMaxX = pinnedSectionMaxX
-        let currentTabOrigin: CGFloat
-        if dragStartedFromPinnedTab || draggingOverPins {
-            currentTabOrigin = pinnedTabMinXDuringDrag(pinnedTabIndex: dragStartIndex)
-        } else {
-            currentTabOrigin = unpinnedTabMinXDuringDrag(tabIndex: dragStartIndex) - scrollContentOffset
+        let pinnedItemsMaxX = pinnedSectionMaxX
+        var currentItemOrigin: CGFloat = dragStartItemOrigin
+        if !dragStartedFromPinnedItem && !draggingOverPins {
+            currentItemOrigin -= scrollContentOffset
         }
-        var offsetX = currentTabOrigin + (locationX - startLocationX)
+        var offsetX = currentItemOrigin + (locationX - startLocationX)
 
-        let minOffsetXBeforePinning = pinnedTabsMaxX + pinnedTabWidth - spaceBetweenSections
+        let minOffsetXBeforePinning = pinnedItemsMaxX + pinnedItemWidth - spaceBetweenSections
         let minOverlap: CGFloat = 10
         var isNowOverPins = draggingOverPins
-        if !dragStartedFromPinnedTab {
+        if !dragStartedFromPinnedItem {
             isNowOverPins = locationX <= minOffsetXBeforePinning
-            if unpinnedTabsCount > 1 && offsetX < (pinnedTabsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
+            if unpinnedItemsCount > 1 && offsetX < (pinnedItemsMaxX - minOverlap) && locationX > minOffsetXBeforePinning {
                 // resistance to convert a tab to a pinned tab.
-                offsetX = pinnedTabsMaxX - minOverlap
+                offsetX = pinnedItemsMaxX - minOverlap
             } else if locationX < minOffsetXBeforePinning {
-                let locationInTab = startLocationX - currentTabOrigin
-                if locationInTab > pinnedTabWidth {
-                    offsetX += locationInTab - pinnedTabWidth/2
+                let locationInItem = startLocationX - currentItemOrigin
+                if locationInItem > pinnedItemWidth {
+                    offsetX += locationInItem - pinnedItemWidth/2
                 }
             }
-        } else if dragStartedFromPinnedTab {
-            isNowOverPins = locationX <= pinnedTabsMaxX
-            if locationX > pinnedTabsMaxX {
-                offsetX -= pinnedTabWidth
+        } else if dragStartedFromPinnedItem {
+            isNowOverPins = locationX <= pinnedItemsMaxX
+            if !isNowOverPins {
+                offsetX -= pinnedItemWidth
             }
         }
         return (offsetX, isNowOverPins)
+    }
+
+    private func calculateDraggingOverGroup(_ draggingOverIndex: Int, dragStartIndex: Int, offsetX: CGFloat) -> TabClusteringGroup? {
+        let itemFrame = frameForItemAtIndex(draggingOverIndex)
+        let items = allItems
+        guard draggingOverIndex < items.count else { return nil }
+        let item = items[draggingOverIndex]
+        guard let group = item.group else { return nil }
+        guard itemFrame.width > 0 && offsetX < itemFrame.maxX else {
+            if item.isAGroupCapsule && offsetX > itemFrame.maxX && draggingOverIndex >= dragStartIndex {
+                return group
+            }
+            return nil
+        }
+        let percentIn = (offsetX - itemFrame.minX) / itemFrame.width
+        if item.isAGroupCapsule && draggingOverIndex < dragStartIndex {
+            return nil
+        } else if percentIn > 0.5 && draggingOverIndex >= dragStartIndex {
+            if draggingOverIndex == itemsCount - 1 || items[draggingOverIndex + 1].group != group {
+                return nil
+            }
+        } else if percentIn < 0.5 && draggingOverIndex < dragStartIndex {
+            if draggingOverIndex == 0 || items[draggingOverIndex - 1].group != group {
+                return nil
+            }
+        }
+        return group
     }
 
     func dragGestureChanged(gestureValue: TabGestureValue, scrollContentOffset: CGFloat, containerGeometry: GeometryProxy) {
@@ -185,43 +229,38 @@ class TabsDragModel: ObservableObject {
                 self.draggingOverPins = isNowOverPins
             }
         }
-        let minX: CGFloat = unpinnedTabsCount == 1 && !draggingOverPins ? -60 : 0
-        let offset = CGPoint(x: offsetX.clamp(minX, containerGeometry.size.width - activeTabWidth), y: gestureValue.location.y)
+        let minX: CGFloat = unpinnedItemsCount == 1 && !draggingOverPins ? -60 : 0
+        let offset = CGPoint(x: offsetX.clamp(minX, containerGeometry.size.width - activeItemWidth), y: gestureValue.location.y)
 
         var newDragIndex: Int?
         var shouldAnimateIndexMove = false
         if let draggingOverIndex = self.draggingOverIndex {
-            var thresholdMinX: CGFloat // Left
-            var thresholdMaxX: CGFloat // Right
             shouldAnimateIndexMove = true
-            if draggingOverPins {
+            if isNowOverPins {
                 let locX = gestureValue.location.x
-                if dragStartIndex < pinnedTabsCount && locX > pinnedTabWidth * CGFloat(pinnedTabsCount) {
-                    newDragIndex = pinnedTabsCount - 1
+                if dragStartIndex < initialPinnedItemsCount && locX > pinnedItemWidth * CGFloat(initialPinnedItemsCount) {
+                    newDragIndex = initialPinnedItemsCount - 1
                 } else {
-                    newDragIndex = Int((locX / pinnedTabWidth).rounded(.down))
+                    newDragIndex = Int((locX / pinnedItemWidth).rounded(.down))
                 }
-
             } else {
-                if draggingOverIndex < pinnedTabsCount {
-                    thresholdMinX = pinnedTabMinXDuringDrag(pinnedTabIndex: draggingOverIndex)
-                    thresholdMaxX = thresholdMinX + activeTabWidth
-                } else {
-                    thresholdMinX = unpinnedTabMinXDuringDrag(tabIndex: draggingOverIndex)
-                    thresholdMaxX = thresholdMinX + activeTabWidth
-                }
+                let thresholdMinX = itemMinX(atIndex: draggingOverIndex) // Left
+                let thresholdMaxX = thresholdMinX + activeItemWidth // Right
                 let gestureX = gestureValue.location.x + scrollContentOffset
                 if gestureX < thresholdMinX {
                     newDragIndex = draggingOverIndex - 1
                 } else if gestureX > thresholdMaxX {
                     newDragIndex = draggingOverIndex + 1
                 }
+                if let idx = newDragIndex ?? self.draggingOverIndex {
+                    self.draggingOverGroup = calculateDraggingOverGroup(idx, dragStartIndex: dragStartIndex, offsetX: gestureX)
+                }
             }
         } else {
             newDragIndex = dragStartIndex
         }
 
-        if let idx = newDragIndex?.clamp(0, tabsCount - 1) {
+        if let idx = newDragIndex?.clamp(0, itemsCount - 1) {
             if shouldAnimateIndexMove {
                 withAnimation(BeamAnimation.easeInOut(duration: 0.2)) {
                     self.draggingOverIndex = idx
@@ -235,11 +274,9 @@ class TabsDragModel: ObservableObject {
 
     func dragGestureEnded(scrollContentOffset: CGFloat) {
         guard let draggingOverIndex = draggingOverIndex else { return }
-        let x: CGFloat
-        if draggingOverPins {
-            x = pinnedTabMinXDuringDrag(pinnedTabIndex: draggingOverIndex)
-        } else {
-            x = unpinnedTabMinXDuringDrag(tabIndex: draggingOverIndex) - scrollContentOffset
+        var x = itemMinX(atIndex: draggingOverIndex, ignoringItemAtIndex: dragStartIndex)
+        if !draggingOverPins {
+            x -= scrollContentOffset
         }
         offset = CGPoint(x: x, y: 0)
     }
