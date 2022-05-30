@@ -15,6 +15,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdBlockerTests",
         "AdvancedCreditCardsTests\/testValidateAutoFillDataCC()",
         "AdvancedCreditCardsTests\/testValidateAutoFillProposalCC()",
         "AdvancedCreditCardsTests\/testValidateOtherCCLessThan4()",
@@ -34,6 +35,9 @@
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination3()",
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination4()",
         "AllCardsDeleteTests",
+        "AllowListPreferencesTests\/testAddAllowUrlItem()",
+        "AllowListPreferencesTests\/testRemoveAllowUrlItem()",
+        "AllowListPreferencesTests\/testSortAllowUrlItem()",
         "BaseTest",
         "BrowserFancyUrlTests",
         "BrowserHistoryTests",
