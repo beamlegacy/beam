@@ -100,7 +100,9 @@ struct PointAndShootCardPicker: View {
             if shouldShowCopyShareView &&
                 event.modifierFlags.contains(.command) && event.keyCode == KeyCode.c.rawValue {
                 copyShoot()
+                return true
             }
+            return false
         } onStopEditing: {
             DispatchQueue.main.async {
                 cardSearchFieldSelection = nil
