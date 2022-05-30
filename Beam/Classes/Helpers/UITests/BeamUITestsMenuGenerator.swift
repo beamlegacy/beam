@@ -134,6 +134,7 @@ class BeamUITestsMenuGenerator {
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
         ClosedTabDataPersistence.savedTabsData.removeAll()
         ClosedTabDataPersistence.savedCloseTabData.removeAll()
+        ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
         try? GRDBDatabase.shared.clear()
         data?.saveData()
     }

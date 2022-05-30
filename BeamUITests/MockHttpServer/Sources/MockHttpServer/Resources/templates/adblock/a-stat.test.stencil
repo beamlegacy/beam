@@ -1,0 +1,12 @@
+<html>
+
+<head>
+<title>AdBlock</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>This site should be blocked</h1>
+</body>
+
+</html>

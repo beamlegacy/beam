@@ -206,6 +206,7 @@ struct TabView: View {
                 .allowsHitTesting(false)
         }
         .frame(minWidth: isSingleTab ? minWidth : 0)
+        .accessibility(hidden: !isSingleTab)
         .opacity(isSingleTab ? 1 : 0).overlay(isSingleTab ? nil : GeometryReader { proxy in
             let spaceAroundTitle = proxy.frame(in: .named(localCoordinateSpaceName)).minX
             let hasEnoughSpaceForClose = spaceAroundTitle >= leadingViewsWidth
