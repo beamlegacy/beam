@@ -88,14 +88,13 @@ private struct TabDropDelegate: DropDelegate {
                     viewModel.remove(group: groupIdx)
                 }
             } else {
-                if let newGrpHue = viewModel.getNewhueTint() {
-                    DispatchQueue.main.async {
-                        guard let groupIdx = viewModel.remove(tabId: tabItem.tabId) else { return }
-                        let newGroup = TabClusteringGroup(pageIDs: [tabItem.tabId], hueTint: newGrpHue)
-                        viewModel.groups.append(newGroup)
-                        viewModel.updateCorrectedPages(with: tabItem.tabId, in: newGroup.id)
-                        viewModel.remove(group: groupIdx)
-                    }
+                DispatchQueue.main.async {
+                    guard let groupIdx = viewModel.remove(tabId: tabItem.tabId) else { return }
+                    let newGroup = TabClusteringGroup(pageIDs: [tabItem.tabId])
+                    newGroup.color = viewModel.getNewColor()
+                    viewModel.groups.append(newGroup)
+                    viewModel.updateCorrectedPages(with: tabItem.tabId, in: newGroup.id)
+                    viewModel.remove(group: groupIdx)
                 }
             }
         }
@@ -118,9 +117,9 @@ struct TabGroupingFeedbackContentView: View {
                         ForEach(tabGroup.pageIDs, id: \.self) { tabId in
                             if let url = viewModel.urlFor(pageId: tabId),
                                 let title = viewModel.titleFor(pageId: tabId) {
-                                TabGroupingTabView(url: url,
+                                TabGroupingFeedbackTabView(url: url,
                                                    title: title,
-                                                   color: Color(hue: tabGroup.hueTint, saturation: 0.6, brightness: 1, opacity: 0.25))
+                                                   color: (tabGroup.color?.mainColor(isDarkMode: false) ?? Color.red).opacity(0.25))
                                     .onDrag {
                                         return NSItemProvider(object: TabGroupingFeedbackItem(tabId: tabId))
                                     }
@@ -184,7 +183,7 @@ struct TabGroupingFeedbackContentView_Previews: PreviewProvider {
     }
 }
 
-private struct TabGroupingTabView: View {
+private struct TabGroupingFeedbackTabView: View {
     var url: URL
     var title: String
     var color: Color
@@ -207,8 +206,8 @@ private struct TabGroupingTabView: View {
     }
 }
 
-struct TabGroupingTabView_Previews: PreviewProvider {
+struct TabGroupingFeedbackTabView_Previews: PreviewProvider {
     static var previews: some View {
-        TabGroupingTabView(url: URL(string: "www.google.com")!, title: "Google", color: .blue)
+        TabGroupingFeedbackTabView(url: URL(string: "www.google.com")!, title: "Google", color: .blue)
     }
 }

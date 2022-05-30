@@ -36,7 +36,7 @@ extension AppDelegate {
             tabGroupingWindow.makeKeyAndOrderFront(window)
             return
         }
-        let tabGroupingTitleBarView = TabGroupingTitleBarView(clusteringManager: self.data.clusteringManager)
+        let tabGroupingTitleBarView = TabGroupingSettingsTitleBarView(clusteringManager: self.data.clusteringManager)
 
         let accessoryHostingView = BeamHostingView(rootView: tabGroupingTitleBarView)
         accessoryHostingView.frame.size = accessoryHostingView.fittingSize
@@ -44,7 +44,7 @@ extension AppDelegate {
         let titlebarAccessory = NSTitlebarAccessoryViewController()
         titlebarAccessory.view = accessoryHostingView
 
-        tabGroupingWindow = TabGroupingWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: self.data.clusteringManager)
+        tabGroupingWindow = TabGroupingSettingsWindow(contentRect: NSRect(x: 0, y: 0, width: 518, height: 599), clusteringManager: self.data.clusteringManager)
         tabGroupingWindow?.addTitlebarAccessoryViewController(titlebarAccessory)
         tabGroupingWindow?.center()
         tabGroupingWindow?.makeKeyAndOrderFront(window)

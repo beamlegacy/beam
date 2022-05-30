@@ -10,6 +10,10 @@ import Promises
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, Scorable {
 
     var id: UUID = UUID()
+    override var description: String {
+        "BrowserTab(\(!title.isEmpty ? title : (url?.absoluteString ?? super.description)))"
+    }
+
     @Published var isLoading: Bool = false {
         didSet {
             if !isLoading, let url = url {

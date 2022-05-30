@@ -356,3 +356,26 @@ extension BeamColor {
         static let background = BeamColor.Nero.alpha(0.4)
     }
 }
+
+extension BeamColor {
+    enum TabGrouping {
+        static let red        = BeamColor.Custom(named: "tabgroupRed")
+        static let redText    = BeamColor.Custom(named: "tabgroupRedText")
+        static let yellow     = BeamColor.Custom(named: "tabgroupYellow")
+        static let yellowText = BeamColor.Custom(named: "tabgroupYellowText")
+        static let green      = BeamColor.Custom(named: "tabgroupGreen")
+        static let greenText  = BeamColor.Custom(named: "tabgroupGreenText")
+        static let cyan       = BeamColor.Custom(named: "tabgroupCyan")
+        static let cyanText   = BeamColor.Custom(named: "tabgroupCyanText")
+        static let blue       = BeamColor.Custom(named: "tabgroupBlue")
+        static let blueText   = BeamColor.Custom(named: "tabgroupBlueText")
+        static let pink       = BeamColor.Custom(named: "tabgroupPink")
+        static let pinkText   = BeamColor.Custom(named: "tabgroupPinkText")
+        static let purple     = BeamColor.Custom(named: "tabgroupPurple")
+        static let purpleText = BeamColor.Custom(named: "tabgroupPurpleText")
+        static let birgit     = BeamColor.Custom(named: "tabgroupBirgit")
+        static let birgitText = BeamColor.Custom(named: "tabgroupBirgitText")
+        static let gray       = BeamColor.Custom(named: "tabgroupGray")
+        static let grayText   = BeamColor.Custom(named: "tabgroupGrayText")
+    }
+}

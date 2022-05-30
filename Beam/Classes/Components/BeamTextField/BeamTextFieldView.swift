@@ -2,6 +2,7 @@
 //  BeamTextFieldView.swift
 //  Beam
 //
+// swiftlint:disable file_length
 
 import Cocoa
 
@@ -49,6 +50,7 @@ protocol BeamNSTextFieldProtocol {
     func setText(_ text: String, font: NSFont?, icon: NSImage?, skipGuards: Bool)
     func setPlaceholder(_ placeholder: String, font: NSFont?, icon: NSImage?)
     func updateTextSelectionColor(_ color: NSColor?)
+    func updateCaretColor(_ color: NSColor?)
 
 }
 
@@ -64,6 +66,7 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
     private var _placeholderIcon: NSImage?
 
     private var _selectionRangeColor: NSColor = BeamColor.Generic.textSelection.nsColor
+    private var _caretColor: NSColor?
     private var flagsMonitor: Any?
     fileprivate var ignoreResponderChanges = false
 
@@ -173,6 +176,14 @@ private class BeamNSTextFieldProtocolSharedImpl: BeamNSTextFieldProtocol {
         }
     }
 
+    func updateCaretColor(_ color: NSColor? = nil) {
+        guard let newColor = color, _caretColor != newColor else { return }
+        _caretColor = newColor
+        if let textView = textField?.currentEditor() as? NSTextView {
+            textView.insertionPointColor = newColor
+        }
+    }
+
     // MARK: Out of BeamNSTextFieldProtocol
 
     private func attributedStringAttributes(_ foregroundColor: NSColor, _ font: NSFont?) -> [NSAttributedString.Key: Any] {
@@ -265,6 +276,10 @@ class BeamNSTextField: NSTextField, BeamNSTextFieldProtocol {
 
     func updateTextSelectionColor(_ color: NSColor? = nil) {
         sharedImpl.updateTextSelectionColor(color)
+    }
+
+    func updateCaretColor(_ color: NSColor?) {
+        sharedImpl.updateCaretColor(color)
     }
 
     @discardableResult
@@ -371,6 +386,10 @@ class BeamNSSecureTextField: NSSecureTextField, BeamNSTextFieldProtocol {
 
     func updateTextSelectionColor(_ color: NSColor? = nil) {
         sharedImpl.updateTextSelectionColor(color)
+    }
+
+    func updateCaretColor(_ color: NSColor?) {
+        sharedImpl.updateCaretColor(color)
     }
 
     @discardableResult
