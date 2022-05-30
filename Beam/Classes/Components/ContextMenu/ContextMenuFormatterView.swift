@@ -19,10 +19,10 @@ class ContextMenuFormatterView: FormatterView {
     private var defaultSelectedIndex: Int?
     private var sizeToFit: Bool = false
     private var forcedWidth: CGFloat?
+    private var canBecomeKey: Bool = false
     private var onSelectMenuItem: (() -> Void)?
     private var onClosing: (() -> Void)?
     var origin: CGPoint?
-    private var canBecomeKey: Bool
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -37,6 +37,10 @@ class ContextMenuFormatterView: FormatterView {
         _handlesTyping
     }
 
+    override var canBecomeKeyView: Bool {
+        canBecomeKey
+    }
+
     var typingPrefix = 1
 
     init(key: String,
@@ -46,7 +50,7 @@ class ContextMenuFormatterView: FormatterView {
          handlesTyping: Bool = false,
          defaultSelectedIndex: Int? = nil,
          sizeToFit: Bool = false, forcedWidth: CGFloat? = nil,
-         origin: NSPoint? = nil, canBecomeKey: Bool = false,
+         origin: CGPoint? = nil, canBecomeKey: Bool = false,
          onSelectHandler: (() -> Void)? = nil, onClosing: (() -> Void)? = nil) {
 
         self.subviewModel = subviewModel ?? ContextMenuViewModel()
@@ -74,10 +78,6 @@ class ContextMenuFormatterView: FormatterView {
         subviewModel.visible = false
         subviewModel.hideSubMenu?()
         onClosing?()
-    }
-
-    override var canBecomeKeyView: Bool {
-        canBecomeKey
     }
 
     override func animateOnAppear(completionHandler: (() -> Void)? = nil) {

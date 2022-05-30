@@ -102,7 +102,7 @@ class CloseTab: WebCommand {
             urlRequest = URLRequest(url: url)
         }
 
-        context.browserTabsManager.addNewTabAndGroup(
+        context.browserTabsManager.addNewTabAndNeighborhood(
             tab,
             setCurrent: wasCurrentTab,
             withURLRequest: urlRequest,

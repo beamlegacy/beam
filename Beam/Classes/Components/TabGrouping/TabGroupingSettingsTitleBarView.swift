@@ -1,5 +1,5 @@
 //
-//  TabGroupingTitleBarView.swift
+//  TabGroupingSettingsTitleBarView.swift
 //  Beam
 //
 //  Created by Jean-Louis Darmon on 01/06/2021.
@@ -8,7 +8,7 @@
 import SwiftUI
 import BeamCore
 
-struct TabGroupingTitleBarView: View {
+struct TabGroupingSettingsTitleBarView: View {
     @ObservedObject var clusteringManager: ClusteringManager
 
     var body: some View {
@@ -26,6 +26,6 @@ struct TabGroupingTitleBarView: View {
 
 struct TabGroupingTitleBarView_Previews: PreviewProvider {
     static var previews: some View {
-        TabGroupingTitleBarView(clusteringManager: ClusteringManager(ranker: SessionLinkRanker(), candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: UUID(), activeSources: ActiveSources()))
+        TabGroupingSettingsTitleBarView(clusteringManager: ClusteringManager(ranker: SessionLinkRanker(), candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: UUID(), activeSources: ActiveSources()))
     }
 }
