@@ -1,35 +1,42 @@
 import Foundation
 
-class TabClusteringGroup: Identifiable, Equatable, Codable {
+class TabClusteringGroup: Identifiable, Equatable {
     static func == (lhs: TabClusteringGroup, rhs: TabClusteringGroup) -> Bool {
         lhs.id == rhs.id
     }
 
-    var id = UUID()
+    typealias GroupID = UUID
+
+    var id = GroupID()
     /// List of Clustering Link ids
     var pageIDs: [ClusteringManager.PageID]
-    /// hue value between 0 and 1
-    var hueTint: Double
+    var title: String?
+    var color: TabGroupingColor?
+    var collapsed = false
 
-    init(pageIDs: [ClusteringManager.PageID], hueTint: Double) {
+    init(pageIDs: [ClusteringManager.PageID]) {
         self.pageIDs = pageIDs
-        self.hueTint = hueTint
+    }
+
+    func copyProperties(from: TabClusteringGroup) {
+        self.id = from.id
+        self.title = from.title
+        self.color = from.color
+        self.collapsed = from.collapsed
     }
 
     func copy() -> TabClusteringGroup? {
-        let encoder = JSONEncoder()
-        guard let data = try? encoder.encode(self) else { return nil }
-
-        let decoder = JSONDecoder()
-        return try? decoder.decode(TabClusteringGroup.self, from: data)
+        let newGroup = TabClusteringGroup(pageIDs: pageIDs)
+        newGroup.copyProperties(from: self)
+        return newGroup
     }
 }
 
 class TabGroupingUpdater {
     private let myQueue = DispatchQueue(label: "tabGroupingUpdaterQueue")
-    var hueGenerator = DistributedRandomGenerator(range: 0.0..<1.0)
+    var colorGenerator = TabGroupingColorGenerator()
     var hasPagesGroup: Bool {
-        return !builtPagesGroups.isEmpty
+        !builtPagesGroups.isEmpty
     }
 
     @Published private(set) var builtPagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
@@ -77,10 +84,8 @@ class TabGroupingUpdater {
         let previousGroups = self.builtPagesGroups
         var pagesGroups = [ClusteringManager.PageID: TabClusteringGroup]()
         urlGroups.forEach({ group in
-            let groupHue = hueGenerator.generate()
-            hueGenerator.taken.append(groupHue)
 
-            let pageGroup = TabClusteringGroup(pageIDs: [], hueTint: groupHue)
+            let pageGroup = TabClusteringGroup(pageIDs: [])
             var previousGroupsFound = [TabClusteringGroup]()
             group.forEach { pageId in
                 pagesGroups[pageId] = pageGroup
@@ -90,7 +95,7 @@ class TabGroupingUpdater {
                 }
             }
             if previousGroupsFound.count == 1, let first = previousGroupsFound.first {
-                pageGroup.hueTint = first.hueTint
+                pageGroup.copyProperties(from: first)
             } else if previousGroupsFound.count > 1 {
                 // take the previous that have the most shared tabsId with the new group
                 var bestGroup: TabClusteringGroup?
@@ -103,11 +108,14 @@ class TabGroupingUpdater {
                     }
                 }
                 if bestCount > 0, let bestGroup = bestGroup {
-                    pageGroup.hueTint = bestGroup.hueTint
+                    pageGroup.copyProperties(from: bestGroup)
                 }
+            }
+            if pageGroup.color == nil {
+                pageGroup.color = colorGenerator.generateNewColor()
             }
         })
         self.builtPagesGroups = pagesGroups
-        hueGenerator.taken = Array(Set(self.builtPagesGroups.map { $0.value.hueTint }))
+        colorGenerator.updateUsedColor(pagesGroups.compactMap { $0.value.color })
     }
 }
