@@ -44,6 +44,7 @@
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination5()",
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination6()",
         "AllCardsDeleteTests",
+        "AllowListPreferencesTests",
         "BaseTest",
         "BrowserFancyUrlTests",
         "BrowserOpenModalTests",
