@@ -129,6 +129,10 @@ class WebTestView: BaseView {
         return waitForStringValueEqual(expectedString, getBrowserTabTitleElements()[index])
     }
     
+    func waitForTabTitleToContain(index: Int, expectedString: String) -> Bool {
+        return waitForStringValueContain(expectedString, getBrowserTabTitleElements()[index])
+    }
+    
     func waitForPublishedNoteToLoad(noteName: String) -> Bool {
         return app.windows.scrollViews.webViews["\(noteName) - beam"].waitForExistence(timeout: implicitWaitTimeout)
     }
