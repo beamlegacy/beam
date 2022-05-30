@@ -305,14 +305,14 @@ import Sentry
         currentTab?.load(request: request)
 
         guard let currentTabId = currentTab?.id else { return }
-        browserTabsManager.removeFromTabGroup(tabId: currentTabId)
-        browserTabsManager.createNewGroup(for: currentTabId)
+        browserTabsManager.removeFromTabNeighborhood(tabId: currentTabId)
+        browserTabsManager.createNewNeighborhood(for: currentTabId)
     }
 
     func addNewTab(origin: BrowsingTreeOrigin?, setCurrent: Bool = true, note: BeamNote? = nil, element: BeamElement? = nil, request: URLRequest? = nil, webView: BeamWebView? = nil) -> BrowserTab {
         EventsTracker.logBreadcrumb(message: "\(#function) \(String(describing: origin)) \(String(describing: note)) \(String(describing: request))", category: "BeamState")
         let tab = BrowserTab(state: self, browsingTreeOrigin: origin, originMode: mode, note: note, rootElement: element, webView: webView)
-        browserTabsManager.addNewTabAndGroup(tab, setCurrent: setCurrent, withURLRequest: request)
+        browserTabsManager.addNewTabAndNeighborhood(tab, setCurrent: setCurrent, withURLRequest: request)
         if setCurrent {
             mode = .web
         }
@@ -346,9 +346,11 @@ import Sentry
         _ = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: element, request: request)
     }
 
-    func createEmptyTab() {
+    func createEmptyTab() -> BrowserTab {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
-        _ = addNewTab(origin: nil)
+        let tab = addNewTab(origin: nil)
+        tab.title = loc("New Tab")
+        return tab
     }
 
     func startNewSearchWithCurrentDestinationCard() {
@@ -367,7 +369,7 @@ import Sentry
     func duplicate(tab: BrowserTab) {
         guard let url = tab.url else { return }
         let duplicatedTab = BrowserTab(state: self, browsingTreeOrigin: tab.browsingTreeOrigin, originMode: .web, note: nil)
-        browserTabsManager.addNewTabAndGroup(duplicatedTab, setCurrent: true, withURLRequest: URLRequest(url: url))
+        browserTabsManager.addNewTabAndNeighborhood(duplicatedTab, setCurrent: true, withURLRequest: URLRequest(url: url))
     }
 
     func closeTab(_ index: Int, allowClosingPinned: Bool = false) {
@@ -390,10 +392,8 @@ import Sentry
             tabIdToKeep = browserTabsManager.tabs[index].id
         }
         cmdManager.beginGroup(with: "CloseAllTabs")
-        for tab in browserTabsManager.tabs where tab.id != tabIdToKeep && (closePinnedTabs || !tab.isPinned) {
-            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
-            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self)
-        }
+        let tabs = browserTabsManager.tabs.filter { $0.id != tabIdToKeep && (closePinnedTabs || !$0.isPinned) }
+        closeTabs(tabs)
         cmdManager.endGroup(forceGroup: true)
     }
 
@@ -406,11 +406,16 @@ import Sentry
         }
 
         cmdManager.beginGroup(with: "CloseTabsToTheRightCmdGrp")
-        for tab in rightTabs {
-            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
-            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: false), on: self)
-        }
+        closeTabs(rightTabs)
         cmdManager.endGroup(forceGroup: true)
+    }
+
+    func closeTabs(_ tabs: [BrowserTab]) {
+        for tab in tabs {
+            guard let tabIndex = browserTabsManager.tabs.firstIndex(of: tab) else { continue }
+            cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab),
+                           on: self)
+        }
     }
 
     @discardableResult

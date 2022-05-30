@@ -1,5 +1,5 @@
 //
-//  TabGroupingWindow.swift
+//  TabGroupingSettingsWindow.swift
 //  Beam
 //
 //  Created by Jean-Louis Darmon on 22/05/2021.
@@ -10,7 +10,7 @@ import Cocoa
 import Combine
 import Clustering
 
-class TabGroupingWindow: NSWindow, NSWindowDelegate {
+class TabGroupingSettingsWindow: NSWindow, NSWindowDelegate {
 
     init(contentRect: NSRect, clusteringManager: ClusteringManager) {
         super.init(contentRect: contentRect,
@@ -19,7 +19,7 @@ class TabGroupingWindow: NSWindow, NSWindowDelegate {
                    defer: false)
         title = "Tab Grouping"
 
-        let tabGroupingContentView = TabGroupingContentView(clusteringManager: clusteringManager)
+        let tabGroupingContentView = TabGroupingSettingsContentView(clusteringManager: clusteringManager)
 
         contentView = BeamHostingView(rootView: tabGroupingContentView)
         isMovableByWindowBackground = false
