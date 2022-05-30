@@ -16,6 +16,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AdBlockerTests",
         "AdvancedCreditCardsTests\/testValidateAutoFillProposalCC()",
         "AdvancedCreditCardsTests\/testValidateNoAutoFillCC()",
         "AdvancedCreditCardsTests\/testValidateOtherCCLessThan4()",
@@ -37,6 +38,8 @@
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination6()",
         "AllCardsDeleteTests",
         "AllCardsViewTests",
+        "AllowListPreferencesTests\/testCancelAllowUrlOperation()",
+        "AllowListPreferencesTests\/testSearchForAllowUrl()",
         "BaseTest",
         "BlockReferenceTests",
         "BrowserFancyUrlTests",
