@@ -10,12 +10,14 @@ import Foundation
 class AccountCalendar: Identifiable {
     var id: UUID = UUID()
     var sourceId: UUID
+    var service: CalendarServices
     var name: String
     var nbrOfCalendar: Int
     var meetingCalendar: [MeetingCalendar]?
 
-    init(sourceId: UUID, name: String, nbrOfCalendar: Int, meetingCalendar: [MeetingCalendar]? = nil) {
+    init(sourceId: UUID, service: CalendarServices, name: String, nbrOfCalendar: Int, meetingCalendar: [MeetingCalendar]? = nil) {
         self.sourceId = sourceId
+        self.service = service
         self.name = name
         self.nbrOfCalendar = nbrOfCalendar
         self.meetingCalendar = meetingCalendar

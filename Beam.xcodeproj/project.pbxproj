@@ -540,6 +540,7 @@
 		872644772619903B0070E83D /* StepperControl.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644762619903B0070E83D /* StepperControl.swift */; };
 		8726448F26199B8F0070E83D /* OptionSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8726448E26199B8F0070E83D /* OptionSelector.swift */; };
 		872644C3261B29620070E83D /* PasswordManagerMenuViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */; };
+		872AD79B2836D16D00AB3C12 /* AppleCalendarService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872AD79A2836D16D00AB3C12 /* AppleCalendarService.swift */; };
 		872F658127F1C0EE005475B8 /* HostnameCanonicalizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872F658027F1C0EE005475B8 /* HostnameCanonicalizer.swift */; };
 		872F658927F1C29B005475B8 /* shared-credentials.json in Resources */ = {isa = PBXBuildFile; fileRef = 872F658827F1C29A005475B8 /* shared-credentials.json */; };
 		872F658B27F1C36A005475B8 /* canonical-hostnames.json in Resources */ = {isa = PBXBuildFile; fileRef = 872F658A27F1C36A005475B8 /* canonical-hostnames.json */; };
@@ -2107,6 +2108,7 @@
 		872644762619903B0070E83D /* StepperControl.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StepperControl.swift; sourceTree = "<group>"; };
 		8726448E26199B8F0070E83D /* OptionSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OptionSelector.swift; sourceTree = "<group>"; };
 		872644C1261B29620070E83D /* PasswordManagerMenuViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PasswordManagerMenuViewModel.swift; sourceTree = "<group>"; };
+		872AD79A2836D16D00AB3C12 /* AppleCalendarService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleCalendarService.swift; sourceTree = "<group>"; };
 		872F658027F1C0EE005475B8 /* HostnameCanonicalizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HostnameCanonicalizer.swift; sourceTree = "<group>"; };
 		872F658827F1C29A005475B8 /* shared-credentials.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = "shared-credentials.json"; sourceTree = "<group>"; };
 		872F658A27F1C36A005475B8 /* canonical-hostnames.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = "canonical-hostnames.json"; sourceTree = "<group>"; };
@@ -6638,6 +6640,7 @@
 			isa = PBXGroup;
 			children = (
 				A07C013C2705ED2700D91750 /* GoogleCalendarService.swift */,
+				872AD79A2836D16D00AB3C12 /* AppleCalendarService.swift */,
 				A0614EE9270B382400C38F82 /* GoogleCalendar.swift */,
 				A0614EEB270B383000C38F82 /* GoogleEvent.swift */,
 				A0EFCFF427162499004A7C7B /* CalendarManager.swift */,
@@ -8584,6 +8587,7 @@
 				418171EF2581107C00317ED8 /* User.swift in Sources */,
 				8A2A398726F24F9E0084A073 /* Debounce.swift in Sources */,
 				A5153EE3260DD58A00C84902 /* RecentsManager.swift in Sources */,
+				872AD79B2836D16D00AB3C12 /* AppleCalendarService.swift in Sources */,
 				4181732D25811E9800317ED8 /* Icon.swift in Sources */,
 				87F47CC92669415800D01960 /* WebFieldClassifier.swift in Sources */,
 				4181722E2581107C00317ED8 /* AutocompleteItemView.swift in Sources */,
