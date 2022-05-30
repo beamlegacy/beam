@@ -388,7 +388,7 @@ extension BeamData {
     }
 
     func reloadAllEvents() {
-        if calendarManager.isConnected(calendarService: .googleCalendar) {
+        if calendarManager.hasConnectedSource() {
             for journal in journal {
                 if let journalDate = journal.type.journalDate, !journal.isEntireNoteEmpty() || journal.isTodaysNote {
                     loadEvents(for: journal.id, for: journalDate)
@@ -398,7 +398,7 @@ extension BeamData {
     }
 
     private func loadEvents(for noteUuid: UUID, for journalDate: Date) {
-        if calendarManager.isConnected(calendarService: .googleCalendar) {
+        if calendarManager.hasConnectedSource() {
             self.calendarManager.requestMeetings(for: journalDate, onlyToday: true) { meetings in
                 guard let oldMeetings = self.calendarManager.meetingsForNote[noteUuid], oldMeetings == meetings else {
                     self.calendarManager.meetingsForNote[noteUuid] = meetings

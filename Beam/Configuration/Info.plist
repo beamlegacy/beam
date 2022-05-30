@@ -354,6 +354,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCalendarsUsageDescription</key>
+	<string>Beam requires access in order to display your events in your notes.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Beam requires access so that you can use video conferencing web services.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
