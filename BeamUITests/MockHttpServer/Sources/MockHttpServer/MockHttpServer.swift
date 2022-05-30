@@ -43,6 +43,7 @@ public class MockHttpServer {
         installFormHandlers(to: router)
         installBrowserHandlers(to: router)
         installRedirectionHandlers(to: router)
+        installAdBlockHandlers(to: router)
         router.all("/view", middleware: BodyParser())
         router.post("/view", handler: submitHandler)
         router.all("/signinstep2", middleware: BodyParser())
@@ -76,6 +77,15 @@ public class MockHttpServer {
             }
         }
     }
+    
+    private func installAdBlockHandlers(to router: Router) {
+        for templateName in browserNames {
+            router.get("adblock/\(templateName)") { request, response, next in
+                self.renderStencil(request, response, "adblock/\(templateName)")
+                next()
+            }
+        }
+    }
 
     private func rootHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
         if let formTemplateName = request.hostname.removingSuffix(".form.lvh.me") {
@@ -84,6 +94,8 @@ public class MockHttpServer {
             renderStencil(request, response, "browser/\(browserTemplateName)")
         } else if let redirectionTemplateName = request.hostname.removingSuffix(".redirection.lvh.me") {
             renderStencil(request, response, "redirection/\(redirectionTemplateName)")
+        } else if let redirectionTemplateName = request.hostname.removingSuffix(".adblock.lvh.me") {
+            renderStencil(request, response, "adblock/\(redirectionTemplateName)")
         } else {
             return listHandler(request: request, response: response, next: next)
         }
@@ -102,6 +114,14 @@ public class MockHttpServer {
             return listHandler(request: request, response: response, next: next)
         }
         renderStencil(request, response, "browser/\(browser)")
+        next()
+    }
+    
+    private func adblockPathHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        guard let browser = request.parameters["adblock"] else {
+            return listHandler(request: request, response: response, next: next)
+        }
+        renderStencil(request, response, "adblock/\(browser)")
         next()
     }
 
