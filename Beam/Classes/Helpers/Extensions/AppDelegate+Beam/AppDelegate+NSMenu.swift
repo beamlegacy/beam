@@ -103,6 +103,9 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             case Self.statusBarItemIdentifier:
                 updateStatusBarMenu(item)
 
+            case Self.sidebarItemIdentifier:
+                updateSideBarMenu(item)
+
             default: break
             }
 
@@ -127,6 +130,17 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             title = NSLocalizedString("Hide Status Bar", comment: "Hide Status Bar menu item")
         } else {
             title = NSLocalizedString("Show Status Bar", comment: "Show Status Bar Menu item")
+        }
+        menuItem.title = title
+    }
+
+    private func updateSideBarMenu(_ menuItem: NSMenuItem) {
+        guard let sidebarIsDisplayed = window?.state.showSidebar else { return }
+        let title: String
+        if sidebarIsDisplayed {
+            title = NSLocalizedString("Hide Sidebar", comment: "Hide Sidebar menu item")
+        } else {
+            title = NSLocalizedString("Show Sidebar", comment: "Show Sidebar Menu item")
         }
         menuItem.title = title
     }
@@ -183,6 +197,7 @@ extension AppDelegate {
     private static let statusBarItemIdentifier = NSUserInterfaceItemIdentifier("toggle_status_bar")
     private static let collectPageToCardItemIdentifier = NSUserInterfaceItemIdentifier("collect_page")
     private static let collectPageToCardAlternateItemIdentifier = NSUserInterfaceItemIdentifier("collect_page_alternate")
+    private static let sidebarItemIdentifier = NSUserInterfaceItemIdentifier("toggle_sidebar")
 
 }
 

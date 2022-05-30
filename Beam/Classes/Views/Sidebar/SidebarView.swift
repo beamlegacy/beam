@@ -16,6 +16,7 @@ struct SidebarView: View {
 
     @State private var dismissTimerCancellable: Cancellable?
     @State private var didAppear = false
+    private var shouldAutodismiss = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3.0) {
@@ -24,18 +25,23 @@ struct SidebarView: View {
                     journal
                     allNotes
                     Separator(horizontal: true)
-                        .padding(.vertical, 10)
+                        .padding(.top, 10)
+                        .padding(.bottom, -3)
+                        .blendModeLightMultiplyDarkScreen()
                     ScrollView {
                         VStack(spacing: 3.0) {
-                            pinned
+//                            pinned
                             recents
                         }
+                        .padding(.top, 10)
                     }
-                    Spacer()
+                    Spacer(minLength: 0)
                     Separator(horizontal: true)
+                        .padding(.top, -6)
                         .padding(.bottom, 1)
+                        .blendModeLightMultiplyDarkScreen()
                     footer
-                }.transition(.animatableOffset(offset: CGSize(width: -40, height: 0)).animation(BeamAnimation.defaultiOSEasing(duration: 0.3)))
+                }.transition(.animatableOffset(offset: CGSize(width: -40, height: 0)).animation(BeamAnimation.defaultiOSEasing(duration: 0.20)))
             }
         }
         .padding(.top, 144)
@@ -44,8 +50,8 @@ struct SidebarView: View {
         .onHover { hover in
             if hover {
                 dismissTimerCancellable?.cancel()
-            } else {
-                dismissTimerCancellable = Timer.publish(every: 1, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
+            } else if shouldAutodismiss {
+                dismissTimerCancellable = Timer.publish(every: 0.5, on: .main, in: .common).autoconnect().sink(receiveValue: { _ in
                     state.showSidebar = false
                     dismissTimerCancellable?.cancel()
                 })
@@ -107,14 +113,14 @@ struct SidebarView: View {
     }
 
     private var sidebarTransition: AnyTransition {
-        .asymmetric(insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.2).delay(0.1))
-                                    .combined(with: .animatableOffset(offset: CGSize(width: -240, height: 0)).animation(BeamAnimation.spring(stiffness: 340, damping: 30))),
+        .asymmetric(insertion: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15))
+                                    .combined(with: .animatableOffset(offset: CGSize(width: -250, height: 0)).animation(BeamAnimation.spring(stiffness: 480, damping: 36))),
                                 removal: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.15))
-                                    .combined(with: .animatableOffset(offset: CGSize(width: -240, height: 0)).animation(BeamAnimation.spring(stiffness: 340, damping: 30))))
+                                    .combined(with: .animatableOffset(offset: CGSize(width: -250, height: 0)).animation(BeamAnimation.spring(stiffness: 480, damping: 36))))
     }
 
     private var shadowOpacity: CGFloat {
-        colorScheme == .light ? 0.1 : 0.5
+        colorScheme == .light ? 0.1 : 0.3
     }
 
     private var sideStroke: some View {
@@ -122,7 +128,7 @@ struct SidebarView: View {
     }
 
     private var sideStrokeAlpha: CGFloat {
-        colorScheme == .light ? 0.05 : 0.5
+        colorScheme == .light ? 0.05 : 0.25
     }
 
     private var isAllNotesActive: Bool {
