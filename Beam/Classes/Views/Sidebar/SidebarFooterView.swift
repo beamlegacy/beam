@@ -20,10 +20,13 @@ struct SidebarFooterView: View {
             if let username = username {
                 HStack {
                     UsernameBadgeView(username: username)
-                    Text(username)
+                    GeometryReader { proxy in
+                        ButtonLabel(username, variant: .dropdown) {
+                            showMenuView(at: proxy)
+                        }
+                    }.frame(height: 20)
                 }
                 .padding(.trailing, 12)
-                .overlay(menu)
             } else {
                 ButtonLabel(loc("Sign Up or Sign In"), icon: "editor-account_placeholder", customStyle: buttonLabelStyle) {
                     openAccountPreferences()
@@ -37,18 +40,27 @@ struct SidebarFooterView: View {
 
     }
 
-    @ViewBuilder private var menu: some View {
-            Menu("") {
-                if let url = BeamNoteSharingUtils.getProfileLink() {
-                    Button("Public Profile") {
-                        state.showSidebar = false
-                        state.createTab(withURLRequest: URLRequest(url: url))
-                    }
-                }
-                Button("Account Settings") {
-                    openAccountPreferences()
-                }
-            }.menuStyle(.borderlessButton)
+    func showMenuView(at proxy: GeometryProxy) {
+
+        guard let window = AppDelegate.main.window else { return }
+        let origin = proxy.safeTopLeftGlobalFrame(in: window).origin
+        let point = origin.flippedPointToTopLeftOrigin(in: window)
+
+        let menu = ContextMenuFormatterView(key: "sidebarcontextmenu", items: contextMenuItems, defaultSelectedIndex: 0, canBecomeKey: true)
+        CustomPopoverPresenter.shared.presentFormatterView(menu, atPoint: point)
+    }
+
+    private var contextMenuItems: [ContextMenuItem] {
+        var menu = [ContextMenuItem(title: "Account Settings", action: openAccountPreferences)]
+        if let url = BeamNoteSharingUtils.getProfileLink() {
+            menu.append(ContextMenuItem(title: "Public Profile", action: { showPublicProfile(at: url) }))
+        }
+        return menu
+    }
+
+    private func showPublicProfile(at url: URL) {
+        state.showSidebar = false
+        state.createTab(withURLRequest: URLRequest(url: url))
     }
 
     private func openAccountPreferences() {
