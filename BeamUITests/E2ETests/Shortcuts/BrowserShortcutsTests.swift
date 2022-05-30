@@ -25,6 +25,11 @@ class BrowserShortcutsTests: BaseTest {
         testHelper = BeamUITestsHelper(journalView.app)
     }
     
+    private func assertTabTitleContainsBeamSearch(_ tabIndex: Int) {
+        XCTAssertTrue(webView.waitForTabTitleToContain(index: tabIndex, expectedString: "beam - "))
+        XCTAssertTrue(webView.waitForTabTitleToContain(index: tabIndex, expectedString: "Google"))
+    }
+    
     func testWebTabsJumpOpenCloseReopen() {
         step ("Given I open a web page"){
             testHelper.openTestPage(page: .password)
@@ -57,7 +62,7 @@ class BrowserShortcutsTests: BaseTest {
 
     }
     
-    func testJumpBetweenWebTabs() throws {
+    func testJumpBetweenWebTabs() {
         step ("Given I open web pages"){
             testHelper.openTestPage(page: .password)
             testHelper.openTestPage(page: .media)
@@ -102,7 +107,7 @@ class BrowserShortcutsTests: BaseTest {
         
     }
     
-    func testReopenTabsCmdT() throws {
+    func testReopenTabsCmdT() {
         let expectedTabsNumber = 3
         
         step ("Then nothing happens by default on CMD+T action"){
@@ -141,6 +146,30 @@ class BrowserShortcutsTests: BaseTest {
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 2, elementQuery: webView.getTabs()))
             shortcutHelper.shortcutActionInvoke(action: .reOpenClosedTab)
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 3, elementQuery: webView.getTabs()))
+        }
+    }
+    
+    func testTextInstantSearchInNewTabShortcut () {
+        
+        let textToSelect = "H-beam"
+        let expectedSearchText = "beam - Google Search"
+        
+        step("GIVEN I open test page") {
+            testHelper.openTestPage(page: .page2)
+        }
+        
+        step("WHEN I select \(textToSelect) and press CMD+Return") {
+            webView.app.staticTexts[textToSelect].firstMatch.doubleTapInTheMiddle()
+            shortcutHelper.shortcutActionInvoke(action: .instantSearch)
+        }
+        
+        step("THEN new tab is opened and it has search text: \(expectedSearchText)") {
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            if isBigSurOS() {
+                assertTabTitleContainsBeamSearch(1)
+            } else {
+                assertTabTitleContainsBeamSearch(2)
+            }
         }
     }
     
