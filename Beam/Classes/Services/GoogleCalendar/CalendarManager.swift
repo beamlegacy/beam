@@ -13,21 +13,25 @@ enum CalendarError: Error {
     case cantRefreshTokens
     case cantDecode
     case responseDataIsEmpty
+    case permissionDenied
     case unknownError(message: String)
 }
 
 enum CalendarServices: String {
     case googleCalendar
+    case appleCalendar
 
     var scope: String? {
         switch self {
         case .googleCalendar: return "https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/calendar.readonly"
+        case .appleCalendar: return nil
         }
     }
 }
 
 protocol CalendarService {
     var id: UUID { get }
+    var service: CalendarServices { get }
     var name: String { get }
     var scope: String? { get }
     var inNeedOfPermission: Bool { get }
@@ -35,7 +39,16 @@ protocol CalendarService {
     func requestAccess(completionHandler: @escaping (Bool) -> Void)
     func getMeetings(for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void)
     func getCalendars(completionHandler: @escaping (Result<[MeetingCalendar]?, CalendarError>) -> Void)
-    func getUserEmail(completionHandler: @escaping (Result<String, CalendarError>) -> Void)
+    func getAccountName(completionHandler: @escaping (Result<String, CalendarError>) -> Void)
+}
+
+extension CalendarService {
+    var name: String {
+        service.rawValue
+    }
+    var scope: String? {
+        service.scope
+    }
 }
 
 class CalendarManager: ObservableObject {
@@ -58,6 +71,9 @@ class CalendarManager: ObservableObject {
         guard !didLazyInitConnectedSources else { return }
         didLazyInitConnectedSources = true
 
+        if Persistence.Authentication.hasAppleCalendarConnection == true {
+            connectedSources.append(AppleCalendarService())
+        }
         if let googleTokens = Persistence.Authentication.googleCalendarTokens {
             for (googleAccessToken, googleRefreshToken) in googleTokens {
                 let googleCalendar = GoogleCalendarService(accessToken: googleAccessToken, refreshToken: googleRefreshToken)
@@ -68,10 +84,12 @@ class CalendarManager: ObservableObject {
 
     func isConnected(calendarService: CalendarServices) -> Bool {
         lazyInitConnectedSources()
-        guard !connectedSources.isEmpty else {
-            return false
-        }
-        return true
+        return connectedSources.contains(where: { $0.service == calendarService })
+    }
+
+    func hasConnectedSource() -> Bool {
+        lazyInitConnectedSources()
+        return !connectedSources.isEmpty
     }
 
     func requestAccess(from calendarService: CalendarServices, completionHandler: @escaping (Bool) -> Void) {
@@ -86,19 +104,30 @@ class CalendarManager: ObservableObject {
                 }
                 completionHandler(connected)
             }
+        case .appleCalendar:
+            let appleCalendar = connectedSources.first(where: { $0.service == .appleCalendar }) ?? AppleCalendarService()
+            appleCalendar.requestAccess { [weak self] connected in
+                guard let self = self else { return }
+                if connected && !self.isConnected(calendarService: .appleCalendar) {
+                    Persistence.Authentication.hasAppleCalendarConnection = true
+                    self.connectedSources.append(appleCalendar)
+                }
+                completionHandler(connected)
+            }
         }
     }
 
     func getInformation(for source: CalendarService, completionHandler: @escaping (AccountCalendar) -> Void) {
         lazyInitConnectedSources()
-        source.getUserEmail { result in
+        source.getAccountName { result in
             switch result {
-            case .success(let email):
+            case .success(let name):
                 source.getCalendars { result in
                     switch result {
                     case .success(let meetingsCalendar):
                         completionHandler(AccountCalendar(sourceId: source.id,
-                                                          name: email,
+                                                          service: source.service,
+                                                          name: name,
                                                           nbrOfCalendar: meetingsCalendar?.count ?? 0,
                                                           meetingCalendar: meetingsCalendar))
                     case .failure: break
@@ -122,6 +151,11 @@ class CalendarManager: ObservableObject {
                 connectedSources.remove(at: idx)
                 updated = true
             }
+        case .appleCalendar:
+            guard let idx = connectedSources.firstIndex(where: { $0.id == sourceId }) else { return }
+            Persistence.Authentication.hasAppleCalendarConnection = false
+            connectedSources.remove(at: idx)
+            updated = true
         }
     }
 
@@ -129,6 +163,7 @@ class CalendarManager: ObservableObject {
         self.meetingsForNote.removeAll()
         self.connectedSources.removeAll()
         Persistence.Authentication.googleCalendarTokens = nil
+        Persistence.Authentication.hasAppleCalendarConnection = false
     }
 
     func requestMeetings(for dateMin: Date, and dateMax: Date? = nil, onlyToday: Bool, query: String? = nil, completionHandler: @escaping ([Meeting]) -> Void) {
