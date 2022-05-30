@@ -40,14 +40,14 @@ struct SidebarListNoteButton: View {
                 Text(titleForNote(note))
                     .lineLimit(1)
                 Spacer()
-            }
+            }.padding(.vertical, 7)
             .contentShape(Rectangle())
-                .onTouchDown { isPressed = $0 }
-                .if(action != nil) {
-                    $0.simultaneousGesture(TapGesture().onEnded {
-                        action?()
-                    })
-                }
+            .onTouchDown { isPressed = $0 }
+            .if(action != nil) {
+                $0.simultaneousGesture(TapGesture().onEnded {
+                    action?()
+                })
+            }
             if note.publicationStatus.isPublic {
                 ButtonLabel(icon: "editor-url_link", customStyle: buttonLabelStyle) {
                     BeamNoteSharingUtils.copyLinkToClipboard(for: note, completion: nil)
@@ -58,10 +58,12 @@ struct SidebarListNoteButton: View {
             }
         }
         .foregroundColor(foregroundColor)
-        .font(BeamFont.regular(size: 12).swiftUI)
+        .font(textFont)
         .padding(.horizontal, 8)
         .frame(width: 220, height: 30)
-        .background(SidebarListBackground(isSelected: isSelected, isHovering: isHovering, isPressed: isPressed))
+        .background(SidebarListBackground(isSelected: isSelected,
+                                          isHovering: isHovering,
+                                          isPressed: isPressed))
         .onHover {
             isHovering = $0
             if !$0 {
@@ -90,10 +92,14 @@ struct SidebarListNoteButton: View {
         }
     }
 
+    private var textFont: Font {
+        isSelected ? BeamFont.medium(size: 12).swiftUI : BeamFont.regular(size: 12).swiftUI
+    }
+
     private var foregroundColor: Color {
         BeamColor.Niobium.swiftUI
     }
-    
+
     private var buttonLabelStyle: ButtonLabelStyle {
         ButtonLabelStyle(horizontalPadding: 0, verticalPadding: 0, activeBackgroundColor: .clear)
     }
