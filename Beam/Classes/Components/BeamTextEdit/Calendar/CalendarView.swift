@@ -15,7 +15,7 @@ class CalendarGutterViewModel: ObservableObject {
     var noteId: UUID
     var todaysCalendar: Bool
     var isConnected: Bool {
-        calendarManager.connectedSources.count > 0
+        !calendarManager.connectedSources.isEmpty
     }
 
     @Published var meetings: [Meeting] = []
@@ -109,29 +109,34 @@ struct CalendarView: View {
                 Spacer()
             }.frame(width: 21)
             if isHoveringNotConnect {
-                Button {
-                    viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                        if connected {
-                            viewModel.calendarManager.updated = true
-                            isHoveringConnect = true
-                        }
-                    }
-                } label: {
-                    VStack(alignment: .leading, spacing: 4.5) {
-                        Text("Connect your Calendar")
-                            .font(BeamFont.medium(size: 12).swiftUI)
-                            .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-                        Text("Write a meeting note or join a video call")
-                            .lineLimit(3)
-                            .fixedSize(horizontal: false, vertical: true)
-                            .multilineTextAlignment(.leading)
-                            .font(BeamFont.regular(size: 11).swiftUI)
-                            .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-                        Spacer()
-                    }
-                }.buttonStyle(.plain)
+                VStack(alignment: .leading, spacing: 4.5) {
+                    connectCalendarButton(service: .appleCalendar, label: "Connect macOS Calendar")
+                    connectCalendarButton(service: .googleCalendar, label: "Connect Google Calendar")
+                    Text("Write a meeting note or join a video call")
+                        .lineLimit(3)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .multilineTextAlignment(.leading)
+                        .font(BeamFont.regular(size: 11).swiftUI)
+                        .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+                    Spacer()
+                }
             }
         }
+    }
+
+    private func connectCalendarButton(service: CalendarServices, label: String) -> some View {
+        Button {
+            viewModel.calendarManager.requestAccess(from: service) { connected in
+                if connected {
+                    viewModel.calendarManager.updated = true
+                    isHoveringConnect = true
+                }
+            }
+        } label: {
+            Text(label)
+                .font(BeamFont.medium(size: 12).swiftUI)
+                .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
+        }.buttonStyle(.plain)
     }
 
     private func prompt(_ meeting: Meeting) {
