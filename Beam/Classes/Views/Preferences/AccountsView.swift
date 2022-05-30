@@ -107,39 +107,45 @@ struct AccountsView: View {
                 .frame(width: 250, alignment: .trailing)
         } content: {
             VStack(alignment: .leading) {
-                if viewModel.accountsCalendar.isEmpty {
-                    connectGoogleCalendarView
-                } else {
+                if !viewModel.accountsCalendar.isEmpty {
                     VStack(alignment: .leading) {
                         VStack(alignment: .leading) {
                             ForEach(viewModel.accountsCalendar) { account in
-                                GoogleAccountView(viewModel: viewModel, account: account) {
-                                    viewModel.calendarManager.disconnect(from: .googleCalendar, sourceId: account.sourceId)
+                                calendarAccountView(account: account) {
+                                    viewModel.calendarManager.disconnect(from: account.service, sourceId: account.sourceId)
                                     viewModel.accountsCalendar.removeAll(where: { $0 === account })
                                 }
                             }
                         }.padding(.bottom, 20)
 
-                        Button(action: {
-                            viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                                if connected { viewModel.calendarManager.updated = true }
-                            }
-                        }, label: {
-                            // TODO: loc
-                            Text("Connect Another Google Calendar...")
-                                .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                .frame(width: 236)
-                                .padding(.top, -4)
-                        })
-                        VStack {
-                            Text("Connect with Google to import your Calendar & Contacts and easily take meeting notes.")
-                                .font(BeamFont.regular(size: 11).swiftUI)
-                                .foregroundColor(BeamColor.Corduroy.swiftUI)
-                                .lineLimit(2)
-                                .fixedSize(horizontal: false, vertical: true)
-                                .multilineTextAlignment(.leading)
-                        }.frame(width: 297, height: 26, alignment: .leading)
+                        if viewModel.calendarManager.isConnected(calendarService: .googleCalendar) {
+                            Button(action: {
+                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
+                                    if connected { viewModel.calendarManager.updated = true }
+                                }
+                            }, label: {
+                                // TODO: loc
+                                Text("Connect Another Google Calendar...")
+                                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                                    .frame(width: 236)
+                                    .padding(.top, -4)
+                            })
+                            VStack {
+                                Text("Connect with Google to import your Calendar & Contacts and easily take meeting notes.")
+                                    .font(BeamFont.regular(size: 11).swiftUI)
+                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+                                    .lineLimit(2)
+                                    .fixedSize(horizontal: false, vertical: true)
+                                    .multilineTextAlignment(.leading)
+                            }.frame(width: 297, height: 26, alignment: .leading)
+                        }
                     }
+                }
+                if !viewModel.calendarManager.isConnected(calendarService: .appleCalendar) {
+                    connectAppleCalendarView
+                }
+                if !viewModel.calendarManager.isConnected(calendarService: .googleCalendar) {
+                    connectGoogleCalendarView
                 }
             }
         }
@@ -192,8 +198,8 @@ struct AccountsView: View {
                     .foregroundColor(BeamColor.Generic.text.swiftUI)
                     .frame(width: 208, height: 20)
                     .padding(.top, -4)
-        })
-                .padding(.bottom, 6)
+            })
+            .padding(.bottom, 6)
             VStack {
                 Text("Sync your notes between device and share them easily")
                     .lineLimit(2)
@@ -218,6 +224,32 @@ struct AccountsView: View {
                     .frame(width: 208)
                     .padding(.top, -4)
             })
+        }
+    }
+
+    private var connectAppleCalendarView: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                viewModel.calendarManager.requestAccess(from: .appleCalendar) { connected in
+                    if connected { viewModel.calendarManager.updated = true }
+                }
+            }, label: {
+                // TODO: loc
+                Text("Connect macOS Calendar...")
+                    .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    .frame(width: 208)
+                    .padding(.top, -4)
+            })
+        }
+    }
+
+    @ViewBuilder
+    private func calendarAccountView(account: AccountCalendar, onDisconnect: (() -> Void)?) -> some View {
+        switch account.service {
+        case .googleCalendar:
+            GoogleAccountView(viewModel: viewModel, account: account, onDisconnect: onDisconnect)
+        case .appleCalendar:
+            AppleAccountView(viewModel: viewModel, account: account, onDisconnect: onDisconnect)
         }
     }
 
@@ -451,6 +483,55 @@ struct GoogleAccountView: View {
                     .foregroundColor(BeamColor.Corduroy.swiftUI)
             }
 
+        }
+    }
+}
+
+struct AppleAccountView: View {
+    @ObservedObject var viewModel: AccountsViewModel
+    var account: AccountCalendar
+    var onDisconnect: (() -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            HStack(alignment: .top) {
+                Text(account.name)
+                    .frame(width: 227, alignment: .topLeading)
+                    .padding(.trailing, 12)
+                if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
+                    Button {
+                        if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars") {
+                            NSWorkspace.shared.open(url)
+                        }
+                    } label: {
+                        Text("Open Preferences...")
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                            .padding(.top, -4)
+                    }
+                } else {
+                    Button {
+                        UserAlert.showMessage(message: "Are you sure you want to disconnect your calendar?",
+                                              buttonTitle: "Disconnect",
+                                              secondaryButtonTitle: "Cancel") {
+                            onDisconnect?()
+                        }
+                    } label: {
+                        Text("Disconnect")
+                            .foregroundColor(BeamColor.Generic.text.swiftUI)
+                            .frame(width: 99)
+                            .padding(.top, -4)
+                    }
+                }
+            }.padding(.bottom, -5)
+            if viewModel.calendarManager.connectedSources.first(where: { $0.id == account.sourceId })?.inNeedOfPermission ?? true {
+                Text("Fix permissions in System Preferences...")
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Shiraz.swiftUI)
+            } else {
+                Text("\(account.nbrOfCalendar) calendars, 0 contacts synced")
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+            }
         }
     }
 }

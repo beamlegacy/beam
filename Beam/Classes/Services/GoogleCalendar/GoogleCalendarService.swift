@@ -29,10 +29,9 @@ enum GoogleCalendarEndPoints {
     }
 }
 
-class GoogleCalendarService {
-    var id: UUID = UUID()
-    var name: String = CalendarServices.googleCalendar.rawValue
-    var scope: String? = CalendarServices.googleCalendar.scope
+final class GoogleCalendarService {
+    let id: UUID = UUID()
+    let service = CalendarServices.googleCalendar
     var inNeedOfPermission: Bool = false
 
     var accessToken: String?
@@ -335,7 +334,7 @@ class GoogleCalendarService {
 }
 
 extension GoogleCalendarService: CalendarService {
-    func getUserEmail(completionHandler: @escaping (Result<String, CalendarError>) -> Void) {
+    func getAccountName(completionHandler: @escaping (Result<String, CalendarError>) -> Void) {
         getGoogleUserEmail { result in
             completionHandler(result)
         }

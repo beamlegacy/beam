@@ -13,6 +13,7 @@ enum Persistence {
         @KeychainStorable("authentication.password") static var password: String?
 
         @KeychainStorable("authentication.google.tokens", synchronizable: false) static var googleCalendarTokens: [String: String]?
+        @StandardStorable("authentication.apple.calendar") static var hasAppleCalendarConnection: Bool?
 
         @StandardStorable("authentication.username") static var username: String?
         @StandardStorable("authentication.hasSeenOnboarding") static var hasSeenOnboarding: Bool?
@@ -105,6 +106,7 @@ enum Persistence {
         Persistence.Authentication.username = nil
         Persistence.Authentication.password = nil
         Persistence.Authentication.googleCalendarTokens = nil
+        Persistence.Authentication.hasAppleCalendarConnection = nil
         Persistence.ImportedBrowserHistory.maxDateByBrowser = nil
         Sync.cleanUp()
     }
