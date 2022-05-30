@@ -110,4 +110,9 @@ class BaseTest: XCTestCase {
         ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
         return AllCardsTestView().openFirstCard()
     }
+    
+    func isBigSurOS() -> Bool {
+        let osVersion = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
+        return osVersion < 12
+    }
 }

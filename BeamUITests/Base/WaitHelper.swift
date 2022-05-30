@@ -21,6 +21,7 @@ enum PredicateFormat: String {
     case notExists = "exists == false"
     case identifierEquals = "identifier == "
     case valueEquals = "value == "
+    case valueContains = "value CONTAINS "
     case hasKeyboardFocus = "hasKeyboardFocus == true"
     case doesntHaveKeyboardFocus = "hasKeyboardFocus == false"
 }
@@ -154,6 +155,11 @@ extension WaitHelper {
     @discardableResult
     func waitForStringValueEqual(_ expectedValue: String, _ element: XCUIElement, _ timeout: TimeInterval) -> Bool {
         return waitFor(PredicateFormat.valueEquals.rawValue + "'\(expectedValue)'", element, timeout)
+    }
+    
+    @discardableResult
+    func waitForStringValueContain(_ expectedValue: String, _ element: XCUIElement) -> Bool {
+        return waitFor(PredicateFormat.valueContains.rawValue + "'\(expectedValue)'", element)
     }
     
     @discardableResult
