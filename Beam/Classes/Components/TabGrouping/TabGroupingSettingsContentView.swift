@@ -7,10 +7,9 @@
 
 import Foundation
 import SwiftUI
-import Fakery
 import Clustering
 
-struct TabGroupingContentView: View {
+struct TabGroupingSettingsContentView: View {
     @ObservedObject var clusteringManager: ClusteringManager
 
     var body: some View {

@@ -59,7 +59,7 @@ struct Toolbar: View {
         ToolbarContentView(downloadList: state.data.downloadManager.downloadList)
             .environmentObject(state.autocompleteManager)
             .zIndex(11)
-            .background(ClickCatchingView(onTap: { _ in }, onDoubleTap: { _ in
+            .background(ClickCatchingView(onDoubleTap: { _ in
                 state.associatedWindow?.zoomOrMiniaturize(nil)
             }))
             .background(

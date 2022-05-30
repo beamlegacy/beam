@@ -68,9 +68,9 @@ extension BrowserTab: WebPage {
 
     func createNewTab(_ request: URLRequest, _ configuration: WKWebViewConfiguration?, setCurrent: Bool, rect: NSRect) -> WebPage? {
         guard let state = state else { return nil }
-        if let currentTab = state.browserTabsManager.currentTab, !currentTab.isPinned && !setCurrent && state.browserTabsManager.currentTabGroupKey != currentTab.id {
-            state.browserTabsManager.removeFromTabGroup(tabId: currentTab.id)
-            state.browserTabsManager.createNewGroup(for: currentTab.id)
+        if let currentTab = state.browserTabsManager.currentTab, !currentTab.isPinned && !setCurrent && state.browserTabsManager.currentTabNeighborhoodKey != currentTab.id {
+            state.browserTabsManager.removeFromTabNeighborhood(tabId: currentTab.id)
+            state.browserTabsManager.createNewNeighborhood(for: currentTab.id)
         }
         return createNewTab(request, configuration, setCurrent: setCurrent, state: state, rect: rect)
     }
