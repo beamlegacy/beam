@@ -38,7 +38,7 @@ struct BeamTextField: NSViewRepresentable {
     /// Returns true to stop event propagation
     var onTab: (() -> Bool)?
     var onCursorMovement: (CursorMovement) -> Bool = { _ in false }
-    var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Void)?
+    var onModifierFlagPressed: ((_ modifierFlag: NSEvent) -> Bool)?
     var onStartEditing: () -> Void = { }
     var onStopEditing: () -> Void = { }
     var onSelectionChanged: (NSRange) -> Void = { _ in }
@@ -236,7 +236,7 @@ struct BeamTextField: NSViewRepresentable {
 
             modifierFlagsPressed = event.modifierFlags
             if !event.modifierFlags.isEmpty {
-                parent.onModifierFlagPressed?(event)
+                return parent.onModifierFlagPressed?(event) ?? false
             }
             return false
         }
