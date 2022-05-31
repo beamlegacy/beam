@@ -86,4 +86,14 @@ class PrivacyPreferencesTestView: PreferencesBaseView {
         return allowListTables.children(matching: .tableRow).element.textFields[text].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
+    func getInsideAdBlockerSettingElement() -> XCUIElement {
+        return checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.adsCheckbox.accessibilityIdentifier)
+    }
+    
+    @discardableResult
+    func clickInsideAdBlockerSetting() -> PrivacyPreferencesTestView {
+        checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.adsCheckbox.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
 }
