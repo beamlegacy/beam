@@ -328,17 +328,45 @@ extension BeamTextEdit {
             }
             addNoteSourceFrom(text: beamText)
         }
+        cmdManager.endGroup()
 
         if let lastInsertedNode = lastInserted as? TextNode,
-           let linkRanges = lastInserted?.elementText.linkRanges, linkRanges.count == 1,
-           let linkRange = linkRanges.first {
+           let insertedElement = lastInserted?.elementText,
+           insertedElement.linkRanges.count == 1,
+           let linkRange = insertedElement.linkRanges.first {
 
             let embedable = showLinkEmbedPasteMenu(for: linkRange)
             if !embedable {
-                cmdManager.insertText(BeamText(text: " ", attributes: []), in: lastInsertedNode, at: linkRange.end)
-                cmdManager.focusElement(lastInsertedNode, cursorPosition: linkRange.end + 1)
+                updateLinkToFormattedLink(in: lastInsertedNode, at: linkRange, with: cmdManager)
             }
         }
-        cmdManager.endGroup()
     }
+
+    /// Updates a plain link to the formatted version of "<linktitle> - <source site>"
+    /// To get the link title it will query the proxy API. The proxy API will attempt to trim
+    /// a trailing the site name from the page title.
+    /// - Parameters:
+    ///   - node: Target node to update
+    ///   - range: Range of node that contains the link
+    ///   - cmdManager: CommandManager<Widget> to execute text edit events with
+    public func updateLinkToFormattedLink(in node: TextNode, at range: BeamText.Range, with cmdManager: CommandManager<Widget>) {
+        if let url = URL(string: node.elementText.text) {
+            Task.detached(priority: .background) { @MainActor [weak self] in
+                guard let self = self else { return }
+                var fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
+                if let host = url.minimizedHost, let hostUrl = url.domain {
+                    fetchedTitle.append(BeamText(" - "))
+                    fetchedTitle.append(BeamText(host, attributes: [.link(hostUrl.absoluteString)]))
+                }
+                self.disableInputDetector()
+                cmdManager.beginGroup(with: "UpdateLinkToFormattedLink")
+                self.rootNode?.insertText(text: fetchedTitle, replacementRange: range.range)
+                cmdManager.insertText(BeamText(text: " ", attributes: []), in: node, at: range.end)
+                cmdManager.focusElement(node, cursorPosition: range.end + 1)
+                cmdManager.endGroup()
+                self.enableInputDetector()
+            }
+        }
+    }
+
 }

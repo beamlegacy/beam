@@ -99,6 +99,24 @@ extension NSAttributedString {
     }
 }
 
+/// source: https://stackoverflow.com/a/43313833/3199999
+extension NSAttributedString {
+
+    convenience init(data: Data, documentType: DocumentType, encoding: String.Encoding = .utf8) throws {
+        try self.init(attributedString: .init(data: data, options: [.documentType: documentType, .characterEncoding: encoding.rawValue], documentAttributes: nil))
+    }
+
+    func data(_ documentType: DocumentType) -> Data? {
+        try? data(from: .init(location: 0, length: length),
+                  documentAttributes: [.documentType: documentType])
+    }
+
+    var text: Data? { data(.plain) }
+    var html: Data? { data(.html) }
+    var rtf: Data? { data(.rtf) }
+    var rtfd: Data? { data(.rtfd) }
+}
+
 extension NSMutableAttributedString {
     convenience init(withImage image: NSImage, font: NSFont?, spacing: Float?) {
         let attachment = InlineTextAttachment()
