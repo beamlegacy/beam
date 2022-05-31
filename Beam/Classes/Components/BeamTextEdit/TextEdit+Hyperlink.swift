@@ -63,6 +63,7 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
         } else if PreferencesManager.embedContentPreference == PreferencesEmbedOptions.only.id {
             showHyperlinkContextMenu(for: node, targetRange: targetRange, frame: rect, url: link, linkTitle: selectedText, fromPaste: true)
         }
+
         return true
     }
 
@@ -136,6 +137,9 @@ extension BeamTextEdit: HyperlinkFormatterViewDelegate {
     private func getPasteMenuItemsForLink(for node: TextNode, range: Range<Int>) -> [ContextMenuItem] {
         return [
             ContextMenuItem(title: "Show as Link", action: {
+                if let cmdManager = self.rootNode?.note?.cmdManager, let range = node.text.linkRanges.first {
+                    self.updateLinkToFormattedLink(in: node, at: range, with: cmdManager)
+                }
                 self.hideInlineFormatter()
             }),
             ContextMenuItem(title: "Show as Embed", action: {
