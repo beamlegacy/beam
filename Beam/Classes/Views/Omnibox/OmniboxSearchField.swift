@@ -132,6 +132,7 @@ struct OmniboxSearchField: View {
                     onCursorMovement: { handleCursorMovement($0) },
                     onModifierFlagPressed: { event in
                         modifierFlagsPressed = event.modifierFlags
+                        return false
                     }
                 )
                     .frame(maxHeight: .infinity)

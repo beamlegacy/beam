@@ -49,6 +49,7 @@ struct OmniboxContentDebuggerView: View {
                 onCursorMovement: { handleCursorMovement($0) },
                 onModifierFlagPressed: { event in
                     modifierFlagsPressed = event.modifierFlags
+                    return false
                 }
             ).frame(height: 40, alignment: .center)
 
