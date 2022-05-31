@@ -635,11 +635,59 @@ import Promises
         }
     }
 
-    func copyURLToPasteboard() {
-        guard let url = url ?? preloadUrl else { return }
+    /// Writes the url the pasteboard in the following format: `<url title> - <minimizedHost>` where
+    /// `<url title>` is a link pointing to the url
+    /// `<minimizedHost>` is a link pointing to the minimizedHost url.
+    ///
+    /// It will first write the plain title to the pasteboard. Then it will fetch the page title
+    /// from the proxy-api, clear and set the pasteboard with the correct title.
+    ///
+    /// - Parameters:
+    ///   - url: url to write to pastebaord
+    ///   - title: string to use as url title, if nil the url.absoluteString is used
+    internal func writeURLToPasteboard(url: URL, title: String? = nil) {
+        let linkTitle = title ?? url.absoluteString
+
+        let formattedURLString = NSMutableAttributedString()
+        formattedURLString.append(NSAttributedString(string: linkTitle, attributes: [.link: url]))
+
+        if let host = url.minimizedHost, let hostUrl = url.domain {
+            formattedURLString.append(NSAttributedString(string: " - "))
+            formattedURLString.append(NSAttributedString(string: host, attributes: [.link: hostUrl.absoluteString]))
+        }
+
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.setString(url.absoluteString, forType: .string)
+        pasteboard.writeObjects([formattedURLString])
+
+        Task.detached(priority: .background) {
+            let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
+            let fetchedFormattedURLString = NSMutableAttributedString()
+            fetchedFormattedURLString.append(NSAttributedString(string: fetchedTitle.text, attributes: [.link: url]))
+
+            if let host = url.minimizedHost, let hostUrl = url.domain {
+                fetchedFormattedURLString.append(NSAttributedString(string: " - "))
+                fetchedFormattedURLString.append(NSAttributedString(string: host, attributes: [.link: hostUrl.absoluteString]))
+            }
+
+            pasteboard.clearContents()
+            pasteboard.setData(fetchedFormattedURLString.data(.rtf), forType: .rtf)
+            pasteboard.setData(url.absoluteString.asData, forType: .string)
+        }
+    }
+
+    func copyURLToPasteboard() {
+        guard let url = url ?? preloadUrl else { return }
+
+        // First write the plain url to the pasteboard
+        writeURLToPasteboard(url: url)
+
+        // Then query proxy API to retrieve the page title and update the pasteboard
+        Task.detached(priority: .background) { [weak self] in
+            let title = await WebNoteController.convertURLToBeamTextLink(url: url)
+            self?.writeURLToPasteboard(url: url, title: title.text)
+        }
+
         guard !hasCopiedURL else {
             // if it was already copied, let's dismiss right away.
             hasCopiedURL = false
