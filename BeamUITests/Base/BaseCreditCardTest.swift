@@ -20,8 +20,13 @@ class BaseCreditCardTest: BaseTest {
     let janeCCOwnerName = "Jane Appleseed"
     let creditCardNumberLabel = "Credit card number: "
     let creditCardExpDateLabel = "Expiration date: "
+    let creditCardExpDateMonthLabel = "Expiration date month: "
+    let creditCardExpDateYearLabel = "Expiration date year: "
     let creditCardSecCodeLabel = "Security code: "
     let creditCardOwnerNameLabel = "Name on card: "
+    let creditCardOwnerGivenNameLabel = "Given name on card: "
+    let creditCardOwnerFamilyNameLabel = "Family name on card: "
+    let timeout = TimeInterval(0.5)
     
     //Mock Page
     let creditCardNumberLabelMockPage = "cc-number"
@@ -34,21 +39,28 @@ class BaseCreditCardTest: BaseTest {
     
     var creditCardView: CreditCardTestView!
 
-    func verifyAutoFillIsDisplayed(title: String, inView: String, autocomplete: Bool = true){
+    func verifyAutoFillIsDisplayed(title: String, inView: String = "Payment", password: Bool = false, autocomplete: Bool = true){
+        
         step("When I click on \"\(title)\" field") {
-            mockPage.getUsernameFieldElement(title: title, inView: inView).clickOnExistence()
+            if password {
+                mockPage.getPasswordFieldElement(title: title, inView: inView).clickOnExistence()
+            } else {
+                mockPage.getUsernameFieldElement(title: title, inView: inView).clickOnExistence()
+            }
         }
+
         
         if autocomplete {
             step("Then CC number autofill is displayed") {
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber, timeout: timeout))
                 XCTAssertTrue(helper.getOtherCCOptionElement().exists)
             }
         } else {
             step("Then CC number autofill is not displayed") {
-                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
                 XCTAssertFalse(helper.getOtherCCOptionElement().exists)
+                XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
             }
         }
         
@@ -56,10 +68,10 @@ class BaseCreditCardTest: BaseTest {
     
     func verifyDBCCCards(otherCCAvailable: Bool = false) {
         step("Then Jane and John's cards are displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCName))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCHiddenNumber))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber, timeout: timeout))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCName, timeout: timeout))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCHiddenNumber, timeout: timeout))
             if otherCCAvailable {
                 XCTAssertTrue(helper.getOtherCCOptionElement().exists)
             } else {
@@ -68,13 +80,33 @@ class BaseCreditCardTest: BaseTest {
         }
     }
     
-    func verifyCCIsPopulated(number: String, expDate: String, ownerName: String, secCode: String, view: String = "Payment") {
+    func verifyCCIsPopulated(number: String, expDate: String, ownerName: String, secCode: String, inView: String = "Payment") {
         step("Then CC is succesfully populated") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: number, inView: view)), johnCCNumber)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: expDate, inView: view)), johnCCExpDate)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: ownerName, inView: view)), johnCCOwnerName)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: secCode, inView: view)), emptyString)
+            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: number, inView: inView)), johnCCNumber)
+            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: expDate, inView: inView)), johnCCExpDate)
+            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: ownerName, inView: inView)), johnCCOwnerName)
+            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: secCode, inView: inView)), emptyString)
         }
+    }
+    
+    func verifyCCAutofillNotDisplayedDropdown(title: String, inView: String = "Payment", autocomplete: Bool = true) {
+        step("When I click on \(title) field") {
+            mockPage.getDropdownFieldElement(title: title, inView: inView).clickOnExistence()
+        }
+        
+        if autocomplete {
+            step("Then CC number autofill is displayed") {
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber, timeout: timeout))
+                XCTAssertTrue(helper.getOtherCCOptionElement().exists)
+            }
+        } else {
+            step("Then CC number autofill is not displayed") {
+                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
+                XCTAssertFalse(helper.getOtherCCOptionElement().exists)
+            }
+        }
+        mockPage.typeKeyboardKey(.escape) // Close dropdown
     }
     
 }
