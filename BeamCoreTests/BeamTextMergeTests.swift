@@ -70,4 +70,11 @@ class BeamTextMergeTests: XCTestCase {
         let theirs = BeamText("Salut le monde")
         XCTAssertEqual(mine.merge(ancestor: ancestor, other: theirs, strategy: .chooseTheirs), BeamText("Salut le monde"))
     }
+
+    func testMergeBeamText9() {
+        let ancestor = BeamText("Rewrite everything")
+        let mine = BeamText("Rewrite everything in Swift")
+        let theirs = BeamText("Rewrite everything in Obj-C")
+        XCTAssertEqual(mine.merge(ancestor: ancestor, other: theirs, strategy: .chooseTheirs), BeamText("Rewrite everything in Obj-C"))
+    }
 }

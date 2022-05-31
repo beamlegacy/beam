@@ -17,25 +17,14 @@ func diffExample<T: Equatable>(original: [T], new: [T], diff: [ArrayDiff<T>], fi
 
 class DiffTest: QuickSpec {
     override func spec() {
-        describe("Graph") {
-            let graph = Graph(original: ["a", "b", "c"], new: ["a", "c", "x"])
-
-            it("calculates cost") {
-                XCTAssertEqual(0, graph.cost(from: (x: 0, y: 0), to: (x: 1, y: 1)))
-                XCTAssertEqual(1, graph.cost(from: (x: 0, y: 0), to: (x: 0, y: 1)))
-                XCTAssertEqual(0, graph.cost(from: (x: 2, y: 1), to: (x: 3, y: 2)))
-                XCTAssertNil(graph.cost(from: (x: 1, y: 1), to: (x: 2, y: 2)))
-            }
-        }
-
         describe("Diff") {
             let examples = [
                 diffExample(original: ["1", "2", "3"], new: ["1", "2", "3"], diff: []),
                 diffExample(original: ["1", "2", "3"], new: ["1", "2"], diff: [.Deletion(2)]),
                 diffExample(original: ["1", "2", "3"], new: ["1", "2", "3", "4"], diff: [.Insertion(3, "4")]),
-                diffExample(original: ["1", "2"], new: ["0", "2"], diff: [.Deletion(0), .Insertion(1, "0")]),
-                diffExample(original: ["1", "2", "3"], new: ["2", "1", "3"], diff: [.Deletion(0), .Insertion(2, "1")]),
-                diffExample(original: ["1", "2", "3"], new: ["2", "3", "4", "5"], diff: [.Deletion(0), .Insertion(3, "4"), .Insertion(3, "5")])
+                diffExample(original: ["1", "2"], new: ["0", "2"], diff: [.Insertion(0, "0"), .Deletion(0)]),
+                diffExample(original: ["1", "2", "3"], new: ["2", "1", "3"], diff: [.Insertion(1, "1"), .Deletion(0)]),
+                diffExample(original: ["1", "2", "3"], new: ["2", "3", "4", "5"], diff: [.Insertion(3, "5"), .Insertion(2, "4"), .Deletion(0)])
             ]
 
             it("calculates diff") {
@@ -46,6 +35,16 @@ class DiffTest: QuickSpec {
                     XCTAssertEqual(d, example.diff, file: example.file, line: example.line)
                     XCTAssertEqual(example.new, applyPatch(base: example.original, patch: example.diff))
                 }
+            }
+        }
+
+        describe("String diff") {
+            it("calculates string diff without crashing on small texts") {
+                let diff = Diff()
+                let t1 = BeamText("Summiting the World’s Most Dangerous Mountain | Podcast | Overheard at National Geographic").splitForMerge()
+                let t2 = BeamText("https://www.youtube.com/watch?v=3fNf4eoj8jc").splitForMerge()
+                let result = diff.diff(original: t1, new: t2)
+                XCTAssertNotNil(result)
             }
         }
     }
