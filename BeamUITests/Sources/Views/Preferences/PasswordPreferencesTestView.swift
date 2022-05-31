@@ -64,12 +64,6 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     }
     
     @discardableResult
-    func isAutofillPasswordEnabled() -> Bool {
-        let enabled = (checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier).value as? Int == 1)
-        return enabled
-    }
-    
-    @discardableResult
     func searchForPasswordBy(_ searchKeyword: String) -> PasswordPreferencesTestView {
         textField(PasswordPreferencesViewLocators.TextFields.searchField.accessibilityIdentifier).clickOnExistence()
         textField(PasswordPreferencesViewLocators.TextFields.searchField.accessibilityIdentifier).clickClearAndType(searchKeyword)
@@ -145,10 +139,12 @@ class PasswordPreferencesTestView: PreferencesBaseView {
         return PasswordPreferencesTestView()
     }
     
-    @discardableResult
-    func isAutofillCCEnabled() -> Bool {
-        let enabled = (checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillCC.accessibilityIdentifier).value as? Int == 1)
-        return enabled
+    func getAutofillPasswordSettingElement() -> XCUIElement {
+        return checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillPasswords.accessibilityIdentifier)
+    }
+    
+    func getAutofillCCSettingElement() -> XCUIElement {
+        return checkBox(PasswordPreferencesViewLocators.CheckboxTexts.autofillCC.accessibilityIdentifier)
     }
     
     enum PasswordFieldToFill: Int, CaseIterable {
