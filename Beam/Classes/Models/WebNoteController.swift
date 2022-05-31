@@ -134,7 +134,7 @@ class WebNoteController: Encodable, Decodable {
                 // Creating SocialTitle
                 Logger.shared.logDebug("Source not found, adding \(content) with source:\(source) as child of last element:\(element) of note", category: .web)
                 element = getEmptyOrCreateTargetElement(reason: reason)
-                let text = await convertURLToBeamTextLink(url: source, title: title)
+                let text = await WebNoteController.convertURLToBeamTextLink(url: source, title: title)
                 // Update UI back on main thread
                 await MainActor.run {
                     element.text = text
@@ -221,7 +221,7 @@ class WebNoteController: Encodable, Decodable {
               !element.outLinks.contains(url.absoluteString) else {
             return
         }
-        let text = await convertURLToBeamTextLink(url: url)
+        let text = await WebNoteController.convertURLToBeamTextLink(url: url)
         // Update UI back on main thread
         await MainActor.run {
             element.text = text
@@ -309,7 +309,7 @@ extension WebNoteController {
     /// - Parameter url: url for the linkBullet
     /// - Parameter title: Fallback text that will be visible
     /// - Returns: BeamElement with .link
-    private func convertURLToBeamTextLink(url: URL, title: String? = nil) async -> BeamText {
+    static func convertURLToBeamTextLink(url: URL, title: String? = nil) async -> BeamText {
         guard url.scheme != "file",
               let link = await SocialTitleFetcher.shared.fetch(for: url),
               let title = link.title.removingPercentEncoding else {
