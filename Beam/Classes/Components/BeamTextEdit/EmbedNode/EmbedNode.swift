@@ -620,11 +620,12 @@ extension EmbedNode: EmbedContentViewDelegate {
         }
     }
 
-    func embedContentView(_ embedContentView: EmbedContentView, didRequestNewTab request: URLRequest) {
+    func embedContentView(_ embedContentView: EmbedContentView, didRequestNewTab request: URLRequest?) {
         guard
             let destinationNote = root?.editor?.note as? BeamNote,
             let rootElement = root?.element,
-            let state = self.editor?.state
+            let state = self.editor?.state,
+            let request = request
         else {
             return
         }
