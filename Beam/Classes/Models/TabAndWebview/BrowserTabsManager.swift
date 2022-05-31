@@ -39,7 +39,6 @@ class BrowserTabsManager: ObservableObject {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
 
             if let state = state, !state.isIncognito {
-                self.autoSave()
                 self.updateClusteringOpenPages()
             }
             if !pauseListItemsUpdate {
@@ -83,7 +82,6 @@ class BrowserTabsManager: ObservableObject {
 
             self.updateCurrentTabObservers()
             self.delegate?.tabsManagerDidChangeCurrentTab(currentTab, previousTab: oldValue)
-            self.autoSave()
         }
     }
     @Published var currentTabUIFrame: CGRect?
@@ -120,12 +118,10 @@ class BrowserTabsManager: ObservableObject {
         currentTab?.$canGoBack.receive(on: DispatchQueue.main).sink { [unowned self]  v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: v, canGoForward: tab.canGoForward)
-            self.autoSave()
         }.store(in: &currentTabScope)
         currentTab?.$canGoForward.receive(on: DispatchQueue.main).sink { [unowned self] v in
             guard let tab = self.currentTab else { return }
             self.delegate?.tabsManagerBrowsingHistoryChanged(canGoBack: tab.canGoBack, canGoForward: v)
-            self.autoSave()
         }.store(in: &currentTabScope)
         currentTab?.$title.receive(on: DispatchQueue.main).sink { [unowned self] _ in
             self.state?.updateWindowTitle()
@@ -366,15 +362,6 @@ extension BrowserTabsManager {
                 newCurrentTab = tabs[nextTabIndex]
             }
             setCurrentTab(newCurrentTab)
-        }
-    }
-}
-
-// State tabs auto save
-extension BrowserTabsManager {
-    func autoSave() {
-        if tabs.contains(where: { !$0.isPinned }) {
-            AppDelegate.main.saveCloseTabsCmd(onExit: false)
         }
     }
 }
