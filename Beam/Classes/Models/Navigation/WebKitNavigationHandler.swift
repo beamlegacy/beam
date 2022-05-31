@@ -51,9 +51,12 @@ extension WebKitNavigationHandler {
         let deeplinkHandler = ExternalDeeplinkHandler(request: navigationAction.request)
         if deeplinkHandler.isDeeplink() {
             decisionHandler(.cancel, preferences)
+            // Assigning it to an optional to check if we have a value
+            // see: https://linear.app/beamapp/issue/BE-4279/exc-breakpoint-exception-6-code-2765529536-subcode-8
+            let optionalRequest: URLRequest? = navigationAction.request
             // Open Alert with userprompt to open External Application
             if deeplinkHandler.shouldOpenDeeplink(),
-                let targetURL = navigationAction.request.url {
+                let targetURL = optionalRequest?.url {
                 NSWorkspace.shared.open(targetURL)
             }
             return
@@ -248,12 +251,15 @@ extension WebKitNavigationHandler {
     /// - Parameter navigationAction: The NavigationAction to decide if a new tab should be opened
     /// - Returns: True if a new tab is created, false if not
     func openNewTab(_ navigationAction: WKNavigationAction) -> Bool {
-        if let page = page, let targetURL = navigationAction.request.url,
+        // Assigning it to an optional to check if we have a value
+        // see: https://linear.app/beamapp/issue/BE-4279/exc-breakpoint-exception-6-code-2765529536-subcode-8
+        let optionalRequest: URLRequest? = navigationAction.request
+        if let page = page, let request = optionalRequest, let targetURL = request.url,
            navigationAction.navigationType == .linkActivated,
            isNavigationWithCommandKey(navigationAction) || page.shouldNavigateInANewTab(url: targetURL) || isNavigationWithMiddleMouseDown(navigationAction) {
             let setCurent = (isNavigationWithCommandKey(navigationAction) || isNavigationWithMiddleMouseDown(navigationAction)) ? false : true
             _ = page.createNewTab(
-                navigationAction.request,
+                request,
                 nil,
                 setCurrent: setCurent,
                 rect: page.frame
