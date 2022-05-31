@@ -1,0 +1,43 @@
+<html>
+
+<head>
+<title>Payment</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Payment</h1>
+<form action="/view" method="POST">
+<div>Credit card number: <input type="text" autocomplete="off" name="cc-number" id="cc-number"></input></div>
+<div id="cc-exp-month" class="dropdown" autocomplete="off" name="cc_month">Expiration date month: 
+    <select name="mm" id="cc-exp-month">
+    <option value="" selected="" disabled="">Month</option>
+    <option value="1">January</option>
+    <option value="2">February</option>
+    <option value="3">March</option>
+    <option value="4">April</option>
+    <option value="5">May</option>
+    <option value="6">June</option>
+    <option value="7">July</option>
+    <option value="8">August</option>
+    <option value="9">September</option>
+    <option value="10">October</option>
+    <option value="11">November</option>
+    <option value="12">December</option>
+    </select>
+    <div class="arrow"></div>
+</div>
+<div id="cc-exp-year" class="dropdown" autocomplete="off" name="cc_year">Expiration date year: 
+    <select name="mm" id="cc-exp-year">
+    <option value="" selected="" disabled="">Year</option>
+    <option value="1">2025</option>
+    <option value="2">2026</option>
+    </select>
+    <div class="arrow"></div>
+</div>
+<div>Security code: <input type="text" autocomplete="off"></input></div>
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>
