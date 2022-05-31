@@ -84,6 +84,7 @@
         "EditorShortcutsTests",
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
+        "InsideAdsBlockerTests",
         "NotesNavigationHistoryTests",
         "OmniboxViewTests",
         "OmniboxViewTests\/testOmniBoxSearchField()",

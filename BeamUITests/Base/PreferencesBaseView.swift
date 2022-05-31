@@ -89,4 +89,9 @@ class PreferencesBaseView: BaseView {
     func navigateTo(preferenceView: PreferenceMenus) {
         self.app.toolbars.buttons.matching(identifier: preferenceView.rawValue).firstMatch.clickOnHittable()
     }
+    
+    @discardableResult
+    func isSettingEnabled(element: XCUIElement) -> Bool {
+        return (element.value as? Int == 1)
+    }
 }
