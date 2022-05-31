@@ -1,0 +1,20 @@
+<html>
+
+<head>
+<title>Payment</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Payment</h1>
+<form action="/view" method="POST">
+<div>Credit card number: <input autocomplete="cc-number" type="tel"></input></div>
+<div>Expiration date: <input type="tel" autocomplete="off" name="creditExpirationMonth" id="id_creditExpirationMonth"></input></div>
+<div>Security code: <input autocomplete="cc-csc" type="tel"></input></div>
+<div>Given name on card: <input autocomplete="cc-given-name" type="text"></input></div>
+<div>Family name on card: <input autocomplete="cc-family-name" type="text"></input></div>
+<div><button type="submit">Continue</button></div>
+</form>
+</body>
+
+</html>
