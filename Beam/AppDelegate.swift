@@ -87,7 +87,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSSetUncaughtExceptionHandler { _ in
             guard let prevHandler = NSGetUncaughtExceptionHandler() else { return }
             DispatchQueue.mainSync {
-                AppDelegate.main.saveCloseTabsCmd(onExit: true)
+                RestoreTabsManager.shared.saveOpenedTabsBeforeTerminatingApp()
             }
             NSSetUncaughtExceptionHandler(prevHandler)
         }
@@ -501,48 +501,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         KeychainDailyNoteScoreStore.shared.save()
     }
 
-    public func saveCloseTabsCmd(onExit: Bool) {
-        guard windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else {
-            if onExit { ClosedTabDataPersistence.savedTabsData.removeAll() }
-            return
-        }
-        var windowForTabsCmd = [Int: Command<BeamState>]()
-        var windowCount = 0
-        let tmpCmdManager = CommandManager<BeamState>()
-
-        for window in windows where window.state.browserTabsManager.tabs.count > 0 {
-            tmpCmdManager.beginGroup(with: ClosedTabDataPersistence.closeTabCmdGrp)
-
-            for tab in window.state.browserTabsManager.tabs.reversed() {
-                guard tab.url != nil, let index = window.state.browserTabsManager.tabs.firstIndex(of: tab) else { continue }
-                // Since we don't run the cmd when closing the app we need to do this out of the CloseTab Cmd
-                if onExit {
-                    tab.appWillClose()
-                }
-                if tab.isPinned { continue }
-                let closeTabCmd = CloseTab(tab: tab, appIsClosing: true, tabIndex: index, wasCurrentTab: window.state.browserTabsManager.currentTab === tab)
-
-                tmpCmdManager.appendToDone(command: closeTabCmd)
-            }
-            tmpCmdManager.endGroup(forceGroup: true)
-
-            if let lastCmd = tmpCmdManager.lastCmd {
-                windowForTabsCmd[windowCount] = lastCmd
-                windowCount += 1
-            }
-        }
-        let encoder = JSONEncoder()
-        guard let data = try? encoder.encode(windowForTabsCmd) else { return }
-        if onExit {
-            ClosedTabDataPersistence.savedCloseTabData = data
-        } else {
-            ClosedTabDataPersistence.savedTabsData = data
-        }
-    }
-
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
         if !flag && data != nil {
-            createWindow(frame: nil, restoringTabs: true)
+            createWindow(frame: nil, restoringTabs: false)
         }
 
         return true
@@ -616,7 +577,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
         AccountManager.logoutIfNeeded()
         data.saveData()
-        saveCloseTabsCmd(onExit: true)
+        RestoreTabsManager.shared.saveOpenedTabsBeforeTerminatingApp()
         _ = self.data.browsingTreeSender?.groupWait()
         _ = BrowsingTreeStoreManager.shared.groupWait()
         // Save changes in the application's managed object context before the application terminates.

@@ -132,8 +132,7 @@ class BeamUITestsMenuGenerator {
         DatabaseManager().deleteAll { _ in }
         let data = AppDelegate.main.window?.state.data
         LinkStore.shared.deleteAll(includedRemote: false) { _ in }
-        ClosedTabDataPersistence.savedTabsData.removeAll()
-        ClosedTabDataPersistence.savedCloseTabData.removeAll()
+        RestoreTabsManager.shared.clearSavedClosedTabs()
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
         try? GRDBDatabase.shared.clear()
         data?.saveData()
