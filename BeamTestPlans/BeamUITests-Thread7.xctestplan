@@ -89,6 +89,7 @@
         "GoogleSheetsTests",
         "HelpAndFeedbackTests",
         "IncognitoModeTests",
+        "InsideAdsBlockerTests",
         "JavascriptNativeInteractionsTests",
         "JournalTest",
         "LinksTests",

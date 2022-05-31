@@ -12,7 +12,7 @@ class PasswordPreferencesTests: BaseTest {
     
     let shortcutsHelper = ShortcutsHelper()
     let uiMenu = UITestsMenuBar()
-    let passwordsWindow = PasswordPreferencesTestView()
+    let passwordPreferencesView = PasswordPreferencesTestView()
     let testPage = UITestPagePasswordManager()
     let hostnameGoogle = "google.com"
     let hostnameApple = "apple.com"
@@ -31,102 +31,102 @@ class PasswordPreferencesTests: BaseTest {
     }
     
     func verifyPasswordPopUpDisplay(_ siteValue: String, _ usernameValue: String, _ passwordValue: String, _ update: Bool = false) {
-        XCTAssertTrue(passwordsWindow.isFormToFillPasswordDisplayed(update))
-        XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.site)), siteValue)
-        XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.username)), usernameValue)
-        XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.password)), passwordValue)
+        XCTAssertTrue(passwordPreferencesView.isFormToFillPasswordDisplayed(update))
+        XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordFieldToFill(.site)), siteValue)
+        XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordFieldToFill(.username)), usernameValue)
+        XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordFieldToFill(.password)), passwordValue)
     }
     
     func addPassword(_ siteValue: String, _ usernameValue: String, _ passwordValue: String) {
-        passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(siteValue, true)
-        passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType(usernameValue, true)
-        passwordsWindow.getPasswordFieldToFill(.password).clickClearAndType(passwordValue, true)
-        passwordsWindow.clickAddPassword()
-        waitForDoesntExist(passwordsWindow.getPasswordFieldToFill(.site))
+        passwordPreferencesView.getPasswordFieldToFill(.site).clickClearAndType(siteValue, true)
+        passwordPreferencesView.getPasswordFieldToFill(.username).clickClearAndType(usernameValue, true)
+        passwordPreferencesView.getPasswordFieldToFill(.password).clickClearAndType(passwordValue, true)
+        passwordPreferencesView.clickAddPassword()
+        waitForDoesntExist(passwordPreferencesView.getPasswordFieldToFill(.site))
     }
     
     func testAddPasswordItem() throws {
         setup()
         
         step ("AND I click on add password button"){
-            passwordsWindow.clickFill()
+            passwordPreferencesView.clickFill()
         }
         
         step ("THEN form to fill password is displayed"){
-            XCTAssertTrue(passwordsWindow.isFormToFillPasswordDisplayed())
+            XCTAssertTrue(passwordPreferencesView.isFormToFillPasswordDisplayed())
         }
         
         step ("WHEN I click on Cancel"){
-            passwordsWindow.clickCancel()
-            XCTAssertTrue(passwordsWindow.waitForFormToFillPasswordToClose())
+            passwordPreferencesView.clickCancel()
+            XCTAssertTrue(passwordPreferencesView.waitForFormToFillPasswordToClose())
         }
         
         step ("THEN the pop-up is closed"){
-            XCTAssertFalse(passwordsWindow.isFormToFillPasswordDisplayed())
+            XCTAssertFalse(passwordPreferencesView.isFormToFillPasswordDisplayed())
         }
 
         step ("AND no data is added"){
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayed())
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayed())
         }
         
         step ("WHEN I add password data without data"){
-            passwordsWindow.clickFill()
-            passwordsWindow.clickAddPassword()
+            passwordPreferencesView.clickFill()
+            passwordPreferencesView.clickAddPassword()
         }
         
         step ("THEN nothing happens"){
-            XCTAssertFalse(passwordsWindow.isAddPasswordButtonEnabled())
+            XCTAssertFalse(passwordPreferencesView.isAddPasswordButtonEnabled())
             verifyPasswordPopUpDisplay(emptyString,emptyString,emptyString)
         }
 
         step ("WHEN I populate hostname '\(hostnameGoogle)' only"){
-            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle, true)
+            passwordPreferencesView.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle, true)
         }
 
         step ("AND I click on Add Password"){
-            passwordsWindow.clickAddPassword()
+            passwordPreferencesView.clickAddPassword()
         }
         
         step ("THEN nothing happens"){
-            XCTAssertFalse(passwordsWindow.isAddPasswordButtonEnabled())
+            XCTAssertFalse(passwordPreferencesView.isAddPasswordButtonEnabled())
             verifyPasswordPopUpDisplay(hostnameGoogle,emptyString,emptyString)
         }
         
         step ("WHEN I populate hostname '\(hostnameGoogle)' and username '\(usernameExample)' only"){
-            passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType(usernameExample, true)
+            passwordPreferencesView.getPasswordFieldToFill(.username).clickClearAndType(usernameExample, true)
         }
 
         step ("AND I click on Add Password"){
-            passwordsWindow.clickAddPassword()
+            passwordPreferencesView.clickAddPassword()
         }
         
         step ("THEN nothing happens"){
-            XCTAssertFalse(passwordsWindow.isAddPasswordButtonEnabled())
+            XCTAssertFalse(passwordPreferencesView.isAddPasswordButtonEnabled())
             verifyPasswordPopUpDisplay(hostnameGoogle,usernameExample,emptyString)
         }
         
         step ("WHEN I populate wrong hostname '\(badHostname)' with all information"){
-            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(badHostname, true)
-            passwordsWindow.getPasswordFieldToFill(.password).clickClearAndType(usernameExample, true)
+            passwordPreferencesView.getPasswordFieldToFill(.site).clickClearAndType(badHostname, true)
+            passwordPreferencesView.getPasswordFieldToFill(.password).clickClearAndType(usernameExample, true)
         }
         
         step ("AND I click on Add Password"){
-            XCTAssertTrue(passwordsWindow.isAddPasswordButtonEnabled())
-            passwordsWindow.clickAddPassword()
+            XCTAssertTrue(passwordPreferencesView.isAddPasswordButtonEnabled())
+            passwordPreferencesView.clickAddPassword()
         }
         
         step ("THEN error message is displayed"){
-            XCTAssertFalse(passwordsWindow.isAddPasswordButtonEnabled())
-            XCTAssertTrue(passwordsWindow.isErrorDisplayed())
+            XCTAssertFalse(passwordPreferencesView.isAddPasswordButtonEnabled())
+            XCTAssertTrue(passwordPreferencesView.isErrorDisplayed())
             verifyPasswordPopUpDisplay(badHostname,usernameExample,passwordExample)
         }
         
         step ("THEN password item is successfully added when correct hostname format is typed"){
-            passwordsWindow.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle, true)
-            XCTAssertFalse(passwordsWindow.isErrorDisplayed())
+            passwordPreferencesView.getPasswordFieldToFill(.site).clickClearAndType(hostnameGoogle, true)
+            XCTAssertFalse(passwordPreferencesView.isErrorDisplayed())
             verifyPasswordPopUpDisplay(hostnameGoogle,usernameExample,passwordExample)
-            passwordsWindow.clickAddPassword()
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(hostnameGoogle))
+            passwordPreferencesView.clickAddPassword()
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy(hostnameGoogle))
         }
         
     }
@@ -136,8 +136,8 @@ class PasswordPreferencesTests: BaseTest {
         var alertView: AlertTestView?
         step ("WHEN I click to delete passwordentry \(hostnameApple)"){
             uiMenu.populatePasswordsDB()
-            passwordsWindow.selectPassword(hostnameApple)
-            alertView = passwordsWindow.clickRemove()
+            passwordPreferencesView.selectPassword(hostnameApple)
+            alertView = passwordPreferencesView.clickRemove()
         }
         
         step ("AND I do not confirm deletion"){
@@ -145,12 +145,12 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN password entry \(hostnameApple) is not deleted"){
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(hostnameApple))
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy(hostnameApple))
         }
         
         step ("WHEN I click to delete password entry \(hostnameApple)"){
-            passwordsWindow.selectPassword(hostnameApple)
-            passwordsWindow.clickRemove()
+            passwordPreferencesView.selectPassword(hostnameApple)
+            passwordPreferencesView.clickRemove()
         }
         
         step ("AND I confirm deletion"){
@@ -158,7 +158,7 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN password entry \(hostnameApple) is correctly deleted"){
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayedBy(hostnameApple))
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayedBy(hostnameApple))
         }
     }
     
@@ -167,34 +167,34 @@ class PasswordPreferencesTests: BaseTest {
         
         step ("WHEN I click to see password details of \(hostnameApple)"){
             uiMenu.populatePasswordsDB()
-            passwordsWindow.selectPassword(hostnameApple)
-            passwordsWindow.clickDetails()
+            passwordPreferencesView.selectPassword(hostnameApple)
+            passwordPreferencesView.clickDetails()
         }
         
         
         step ("THEN password details of \(hostnameApple) are displayed"){
             verifyPasswordPopUpDisplay(hostnameApple,"user1","password1", true)
-            XCTAssertFalse(passwordsWindow.getPasswordFieldToFill(.site).isEnabled)
+            XCTAssertFalse(passwordPreferencesView.getPasswordFieldToFill(.site).isEnabled)
         }
         
         step ("WHEN I click on cancel"){
-            passwordsWindow.clickCancel()
+            passwordPreferencesView.clickCancel()
         }
         
         step ("THEN details are closed"){
-            XCTAssertFalse(passwordsWindow.isFormToFillPasswordDisplayed())
+            XCTAssertFalse(passwordPreferencesView.isFormToFillPasswordDisplayed())
         }
         
         step ("WHEN I update username of \(hostnameApple)"){
-            passwordsWindow.selectPassword(hostnameApple)
-            passwordsWindow.clickDetails()
-            passwordsWindow.getPasswordFieldToFill(.username).clickClearAndType("user1Update", true)
-            passwordsWindow.clickDone()
+            passwordPreferencesView.selectPassword(hostnameApple)
+            passwordPreferencesView.clickDetails()
+            passwordPreferencesView.getPasswordFieldToFill(.username).clickClearAndType("user1Update", true)
+            passwordPreferencesView.clickDone()
         }
         
         step ("THEN username of \(hostnameApple) is updated"){
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy("user1Update"))
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayedBy("quentin"))
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy("user1Update"))
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayedBy("quentin"))
         }
         
     }
@@ -204,31 +204,31 @@ class PasswordPreferencesTests: BaseTest {
         uiMenu.populatePasswordsDB()
         
         step ("WHEN I search for specific password entry 'apple'"){
-            passwordsWindow.searchForPasswordBy("apple")
+            passwordPreferencesView.searchForPasswordBy("apple")
         }
         
         step ("THEN \(hostnameApple) is correctly displayed"){
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(hostnameApple))
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayedBy(hostnameFacebook))
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayedBy(hostnameLvh))
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy(hostnameApple))
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayedBy(hostnameFacebook))
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayedBy(hostnameLvh))
         }
         
         step ("WHEN I search for a non existing password entry 'google10'"){
-            passwordsWindow.searchForPasswordBy("google10")
+            passwordPreferencesView.searchForPasswordBy("google10")
         }
         
         step ("THEN empty result is returned"){
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayed())
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayed())
         }
         
         step ("WHEN I search for multiple passwords with '.com' keyword"){
-            passwordsWindow.searchForPasswordBy(".com")
+            passwordPreferencesView.searchForPasswordBy(".com")
         }
         
         step ("THEN they are all listed"){
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(hostnameApple))
-            XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(hostnameFacebook))
-            XCTAssertFalse(passwordsWindow.isPasswordDisplayedBy(hostnameLvh))
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy(hostnameApple))
+            XCTAssertTrue(passwordPreferencesView.isPasswordDisplayedBy(hostnameFacebook))
+            XCTAssertFalse(passwordPreferencesView.isPasswordDisplayedBy(hostnameLvh))
         }
         
     }
@@ -238,28 +238,28 @@ class PasswordPreferencesTests: BaseTest {
         uiMenu.populatePasswordsDB()
         
         step ("WHEN I click on Sites to sort passwords"){
-            passwordsWindow.sortPasswords()
+            passwordPreferencesView.sortPasswords()
         }
 
         step ("THEN password entries are correctly sorted"){
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(0)), hostnameLvh)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(1)), hostnameLvh)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(2)), hostnameLvh)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(3)), hostnameFacebook)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(4)), hostnameApple)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(0)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(1)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(2)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(3)), hostnameFacebook)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(4)), hostnameApple)
         }
         
         
         step ("WHEN I click again on Sites to sort passwords"){
-            passwordsWindow.sortPasswords()
+            passwordPreferencesView.sortPasswords()
         }
 
         step ("THEN password entries are correctly sorted"){
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(0)), hostnameApple)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(1)), hostnameFacebook)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(2)), hostnameLvh)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(3)), hostnameLvh)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordByIndex(4)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(0)), hostnameApple)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(1)), hostnameFacebook)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(2)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(3)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(4)), hostnameLvh)
         }
         
     }
@@ -276,10 +276,10 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN Autofill password settings is enabled"){
-            if (!passwordsWindow.isAutofillPasswordEnabled()) {
-                passwordsWindow.clickAutofillPassword()
+            if (!passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillPasswordSettingElement())) {
+                passwordPreferencesView.clickAutofillPassword()
             }
-            XCTAssertTrue(passwordsWindow.isAutofillPasswordEnabled())
+            XCTAssertTrue(passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillPasswordSettingElement()))
         }
         
         
@@ -307,11 +307,11 @@ class PasswordPreferencesTests: BaseTest {
         step ("WHEN I deactivate Autofill password setting"){
             shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
-            passwordsWindow.clickAutofillPassword()
+            passwordPreferencesView.clickAutofillPassword()
         }
         
         step ("THEN Autofill password settings is disabled"){
-            XCTAssertFalse(passwordsWindow.isAutofillPasswordEnabled())
+            XCTAssertFalse(passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillPasswordSettingElement()))
             XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()
         }
 
