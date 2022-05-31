@@ -62,39 +62,13 @@ extension BeamWindow {
     }
 
     @IBAction func reOpenClosedTab(_ sender: Any?) {
-        if state.cmdManager.canUndo {
+        if state.cmdManager.canUndo, state.cmdManager.lastCmd is CloseTab {
             if state.mode != .web {
                 state.mode = .web
             }
             _ = state.cmdManager.undo(context: state)
-        } else if !ClosedTabDataPersistence.savedCloseTabData.isEmpty {
-            restoreTabs(from: ClosedTabDataPersistence.savedCloseTabData)
-            ClosedTabDataPersistence.savedCloseTabData.removeAll()
-            ClosedTabDataPersistence.savedTabsData.removeAll()
-        } else if !ClosedTabDataPersistence.savedTabsData.isEmpty {
-            restoreTabs(from: ClosedTabDataPersistence.savedTabsData)
-            ClosedTabDataPersistence.savedTabsData.removeAll()
-        }
-    }
-
-    private func restoreTabs(from data: Data) {
-        let decoder = BeamJSONDecoder()
-        guard let windowCommands = try? decoder.decode([Int: GroupWebCommand].self, from: data) else { return }
-        for windowCommand in windowCommands.keys {
-            guard var beamWindow = AppDelegate.main.windows.first,
-                    let command = windowCommands[windowCommand] else { continue }
-            if windowCommand > 0, let newWindow = AppDelegate.main.createWindow(frame: nil, restoringTabs: false) {
-                beamWindow = newWindow
-            }
-            beamWindow.state.cmdManager.appendToDone(command: command)
-
-            if beamWindow.state.cmdManager.canUndo {
-                _ = beamWindow.state.cmdManager.undo(context: beamWindow.state)
-            }
-
-            if beamWindow.state.browserTabsManager.currentTab != nil, beamWindow.state.mode != .web {
-                beamWindow.state.mode = .web
-            }
+        } else {
+            RestoreTabsManager.shared.reopendSavedClosedTabsIfPossible()
         }
     }
 
