@@ -1330,6 +1330,7 @@
 		D71D7484282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7483282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift */; };
 		D71D7488282B9E9200D8D6F5 /* AllowListPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7487282B9E9200D8D6F5 /* AllowListPreferencesTests.swift */; };
 		D71D7491282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */; };
+		D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */; };
 		D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */; };
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
@@ -3182,6 +3183,7 @@
 		D71D7487282B9E9200D8D6F5 /* AllowListPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListPreferencesTests.swift; sourceTree = "<group>"; };
 		D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSignUpPasswordAutofillTests.swift; sourceTree = "<group>"; };
 		D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread5.xctestplan"; sourceTree = "<group>"; };
+		D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsideAdsBlockerTests.swift; sourceTree = "<group>"; };
 		D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedCreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
@@ -7680,6 +7682,7 @@
 		D71D7485282B9C7600D8D6F5 /* Privacy */ = {
 			isa = PBXGroup;
 			children = (
+				D75EEB482845F89600994C17 /* Ads */,
 				D71D7486282B9C7E00D8D6F5 /* AdBlocker */,
 			);
 			path = Privacy;
@@ -7691,6 +7694,14 @@
 				D7E38CEC282A93580059F60D /* AdBlockerTests.swift */,
 			);
 			path = AdBlocker;
+			sourceTree = "<group>";
+		};
+		D75EEB482845F89600994C17 /* Ads */ = {
+			isa = PBXGroup;
+			children = (
+				D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */,
+			);
+			path = Ads;
 			sourceTree = "<group>";
 		};
 		D7E38CE6282A93460059F60D /* Privacy */ = {
@@ -9663,6 +9674,7 @@
 				B55E4D2F27FEE1E200F73218 /* SearchOnPDFTests.swift in Sources */,
 				B57A9B3926AB0809002C954D /* BaseView.swift in Sources */,
 				B557155526FA250300F6C9D4 /* UpdateViewTests.swift in Sources */,
+				D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

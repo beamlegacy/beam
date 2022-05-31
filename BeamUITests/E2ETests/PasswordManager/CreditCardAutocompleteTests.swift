@@ -81,7 +81,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         step ("WHEN I deactivate Autofill password setting"){
             ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
-            if (!passwordPreferencesView.isAutofillCCEnabled()) {
+            if (!passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillCCSettingElement())) {
                 passwordPreferencesView.clickAutofillCC()
             }
             
@@ -159,7 +159,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         step ("WHEN I deactivate Autofill password setting"){
             ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
-            if (passwordPreferencesView.isAutofillCCEnabled()) {
+            if (passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillCCSettingElement())) {
                 passwordPreferencesView.clickAutofillCC()
             }
             
