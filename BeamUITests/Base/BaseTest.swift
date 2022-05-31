@@ -73,11 +73,17 @@ class BaseTest: XCTestCase {
         app.launch()
         return JournalTestView()
     }
-    
+
+    /// terminateImmediately means the app won't receive the proper termination events (aka applicationShouldTerminate),
+    /// and therefore none of our sync or save mechanism will be triggered
     @discardableResult
-    func restartApp() -> JournalTestView {
+    func restartApp(terminateImmediately: Bool = false) -> JournalTestView {
         let app = XCUIApplication()
-        app.terminate()
+        if !terminateImmediately {
+            ShortcutsHelper().shortcutActionInvoke(action: .quitApp)
+        } else {
+            app.terminate()
+        }
         app.launch()
         return JournalTestView()
     }

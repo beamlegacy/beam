@@ -135,22 +135,26 @@ class BeamWindow: NSWindow, NSDraggingDestination {
         }
     }
 
-    override func close() {
-        // TODO: Add a proper way to clean the entire window state
-        // https://linear.app/beamapp/issue/BE-1152/
-        AppDelegate.main.windows.removeAll { window in
-            if window === self {
-                window.contentView = nil
-                let idToRemove = window.state.browserTabsManager.browserTabManagerId
-                window.data.clusteringManager.openBrowsing.allOpenBrowsingTrees = window.data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != idToRemove }
-            }
-            return window === self
-        }
+    private func cleanUpWindowContentBeforeClosing() {
+        self.contentView = nil
+        RestoreTabsManager.shared.saveOpenedTabsBeforeClosingWindow(self)
 
-        super.close()
+        let idToRemove = state.browserTabsManager.browserTabManagerId
+        let updatedOpenTrees = data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != idToRemove }
+        data.clusteringManager.openBrowsing.allOpenBrowsingTrees = updatedOpenTrees
 
         // Closing the window so removing its associated window item
         NSApp.removeWindowsItem(self)
+    }
+
+    override func close() {
+        AppDelegate.main.windows.removeAll { window in
+            if window === self {
+                window.cleanUpWindowContentBeforeClosing()
+            }
+            return window === self
+        }
+        super.close()
     }
 
     override func restoreState(with coder: NSCoder) {
