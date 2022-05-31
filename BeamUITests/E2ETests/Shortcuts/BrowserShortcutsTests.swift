@@ -25,11 +25,6 @@ class BrowserShortcutsTests: BaseTest {
         testHelper = BeamUITestsHelper(journalView.app)
     }
     
-    private func assertTabTitleContainsBeamSearch(_ tabIndex: Int) {
-        XCTAssertTrue(webView.waitForTabTitleToContain(index: tabIndex, expectedString: "beam - "))
-        XCTAssertTrue(webView.waitForTabTitleToContain(index: tabIndex, expectedString: "Google"))
-    }
-    
     func testWebTabsJumpOpenCloseReopen() {
         step ("Given I open a web page"){
             testHelper.openTestPage(page: .password)
@@ -152,7 +147,8 @@ class BrowserShortcutsTests: BaseTest {
     func testTextInstantSearchInNewTabShortcut () {
         
         let textToSelect = "H-beam"
-        let expectedSearchText = "beam - Google Search"
+        let expectedSearchTextPart1 = "beam - "
+        let expectedSearchTextPart2 = "Google"
         
         step("GIVEN I open test page") {
             testHelper.openTestPage(page: .page2)
@@ -163,13 +159,10 @@ class BrowserShortcutsTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .instantSearch)
         }
         
-        step("THEN new tab is opened and it has search text: \(expectedSearchText)") {
+        step("THEN new tab is opened and it has search text of  \(expectedSearchTextPart1) and \(expectedSearchTextPart2)") {
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
-            if isBigSurOS() {
-                assertTabTitleContainsBeamSearch(1)
-            } else {
-                assertTabTitleContainsBeamSearch(2)
-            }
+            XCTAssertTrue(webView.waitForTabTitleToContain(index: 1, expectedString: expectedSearchTextPart1))
+            XCTAssertTrue(webView.waitForTabTitleToContain(index: 1, expectedString: expectedSearchTextPart2))
         }
     }
     
