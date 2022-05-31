@@ -14,7 +14,7 @@ extension AppDelegate {
     static private let tabGroupingFeedbackInterval: TimeInterval = 3600
 
     func showTagGroupingFeedbackIfNeeded() {
-        guard Configuration.branchType == .develop, PreferencesManager.showTabsColoring else { return }
+        guard Configuration.branchType == .develop, Configuration.env != .test, PreferencesManager.showTabsColoring else { return }
         guard let lastTabGroupingFeedback = Self.lastTabGroupingFeedback else {
             Self.lastTabGroupingFeedback = BeamDate.now
             return
