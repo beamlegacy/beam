@@ -1458,6 +1458,29 @@ extension GRDBDatabase {
         }
     }
     // MARK: - LinkStore
+
+    func checkAndRepairLinksIntegrity() {
+        try? dbWriter.write { db in
+            let linkContentTable = Link.FTS.databaseTableName
+            typealias DBError = GRDB.DatabaseError
+            do {
+                try db.execute(sql: "INSERT INTO \(linkContentTable)(\(linkContentTable)) VALUES('integrity-check')")
+            } catch {
+                Logger.shared.logWarning("Integrity issue detected on '\(linkContentTable)' table", category: .database)
+                EventsTracker.sendManualReport(forError: error)
+                if let dbError = error as? GRDB.DatabaseError,
+                   [DBError.SQLITE_CORRUPT, DBError.SQLITE_CORRUPT_VTAB, DBError.SQLITE_CORRUPT_INDEX].map({ $0.primaryResultCode }).contains(dbError.resultCode) {
+                    Logger.shared.logWarning("Rebuilding '\(linkContentTable)' table", category: .database)
+                    do {
+                        try db.execute(sql: "INSERT INTO \(linkContentTable)(\(linkContentTable)) VALUES('rebuild')")
+                    } catch {
+                        EventsTracker.sendManualReport(forError: error)
+                    }
+                }
+            }
+        }
+    }
+
     func getLinks(matchingUrl url: String) -> [UUID: Link] {
         var matchingLinks = [UUID: Link]()
         try? dbReader.read { db in
