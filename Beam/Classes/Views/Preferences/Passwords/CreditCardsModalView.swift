@@ -136,9 +136,11 @@ struct CreditCardInformations {
 @objcMembers
 class CreditCardTableViewItem: TwoTextFieldViewItem {
     var cardDate: String
+    var cardImageName: String
 
     init(creditCard: CreditCardEntry) {
         self.cardDate = creditCard.formattedDate
+        self.cardImageName = creditCard.typeImageName
         super.init()
         self.text = creditCard.cardDescription
         self.topTextFieldValue = creditCard.obfuscatedNumber
@@ -148,8 +150,9 @@ class CreditCardTableViewItem: TwoTextFieldViewItem {
     }
 
     override func loadRemoteFavIcon(completion: @escaping (NSImage) -> Void) {
-        let icon = NSImage(named: "preferences-credit_card")!
-        icon.isTemplate = true
+        let icon = NSImage(named: cardImageName)!
+        icon.isTemplate = false
+        icon.accessibilityDescription = "Card Icon"
         completion(icon)
     }
 }
