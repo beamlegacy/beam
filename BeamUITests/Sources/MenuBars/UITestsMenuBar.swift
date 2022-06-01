@@ -89,4 +89,34 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.resetCollectAlert.rawValue)
         return self
     }
+    
+    @discardableResult
+    func setAPIEndpointsToStaging() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.setAPIEndpointsToStaging.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func resetAPIEndpoints() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.resetAPIEndpoints.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func signUpWithRandomTestAccount() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.signUpWithRandomTestAccount.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func deleteRemoteAccount() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.deleteRemoteAccount.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func showOnboarding() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.showOnboarding.rawValue)
+        return self
+    }
 }
