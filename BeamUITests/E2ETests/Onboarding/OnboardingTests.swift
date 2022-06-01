@@ -97,6 +97,22 @@ class OnboardingTests: BaseTest {
         }
     }
     
+    func testConnectWithEmailUsernameSignInCaseInsensitive() throws {
+        
+        step("Then I can successfully move to next view with camel case on email") {
+            onboardingView.getEmailTextField().tapInTheMiddle()
+            onboardingView.getEmailTextField().typeText(correctEmailCamelCase)
+            XCTAssertTrue(onboardingView.isContinueWithEmailButtonActivated())
+        }
+        
+        step("And next view is Signin view") {
+            onboardingView.clickContinueWithEmailButton()
+            onboardingUsernameView.waitForUsernameViewOpened()
+            XCTAssertTrue(onboardingUsernameView.getConnectButtonElement().exists)
+            XCTAssertTrue(onboardingUsernameView.getForgotPasswordLink().isEnabled) // only available on signin screen
+        }
+    }
+    
     func testConnectWithEmailUsernameSignInRequirements() throws {
         
         step("Then I can successfully edit email field and move to next view") {
