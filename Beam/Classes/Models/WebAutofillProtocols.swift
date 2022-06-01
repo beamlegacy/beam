@@ -172,22 +172,22 @@ private extension Array where Element == Int {
 // MARK: - Credit Card Formatting
 
 extension CreditCardEntry {
-    private var typeDescription: String {
+    var typeImageName: String {
         switch cardType {
         case .visa:
-            return "Visa"
+            return "autofill-card_visa"
         case .masterCard:
-            return "MasterCard"
+            return "autofill-card_mastercard"
         case .amex:
-            return "American Express"
+            return "autofill-card_amex"
         case .discover:
-            return "Discover"
+            return "autofill-card_discover"
         case .diners:
-            return "Diners Club"
+            return "autofill-card_generic"
         case .jcb:
-            return "JCB"
+            return "autofill-card_jcb"
         case .unknown:
-            return "Card"
+            return "autofill-card_generic"
         }
     }
 

@@ -17,7 +17,7 @@ struct CreditCardsMenu: View {
             VStack(alignment: .leading, spacing: 0) {
                 VStack(spacing: 0) {
                     ForEach(viewModel.entries.prefix(viewModel.entryDisplayLimit), id: \.self) { entry in
-                        StoredCreditCardCell(cardDescription: entry.cardDescription, obfuscatedNumber: entry.obfuscatedNumber) { newState in
+                        StoredCreditCardCell(cardDescription: entry.cardDescription, obfuscatedNumber: entry.obfuscatedNumber, cardImageName: entry.typeImageName) { newState in
                             if newState == .clicked {
                                 viewModel.fillCreditCard(entry)
                             }
