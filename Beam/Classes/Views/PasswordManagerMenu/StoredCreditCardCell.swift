@@ -10,6 +10,7 @@ import SwiftUI
 struct StoredCreditCardCell: View {
     let cardDescription: String
     let obfuscatedNumber: String
+    let cardImageName: String
     let onChange: (WebFieldAutofillMenuCellState) -> Void
 
     @Environment(\.colorScheme) private var colorScheme
@@ -17,8 +18,8 @@ struct StoredCreditCardCell: View {
     var body: some View {
         WebFieldAutofillMenuCell(type: .autofill, height: 56, onChange: onChange) {
             HStack(spacing: 12) {
-                Image("preferences-credit_card") // FIXME: add asset
-                    .renderingMode(.template)
+                Image(cardImageName)
+                    .renderingMode(.original)
                     .foregroundColor(BeamColor.WebFieldAutofill.icon.swiftUI)
                     .blendMode(colorScheme == .light ? .multiply : .screen)
                 VStack(alignment: .leading, spacing: 3) {
@@ -37,6 +38,6 @@ struct StoredCreditCardCell: View {
 
 struct StoredCreditCardCell_Previews: PreviewProvider {
     static var previews: some View {
-        StoredCreditCardCell(cardDescription: "Personal", obfuscatedNumber: "Visa xxxx-1234") { _ in }
+        StoredCreditCardCell(cardDescription: "Personal", obfuscatedNumber: "xxxx-xxxx-xxxx-1234", cardImageName: "autofill-card_visa") { _ in }
     }
 }
