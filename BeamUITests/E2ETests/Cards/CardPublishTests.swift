@@ -14,6 +14,18 @@ class CardPublishTests: BaseTest {
     var allCardsView: AllCardsTestView!
     let shortcuts = ShortcutsHelper()
     let dialogView = DialogTestView()
+    var deletePK = false
+    var deleteRemoteAccount = false
+    
+    override func tearDown() {
+        super.tearDown()
+        if deletePK {
+            UITestsMenuBar().deletePrivateKeys()
+        }
+        if deleteRemoteAccount {
+            UITestsMenuBar().deleteRemoteAccount().resetAPIEndpoints()
+        }
+    }
     
     private func switchReloadAndAssert(cardName: String, isPublished: Bool = true) {
         shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
@@ -67,14 +79,17 @@ class CardPublishTests: BaseTest {
         }
     }
     
-    
-    
     func testPublishUnpublishNote() throws {
-        try XCTSkipIf(true, "To be included after https://linear.app/beamapp/issue/BE-3934/uitestmenu-sign-in-with-correct-pk fix")
+        deleteRemoteAccount = true
+        deletePK = true
         let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
-        UITestsMenuBar().signInApp()
+        UITestsMenuBar()
+            .setAPIEndpointsToStaging()
+            .signUpWithRandomTestAccount()
+        
+        XCTAssertTrue(WebTestView().waitForWebViewToLoad(), "Webview is not loaded")
+        journalView.shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
         let cardNameToBeCreated = "Note publish"
-        let shortcuts = ShortcutsHelper()
         
         step("Given I create \(cardNameToBeCreated) note"){
             cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
@@ -87,14 +102,14 @@ class CardPublishTests: BaseTest {
         
         step("Then I can open it in the web") {
             XCTAssertTrue(cardView.staticText(CardViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            shortcuts.shortcutActionInvoke(action: .newTab)
-            shortcuts.shortcutActionInvoke(action: .paste)
+            cardView.shortcutsHelper.shortcutActionInvoke(action: .newTab)
+            cardView.shortcutsHelper.shortcutActionInvoke(action: .paste)
             cardView.typeKeyboardKey(.enter)
             XCTAssertTrue(WebTestView().waitForPublishedNoteToLoad(noteName: cardNameToBeCreated))
         }
         
         step("When I unpublish the note") {
-            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            cardView.shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
             cardView.unpublishCard()
         }
         
@@ -103,7 +118,7 @@ class CardPublishTests: BaseTest {
         }
         
         step("When I publish the note") {
-            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            journalView.shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
             cardView.publishCard()
         }
         
@@ -112,15 +127,16 @@ class CardPublishTests: BaseTest {
         }
         
         step("When I delete the note") {
-            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
+            journalView.shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
             cardView
                 .clickDeleteButton()
                 .confirmDeletion()
         }
         
-        step("Then I can not open it in the web") {
+        //To be uncommented once BE-2201 is fixed
+        /*step("Then I can not open it in the web") {
             switchReloadAndAssert(cardName: cardNameToBeCreated, isPublished: false)
-        }
+        }*/
     }
     
     func SKIPtestPublishedCardContentCorrectness() throws {
