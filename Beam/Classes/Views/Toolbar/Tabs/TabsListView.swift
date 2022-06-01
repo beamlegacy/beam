@@ -676,8 +676,17 @@ extension TabsListView {
         browserTabsManager.listItems.allItems.firstIndex { $0.tab == tab }
     }
 
-    fileprivate func dragGestureOnChange(gestureValue: TabGestureValue,
-                                         containerGeometry: GeometryProxy) {
+    /// A drag is allowed to leave the window when the mouse leaves the ToolBar (horizontaly or vertically)
+    /// and if this is not a pinned tab (pin tabs are present on every window, it doesn't make sense to change their window)
+    private func shouldStartExternalDrag(for tab: BrowserTab, atLocation location: CGPoint, inContainer containerGeometry: GeometryProxy) -> Bool {
+        guard !externalDragModel.isDraggingTabOutside && !tab.isPinned else { return false }
+        let horizontalThreshold: CGFloat = 30
+        return location.y < 0 || location.y > Toolbar.height
+        || location.x < -horizontalThreshold
+        || location.x > containerGeometry.size.width + horizontalThreshold
+    }
+
+    private func dragGestureOnChange(gestureValue: TabGestureValue, containerGeometry: GeometryProxy) {
         guard let currentTab = currentTab else { return }
         if dragModel.dragStartIndex == nil {
             guard let currentTabIndex = index(of: currentTab) else { return }
@@ -707,16 +716,13 @@ extension TabsListView {
         dragModel.dragGestureChanged(gestureValue: gestureValue,
                                      scrollContentOffset: scrollOffset,
                                      containerGeometry: containerGeometry)
-        guard !externalDragModel.isDraggingTabOutside else { return }
         let location = gestureValue.location
-        let horizontalThreshold: CGFloat = 30
-        if location.y < 0 || location.y > Toolbar.height ||
-            location.x < -horizontalThreshold || location.x > containerGeometry.size.width + horizontalThreshold {
+        if shouldStartExternalDrag(for: currentTab, atLocation: location, inContainer: containerGeometry) {
             startExternalDragging(atLocation: location)
         }
     }
 
-    fileprivate func dragGestureOnEnded(gestureValue: TabGestureValue) {
+    private func dragGestureOnEnded(gestureValue: TabGestureValue) {
         guard let currentTab = currentTab,
               let dragStartIndex = self.dragModel.dragStartIndex,
               let firstGestureValue = viewModel.firstDragGestureValue,

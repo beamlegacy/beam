@@ -22,6 +22,7 @@ struct EnhancedWebView: View {
                 let tabBelongsToThisWindow = tab.state === state
                 if tab.isPinned && !windowInfo.windowIsMain && !tabBelongsToThisWindow, let captured = tab.screenshotCapture {
                     Image(nsImage: captured).scaledToFit()
+                        .padding(.top, topContentInset)
                         .opacity(0.5)
                 }
 
