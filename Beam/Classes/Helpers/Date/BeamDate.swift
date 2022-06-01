@@ -25,6 +25,15 @@ public class BeamDate {
         currentDate = dateFormatter.date(from: dateString)
     }
 
+    public static func freeze(_ date: Date?) {
+        guard let date = date else {
+            currentDate = now
+            return
+        }
+
+        currentDate = date
+    }
+
     public static func reset() {
         currentDate = nil
     }
