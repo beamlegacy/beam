@@ -15,6 +15,7 @@ enum CardViewLocators {
     
     enum DisclosureTriangles: String, CaseIterable, UIElement {
         case indentationArrow = "node_arrow"
+        case editorArrowDown = "editor-arrow_down"
     }
     
     enum Buttons: String, CaseIterable, UIElement {
