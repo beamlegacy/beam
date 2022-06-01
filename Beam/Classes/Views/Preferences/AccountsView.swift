@@ -47,15 +47,16 @@ The main view of “Accounts” preference pane.
 */
 // swiftlint:disable:next type_body_length
 struct AccountsView: View {
-    @State private var enableLogging: Bool = true
+    @State private var enableLogging = true
     @State private var errorMessage: Error!
-    @State private var loading: Bool = false
+    @State private var loading = false
 
-    @State private var showingChangeEmailSheet: Bool = false
-    @State private var showingChangePasswordSheet: Bool = false
+    @State private var showingChangeEmailSheet = false
+    @State private var showingChangePasswordSheet = false
+    @State private var connectCalendarChoice = -1
 
-    @State var encryptionKeyIsHover = false
-    @State var encryptionKeyIsCopied = false
+    @State private var encryptionKeyIsHover = false
+    @State private var encryptionKeyIsCopied = false
 
     @ObservedObject var viewModel: AccountsViewModel
 
@@ -117,37 +118,44 @@ struct AccountsView: View {
                                 }
                             }
                         }.padding(.bottom, 20)
-
-                        if viewModel.calendarManager.isConnected(calendarService: .googleCalendar) {
-                            Button(action: {
-                                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                                    if connected { viewModel.calendarManager.updated = true }
-                                }
-                            }, label: {
-                                // TODO: loc
-                                Text("Connect Another Google Calendar...")
-                                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                                    .frame(width: 236)
-                                    .padding(.top, -4)
-                            })
-                            VStack {
-                                Text("Connect with Google to import your Calendar & Contacts and easily take meeting notes.")
-                                    .font(BeamFont.regular(size: 11).swiftUI)
-                                    .foregroundColor(BeamColor.Corduroy.swiftUI)
-                                    .lineLimit(2)
-                                    .fixedSize(horizontal: false, vertical: true)
-                                    .multilineTextAlignment(.leading)
-                            }.frame(width: 297, height: 26, alignment: .leading)
-                        }
                     }
                 }
-                if !viewModel.calendarManager.isConnected(calendarService: .appleCalendar) {
-                    connectAppleCalendarView
+                Picker("", selection: $connectCalendarChoice) {
+                    Text("Connect Calendars & Contacts…").tag(-1)
+                    if !viewModel.calendarManager.isConnected(calendarService: .appleCalendar) {
+                        Text("macOS Calendar…").tag(0)
+                    }
+                    Text("Google Calendar…").tag(1)
                 }
-                if !viewModel.calendarManager.isConnected(calendarService: .googleCalendar) {
-                    connectGoogleCalendarView
+                .pickerStyle(.menu)
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .fixedSize()
+                .padding(.leading, -8)
+                .onChange(of: connectCalendarChoice) { index in
+                    switch index {
+                    case 0:
+                        connectCalendar(service: .appleCalendar)
+                        connectCalendarChoice = -1
+                    case 1:
+                        connectCalendar(service: .googleCalendar)
+                        connectCalendarChoice = -1
+                    default:
+                        break
+                    }
                 }
+                Text("Connect your Calendars & Contacts and easily take meeting notes.")
+                    .font(BeamFont.regular(size: 11).swiftUI)
+                    .foregroundColor(BeamColor.Corduroy.swiftUI)
+                    .lineLimit(2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .multilineTextAlignment(.leading)
             }
+        }
+    }
+
+    private func connectCalendar(service: CalendarServices) {
+        viewModel.calendarManager.requestAccess(from: service) { connected in
+            if connected { viewModel.calendarManager.updated = true }
         }
     }
 
@@ -208,38 +216,6 @@ struct AccountsView: View {
                     .font(BeamFont.regular(size: 11).swiftUI)
                     .foregroundColor(BeamColor.Corduroy.swiftUI)
             }.frame(width: 238, height: 26, alignment: .leading)
-        }
-    }
-
-    private var connectGoogleCalendarView: some View {
-        VStack(alignment: .leading) {
-            Button(action: {
-                viewModel.calendarManager.requestAccess(from: .googleCalendar) { connected in
-                    if connected { viewModel.calendarManager.updated = true }
-                }
-            }, label: {
-                // TODO: loc
-                Text("Connect Google Calendar...")
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 208)
-                    .padding(.top, -4)
-            })
-        }
-    }
-
-    private var connectAppleCalendarView: some View {
-        VStack(alignment: .leading) {
-            Button(action: {
-                viewModel.calendarManager.requestAccess(from: .appleCalendar) { connected in
-                    if connected { viewModel.calendarManager.updated = true }
-                }
-            }, label: {
-                // TODO: loc
-                Text("Connect macOS Calendar...")
-                    .foregroundColor(BeamColor.Generic.text.swiftUI)
-                    .frame(width: 208)
-                    .padding(.top, -4)
-            })
         }
     }
 
