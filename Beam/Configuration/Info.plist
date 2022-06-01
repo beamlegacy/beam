@@ -355,9 +355,11 @@
 		<true/>
 	</dict>
 	<key>NSCalendarsUsageDescription</key>
-	<string>Beam requires access in order to display your events in your notes.</string>
+	<string>Beam uses your events to help you create meeting notes.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Beam requires access so that you can use video conferencing web services.</string>
+	<key>NSContactsUsageDescription</key>
+	<string>Beam uses your contacts to display the names in meeting notes.</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>The website you are visiting is requesting to always see your location</string>
 	<key>NSLocationUsageDescription</key>
