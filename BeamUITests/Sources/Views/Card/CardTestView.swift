@@ -93,7 +93,8 @@ class CardTestView: BaseView {
     
     @discardableResult
     func unpublishCard() -> CardTestView {
-        button(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).clickOnExistence()
+        image(CardViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
+        app.staticTexts[CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
         app.windows.sheets["alert"].buttons[CardViewLocators.Buttons.unpublishCardButton.accessibilityIdentifier].clickOnHittable()
         return self
     }

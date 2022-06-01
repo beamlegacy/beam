@@ -59,6 +59,7 @@
         "AllCardsDeleteTests",
         "AllCardsViewTests",
         "AllowListPreferencesTests",
+        "BaseCreditCardTest",
         "BaseTest",
         "BlockReferenceTests",
         "BrowserHistoryTests",
