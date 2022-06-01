@@ -2,9 +2,9 @@ import Foundation
 import BeamCore
 import AutoUpdate
 import MockHttpServer
+import Fakery
 
-import SwiftUI // Remove once we remove .testMeetingModal menu
-
+// swiftlint:disable file_length type_body_length
 class BeamUITestsMenuGenerator {
     static var beeper: CrossTargetBeeper?
     // swiftlint:disable:next cyclomatic_complexity function_body_length
@@ -61,6 +61,7 @@ class BeamUITestsMenuGenerator {
         case .resetAPIEndpoints: connectToProductionServer()
         case .setAPIEndpointsToStaging: connectToStagingServer()
         case .deleteRemoteAccount: deleteRemoteAccount()
+        case .createFakeDailySummary: createFakeDailySummary()
         default: break
         }
     }
@@ -425,4 +426,63 @@ class BeamUITestsMenuGenerator {
         }
     }
 
+    private func createFakeDailySummary() {
+        let now = BeamDate.now
+        let cal = Calendar(identifier: .iso8601)
+
+        guard let pastday = cal.date(byAdding: .day, value: -2, to: now) else { return }
+        BeamDate.freeze(pastday)
+        let pastdayNotes: [BeamNote] = createNotes(with: ["Alpha Wann", "Prince Waly"])
+
+        guard let yesterday = cal.date(byAdding: .day, value: -1, to: now) else { return }
+        BeamDate.freeze(yesterday)
+        createNotes(with: ["Key Glock", "Maxo Kream"])
+
+        let urlsAndTitlesYesterday = [
+            ("https://twitter.com", "Twitter"),
+            ("http://lemonde.fr/", "LeMonde")
+        ]
+        createFakeDailyUrl(for: urlsAndTitlesYesterday)
+
+        BeamDate.reset()
+        createNotes(with: ["Triplego", "Laylow"])
+
+        for pastdayNote in pastdayNotes {
+            pastdayNote.updateDate = BeamDate.now
+            pastdayNote.save()
+        }
+
+        let urlsAndTitlesToday = [
+            ("https://pitchfork.com", "Pitchfork"),
+            ("https://ra.co", "RA Electronic music online")
+        ]
+        createFakeDailyUrl(for: urlsAndTitlesToday)
+    }
+
+    @discardableResult
+    private func createNotes(with titles: [String]) -> [BeamNote] {
+        let faker = Faker(locale: "en-US")
+        let text = BeamText(text: faker.company.bs())
+        var notes: [BeamNote] = []
+
+        for title in titles {
+            let note = BeamNote(title: title)
+            note.type = .note
+            note.children.append(BeamElement(text))
+            note.save()
+            notes.append(note)
+        }
+        return notes
+    }
+
+    private func createFakeDailyUrl(for urlAndTitles: [(String, String)]) {
+        let storage = GRDBDailyUrlScoreStore()
+
+        let urlIdsToday: [UUID] = urlAndTitles.map {
+            return LinkStore.shared.visit($0.0, title: $0.1, content: nil, destination: nil).id
+        }
+        for urlId in urlIdsToday {
+            storage.apply(to: urlId) { $0.readingTimeToLastEvent = 100 }
+        }
+    }
 }

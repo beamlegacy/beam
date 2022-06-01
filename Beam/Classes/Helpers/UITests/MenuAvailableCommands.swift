@@ -45,6 +45,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
     case create10Notes = "Create 10 Random Notes"
     case create10NormalNotes = "Create 10 Normal Notes"
     case create10JournalNotes = "Create 10 Journal Notes"
+    case createFakeDailySummary = "Create Fake Daily Summary"
 
     // Links
     case create1000Links = "Create 1,000 Links"
@@ -89,7 +90,7 @@ public enum UITestMenuAvailableCommands: String, CaseIterable {
              .loadUITestPageAlerts, .loadUITestPagePassword, .loadUITestPagePlayground:
             return .loadHTMLPage
         case .populateDBWithJournal, .insertTextInCurrentNote,
-                .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes:
+                .create100Notes, .create100NormalNotes, .create100JournalNotes, .create10Notes, .create10NormalNotes, .create10JournalNotes, .createFakeDailySummary:
             return .notes
         case .create1000Links, .create10000Links, .create50000Links:
             return .links
