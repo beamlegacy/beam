@@ -10,23 +10,29 @@ import XCTest
 
 class BrowserTabViewTests: BaseTest {
     
-    func testOpenCloseTabs() {
-        let journalView = launchApp()
-        let helper = BeamUITestsHelper(journalView.app)
-        let webView = WebTestView()
-        
+    let webView = WebTestView()
+    let linkToOpen = "released his perhaps still-in-progress album"
+    let uiTestPage1Title = "Point And Shoot Test Fixture Ultralight Beam"
+    var journalView: JournalTestView!
+    
+    override func setUp() {
         step("Given I open a web page"){
+            journalView = launchApp()
+            let helper = BeamUITestsHelper(journalView.app)
             helper.openTestPage(page: .page1)
         }
         
+    }
+    
+    func testOpenCloseTabs() {
+
         let uiTestPageLink = webView.staticText("new-tab-beam")
         
         step("Then 1 tab is opened"){
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
         }
-
-
+        
         step("When I open another from the link on the web page"){
             uiTestPageLink.click()
         }
@@ -52,7 +58,22 @@ class BrowserTabViewTests: BaseTest {
         step("Then I'm redirected to Journal"){
             XCTAssertTrue(waitFor( PredicateFormat.exists.rawValue, journalView.scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier)))
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 0)
-
         }
+        
+    }
+    
+    func testOpenLinkInNewTab() { // BE-3783: crash when opening a tab with CMD+Click
+        
+        step("When I open a link with CMD+Click"){
+            XCUIElement.perform(withKeyModifiers: .command) {
+                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].click()
+            }
+        }
+        
+        step("Then 2 tabs are opened"){
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 2)
+        }
+        
     }
 }
