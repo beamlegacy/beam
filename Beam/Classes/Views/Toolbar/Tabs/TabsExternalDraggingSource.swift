@@ -144,11 +144,16 @@ extension TabExternalDraggingSource: NSDraggingSource {
     func draggingSession(_ session: NSDraggingSession, endedAt screenPoint: NSPoint, operation: NSDragOperation) {
         state?.data.currentDraggingSession = nil
         delegate?.tabExternalDragSessionEnded()
-        guard let tab = self.browserTab, !self.isDropHandledByBeamUI else { return }
+        guard let tab = self.browserTab, !self.isDropHandledByBeamUI else {
+            if state?.associatedWindow?.isVisible == false && state?.browserTabsManager.tabs.filter({ !$0.isPinned }).isEmpty == true {
+                state?.associatedWindow?.close()
+            }
+            return
+        }
 
         state?.browserTabsManager.removeTab(tabId: tab.id, suggestedNextCurrentTab: nil)
 
-        if state?.browserTabsManager.tabs.isEmpty == true, let window = state?.associatedWindow as? BeamWindow {
+        if state?.browserTabsManager.tabs.filter({ !$0.isPinned }).isEmpty == true, let window = state?.associatedWindow as? BeamWindow {
             // tab was dragged out from a window with only 1 tab. bring back the originated window that was hidden.
             let frameOrigin = CGPoint(x: max(0, screenPoint.x - (window.frame.width / 2)),
                                       y: max(0, screenPoint.y - window.frame.height + (Toolbar.height / 2)))

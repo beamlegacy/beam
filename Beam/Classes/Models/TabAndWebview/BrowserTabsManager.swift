@@ -98,18 +98,20 @@ class BrowserTabsManager: ObservableObject {
     private var isModifyingPinnedTabs = false
     private func setupPinnedTabObserver() {
         data.$pinnedTabs
-            .dropFirst()
             .scan(([], [])) { ($0.1, $1) }
             .sink { [weak self] (previousPinnedTab, newPinnedTabs) in
                 guard self?.isModifyingPinnedTabs == false else { return }
+                guard previousPinnedTab != newPinnedTabs else { return }
                 // receiving updated pinned tabs from another window
-                var tabs = self?.tabs ?? []
+                let previousTabs = self?.tabs
+                var tabs = previousTabs ?? []
                 let previousIds = previousPinnedTab.map { $0.id }
                 let statePinnedTabs = tabs.filter { $0.isPinned || previousIds.contains($0.id) }
                 guard statePinnedTabs != newPinnedTabs else { return }
                 tabs.removeAll { previousIds.contains($0.id) }
                 tabs.insert(contentsOf: newPinnedTabs, at: 0)
                 self?.tabs = tabs
+                self?.changeCurrentTabIfNotVisible(previousTabsList: previousTabs)
         }.store(in: &dataScope)
     }
 
@@ -194,6 +196,13 @@ class BrowserTabsManager: ObservableObject {
             currentTab = tab
         }
         data.sessionLinkRanker.addTree(tree: tab.browsingTree)
+    }
+
+    private func changeCurrentTabIfNotVisible(previousTabsList: [BrowserTab]?) {
+        guard let currentTab = currentTab, !visibleTabs.contains(currentTab) else { return }
+        let index = previousTabsList?.firstIndex(of: currentTab) ?? 0
+        // current tab is not visible anymore, select the next one.
+        setCurrentTab(at: index)
     }
 }
 
@@ -510,9 +519,8 @@ extension BrowserTabsManager {
             let tabsInGroup = tabsIds(inGroup: groupID)
             collapsedTabsInGroup[group.id] = tabsInGroup
             updateListItems()
-            if let currentTab = currentTab, tabsInGroup.contains(currentTab.id),
-               let tabIndex = tabs.firstIndex(of: currentTab) {
-                setCurrentTab(at: tabIndex)
+            if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
+                changeCurrentTabIfNotVisible(previousTabsList: tabs)
             }
         } else {
             collapsedTabsInGroup.removeValue(forKey: group.id)
