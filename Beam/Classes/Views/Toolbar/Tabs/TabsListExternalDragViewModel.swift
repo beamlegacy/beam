@@ -41,7 +41,7 @@ class TabsListExternalDragViewModel: ObservableObject {
               let currentTab = tabsManager?.currentTab, let view = state?.associatedWindow?.contentView else { return }
 
         tabsManager?.removeTab(tabId: currentTab.id, suggestedNextCurrentTab: nil)
-        if tabsManager?.tabs.isEmpty == true {
+        if tabsManager?.tabs.filter({ !$0.isPinned }).isEmpty == true {
             // hide the origin window, we will close it if tab is moved to another window, or unhide instead of creating a new one.
             state?.associatedWindow?.orderOut(self)
         }
