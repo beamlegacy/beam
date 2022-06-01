@@ -254,7 +254,8 @@ class BeamUITestsMenuGenerator {
         let accountManager = AccountManager()
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
-
+        try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
+    
         accountManager.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)

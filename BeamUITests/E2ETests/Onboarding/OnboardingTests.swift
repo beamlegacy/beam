@@ -21,7 +21,9 @@ class OnboardingTests: BaseTest {
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding"){
-            BeamUITestsHelper(launchAppWithArgument(uiTestModeLaunchArgument).app).tapCommand(.showOnboarding)
+            launchAppWithArgument(uiTestModeLaunchArgument)
+            UITestsMenuBar().resetAPIEndpoints()
+                            .showOnboarding()
         }
     }
     
@@ -370,7 +372,8 @@ class OnboardingTests: BaseTest {
     
     func testOnboardingImportView() throws {
         try XCTSkipIf(true, "blocked by https://linear.app/beamapp/issue/BE-3880/ansible-script-update-to-install-chrome-firefox-brave-browsers-on-ci")
-        step("Given I'm on import data view'") { onboardingView.signUpLater()
+        step("Given I'm on import data view'") {
+            onboardingView.signUpLater()
             onboardingImportDataTestView = OnboardingImportDataTestView()
         }
         
