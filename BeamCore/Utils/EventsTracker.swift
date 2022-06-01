@@ -31,6 +31,10 @@ public class EventsTracker {
         #endif
     }
 
+    public static func sendManualReport(forError error: Error) {
+        SentrySDK.capture(error: error)
+    }
+
 }
 
 // MARK: - Events
