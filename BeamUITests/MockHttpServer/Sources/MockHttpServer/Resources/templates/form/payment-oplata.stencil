@@ -11,6 +11,7 @@
 <div>Credit card number: <input type="text" autocomplete="cc-number" name="cc-number" id="cc-number"></input></div>
 <div>Expiration date: <input type="text" autocomplete="cc-exp" name="cc-exp-month" id="cc-exp-month"></input></div>
 <div>Security code: <input type="password" autocomplete="cc-csc" name="cc-security" id="cc-security"></input></div>
+<div>Mobile Number: <input type="text"></input></div>
 <div><button type="submit">Continue</button></div>
 </form>
 </body>

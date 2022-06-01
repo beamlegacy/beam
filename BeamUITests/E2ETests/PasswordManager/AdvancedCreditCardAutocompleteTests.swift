@@ -42,6 +42,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     
     func testOplataAutofill() {
         navigateToPayment(page: "payment-oplata")
+        verifyAutoFillIsDisplayed(title: "Mobile Number: ", autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password: true, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
