@@ -750,6 +750,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         for window in windows {
             window.state.browserTabsManager.currentTab?.switchToBackground()
         }
+        checkAndRepairLinkDBIfNeeded()
     }
 
     func application(_ sender: NSApplication, openFile filename: String) -> Bool {

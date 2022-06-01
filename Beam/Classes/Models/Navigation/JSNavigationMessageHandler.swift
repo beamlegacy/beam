@@ -20,6 +20,10 @@ class JSNavigationMessageHandler: SimpleBeamMessageHandler {
             Logger.shared.logError("Unsupported message '\(messageName)' for navigation message handler", category: .web)
             return
         }
+        guard frameInfo?.isMainFrame == true else {
+            // We don't want to react to iframes navigations/state changes
+            return
+        }
         let msgPayload = messageBody as? [String: AnyObject]
         switch messageKey {
         /// Is only called when the JS history API registers a change
