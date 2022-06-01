@@ -8,6 +8,7 @@
 import Foundation
 import BeamCore
 import Combine
+import SwiftUI
 
 /// Embeds password manager child windows and frame info for the currently focused input field.
 /// Lifecycle: created when field gets focus, destroyed when field loses focus.
@@ -99,15 +100,19 @@ final class WebFieldAutofillOverlay {
             return CGPoint(x: rect.maxX - 24 - 16, y: rect.midY + 12)
         }
         let imageName: String
+        let renderingMode: Image.TemplateRenderingMode
         switch autofillGroup.action {
         case .login, .createAccount:
             imageName = "autofill-password"
+            renderingMode = .template
         case .personalInfo:
             imageName = "autofill-form"
+            renderingMode = .template
         case .payment:
-            imageName = "preferences-credit_card" // FIXME: add asset
+            imageName = "autofill-card_generic"
+            renderingMode = .original
         }
-        let buttonView = WebFieldAutofillButton(imageName: imageName) { [weak self] in
+        let buttonView = WebFieldAutofillButton(imageName: imageName, renderingMode: renderingMode) { [weak self] in
             if let self = self, self.menuPopover == nil {
                 self.iconAction(self.frameInfo)
             }

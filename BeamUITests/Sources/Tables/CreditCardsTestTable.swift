@@ -53,7 +53,7 @@ class CreditCardsTestTable: BaseView, Rowable {
     
     func getVisibleRow(_ rowNumber: Int) -> CreditCardsTestTable.Row {
         //To be replaced once https://gitlab.com/beamgroup/beam/-/merge_requests/2840 is merged
-        let description = getElementStringValue(element:app.tables.containing(.tableColumn, identifier:CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:CreditCardTableLocators.TextFields.descriptionTextField.accessibilityIdentifier).children(matching: .textField).element)
+        let description = getElementStringValue(element:app.tables.containing(.tableColumn, identifier:CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:CreditCardTableLocators.Images.cardIcon.accessibilityIdentifier).children(matching: .textField).element)
         let cardHolder = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardHolderTextField)
         let cardNumber = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardNumberTextField)
         let expirationDate = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardDateTextField)
@@ -85,6 +85,6 @@ class CreditCardsTestTable: BaseView, Rowable {
     }
     
     private func getCardIconElement(index: Int) -> XCUIElement {
-        return app.images.matching(identifier: CreditCardTableLocators.TextFields.descriptionTextField.accessibilityIdentifier).allElementsBoundByIndex[index]
+        return app.images.matching(identifier: CreditCardTableLocators.Images.cardIcon.accessibilityIdentifier).allElementsBoundByIndex[index]
     }
 }
