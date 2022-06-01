@@ -194,3 +194,20 @@ extension AppDelegate {
         }
     }
 }
+
+// MARK: - DB Integrity check
+extension AppDelegate {
+    private static var lastLinkDBIntegrityCheckKey: String { "LinkStoreLastIntegrityCheck" }
+    @UserDefault(key: lastLinkDBIntegrityCheckKey, defaultValue: nil)
+    private static var lastLinkDBIntegrityCheck: Date?
+
+    /// We discovered in https://linear.app/beamapp/issue/BE-4107/
+    /// That the linkContent FTS table can have some integrity issues, producing incoherent search result.
+    /// We're not sure yet what was the cause, so we're adding a safe guard  checking and repairing any integrity issue found every day.
+    /// And we send a Sentry report if needed.
+    public func checkAndRepairLinkDBIfNeeded() {
+        guard Self.lastLinkDBIntegrityCheck == nil || Self.lastLinkDBIntegrityCheck?.timeIntervalSinceNow ?? 0 < -86400 else { return }
+        Self.lastLinkDBIntegrityCheck = BeamDate.now
+        GRDBDatabase.shared.checkAndRepairLinksIntegrity()
+    }
+}
