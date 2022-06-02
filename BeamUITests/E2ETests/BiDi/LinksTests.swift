@@ -131,7 +131,7 @@ class LinksTests: BaseTest {
             XCTAssertEqual(cardView!.getLinksNamesNumber(), 1)
             XCTAssertEqual(cardView!.getLinksContentNumber(), 1)
             XCTAssertEqual(cardView!.getLinkNameByIndex(0), cardName2)
-            XCTAssertTrue(waitForStringValueEqual(expectedEditedName1, cardView!.getLinkContentElementByIndex(0), BaseTest.minimumWaitTimeout), "\(cardView!.getLinkContentByIndex(0)) is not equal to \(expectedEditedName1)")
+            XCTAssertTrue(waitForStringValueEqual(expectedEditedName1, cardView!.getLinkContentElementByIndex(0), TimeInterval(2)), "\(cardView!.getLinkContentByIndex(0)) is not equal to \(expectedEditedName1)")
         }
        
         step("And note name changes are applied for note 2 note"){

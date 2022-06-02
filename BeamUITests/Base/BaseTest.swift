@@ -12,10 +12,10 @@ import XCTest
 //It contains common setup and tear down methods as well as the common methods used in Test classes
 class BaseTest: XCTestCase {
 
-    /// Default timeout of 20s
-    static let implicitWaitTimeout = TimeInterval(10)
-    /// Default minimum timeout of 2s
-    static let minimumWaitTimeout = TimeInterval(2)
+    /// Default timeout of 10s
+    static let implicitWaitTimeout = TimeInterval(5)
+    /// Default minimum timeout of 0.5s
+    static let minimumWaitTimeout = TimeInterval(0.5)
     let emptyString = ""
     let beamAppInstance = XCUIApplication(bundleIdentifier: "co.beamapp.macos")
     let uiTestModeLaunchArgument = "XCUITest"
