@@ -1330,8 +1330,8 @@
 		D71D7484282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7483282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift */; };
 		D71D7488282B9E9200D8D6F5 /* AllowListPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7487282B9E9200D8D6F5 /* AllowListPreferencesTests.swift */; };
 		D71D7491282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */; };
-		D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */; };
 		D75EEB402844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */; };
+		D75EEB4F2845F8B000994C17 /* InsideAdsBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */; };
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
@@ -1342,6 +1342,7 @@
 		D7858BCF283BC4E000D0336A /* AutoFillCCViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */; };
 		D7858BD1283BDAB500D0336A /* CreditCardSaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BD0283BDAB500D0336A /* CreditCardSaveTests.swift */; };
 		D7858BD3283CBC5A00D0336A /* BaseCreditCardTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */; };
+		D7865FAF2848A67400C86BC0 /* DailySummaryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7865FAE2848A67400C86BC0 /* DailySummaryTests.swift */; };
 		D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEC282A93580059F60D /* AdBlockerTests.swift */; };
 		D7E38CEF282A95250059F60D /* AdBlockerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */; };
 		D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */; };
@@ -3185,8 +3186,8 @@
 		D71D7487282B9E9200D8D6F5 /* AllowListPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllowListPreferencesTests.swift; sourceTree = "<group>"; };
 		D71D7490282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedSignUpPasswordAutofillTests.swift; sourceTree = "<group>"; };
 		D7472EAA27E0940300F629EF /* BeamUITests-Thread5.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread5.xctestplan"; sourceTree = "<group>"; };
-		D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsideAdsBlockerTests.swift; sourceTree = "<group>"; };
 		D75EEB3F2844EA4500994C17 /* AdvancedCreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdvancedCreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
+		D75EEB4E2845F8B000994C17 /* InsideAdsBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InsideAdsBlockerTests.swift; sourceTree = "<group>"; };
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
@@ -3197,6 +3198,7 @@
 		D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCCViewLocators.swift; sourceTree = "<group>"; };
 		D7858BD0283BDAB500D0336A /* CreditCardSaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardSaveTests.swift; sourceTree = "<group>"; };
 		D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCreditCardTest.swift; sourceTree = "<group>"; };
+		D7865FAE2848A67400C86BC0 /* DailySummaryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailySummaryTests.swift; sourceTree = "<group>"; };
 		D7E38CEC282A93580059F60D /* AdBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTests.swift; sourceTree = "<group>"; };
 		D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerViewLocators.swift; sourceTree = "<group>"; };
 		D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTestView.swift; sourceTree = "<group>"; };
@@ -7281,6 +7283,7 @@
 				B57535EF26BD5F690053CE2D /* NoteEditorTests.swift */,
 				B507CB33275F8CB800DFF11A /* SlashMenuTests.swift */,
 				A3372E2E283F7BA000F86DA7 /* NotesNavigationHistoryTests.swift */,
+				D7865FAE2848A67400C86BC0 /* DailySummaryTests.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -9589,6 +9592,7 @@
 				B5DC1FBE26B92A8800A4C94B /* CardViewTests.swift in Sources */,
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
 				B5D2A1802805E91E00C833B9 /* OnboardingPrivateKeyViewLocators.swift in Sources */,
+				D7865FAF2848A67400C86BC0 /* DailySummaryTests.swift in Sources */,
 				D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */,
 				B551F3C726BD10C300B72D27 /* AppWebsiteViewLocators.swift in Sources */,
 				B5DC1F8126B1975900A4C94B /* ToolbarLocators.swift in Sources */,

@@ -98,11 +98,11 @@ class AllCardsTestView: BaseView {
     @discardableResult
     func openCardByName(cardTitle: String) -> CardTestView {
         var elementFound = false
-        self.getCardsNamesElements().forEach{ element in
+        mainLoop: for element in self.getCardsNamesElements(){
             if getElementStringValue(element: element) == cardTitle {
                 element.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
                 elementFound = true
-                return
+                break mainLoop
             }
         }
         XCTAssertTrue(elementFound, "\(cardTitle) was not found in All Notes list")
