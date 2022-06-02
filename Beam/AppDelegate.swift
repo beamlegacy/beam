@@ -55,6 +55,16 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private let networkMonitor = NetworkMonitor()
     public private(set) var isNetworkReachable: Bool = false
 
+    private var synchronizationTask: Task<Void, Error>?
+    private let synchronizationTaskQueue = DispatchQueue(label: "SyncTask")
+    private var synchronizationSemaphore = DispatchSemaphore(value: 0)
+    private var synchronizationSubject = PassthroughSubject<Bool, Never>()
+    private(set) var isSynchronizationRunning = false
+
+    var isSynchronizationRunningPublisher: AnyPublisher<Bool, Never> {
+        synchronizationSubject.eraseToAnyPublisher()
+    }
+
     #if DEBUG
     var beamUIMenuGenerator: BeamUITestsMenuGenerator!
     #endif
@@ -197,13 +207,22 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             return
         }
 
+        synchronizationTaskQueue.sync {
+            guard isSynchronizationRunning == false else {
+                Logger.shared.logDebug("syncTask already running", category: .beamObjectNetwork)
+                completionHandler?(.success(false))
+                return
+            }
+            isSynchronizationRunning = true
+            synchronizationIsRunningDidUpdate()
+
+            synchronizationSemaphore = DispatchSemaphore(value: 0)
+            synchronizationTask = launchSynchronizationTask(force, showAlert, completionHandler)
+        }
+    }
+
+    private func launchSynchronizationTask(_ force: Bool, _ showAlert: Bool, _ completionHandler: ((Result<Bool, Error>) -> Void)?) -> Task<Void, Error> {
         Task {
-            // With Vinyl and Network test recording, and this executing, it generates async network
-            // calls and randomly fails.
-
-            // My feeling is we should sync + trigger notification and only start network calls when
-            // this sync has finished.
-
             // swiftlint:disable:next date_init
             let localTimer = Date()
 
@@ -221,9 +240,25 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logInfo("syncAllFromAPI called",
                                   category: .beamObjectNetwork,
                                   localTimer: localTimer)
-            self.deleteEmptyDatabases(showAlert: showAlert) { _ in
+            if !Task.isCancelled {
+                self.deleteEmptyDatabases(showAlert: showAlert) { _ in
+                    self.synchronizationTaskDidStop()
+                    self.synchronizationSemaphore.signal()
+                    if let error = syncError {
+                        Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
+                                              category: .beamObjectNetwork,
+                                              localTimer: localTimer)
+                        completionHandler?(.failure(error))
+                    } else {
+                        DatabaseManager.changeDefaultDatabaseIfNeeded()
+                        completionHandler?(.success(true))
+                    }
+                }
+            } else {
+                synchronizationTaskDidStop()
+                synchronizationSemaphore.signal()
                 if let error = syncError {
-                    Logger.shared.logInfo("syncAllFromAPI failed",
+                    Logger.shared.logInfo("syncAllFromAPI failed: \(error)",
                                           category: .beamObjectNetwork,
                                           localTimer: localTimer)
                     completionHandler?(.failure(error))
@@ -233,6 +268,27 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 }
             }
         }
+    }
+
+    public func stopSynchronization() {
+        if let task = synchronizationTask {
+            task.cancel()
+            let semaphoreResult = synchronizationSemaphore.wait(timeout: DispatchTime.now() + .seconds(30))
+            if case .timedOut = semaphoreResult {
+                Logger.shared.logError("Couldn't cancel synchronization task, timedout", category: .beamObjectNetwork)
+            }
+        }
+    }
+
+    private func synchronizationTaskDidStop() {
+        Logger.shared.logInfo("synchronizationTaskDidStop", category: .beamObjectNetwork)
+        synchronizationTask = nil
+        isSynchronizationRunning = false
+        synchronizationIsRunningDidUpdate()
+    }
+
+    private func synchronizationIsRunningDidUpdate() {
+        synchronizationSubject.send(isSynchronizationRunning)
     }
 
     //swiftlint:disable:next cyclomatic_complexity function_body_length
