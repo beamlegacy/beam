@@ -322,7 +322,7 @@ class OmniboxViewTests: BaseTest {
         
         step("Then the note is created"){
             XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertTrue(cardView.textField(secondNoteTitle).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertEqual(cardView.getCardTitle(), secondNoteTitle)
         }
         
     }

@@ -84,6 +84,7 @@
         "CreditCardAutocompleteTests\/testValidateOtherCCMoreThan4()",
         "CreditCardSaveTests",
         "CreditCardsTests",
+        "DailySummaryTests",
         "DeleteNotesTests",
         "DownloadsTest",
         "EditorShortcutsTests",
