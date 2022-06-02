@@ -1345,6 +1345,7 @@
 		D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEC282A93580059F60D /* AdBlockerTests.swift */; };
 		D7E38CEF282A95250059F60D /* AdBlockerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */; };
 		D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */; };
+		DA0BBE6A282D006600437AA1 /* BrowsingTreeTriggerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */; };
 		DA0EA7172698400400BD5D2F /* LongTermUrlScoreStoreTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */; };
 		DA113A852760FA26006B20AF /* chromeHistory.db in Resources */ = {isa = PBXBuildFile; fileRef = DA113A842760FA26006B20AF /* chromeHistory.db */; };
 		DA113A872760FAEF006B20AF /* BrowserHistoryImportTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */; };
@@ -1364,6 +1365,7 @@
 		DA3A84BE2805C3D500092200 /* NoteDailySummary.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */; };
 		DA3A84C52805DCCD00092200 /* NoteDailySummaryTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */; };
 		DA3E41D42642CC7900BA3952 /* TextSaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3E41BF2642CC7900BA3952 /* TextSaver.swift */; };
+		DA3FD00D282D12AD00294A14 /* WebBrowsingBaseTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA3FD00C282D12AD00294A14 /* WebBrowsingBaseTests.swift */; };
 		DA52E967276B4430008D4990 /* BrowserType.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA52E966276B4430008D4990 /* BrowserType.swift */; };
 		DA52E96E276B57BD008D4990 /* BrowserImportManagerTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA52E96D276B57BD008D4990 /* BrowserImportManagerTest.swift */; };
 		DA52E980276CE026008D4990 /* BrowsingTreeProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA52E97F276CE026008D4990 /* BrowsingTreeProcessor.swift */; };
@@ -3198,6 +3200,7 @@
 		D7E38CEC282A93580059F60D /* AdBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTests.swift; sourceTree = "<group>"; };
 		D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerViewLocators.swift; sourceTree = "<group>"; };
 		D7E38CF0282A96BA0059F60D /* AdBlockerTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTestView.swift; sourceTree = "<group>"; };
+		DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowsingTreeTriggerTest.swift; path = BeamTests/BrowsingTreeTriggerTest.swift; sourceTree = SOURCE_ROOT; };
 		DA0EA7162698400400BD5D2F /* LongTermUrlScoreStoreTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongTermUrlScoreStoreTest.swift; sourceTree = "<group>"; };
 		DA113A842760FA26006B20AF /* chromeHistory.db */ = {isa = PBXFileReference; lastKnownFileType = text; path = chromeHistory.db; sourceTree = "<group>"; };
 		DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = BrowserHistoryImportTest.swift; path = Managers/BrowserHistoryImportTest.swift; sourceTree = "<group>"; };
@@ -3217,6 +3220,7 @@
 		DA3A84BD2805C3D500092200 /* NoteDailySummary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDailySummary.swift; sourceTree = "<group>"; };
 		DA3A84C42805DCCD00092200 /* NoteDailySummaryTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteDailySummaryTest.swift; sourceTree = "<group>"; };
 		DA3E41BF2642CC7900BA3952 /* TextSaver.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TextSaver.swift; sourceTree = "<group>"; };
+		DA3FD00C282D12AD00294A14 /* WebBrowsingBaseTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebBrowsingBaseTests.swift; sourceTree = "<group>"; };
 		DA52E966276B4430008D4990 /* BrowserType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserType.swift; sourceTree = "<group>"; };
 		DA52E96D276B57BD008D4990 /* BrowserImportManagerTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserImportManagerTest.swift; sourceTree = "<group>"; };
 		DA52E97F276CE026008D4990 /* BrowsingTreeProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeProcessor.swift; sourceTree = "<group>"; };
@@ -4725,6 +4729,7 @@
 			isa = PBXGroup;
 			children = (
 				DAAFF676283BE779007305B4 /* OmniboxAnalyticsTests.swift */,
+				DA0BBE69282D006600437AA1 /* BrowsingTreeTriggerTest.swift */,
 				DA23C75327F31816005508EB /* DailyUrlStorageTest.swift */,
 				DA5D4B892771DF0B00D3E80C /* BrowsingTreeStoreTest.swift */,
 				DA52E96D276B57BD008D4990 /* BrowserImportManagerTest.swift */,
@@ -6461,6 +6466,7 @@
 		965A78402514F149009980D4 /* BeamTests */ = {
 			isa = PBXGroup;
 			children = (
+				DA3FD00C282D12AD00294A14 /* WebBrowsingBaseTests.swift */,
 				DA3A84B6280466C900092200 /* NoteScoreTriggerTests.swift */,
 				A5E00B4C27EB5A9F00474360 /* Autocomplete */,
 				DA113A862760FAEF006B20AF /* BrowserHistoryImportTest.swift */,
@@ -9382,6 +9388,7 @@
 				8A7F949026A85D7600270A74 /* PointAndShootShootGroupTest.swift in Sources */,
 				52A7DE2826AECFAC003E770E /* MyRemoteObject.swift in Sources */,
 				9693FD5D27A07CAD00EB024A /* BeamFileDBManagerTests.swift in Sources */,
+				DA3FD00D282D12AD00294A14 /* WebBrowsingBaseTests.swift in Sources */,
 				52E04FED252C814D00AD9F56 /* RoamImporterTests.swift in Sources */,
 				5227B2CF26DD12EF0006FA7D /* ZZZTests.swift in Sources */,
 				DAF063F927D25DA4000406DE /* BrowsingTreeStatsTest.swift in Sources */,
@@ -9478,6 +9485,7 @@
 				8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */,
 				8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */,
 				A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */,
+				DA0BBE6A282D006600437AA1 /* BrowsingTreeTriggerTest.swift in Sources */,
 				5281B07525C994BE00DF66D9 /* ConfigurationTests.swift in Sources */,
 				52A7DE3226AECFC6003E770E /* MyRemoteObjectManager.swift in Sources */,
 				A5BD34D727C4CFF3002AA8C6 /* DistributedRandomGeneratorTests.swift in Sources */,

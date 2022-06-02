@@ -818,6 +818,7 @@ extension GRDBDatabase {
             try BrowsingTreeStats.deleteAll(db)
             try TabPinSuggestion.deleteAll(db)
             try DailyURLScore.deleteAll(db)
+            try Link.deleteAll(db)
         }
     }
 
