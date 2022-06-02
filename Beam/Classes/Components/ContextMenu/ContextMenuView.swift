@@ -181,6 +181,7 @@ class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
     @Published var sizeToFit: Bool = false
     @Published var containerSize: CGSize = .zero
     @Published var forcedWidth: CGFloat?
+    var frameAlignment: Alignment = .topLeading
     var onSelectMenuItem: (() -> Void)?
     @Published var updateSize: Bool = false
     // SubMenu
@@ -191,6 +192,7 @@ class ContextMenuViewModel: BaseFormatterViewViewModel, ObservableObject {
 struct ContextMenuView: View {
 
     @ObservedObject var viewModel: ContextMenuViewModel
+
     static let standardItemHeight: CGFloat = 24
     static let subtitleButtonItemHeight: CGFloat = 47
     static let itemsSpacing = BeamSpacing._50
@@ -228,7 +230,6 @@ struct ContextMenuView: View {
         } set: {
             viewModel.items[index].showSubtitleButton = $0
         }
-
     }
 
     var body: some View {
@@ -240,11 +241,11 @@ struct ContextMenuView: View {
             FormatterViewBackground {
                 VStack(alignment: .leading, spacing: Self.itemsSpacing) {
                     ForEach(Array(viewModel.items.enumerated()), id: \.1.id) { index, item in
-                        let isSelected = viewModel.selectedIndex == index
                         if item.type == .separator {
                             Separator(horizontal: true)
                                 .padding(.horizontal, item.allowPadding ? BeamSpacing._50 : 0)
                         } else {
+                            let isSelected = viewModel.selectedIndex == index
                             ContextMenuItemView(viewModel: viewModel, item: item, highlight: isSelected,
                                                 toggleSwitched: item.isToggleOn, showSubtitleButton: showSubtitleButtonBinding(for: item, index: index))
                             .frame(height: Self.height(forItem: item))
@@ -286,13 +287,13 @@ struct ContextMenuView: View {
             .if(viewModel.sizeToFit) { $0.frame(maxWidth: computedSize.width, alignment: .leading) }
             .if(!viewModel.sizeToFit) { $0.frame(width: computedSize.width, alignment: .leading) }
             .fixedSize(horizontal: viewModel.sizeToFit, vertical: true)
-            .frame(height: viewModel.containerSize.height, alignment: .topLeading)
+            .frame(height: viewModel.containerSize.height, alignment: viewModel.frameAlignment)
             .animation(BeamAnimation.easeInOut(duration: 0.15), value: computedSize.height)
             .formatterViewBackgroundAnimation(with: viewModel)
             .accessibilityElement(children: .contain)
             .accessibility(identifier: "ContextMenu")
         }
-        .frame(width: viewModel.containerSize.width, height: viewModel.containerSize.height, alignment: .topLeading)
+        .frame(width: viewModel.containerSize.width, height: viewModel.containerSize.height, alignment: viewModel.frameAlignment)
     }
 }
 
