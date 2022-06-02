@@ -26,7 +26,6 @@ class BaseCreditCardTest: BaseTest {
     let creditCardOwnerNameLabel = "Name on card: "
     let creditCardOwnerGivenNameLabel = "Given name on card: "
     let creditCardOwnerFamilyNameLabel = "Family name on card: "
-    let timeout = TimeInterval(0.5)
     
     //Mock Page
     let creditCardNumberLabelMockPage = "cc-number"
@@ -52,13 +51,13 @@ class BaseCreditCardTest: BaseTest {
         
         if autocomplete {
             step("Then CC number autofill is displayed") {
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber, timeout: timeout))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
                 XCTAssertTrue(helper.getOtherCCOptionElement().exists)
             }
         } else {
             step("Then CC number autofill is not displayed") {
-                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
+                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName))
                 XCTAssertFalse(helper.getOtherCCOptionElement().exists)
                 XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
             }
@@ -68,10 +67,10 @@ class BaseCreditCardTest: BaseTest {
     
     func verifyDBCCCards(otherCCAvailable: Bool = false) {
         step("Then Jane and John's cards are displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber, timeout: timeout))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCName, timeout: timeout))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCHiddenNumber, timeout: timeout))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCName))
+            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCHiddenNumber))
             if otherCCAvailable {
                 XCTAssertTrue(helper.getOtherCCOptionElement().exists)
             } else {
@@ -96,13 +95,13 @@ class BaseCreditCardTest: BaseTest {
         
         if autocomplete {
             step("Then CC number autofill is displayed") {
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber, timeout: timeout))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
                 XCTAssertTrue(helper.getOtherCCOptionElement().exists)
             }
         } else {
             step("Then CC number autofill is not displayed") {
-                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName, timeout: timeout))
+                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName))
                 XCTAssertFalse(helper.getOtherCCOptionElement().exists)
             }
         }
