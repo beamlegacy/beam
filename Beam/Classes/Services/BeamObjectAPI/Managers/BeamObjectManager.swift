@@ -1,6 +1,7 @@
 import Foundation
 import BeamCore
 import Atomics
+import Combine
 
 /// How do you want to resolve checksum conflicts
 enum BeamObjectConflictResolution {
@@ -35,6 +36,31 @@ enum BeamObjectObjectType: String {
     }
 }
 
+enum BeamObjectObjectSynchronizationStatus: CustomStringConvertible {
+    case notStarted
+    case downloading(Float)
+    case uploading(Float)
+    case finished
+    case failure(Error)
+
+    var description: String {
+        switch self {
+        case .notStarted:
+            return "Not started"
+        case .downloading(let progress):
+            let formattedProgress = String(format: "%.0f%%", progress)
+            return "Downloading \(formattedProgress)"
+        case .uploading(let progress):
+            let formattedProgress = String(format: "%.0f%%", progress)
+            return "Uploading \(formattedProgress)"
+        case .finished:
+            return "Finished"
+        case .failure(let error):
+            return "Error: \(error.localizedDescription)"
+        }
+    }
+}
+
 class BeamObjectManager {
     static var managerOrder: [BeamObjectObjectType] = []
     static var managerInstances: [BeamObjectObjectType: BeamObjectManagerDelegateProtocol] = [:]
@@ -42,6 +68,15 @@ class BeamObjectManager {
     static var uploadTypeForTests: BeamObjectRequestUploadType = .multipartUpload
     internal static var disableSendingObjects = true
     internal static var fullSyncRunning = ManagedAtomic<Bool>(false)
+
+    internal static var synchronizationStatusSubject = CurrentValueSubject<BeamObjectObjectSynchronizationStatus, Never>(.notStarted)
+    public static var synchronizationStatusPublisher: AnyPublisher<BeamObjectObjectSynchronizationStatus, Never> {
+        Self.synchronizationStatusSubject.eraseToAnyPublisher()
+    }
+    internal static func synchronizationStatusUpdated(_ status: BeamObjectObjectSynchronizationStatus) {
+        Self.synchronizationStatusSubject.send(status)
+    }
+    private(set) static var synchronizationStatus: BeamObjectObjectSynchronizationStatus = .notStarted
 
     #if DEBUG
     static var networkRequests: [APIRequest] = []

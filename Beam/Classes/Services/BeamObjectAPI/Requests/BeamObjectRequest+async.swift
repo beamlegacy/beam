@@ -279,6 +279,8 @@ extension BeamObjectRequest {
         var after = ""
         let first = Configuration.beamObjectsPageSize
         while hasNext {
+            try Task.checkCancellation()
+
             let parameters = PaginatedBeamObjectsParameters(receivedAtAfter: receivedAtAfter,
                                                             ids: ids,
                                                             beamObjectType: beamObjectType,
@@ -486,6 +488,7 @@ extension BeamObjectRequest {
                 // swiftlint:disable:next date_init
                 let localTimer = Date()
                 let decryptedObjects: [BeamObject] = try beamObjects.compactMap {
+                    try Task.checkCancellation()
                     do {
                         try $0.decrypt()
                         try $0.setTimestamps()
@@ -502,6 +505,8 @@ extension BeamObjectRequest {
                 }
 
                 Logger.shared.logDebug("Decrypted \(decryptedObjects.count) objects", category: .beamObject, localTimer: localTimer)
+
+                try Task.checkCancellation()
 
                 if decryptedObjects.count < beamObjects.count && raisePrivateKeyError {
                     throw BeamObjectRequestError.privateKeyError(validObjects: decryptedObjects, invalidObjects: invalidObjects)

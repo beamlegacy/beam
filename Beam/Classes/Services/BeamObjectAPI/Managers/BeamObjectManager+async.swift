@@ -16,30 +16,43 @@ extension BeamObjectManager {
 
         assert(Self.fullSyncRunning.load(ordering: .relaxed) == false)
 
-        defer {
-            // Reactivate sending object
-            Self.disableSendingObjects = false
-            Self.fullSyncRunning.store(false, ordering: .relaxed)
-        }
+        do {
+            defer {
+                // Reactivate sending object
+                Self.disableSendingObjects = false
+                Self.fullSyncRunning.store(false, ordering: .relaxed)
+            }
 
-        Self.fullSyncRunning.store(true, ordering: .relaxed)
+            Self.fullSyncRunning.store(true, ordering: .relaxed)
 
-        try await fetchAllByChecksumsFromAPI(force: force)
+            Self.synchronizationStatusUpdated(.downloading(0))
+            try await fetchAllByChecksumsFromAPI(force: force)
+            Self.synchronizationStatusUpdated(.downloading(100))
 
-        if let prepareBeforeSaveAll = prepareBeforeSaveAll {
-            Logger.shared.logDebug("syncAllFromAPI: calling prepareBeforeSaveAll",
+            try Task.checkCancellation()
+
+            if let prepareBeforeSaveAll = prepareBeforeSaveAll {
+                Logger.shared.logDebug("syncAllFromAPI: calling prepareBeforeSaveAll",
+                                       category: .beamObjectNetwork)
+                prepareBeforeSaveAll()
+            }
+
+            // swiftlint:disable:next date_init
+            let localTimer = Date()
+            Logger.shared.logDebug("syncAllFromAPI: calling asyncSaveAllToAPI",
                                    category: .beamObjectNetwork)
-            prepareBeforeSaveAll()
-        }
+            Self.synchronizationStatusUpdated(.uploading(0))
+            let objectsCount = try await self.asyncSaveAllToAPI(force: force)
+            Self.synchronizationStatusUpdated(.uploading(100))
+            Logger.shared.logDebug("syncAllFromAPI: Called asyncSaveAllToAPI, saved \(objectsCount) objects",
+                                   category: .beamObjectNetwork,
+                                   localTimer: localTimer)
 
-        // swiftlint:disable:next date_init
-        let localTimer = Date()
-        Logger.shared.logDebug("syncAllFromAPI: calling asyncSaveAllToAPI",
-                               category: .beamObjectNetwork)
-        let objectsCount = try await self.asyncSaveAllToAPI(force: force)
-        Logger.shared.logDebug("syncAllFromAPI: Called asyncSaveAllToAPI, saved \(objectsCount) objects",
-                               category: .beamObjectNetwork,
-                               localTimer: localTimer)
+            Self.synchronizationStatusUpdated(.finished)
+        } catch {
+            Self.synchronizationStatusUpdated(.failure(error))
+            throw error
+        }
     }
 
     @discardableResult
@@ -64,8 +77,27 @@ extension BeamObjectManager {
          for parsing
          */
 
+        actor SimpleProgressReporter {
+            private var managers: [BeamObjectObjectType: Float] = [:]
+            private let size: Float
+
+            init(size: Int) {
+                self.size = Float(size)
+            }
+
+            func storeProgress(_ beamObjectObjectType: BeamObjectObjectType, _ progress: Float) {
+                managers[beamObjectObjectType] = progress
+                BeamObjectManager.synchronizationStatusUpdated(.uploading(self.progress()))
+            }
+
+            private func progress() -> Float {
+                managers.values.map({ $0 / size}).reduce(0, +)
+            }
+        }
+
+        let progress = SimpleProgressReporter(size: Self.managerInstances.count)
         await withTaskGroup(of: Swift.Result<(Int, Date?), Error>.self, body: { group in
-            for (_, manager) in Self.managerInstances {
+            for (beamObjectObjectType, manager) in Self.managerInstances {
                 group.addTask {
                     // swiftlint:disable:next date_init
                     let localTimer = Date()
@@ -77,9 +109,12 @@ extension BeamObjectManager {
                     do {
                         Logger.shared.logDebug("saveAllToAPI using \(manager)",
                                                category: .beamObjectNetwork)
-                        let result = try await manager.saveAllOnBeamObjectApi(force: force)
+                        let result = try await manager.saveAllOnBeamObjectApi(force: force, progress: { percentage in
+                            await progress.storeProgress(beamObjectObjectType, percentage)
+                        })
                         return .success(result)
                     } catch {
+                        await progress.storeProgress(beamObjectObjectType, 100)
                         return .failure(error)
                     }
                 }
@@ -163,11 +198,14 @@ extension BeamObjectManager {
         Logger.shared.logDebug("fetchAllByChecksumsFromAPI: \(beamObjects.count) beam object checksums fetched",
                                category: .beamObjectNetwork,
                                localTimer: localTimer)
+        Self.synchronizationStatusUpdated(.downloading(33))
 
         do {
             // swiftlint:disable:next date_init
             localTimer = Date()
             let changedObjects = self.parseObjectChecksums(beamObjects)
+
+            Self.synchronizationStatusUpdated(.downloading(66))
 
             Logger.shared.logDebug("parsed \(beamObjects.count) checksums, got \(changedObjects.count) objects after",
                                    category: .beamObjectNetwork,
@@ -295,6 +333,8 @@ extension BeamObjectManager {
 
         // API can't handle too many objects at once. If it fails we return early
         for objectsToSaveChunked in objects.chunked(into: maxChunk) {
+            try Task.checkCancellation()
+
             Logger.shared.logDebug("Saving \(index)/\(objects.count)", category: .beamObjectNetwork)
             try await self.saveToAPIClassicChunk(objectsToSaveChunked, force: force)
             index += maxChunk
