@@ -12,65 +12,7 @@ import MockHttpServer
 
 // Testing the navigation flow from the BrowserTab to the LinkStore
 // to check what ends up in the indexing when doing different kind of navigation
-class BrowserTabIndexingTests: XCTestCase {
-
-    private var webView: WKWebView!
-    private var state: BeamState!
-    private var tab: BrowserTab!
-    private var mockIndexingDelegate: MockWebIndexingDelegate?
-    private var destinationURL: URL!
-    private static let port: Int = 8080
-
-    private let destinationPageTitle = "Redirection Destination"
-    private let jsDestinationPageTitle = "Redirected to destination"
-    private let defaultTimeout: TimeInterval = 2
-
-    private var linkStore: LinkStore {
-        LinkStore.shared
-    }
-
-    override class func setUp() {
-        MockHttpServer.start(port: port)
-    }
-
-    override class func tearDown() {
-        MockHttpServer.stop(unregister: true)
-    }
-
-    override func setUp() {
-        linkStore.deleteAll(includedRemote: false, nil)
-        webView = WKWebView()
-
-        state = BeamState()
-        state.data = BeamData()
-        mockIndexingDelegate = MockWebIndexingDelegate()
-        state.webIndexingController?.delegate = mockIndexingDelegate
-        state.webIndexingController?.betterContentReadDelay = 0.2
-        tab = BrowserTab(state: state, browsingTreeOrigin: .searchBar(query: "http", referringRootId: nil), originMode: .web, note: nil)
-
-        destinationURL = redirectURL(for: .none)
-    }
-
-    private func redirectURL(for type: MockHttpServer.RedirectionType) -> URL {
-        URL(string: MockHttpServer.redirectionURL(for: type, port: Self.port))!
-    }
-
-    private func simulateLinkNavigation(to type: MockHttpServer.RedirectionType, completion: (() -> Void)?) {
-        tab.webView.evaluateJavaScript(MockHttpServer.redirectionScriptToSimulateLinkRedirection(for: type)) { _, _ in
-            completion?()
-        }
-    }
-
-    private class MockWebIndexingDelegate: WebIndexControllerDelegate {
-
-        var onIndexingFinished: ((URL) -> Void)?
-
-        func webIndexingController(_ controller: WebIndexingController, didIndexPageForURL url: URL) {
-            self.onIndexingFinished?(url)
-        }
-
-    }
-
+class BrowserTabIndexingTests: WebBrowsingBaseTests {
     private func performAndTestAliasRedirection(ofType type: MockHttpServer.RedirectionType,
                                                 expectedNumberOfIndexingCalls: Int,
                                                 initialURLShouldBeAlias: Bool = true,

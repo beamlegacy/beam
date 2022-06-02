@@ -156,12 +156,12 @@ class UrlScoresCollectionTest: XCTestCase {
             parentHref: "https://example.com",
             x: 0,
             y: 0,
-            scrollX: 0,
-            scrollY: 0,
-            scrollWidth: 2,
-            scrollHeight: 5,
-            width: 10,
-            height: 10
+            scrollX: 2,
+            scrollY: 5,
+            scrollWidth: 10,
+            scrollHeight: 10,
+            width: 1,
+            height: 1
         )
 
         scorer.updateScrollingScore(scroll1)
@@ -193,12 +193,12 @@ class UrlScoresCollectionTest: XCTestCase {
             parentHref: "https://example.com",
             x: 0,
             y: 0,
-            scrollX: 0,
-            scrollY: 0,
-            scrollWidth: 8,
-            scrollHeight: 4,
-            width: 20,
-            height: 20
+            scrollX: 8,
+            scrollY: 4,
+            scrollWidth: 20,
+            scrollHeight: 20,
+            width: 1,
+            height: 1
         )
         scorer.updateScrollingScore(scroll2)
         score = try XCTUnwrap(store.data[link])
@@ -229,12 +229,12 @@ class UrlScoresCollectionTest: XCTestCase {
             parentHref: "https://example.com",
             x: 0,
             y: 0,
-            scrollX: 0,
-            scrollY: 0,
-            scrollWidth: CGFloat.nan,
-            scrollHeight: CGFloat.nan,
-            width: 20,
-            height: 20
+            scrollX: CGFloat.nan,
+            scrollY: CGFloat.nan,
+            scrollWidth: 20,
+            scrollHeight: 20,
+            width: 1,
+            height: 1
         )
         scorer.updateScrollingScore(scroll3)
         score = try XCTUnwrap(store.data[link])
