@@ -86,6 +86,7 @@
         "CreditCardAutocompleteTests",
         "CreditCardSaveTests",
         "CreditCardsTests",
+        "DailySummaryTests",
         "DeleteNotesTests",
         "DownloadsTest",
         "EditorShortcutsTests",

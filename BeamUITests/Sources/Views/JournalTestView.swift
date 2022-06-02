@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class JournalTestView: BaseView {
+class JournalTestView: TextEditorContextTestView {
     
     func getHelpButton() -> XCUIElement {
         return staticText("HelpButton")
