@@ -39,4 +39,45 @@ class TextEditorContextTestView: BaseView {
         //return textField(TextEditorContextViewLocators.TextFields.linkURL.accessibilityIdentifier)
         return app.dialogs.textFields[TextEditorContextViewLocators.TextFields.linkURL.accessibilityIdentifier].firstMatch
     }
+    
+    func doesStartedDailySummaryExist() -> Bool {
+        return app.textViews.containing(.button, identifier: "Started").element.exists
+    }
+    
+    func doesContinueOnDailySummaryExist() -> Bool {
+        return app.textViews.containing(.button, identifier: "Continue").element.exists
+    }
+    
+    func getCardNoteValueByIndex(_ index: Int) -> String {
+        return self.getElementStringValue(element:  getCardNoteElementByIndex(index))
+    }
+    
+    func getCardNoteElementByIndex(_ index: Int) -> XCUIElement {
+        return self.getCardNotesForVisiblePart()[index]
+    }
+    
+    func getCardNotesForVisiblePart() -> [XCUIElement] {
+        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
+    }
+    
+    @discardableResult
+    func openBiDiLink(_ linkName: String) -> CardTestView {
+        app.windows.scrollViews.buttons[linkName].firstMatch.tapInTheMiddle()
+        return CardTestView()
+    }
+    
+    @discardableResult
+    func openBiDiLink(_ index: Int) -> CardTestView {
+        app.buttons.matching(identifier: "internalLink").element(boundBy: index).tapInTheMiddle()
+        return CardTestView()
+    }
+    
+    @discardableResult
+    func typeInCardNoteByIndex(noteIndex: Int, text: String, needsActivation: Bool = false) -> TextEditorContextTestView {
+        if needsActivation {
+            getCardNotesForVisiblePart()[noteIndex].tapInTheMiddle()
+        }
+        app.typeText(text)
+        return self
+    }
 }

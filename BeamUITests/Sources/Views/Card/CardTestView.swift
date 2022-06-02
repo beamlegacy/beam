@@ -8,11 +8,15 @@
 import Foundation
 import XCTest
 
-class CardTestView: BaseView {
+class CardTestView: TextEditorContextTestView {
     
-    var cardTitle: XCUIElement { return textField(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)}
-    var cardTitleStatic: XCUIElement { return staticText(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)}
-
+    var cardTitle: XCUIElement {
+        return app.windows.scrollViews[CardViewLocators.ScrollViews.noteView.accessibilityIdentifier].textFields[CardViewLocators.TextFields.noteTitle.accessibilityIdentifier]
+    }
+    var cardTitleStatic: XCUIElement {
+        return app.windows.scrollViews[CardViewLocators.ScrollViews.noteView.accessibilityIdentifier].staticTexts[CardViewLocators.TextFields.noteTitle.accessibilityIdentifier]
+    }
+    
     @discardableResult
     func waitForCardViewToLoad() -> Bool {
         return scrollView(CardViewLocators.ScrollViews.noteView.accessibilityIdentifier)
@@ -44,11 +48,6 @@ class CardTestView: BaseView {
     func getNumberOfDisclosureTriangles() -> Int {
         return app.disclosureTriangles.matching(identifier: CardViewLocators.DisclosureTriangles.indentationArrow.accessibilityIdentifier).count
     }
-    
-    /*Deprecated 
-    func openEditorOptions() {
-        image(CardViewLocators.Buttons.editorOptions.accessibilityIdentifier).click()
-    }*/
     
     func getCardTitle() -> String {
         return self.getElementStringValue(element: cardTitle)
@@ -99,10 +98,6 @@ class CardTestView: BaseView {
         return self
     }
     
-    func getCardNotesForVisiblePart() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
-    }
-    
     func getCardNotesElementQueryForVisiblePart() -> XCUIElementQuery {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
@@ -118,23 +113,6 @@ class CardTestView: BaseView {
     
     func getNumberOfVisibleNotes() -> Int {
         return self.getCardNotesForVisiblePart().count
-    }
-    
-    func getCardNoteValueByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element:  getCardNoteElementByIndex(index))
-    }
-    
-    func getCardNoteElementByIndex(_ index: Int) -> XCUIElement {
-        return self.getCardNotesForVisiblePart()[index]
-    }
-    
-    @discardableResult
-    func typeInCardNoteByIndex(noteIndex: Int, text: String, needsActivation: Bool = false) -> CardTestView {
-        if needsActivation {
-            getCardNotesForVisiblePart()[noteIndex].tapInTheMiddle()
-        }
-        app.typeText(text)
-        return self
     }
     
     func navigateToWebView() {
@@ -240,18 +218,6 @@ class CardTestView: BaseView {
     
     func getReferences() -> [XCUIElement] {
         return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
-    }
-    
-    @discardableResult
-    func openBiDiLink(_ linkName: String) -> CardTestView {
-        button(linkName).tapInTheMiddle()
-        return self
-    }
-    
-    @discardableResult
-    func openBiDiLink(_ index: Int) -> CardTestView {
-        app.buttons.matching(identifier: "internalLink").element(boundBy: index).tapInTheMiddle()
-        return self
     }
     
     @discardableResult
