@@ -10,7 +10,7 @@ protocol BeamObjectManagerDelegateProtocol {
     // it will call this method
     func saveAllOnBeamObjectApi(force: Bool, _ completion: @escaping ((Swift.Result<(Int, Date?), Error>) -> Void)) throws -> APIRequest?
 
-    func saveAllOnBeamObjectApi(force: Bool) async throws -> (Int, Date?)
+    func saveAllOnBeamObjectApi(force: Bool, progress: ((Float) async -> Void)?) async throws -> (Int, Date?)
 }
 
 protocol BeamObjectManagerDelegate: AnyObject, BeamObjectManagerDelegateProtocol {
