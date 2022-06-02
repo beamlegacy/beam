@@ -49,11 +49,15 @@ extension BeamTextEdit {
 
         let items = getSlashMenuItems()
         let menuView = ContextMenuFormatterView(key: "SlashFormatter", items: items, handlesTyping: true)
-        inlineFormatter = menuView
-        prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint)
 
+        // for this menu, we can adjust the origin if necessary if the popover is going to be outside the screen
+        // visible frame. 32 is the vertical offset in case of adjusting the origin
+        prepareInlineFormatterWindowBeforeShowing(menuView, atPoint: atPoint, originParameters: (true, 32))
+
+        inlineFormatter = menuView
         formatterTargetRange = targetRange
         formatterTargetNode = targetNode
+
         DispatchQueue.main.async {
             self.showInlineFormatter()
         }
