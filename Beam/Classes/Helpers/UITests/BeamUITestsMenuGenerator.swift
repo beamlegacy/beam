@@ -482,8 +482,8 @@ class BeamUITestsMenuGenerator {
         let urlIdsToday: [UUID] = urlAndTitles.map {
             return LinkStore.shared.visit($0.0, title: $0.1, content: nil, destination: nil).id
         }
-        for urlId in urlIdsToday {
-            storage.apply(to: urlId) { $0.readingTimeToLastEvent = 100 }
+        for (index, urlId) in urlIdsToday.enumerated() {
+            storage.apply(to: urlId) { $0.readingTimeToLastEvent = 100 + Double(index)}
         }
     }
 }
