@@ -9,10 +9,33 @@ import Foundation
 import SwiftUI
 import Preferences
 import BeamCore
+import Combine
 
 let BetaPreferencesViewController: PreferencePane = PreferencesPaneBuilder.build(identifier: .beta, title: "Beta", imageName: "preferences-developer") {
-    BetaPreferencesView()
+    BetaPreferencesView(viewModel: BetaPreferencesViewModel())
         .environment(\.managedObjectContext, CoreDataManager.shared.mainContext)
+}
+
+class BetaPreferencesViewModel: ObservableObject {
+    @Published var isSynchronizationRunning = AppDelegate.main.isSynchronizationRunning
+    @Published var isloggedIn = AuthenticationManager.shared.isAuthenticated && AccountManager.state == .signedIn
+    @Published var synchronizationStatus: BeamObjectObjectSynchronizationStatus = .notStarted
+
+    private var scope = Set<AnyCancellable>()
+
+    init() {
+        AuthenticationManager.shared.isAuthenticatedPublisher.receive(on: DispatchQueue.main).sink { [weak self] isAuthenticated in
+            self?.isloggedIn = isAuthenticated && AccountManager.state == .signedIn
+        }.store(in: &scope)
+
+        AppDelegate.main.isSynchronizationRunningPublisher.receive(on: DispatchQueue.main).sink { [weak self] isSynchronizationRunning in
+            self?.isSynchronizationRunning = isSynchronizationRunning
+        }.store(in: &scope)
+
+        BeamObjectManager.synchronizationStatusPublisher.receive(on: DispatchQueue.main).sink { [weak self] synchronizationStatus in
+            self?.synchronizationStatus = synchronizationStatus
+        }.store(in: &scope)
+    }
 }
 
 struct BetaPreferencesView: View {
@@ -29,10 +52,11 @@ struct BetaPreferencesView: View {
 
     @State var showDebugSection = PreferencesManager.showDebugSection
     @State var showOmniboxScoreSection = PreferencesManager.showOmniboxScoreSection
+    @ObservedObject var viewModel: BetaPreferencesViewModel
 
     var body: some View {
         Preferences.Container(contentWidth: contentWidth) {
-            Preferences.Section(title: "Synchronize:", bottomDivider: true, verticalAlignment: .top) {
+            Preferences.Section(title: "Synchronize:", bottomDivider: false, verticalAlignment: .top) {
                 Button(action: {
                     self.loading = true
                     Persistence.Sync.BeamObjects.last_received_at = nil
@@ -45,6 +69,18 @@ struct BetaPreferencesView: View {
                         .frame(maxWidth: 180)
                 })
                 .disabled(loading)
+
+                Button(action: {
+                    AppDelegate.main.stopSynchronization()
+                }, label: {
+                    Text("Stop synchronization")
+                        .frame(maxWidth: 180)
+                })
+                .disabled(!viewModel.isloggedIn || !viewModel.isSynchronizationRunning)
+            }
+
+            Preferences.Section(title: "Status:", bottomDivider: true, verticalAlignment: .top) {
+                Text(viewModel.synchronizationStatus.description)
             }
 
             Preferences.Section(title: "Database:", bottomDivider: true) {
@@ -146,6 +182,6 @@ struct BetaPreferencesView: View {
 
 struct BetaPreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        BetaPreferencesView()
+        BetaPreferencesView(viewModel: BetaPreferencesViewModel())
     }
 }

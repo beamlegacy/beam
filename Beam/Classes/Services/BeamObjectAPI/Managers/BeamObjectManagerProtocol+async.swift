@@ -3,7 +3,7 @@ import BeamCore
 // swiftlint:disable file_length
 
 extension BeamObjectManagerDelegate {
-    func saveAllOnBeamObjectApi(force: Bool = false) async throws -> (Int, Date?) {
+    func saveAllOnBeamObjectApi(force: Bool = false, progress: ((Float) async -> Void)? = nil) async throws -> (Int, Date?) {
         guard AuthenticationManager.shared.isAuthenticated, Configuration.networkEnabled else {
             throw APIRequestError.notAuthenticated
         }
@@ -13,20 +13,53 @@ extension BeamObjectManagerDelegate {
         // swiftlint:disable:next date_init
         let localTimer = Date()
 
-        let toSaveObjects = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
+        var mostRecentUpdatedAt = Date(timeIntervalSince1970: 0)
+        var savedCount = 0
+        var objects: [BeamObjectType] = []
 
-        Logger.shared.logDebug("\(Self.BeamObjectType.beamObjectType.rawValue) manager returned \(toSaveObjects.count) objects",
-                               category: .beamObjectNetwork,
-                               localTimer: localTimer)
+        let objectsToSave = try allObjects(updatedSince: Persistence.Sync.BeamObjects.last_updated_at)
 
-        guard !toSaveObjects.isEmpty else {
-            return (0, nil)
+        var chunk = objectsToSave.count / 100
+        let min = 1000
+        let max = 10000
+
+        if chunk > max {
+            chunk = max
+        } else if chunk < min {
+            chunk = min
         }
 
-        let mostRecentUpdatedAt = toSaveObjects.compactMap({ $0.updatedAt }).sorted().last
+        let save = {
+            let savedObjects = try await self.saveOnBeamObjectsAPI(objects, force: force)
+            savedCount += savedObjects.count
+            objects = []
 
-        let savedObjects = try await saveOnBeamObjectsAPI(toSaveObjects, force: force)
-        return (savedObjects.count, mostRecentUpdatedAt)
+            let percentage = Float(savedCount) / Float(objectsToSave.count) * 100.0
+            await progress?(percentage)
+        }
+
+        for object in objectsToSave {
+            if object.updatedAt > mostRecentUpdatedAt {
+                mostRecentUpdatedAt = object.updatedAt
+            }
+
+            objects.append(object)
+
+            if objects.count >= chunk {
+                try await save()
+            }
+        }
+
+        if objects.count > 0 {
+            try await save()
+        } else {
+            await progress?(100)
+        }
+
+        Logger.shared.logDebug("\(Self.BeamObjectType.beamObjectType.rawValue) manager returned \(savedCount) objects",
+                               category: .beamObjectNetwork,
+                               localTimer: localTimer)
+        return (savedCount, mostRecentUpdatedAt)
     }
 
     @discardableResult
@@ -375,3 +408,4 @@ extension BeamObjectManagerDelegate {
         return goodObjects + newObjectsSaved
     }
 }
+

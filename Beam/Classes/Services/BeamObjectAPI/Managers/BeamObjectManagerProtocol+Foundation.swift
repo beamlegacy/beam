@@ -8,7 +8,6 @@ extension BeamObjectManagerDelegate {
             completion(.failure(APIRequestError.notAuthenticated))
             throw APIRequestError.notAuthenticated
         }
-
         self.willSaveAllOnBeamObjectApi()
 
         // swiftlint:disable:next date_init
