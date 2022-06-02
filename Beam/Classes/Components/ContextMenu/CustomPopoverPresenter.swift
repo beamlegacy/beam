@@ -61,8 +61,14 @@ final class CustomPopoverPresenter {
     }
 
     @discardableResult
-    func presentFormatterView(_ view: FormatterView, atPoint: CGPoint,
-                              from fromView: NSView? = nil, animated: Bool = true, in window: NSWindow? = nil) -> NSWindow? {
+    func presentFormatterView(
+        _ view: FormatterView,
+        atPoint: CGPoint,
+        from fromView: NSView? = nil,
+        animated: Bool = true,
+        in window: NSWindow? = nil,
+        originParameters: (shouldAdjust: Bool, offset: CGFloat) = (false, .zero)
+    ) -> NSWindow? {
         let window = presentPopoverChildWindow(canBecomeKey: view.canBecomeKeyView, canBecomeMain: false,
                                                withShadow: false, movable: false, storedInPresenter: false, in: window)
         let position = fromView?.convert(atPoint, to: nil) ?? atPoint
@@ -70,10 +76,22 @@ final class CustomPopoverPresenter {
         let viewPadding = Self.padding(for: view) // give some space for shadow + possible extra content outside
         var rect = CGRect(origin: position, size: idealSize).insetBy(dx: -viewPadding.width, dy: -viewPadding.height)
         rect.origin.y -= idealSize.height
+
         let container = NSView(frame: CGRect(origin: .zero, size: rect.size))
         container.autoresizingMask = [.width, .height]
         container.addSubview(view)
+
         view.frame = CGRect(origin: CGPoint(x: viewPadding.width, y: viewPadding.height), size: idealSize)
+
+        if originParameters.shouldAdjust, let menuView = view as? ContextMenuFormatterView, let parent = window?.parent {
+            let convertedRect = parent.convertToScreen(rect)
+            let popoverWithinScreenVisibleFrame = parent.screen?.visibleFrame.contains(convertedRect) ?? true
+            menuView.shouldToggleAlignment = !popoverWithinScreenVisibleFrame
+            if !popoverWithinScreenVisibleFrame {
+                rect.origin.y += idealSize.height + originParameters.offset
+            }
+        }
+
         window?.setView(with: container, at: rect.origin)
         window?.setContentSize(rect.size)
         presentedFormatterViews.append(view)
@@ -84,6 +102,7 @@ final class CustomPopoverPresenter {
         if view.canBecomeKeyView {
             window?.makeKeyAndOrderFront(nil)
         }
+
         return window
     }
 
