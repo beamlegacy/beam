@@ -78,6 +78,7 @@
         "CreditCardAutocompleteTests\/testValidateOtherCCLessThan4()",
         "CreditCardSaveTests",
         "CreditCardsTests",
+        "DailySummaryTests",
         "DeleteNotesTests",
         "DownloadsTest",
         "GoogleSheetsTests",
