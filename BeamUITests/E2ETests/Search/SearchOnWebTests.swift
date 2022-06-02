@@ -10,9 +10,12 @@ import XCTest
 
 class SearchOnWebTests: BaseTest {
     
+    let waitForCountValueTimeout = TimeInterval(2)
+
     func testSearchViewAppearance() {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
+        
         step("Given I open a test page"){
             helper.openTestPage(page: .page2)
         }
@@ -176,7 +179,7 @@ class SearchOnWebTests: BaseTest {
         }
         
         step("Then I see correct number of results"){
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: firstSearch)))
+            XCTAssertTrue(waitForCountValueEqual(timeout: waitForCountValueTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: firstSearch)))
         }
         
         step("When I search for \(secondSearch)"){
@@ -196,7 +199,7 @@ class SearchOnWebTests: BaseTest {
         }
         
         step("Then I see correct number of results"){
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 1, elementQuery: searchView.app.staticTexts.matching(identifier: thirdSearch)))
+            XCTAssertTrue(waitForCountValueEqual(timeout: waitForCountValueTimeout, expectedNumber: 1, elementQuery: searchView.app.staticTexts.matching(identifier: thirdSearch)))
             XCTAssertEqual(searchView.app.staticTexts.matching(identifier: firstSearch).count, 0)
         }
        
@@ -220,7 +223,7 @@ class SearchOnWebTests: BaseTest {
         }
         
         step("Then I see correct number of results"){
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: expectedFirstResult)))
+            XCTAssertTrue(waitForCountValueEqual(timeout: waitForCountValueTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: expectedFirstResult)))
         }
         
         step("Then I see no highlight on the web page after I close the search field"){
@@ -234,7 +237,7 @@ class SearchOnWebTests: BaseTest {
         }
         
         step("Then I see correct number of results"){
-            XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.minimumWaitTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: expectedSecondResult)))
+            XCTAssertTrue(waitForCountValueEqual(timeout: waitForCountValueTimeout, expectedNumber: 4, elementQuery: searchView.app.staticTexts.matching(identifier: expectedSecondResult)))
         }
         
     }
