@@ -11,7 +11,7 @@ import XCTest
 class CardCreationTests: BaseTest {
     
     let cardNameToBeCreated = "CardCreation"
-    var cardView: CardTestView?
+    var cardView: CardTestView!
     
     func testCreateCardFromAllCards() {
         let journalView = launchApp()
@@ -50,8 +50,8 @@ class CardCreationTests: BaseTest {
         }
 
         step("Then note with \(cardNameToBeCreated) is opened"){
-            XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView.waitForCardViewToLoad())
+            XCTAssertTrue(cardView.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
     }
@@ -79,15 +79,15 @@ class CardCreationTests: BaseTest {
         }
         
         step("Then note with \(cardNameToBeCreated) is opened"){
-            XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(cardView.waitForCardViewToLoad())
+            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
         }
 
         step("Then Journal has no mentions for created note"){
             ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
             journalView.waitForJournalViewToLoad()
-            XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 2)
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), emptyString )
+            XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
+            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString )
         }
 
     }
@@ -103,8 +103,8 @@ class CardCreationTests: BaseTest {
 
         step("Then note with \(cardNameToBeCreated) is opened"){
             cardView = CardTestView()
-            XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView.waitForCardViewToLoad())
+            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
         }
 
     }
@@ -114,15 +114,14 @@ class CardCreationTests: BaseTest {
         cardView = CardTestView()
         
         step("When I click New note icon") {
-            cardView!.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(cardNameToBeCreated)
-            cardView!.typeKeyboardKey(.enter)
+            cardView.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(cardNameToBeCreated)
+            cardView.typeKeyboardKey(.enter)
         }
         
         step("Then I can sucessfully create a note") {
-            XCTAssertTrue(cardView!.waitForCardViewToLoad())
-            XCTAssertTrue(cardView!.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(cardView.waitForCardViewToLoad())
+            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
         }
-        
     }
     
 }
