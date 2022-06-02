@@ -92,4 +92,87 @@ class WebFramesTest: XCTestCase {
         XCTAssert(removedFrames.contains("https://www.iframe11.com"))
         XCTAssert(removedFrames.contains("https://www.iframe12.com"))
     }
+
+    func testUpdatingScrollSizes() throws {
+        let spaBeforeInfiniteScroll = WebFrames.FrameInfo(
+            href: "https://www.twitter.com",
+            parentHref: "https://www.twitter.com",
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+            scrollWidth: 1000,
+            scrollHeight: 4000,
+            width: 1000,
+            height: 2000,
+            isMain: true
+        )
+        // set inital frames
+        webFrames.setFrames([spaBeforeInfiniteScroll], isMain: true)
+
+        XCTAssertEqual(webFrames.framesInfo[spaBeforeInfiniteScroll.href]?.scrollWidth, 1000)
+        XCTAssertEqual(webFrames.framesInfo[spaBeforeInfiniteScroll.href]?.scrollHeight, 4000)
+
+        let spaAfterInfiniteScroll = WebFrames.FrameInfo(
+            href: "https://www.twitter.com",
+            parentHref: "https://www.twitter.com",
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+            scrollWidth: 2000, // grew in size
+            scrollHeight: 6000, // grew in size
+            width: 1000,
+            height: 2000,
+            isMain: true
+        )
+
+        webFrames.setFrames([spaAfterInfiniteScroll], isMain: true)
+        XCTAssertEqual(webFrames.framesInfo[spaBeforeInfiniteScroll.href]?.scrollWidth, 2000)
+        XCTAssertEqual(webFrames.framesInfo[spaBeforeInfiniteScroll.href]?.scrollHeight, 6000)
+    }
+
+    func testUpdatingScrollSizes_OnlyWidthAndHeight() throws {
+        let spaBeforeInfiniteScroll = WebFrames.FrameInfo(
+            href: "https://www.twitter.com",
+            parentHref: "https://www.twitter.com",
+            x: 0,
+            y: 0,
+            scrollX: 0,
+            scrollY: 0,
+            scrollWidth: 1000,
+            scrollHeight: 4000,
+            width: 1000,
+            height: 2000,
+            isMain: true
+        )
+        // set inital frames
+        webFrames.setFrames([spaBeforeInfiniteScroll], isMain: true)
+
+        XCTAssertEqual(webFrames.framesInfo[spaBeforeInfiniteScroll.href]?.scrollWidth, 1000)
+        XCTAssertEqual(webFrames.framesInfo[spaBeforeInfiniteScroll.href]?.scrollHeight, 4000)
+
+        let spaAfterInfiniteScroll = WebFrames.FrameInfo(
+            href: "https://www.twitter.com",
+            parentHref: "https://www.twitter.com",
+            x: 2,
+            y: 3,
+            scrollX: 3,
+            scrollY: 2,
+            scrollWidth: 2000, // grew in size
+            scrollHeight: 6000, // grew in size
+            width: 1000,
+            height: 2000,
+            isMain: true
+        )
+
+        webFrames.setFrames([spaAfterInfiniteScroll], isMain: true)
+        let frameAfter = webFrames.framesInfo[spaBeforeInfiniteScroll.href]
+        XCTAssertEqual(frameAfter?.x, 0)
+        XCTAssertEqual(frameAfter?.y, 0)
+        XCTAssertEqual(frameAfter?.scrollX, 0)
+        XCTAssertEqual(frameAfter?.scrollY, 0)
+        XCTAssertEqual(frameAfter?.scrollWidth, 2000)
+        XCTAssertEqual(frameAfter?.scrollHeight, 6000)
+    }
 }

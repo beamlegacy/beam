@@ -46,7 +46,7 @@ class OmniboxAnalyticsTests: XCTestCase {
         expect(self.state.autocompleteManager.autocompleteResults.count).toEventually(condition)
         let resultCount = state.autocompleteManager.autocompleteResults.count
         state.autocompleteManager.autocompleteSelectedIndex = selectedIndex
-        state.startOmniboxQuery()
+        state.startOmniboxQuery(navigate: false) //runs method without actually navigating to destination url
 
         let lastEvent = try XCTUnwrap(analyticsBackend.events.last as? OmniboxQueryAnalyticsEvent)
         XCTAssertEqual(lastEvent.type, .omniboxQuery)

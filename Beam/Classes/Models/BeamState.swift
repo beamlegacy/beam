@@ -538,7 +538,7 @@ import Sentry
         }
     }
 
-    func startOmniboxQuery(selectingNewIndex: Int? = nil) {
+    func startOmniboxQuery(selectingNewIndex: Int? = nil, navigate: Bool = true) {
         EventsTracker.logBreadcrumb(message: #function, category: "BeamState")
         let queryString = autocompleteManager.searchQuery.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -560,6 +560,7 @@ import Sentry
         sendOmniboxAnalyticsEvent()
         // Logger.shared.logDebug("Start query: \(url)")
 
+        if !navigate { return }
         if mode == .web && currentTab != nil && omniboxInfo.wasFocusedFromTab && currentTab?.shouldNavigateInANewTab(url: url) != true {
             navigateCurrentTab(toURLRequest: URLRequest(url: url))
         } else {
