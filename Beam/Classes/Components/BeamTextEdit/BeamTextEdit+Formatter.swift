@@ -89,8 +89,12 @@ extension BeamTextEdit {
     }
 
     /// This will put the formatter in a window, but you need to call showOrHideInlineFormatter to actually make it visible.
-    internal func prepareInlineFormatterWindowBeforeShowing(_ view: FormatterView, atPoint: CGPoint) {
-        CustomPopoverPresenter.shared.presentFormatterView(view, atPoint: atPoint, from: self, animated: false)
+    internal func prepareInlineFormatterWindowBeforeShowing(
+        _ view: FormatterView,
+        atPoint: CGPoint,
+        originParameters: (shouldAdjust: Bool, offset: CGFloat) = (false, .zero)
+    ) {
+        CustomPopoverPresenter.shared.presentFormatterView(view, atPoint: atPoint, from: self, animated: false, originParameters: originParameters)
     }
 
     private func showInlineTextFormatterIfNeeded() -> Bool {
