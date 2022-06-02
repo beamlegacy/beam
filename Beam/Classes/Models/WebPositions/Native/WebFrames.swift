@@ -58,6 +58,15 @@ final class WebFrames: ObservableObject {
         for frame in frames {
             if frame.hasParentFrame || framesInfo[frame.href] == nil || !isConnectedToMain(href: frame.href) {
                 framesInfo[frame.href] = frame
+            } else if let oldFrameInfo = framesInfo[frame.href] {
+                if frame.scrollHeight != oldFrameInfo.scrollHeight {
+                    Logger.shared.logDebug("Updating scrollHeight for \(frame) because scrollHeight changed", category: .web)
+                    framesInfo[frame.href]?.scrollHeight = frame.scrollHeight
+                }
+                if frame.scrollWidth != oldFrameInfo.scrollWidth {
+                    Logger.shared.logDebug("Updating scrollWidth for \(frame) because scrollWidth changed", category: .web)
+                    framesInfo[frame.href]?.scrollWidth = frame.scrollWidth
+                }
             } else {
                 Logger.shared.logDebug("Ignoring frameInfo for \(frame)", category: .web)
             }
