@@ -22,7 +22,14 @@ class ContextMenuFormatterView: FormatterView {
     private var canBecomeKey: Bool = false
     private var onSelectMenuItem: (() -> Void)?
     private var onClosing: (() -> Void)?
+
     var origin: CGPoint?
+
+    var shouldToggleAlignment: Bool = false {
+        didSet {
+            subviewModel.frameAlignment = shouldToggleAlignment ? .bottomLeading : .topLeading
+        }
+    }
 
     private var cancellables = Set<AnyCancellable>()
 
@@ -43,16 +50,18 @@ class ContextMenuFormatterView: FormatterView {
 
     var typingPrefix = 1
 
-    init(key: String,
-         subviewModel: ContextMenuViewModel? = nil,
-         items: [ContextMenuItem],
-         direction: Edge = .bottom,
-         handlesTyping: Bool = false,
-         defaultSelectedIndex: Int? = nil,
-         sizeToFit: Bool = false, forcedWidth: CGFloat? = nil,
-         origin: CGPoint? = nil, canBecomeKey: Bool = false,
-         onSelectHandler: (() -> Void)? = nil, onClosing: (() -> Void)? = nil) {
-
+    init(
+        key: String,
+        subviewModel: ContextMenuViewModel? = nil,
+        items: [ContextMenuItem],
+        direction: Edge = .bottom,
+        handlesTyping: Bool = false,
+        defaultSelectedIndex: Int? = nil,
+        sizeToFit: Bool = false, forcedWidth: CGFloat? = nil,
+        shouldToggleAlignment: Bool = false,
+        origin: CGPoint? = nil, canBecomeKey: Bool = false,
+        onSelectHandler: (() -> Void)? = nil, onClosing: (() -> Void)? = nil
+    ) {
         self.subviewModel = subviewModel ?? ContextMenuViewModel()
         self.items = items
         self.displayedItems = items
@@ -60,6 +69,7 @@ class ContextMenuFormatterView: FormatterView {
         self.defaultSelectedIndex = defaultSelectedIndex
         self.sizeToFit = sizeToFit
         self.forcedWidth = forcedWidth
+        self.shouldToggleAlignment = shouldToggleAlignment
         self.onSelectMenuItem = onSelectHandler
         self.onClosing = onClosing
         self._handlesTyping = handlesTyping
@@ -98,6 +108,7 @@ class ContextMenuFormatterView: FormatterView {
 
     override func setupUI() {
         super.setupUI()
+
         subviewModel.items = displayedItems
         subviewModel.selectedIndex = defaultSelectedIndex ?? (handlesTyping ? 0 : nil)
         subviewModel.animationDirection = direction
@@ -110,9 +121,8 @@ class ContextMenuFormatterView: FormatterView {
         }
 
         subviewModel.$updateSize.sink { [weak self] updateSize in
-            guard let self = self else { return }
             if updateSize {
-                self.invalidateLayout()
+                self?.invalidateLayout()
             }
         }.store(in: &cancellables)
 
@@ -132,17 +142,21 @@ class ContextMenuFormatterView: FormatterView {
         if let window = window as? PopoverWindow {
             var newWindowFrame = window.frame
             sizeUpdateDispatchedBlock?.cancel()
-            let updateWindowSizeBlock = DispatchWorkItem { [weak self] in
-                self?.lastComputedSize = newSize
-                self?.subviewModel.containerSize = newSize
+            let updateWindowSizeBlock = DispatchWorkItem { [unowned self] in
+                self.lastComputedSize = newSize
+                self.subviewModel.containerSize = newSize
                 newWindowFrame.size.height = newSize.height + CustomPopoverPresenter.padding().height * 2
-                self?.hostView?.frame.size.height = newSize.height
-                window.setContentSize(newWindowFrame.size)
+                self.hostView?.frame.size.height = newSize.height
+                if self.shouldToggleAlignment {
+                    window.setFrame(newWindowFrame, display: true)
+                } else {
+                    window.setContentSize(newWindowFrame.size)
+                }
             }
             if newSize.height < lastComputedSize.height {
                 // give some time for the view to animate then change the window size
                 sizeUpdateDispatchedBlock = updateWindowSizeBlock
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now().advanced(by: .milliseconds(400)), execute: updateWindowSizeBlock)
+                DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(600), execute: updateWindowSizeBlock)
             } else {
                 updateWindowSizeBlock.perform()
             }
