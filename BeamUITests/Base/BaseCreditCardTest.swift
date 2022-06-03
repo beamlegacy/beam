@@ -80,15 +80,19 @@ class BaseCreditCardTest: BaseTest {
         }
     }
     
-    func verifyCCIsPopulated(number: String, expDate: String, ownerName: String, secCode: String, inView: String = "Payment") {
+    func verifyCCIsPopulated(number: String, expDate: String, ownerName: String, secCode: String, secCodeIsPassword: Bool = false, inView: String = "Payment") {
         step("Then CC is succesfully populated") {
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: number, inView: inView)), johnCCNumber)
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: expDate, inView: inView)), johnCCExpDate)
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: ownerName, inView: inView)), johnCCOwnerName)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: secCode, inView: inView)), emptyString)
+            if secCodeIsPassword {
+                XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(title: secCode, inView: inView)), emptyString)
+            } else {
+                XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: secCode, inView: inView)), emptyString)
+            }
         }
     }
-    
+
     func verifyCCAutofillNotDisplayedDropdown(title: String, inView: String = "Payment", autocomplete: Bool = true) {
         step("When I click on \(title) field") {
             mockPage.getDropdownFieldElement(title: title, inView: inView).clickOnExistence()
