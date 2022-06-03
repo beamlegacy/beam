@@ -24,5 +24,5 @@ struct BrowserPasswordResult {
 
 protocol BrowserPasswordImporter: BrowserImporter {
     var passwordsPublisher: AnyPublisher<BrowserPasswordResult, Error> { get }
-    func importPasswords() throws
+    func importPasswords(importedCountCallback: (Int) -> Void) throws
 }

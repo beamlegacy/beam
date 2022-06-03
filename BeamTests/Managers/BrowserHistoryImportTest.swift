@@ -14,7 +14,7 @@ import GRDB
 class BrowserHistoryTest: XCTestCase {
     var subscriptions: Set<AnyCancellable>!
 
-    func runImporter(importer: BrowserHistoryImporter, dbPath: String, startDate: Date? = nil) throws -> [BrowserHistoryResult] {
+    func runImporter(importer: BrowserHistoryImporter, dbPath: String, startDate: Date? = nil, expectedCount: Int) throws -> [BrowserHistoryResult] {
         var results = [BrowserHistoryResult]()
         let expectation = XCTestExpectation(description: "Import finished")
         importer.publisher.sink(
@@ -28,7 +28,9 @@ class BrowserHistoryTest: XCTestCase {
                 results.append(result)
             })
         .store(in: &subscriptions)
-        try importer.importHistory(from: dbPath, startDate: startDate)
+        try importer.importHistory(from: dbPath, startDate: startDate) { importedCount in
+            XCTAssertEqual(importedCount, expectedCount)
+        }
         wait(for: [expectation], timeout: 2.0)
         return results
     }
@@ -46,7 +48,7 @@ class BrowserHistoryImportWithFileTest: BrowserHistoryTest {
         let bundle = Bundle(for: type(of: self))
 
         let historyURL = try XCTUnwrap(bundle.url(forResource: "chromeHistory", withExtension: "db"))
-        let results = try runImporter(importer: ChromiumHistoryImporter(browser: .chrome), dbPath: historyURL.path)
+        let results = try runImporter(importer: ChromiumHistoryImporter(browser: .chrome), dbPath: historyURL.path, expectedCount: 3)
         XCTAssertEqual(results.count, 3)
 
         XCTAssertEqual(results[0].item.url?.absoluteString, "https://lemonde.fr/")
@@ -65,7 +67,7 @@ class BrowserHistoryImportWithFileTest: BrowserHistoryTest {
     func testSafariImport() throws {
         let bundle = Bundle(for: type(of: self))
         let historyURL = try XCTUnwrap(bundle.url(forResource: "safariHistory", withExtension: "db"))
-        let results = try runImporter(importer: SafariImporter(), dbPath: historyURL.path)
+        let results = try runImporter(importer: SafariImporter(), dbPath: historyURL.path, expectedCount: 2)
         XCTAssertEqual(results.count, 2)
 
         XCTAssertEqual(results[0].item.url?.absoluteString, "https://twitter.com/")
@@ -80,7 +82,7 @@ class BrowserHistoryImportWithFileTest: BrowserHistoryTest {
     func testFirefoxImport() throws {
         let bundle = Bundle(for: type(of: self))
         let historyURL = try XCTUnwrap(bundle.url(forResource: "firefoxPlaces", withExtension: "db"))
-        let results = try runImporter(importer: FirefoxImporter(), dbPath: historyURL.path)
+        let results = try runImporter(importer: FirefoxImporter(), dbPath: historyURL.path, expectedCount: 2)
         XCTAssertEqual(results.count, 2)
 
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://lemonde.fr/")
@@ -93,7 +95,7 @@ class BrowserHistoryImportWithFileTest: BrowserHistoryTest {
     }
 }
 
-//Test importer beahvior in case of faulty history items
+//Test importer behavior in case of faulty history items
 class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
     func testChromeImport() throws {
         let createTablesQuery = """
@@ -116,7 +118,7 @@ class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
             try db.execute(sql: visitInsertQuery, arguments: [2, 2 * 1000000])
             try db.execute(sql: urlInsertQuery, arguments: [2, "http://def.com", "alphabet soup", 2])
         }
-        var results = try runImporter(importer: ChromiumHistoryImporter(browser: .chrome), dbPath: dbPath)
+        var results = try runImporter(importer: ChromiumHistoryImporter(browser: .chrome), dbPath: dbPath, expectedCount: 2)
         XCTAssertEqual(results.count, 2)
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://abc.com")
         XCTAssertEqual(results[0].item.timestamp.description, "1601-01-01 00:00:00 +0000")
@@ -128,7 +130,7 @@ class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
 
         //time filtering
         let startDate = ISO8601DateFormatter().date(from: "1601-01-01T00:00:00+0000")
-        results = try runImporter(importer: ChromiumHistoryImporter(browser: .chrome), dbPath: dbPath, startDate: startDate)
+        results = try runImporter(importer: ChromiumHistoryImporter(browser: .chrome), dbPath: dbPath, startDate: startDate, expectedCount: 1)
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://def.com")
         XCTAssertEqual(results[0].item.timestamp.description, "1601-01-01 00:00:02 +0000")
@@ -159,7 +161,7 @@ class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
             try db.execute(sql: urlInsertQuery, arguments: [2, "http://def.com"])
             try db.execute(sql: visitInsertQuery, arguments: [2, 2, "alphabet soup"])
         }
-        var results = try runImporter(importer: SafariImporter(), dbPath: dbPath)
+        var results = try runImporter(importer: SafariImporter(), dbPath: dbPath, expectedCount: 2)
         XCTAssertEqual(results.count, 2)
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://abc.com")
         XCTAssertEqual(results[0].item.timestamp.description, "2001-01-01 00:00:00 +0000")
@@ -170,7 +172,7 @@ class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
         XCTAssertEqual(results[1].item.title, "alphabet soup")
 
         //time filtering
-        results = try runImporter(importer: SafariImporter(), dbPath: dbPath, startDate: Date(timeIntervalSinceReferenceDate: 0))
+        results = try runImporter(importer: SafariImporter(), dbPath: dbPath, startDate: Date(timeIntervalSinceReferenceDate: 0), expectedCount: 1)
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://def.com")
         XCTAssertEqual(results[0].item.timestamp.description, "2001-01-01 00:00:02 +0000")
@@ -199,7 +201,7 @@ class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
             try db.execute(sql: visitInsertQuery, arguments: [2, 2, 2 * 1_000_000])
             try db.execute(sql: urlInsertQuery, arguments: [2, "http://def.com", "alphabet soup"])
         }
-        var results = try runImporter(importer: FirefoxImporter(), dbPath: dbPath)
+        var results = try runImporter(importer: FirefoxImporter(), dbPath: dbPath, expectedCount: 2)
         XCTAssertEqual(results.count, 2)
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://abc.com")
         XCTAssertEqual(results[0].item.timestamp.description, "1970-01-01 00:00:00 +0000")
@@ -210,7 +212,7 @@ class BrowserHistoryImportInMemoryTest: BrowserHistoryTest {
         XCTAssertEqual(results[1].item.title, "alphabet soup")
 
         //time filtering
-        results = try runImporter(importer: FirefoxImporter(), dbPath: dbPath, startDate: Date(timeIntervalSince1970: 0))
+        results = try runImporter(importer: FirefoxImporter(), dbPath: dbPath, startDate: Date(timeIntervalSince1970: 0), expectedCount: 1)
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].item.url?.absoluteString, "http://def.com")
         XCTAssertEqual(results[0].item.timestamp.description, "1970-01-01 00:00:02 +0000")

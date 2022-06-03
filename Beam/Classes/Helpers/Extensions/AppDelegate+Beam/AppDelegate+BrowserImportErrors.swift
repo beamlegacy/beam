@@ -3,35 +3,34 @@ import Combine
 import BeamCore
 
 extension AppDelegate {
-    func startDisplayingBrowserImportErrors() {
-        importErrorCancellable = data.importsManager.errorPublisher
+    func startDisplayingBrowserImportCompletions() {
+        data.importsManager.errorPublisher
             .receive(on: DispatchQueue.main)
             .sink(receiveValue: self.showError)
+            .store(in: &importCancellables)
+        data.importsManager.successPublisher
+            .receive(on: DispatchQueue.main)
+            .sink(receiveValue: self.showSuccess)
+            .store(in: &importCancellables)
     }
 
     func stopDisplayingBrowserImportErrors() {
-        importErrorCancellable = nil
+        importCancellables.removeAll()
     }
 
     private func showError(_ error: ImportsManager.ImportError) {
         switch error.error {
         case .userCancelled:
             break
-        case .fileNotFound:
-            UserAlert.showError(message: "\(error.failureDescription): the database file couldn't be found.", informativeText: nil)
-        case .databaseInUse:
-            UserAlert.showError(message: "Please quit \(error.browser.description).", informativeText: "Beam can only \(error.actionDescription) if \(error.browser.description) is closed. Close it and try again.")
-        case .concurrentImport:
-            UserAlert.showError(message: "Another import is in progress.", informativeText: "Try again later.")
-        case .keychainError:
-            UserAlert.showError(message: "\(error.failureDescription): unable to extract the encryption key from the keychain.", informativeText: nil)
-        case .invalidFormat:
-            UserAlert.showError(message: "\(error.failureDescription): the database couldn't be read.", informativeText: nil)
-        case .saveError:
-            UserAlert.showError(message: "\(error.failureDescription): imported data couldn't be saved.", informativeText: nil)
         case .other(let underlyingError):
-            UserAlert.showError(message: "\(error.failureDescription).", error: underlyingError)
+            UserAlert.showError(message: error.failureDescription, error: underlyingError)
+        default:
+            UserAlert.showError(message: error.failureDescription, informativeText: error.failureInformation)
         }
+    }
+
+    private func showSuccess(_ operation: ImportsManager.ImportSuccess) {
+        UserAlert.showMessage(message: operation.successDescription, informativeText: operation.successInformation)
     }
 }
 
@@ -54,9 +53,28 @@ extension ImportsManager.ImportError {
     var failureDescription: String {
         switch action {
         case .passwords:
-            return "Importing \(browser.description) passwords failed"
+            return "Passwords Import Failure"
         case .history:
-            return "Importing \(browser.description) history failed"
+            return "History Import Failure"
+        }
+    }
+
+    var failureInformation: String {
+        switch error {
+        case .userCancelled, .other:
+            return "" // handled separately
+        case .fileNotFound:
+            return "The database file from \(browser.description) couldn't be found."
+        case .databaseInUse:
+            return "Beam can only \(actionDescription) if \(browser.description) is closed. Close it and try again."
+        case .concurrentImport:
+            return "Another import is in progress. Try again later."
+        case .keychainError:
+            return "Unable to extract the encryption key from the keychain."
+        case .invalidFormat:
+            return "The database from \(browser.description) couldn't be read."
+        case .saveError:
+            return "Imported data from \(browser.description) couldn't be saved."
         }
     }
 
@@ -66,6 +84,26 @@ extension ImportsManager.ImportError {
             return "import your passwords"
         case .history:
             return "import your history"
+        }
+    }
+}
+
+extension ImportsManager.ImportSuccess {
+    var successDescription: String {
+        switch action {
+        case .passwords:
+            return "Passwords Import Success"
+        case .history:
+            return "History Import Success"
+        }
+    }
+
+    var successInformation: String {
+        switch action {
+        case .passwords:
+            return "Beam successfully imported your \(count) passwords from \(browser.description)."
+        case .history:
+            return "Beam successfully imported your history from \(browser.description)."
         }
     }
 }
