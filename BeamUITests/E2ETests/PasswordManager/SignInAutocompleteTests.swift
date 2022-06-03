@@ -118,10 +118,21 @@ class SignInAutocompleteTests: BaseTest {
         }
         let passwordPage = UITestPagePasswordManager()
         
-        step("When I click Other passwords option"){
+        step("When I click password field") {
             passwordPage.clickInputField(.password)
         }
-        let passPrefView = helper.openPasswordPreferences()
+        step("Then the menu is not displayed") {
+            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+        }
+
+        step("When I click key icon") {
+            helper.clickKeyIcon()
+        }
+
+        var passPrefView: AutoFillPasswordsTestView!
+        step("And I click Other passwords option") {
+            passPrefView = helper.openPasswordPreferences()
+        }
 
         step("Then Password preferences window is opened, and menu isn't visible anymore"){
             XCTAssertTrue(passPrefView.isPasswordPreferencesOpened())
@@ -187,10 +198,21 @@ class SignInAutocompleteTests: BaseTest {
         }
         let passwordPage = UITestPagePasswordManager()
 
-        step("When I click Other passwords option"){
+        step("When I click password field") {
             passwordPage.clickInputField(.password)
         }
-        let passPrefView = helper.openPasswordPreferences()
+        step("Then the menu is not displayed") {
+            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+        }
+
+        step("When I click key icon") {
+            helper.clickKeyIcon()
+        }
+
+        var passPrefView: AutoFillPasswordsTestView!
+        step("And I click Other passwords option") {
+            passPrefView = helper.openPasswordPreferences()
+        }
 
         step("Then Password preferences window is opened, and menu isn't visible anymore"){
             XCTAssertTrue(passPrefView.isPasswordPreferencesOpened())
