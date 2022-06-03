@@ -10,12 +10,11 @@ import XCTest
 
 class InsideAdsBlockerTests: BaseTest {
     
+    let mockHttpPage = MockHTTPWebPages()
     let uiMenu = UITestsMenuBar()
-    let adBlockerPage = AdBlockerTestView()
     let shortcutHelper = ShortcutsHelper()
-    let omniboxView = OmniBoxTestView()
     let privacyWindow = PrivacyPreferencesTestView()
-    let url = "http://inside-adblock.test.adblock.lvh.me:8080/"
+    let url = MockHTTPWebPages().getMockPageUrl(.insideAdBlock)
     let adLinkText = "Featured Deals made easy all year long. Free shipping. Best prices. Get your thing Get your thing"
     let view = "AdBlock"
 
@@ -39,7 +38,7 @@ class InsideAdsBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.insideAdBlock)
         }
         
         step ("Then inside ad is displayed"){
@@ -57,7 +56,7 @@ class InsideAdsBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.insideAdBlock)
         }
         
         step ("Then inside ad is not displayed"){

@@ -140,6 +140,7 @@
         "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
+        "TrackersBlockerTests",
         "UpdateViewTests\/testUpdateViewAppearance()",
         "WaitHelper",
         "dummytests"

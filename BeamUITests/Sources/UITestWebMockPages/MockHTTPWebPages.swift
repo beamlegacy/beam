@@ -57,4 +57,22 @@ class MockHTTPWebPages: BaseView {
         let element = staticTexts.element(boundBy: 2)
         return getElementStringValue(element: element)
     }
+    
+    enum MockPageLink: String, CaseIterable {
+        case socialMediaAdBlock = "http://social-media-adblock.test.adblock.lvh.me:8080/"
+        case insideAdBlock = "http://inside-adblock.test.adblock.lvh.me:8080/"
+        case fullSiteAdBlock = "http://a-stat.test.adblock.lvh.me:8080/"
+    }
+    
+    @discardableResult
+    func openMockPage(_ pageLink: MockPageLink) -> WebTestView {
+        let omniboxView = OmniBoxTestView()
+        omniboxView.searchInOmniBox(pageLink.rawValue, true)
+        return WebTestView()
+    }
+    
+    func getMockPageUrl(_ pageLink: MockPageLink) -> String {
+        return pageLink.rawValue
+    }
+    
 }
