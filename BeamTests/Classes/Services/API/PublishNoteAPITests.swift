@@ -24,6 +24,7 @@ class PublishNoteAPITests: XCTestCase {
         BeamTestsHelper.logout()
         BeamDate.freeze("2022-04-18T06:00:03Z")
         beamTestHelper.beginNetworkRecording(test: self)
+        BeamObjectManager.disableSendingObjects = false
 
         LoggerRecorder.shared.reset()
 

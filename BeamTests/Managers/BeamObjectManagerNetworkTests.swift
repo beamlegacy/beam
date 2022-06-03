@@ -25,7 +25,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             APIRequest.networkCallFiles = []
 
             sut = BeamObjectManager()
-            BeamObjectManager.clearNetworkCalls()
             BeamTestsHelper.logout()
 
             beamHelper.beginNetworkRecording()
@@ -48,8 +47,6 @@ class BeamObjectManagerNetworkTests: QuickSpec {
 
         afterEach {
             beamHelper.endNetworkRecording()
-
-            BeamObjectManager.clearNetworkCalls()
 
             BeamDate.reset()
             // Sad: this is broken when using Vinyl

@@ -466,7 +466,6 @@ class MyRemoteObjectManagerNetworkTests: QuickSpec {
         }
 
         afterEach {
-            BeamObjectManager.clearNetworkCalls()
             beamHelper.endNetworkRecording()
 
             BeamDate.reset()
