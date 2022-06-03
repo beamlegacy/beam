@@ -13,6 +13,7 @@ var AdvancedPreferencesViewController: PreferencePane = PreferencesPaneBuilder.b
 //swiftlint:disable:next function_body_length type_body_length
 struct AdvancedPreferencesView: View {
     @State private var apiHostname: String = Configuration.apiHostname
+    @State private var restApiHostname: String = Configuration.restApiHostname
     @State private var publicAPIpublishServer: String = Configuration.publicAPIpublishServer
     @State private var publicAPIembed: String = Configuration.publicAPIembed
     @State private var bundleIdentifier: String = Configuration.bundleIdentifier
@@ -65,6 +66,13 @@ struct AdvancedPreferencesView: View {
             Configuration.apiHostname = cleanValue
         })
 
+        let restApiHostnameBinding = Binding<String>(get: {
+            self.restApiHostname
+        }, set: {
+            let cleanValue = $0.trimmingCharacters(in: .whitespacesAndNewlines)
+            self.restApiHostname = cleanValue
+            Configuration.restApiHostname = cleanValue
+        })
         let publicAPIpublishServerBinding = Binding<String>(get: {
             self.publicAPIpublishServer
         }, set: {
@@ -100,11 +108,14 @@ struct AdvancedPreferencesView: View {
                 }
 
                 Preferences.Section {
-                    Text("API endpoint:")
+                    Text("API endpoints")
                         .font(BeamFont.regular(size: 13).swiftUI)
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
-                    TextField("api hostname", text: apiHostnameBinding)
+                    TextField("API hostname", text: apiHostnameBinding)
+                        .lineLimit(1)
+                        .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
+                    TextField("REST API hostname", text: restApiHostnameBinding)
                         .lineLimit(1)
                         .textFieldStyle(RoundedBorderTextFieldStyle()).frame(maxWidth: 286)
                 }
@@ -131,6 +142,7 @@ struct AdvancedPreferencesView: View {
                 } content: {
                     ResetAPIEndpointsButton
                     SetAPIEndPointsToStagingButton
+                    SetAPIEndPointsToLocal
                 }
                 Preferences.Section(title: "Network") {
                     NetworkEnabled
@@ -719,6 +731,7 @@ struct AdvancedPreferencesView: View {
         Button(action: {
             Configuration.reset()
             apiHostname = Configuration.apiHostname
+            restApiHostname = Configuration.restApiHostname
             publicAPIpublishServer = Configuration.publicAPIpublishServer
             publicAPIembed = Configuration.publicAPIembed
             promptEraseAllDataAlert()
@@ -732,12 +745,24 @@ struct AdvancedPreferencesView: View {
         Button(action: {
             Configuration.setAPIEndPointsToStaging()
             apiHostname = Configuration.apiHostname
+            restApiHostname = Configuration.restApiHostname
             publicAPIpublishServer = Configuration.publicAPIpublishServer
             publicAPIembed = Configuration.publicAPIembed
             promptEraseAllDataAlert()
         }, label: {
             // TODO: loc
             Text("Set API Endpoints to staging server").frame(minWidth: 100)
+        })
+    }
+
+    private var SetAPIEndPointsToLocal: some View {
+        Button(action: {
+            Configuration.setAPIEndPointsToDevelopment()
+            apiHostname = Configuration.apiHostname
+            restApiHostname = Configuration.restApiHostname
+        }, label: {
+            // TODO: loc
+            Text("Set API Endpoints to local server").frame(minWidth: 100)
         })
     }
 

@@ -130,6 +130,11 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             Logger.shared.logWarning("API HOSTNAME is \(Configuration.apiHostname)", category: .general)
         }
 
+        // So we remember we're not currently using the default api server
+        if Configuration.restApiHostname != Configuration.restApiHostnameDefault {
+            Logger.shared.logWarning("REST API HOSTNAME is \(Configuration.restApiHostname)", category: .general)
+        }
+
         #if DEBUG
         self.beamUIMenuGenerator = BeamUITestsMenuGenerator()
         prepareMenuForTestEnv()
