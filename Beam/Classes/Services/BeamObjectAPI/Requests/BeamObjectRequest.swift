@@ -3,6 +3,21 @@ import CommonCrypto
 import BeamCore
 
 class BeamObjectRequest: APIRequest {
+    override init() {
+        super.init()
+
+        #if DEBUG
+        if Configuration.env == .test {
+            DispatchQueue.main.async {
+                // We store all requests in order to be able to cancel them
+                // before recording calls with Vinyl during tests
+                // (see BeamTestsHelper)
+                BeamObjectManager.networkRequests.append(self)
+            }
+        }
+        #endif
+    }
+
     struct DeleteAllBeamObjects: Decodable, Errorable {
         let success: Bool?
         let errors: [UserErrorData]?

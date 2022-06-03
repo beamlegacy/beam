@@ -244,6 +244,7 @@ class PasswordsDBTests: XCTestCase {
         XCTAssertEqual(entries.count, 0)
 
         stopNetworkTests()
+        cleanupPasswordsAfterTest()
     }
 
     private func beforeNetworkTests() {
@@ -262,12 +263,6 @@ class PasswordsDBTests: XCTestCase {
 
     private func stopNetworkTests() {
         BeamObjectTestsHelper().deleteAll()
-        let semaphore = DispatchSemaphore(value: 0)
-
-        PasswordManager.shared.deleteAll(includedRemote: true) { _ in
-            semaphore.signal()
-        }
-        semaphore.wait()
         beamHelper.endNetworkRecording()
         BeamDate.reset()
     }
