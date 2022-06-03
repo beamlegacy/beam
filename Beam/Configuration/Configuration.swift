@@ -40,9 +40,12 @@ struct Configuration {
 
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
-    static private(set) var apiHostnameDefault = "https://api.prod.beamapp.co" // "http://api.beam.lvh.me"
+    static private(set) var apiHostnameDefault = "https://api.prod.beamapp.co"
+    static private(set) var restApiHostnameDefault = "https://api-rust.prod.beamapp.co"
 
     static private(set) var apiHostnameDefaultStaging = "https://api.staging.beamapp.co"
+
+    static private(set) var apiHostnameDefaultDev = "https://api.beam.lvh.me"
 
     static private(set) var beamObjectsPageSizeDefault = 1000
 
@@ -120,6 +123,16 @@ struct Configuration {
                 UserDefaults.standard.set(newValue, forKey: apiHostnameKey)
                 AccountManager.logout()
             }
+        }
+    }
+
+    static private var restApiHostnameKey = "restApiHostname"
+    static var restApiHostname: String {
+        get {
+            UserDefaults.standard.string(forKey: restApiHostnameKey) ?? restApiHostnameDefault
+        }
+        set {
+            UserDefaults.standard.set(newValue, forKey: restApiHostnameKey)
         }
     }
 
@@ -230,14 +243,21 @@ struct Configuration {
         UserDefaults.standard.removeObject(forKey: publicAPIpublishServerKey)
         UserDefaults.standard.removeObject(forKey: publicAPIembedKey)
         UserDefaults.standard.removeObject(forKey: apiHostnameKey)
+        UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
         UserDefaults.standard.removeObject(forKey: beamObjectsPageSizeKey)
         AccountManager.logout()
     }
 
     static func setAPIEndPointsToStaging() {
         Self.apiHostname = apiHostnameDefaultStaging
+        UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
         Self.publicAPIpublishServer = "https://staging-web-server.ew.r.appspot.com"
         Self.publicAPIembed = "https://staging-proxy-api.netlify.app/.netlify/functions/embed"
+    }
+
+    static func setAPIEndPointsToDevelopment() {
+        Self.apiHostname = apiHostnameDefaultDev
+        UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
     }
 
     static private func value<T>(for key: String) -> T {
