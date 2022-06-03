@@ -33,6 +33,7 @@ struct WebInputField {
         case cardExpirationDate
         case cardExpirationMonth
         case cardExpirationYear
+        case ignored
 
         var isPassword: Bool {
             self == .currentPassword || self == .newPassword
@@ -62,16 +63,20 @@ struct WebAutofillRules {
 
     let ignoreTextAutocompleteOff: Condition
     let ignoreEmailAutocompleteOff: Condition
+    let ignoreTelAutocompleteOff: Condition
     let ignorePasswordAutocompleteOff: Condition
     let discardAutocompleteAttribute: Condition
     let ignoreUntaggedPasswordFieldAlone: Bool
+    let mergeIncompleteCardExpirationDate: Bool
 
-    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never, ignoreUntaggedPasswordFieldAlone: Bool = false) {
+    init(ignoreTextAutocompleteOff: Condition = .whenPasswordField, ignoreEmailAutocompleteOff: Condition = .whenPasswordField, ignoreTelAutocompleteOff: Condition = .whenPasswordField, ignorePasswordAutocompleteOff: Condition = .always, discardAutocompleteAttribute: Condition = .never, ignoreUntaggedPasswordFieldAlone: Bool = false, mergeIncompleteCardExpirationDate: Bool = false) {
         self.ignoreTextAutocompleteOff = ignoreTextAutocompleteOff
         self.ignoreEmailAutocompleteOff = ignoreEmailAutocompleteOff
+        self.ignoreTelAutocompleteOff = ignoreTelAutocompleteOff
         self.ignorePasswordAutocompleteOff = ignorePasswordAutocompleteOff
         self.discardAutocompleteAttribute = discardAutocompleteAttribute
         self.ignoreUntaggedPasswordFieldAlone = ignoreUntaggedPasswordFieldAlone
+        self.mergeIncompleteCardExpirationDate = mergeIncompleteCardExpirationDate
     }
 
     static let `default` = Self()
@@ -95,6 +100,8 @@ struct WebAutofillRules {
                 return apply(condition: ignoreTextAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             case .email:
                 return apply(condition: ignoreEmailAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
+            case .tel:
+                return apply(condition: ignoreTelAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             case .password:
                 return apply(condition: ignorePasswordAutocompleteOff, inPageContainingPasswordField: pageContainsPasswordField)
             default:
@@ -118,14 +125,17 @@ struct WebAutofillRules {
     }
 }
 
-extension DOMInputElement {
+private extension DOMInputElement {
     /// decodedAutocomplete returns matching DOMInputAutocomplete case.
     /// With no matching autocomplete attribute value is found default to `.on`
     var decodedAutocomplete: DOMInputAutocomplete? {
         guard let autocomplete = autocomplete else {
             return nil
         }
-        if let autocompleteCase = DOMInputAutocomplete(rawValue: autocomplete) {
+        if let autocompleteCase = autocomplete
+            .components(separatedBy: .whitespaces)
+            .compactMap(DOMInputAutocomplete.fromString)
+            .first {
             return autocompleteCase
         }
         return DOMInputAutocomplete.off
@@ -146,30 +156,15 @@ extension DOMInputElement {
     }
 
     var isAutocompleteOnField: Bool {
-        switch decodedAutocomplete {
-        case .on:
-            return true
-        default:
-            return false
-        }
+        decodedAutocomplete == .on
     }
 
     var isCurrentPasswordField: Bool {
-        switch decodedAutocomplete {
-        case .currentPassword:
-            return true
-        default:
-            return false
-        }
+        decodedAutocomplete == .currentPassword
     }
 
     var isNewPasswordField: Bool {
-        switch decodedAutocomplete {
-        case .newPassword:
-            return true
-        default:
-            return false
-        }
+        decodedAutocomplete == .newPassword
     }
 
     var isPersonalInfoField: Bool {
@@ -178,15 +173,6 @@ extension DOMInputElement {
             return true
         case .tel:
             return true
-        default:
-            return false
-        }
-    }
-
-    var isPaymentInfoField: Bool {
-        switch decodedAutocomplete {
-        //        case .creditCardNumber:
-        //            return true
         default:
             return false
         }
@@ -346,28 +332,29 @@ final class WebFieldClassifier {
         }
         switch field.type {
         case .password:
-            score += 1000
+            score = 1000 // ignore score given by autocomplete if not already identified as password
         case .email:
             score += 100
         default:
             break
         }
-        if field.decodedAutocomplete == bestUsernameAutocomplete {
+        if field.decodedAutocomplete == bestUsernameAutocomplete && field.type != .password {
             score += 500
         }
-        [field.elementClass, field.name]
-            .compactMap { $0?.lowercased() }
-            .forEach { value in
-                if value.contains("login") || value.contains("account") || value.contains("user") {
-                    score += 10
-                }
-                if value.contains("email") {
-                    score += 5
-                }
-                if value.contains("first") || value.contains("last") {
-                    score -= 10
-                }
+        field.decodedHints.forEach { value in
+            if value.contains("login") || value.contains("account") || value.contains("user") {
+                score += 10
             }
+            if value.contains("email") {
+                score += 5
+            }
+            if value.contains("first") || value.contains("last") {
+                score -= 10
+            }
+            if value.contains("cvv") || value.contains("csc") || value.contains("cardverificationnumber") {
+                score -= 500
+            }
+        }
         return .init(role: expectedRole, match: .score(score + bias))
     }
 
@@ -385,21 +372,21 @@ final class WebFieldClassifier {
             return .init(role: .cardExpirationYear, match: .always)
         default:
             var result: WeightedRole?
-            var components = field.elementClass?.components(separatedBy: .whitespaces) ?? []
-            if let name = field.name {
-                components.append(name)
-            }
-            components
-                .map { String($0.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }).lowercased() }
-                .forEach { value in
-                    if value.contains("cardnum") {
-                        result = .init(role: .cardNumber, match: .score(800))
-                    } else if value.contains("cardholder") || value.contains("holdername") {
-                        result = .init(role: .cardHolder, match: .score(800))
-                    } else if value.contains("cardexpiry") || value.contains("cardexpiration") || value.contains("expirationdate") {
-                        result = .init(role: .cardExpirationDate, match: .score(800))
-                    }
+            field.decodedHints.forEach { value in
+                if value.contains("cardnum") {
+                    result = .init(role: .cardNumber, match: .score(800))
+                } else if value.contains("cardholder") || value.contains("holdername") {
+                    result = .init(role: .cardHolder, match: .score(800))
+                } else if value.contains("cardexpiry") || value.contains("cardexpiration") || value.contains("expirationdate") {
+                    result = .init(role: .cardExpirationDate, match: .score(800))
+                } else if value.contains("expirationmonth") || value.contains("expmonth") || value.contains("ccmonth") {
+                    result = .init(role: .cardExpirationMonth, match: .score(800))
+                } else if value.contains("expirationyear") || value.contains("expyear") || value.contains("ccyear") {
+                    result = .init(role: .cardExpirationYear, match: .score(800))
+                } else if value.contains("cvv") || value.contains("csc") || value.contains("cardverificationnumber") {
+                    result = .init(role: .ignored, match: .score(800))
                 }
+            }
             return result
         }
     }
@@ -427,8 +414,10 @@ final class WebFieldClassifier {
         switch host {
         case "app.beamapp.co":
             return WebAutofillRules(ignorePasswordAutocompleteOff: .never, ignoreUntaggedPasswordFieldAlone: true)
-        case "pinterest.com", "netflix.com", "maderasbarber.com":
+        case "pinterest.com", "maderasbarber.com":
             return WebAutofillRules(discardAutocompleteAttribute: .whenPasswordField)
+        case "netflix.com", "payment-netflix.form.lvh.me":
+            return WebAutofillRules(ignoreTelAutocompleteOff: .always, discardAutocompleteAttribute: .whenPasswordField, mergeIncompleteCardExpirationDate: true)
         default:
             return .default
         }
@@ -441,7 +430,7 @@ final class WebFieldClassifier {
         let pageContainsNonPasswordField = rawFields.contains { $0.type != .password }
         let fields = rawFields.compactMap { autofillRules.transformField($0, inPageContainingPasswordField: pageContainsPasswordField, nonPasswordField: pageContainsNonPasswordField) }
         let pageContainsTaggedField = fields.contains { $0.decodedAutocomplete != nil && $0.decodedAutocomplete != .off }
-        let allowedFields = fields.filter { autofillRules.allowField($0, pageContainsTaggedField: pageContainsTaggedField, pageContainsPasswordField: pageContainsPasswordField)}
+        let allowedFields = fields.filter { autofillRules.allowField($0, pageContainsTaggedField: pageContainsTaggedField, pageContainsPasswordField: pageContainsPasswordField) }
         Logger.shared.logDebug("Candidates: \(allowedFields.map { $0.debugDescription })", category: .webAutofillInternal)
 
         let passwordFields = fields.filter { $0.isCompatibleWithPassword }
@@ -456,12 +445,13 @@ final class WebFieldClassifier {
         let minimumLoginMatch = evaluatedFields.bestMatch(forRole: .currentUsername)
         let minimiumCreateAccountMatch = evaluatedFields.bestMatch(forRole: .newUsername)
         let pageContainsCardNumberField = evaluatedFields.contains { $0.compatibleWithRole(.cardNumber) }
+        let pageContainsIncompleteCardExpirationDate = evaluatedFields.contains { $0.compatibleWithRole(.cardExpirationMonth) } != evaluatedFields.contains { $0.compatibleWithRole(.cardExpirationYear) }
         let thresholds: [WebAutofillAction: Match] = [
             .login: max(minimumLoginMatch, containsPasswordFieldsUsableForLogin ? .score(0) : .score(900)),
             .createAccount: max(minimiumCreateAccountMatch, containsPasswordFieldsUsableForNewAccount ? .score(0) : .score(900)),
             .payment: pageContainsCardNumberField ? .score(0) : .always // This can be changed to `.payment: .always` to disable heuristics based on `class` and `name` attributes.
         ]
-        return makeClassifierResult(fields: evaluatedFields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction)
+        return makeClassifierResult(fields: evaluatedFields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction, incompleteCardExpirationDate: pageContainsIncompleteCardExpirationDate)
     }
 
     private func includedInEvaluation(_ inputElement: DOMInputElement) -> Bool {
@@ -475,12 +465,12 @@ final class WebFieldClassifier {
         }
     }
 
-    private func makeClassifierResult(fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool) -> ClassifierResult {
+    private func makeClassifierResult(fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool, incompleteCardExpirationDate: Bool) -> ClassifierResult {
         Logger.shared.logDebug("Making classifier results for: \(fields)", category: .webAutofillInternal)
         var groups: [String: WebAutofillGroup] = [:]
         var activeFields: [String] = []
         for field in fields {
-            if let group = makeAutofillGroup(from: field, in: fields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction) {
+            if let group = makeAutofillGroup(from: field, in: fields, thresholds: thresholds, ambiguousPasswordAction: ambiguousPasswordAction, incompleteCardExpirationDate: incompleteCardExpirationDate) {
                 let id = field.element.beamId
                 groups[id] = group
                 activeFields.append(id)
@@ -490,7 +480,7 @@ final class WebFieldClassifier {
         return ClassifierResult(autofillGroups: groups, activeFields: activeFields)
     }
 
-    private func makeAutofillGroup(from field: EvaluatedField, in fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool) -> WebAutofillGroup? {
+    private func makeAutofillGroup(from field: EvaluatedField, in fields: [EvaluatedField], thresholds: [WebAutofillAction: Match], ambiguousPasswordAction: Bool, incompleteCardExpirationDate: Bool) -> WebAutofillGroup? {
         guard let best = field.bestMatch(thresholds: thresholds) else { return nil }
         Logger.shared.logDebug("Best match for: \(field): \(best)", category: .webAutofillInternal)
         switch best.role {
@@ -532,7 +522,10 @@ final class WebFieldClassifier {
             return WebAutofillGroup(action: .createAccount, relatedFields: relatedFields, isAmbiguous: ambiguousPasswordAction)
         case .cardNumber, .cardHolder, .cardExpirationDate, .cardExpirationMonth, .cardExpirationYear:
             let relatedFields = fields.compactMap { otherField -> WebInputField? in
-                guard let role = otherField.roleForAction(.payment) else { return nil }
+                guard var role = otherField.roleForAction(.payment) else { return nil }
+                if incompleteCardExpirationDate && autofillRules.mergeIncompleteCardExpirationDate && (role == .cardExpirationMonth || role == .cardExpirationYear) {
+                    role = .cardExpirationDate
+                }
                 return WebInputField(id: otherField.element.beamId, role: role)
             }
             return WebAutofillGroup(action: .payment, relatedFields: relatedFields)
@@ -542,8 +535,21 @@ final class WebFieldClassifier {
     }
 }
 
-fileprivate extension Array where Element == WebFieldClassifier.EvaluatedField {
+private extension Array where Element == WebFieldClassifier.EvaluatedField {
     func bestMatch(forRole role: WebInputField.Role) -> WebFieldClassifier.Match {
         map { $0.matchForRole(role) }.max() ?? .never
+    }
+}
+
+private extension DOMInputElement {
+    var decodedHints: [String] {
+        var components = elementClass?.components(separatedBy: .whitespaces) ?? []
+        if let name = name {
+            components.append(name)
+        }
+        if let elementId = elementId {
+            components.append(elementId)
+        }
+        return components.map { String($0.unicodeScalars.filter { CharacterSet.alphanumerics.contains($0) }).lowercased() }
     }
 }
