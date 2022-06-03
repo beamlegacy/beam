@@ -36,7 +36,7 @@ extension APIRequest {
                                              queryParams: queryParams,
                                              postParams: postParams,
                                              authenticatedCall: authenticatedCall)
-        let filename = "rest call: \(path)"
+        let filename = "rest call: \(Configuration.restApiHostname)\(path)"
         #if DEBUG
         Self.networkCallFilesSemaphore.wait()
         Self.networkCallFiles.append(filename)
@@ -82,7 +82,7 @@ extension APIRequest {
                                         queryParams: [[String: String]]? = nil,
                                         postParams: C? = nil,
                                         authenticatedCall: Bool?) throws -> URLRequest {
-        let fullLink = "\(Configuration.apiHostname)\(path)"
+        let fullLink = "\(Configuration.restApiHostname)\(path)"
         var request: URLRequest
 
         var headers: [String: String] = [
