@@ -34,7 +34,6 @@ class DocumentManagerNetworkTests: QuickSpec {
                                                 coreDataManager: coreDataManager)
 
             DocumentManager.cancelAllPreviousThrottledAPICall()
-            BeamObjectManager.clearNetworkCalls()
             BeamTestsHelper.logout()
 
             beamHelper.beginNetworkRecording()
@@ -60,7 +59,6 @@ class DocumentManagerNetworkTests: QuickSpec {
         afterEach {
             beamHelper.endNetworkRecording()
 
-            BeamObjectManager.clearNetworkCalls()
             BeamDate.reset()
         }
 

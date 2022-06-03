@@ -156,11 +156,6 @@ extension BeamObjectManager {
         }
 
         let beamRequest = BeamObjectRequest()
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(beamRequest)
-        }
-        #endif
 
         let lastReceivedAt: Date? = force ? nil : Persistence.Sync.BeamObjects.last_received_at
 
@@ -259,12 +254,6 @@ extension BeamObjectManager {
     private func fetchAllFromAPI(lastReceivedAt: Date? = nil,
                                  ids: [UUID]? = nil) async throws {
         let beamRequest = BeamObjectRequest()
-
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(beamRequest)
-        }
-        #endif
 
         let beamObjects = try await beamRequest.fetchAll(receivedAtAfter: lastReceivedAt, ids: ids)
         // If we are doing a delta refreshAll, and 0 document is fetched, we exit early
@@ -404,6 +393,7 @@ extension BeamObjectManager {
         #endif
 
         let request = BeamObjectRequest()
+
         do {
             try await request.save(beamObjectsToSave)
         } catch {
@@ -480,7 +470,7 @@ extension BeamObjectManager {
         // swiftlint:disable:next date_init
         localTimer = Date()
 
-        var request = BeamObjectRequest()
+        let request = BeamObjectRequest()
 
         #if DEBUG
         if objectsToSave.count > 200 {
@@ -552,12 +542,13 @@ extension BeamObjectManager {
             objectToSave.data = nil
         }
 
-        request = BeamObjectRequest()
+        let saveRequest = BeamObjectRequest()
+
         // swiftlint:disable:next date_init
         localTimer = Date()
 
         do {
-            try await request.save(objectsToSave)
+            try await saveRequest.save(objectsToSave)
         } catch {
             Logger.shared.logError("Error while saving \(objectsToSave.count) \(T.beamObjectType)",
                                    category: .beamObjectNetwork,
@@ -780,11 +771,6 @@ extension BeamObjectManager {
         }
 
         let request = BeamObjectRequest()
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         do {
             try await request.save(beamObject)
@@ -959,11 +945,6 @@ extension BeamObjectManager {
         }
 
         let request = BeamObjectRequest()
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         do {
             try await request.save(beamObjects)
@@ -1072,11 +1053,6 @@ extension BeamObjectManager {
         beamObject.previousChecksum = BeamObjectChecksum.previousChecksum(beamObject: beamObject)
 
         let request = BeamObjectRequest()
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         do {
             try await request.save(beamObject)
@@ -1180,11 +1156,13 @@ extension BeamObjectManager {
 
     internal func fetchBeamObjects(_ beamObjects: [BeamObject]) async throws -> [BeamObject] {
         let request = BeamObjectRequest()
+
         return try await request.fetchAll(ids: beamObjects.map { $0.id })
     }
 
     internal func fetchBeamObjects(_ ids: [UUID]) async throws -> [BeamObject] {
         let request = BeamObjectRequest()
+
         if Configuration.beamObjectDataOnSeparateCall {
             return try await request.fetchAllWithDataUrl(ids: ids)
         } else {
@@ -1194,12 +1172,14 @@ extension BeamObjectManager {
 
     internal func asyncFetchBeamObjectChecksums(_ ids: [UUID]) async throws -> [BeamObject] {
         let request = BeamObjectRequest()
+
         return try await request.fetchAll(ids: ids)
     }
 
     internal func fetchBeamObjects(_ beamObjectType: String,
                                    raisePrivateKeyError: Bool = false) async throws -> [BeamObject] {
         let request = BeamObjectRequest()
+
         if Configuration.beamObjectDataOnSeparateCall {
             return try await request.fetchAllWithDataUrl(beamObjectType: beamObjectType, raisePrivateKeyError: raisePrivateKeyError)
         } else {
@@ -1209,6 +1189,7 @@ extension BeamObjectManager {
 
     internal func fetchBeamObject(beamObject: BeamObject) async throws -> BeamObject {
         let request = BeamObjectRequest()
+
         if Configuration.beamObjectDataOnSeparateCall {
             return try await request.fetchWithDataUrl(beamObject: beamObject)
         } else {
@@ -1228,12 +1209,14 @@ extension BeamObjectManager {
 
     internal func fetchMinimalBeamObject(beamObject: BeamObject) async throws -> BeamObject {
         let request = BeamObjectRequest()
+
         return try await request.fetchMinimalBeamObject(beamObject: beamObject)
     }
 
     @discardableResult
     internal func fetchMinimalBeamObject<T: BeamObjectProtocol>(object: T) async throws -> BeamObject {
         let request = BeamObjectRequest()
+
         return try await request.fetchMinimalBeamObject(object: object)
     }
 
@@ -1244,11 +1227,6 @@ extension BeamObjectManager {
         }
 
         let request = BeamObjectRequest()
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         return try await request.delete(object: object)
     }
@@ -1261,11 +1239,6 @@ extension BeamObjectManager {
 
         try BeamObjectChecksum.deletePreviousChecksum(beamObject: beamObject)
         let request = BeamObjectRequest()
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         return try await request.delete(beamObject: beamObject)
     }
@@ -1277,12 +1250,6 @@ extension BeamObjectManager {
         }
 
         let request = BeamObjectRequest()
-
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         _ = try await request.deleteAll(beamObjectType: beamObjectType)
 

@@ -15,6 +15,7 @@ class OmniboxAnalyticsTests: XCTestCase {
     var analyticsBackend: InMemoryAnalyticsBackend!
 
     override func setUpWithError() throws {
+        BeamObjectManager.disableSendingObjects = true
         state = BeamState()
         state.data = BeamData()
         analyticsBackend = InMemoryAnalyticsBackend()

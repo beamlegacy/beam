@@ -123,14 +123,6 @@ extension BeamObjectManager {
                                                localTimer: localTimer)
                         group.leave()
                     }
-
-                    if let request = request {
-                        #if DEBUG
-                        DispatchQueue.main.async {
-                            Self.networkRequests.append(request)
-                        }
-                        #endif
-                    }
                 } catch {
                     lock.wait()
                     errors.append(error)
@@ -247,12 +239,6 @@ extension BeamObjectManager {
                 }
             }
         }
-
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(beamRequest)
-        }
-        #endif
     }
 
     /// Will fetch all updates from the API and call each managers based on object's type
@@ -315,12 +301,6 @@ extension BeamObjectManager {
                 }
             }
         }
-
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(beamRequest)
-        }
-        #endif
     }
 }
 
@@ -957,11 +937,7 @@ extension BeamObjectManager {
             }
         }
 
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
+
 
         return request
     }
@@ -1201,11 +1177,7 @@ extension BeamObjectManager {
             }
         }
 
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
+
 
         return request
     }
@@ -1390,11 +1362,7 @@ extension BeamObjectManager {
             }
         }
 
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
+
 
         return request
     }
@@ -1606,11 +1574,7 @@ extension BeamObjectManager {
             }
         }
 
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
+
 
         return request
     }
@@ -1636,12 +1600,6 @@ extension BeamObjectManager {
             case .success(let object): completion?(.success(object))
             }
         }
-
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
 
         return request
     }
@@ -1672,11 +1630,7 @@ extension BeamObjectManager {
             }
         }
 
-        #if DEBUG
-        DispatchQueue.main.async {
-            Self.networkRequests.append(request)
-        }
-        #endif
+
 
         return request
     }
