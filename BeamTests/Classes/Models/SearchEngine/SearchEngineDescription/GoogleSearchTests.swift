@@ -21,12 +21,28 @@ class GoogleSearchTests: XCTestCase {
 
     func testDecodeSuggestions() throws {
         let data = Data(Self.json.utf8)
-        let suggestions = try searchEngine.decodeSuggestions(from: data)
+        let suggestions = try searchEngine.decodeSuggestions(from: data, encoding: nil)
 
         XCTAssertEqual(suggestions.count, 10)
         guard suggestions.count == 10 else { return }
         XCTAssertEqual(suggestions[0], "steve jobs")
         XCTAssertEqual(suggestions[1], "steve aoki")
+    }
+
+    func testDecodeSuggestionsWithSpecificEncoding() throws {
+        let isoLatin5 = encodingFromName("iso-8859-9")
+        guard let data = Self.jsonTurkish.data(using: isoLatin5) else {
+            XCTFail("Couldn't encode with turkish encoding")
+            return
+        }
+        let suggestions = try searchEngine.decodeSuggestions(from: data, encoding: isoLatin5)
+
+        XCTAssertEqual(suggestions.count, 5)
+        guard suggestions.count == 5 else { return }
+        XCTAssertEqual(suggestions[1], "turkish ğ")
+        XCTAssertEqual(suggestions[2], "turkish İ")
+        XCTAssertEqual(suggestions[3], "turkish ı")
+        XCTAssertEqual(suggestions[4], "turkish ş")
     }
 
     func testCanHandleGoogleSearchURLs() {
@@ -62,4 +78,26 @@ class GoogleSearchTests: XCTestCase {
     ]
     """
 
+    private static var jsonTurkish = """
+    [
+        "turkish",
+        [
+            "turkish alphabet",
+            "turkish ğ",
+            "turkish İ",
+            "turkish ı",
+            "turkish ş"
+        ],
+        [],
+        {
+            "google: suggestsubtypes": []
+        }
+    ]
+    """
+
+    private func encodingFromName(_ name: String) -> String.Encoding {
+        let cfEncoding = CFStringConvertIANACharSetNameToEncoding(name as CFString)
+        let encoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding)
+        return String.Encoding(rawValue: encoding)
+    }
 }

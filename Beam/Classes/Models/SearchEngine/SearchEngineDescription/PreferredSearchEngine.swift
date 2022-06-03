@@ -49,8 +49,8 @@ extension PreferredSearchEngine: SearchEngineDescription {
         searchEngine.suggestionsQueryItems(for: query)
     }
 
-    func decodeSuggestions(from data: Data) throws -> [String] {
-        try searchEngine.decodeSuggestions(from: data)
+    func decodeSuggestions(from data: Data, encoding: String.Encoding?) throws -> [String] {
+        try searchEngine.decodeSuggestions(from: data, encoding: encoding)
     }
 
     func canHandle(_ queryURL: URL) -> Bool {
