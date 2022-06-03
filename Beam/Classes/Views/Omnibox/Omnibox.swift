@@ -105,11 +105,20 @@ struct OmniboxContainer: View {
     @EnvironmentObject var browserTabsManager: BrowserTabsManager
     var containerGeometry: GeometryProxy
 
-    private let boxWidth: CGFloat = 760
-    private let boxMinX: CGFloat = 11
-    private let boxMinXInToolBar: CGFloat = 87
-    private let boxMaxX: CGFloat = 11
+    private let boxMinWidth: CGFloat = 600
+    private let boxDefaultWidth: CGFloat = 680
+    private let boxMinX: CGFloat = 100
+    private var boxMinXInToolBar: CGFloat {
+        state.useSidebar ? 117 : 87
+    }
+    private let boxMaxX: CGFloat = 100
+    private let boxMaxXInToolBar: CGFloat = 11
     private let boxMinY: CGFloat = 11
+    private var boxWidth: CGFloat {
+        boxDefaultWidth
+        // uncomment this when the sidebar is not an overlay
+        // state.showSidebar ? boxMinWidth : boxDefaultWidth
+    }
 
     static func topOffsetForJournal(height: CGFloat) -> CGFloat {
         return height * 0.3
@@ -135,20 +144,27 @@ struct OmniboxContainer: View {
         let value = 1.0 - v / omniboxEndFadeOffset
         return value
     }
+
     private var boxOffset: CGSize {
         var offset: CGSize = CGSize(width: 0, height: 190)
 
         if boxIsInsideNote || state.omniboxInfo.wasFocusedFromJournalTop {
             offset.height = Self.topOffsetForJournal(height: containerGeometry.size.height)
-        } else if state.mode == .web && state.omniboxInfo.wasFocusedFromTab && browserTabsManager.currentTab?.url != nil,
-                    let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
-            let x = max(boxMinXInToolBar, currentTabUIFrame.midX - boxWidth / 2)
+        } else if boxIsInsideToolbar, let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
+            var x = max(boxMinXInToolBar, currentTabUIFrame.midX - boxWidth / 2)
+            if (x + boxWidth + boxMaxXInToolBar) > containerGeometry.size.width {
+                x = max(boxMinXInToolBar, containerGeometry.size.width - boxWidth - boxMaxXInToolBar)
+            }
             offset = CGSize(width: x, height: boxMinY)
         }
         return offset
     }
     private var showPressedState: Bool {
         autocompleteManager.animateInputingCharacter || autocompleteManager.isPreparingForAnimatingToMode
+    }
+
+    private var boxIsInsideToolbar: Bool {
+        state.mode == .web && state.omniboxInfo.wasFocusedFromTab && browserTabsManager.currentTab?.url != nil
     }
 
     private var boxIsInsideNote: Bool {
@@ -163,16 +179,18 @@ struct OmniboxContainer: View {
     private var boxInstance: some View {
         VStack(spacing: 0) {
             let offset = boxOffset
+            let boxIsInsideToolbar = boxIsInsideToolbar
             Spacer(minLength: boxMinY)
                 .frame(maxHeight: offset.height)
             HStack(spacing: 0) {
-                Spacer(minLength: boxMinX)
+                Spacer(minLength: boxIsInsideToolbar ? boxMinXInToolBar : boxMinX)
                     .if(offset.width != 0) {
-                        $0.frame(maxWidth: offset.width != 0 ? offset.width : .infinity)
+                        $0.frame(maxWidth: offset.width)
                     }
                 Omnibox(isInsideNote: boxIsInsideNote)
-                    .frame(idealWidth: boxWidth, maxWidth: boxWidth)
-                Spacer(minLength: boxMaxX)
+                    .frame(minWidth: boxMinWidth, idealWidth: boxWidth, maxWidth: boxDefaultWidth)
+                    .layoutPriority(boxIsInsideToolbar ? 1 : 0)
+                Spacer(minLength: boxIsInsideToolbar ? boxMaxXInToolBar : boxMaxX)
             }
             Spacer(minLength: boxMinY)
         }
