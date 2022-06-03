@@ -21,7 +21,7 @@ class SearchEngineDescriptionTests: XCTestCase {
 
     func testDecodedSuggestions() throws {
         let data = try JSONSerialization.data(withJSONObject: ["uno", "dos", "tres"])
-        XCTAssertEqual(try searchEngine.decodeSuggestions(from: data), ["uno", "dos", "tres"])
+        XCTAssertEqual(try searchEngine.decodeSuggestions(from: data, encoding: nil), ["uno", "dos", "tres"])
     }
 
     func testQueryEncoding() {
@@ -56,7 +56,7 @@ private struct MockSearchEngine: SearchEngineDescription {
         ]
     }
 
-    func decodeSuggestions(from data: Data) throws -> [String] {
+    func decodeSuggestions(from data: Data, encoding: String.Encoding?) throws -> [String] {
         ["uno", "dos", "tres"]
     }
 
