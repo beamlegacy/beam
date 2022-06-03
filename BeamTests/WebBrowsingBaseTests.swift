@@ -36,6 +36,8 @@ class WebBrowsingBaseTests: XCTestCase {
     }
 
     override func setUp() {
+        BeamObjectManager.disableSendingObjects = true
+
         linkStore.deleteAll(includedRemote: false, nil)
         webView = WKWebView()
 

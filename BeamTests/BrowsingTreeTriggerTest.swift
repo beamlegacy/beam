@@ -10,14 +10,18 @@ import Nimble
 @testable import BeamCore
 @testable import Beam
 
-//TODO: Investigate why, when it runs after BrowsingTreeTriggerTests, MyRemoteObjectManagerTest fails.
-class ZZZBrowsingTreeTriggerTests: WebBrowsingBaseTests {
+class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
 
     override func setUpWithError() throws {
+        try super.setUpWithError()
+
+        BeamObjectManager.disableSendingObjects = true
         try GRDBDatabase.shared.clear()
     }
 
     override func tearDownWithError() throws {
+        try super.tearDownWithError()
+        
         try GRDBDatabase.shared.clear()
     }
 
