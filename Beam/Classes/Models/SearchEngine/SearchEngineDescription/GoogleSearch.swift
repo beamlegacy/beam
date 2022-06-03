@@ -18,13 +18,14 @@ struct GoogleSearch: SearchEngineDescription {
         ]
     }
 
-    func decodeSuggestions(from data: Data) throws -> [String] {
-        // Google sends suggestions results with charset ISO-8859-1
-        // Convert to ISO Latin first, then convert back to UTF8 data
-        let isoString = String(data: data, encoding: .isoLatin1)
-        guard let utf8Data = isoString?.data(using: .utf8) else { return [] }
-
-        let response = try JSONSerialization.jsonObject(with: utf8Data)
+    func decodeSuggestions(from data: Data, encoding: String.Encoding?) throws -> [String] {
+        // Google sends suggestions results with specific encoding like ISO-8859-1
+        var unicodeData: Data? = data
+        if let encoding = encoding {
+            unicodeData = self.convertDataToUnicodeData(data, currentEncoding: encoding)
+        }
+        guard let unicodeData = unicodeData else { return [] }
+        let response = try JSONSerialization.jsonObject(with: unicodeData)
         guard let array = response as? [Any],
               let suggestions = array[1] as? [String] else {
                   return []

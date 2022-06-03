@@ -18,10 +18,9 @@ protocol SearchEngineDescription {
     func queryFromURL(_ url: URL) -> String?
 
     /// Decodes the suggestions from the response returned by a search engine provider.
-    func decodeSuggestions(from data: Data) throws -> [String]
+    func decodeSuggestions(from data: Data, encoding: String.Encoding?) throws -> [String]
 
     func canHandle(_ queryURL: URL) -> Bool
-
 }
 
 extension SearchEngineDescription {
@@ -79,9 +78,9 @@ extension SearchEngineDescription {
         return urlComponents.url
     }
 
-    func suggestions(from data: Data) -> [String] {
+    func suggestions(from data: Data, encoding: String.Encoding?) -> [String] {
         do {
-            return try decodeSuggestions(from: data)
+            return try decodeSuggestions(from: data, encoding: encoding)
 
         } catch let DecodingError.dataCorrupted(errorContext),
                 let DecodingError.keyNotFound(_, errorContext),
@@ -97,6 +96,13 @@ extension SearchEngineDescription {
 
     private static func formatQuery(_ query: String) -> String {
         query.addingPercentEncoding(withAllowedCharacters: .urlSearchQueryAllowed) ?? query
+    }
+
+    // Helper for search engines
+    func convertDataToUnicodeData(_ data: Data, currentEncoding encoding: String.Encoding) -> Data? {
+        guard encoding != .utf8 else { return data }
+        let dataString = String(data: data, encoding: encoding)
+        return dataString?.data(using: .utf8)
     }
 
 }
