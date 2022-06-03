@@ -89,17 +89,17 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
         return historyDatabaseCopy
     }
 
-    func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
-        try importHistory(from: databaseURL.path, startDate: startDate)
+    func importHistory(from databaseURL: URL, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
+        try importHistory(from: databaseURL.path, startDate: startDate, importCountCallback: importCountCallback)
     }
 
-    func importHistory(from dbPath: String, startDate: Date? = nil) throws {
+    func importHistory(from dbPath: String, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
         try Self.nonConcurrently.run {
-            try importHistoryOnce(from: dbPath, startDate: startDate)
+            try importHistoryOnce(from: dbPath, startDate: startDate, importCountCallback: importCountCallback)
         }
     }
 
-    private func importHistoryOnce(from dbPath: String, startDate: Date? = nil) throws {
+    private func importHistoryOnce(from dbPath: String, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -108,6 +108,7 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM visits") else {
                     throw ImportError.countNotAvailable
                 }
+                var importedCount = 0
                 // visit_time is number of microseconds since 1601-01-01
                 let rows = try ChromiumHistoryItem.fetchCursor(db, sql: """
                     SELECT v.visit_time / 1000000 + strftime('%s', '1601-01-01 00:00:00') AS visit_time, v.visit_duration, u.url, u.title
@@ -120,9 +121,11 @@ final class ChromiumHistoryImporter: ChromiumImporter, BrowserHistoryImporter {
                 while let row = try rows.next() {
                     if row.url != nil {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                        importedCount += 1
                     }
                 }
                 currentSubject?.send(completion: .finished)
+                importCountCallback(importedCount)
             } catch {
                 currentSubject?.send(completion: .failure(error))
             }
