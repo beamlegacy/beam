@@ -63,7 +63,9 @@
     },
     {
       "skippedTests" : [
-        "BrowserImportManagerTest\/testSpeed()"
+        "BrowserImportManagerTest\/testSpeed()",
+        "BrowsingTreeTriggerTests",
+        "OmniboxAnalyticsTests"
       ],
       "target" : {
         "containerPath" : "container:Beam.xcodeproj",

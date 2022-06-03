@@ -16,6 +16,8 @@ class BeamTestsHelper {
     func beginNetworkRecording(test: XCTestCase? = nil) {
         guard Configuration.networkStubs else { return }
 
+        BeamObjectManager.clearNetworkCalls()
+
         testName = test?.name ?? QuickSpec.current.name // ?? testName
 
         // Cancel today's journal throttled document save. Else we get random network calls where not expecting any,
@@ -63,7 +65,10 @@ class BeamTestsHelper {
 
         turntable?.stopRecording()
         turntable = nil
+
         BeamURLSession.reset()
+
+        BeamObjectManager.clearNetworkCalls()
     }
 
     static let encoder = JSONEncoder()
