@@ -19,7 +19,7 @@ struct NoteHeaderView: View {
     var topPadding: CGFloat = Self.topPadding
     private let errorColor = BeamColor.Shiraz
     private var textColor: BeamColor {
-        model.isTitleTaken ? errorColor : BeamColor.Generic.text
+        model.isTitleTaken.value ? errorColor : BeamColor.Generic.text
     }
 
     @State private var publishShowError: NoteHeaderPublishButton.ErrorMessage?
@@ -71,7 +71,7 @@ struct NoteHeaderView: View {
 
     private var subtitleInfoView: some View {
         Group {
-            if model.isTitleTaken {
+            if model.isTitleTaken.value {
                 Text("This note’s title ")
                 + Text("already exists")
                     .foregroundColor(errorColor.swiftUI)
@@ -80,7 +80,7 @@ struct NoteHeaderView: View {
         }
         .font(BeamFont.medium(size: 10).swiftUI)
         .foregroundColor(BeamColor.Generic.placeholder.swiftUI)
-        .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: 0.15)))
+        .transition(AnyTransition.opacity.animation(BeamAnimation.easeInOut(duration: model.isTitleTaken.animated ? 0.15 : .zero)))
     }
 
     private var dateView: some View {
@@ -248,7 +248,7 @@ struct NoteHeaderView_Previews: PreviewProvider {
     }
     static var titleTakenModel: NoteHeaderView.ViewModel {
         let model = NoteHeaderView.ViewModel(note: BeamNote(title: "Taken Title"))
-        model.isTitleTaken = true
+        model.isTitleTaken = (true, true)
         return model
     }
     static var previews: some View {
