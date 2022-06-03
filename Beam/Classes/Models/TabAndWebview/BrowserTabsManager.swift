@@ -511,13 +511,28 @@ extension BrowserTabsManager {
         updateListItems()
     }
 
+    private func gatherTabsInGroupTogether(_ groupID: TabClusteringGroup.GroupID) {
+        let tabsInGroup = tabsIds(inGroup: groupID)
+        var tabsIndexToMove = IndexSet()
+        tabs.enumerated().forEach { (index, tab) in
+            if tabsInGroup.contains(tab.id) {
+                tabsIndexToMove.insert(index)
+            }
+        }
+        guard let firstIndexOfGroup = tabsIndexToMove.first else { return }
+        tabs.move(fromOffsets: tabsIndexToMove, toOffset: firstIndexOfGroup)
+    }
+
     func toggleGroupCollapse(_ groupID: TabClusteringGroup.GroupID) {
         guard let group = getGroup(groupID) else { return }
         group.collapsed.toggle()
 
         if group.collapsed {
             let tabsInGroup = tabsIds(inGroup: groupID)
+            pauseListItemsUpdate = true
+            defer { pauseListItemsUpdate = false }
             collapsedTabsInGroup[group.id] = tabsInGroup
+            gatherTabsInGroupTogether(group.id)
             updateListItems()
             if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
                 changeCurrentTabIfNotVisible(previousTabsList: tabs)
