@@ -20,7 +20,7 @@ class DuckDuckGoTests: XCTestCase {
     }
 
     func testDecodeSuggestions() throws {
-        let suggestions = try searchEngine.decodeSuggestions(from: Self.data)
+        let suggestions = try searchEngine.decodeSuggestions(from: Self.data, encoding: nil)
 
         XCTAssertEqual(suggestions.count, 8)
         guard suggestions.count == 8 else { return }

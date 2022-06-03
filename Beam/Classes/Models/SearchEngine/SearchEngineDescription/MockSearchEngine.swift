@@ -7,6 +7,6 @@ struct MockSearchEngine: SearchEngineDescription {
 
     var searchHost: String { "" }
 
-    func decodeSuggestions(from data: Data) -> [String] { [] }
+    func decodeSuggestions(from data: Data, encoding: String.Encoding?) throws -> [String] { [] }
 
 }
