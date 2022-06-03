@@ -212,4 +212,28 @@ class BrowserTabsManagerTests: XCTestCase {
         sut.setCurrentTab(at: 2)
         XCTAssertEqual(sut.currentTab, tabs[3])
     }
+
+    func testCollapseGroupGatherSeparatedTabs() {
+        let tabs = [
+            tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
+        ]
+        let groupA = TabClusteringGroup(pageIDs: [])
+        let tabGroups = [
+            tabs[1].id: groupA,
+            tabs[3].id: groupA
+        ]
+        sut._testSetTabsClusteringGroup(tabGroups)
+        sut.tabs = tabs
+        XCTAssertEqual(sut.listItems.allItems.count, 5)
+        XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
+        XCTAssertEqual(sut.listItems.allItems[4].tab, tabs[3])
+
+        sut.toggleGroupCollapse(groupA.id)
+        XCTAssertEqual(sut.listItems.allItems.count, 3)
+
+        // after uncollapsing, grouped tabs are now next to each other.
+        sut.toggleGroupCollapse(groupA.id)
+        XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
+        XCTAssertEqual(sut.listItems.allItems[3].tab, tabs[3])
+    }
 }
