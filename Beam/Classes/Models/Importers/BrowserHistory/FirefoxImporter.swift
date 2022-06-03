@@ -119,17 +119,17 @@ final class FirefoxImporter: BrowserHistoryImporter {
         return subject.eraseToAnyPublisher()
     }
 
-    func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
-        try importHistory(from: databaseURL.path, startDate: startDate)
+    func importHistory(from databaseURL: URL, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
+        try importHistory(from: databaseURL.path, startDate: startDate, importCountCallback: importCountCallback)
     }
 
-    func importHistory(from dbPath: String, startDate: Date? = nil) throws {
+    func importHistory(from dbPath: String, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
         try Self.nonConcurrently.run {
-            try importHistoryOnce(from: dbPath, startDate: startDate)
+            try importHistoryOnce(from: dbPath, startDate: startDate, importCountCallback: importCountCallback)
         }
     }
 
-    private func importHistoryOnce(from dbPath: String, startDate: Date?) throws {
+    private func importHistoryOnce(from dbPath: String, startDate: Date?, importCountCallback: (Int) -> Void) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -138,6 +138,7 @@ final class FirefoxImporter: BrowserHistoryImporter {
                 guard let itemCount = try Int.fetchOne(db, sql: "SELECT COUNT(*) FROM moz_historyvisits") else {
                     throw ImportError.countNotAvailable
                 }
+                var importedCount = 0
                 let rows = try FirefoxHistoryItem.fetchCursor(db, sql: """
                     SELECT v.visit_date, v.visit_type, v.session, p.url, p.title
                     FROM moz_historyvisits v
@@ -148,10 +149,12 @@ final class FirefoxImporter: BrowserHistoryImporter {
                     .filter { $0.timestamp > startDate ?? Date.distantPast }
                 while let row = try rows.next() {
                     if row.url != nil {
+                        importedCount += 1
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
                     }
                 }
                 currentSubject?.send(completion: .finished)
+                importCountCallback(importedCount)
             } catch {
                 currentSubject?.send(completion: .failure(error))
             }
