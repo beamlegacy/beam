@@ -28,8 +28,8 @@ protocol BrowserHistoryImporter: BrowserImporter {
     var currentSubject: PassthroughSubject<BrowserHistoryResult, Error>? { get set }
     var publisher: AnyPublisher<BrowserHistoryResult, Error> { get }
     func historyDatabaseURL() throws -> URLProvider?
-    func importHistory(from databaseURL: URL, startDate: Date?) throws
-    func importHistory(from dbPath: String, startDate: Date?) throws
+    func importHistory(from databaseURL: URL, startDate: Date?, importCountCallback: (Int) -> Void) throws
+    func importHistory(from dbPath: String, startDate: Date?, importCountCallback: (Int) -> Void) throws
 }
 
 enum BrowserHistoryImporterError: Error {
@@ -38,14 +38,14 @@ enum BrowserHistoryImporterError: Error {
 
 extension BrowserHistoryImporter {
 
-    func importHistory(startDate: Date? = nil) throws {
+    func importHistory(startDate: Date? = nil, importCountCallback: @escaping (Int) -> Void) throws {
         guard let provider = try historyDatabaseURL() else {
             throw BrowserHistoryImporterError.noDatabaseURL
         }
         DispatchQueue.global().async {
             do {
                 try withExtendedLifetime(provider) {
-                    try importHistory(from: provider.wrappedURL, startDate: startDate)
+                    try importHistory(from: provider.wrappedURL, startDate: startDate, importCountCallback: importCountCallback)
                 }
             } catch {
                 Logger.shared.logError("Import failed with error: \(error)", category: .browserImport)

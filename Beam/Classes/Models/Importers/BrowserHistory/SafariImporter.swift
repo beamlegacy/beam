@@ -72,17 +72,17 @@ final class SafariImporter: BrowserHistoryImporter {
         return historyDatabaseCopy
     }
 
-    func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
-        try importHistory(from: databaseURL.path, startDate: startDate)
+    func importHistory(from databaseURL: URL, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
+        try importHistory(from: databaseURL.path, startDate: startDate, importCountCallback: importCountCallback)
     }
 
-    func importHistory(from dbPath: String, startDate: Date? = nil) throws {
+    func importHistory(from dbPath: String, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
         try Self.nonConcurrently.run {
-            try importHistoryOnce(from: dbPath, startDate: startDate)
+            try importHistoryOnce(from: dbPath, startDate: startDate, importCountCallback: importCountCallback)
         }
     }
 
-    private func importHistoryOnce(from dbPath: String, startDate: Date?) throws {
+    private func importHistoryOnce(from dbPath: String, startDate: Date?, importCountCallback: (Int) -> Void) throws {
         var configuration = GRDB.Configuration()
         configuration.readonly = true
         let dbQueue = try DatabaseQueue(path: dbPath, configuration: configuration)
@@ -92,6 +92,7 @@ final class SafariImporter: BrowserHistoryImporter {
                     throw ImportError.countNotAvailable
                 }
                 Logger.shared.logDebug("Safari history: \(itemCount) items in database, start date = \(startDate?.description ?? "none")", category: .browserImport)
+                var importedCount = 0
                 let rows = try SafariHistoryItem.fetchCursor(db, sql: """
                     SELECT v.visit_time, v.title, i.url
                     FROM history_visits v JOIN history_items i
@@ -103,10 +104,12 @@ final class SafariImporter: BrowserHistoryImporter {
                 while let row = try rows.next() {
                     if row.url != nil {
                         currentSubject?.send(BrowserHistoryResult(itemCount: itemCount, item: row))
+                        importedCount += 1
                     }
                 }
                 Logger.shared.logInfo("Safari history database access finished successfully", category: .browserImport)
                 currentSubject?.send(completion: .finished)
+                importCountCallback(importedCount)
             } catch {
                 Logger.shared.logError("Safari history database access failed: \(error)", category: .browserImport)
                 currentSubject?.send(completion: .failure(error))
