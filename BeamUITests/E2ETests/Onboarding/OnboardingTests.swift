@@ -16,7 +16,9 @@ class OnboardingTests: BaseTest {
     var onboardingImportDataTestView: OnboardingImportDataTestView!
     var onboardingLostPKTestView: OnboardingLostPKTestView!
     var journalView: JournalTestView!
+    var webView: WebTestView!
     var deletePK = false
+    var cleanupStaging = false
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -28,10 +30,13 @@ class OnboardingTests: BaseTest {
     }
     
     override func tearDown() {
+        super.tearDown()
         if deletePK {
             UITestsMenuBar().deletePrivateKeys()
         }
-        super.tearDown()
+        if cleanupStaging {
+            UITestsMenuBar().deleteRemoteAccount().resetAPIEndpoints()
+        }
     }
     
     private func passAuthorisationViews(email: String, password: String) -> OnboardingPrivateKeyTestView {
@@ -423,6 +428,62 @@ class OnboardingTests: BaseTest {
         
         step("Then I'm redirected to PK verification view") {
             XCTAssertTrue(onboardingView.waitForLandingViewToLoad())
+        }
+    }
+    
+    func testOnboardingWelcomeAppearance() {
+        deletePK = true
+        cleanupStaging = true
+        let expectedTabs = 1
+        let expectedTabTitle = "Welcome to beam"
+        step("GIVEN I sign up an account") {
+            UITestsMenuBar()
+                .setAPIEndpointsToStaging()
+                .signUpWithRandomTestAccount()
+            webView = WebTestView()
+        }
+        
+        step("THEN \(expectedTabs) tab with '\(expectedTabTitle)' is displayed") {
+            XCTAssertTrue(webView.waitForWebViewToLoad(), "Web view wasn't loaded")
+            XCTAssertTrue(webView.waitForTabTitleToEqual(index: 0, expectedString: expectedTabTitle))
+            XCTAssertEqual(webView.getNumberOfTabs(), expectedTabs)
+        }
+    }
+    
+    func testOnboardingWelcomeWebViewsCorrectness() throws {
+        try XCTSkipIf(true, "The test scenario is NOT for MRs as far as welcome web pages are not a part of mac app. The scenario is created to be ran during release activities manually, to make sure the copies are correct and in correct sequence, to avoid making it manually")
+        deletePK = true
+        cleanupStaging = true
+        let page1 = ["Welcome to beam", "beam is a new way to navigate the web, ", "gather knowledge and share with others."]
+        let page2 = ["Beneath your ", "browser", "…"]
+        let page3 = ["A ", "powerful note", " app…"]
+        let page4 = ["So you can ", "capture", " the web…", "And make it ", "your own"]
+        let page5 = ["Hold ", "⌥", " option", "and click to capture text"
+        , "Try capturing this block!", "Hold ⌥ option, then click."]
+        let page6 = ["Also works on images, videos…", "Hold ",
+        "⌥", " option and click to capture"]
+        let page7 = ["Meet your Omnibox", "⌘", "K", " or ", " to search the web & your notes"]
+        let page8 = ["Press ", "⌘", "D", "Or ", " to toggle between the web and your notes"]
+        let welcomePages = [page1, page2, page3, page4, page5, page6, page7, page8]
+        
+        launchAppWithArgument(uiTestModeLaunchArgument)
+        let view = WebTestView()
+        
+        step("GIVEN I sign up a new account") {
+            UITestsMenuBar()
+                .setAPIEndpointsToStaging()
+                .signUpWithRandomTestAccount()
+        }
+        
+        step("THEN welcome web views display correct content") {
+            welcomePages.forEach {page in
+                page.forEach {staticText in
+                    XCTAssertTrue(view.staticText(staticText).waitForExistence(timeout: BaseTest.implicitWaitTimeout), "'\(staticText)' doesn't exist on the page")
+                }
+                if (!view.staticText("Play again").exists) {
+                    view.staticText("⏎").hoverAndTapInTheMiddle()
+                }
+            }
         }
     }
     
