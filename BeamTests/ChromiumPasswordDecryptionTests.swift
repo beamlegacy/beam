@@ -42,7 +42,9 @@ class ChromiumPasswordDecryptionTests: XCTestCase {
                 results.append(result)
             })
         .store(in: &subscriptions)
-        try importer.importPasswords(from: [passwordsURL], keychainSecret: keychainSecret)
+        try importer.importPasswords(from: [passwordsURL], keychainSecret: keychainSecret) { importedCount in
+            XCTAssertEqual(importedCount, 1)
+        }
         wait(for: [expectation], timeout: 2.0)
         XCTAssertEqual(results.count, 1)
         XCTAssertEqual(results[0].itemCount, 1)
@@ -71,8 +73,10 @@ class ChromiumPasswordDecryptionTests: XCTestCase {
                 results.append(result)
             })
         .store(in: &subscriptions)
-        try importer.importPasswords(from: [passwordsURL, passwordsURL, passwordsURL], keychainSecret: keychainSecret)
+        var importedCount = 0
+        try importer.importPasswords(from: [passwordsURL, passwordsURL, passwordsURL], keychainSecret: keychainSecret) { importedCount += $0 }
         wait(for: [expectation], timeout: 2.0)
+        XCTAssertEqual(importedCount, 3)
         XCTAssertEqual(results.count, 3)
         XCTAssertEqual(results[0].itemCount, 1)
         XCTAssertEqual(results[0].item.url, URL(string: "https://ssl.imoof.com/menu_test.html"))

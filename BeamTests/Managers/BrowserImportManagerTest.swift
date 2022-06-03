@@ -45,7 +45,7 @@ class BrowserImportManagerTest: XCTestCase {
         }
 
         var sourceBrowser: BrowserType = .firefox
-        func importHistory(from databaseURL: URL, startDate: Date? = nil) throws {
+        func importHistory(from databaseURL: URL, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {
             self.startDate = startDate
             for i in 0..<itemCount {
                 let item = FakeHistoryItem(secondsFromReference: Double(i), title: nil, urlString: "http://www.site.com/\(i)")
@@ -53,7 +53,7 @@ class BrowserImportManagerTest: XCTestCase {
             }
             currentSubject?.send(completion: .finished)
         }
-        func importHistory(from dbPath: String, startDate: Date? = nil) throws {}
+        func importHistory(from dbPath: String, startDate: Date? = nil, importCountCallback: (Int) -> Void) throws {}
     }
 
     override func setUpWithError() throws {
