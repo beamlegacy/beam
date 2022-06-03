@@ -11,9 +11,13 @@ struct Ecosia: SearchEngineDescription {
 
     var suggestionsHost: String? { "ac.ecosia.org" }
 
-    func decodeSuggestions(from data: Data) throws -> [String] {
+    func decodeSuggestions(from data: Data, encoding: String.Encoding?) throws -> [String] {
         let decoder = BeamJSONDecoder()
-        let response = try decoder.decode(SuggestionsResponse.self, from: data)
+        var unicodeData = data
+        if let encoding = encoding {
+            unicodeData = self.convertDataToUnicodeData(data, currentEncoding: encoding) ?? data
+        }
+        let response = try decoder.decode(SuggestionsResponse.self, from: unicodeData)
         return response.suggestions
     }
 

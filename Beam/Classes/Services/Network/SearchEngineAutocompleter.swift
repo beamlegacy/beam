@@ -29,7 +29,7 @@ class SearchEngineAutocompleter: ObservableObject {
 
             self.lastDataTask?.cancel()
             let engineDescription = self.searchEngine.description
-            self.lastDataTask = BeamURLSession.shared.dataTask(with: url) { [weak self] data, _, error in
+            self.lastDataTask = BeamURLSession.shared.dataTask(with: url) { [weak self] data, response, error in
                 guard let self = self else { return }
                 if let error = error as? URLError, error.code == .cancelled {
                     return
@@ -44,7 +44,14 @@ class SearchEngineAutocompleter: ObservableObject {
                     return
                 }
 
-                res = self.searchEngine.suggestions(from: data).map { str in
+                var encoding: String.Encoding?
+                if let textEncodingName = response?.textEncodingName, !textEncodingName.lowercased().contains("utf") {
+                    // All our search engines use JSON. JSON is supposed to use unicode (as per RFC 8259).
+                    // But we might still receive a different encoding (see https://linear.app/beamapp/issue/BE-3905)
+                    encoding = response?.textEncoding
+                }
+
+                res = self.searchEngine.suggestions(from: data, encoding: encoding).map { str in
                     let isURL = str.mayBeWebURL
                     let source: AutocompleteResult.Source = isURL ? .url : .searchEngine
                     let url = isURL ? URL(string: str) : nil
@@ -70,5 +77,14 @@ class SearchEngineAutocompleter: ObservableObject {
 
     public func clear() {
         lastDataTask?.cancel()
+    }
+}
+
+private extension URLResponse {
+    var textEncoding: String.Encoding? {
+        guard let textEncodingName = textEncodingName else { return nil }
+        let cfEncoding = CFStringConvertIANACharSetNameToEncoding(textEncodingName as CFString)
+        let encoding = CFStringConvertEncodingToNSStringEncoding(cfEncoding)
+        return String.Encoding(rawValue: encoding)
     }
 }
