@@ -121,6 +121,7 @@
         "SignUpAutocompleteTests",
         "SigninTests",
         "TextEditorContextViewTests",
+        "TrackersBlockerTests",
         "UpdateViewTests",
         "WebsiteAuthTest"
       ],
