@@ -241,7 +241,8 @@ class WebAutofillController: NSObject, WebPageRelated {
 
     private func handleInputFieldFocus(elementId: String, inGroup autofillGroup: WebAutofillGroup, frameInfo: WKFrameInfo?, contents: String?) {
         guard isAutofillEnabled(for: autofillGroup.action) else { return }
-        guard menuOptions(for: elementId, emptyField: true, inGroup: autofillGroup) != nil || autofillGroup.action == .payment else { return }
+        let menuOptions = menuOptions(for: elementId, emptyField: true, inGroup: autofillGroup)
+        guard menuOptions != nil || autofillGroup.action == .payment else { return }
         let fieldEdgeInsets: BeamEdgeInsets
         if let host = page?.url?.minimizedHost, let role = autofillGroup.field(id: elementId)?.role {
             fieldEdgeInsets = WebAutofillPositionModifier.shared.inputFieldEdgeInsets(host: host, action: autofillGroup.action, role: role)
@@ -254,7 +255,15 @@ class WebAutofillController: NSObject, WebPageRelated {
         overlay.showIcon(frameInfo: frameInfo)
         currentOverlay?.dismiss()
         currentOverlay = overlay
-        showWebFieldAutofillMenu(for: elementId, inGroup: autofillGroup, frameInfo: frameInfo)
+        if autofillMenuHasSignificantContents(autofillGroup: autofillGroup, menuOptions: menuOptions) {
+            showWebFieldAutofillMenu(for: elementId, inGroup: autofillGroup, frameInfo: frameInfo)
+        }
+    }
+
+    private func autofillMenuHasSignificantContents(autofillGroup: WebAutofillGroup, menuOptions: PasswordManagerMenuOptions?) -> Bool {
+        if autofillGroup.action == .payment { return true }
+        guard let menuOptions = menuOptions, let minimizedHost = getPageHost() else { return false }
+        return menuOptions.suggestNewPassword || credentialsBuilder.suggestedEntry() != nil || !PasswordManager.shared.entries(for: minimizedHost, options: .fuzzy).isEmpty
     }
 
     private func showWebFieldAutofillMenu(for elementId: String, inGroup autofillGroup: WebAutofillGroup, frameInfo: WKFrameInfo?) {
