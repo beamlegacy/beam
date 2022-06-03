@@ -96,4 +96,14 @@ class PrivacyPreferencesTestView: PreferencesBaseView {
         return self
     }
     
+    func getSocialMediaButtonBlockerSettingElement() -> XCUIElement {
+        return checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.trackersSocialMedia.accessibilityIdentifier)
+    }
+    
+    @discardableResult
+    func clickInsideSocialMediaButtonBlockerSetting() -> PrivacyPreferencesTestView {
+        checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.trackersSocialMedia.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
 }

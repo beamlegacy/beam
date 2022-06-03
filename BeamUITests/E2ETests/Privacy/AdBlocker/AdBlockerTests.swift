@@ -10,12 +10,12 @@ import XCTest
 
 class AdBlockerTests: BaseTest {
     
+    let mockHttpPage = MockHTTPWebPages()
     let uiMenu = UITestsMenuBar()
     let adBlockerPage = AdBlockerTestView()
     let shortcutHelper = ShortcutsHelper()
-    let omniboxView = OmniBoxTestView()
     var webTestView = WebTestView()
-    let url = "http://a-stat.test.adblock.lvh.me:8080/"
+    let url = MockHTTPWebPages().getMockPageUrl(.fullSiteAdBlock)
     let hostUrl = "a-stat.test.adblock.lvh.me"
     let tabTitleOfTestPage = "AdBlock"
     let tabTitleOfAdBlocker = "Site is blocked by Beam"
@@ -50,7 +50,7 @@ class AdBlockerTests: BaseTest {
     
     func testBlockedWebsiteAllowOnce() {
         step("Given I navigate to blocked test page \(url)") {
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostUrl)
@@ -65,14 +65,14 @@ class AdBlockerTests: BaseTest {
         }
         
         step("When I relaunch \(url) in the same tab") {
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 0)
         
         step("When I relaunch \(url) in another tab") {
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            webTestView = omniboxView.searchInOmniBox(url, true)
+            webTestView = mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsBlocked(index: 1, url: url, hostUrl: hostUrl)
@@ -94,7 +94,7 @@ class AdBlockerTests: BaseTest {
     func testBlockedWebsitePermanentlyAllowed() {
         
         step("Given I navigate to blocked test page \(url)") {
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostUrl)
@@ -121,14 +121,14 @@ class AdBlockerTests: BaseTest {
         }
         
         step("When I relaunch \(url) in the same tab") {
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 0)
         
         step("When I relaunch \(url) in another tab") {
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            webTestView = omniboxView.searchInOmniBox(url, true)
+            webTestView = mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 1)
@@ -167,7 +167,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("And I navigate to blocked test page \(url)") {
-            omniboxView.searchInOmniBox(url, true)
+            mockHttpPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 0)
