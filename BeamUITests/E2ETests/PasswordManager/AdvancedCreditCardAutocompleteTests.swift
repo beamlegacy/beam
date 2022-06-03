@@ -25,12 +25,16 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
             .populateCreditCardsDB()
     }
     
-    private func navigateToPayment(page: String){
-        step("Given I navigate to \(page)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + page, true)
+    private func navigateToPayment(page: String) {
+        navigateToPayment(absoluteURL: mockBaseUrl + page)
+    }
+
+    private func navigateToPayment(absoluteURL: String) {
+        step("Given I navigate to \(absoluteURL)") {
+            OmniBoxTestView().searchInOmniBox(absoluteURL, true)
         }
     }
-    
+
     func testKiwiAutofill() {
         navigateToPayment(page: "payment-kiwi")
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
@@ -65,13 +69,15 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, autocomplete: false)
     }
     
-    func skipAmazonAutofill() { // Activate once BE-4264 is fixed
+    func testAmazonAutofill() {
         navigateToPayment(page: "payment-amazon")
-        verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
+        verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password: true, autocomplete: false)
-        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
-        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
-        verifyAutoFillIsDisplayed(title: creditCardNumberLabel, autocomplete: false)
+        // Selecting any of these fields triggers the autofill menu to be displayed below the field menu.
+        // TODO: enable the lines below when BE-4304 is fixed.
+//        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
+//        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
+        verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
     }
     
     func testEbayAutofill() {
@@ -88,8 +94,9 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
-        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
-        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
+        // TODO: enable the lines below when BE-4304 is fixed.
+//        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
+//        verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
     }
     
@@ -177,7 +184,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, autocomplete: false)
     }
     
-    func skipAgodaAutofill() { // Activate once BE-4273 is fixed
+    func testAgodaAutofill() {
         navigateToPayment(page: "payment-agoda")
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password:true, autocomplete: false)
@@ -189,12 +196,12 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         }
         
         step("Then CC is succesfully populated") {
-            verifyCCIsPopulated(number: creditCardNumberLabel, expDate: creditCardExpDateLabel, ownerName: creditCardOwnerNameLabel, secCode: creditCardSecCodeLabel)
+            verifyCCIsPopulated(number: creditCardNumberLabel, expDate: creditCardExpDateLabel, ownerName: creditCardOwnerNameLabel, secCode: creditCardSecCodeLabel, secCodeIsPassword: true)
         }
     }
     
-    func skipNetflixAutofill() { // Activate once BE-4277 is fixed
-        navigateToPayment(page: "payment-netflix")
+    func testNetflixAutofill() {
+        navigateToPayment(absoluteURL: "http://payment-netflix.form.lvh.me:8080/") // must be dedicated domain name to apply rule for netflix.com
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -206,7 +213,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         }
         
         step("Then CC is succesfully populated") {
-            verifyCCIsPopulated(number: creditCardNumberLabel, expDate: creditCardExpDateLabel, ownerName: creditCardOwnerNameLabel, secCode: creditCardSecCodeLabel)
+            verifyCCIsPopulated(number: creditCardNumberLabel, expDate: creditCardExpDateLabel, ownerName: creditCardOwnerFamilyNameLabel, secCode: creditCardSecCodeLabel)
         }
     }
     
@@ -241,7 +248,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
     }
     
-    func skipAppleAutofill() { // Activate once BE-4278 is fixed
+    func testAppleAutofill() {
         navigateToPayment(page: "payment-apple")
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name

@@ -32,6 +32,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
     var beamId: String
     var autocomplete: String?
     var autofocus: String?
+    var elementId: String?
     var elementClass: String?
     var name: String?
     var required: String?
@@ -44,6 +45,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
         case beamId = "data-beam-id"
         case autocomplete
         case autofocus
+        case elementId = "id"
         case elementClass = "class"
         case name
         case required
@@ -55,7 +57,7 @@ struct DOMInputElement: Codable, Equatable, Hashable {
 
 extension DOMInputElement {
     var debugDescription: String {
-        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), visible: \(visible), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), inputmode: \(inputmode?.rawValue ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
+        "Input: \(type?.rawValue ?? "(undefined/unknown)"), beamId: \(beamId), visible: \(visible), autocomplete: \(autocomplete ?? "(undefined)"), autofocus: \(autofocus ?? "(undefined)"), inputmode: \(inputmode?.rawValue ?? "(undefined)"), id: \(elementId ?? "(undefined)"), name: \(name ?? "(undefined)"), class: \(elementClass ?? "(undefined)"), required: \(required ?? "(undefined)"), value: \(value ?? "nil"))"
     }
 }
 
@@ -77,6 +79,20 @@ enum DOMInputAutocomplete: String, Codable {
     case creditCardExpirationYear = "cc-exp-year"
     case creditCardSecurityCode = "cc-csc"
     case creditCardType = "cc-type"
+}
+
+extension DOMInputAutocomplete {
+    private static let matchingDict: [String: Self] = [
+        "cardholder-name": .creditCardFullName,
+        "cc-expiry": .creditCardExpirationDate,
+    ]
+
+    static func fromString(_ string: String) -> Self? {
+        if let value = Self(rawValue: string) {
+            return value
+        }
+        return matchingDict[string]
+    }
 }
 
 struct DOMRect: Codable {
