@@ -204,6 +204,9 @@ extension AutocompleteManager {
                     finalList.remove(at: existingIndex)
                     finalList.insert(result, at: existingIndex)
                 }
+            } else if let aliasId = result.aliasForDestinationURL?.urlStringByRemovingUnnecessaryCharacters, uniqueURLs[aliasId] != nil {
+                // Don't insert aliases if their destination is already here
+                continue
             } else {
                 uniqueURLs[id] = finalList.count
                 finalList.append(result)
