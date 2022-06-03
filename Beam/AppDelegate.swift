@@ -44,7 +44,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     var data: BeamData!
     var cancellableScope = Set<AnyCancellable>()
-    var importErrorCancellable: AnyCancellable?
+    var importCancellables = Set<AnyCancellable>()
 
     static let defaultWindowMinimumSize = CGSize(width: 800, height: 400)
     static let defaultWindowSize = CGSize(width: 1024, height: 768)
@@ -117,7 +117,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             GRDBDailyUrlScoreStore(daysToKeep: Configuration.DailyUrlStats.daysToKeep).cleanup()
             NoteScorer.shared.cleanup()
         }
-        startDisplayingBrowserImportErrors()
+        startDisplayingBrowserImportCompletions()
 
         if !isRunningTests {
             createWindow(frame: nil, restoringTabs: true)

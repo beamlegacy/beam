@@ -168,13 +168,13 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
         return subject.eraseToAnyPublisher()
     }
 
-    func importPasswords() throws {
+    func importPasswords(importedCountCallback: (Int) -> Void) throws {
         let databaseURLs = try ["Login Data", "Login Data For Account"].compactMap(endorsedDatabaseURL(fileName:))
         guard !databaseURLs.isEmpty else {
             throw Error.noDatabaseURL
         }
         let keychainSecret = try secretFromKeychain()
-        try importPasswords(from: databaseURLs, keychainSecret: keychainSecret)
+        try importPasswords(from: databaseURLs, keychainSecret: keychainSecret, importedCountCallback: importedCountCallback)
     }
 
     private func endorsedDatabaseURL(fileName: String) throws -> URLProvider? {
@@ -190,18 +190,18 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
     }
 
     // can't be made private (used in unit tests)
-    internal func importPasswords(from databaseURLs: [URLProvider], keychainSecret: String) throws {
+    internal func importPasswords(from databaseURLs: [URLProvider], keychainSecret: String, importedCountCallback: (Int) -> Void) throws {
         try Self.nonConcurrently.run {
-            try importPasswordsOnce(from: databaseURLs, keychainSecret: keychainSecret)
+            try importPasswordsOnce(from: databaseURLs, keychainSecret: keychainSecret, importedCountCallback: importedCountCallback)
         }
     }
 
-    private func importPasswordsOnce(from databaseURLs: [URLProvider], keychainSecret: String) throws {
+    private func importPasswordsOnce(from databaseURLs: [URLProvider], keychainSecret: String, importedCountCallback: (Int) -> Void) throws {
         var importError: Swift.Error?
         for databaseURL in databaseURLs {
             do {
                 try withExtendedLifetime(databaseURL) {
-                    try importPasswords(from: databaseURL.wrappedURL, keychainSecret: keychainSecret)
+                    try importPasswords(from: databaseURL.wrappedURL, keychainSecret: keychainSecret, importedCountCallback: importedCountCallback)
                 }
             } catch {
                 importError = error
@@ -215,7 +215,7 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
         currentSubject = nil
     }
 
-    private func importPasswords(from databaseURL: URL, keychainSecret: String) throws {
+    private func importPasswords(from databaseURL: URL, keychainSecret: String, importedCountCallback: (Int) -> Void) throws {
         Logger.shared.logInfo("Importing passwords from \(databaseURL.path)", category: .browserImport)
         let symmetricKey = try Self.derivedKey(secret: keychainSecret)
         var configuration = GRDB.Configuration()
@@ -231,6 +231,7 @@ extension ChromiumPasswordImporter: BrowserPasswordImporter {
                 Logger.shared.logDebug("Successfully decoded row for \(row.username) at \(row.url.absoluteString)", category: .browserImport)
                 currentSubject?.send(BrowserPasswordResult(itemCount: itemCount, item: row))
             }
+            importedCountCallback(itemCount)
         }
     }
 }

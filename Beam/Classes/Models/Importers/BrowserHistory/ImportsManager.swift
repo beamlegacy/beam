@@ -34,6 +34,12 @@ public class ImportsManager: NSObject, ObservableObject {
         var error: ErrorType
     }
 
+    struct ImportSuccess {
+        var browser: BrowserType
+        var action: ImportAction
+        var count: Int
+    }
+
     private var cancellableScope = [UUID: AnyCancellable]() {
         didSet {
             isImporting = !cancellableScope.isEmpty
@@ -42,12 +48,16 @@ public class ImportsManager: NSObject, ObservableObject {
 
     @Published var isImporting: Bool = false
     var errorPublisher: AnyPublisher<ImportError, Never>
+    var successPublisher: AnyPublisher<ImportSuccess, Never>
 
     private var importErrorSubject: PassthroughSubject<ImportError, Never>
+    private var importSuccessSubject: PassthroughSubject<ImportSuccess, Never>
 
     override init() {
         importErrorSubject = PassthroughSubject<ImportError, Never>()
+        importSuccessSubject = PassthroughSubject<ImportSuccess, Never>()
         errorPublisher = importErrorSubject.eraseToAnyPublisher()
+        successPublisher = importSuccessSubject.eraseToAnyPublisher()
         super.init()
     }
 
@@ -81,7 +91,9 @@ public class ImportsManager: NSObject, ObservableObject {
                 batchImporter.add(item: result.item)
             })
             cancellableScope[id] = cancellable
-            try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser))
+            try importer.importHistory(startDate: Persistence.ImportedBrowserHistory.getMaxDate(for: importer.sourceBrowser)) { [weak self] importedCount in
+                self?.sendSuccess(action: .history, importer: importer, count: importedCount)
+            }
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
             sendError(error, action: .history, importer: importer)
@@ -113,7 +125,9 @@ public class ImportsManager: NSObject, ObservableObject {
                     }
                 })
             cancellableScope[id] = cancellable
-            try importer.importPasswords()
+            try importer.importPasswords { importedCount in
+                sendSuccess(action: .passwords, importer: importer, count: importedCount)
+            }
         } catch {
             Logger.shared.logError("Import didn't start: \(error)", category: .browserImport)
             sendError(error, action: .passwords, importer: importer)
@@ -166,5 +180,11 @@ public class ImportsManager: NSObject, ObservableObject {
     private func sendError(_ decodedError: ErrorType, action: ImportAction, importer: BrowserImporter) {
         let importError = ImportError(browser: importer.sourceBrowser, action: action, error: decodedError)
         importErrorSubject.send(importError)
+    }
+
+    private func sendSuccess(action: ImportAction, importer: BrowserImporter, count: Int) {
+        guard count != 0 else { return }
+        let importSuccess = ImportSuccess(browser: importer.sourceBrowser, action: action, count: count)
+        importSuccessSubject.send(importSuccess)
     }
 }
