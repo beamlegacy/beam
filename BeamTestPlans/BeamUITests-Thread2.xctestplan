@@ -129,6 +129,7 @@
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
         "TextEditorContextViewTests",
+        "TrackersBlockerTests",
         "UpdateViewTests",
         "WaitHelper",
         "WebsiteAuthTest",
