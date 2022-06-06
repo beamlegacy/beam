@@ -120,9 +120,9 @@ class NoteEditorTests: BaseTest {
         
         step("Given I open a note") {
             launchApp()
-            shortcuts.shortcutActionInvoke(action: .showAllCards)
-            AllCardsTestView().waitForAllCardsViewToLoad()
-            AllCardsTestView().openFirstCard()
+            shortcuts.shortcutActionInvoke(action: .showAllNotes)
+            AllNotesTestView().waitForAllCardsViewToLoad()
+            AllNotesTestView().openFirstCard()
         }
         
         step("Given I type a URL in text editor"){

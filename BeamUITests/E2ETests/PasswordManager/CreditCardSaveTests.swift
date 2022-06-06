@@ -57,8 +57,8 @@ class CreditCardSaveTests: BaseCreditCardTest {
             ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             creditCardView = PasswordPreferencesTestView().clickEditCreditCardButton()
-            let expectedCreditCardRow = CreditCardsTestTable.Row(expectedCardOwnerName, expectedCardOwnerName, expectedCardHiddenNumber, expectedCardExpDate)
-            let comparisonResult = CreditCardsTestTable().compareRows(expectedCreditCardRow, 0)
+            let expectedCreditCardRow = RowCreditCardsTestTable(expectedCardOwnerName, expectedCardOwnerName, expectedCardHiddenNumber, expectedCardExpDate)
+            let comparisonResult = CreditCardsTestTable().rows[0].isEqualTo(expectedCreditCardRow)
             XCTAssertTrue(comparisonResult.0, comparisonResult.1)
         }
     }

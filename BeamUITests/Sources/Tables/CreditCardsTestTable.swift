@@ -10,54 +10,25 @@ import XCTest
 
 class CreditCardsTestTable: BaseView, Rowable {
     
-    var rows = [Row]()
+    var rows = [RowCreditCardsTestTable]()
     var numberOfVisibleItems: Int!
-    
-    public class Row {
-        var description: String!
-        var cardHolder: String!
-        var cardNumber: String!
-        var expirationDate: String!
-        
-        init(_ description: String,_ cardHolder: String,_ cardNumber: String,_ expirationDate: String) {
-            self.description = description
-            self.cardHolder = cardHolder
-            self.cardNumber = cardNumber
-            self.expirationDate = expirationDate
-        }
-        
-        init() {}
-    }
     
     override init() {
         super.init()
         getVisibleRows()
     }
     
-    func compareRows(_ externalRow: Row, _ currentRowIndex: Int) -> (Bool, String) {
-        let currentRow = getVisibleRow(currentRowIndex) //rows[currentRowIndex]
-        var errorMessage = ""
-        let result = (externalRow.description == currentRow.description &&
-                      externalRow.cardHolder == currentRow.cardHolder &&
-                      externalRow.cardNumber == currentRow.cardNumber &&
-                      externalRow.expirationDate == externalRow.expirationDate)
-        if !result {
-            errorMessage = "External row data: \(externalRow.description!),\(externalRow.cardHolder!),\(externalRow.cardNumber!),\(externalRow.expirationDate!) is NOT equal to current row data: \(currentRow.description!),\(currentRow.cardHolder!),\(currentRow.cardNumber!),\(currentRow.expirationDate!)"
-        }
-        return (result, errorMessage)
-    }
-    
     private func getTextFieldValueByRow(rowNumber: Int, field:  CreditCardTableLocators.TextFields) -> String {
         return getElementStringValue(element:app.tables.containing(.tableColumn, identifier: CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).textFields[field.accessibilityIdentifier])
     }
     
-    func getVisibleRow(_ rowNumber: Int) -> CreditCardsTestTable.Row {
+    func getVisibleRow(_ rowNumber: Int) -> RowCreditCardsTestTable {
         //To be replaced once https://gitlab.com/beamgroup/beam/-/merge_requests/2840 is merged
         let description = getElementStringValue(element:app.tables.containing(.tableColumn, identifier:CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:CreditCardTableLocators.Images.cardIcon.accessibilityIdentifier).children(matching: .textField).element)
         let cardHolder = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardHolderTextField)
         let cardNumber = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardNumberTextField)
         let expirationDate = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardDateTextField)
-        return Row(description, cardHolder, cardNumber, expirationDate)
+        return RowCreditCardsTestTable(description, cardHolder, cardNumber, expirationDate)
     }
     
     func getVisibleRows() {
@@ -69,7 +40,7 @@ class CreditCardsTestTable: BaseView, Rowable {
     
     @discardableResult
     func getNumberOfVisibleItems() -> Int {
-        numberOfVisibleItems = app.windows.textFields.matching(identifier: CreditCardTableLocators.TextFields.cardNumberTextField.accessibilityIdentifier).allElementsBoundByIndex.count
+        numberOfVisibleItems = app.images.matching(identifier: CreditCardTableLocators.Images.cardIcon.accessibilityIdentifier).allElementsBoundByIndex.count
         return numberOfVisibleItems
     }
     
