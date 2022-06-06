@@ -1351,6 +1351,8 @@
 		D7858BD1283BDAB500D0336A /* CreditCardSaveTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BD0283BDAB500D0336A /* CreditCardSaveTests.swift */; };
 		D7858BD3283CBC5A00D0336A /* BaseCreditCardTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */; };
 		D7D6F00C2849DF7E00C3EE7F /* TrackersBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */; };
+		D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */; };
+		D7D6F031284E2CE900C3EE7F /* AddLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F030284E2CE900C3EE7F /* AddLinkView.swift */; };
 		D7D6F016284A0A7900C3EE7F /* CookieBannerBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7D6F015284A0A7900C3EE7F /* CookieBannerBlockerTests.swift */; };
 		D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEC282A93580059F60D /* AdBlockerTests.swift */; };
 		D7E38CEF282A95250059F60D /* AdBlockerViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */; };
@@ -3216,6 +3218,8 @@
 		D7858BD0283BDAB500D0336A /* CreditCardSaveTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardSaveTests.swift; sourceTree = "<group>"; };
 		D7858BD2283CBC5A00D0336A /* BaseCreditCardTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseCreditCardTest.swift; sourceTree = "<group>"; };
 		D7D6F00B2849DF7E00C3EE7F /* TrackersBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackersBlockerTests.swift; sourceTree = "<group>"; };
+		D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkViewLocators.swift; sourceTree = "<group>"; };
+		D7D6F030284E2CE900C3EE7F /* AddLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddLinkView.swift; sourceTree = "<group>"; };
 		D7D6F015284A0A7900C3EE7F /* CookieBannerBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CookieBannerBlockerTests.swift; sourceTree = "<group>"; };
 		D7E38CEC282A93580059F60D /* AdBlockerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerTests.swift; sourceTree = "<group>"; };
 		D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdBlockerViewLocators.swift; sourceTree = "<group>"; };
@@ -7408,6 +7412,7 @@
 				A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */,
 				B55E4D2627FEDD1C00F73218 /* PublishedNoteViewLocators.swift */,
 				D7E38CEE282A95250059F60D /* AdBlockerViewLocators.swift */,
+				D7D6F029284E2BA100C3EE7F /* AddLinkViewLocators.swift */,
 			);
 			path = Locators;
 			sourceTree = "<group>";
@@ -7419,6 +7424,8 @@
 				B507CB2B275F8C1B00DFF11A /* SlashMenu */,
 				B5CDFF38274EC82700742CC9 /* Onboarding */,
 				B5984C9827031F2200192B5F /* Preferences */,
+				D7D6F030284E2CE900C3EE7F /* AddLinkView.swift */,
+				B57A9B3C26AB08BC002C954D /* AllCardsTestView.swift */,
 				B57A9B3C26AB08BC002C954D /* AllNotesTestView.swift */,
 				B5E8010926AEA1E100C8BD61 /* JournalTestView.swift */,
 				B5E8010D26AEA63300C8BD61 /* WebTestView.swift */,
@@ -9642,6 +9649,8 @@
 				8718E152280483C900CFF53D /* AdvancedSignInPasswordAutofillTests.swift in Sources */,
 				B5FAE300270ED94300EAC8A3 /* GeneralPreferenceTestView.swift in Sources */,
 				B551F3C126BD0FE800B72D27 /* WebsiteAuthPopupTestView.swift in Sources */,
+				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
+				B5DC1FBE26B92A8800A4C94B /* CardViewTests.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
 				B5D2A1802805E91E00C833B9 /* OnboardingPrivateKeyViewLocators.swift in Sources */,
@@ -9715,6 +9724,7 @@
 				B5E8011026AEA64E00C8BD61 /* WebViewLocators.swift in Sources */,
 				A3E7B4C027AC462E0074C9BB /* PasswordPreferencesTests.swift in Sources */,
 				B5FB3A1E27E8C18400037FD5 /* SignInTests.swift in Sources */,
+				D7D6F031284E2CE900C3EE7F /* AddLinkView.swift in Sources */,
 				A315D570282B98F000579362 /* CreditCardsTests.swift in Sources */,
 				B51DC77026F4501E0074ACCA /* PnSTestView.swift in Sources */,
 				B5FAE304270EE16800EAC8A3 /* AccountTestView.swift in Sources */,

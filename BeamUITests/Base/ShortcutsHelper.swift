@@ -50,6 +50,10 @@ class ShortcutsHelper {
         XCUIApplication().typeKey(key, modifierFlags:[.command, .option, .control, .function])
     }
     
+    private func invokeCntrlCMDKey(_ key: String) {
+        XCUIApplication().typeKey(key, modifierFlags:[.control, .command])
+    }
+    
     enum ShortcutCommand {
         case selectAll
         case undo
@@ -96,6 +100,7 @@ class ShortcutsHelper {
         case browserHistoryBackArrow
         case browserHistoryForward
         case browserHistoryBack
+        case insertLink
     }
     
     @discardableResult
@@ -154,6 +159,7 @@ class ShortcutsHelper {
         case .browserHistoryBackArrow: invokeCMDKey(.leftArrow)
         case .browserHistoryForward: invokeCMDKey("]")
         case .browserHistoryBack: invokeCMDKey("[")
+        case .insertLink: invokeCntrlCMDKey("k")
         }
         return BaseView()
     }
