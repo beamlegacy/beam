@@ -83,6 +83,7 @@
         "CardPublishTests\/testDefaultPublishStatus()",
         "CardViewEmbedsTests",
         "CardViewTests",
+        "CookieBannerBlockerTests",
         "CreditCardAutocompleteTests",
         "CreditCardSaveTests",
         "CreditCardsTests",
