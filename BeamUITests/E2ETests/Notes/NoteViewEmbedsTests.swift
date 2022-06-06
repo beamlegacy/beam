@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class CardViewEmbedsTests: BaseTest {
+class NoteViewEmbedsTests: BaseTest {
     
     var cardView: CardTestView?
     

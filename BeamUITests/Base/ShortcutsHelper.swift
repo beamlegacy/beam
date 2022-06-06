@@ -61,7 +61,7 @@ class ShortcutsHelper {
         case openPreferences
         case openLocation
         case showJournal
-        case showAllCards
+        case showAllNotes
         case instantSearch
         case switchBetweenCardWeb
         case foldBullet
@@ -119,7 +119,7 @@ class ShortcutsHelper {
         case .openPreferences: invokeCMDKey(",")
         case .openLocation: invokeCMDKey("l")
         case .showJournal: invokeCMDShiftKey("j")
-        case .showAllCards: invokeCMDShiftKey("h")
+        case .showAllNotes: invokeCMDShiftKey("h")
         case .instantSearch: invokeCMDKey(.return)
         case .switchBetweenCardWeb: invokeCMDKey("d")
         case .foldBullet: invokeCMDKey(.upArrow)

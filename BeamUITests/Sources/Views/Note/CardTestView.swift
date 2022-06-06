@@ -281,7 +281,7 @@ class CardTestView: TextEditorContextTestView {
     }
     
     func getRefereceSectionCounterElement() -> XCUIElement {
-        return otherElement(AllCardsViewLocators.Others.referenceSection.accessibilityIdentifier)
+        return otherElement(AllNotesViewLocators.Others.referenceSection.accessibilityIdentifier)
     }
     
     func getBlockRefs() -> XCUIElementQuery {
