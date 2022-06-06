@@ -16,7 +16,7 @@ class DailySummaryTests: BaseTest {
     var helper: BeamUITestsHelper!
     let webView = WebTestView()
     let shortcuts = ShortcutsHelper()
-    let allCards = AllCardsTestView()
+    let allNotes = AllNotesTestView()
     let linkToOpen = "Pitchfork"
     let pitchForkUrl = "pitchfork.com/"
     let noteToOpen = "Triplego"
@@ -79,8 +79,8 @@ class DailySummaryTests: BaseTest {
         let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
         
         step("When I go to Today Note"){
-            shortcuts.shortcutActionInvoke(action: .showAllCards)
-            cardView = allCards.openCardByName(cardTitle: todaysDateInCardTitleFormat)
+            shortcuts.shortcutActionInvoke(action: .showAllNotes)
+            cardView = allNotes.openCardByName(cardTitle: todaysDateInCardTitleFormat)
         }
         
         verifyDailySummaryInView(view: cardView)

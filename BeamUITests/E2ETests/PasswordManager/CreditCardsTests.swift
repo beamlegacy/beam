@@ -35,7 +35,7 @@ class CreditCardsTests: BaseTest {
     }
     
     @discardableResult
-    private func openAndEditFirstCreditCardFromDB() -> CreditCardsTestTable.Row {
+    private func openAndEditFirstCreditCardFromDB() -> RowCreditCardsTestTable {
         
         creditCardView.getCardTextFieldElement(.description).tapInTheMiddle()
         creditCardView.shortcutsHelper.shortcutActionInvoke(action: .selectAll)
@@ -55,7 +55,7 @@ class CreditCardsTests: BaseTest {
         creditCardView.typeKeyboardKey(.delete)
         creditCardView.app.typeText("9")
         
-        return CreditCardsTestTable.Row("test", "John Appleseededited", "xxxx-xxxx-xxxx-0008", "09/2025")
+        return RowCreditCardsTestTable("test", "John Appleseededited", "xxxx-xxxx-xxxx-0008", "09/2025")
 
     }
     
@@ -74,8 +74,8 @@ class CreditCardsTests: BaseTest {
         }
         
         step("Then it is successfully displayed in Credit cards table") {
-            let expectedCreditCardRow = CreditCardsTestTable.Row(expectedCardDescription, expectedCardHolder, "xxxx-xxxx-xxxx-5670", expectedCardDueDate)
-            let comparisonResult = CreditCardsTestTable().compareRows(expectedCreditCardRow, 0)
+            let expectedCreditCardRow = RowCreditCardsTestTable(expectedCardDescription, expectedCardHolder, "xxxx-xxxx-xxxx-5670", expectedCardDueDate)
+            let comparisonResult = CreditCardsTestTable().rows[0].isEqualTo(expectedCreditCardRow)
             XCTAssertTrue(comparisonResult.0, comparisonResult.1)
         }
     }
@@ -120,7 +120,7 @@ class CreditCardsTests: BaseTest {
         }
         
         step("THEN the Credit Card item is not changed") {
-            let compareResult = CreditCardsTestTable().compareRows(rowBeforeEdit, 0)
+            let compareResult = CreditCardsTestTable().rows[0].isEqualTo(rowBeforeEdit)
             XCTAssertTrue(compareResult.0, compareResult.1)
         }
     }
@@ -128,7 +128,7 @@ class CreditCardsTests: BaseTest {
     func testConfirmCreditCardItemEditing() {
         
         launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
-        var expectedRowAfterEdit: CreditCardsTestTable.Row!
+        var expectedRowAfterEdit: RowCreditCardsTestTable!
         
         step("WHEN edit Credit card data and click Done") {
             creditCardsTable = CreditCardsTestTable().openEditCardView(index: 0)
@@ -137,7 +137,7 @@ class CreditCardsTests: BaseTest {
         }
         
         step("THEN the Credit Card item changes are applied accordingly") {
-            let compareResult = CreditCardsTestTable().compareRows(expectedRowAfterEdit, 0)
+            let compareResult = CreditCardsTestTable().rows[0].isEqualTo(expectedRowAfterEdit)
             XCTAssertTrue(compareResult.0, compareResult.1)
         }
     }

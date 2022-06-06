@@ -103,18 +103,16 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         step("Then CC preferences is displayed") {
             XCTAssertTrue(ccPrefView.isCCPreferencesOpened())
         }
-        
+         
         step("And Credit Cards are displayed") {
-            var expectedCreditCardRow: CreditCardsTestTable.Row
-            var comparisonResult: (Bool, String)
+            var expectedCreditCardRow: RowCreditCardsTestTable
             for index in 0...3 {
                 if(index % 2 == 0){
-                    expectedCreditCardRow = CreditCardsTestTable.Row(johnCCName, johnCCOwnerName, johnCCHiddenNumber, johnCCExpDate)
-                    comparisonResult = CreditCardsTestTable().compareRows(expectedCreditCardRow, index)
+                    expectedCreditCardRow = RowCreditCardsTestTable(johnCCName, johnCCOwnerName, johnCCHiddenNumber, johnCCExpDate)
                 } else {
-                    expectedCreditCardRow = CreditCardsTestTable.Row(janeCCName, janeCCOwnerName, janeCCHiddenNumber, janeCCExpDate)
-                    comparisonResult = CreditCardsTestTable().compareRows(expectedCreditCardRow, index)
+                    expectedCreditCardRow = RowCreditCardsTestTable(janeCCName, janeCCOwnerName, janeCCHiddenNumber, janeCCExpDate)
                 }
+                let comparisonResult = CreditCardsTestTable().rows[index].isEqualTo(expectedCreditCardRow)
                 XCTAssertTrue(comparisonResult.0, comparisonResult.1)
             }
         }

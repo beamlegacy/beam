@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum AllCardsViewLocators {
+enum AllNotesViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case newCardButton = "tool new"
@@ -15,7 +15,11 @@ enum AllCardsViewLocators {
     }
     
     enum TextFields: String, CaseIterable, UIElement {
-        case newCardField = "New Private Note"
+        case newPrivateNote = "New Private Note"
+        case newPublishedNote = "New Published Note"
+        case newFirstPublishedNote = "You haven’t published any note yet. Start today!"
+        case newPublishedProfileNote = "New Published on Profile Note"
+        case newFirstPublishedProfileNote = "You haven’t published any note to your profile yet. Start today!"
     }
     
     enum ColumnCells: String, CaseIterable, UIElement {
@@ -29,6 +33,14 @@ enum AllCardsViewLocators {
     
     enum MenuItems: String, CaseIterable, UIElement {
         case deleteNotes = "deleteNotes"
+    }
+    
+    enum ViewMenuItems: String, CaseIterable, UIElement {
+        case allNotes = "selectAllNotes"
+        case privateNotes = "selectPrivateNotes"
+        case publishedNotes = "selectPublishedNotes"
+        case profileNotes = "selectOnProfileNotes"
+        case dailyNotes = "showDailyNotes"
     }
     
     enum Others: String, CaseIterable, UIElement {

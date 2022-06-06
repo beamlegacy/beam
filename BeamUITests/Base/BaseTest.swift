@@ -97,8 +97,8 @@ class BaseTest: XCTestCase {
     
     @discardableResult
     func openFirstCardInAllCardsList() -> CardTestView {
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
-        return AllCardsTestView().openFirstCard()
+        ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+        return AllNotesTestView().openFirstCard()
     }
 
     func terminateAppInstance() {
@@ -114,8 +114,8 @@ class BaseTest: XCTestCase {
     @discardableResult
     func launchAppAndOpenFirstCard() -> CardTestView {
         launchApp()
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
-        return AllCardsTestView().openFirstCard()
+        ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+        return AllNotesTestView().openFirstCard()
     }
     
     func isBigSurOS() -> Bool {

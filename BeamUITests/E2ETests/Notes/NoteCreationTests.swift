@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class CardCreationTests: BaseTest {
+class NoteCreationTests: BaseTest {
     
     let cardNameToBeCreated = "CardCreation"
     var cardView: CardTestView!
@@ -20,9 +20,9 @@ class CardCreationTests: BaseTest {
             waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier))
         }
         let numberOfCardsBeforeAdding = journalView.openAllCardsMenu().getNumberOfCards()
-        var allCardsView: AllCardsTestView?
+        var allCardsView: AllNotesTestView?
         step("When I create a card from All Notes view"){
-            allCardsView = AllCardsTestView().addNewCard(cardNameToBeCreated)
+            allCardsView = AllNotesTestView().addNewCard(cardNameToBeCreated)
             var timeout = 5 //temp solution while looking for an elegant way to wait
             repeat {
                 if numberOfCardsBeforeAdding != allCardsView!.getNumberOfCards() {
