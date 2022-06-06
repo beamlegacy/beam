@@ -76,6 +76,7 @@
         "CardEditTests",
         "CardViewEmbedsTests",
         "CardViewTests",
+        "CookieBannerBlockerTests",
         "CreditCardAutocompleteTests",
         "CreditCardSaveTests\/testSaveCC()",
         "CreditCardsTests",

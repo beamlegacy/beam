@@ -1,0 +1,31 @@
+<html>
+
+<head>
+<title>AdBlock</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>This ads should be blocked</h1>
+<div class="cookie-consent-banner">
+  <div class="cookie-consent-banner__inner">
+    <div class="cookie-consent-banner__copy">
+      <div class="cookie-consent-banner__header">THIS WEBSITE USES COOKIES</div>
+      <div class="cookie-consent-banner__description">We use cookies to personalise content and ads, to provide social media features and to analyse our traffic.</div>
+    </div>
+
+    <div class="cookie-consent-banner__actions">
+      <a href="#" class="cookie-consent-banner__cta">
+        OK
+      </a>
+      
+      <a href="#" class="cookie-consent-banner__cta cookie-consent-banner__cta--secondary">
+        Decline
+      </a>
+    </div>
+  </div>
+</div>
+
+</body>
+
+</html>

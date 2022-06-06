@@ -15,6 +15,7 @@ class TrackersBlockerTests: BaseTest {
     let shortcutHelper = ShortcutsHelper()
     let privacyWindow = PrivacyPreferencesTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.socialMediaAdBlock)
+    let app = XCUIApplication().windows["AdBlock"]
     let socialMediaButtons = [
         "Partager sur Facebook",
         "Envoyer par e-mail",
@@ -28,7 +29,6 @@ class TrackersBlockerTests: BaseTest {
         "Partage"
     ]
     
-    var app = XCUIApplication().windows["AdBlock"]
 
     override func setUpWithError() throws {
         launchApp()

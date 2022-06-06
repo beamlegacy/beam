@@ -75,6 +75,7 @@
         "CardPublishTests",
         "CardPublishTests\/testDefaultPublishStatus()",
         "CardViewEmbedsTests",
+        "CookieBannerBlockerTests",
         "CreditCardAutocompleteTests\/testValidateAutoFillDataCC()",
         "CreditCardAutocompleteTests\/testValidateAutoFillProposalCC()",
         "CreditCardAutocompleteTests\/testValidateOtherCCLessThan4()",
