@@ -13,7 +13,7 @@ class TextEditorContextViewTests: BaseTest {
     let shortcutsHelper = ShortcutsHelper()
     let textEditorContext = TextEditorContextTestView()
     let webView = WebTestView()
-    let allCardsView = AllCardsTestView()
+    let allCardsView = AllNotesTestView()
     var cardView: CardTestView?
     
     func testCreateCardViaContextView() {
@@ -37,7 +37,7 @@ class TextEditorContextViewTests: BaseTest {
         
         step("Then the note text is remained: \(textToType)"){
             XCTAssertEqual(textToType + " ", cardView!.getCardNoteValueByIndex(0))
-            shortcutsHelper.shortcutActionInvoke(action: .showAllCards)
+            shortcutsHelper.shortcutActionInvoke(action: .showAllNotes)
             XCTAssertTrue(allCardsView.waitForCardTitlesToAppear(), "Card titles didn't load during the timeout")
             allCardsView.openCardByName(cardTitle: cardName)
         }

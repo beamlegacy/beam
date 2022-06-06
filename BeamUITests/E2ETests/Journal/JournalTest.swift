@@ -21,7 +21,7 @@ class JournalTest: BaseTest {
         }
         
         step("When I open All notes and restart the app"){
-            ShortcutsHelper().shortcutActionInvoke(action: .showAllCards)
+            ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
             restartApp()
         }
 

@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class CardViewTests: BaseTest {
+class NoteViewTests: BaseTest {
     
     let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
     let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
@@ -19,7 +19,7 @@ class CardViewTests: BaseTest {
         let defaultNumberOfCardsAtFreshInstallation = 1
         let journalView = launchApp()
         var cardView: CardTestView?
-        var allCardsView: AllCardsTestView?
+        var allCardsView: AllNotesTestView?
         
         step("Given I open All Notes view"){
             allCardsView = journalView.openAllCardsMenu()

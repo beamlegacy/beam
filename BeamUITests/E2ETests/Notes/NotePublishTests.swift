@@ -8,10 +8,10 @@
 import Foundation
 import XCTest
 
-class CardPublishTests: BaseTest {
+class NotePublishTests: BaseTest {
     
     var cardView: CardTestView!
-    var allCardsView: AllCardsTestView!
+    var allCardsView: AllNotesTestView!
     let shortcuts = ShortcutsHelper()
     let dialogView = DialogTestView()
     var deletePK = false
@@ -40,8 +40,8 @@ class CardPublishTests: BaseTest {
     func testDefaultPublishStatus() {
         launchApp()
         step("Given I open all cards menu"){
-            shortcuts.shortcutActionInvoke(action: .showAllCards)
-            allCardsView = AllCardsTestView()
+            shortcuts.shortcutActionInvoke(action: .showAllNotes)
+            allCardsView = AllNotesTestView()
         }
         
         step("Then I see a label with instructions to publish note and redirected to Onboarding view on click") {

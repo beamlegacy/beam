@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class CardEditTests: BaseTest {
+class NoteEditTests: BaseTest {
     
     var cardView: CardTestView!
     let shortcutsHelper = ShortcutsHelper()
