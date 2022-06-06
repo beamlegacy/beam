@@ -358,11 +358,15 @@ extension BeamTextEdit {
                     fetchedTitle.append(BeamText(" - "))
                     fetchedTitle.append(BeamText(host, attributes: [.link(hostUrl.absoluteString)]))
                 }
+                let cursorIsStillAtEndOfLink = self.rootNode?.cursorPosition == range.end
+                let endRange = range.position + fetchedTitle.wholeRange.upperBound
                 self.disableInputDetector()
                 cmdManager.beginGroup(with: "UpdateLinkToFormattedLink")
-                self.rootNode?.insertText(text: fetchedTitle, replacementRange: range.range)
-                cmdManager.insertText(BeamText(text: " ", attributes: []), in: node, at: range.end)
-                cmdManager.focusElement(node, cursorPosition: range.end + 1)
+                cmdManager.replaceText(in: node, for: range.range, with: fetchedTitle)
+                cmdManager.insertText(BeamText(text: " ", attributes: []), in: node, at: endRange)
+                if cursorIsStillAtEndOfLink {
+                    cmdManager.focusElement(node, cursorPosition: endRange + 1)
+                }
                 cmdManager.endGroup()
                 self.enableInputDetector()
             }
