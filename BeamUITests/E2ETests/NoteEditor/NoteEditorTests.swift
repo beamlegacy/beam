@@ -35,7 +35,6 @@ class NoteEditorTests: BaseTest {
         let journalView = launchApp()
         BeamUITestsHelper(journalView.app).tapCommand(.destroyDB)
         launchApp()
-        let helper = ShortcutsHelper()
         let firstJournalEntry = journalView.getNoteByIndex(1)
         firstJournalEntry.clear()
         
@@ -46,14 +45,14 @@ class NoteEditorTests: BaseTest {
         }
 
         step("Then note displays typed text from the beginning of the note correctly"){
-            helper.shortcutActionInvoke(action: .beginOfNote)
+            shortcuts.shortcutActionInvoke(action: .beginOfNote)
             journalView.app.typeText(texts[1])
             XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + texts[0])
         }
 
         
         step("Then note displays replaced typed text correctly"){
-            helper.shortcutActionInvoke(action: .selectAll)
+            shortcuts.shortcutActionInvoke(action: .selectAll)
             journalView.app.typeText(texts[2])
             XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[2])
         }
@@ -181,7 +180,7 @@ class NoteEditorTests: BaseTest {
         
         step("When I unindent row5 2 times") {
             cardTestView.typeKeyboardKey(.upArrow)
-            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            shortcuts.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
         }
         
         step("Then row5 and row6 positions are swapped") {
@@ -215,7 +214,7 @@ class NoteEditorTests: BaseTest {
         }
         
         step("When I unindent row5 and close row1") {
-            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            shortcuts.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
             cardTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
         }
         
@@ -239,10 +238,10 @@ class NoteEditorTests: BaseTest {
         
         step("When I unindent row4 and row6") {
             cardTestView.getTextNodeByIndex(nodeIndex: 3).tapInTheMiddle()
-            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            shortcuts.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
             cardTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
             cardTestView.getTextNodeByIndex(nodeIndex: 4).tapInTheMiddle()
-            ShortcutsHelper().shortcutActionInvoke(action: .unindent) 
+            shortcuts.shortcutActionInvoke(action: .unindent)
         }
         
         step("Then number of disclosure tirangles is 1 available for row 1 and all rows are visible") {
@@ -254,6 +253,64 @@ class NoteEditorTests: BaseTest {
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(3), "row4")
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(4), "row6")
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(5), "row5")
+        }
+    }
+    
+    func testInsertLinkPopUp() {
+
+        let addLinkView = AddLinkView()
+        let webView = WebTestView()
+        let textToAddLink = "Test Link"
+        let urlAdded = "beamapp.co/"
+        let textAppended = " Updated"
+        let expectedBiDiLink = textToAddLink + textAppended
+        
+        launchAppAndOpenFirstCard()
+        
+        step("Given I add text in a note") {
+            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
+        }
+        
+        step("When I access to Link editor") {
+            shortcuts.shortcutActionInvoke(action: .selectAll)
+            shortcuts.shortcutActionInvoke(action: .insertLink)
+            addLinkView.waitForLinkEditorPopUpAppear()
+        }
+        
+        step("Then Link URL is empty") {
+            XCTAssertEqual(addLinkView.getLink(), emptyString)
+        }
+        
+        step("When I add Link URL field") {
+            addLinkView.getLinkElement().clickOnExistence()
+            XCTAssertFalse(addLinkView.isCopyLinkIconDisplayed())
+            addLinkView.getLinkElement().typeText(urlAdded)
+        }
+        
+        step("And I modify title") {
+            addLinkView.clickOnTitleCell(title: textToAddLink).typeText(textAppended)
+            XCTAssertTrue(addLinkView.isCopyLinkIconDisplayed())
+        }
+        
+        step("And I copy URL") {
+            addLinkView.clickOnCopyLinkElement()
+            XCTAssertTrue(addLinkView.isLinkCopiedLabelDisplayed())
+        }
+        
+        step("Then Note is updated with link correctly inserted") {
+            addLinkView.typeKeyboardKey(.enter)
+            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), expectedBiDiLink)
+            cardTestView.openBiDiLink(expectedBiDiLink)
+            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), urlAdded)
+        }
+        
+        step("And link is copied") {
+            cardTestView.shortcutsHelper.shortcutActionInvoke(action: .newTab)
+            cardTestView.shortcutsHelper.shortcutActionInvoke(action: .paste)
+            cardTestView.typeKeyboardKey(.enter)
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getTabUrlAtIndex(index: 1), urlAdded)
         }
     }
 }
