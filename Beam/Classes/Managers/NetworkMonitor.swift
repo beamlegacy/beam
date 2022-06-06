@@ -1,6 +1,7 @@
 import Foundation
 import Combine
 import Network
+import BeamCore
 
 // From https://khorbushko.github.io/article/2021/01/18/network-reachability.html
 
@@ -22,13 +23,18 @@ final class NetworkMonitor: NetworkReachabilityProvider {
         reachabilityNotifier.eraseToAnyPublisher()
     }
 
+    private var cancellable = Set<AnyCancellable>()
+
     private let monitor: NWPathMonitor = .init()
     private let handlerQueue: DispatchQueue = .main
     private let reachabilityNotifier: PassthroughSubject<NetworkReachabilityStatus, Never>
+    let sessionConfig = URLSessionConfiguration.default
 
     // MARK: - Lifecycle
 
     public init() {
+        sessionConfig.timeoutIntervalForRequest = 5.0
+        sessionConfig.timeoutIntervalForResource = 5.0
         reachabilityNotifier = PassthroughSubject<NetworkReachabilityStatus, Never>()
         configureListener()
     }
@@ -52,20 +58,46 @@ final class NetworkMonitor: NetworkReachabilityProvider {
     // MARK: - Private
 
     private func configureListener() {
-        var networkStatus: NetworkReachabilityStatus = .unknown
-
         monitor.pathUpdateHandler = { [weak self] path in
+            guard let self = self else { return }
+
             switch path.status {
             case .satisfied:
-                networkStatus = .reachable
-            case .unsatisfied,
-                 .requiresConnection:
-                networkStatus = .notReachable
-            @unknown default:
-                networkStatus = .notReachable
-            }
+                if let url = URL(string: "https://1.1.1.1") {
+                    var request = URLRequest(url: url)
+                    request.httpMethod = "HEAD"
 
-            self?.reachabilityNotifier.send(networkStatus)
+                    let urlSessionPublisher = URLSession(configuration: self.sessionConfig)
+                            .dataTaskPublisher(for: request)
+                            .retry(3)
+
+                        urlSessionPublisher.map() {
+                            $0.response
+                        }.receive(on: DispatchQueue.main)
+                        .sink(receiveCompletion: {
+                            switch $0 {
+                            case .finished:
+                                Logger.shared.logInfo("Outside world reachable", category: .network)
+                            case .failure(let error):
+                                Logger.shared.logWarning("Outside world not reachable: \(error)", category: .network)
+                                self.reachabilityNotifier.send(.notReachable)
+                            }
+                        }, receiveValue: { response in
+                            guard let httpResponse = response as? HTTPURLResponse,
+                                  httpResponse.statusCode == 200 else {
+                                self.reachabilityNotifier.send(.notReachable)
+                                return
+                            }
+                            self.reachabilityNotifier.send(.reachable)
+                        }).store(in: &self.cancellable)
+
+                }
+            case .unsatisfied,
+                    .requiresConnection:
+                self.reachabilityNotifier.send(.notReachable)
+            @unknown default:
+                self.reachabilityNotifier.send(.notReachable)
+            }
         }
     }
 }

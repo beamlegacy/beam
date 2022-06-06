@@ -53,7 +53,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     public private(set) lazy var beamObjectManager = BeamObjectManager()
 
     private let networkMonitor = NetworkMonitor()
-    public private(set) var isNetworkReachable: Bool = false
+    @Published public private(set) var isNetworkReachable: Bool = false
 
     private var synchronizationTask: Task<Void, Error>?
     private let synchronizationTaskQueue = DispatchQueue(label: "SyncTask")
@@ -173,7 +173,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     // MARK: - Network Monitor
     func setupNetworkMonitor() {
         networkMonitor.startListening()
-        networkMonitor.networkStatusHandler.sink { [weak self] status in
+        networkMonitor.networkStatusHandler
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] status in
             switch status {
             case .unknown, .notReachable:
                 self?.isNetworkReachable = false
