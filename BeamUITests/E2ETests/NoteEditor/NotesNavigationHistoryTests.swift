@@ -19,7 +19,7 @@ class NotesNavigationHistoryTests: BaseTest {
     }
     
     private func assertAllNotesIsOpened() {
-        XCTAssertTrue(AllCardsTestView().waitForAllCardsViewToLoad())
+        XCTAssertTrue(AllNotesTestView().waitForAllCardsViewToLoad())
     }
     
     private func assertNoteIsOpened() {
