@@ -106,4 +106,24 @@ class PrivacyPreferencesTestView: PreferencesBaseView {
         return self
     }
     
+    func getCookieBannerBlockerSettingElement() -> XCUIElement {
+        return checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.annoyancesCookieBanners.accessibilityIdentifier)
+    }
+    
+    @discardableResult
+    func clickCookieBannerBlockerSetting() -> PrivacyPreferencesTestView {
+        checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.annoyancesCookieBanners.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
+    func getBannerPopupBlockerSettingElement() -> XCUIElement {
+        return checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.annoyancesBanners.accessibilityIdentifier)
+    }
+    
+    @discardableResult
+    func clickBannerPopupBlockerSetting() -> PrivacyPreferencesTestView {
+        checkBox(PrivacyPreferencesViewLocators.CheckboxTexts.annoyancesBanners.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
 }
