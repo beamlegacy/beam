@@ -33,9 +33,9 @@ class WebTestView: BaseView {
     }
     
     @discardableResult
-    func openAllCardsMenu() -> AllCardsTestView {
+    func openAllCardsMenu() -> AllNotesTestView {
         button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier).click()
-        return AllCardsTestView()
+        return AllNotesTestView()
     }
     
     func searchForCardByTitle(_ title: String) {

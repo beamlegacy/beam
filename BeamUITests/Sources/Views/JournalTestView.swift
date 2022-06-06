@@ -15,11 +15,11 @@ class JournalTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func openAllCardsMenu() -> AllCardsTestView {
+    func openAllCardsMenu() -> AllNotesTestView {
         let allCardsMenuButton = button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier)
         waitFor(PredicateFormat.isHittable.rawValue, allCardsMenuButton)
         allCardsMenuButton.click()
-        return AllCardsTestView()
+        return AllNotesTestView()
     }
     
     @discardableResult
