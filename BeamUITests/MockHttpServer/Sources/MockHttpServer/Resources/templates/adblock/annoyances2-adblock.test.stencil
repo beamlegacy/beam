@@ -1,0 +1,21 @@
+<html>
+
+<head>
+<title>AdBlock</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Popup/Modal Windows</h1>
+
+<div>
+<a id="popup1" href="https://diego.hu" 
+  target="popup" 
+  onclick="window.open('https://diego.hu','popup','width=600,height=600'); return false;">
+    Open Link in Popup
+</a>
+</div>
+
+</body>
+
+</html>

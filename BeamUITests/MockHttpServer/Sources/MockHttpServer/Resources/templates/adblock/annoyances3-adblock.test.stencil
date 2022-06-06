@@ -1,0 +1,41 @@
+<html>
+
+<head>
+<title>AdBlock</title>
+<link href="/static/{{ params.style }}.css" rel="stylesheet"/>
+</head>
+
+<body>
+<h1>Banner Windows</h1>
+<a class="banner" href="https://diego.hu">
+  <img class="logo" src="https://osef" alt="sephora logo">
+  
+  <section class="section1">
+    <h1>Get 20% off</h1>
+  </section>
+  
+  <section class="section2">
+    <img class="cclock" src="http://www.herworldplus.com/sites/default/files/NARS%20Fall%202015%20VIP%20Red%20How%20to%20wear%20dark%20brick%20red%20plum%20lipstick%20trend.png" alt="">
+    <img class="clock" src="https://s-media-cache-ak0.pinimg.com/originals/37/85/68/378568e9110587435707b688cb727b81.jpg" alt="">
+  </section>
+  
+  <section class="section3 slidedown">
+    <h3>Summer Event:</h3>
+    <h1 class="scale">2X</h1>
+    <p>Bonus points</p>
+    <p class="small">Ends August 31*</p>
+  </section>
+  
+  <section class="section4 slideright">
+    <h2>SHOP NOW!!</h2>
+  </section>
+  
+  <section class="section5">
+    <img class="lip" src="http://designingflicks.com/images/kiss-svg-12.jpg" alt="">
+  </section>
+  
+</a>
+
+</body>
+
+</html>

@@ -79,7 +79,7 @@ public class MockHttpServer {
     }
     
     private func installAdBlockHandlers(to router: Router) {
-        for templateName in browserNames {
+        for templateName in adblockNames {
             router.get("adblock/\(templateName)") { request, response, next in
                 self.renderStencil(request, response, "adblock/\(templateName)")
                 next()
@@ -127,6 +127,7 @@ public class MockHttpServer {
 
     struct Parameters: Encodable {
         var browsers: [String]
+        var adblock: [String]
         var forms: [String]
         var redirections: [String]
         var styles: [String]
@@ -134,7 +135,7 @@ public class MockHttpServer {
     }
 
     private func defaultParameters(for request: RouterRequest) -> Parameters {
-        return Parameters(browsers: browserNames.sorted(), forms: formNames.sorted(), redirections: redirectionNames.sorted(),
+        return Parameters(browsers: browserNames.sorted(), adblock: adblockNames.sorted(), forms: formNames.sorted(), redirections: redirectionNames.sorted(),
                           styles: styleNames.sorted(), port: request.port)
     }
 
@@ -189,6 +190,11 @@ public class MockHttpServer {
         Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates/form")
             .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
             .filter { $0 != "main" && $0 != "view" && $0 != "customfields" }
+    }
+    
+    private var adblockNames: [String] {
+        Bundle.module.paths(forResourcesOfType: "stencil", inDirectory: "/Resources/templates/adblock")
+            .compactMap { $0.lastPathComponent.removingSuffix(".stencil") }
     }
 
     private var browserNames: [String] {
