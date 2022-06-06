@@ -62,6 +62,10 @@ class MockHTTPWebPages: BaseView {
         case socialMediaAdBlock = "http://social-media-adblock.test.adblock.lvh.me:8080/"
         case insideAdBlock = "http://inside-adblock.test.adblock.lvh.me:8080/"
         case fullSiteAdBlock = "http://a-stat.test.adblock.lvh.me:8080/"
+        case cookieBannerAdBlock = "http://annoyances-adblock.test.adblock.lvh.me:8080/"
+        case popupBannerAdBlock = "http://annoyances2-adblock.test.adblock.lvh.me:8080/"
+        case adsBannerAdBlock = "http://annoyances3-adblock.test.adblock.lvh.me:8080/"
+
     }
     
     @discardableResult

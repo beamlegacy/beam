@@ -17,6 +17,15 @@
 {% endfor %}
 </ul>
 
+<h2>AdBlock:</h2>
+<ul>
+{% for adblock in params.adblock %}
+<li>
+<a href="http://{{ adblock }}.adblock.lvh.me:{{ params.port }}">http://{{ adblock }}.adblock.lvh.me:{{ params.port }}</a>
+</li>
+{% endfor %}
+</ul>
+
 <h2>Forms:</h2>
 <ul>
 {% for form in params.forms %}
