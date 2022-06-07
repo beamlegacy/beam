@@ -13,7 +13,6 @@ class CreditCardSaveTests: BaseCreditCardTest {
     let alertView = AlertTestView()
     let uiMenu = UITestsMenuBar()
     var ccPrefView = AutoFillCCTestView()
-    let page = "payment"
     let view = "Payment"
     let fakeCardNumber = "5425233430109903"
     let fakeSecurityCode = "123"
@@ -36,8 +35,8 @@ class CreditCardSaveTests: BaseCreditCardTest {
     }
     
     func testSaveCC(){
-        step("Given I navigate to \(page)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + page, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
+            mockPage.openMockPage(.paymentForm)
         }
         
         fillDataWithoutPwManager(field: creditCardNumberLabel, data: fakeCardNumber)
@@ -64,8 +63,8 @@ class CreditCardSaveTests: BaseCreditCardTest {
     }
     
     func testDoNotSaveCC(){
-        step("Given I navigate to \(page)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + page, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
+            mockPage.openMockPage(.paymentForm)
         }
         
         fillDataWithoutPwManager(field: creditCardNumberLabel, data: fakeCardNumber)

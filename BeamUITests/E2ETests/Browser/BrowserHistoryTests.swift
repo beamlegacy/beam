@@ -15,10 +15,7 @@ class BrowserHistoryTests: BaseTest {
     let webView = WebTestView()
     let shortcuts = ShortcutsHelper()
     let omnibox = OmniBoxTestView()
-    let linkToOpen = "http://ambiguous.form.lvh.me:8080"
-    let url1 = "http://localhost:8080/"
-    let url2 = "http://ambiguous.form.lvh.me:8080/"
-    let url3 = "http://ambiguous.form.lvh.me:8080/view"
+    let linkToOpen = MockHTTPWebPages().getMockPageUrl(.ambiguousShortForm).dropLast()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -28,7 +25,7 @@ class BrowserHistoryTests: BaseTest {
     }
     
     private func openPageByLinkClick() {
-        webView.staticText(linkToOpen).tapInTheMiddle()
+        webView.staticText(String(linkToOpen)).tapInTheMiddle()
     }
     
     private func openPageByContinueButtonClick() {
@@ -37,8 +34,12 @@ class BrowserHistoryTests: BaseTest {
     
     func testBrowserHistoryNavigation() {
         
+        let url1 = mockPage.getMockPageUrl(.mainView)
+        let url2 = mockPage.getMockPageUrl(.ambiguousShortForm)
+        let url3 = url2 + "view"
+        
         step("GIVEN I open multiple web pages in the same tab"){
-            OmniBoxTestView().searchInOmniBox("http://localhost:8080/", true)
+            mockPage.openMockPage(.mainView)
             self.openPageByLinkClick()
             self.openPageByContinueButtonClick()
         }
