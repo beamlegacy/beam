@@ -10,12 +10,13 @@ import Foundation
 enum AddLinkViewLocators {
     
     enum TextFields: String, CaseIterable, UIElement  {
-        case linkTitleEmpty = "Title"
-        case linkUrl = "Link URL"
+        case linkTitle = "link-title"
+        case linkUrl = "link-url"
     }
     
     enum Images: String, CaseIterable, UIElement  {
         case copyIcon = "editor-url_copy"
+        case shortcutReturn = "shortcut-return"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {

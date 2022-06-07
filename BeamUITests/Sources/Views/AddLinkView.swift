@@ -19,8 +19,8 @@ class AddLinkView: BaseView {
         return app.dialogs.textFields[AddLinkViewLocators.TextFields.linkUrl.accessibilityIdentifier]
     }
     
-    func getTitleEmptyElement() -> XCUIElement{
-        return app.dialogs.textFields[AddLinkViewLocators.TextFields.linkTitleEmpty.accessibilityIdentifier]
+    func getTitleElement() -> XCUIElement{
+        return app.dialogs.textFields[AddLinkViewLocators.TextFields.linkTitle.accessibilityIdentifier]
     }
     
     func getCopyLinkElement() -> XCUIElement{
@@ -29,6 +29,10 @@ class AddLinkView: BaseView {
     
     func getLink() -> String {
         return getElementStringValue(element: getLinkElement())
+    }
+    
+    func getTitle() -> String {
+        return getElementStringValue(element: getTitleElement())
     }
     
     func clickOnTitleCell(title: String) -> XCUIElement {
