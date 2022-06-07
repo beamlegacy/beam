@@ -24,7 +24,7 @@ class BrowserOpenModalTests: BaseTest {
 
     func testOpenModalInNewWindowTHENNewTab() {
         step("WHEN the page has opened"){
-            OmniBoxTestView().searchInOmniBox("http://windowopen.browser.lvh.me:8080/", true)
+            mockPage.openMockPage(.newWindowBrowser)
         }
 
         step("Given I tap on the open window button") {
@@ -49,7 +49,7 @@ class BrowserOpenModalTests: BaseTest {
 
     func testOpenModalInNewWindowTHENNewTab_Async() {
         step("WHEN the page has opened"){
-            OmniBoxTestView().searchInOmniBox("http://windowopen-async.browser.lvh.me:8080/", true)
+            mockPage.openMockPage(.newWindowBrowser)
         }
 
         step("Given I tap on the open window button") {
