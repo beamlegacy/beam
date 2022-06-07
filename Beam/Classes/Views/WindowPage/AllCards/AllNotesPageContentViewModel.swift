@@ -32,7 +32,11 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     @Published var onProfileNotesItems = [NoteTableViewItem]()
     @Published var shouldReloadData: Bool? = false
     @Published var publishingNoteTitle: String?
-    @Published var showDailyNotes: Bool = true
+    @Published var showDailyNotes: Bool = true {
+        didSet {
+            updateNoteItemsFromAllNotes()
+        }
+    }
 
     private var coreDataObservers = Set<AnyCancellable>()
     private var metadataFetchers = Set<AnyCancellable>()
@@ -115,7 +119,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
 
     private func updatePublicPrivateLists() {
         if !showDailyNotes {
-            allNotesItems = allNotesItems.filter { $0.note?.type.isJournal == false  }
+            allNotesItems = allNotesItems.filter { $0.isJournal == false }
         }
         publicNotesItems = allNotesItems.filter({ $0.isPublic })
         onProfileNotesItems = publicNotesItems.filter({ $0.isOnProfile })
@@ -213,6 +217,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
     var title: String
     var createdAt: Date = BeamDate.now
     var updatedAt: Date = BeamDate.now
+    var isJournal: Bool = false
     var words: Int = -1
     var mentions: Int = -1
     var copyLinkIconName: String?
@@ -224,6 +229,7 @@ class NoteTableViewItem: IconButtonTableViewItem {
         title = note?.title ?? document.title
         createdAt = document.createdAt
         updatedAt = document.updatedAt
+        isJournal = document.journalDate != nil
         words = note?.textStats.wordsCount ?? -1
 
         super.init()
