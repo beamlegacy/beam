@@ -151,7 +151,7 @@ extension TabExternalDraggingSource: NSDraggingSource {
             return
         }
 
-        state?.browserTabsManager.removeTab(tabId: tab.id, suggestedNextCurrentTab: nil)
+        state?.browserTabsManager.removeTab(tabId: tab.id)
 
         if state?.browserTabsManager.tabs.filter({ !$0.isPinned }).isEmpty == true, let window = state?.associatedWindow as? BeamWindow {
             // tab was dragged out from a window with only 1 tab. bring back the originated window that was hidden.

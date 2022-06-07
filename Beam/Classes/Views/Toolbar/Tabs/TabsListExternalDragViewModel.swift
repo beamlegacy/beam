@@ -40,7 +40,7 @@ class TabsListExternalDragViewModel: ObservableObject {
         guard data?.currentDraggingSession?.draggingSession == nil, let event = NSApp.currentEvent,
               let currentTab = tabsManager?.currentTab, let view = state?.associatedWindow?.contentView else { return }
 
-        tabsManager?.removeTab(tabId: currentTab.id, suggestedNextCurrentTab: nil)
+        tabsManager?.removeTab(tabId: currentTab.id)
         if tabsManager?.tabs.filter({ !$0.isPinned }).isEmpty == true {
             // hide the origin window, we will close it if tab is moved to another window, or unhide instead of creating a new one.
             state?.associatedWindow?.orderOut(self)
@@ -78,7 +78,7 @@ class TabsListExternalDragViewModel: ObservableObject {
 
     func dropOfExternalTabExitedWindow(tab: BrowserTab) {
         data?.currentDraggingSession?.dropHandledByBeamUI = false
-        tabsManager?.removeTab(tabId: tab.id, suggestedNextCurrentTab: nil)
+        tabsManager?.removeTab(tabId: tab.id)
     }
 }
 
