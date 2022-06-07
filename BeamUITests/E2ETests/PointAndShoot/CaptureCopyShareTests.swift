@@ -23,7 +23,7 @@ class CaptureCopyShareTests: BaseTest {
     
     private func triggerShareOption(elementToAdd: XCUIElement, title: String, clickMenuItem: Bool = true) {
         pnsView
-            .triggerAddToCardPopup(elementToAdd)
+            .triggerAddToNotePopup(elementToAdd)
             .getShareButton()
             .clickOnExistence()
         if clickMenuItem {
@@ -38,7 +38,7 @@ class CaptureCopyShareTests: BaseTest {
         
         step ("When I capture text and click Copy") {
             let textElementToAdd = pnsView.staticText(textToCapture)
-            pnsView.triggerAddToCardPopup(textElementToAdd)
+            pnsView.triggerAddToNotePopup(textElementToAdd)
         }
         
         step ("Then I see copied label") {
@@ -61,7 +61,7 @@ class CaptureCopyShareTests: BaseTest {
         step ("When I capture text and click Copy") {
             helper.openTestPage(page: .page4)
             let imageItemToAdd = pnsView.image("forest")
-            pnsView.triggerAddToCardPopup(imageItemToAdd)
+            pnsView.triggerAddToNotePopup(imageItemToAdd)
             pnsView.getCopyButton().tapInTheMiddle()
         }
            

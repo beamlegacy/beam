@@ -11,21 +11,21 @@ import XCTest
 class NoteCreationTests: BaseTest {
     
     let cardNameToBeCreated = "CardCreation"
-    var cardView: CardTestView!
+    var cardView: NoteTestView!
     
     func testCreateCardFromAllCards() {
         let journalView = launchApp()
         
         step("Given I get number of cards in All Notes view"){
-            waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier))
+            waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.noteSwitcherAllCards.accessibilityIdentifier))
         }
-        let numberOfCardsBeforeAdding = journalView.openAllCardsMenu().getNumberOfCards()
+        let numberOfCardsBeforeAdding = journalView.openAllNotesMenu().getNumberOfNotes()
         var allCardsView: AllNotesTestView?
         step("When I create a card from All Notes view"){
-            allCardsView = AllNotesTestView().addNewCard(cardNameToBeCreated)
+            allCardsView = AllNotesTestView().addNewNote(cardNameToBeCreated)
             var timeout = 5 //temp solution while looking for an elegant way to wait
             repeat {
-                if numberOfCardsBeforeAdding != allCardsView!.getNumberOfCards() {
+                if numberOfCardsBeforeAdding != allCardsView!.getNumberOfNotes() {
                     return
                 }
                 sleep(1)
@@ -34,7 +34,7 @@ class NoteCreationTests: BaseTest {
         }
 
         step("Then number of notes is increased to +1 in All Notes list"){
-            XCTAssertEqual(numberOfCardsBeforeAdding + 1, allCardsView!.getNumberOfCards())
+            XCTAssertEqual(numberOfCardsBeforeAdding + 1, allCardsView!.getNumberOfNotes())
         }
     }
     
@@ -43,9 +43,9 @@ class NoteCreationTests: BaseTest {
         let journalView = launchApp()
         step("When I create \(cardNameToBeCreated) a note from Webview cards search results"){
             let webView = journalView.searchInOmniBox(cardNameToBeCreated, true)
-            webView.searchForCardByTitle(cardNameToBeCreated)
-            XCTAssertTrue(waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationCardElement()), "Destination note is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationCardElement().value))")
-            cardView = webView.openDestinationCard()
+            webView.searchForNoteByTitle(cardNameToBeCreated)
+            XCTAssertTrue(waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationNoteElement()), "Destination note is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationNoteElement().value))")
+            cardView = webView.openDestinationNote()
             
         }
 
@@ -66,8 +66,8 @@ class NoteCreationTests: BaseTest {
         }
 
         step("Then note with \(cardNameToBeCreated) name appears in All notes menu list"){
-            let allCardsMenu = journalView.openAllCardsMenu()
-            XCTAssertTrue(allCardsMenu.isCardNameAvailable(cardNameToBeCreated))
+            let allCardsMenu = journalView.openAllNotesMenu()
+            XCTAssertTrue(allCardsMenu.isNoteNameAvailable(cardNameToBeCreated))
         }
     }
     
@@ -75,7 +75,7 @@ class NoteCreationTests: BaseTest {
         let journalView = launchApp()
         
         step("When I create \(cardNameToBeCreated) a note from Omnibox search results"){
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("Then note with \(cardNameToBeCreated) is opened"){
@@ -102,7 +102,7 @@ class NoteCreationTests: BaseTest {
         }
 
         step("Then note with \(cardNameToBeCreated) is opened"){
-            cardView = CardTestView()
+            cardView = NoteTestView()
             XCTAssertTrue(cardView.waitForCardViewToLoad())
             XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
         }
@@ -111,7 +111,7 @@ class NoteCreationTests: BaseTest {
     
     func testCreateNoteViewIcon() {
         launchApp()
-        cardView = CardTestView()
+        cardView = NoteTestView()
         
         step("When I click New note icon") {
             cardView.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(cardNameToBeCreated)

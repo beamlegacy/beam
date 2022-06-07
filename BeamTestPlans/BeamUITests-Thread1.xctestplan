@@ -139,6 +139,7 @@
         "SlashMenuTests",
         "SlashMenuTests\/testNoteDividerCreation()",
         "TextEditorContextViewTests",
+        "TodayNoteTests",
         "TrackersBlockerTests",
         "UpdateViewTests",
         "UpdateViewTests\/testUpdateAvailableEverywhereInCardView()",

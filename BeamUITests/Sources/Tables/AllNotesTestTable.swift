@@ -39,7 +39,7 @@ class AllNotesTestTable: BaseView, Rowable {
     
     @discardableResult
     func getNumberOfVisibleItems() -> Int {
-        numberOfVisibleItems = AllNotesTestView().getNumberOfCards()
+        numberOfVisibleItems = AllNotesTestView().getNumberOfNotes()
         return numberOfVisibleItems
     }
     
