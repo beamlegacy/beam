@@ -133,10 +133,9 @@ class NotePublishTests: BaseTest {
                 .confirmDeletion()
         }
         
-        //To be uncommented once BE-2201 is fixed
-        /*step("Then I can not open it in the web") {
+        step("Then I can not open it in the web") {
             switchReloadAndAssert(cardName: cardNameToBeCreated, isPublished: false)
-        }*/
+        }
     }
     
     func SKIPtestPublishedCardContentCorrectness() throws {
