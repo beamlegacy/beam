@@ -15,7 +15,6 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
     let uiMenu = UITestsMenuBar()
     var ccPrefView = AutoFillCCTestView()
     var passwordPreferencesView = PasswordPreferencesTestView()
-    let page = "payment"
     let view = "Payment"
     
     var creditCardsTable: CreditCardsTestTable!
@@ -26,8 +25,8 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
             .startMockHTTPServer()
             .populateCreditCardsDB()
         
-        step("Given I navigate to \(page)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + page, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.paymentForm))") {
+            mockPage.openMockPage(.paymentForm)
         }
     }
     

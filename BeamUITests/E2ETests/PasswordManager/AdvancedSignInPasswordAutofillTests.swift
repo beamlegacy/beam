@@ -29,10 +29,9 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
 
     func testHiddenFieldsAreIgnored() {
-        let url = mockBaseUrl + "visibility"
 
         step("Given I navigate to visibility test page") {
-            OmniBoxTestView().searchInOmniBox(url, true)
+            mockPage.openMockPage(.visibilityForm)
         }
 
         step("When I click on password field") {
@@ -67,10 +66,10 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     
 //    Sign in auth combination are here: https://www.notion.so/Password-manager-authentication-combinations-650079c604c2458da446be10fd428995
     
-    private func validateClassicSignInPage(page: String, login: String, password: String, autocomplete: Bool = true) {
+    private func validateClassicSignInPage(page: MockHTTPWebPages.MockPageLink, login: String, password: String, autocomplete: Bool = true) {
         
-        step("Given I navigate to \(page)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + page, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(page))") {
+            mockPage.openMockPage(page)
         }
         
         step("When I click on password field") {
@@ -107,10 +106,10 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
     }
     
-    private func validateTwoStepsSignInPage(usernamePage: String, passwordPage: String, login: String, password: String) {
+    private func validateTwoStepsSignInPage(usernamePage: MockHTTPWebPages.MockPageLink, passwordPage: String, login: String, password: String) {
         
-        step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(usernamePage))") {
+            mockPage.openMockPage(usernamePage)
         }
         
         step("When I click on username field") {
@@ -133,7 +132,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         step("Then Sign in Step 2 is displayed") {
             ShortcutsHelper().shortcutActionInvoke(action: .openLocation)
             let url = OmniBoxTestView().getSearchFieldValue()
-            XCTAssertTrue(url.contains(mockBaseUrl + passwordPage))
+            XCTAssertTrue(url.contains(mockPage.getMockPageUrl(.mockBaseUrl) + passwordPage))
         }
         
         step("When I click on password field") {
@@ -163,26 +162,25 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
     
     func testSignInPageAuthCombination1() {
-        validateClassicSignInPage(page: "signinpage1", login: loginUsername, password:passwordUsername, autocomplete: false)
+        validateClassicSignInPage(page: .signin1Form, login: loginUsername, password:passwordUsername, autocomplete: false)
     }
     
     func testSignInPageAuthCombination2() {
-        validateClassicSignInPage(page: "signinpage2", login: loginUsername, password:passwordUsername)
+        validateClassicSignInPage(page: .signin2Form, login: loginUsername, password:passwordUsername)
     }
     
     func testSignInPageAuthCombination3() {
-        validateClassicSignInPage(page: "signinpage3", login: loginUsername, password:passwordUsername)
+        validateClassicSignInPage(page: .signin3Form, login: loginUsername, password:passwordUsername)
     }
     
     func testSignInPageAuthCombination4() {
-        validateClassicSignInPage(page: "signinpage4", login: loginEmail, password:passwordEmail)
+        validateClassicSignInPage(page: .signin4Form, login: loginEmail, password:passwordEmail)
     }
     
     func testSignInPageAuthCombination5() {
-        let usernamePage = "signinpage5"
         
-        step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signin5Form))") {
+            mockPage.openMockPage(.signin5Form)
         }
         
         step("When I click on username field") {
@@ -210,27 +208,26 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
     
     func testSignInPageAuthCombination6() {
-        validateTwoStepsSignInPage(usernamePage: "signinpage6-1", passwordPage: "signinstep2", login: loginEmail, password:passwordEmail)
+        validateTwoStepsSignInPage(usernamePage: .signin61Form, passwordPage: "signinstep2", login: loginEmail, password:passwordEmail)
     }
 
     func testSignInPageAuthCombination7() {
-        validateTwoStepsSignInPage(usernamePage: "signinpage7-1", passwordPage: "signinstep2", login: loginUsername, password:passwordUsername)
+        validateTwoStepsSignInPage(usernamePage: .signin71Form, passwordPage: "signinstep2", login: loginUsername, password:passwordUsername)
     }
     
     func testSignInPageAuthCombination8() {
-        validateClassicSignInPage(page: "signinpage8", login: loginEmail, password:passwordEmail, autocomplete: false)
+        validateClassicSignInPage(page: .signin8Form, login: loginEmail, password:passwordEmail, autocomplete: false)
     }
     
     func testSignInPageAuthCombination9() {
-        validateTwoStepsSignInPage(usernamePage: "signinpage9-1", passwordPage: "signinpage9-2", login: loginEmail, password:passwordEmail)
+        validateTwoStepsSignInPage(usernamePage: .signin91Form, passwordPage: "signinpage9-2", login: loginEmail, password:passwordEmail)
     }
     
     func testSignInPageWithTextfieldAutocompleted() {
-        let usernamePage = "signinebay"
         let testData = "test"
         
-        step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signinebayForm))") {
+            mockPage.openMockPage(.signinebayForm)
         }
         
         step("When I click on Name field") {
@@ -289,10 +286,9 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
     }
 
     func testSignInPageWithPasswordContainingSpecialCharacters() {
-        let usernamePage = "signin"
 
-        step("Given I navigate to \(usernamePage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + usernamePage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signinForm))") {
+            mockPage.openMockPage(.signinForm)
         }
 
         step("When I click on Username field") {

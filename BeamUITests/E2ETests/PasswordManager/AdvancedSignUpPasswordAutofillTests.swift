@@ -85,10 +85,9 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination1() {
-        let signUpPage = "signuppage1"
         
-        step("Given I navigate to \(signUpPage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + signUpPage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signup1Form))") {
+            mockPage.openMockPage(.signup1Form)
         }
         
         verifyPwManagerNotDisplayedTextField(field: "First Name: ", data: firstName)
@@ -114,10 +113,8 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination2() {
-        let signUpPage = "signuppage2"
-        
-        step("Given I navigate to \(signUpPage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + signUpPage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signup2Form))") {
+            mockPage.openMockPage(.signup2Form)
         }
         
         verifyPwManagerNotDisplayedTextField(field: "First Name: ", data: firstName)
@@ -143,10 +140,8 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination3() {
-        let signUpPage = "signuppage3"
-        
-        step("Given I navigate to \(signUpPage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + signUpPage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signup3Form))") {
+            mockPage.openMockPage(.signup3Form)
         }
         
         verifyPwManagerNotDisplayedTextField(field: "Phone: ", data: phone)
@@ -167,10 +162,8 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination4() {
-        let signUpPage = "signuppage4"
-
-        step("Given I navigate to \(signUpPage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + signUpPage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signup4Form))") {
+            mockPage.openMockPage(.signup4Form)
         }
         
         verifyPwManagerNotDisplayedTextField(field: "First Name: ", data: firstName)
@@ -194,10 +187,8 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination5() {
-        let signUpPage = "signuppage5-1"
-        
-        step("Given I navigate to \(signUpPage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + signUpPage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signup51Form))") {
+            mockPage.openMockPage(.signup51Form)
         }
         
         fillDataWithoutPwManager(field: "Email: ", data: loginEmail)
@@ -217,10 +208,8 @@ class AdvancedSignUpPasswordAutofillTests: BaseTest {
     }
     
     func testSignUpPageCombination6() {
-        let signUpPage = "signuppage6"
-        
-        step("Given I navigate to \(signUpPage)") {
-            OmniBoxTestView().searchInOmniBox(mockBaseUrl + signUpPage, true)
+        step("Given I navigate to \(mockPage.getMockPageUrl(.signup6Form))") {
+            mockPage.openMockPage(.signup6Form)
         }
         
         verifyPwManagerNotDisplayedTextField(field: "Name: ", data: firstName)

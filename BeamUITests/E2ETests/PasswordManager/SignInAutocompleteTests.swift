@@ -10,8 +10,8 @@ import XCTest
 
 class SignInAutocompleteTests: BaseTest {
     
-    let signInPageURL = "http://signin.form.lvh.me:8080/"
-    let signUpPageURL = "http://signup.form.lvh.me:8080/"
+    let signUpPageURL = MockHTTPWebPages().getMockPageUrl(.signupShortForm)
+    let signInPageURL = MockHTTPWebPages().getMockPageUrl(.signinShortForm)
     let uiMenu = UITestsMenuBar()
     let mockPage = MockHTTPWebPages()
     let helper = PasswordManagerHelper()
@@ -51,7 +51,7 @@ class SignInAutocompleteTests: BaseTest {
         uiMenu.destroyDB()
             .startMockHTTPServer()
             .populatePasswordsDB()
-        OmniBoxTestView().searchInOmniBox(signInPageURL, true)
+        mockPage.openMockPage(.signinForm)
 
         step("When I click on password field"){
             mockPage.getPasswordFieldElement(false).clickOnExistence()
@@ -83,7 +83,7 @@ class SignInAutocompleteTests: BaseTest {
         uiMenu.destroyDB()
             .startMockHTTPServer()
             .populatePasswordsDB()
-        OmniBoxTestView().searchInOmniBox(signInPageURL, true)
+        mockPage.openMockPage(.signinForm)
 
         step("When I click on password field"){
             mockPage.getPasswordFieldElement(false).clickOnExistence()
