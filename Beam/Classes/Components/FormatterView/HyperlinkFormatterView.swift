@@ -52,7 +52,7 @@ private struct HyperlinkEditorView: View {
         FormatterViewBackground(showBorder: true) {
             VStack(spacing: 0) {
                 HStack(alignment: .center, spacing: 4) {
-                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title")
+                    textField(viewModel.title, editingBinding: $isEditingTitle, placeholder: "Title", accId: "link-title")
                     Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
                         .opacity(isEditingTitle ? 1 : 0)
                         .padding(BeamSpacing._20)
@@ -65,7 +65,7 @@ private struct HyperlinkEditorView: View {
                 Separator(horizontal: true)
 
                 HStack(alignment: .center, spacing: 4) {
-                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL")
+                    textField(viewModel.url, editingBinding: $isEditingUrl, placeholder: "Link URL", accId: "link-url")
                     urlIcon
                         .padding(BeamSpacing._20)
                 }
@@ -74,6 +74,7 @@ private struct HyperlinkEditorView: View {
             .animation(nil)
             .padding(.horizontal, BeamSpacing._100)
         }
+        .accessibilityElement(children: .contain)
         .frame(width: Self.idealSize.width, height: Self.idealSize.height)
         .overlay(!showOverlayForCopyIcon ? nil : Tooltip(title: "Link Copied")
             .fixedSize()
@@ -92,7 +93,7 @@ private struct HyperlinkEditorView: View {
         })
     }
 
-    private func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String) -> some View {
+    private func textField(_ textBinding: Binding<String>, editingBinding: Binding<Bool>, placeholder: String, accId: String) -> some View {
         return BeamTextField(text: textBinding,
                              isEditing: editingBinding,
                              placeholder: placeholder,
@@ -105,6 +106,7 @@ private struct HyperlinkEditorView: View {
                                 onFinishEditing?(true)
                              })
             .frame(height: Self.sectionHeight)
+            .accessibilityIdentifier(accId)
     }
 
     private var urlIconCopyColor: Color {

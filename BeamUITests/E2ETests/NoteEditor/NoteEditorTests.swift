@@ -278,6 +278,7 @@ class NoteEditorTests: BaseTest {
         }
         
         step("Then Link URL is empty") {
+            XCTAssertEqual(addLinkView.getTitle(), textToAddLink)
             XCTAssertEqual(addLinkView.getLink(), emptyString)
         }
         
