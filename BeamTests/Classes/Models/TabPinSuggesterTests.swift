@@ -16,6 +16,7 @@ class TabPinSuggesterTests: XCTestCase {
     override func setUp() {
         super.setUp()
         existingHasPinned = Persistence.TabPinSuggestion.hasPinned
+        Persistence.TabPinSuggestion.hasPinned = nil
     }
 
     override func tearDown() {
