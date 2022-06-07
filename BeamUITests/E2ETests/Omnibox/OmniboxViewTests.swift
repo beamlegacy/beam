@@ -12,6 +12,7 @@ class OmniboxViewTests: BaseTest {
     
     let webView = WebTestView()
     let omniboxView = OmniBoxTestView()
+    let mockPage = MockHTTPWebPages()
     let cardView = NoteTestView()
     var stopMockServer = false
     
@@ -195,7 +196,7 @@ class OmniboxViewTests: BaseTest {
     }
     
     func testOmniboxTextSelectionAndEditing() throws {
-        let initialSearch = "http://localhost:8080/"
+        let initialSearch = mockPage.getMockPageUrl(.mainView)
         let expectedInitialSearchURLinTab = "http://localhost:8080/"
         let expectedTabTitle = "Mock HTTP Server"
         
@@ -212,8 +213,7 @@ class OmniboxViewTests: BaseTest {
         stopMockServer = true
         
         step("GIVEN I open \(initialSearch)"){
-            omniboxView.typeInOmnibox(initialSearch)
-            omniboxView.typeKeyboardKey(.enter)
+            mockPage.openMockPage(.mainView)
         }
 
         step("THEN I see \(expectedTabTitle) Tab title"){
