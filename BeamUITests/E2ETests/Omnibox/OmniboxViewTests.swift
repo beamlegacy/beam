@@ -12,7 +12,7 @@ class OmniboxViewTests: BaseTest {
     
     let webView = WebTestView()
     let omniboxView = OmniBoxTestView()
-    let cardView = CardTestView()
+    let cardView = NoteTestView()
     var stopMockServer = false
     
     override func tearDown() {
@@ -77,13 +77,13 @@ class OmniboxViewTests: BaseTest {
             XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
             XCTAssertEqual(omniboxView.getAutocompleteResults().count, 0)
             XCTAssertTrue(omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).exists)
-            let pivotButton = omniboxView.button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier)
+            let pivotButton = omniboxView.button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier)
             XCTAssertTrue(pivotButton.exists)
             XCTAssertEqual(pivotButton.title, "note")
         }
 
         step("When I click on pivot button"){
-            WebTestView().openDestinationCard()
+            WebTestView().openDestinationNote()
         }
         
         step("Then journal view is opened"){
@@ -97,7 +97,7 @@ class OmniboxViewTests: BaseTest {
         }
 
         step("When I open web view"){
-            CardTestView().navigateToWebView()
+            NoteTestView().navigateToWebView()
         }
         
         step("Then Webview is opened and Journal is closed"){
@@ -115,16 +115,16 @@ class OmniboxViewTests: BaseTest {
         let noteBTitle = "Note B"
 
         step("Given I have at least 4 notes"){
-            journalView.createCardViaOmniboxSearch(noteATitle)
-            journalView.createCardViaOmniboxSearch(noteBTitle)
-            journalView.createCardViaOmniboxSearch("Note C")
+            journalView.createNoteViaOmniboxSearch(noteATitle)
+            journalView.createNoteViaOmniboxSearch(noteBTitle)
+            journalView.createNoteViaOmniboxSearch("Note C")
         }
         let results = omniboxView.getAutocompleteResults()
         let noteResults = results.matching(omniboxHelper.autocompleteNotePredicate)
 
         // In all note
         step("When I open omnibox in all notes"){
-            journalView.openAllCardsMenu()
+            journalView.openAllNotesMenu()
             omniboxView.focusOmniBoxSearchField()
         }
 
@@ -139,8 +139,8 @@ class OmniboxViewTests: BaseTest {
 
         // In a note
         step("When I open omnibox in a note view"){
-            journalView.openRecentCardByName(noteATitle)
-            journalView.openRecentCardByName(noteBTitle)
+            journalView.openRecentNoteByName(noteATitle)
+            journalView.openRecentNoteByName(noteBTitle)
             omniboxView.focusOmniBoxSearchField()
         }
 
@@ -152,7 +152,7 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(results.element(boundBy: 3).label, OmniboxLocators.Labels.allNotes.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 4).label, OmniboxLocators.Labels.createNote.accessibilityIdentifier)
             XCTAssertEqual(noteResults.count, 2)
-            journalView.openRecentCardByName(noteATitle)
+            journalView.openRecentNoteByName(noteATitle)
         }
 
         // In Web
@@ -272,7 +272,7 @@ class OmniboxViewTests: BaseTest {
         let noteATitle = "Note A"
 
         step("Given I have at least 1 note"){
-            journalView.createCardViaOmniboxSearch(noteATitle)
+            journalView.createNoteViaOmniboxSearch(noteATitle)
         }
         
         let results = omniboxView.getAutocompleteResults()
@@ -288,7 +288,7 @@ class OmniboxViewTests: BaseTest {
         }
         
         step("When I enter create note mode"){
-            omniboxView.enterCreateCardMode()
+            omniboxView.enterCreateNoteMode()
         }
         
         step("Then no suggestion is shown"){
@@ -305,7 +305,7 @@ class OmniboxViewTests: BaseTest {
 
         let secondNoteTitle = "Not"
         step("When I enter create note mode and type a new note name"){
-            omniboxView.enterCreateCardMode()
+            omniboxView.enterCreateNoteMode()
             omniboxView.typeInOmnibox(secondNoteTitle)
         }
 

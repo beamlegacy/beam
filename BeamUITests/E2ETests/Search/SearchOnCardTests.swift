@@ -142,7 +142,7 @@ class SearchOnCardTests: BaseTest {
     
     func testSearchFieldUpdateInstantly() {
         let searchView = prepareTest(populateCardTimes: 1)
-        let cardView = CardTestView()
+        let cardView = NoteTestView()
         let textToType = "test"
         
         searchView.activateSearchField(isWebSearch: false).typeInSearchField(textToType, true)
@@ -192,7 +192,7 @@ class SearchOnCardTests: BaseTest {
     func prepareTest(populateCardTimes: Int) -> SearchTestView {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
-        JournalTestView().createCardViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
+        JournalTestView().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
         step("Given I populate the note"){
             for _ in 1...populateCardTimes {
                 helper.tapCommand(.insertTextInCurrentNote)

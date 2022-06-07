@@ -10,30 +10,30 @@ import XCTest
 
 class NoteViewTests: BaseTest {
     
-    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
-    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
-    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
+    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.noteViewCreation)
+    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.noteViewTitle)
+    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.noteViewCreationNoZeros)
     
     func SKIPtestDefaultCardView() throws {
         try XCTSkipIf(true, "Workaround to open a note from journal/all notes menu is pending")
         let defaultNumberOfCardsAtFreshInstallation = 1
         let journalView = launchApp()
-        var cardView: CardTestView?
+        var cardView: NoteTestView?
         var allCardsView: AllNotesTestView?
         
         step("Given I open All Notes view"){
-            allCardsView = journalView.openAllCardsMenu()
+            allCardsView = journalView.openAllNotesMenu()
         }
         
         step("Then number of notes available by default is \(defaultNumberOfCardsAtFreshInstallation)"){
-            XCTAssertEqual(defaultNumberOfCardsAtFreshInstallation, allCardsView!.getNumberOfCards())
+            XCTAssertEqual(defaultNumberOfCardsAtFreshInstallation, allCardsView!.getNumberOfNotes())
         }
         
-        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
-        let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(.cardViewCreation)
+        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
+        let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(.noteViewCreation)
         step("When I open \(todaysDateInCardTitleFormat) from All notes view"){
             cardView = allCardsView!.openJournal()
-                                        .openRecentCardByName(todaysDateInCardTitleFormat)
+                                        .openRecentNoteByName(todaysDateInCardTitleFormat)
         }
 
         step("Then the title of the note is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)"){

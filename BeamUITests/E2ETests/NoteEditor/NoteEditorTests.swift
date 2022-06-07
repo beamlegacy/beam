@@ -10,7 +10,7 @@ import XCTest
 
 class NoteEditorTests: BaseTest {
     
-    let cardTestView = CardTestView()
+    let cardTestView = NoteTestView()
     let shortcuts = ShortcutsHelper()
     let texts = [
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
@@ -120,8 +120,8 @@ class NoteEditorTests: BaseTest {
         step("Given I open a note") {
             launchApp()
             shortcuts.shortcutActionInvoke(action: .showAllNotes)
-            AllNotesTestView().waitForAllCardsViewToLoad()
-            AllNotesTestView().openFirstCard()
+            AllNotesTestView().waitForAllNotesViewToLoad()
+            AllNotesTestView().openFirstNote()
         }
         
         step("Given I type a URL in text editor"){
@@ -147,7 +147,7 @@ class NoteEditorTests: BaseTest {
     }
     
     func testTextNodeIndentationLevels() {
-        launchAppAndOpenFirstCard()
+        launchAppAndOpenFirstNote()
         
         step("Given I create indentation levels") {
             cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
@@ -265,7 +265,7 @@ class NoteEditorTests: BaseTest {
         let textAppended = " Updated"
         let expectedBiDiLink = textToAddLink + textAppended
         
-        launchAppAndOpenFirstCard()
+        launchAppAndOpenFirstNote()
         
         step("Given I add text in a note") {
             cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)

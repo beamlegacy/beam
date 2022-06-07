@@ -13,21 +13,21 @@ class EditorShortcutsTests: BaseTest {
     
     let helper = ShortcutsHelper()
     let webView = WebTestView()
-    var cardView: CardTestView!
+    var cardView: NoteTestView!
     
     func testInstantSearchFromCard() {
         let searchWord = "Everest"
         
         step ("Given I search for \(searchWord)"){
             launchApp()
-            cardView = openFirstCardInAllCardsList()
+            cardView = openFirstNoteInAllNotesList()
             cardView.typeInCardNoteByIndex(noteIndex: 0, text: searchWord)
             helper.shortcutActionInvoke(action: .instantSearch)
         }
         
         step ("Then I see 1 tab opened"){
             XCTAssertTrue(waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 1, elementQuery: webView.getTabs()))
-            webView.openDestinationCard()
+            webView.openDestinationNote()
             XCTAssertTrue(cardView.waitForCardViewToLoad())
         }
         
@@ -44,7 +44,7 @@ class EditorShortcutsTests: BaseTest {
         
         step ("Then I'm redirected to a new tab and the card has not been changed"){
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
-            webView.openDestinationCard()
+            webView.openDestinationNote()
             XCTAssertTrue(cardView!.waitForCardViewToLoad())
             XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 1)
             let actualNoteValue = cardView.getCardNoteValueByIndex(0)
@@ -61,7 +61,7 @@ class EditorShortcutsTests: BaseTest {
         let textToType = "This text replaces selected notes text"
         step ("Then app doesn't crash after using text edit shortcuts on empty note"){
             launchApp()
-            cardView = openFirstCardInAllCardsList()
+            cardView = openFirstNoteInAllNotesList()
             helper.shortcutActionInvoke(action: .selectAll)
             helper.shortcutActionInvoke(action: .copy)
             cardView.typeKeyboardKey(.delete)
@@ -136,8 +136,8 @@ class EditorShortcutsTests: BaseTest {
         let journalView = launchApp()
         step ("Given I create \(card1) note"){
             //TBD replace creation by omnibox to craetion by Destination cards search
-            webView.searchForCardByTitle(card1)
-            journalView.createCardViaOmniboxSearch(card1)
+            webView.searchForNoteByTitle(card1)
+            journalView.createNoteViaOmniboxSearch(card1)
         }
         
         step ("When I search in web and switch to card view"){
@@ -150,7 +150,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Given I create \(card2) note"){
-            journalView.createCardViaOmniboxSearch(card2)
+            journalView.createNoteViaOmniboxSearch(card2)
         }
         
         step ("When I search in web and switch to note view"){
@@ -164,22 +164,22 @@ class EditorShortcutsTests: BaseTest {
         
         step ("Then \(card2) is a destination note in web mode"){
             helper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            XCTAssertEqual(webView.getDestinationCardTitle(), card2)
+            XCTAssertEqual(webView.getDestinationNoteTitle(), card2)
         }
         
         step ("Then \(card1) is a destination note in web mode when switching tabs"){
             helper.shortcutActionInvoke(action: .jumpToPreviousTab)
-            XCTAssertTrue(waitForStringValueEqual(card1, webView.getDestinationCardElement(), BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(waitForStringValueEqual(card1, webView.getDestinationNoteElement(), BaseTest.minimumWaitTimeout))
         }
         
         step ("Then \(card2) is a destination note in web mode when switching tabs"){
             helper.shortcutActionInvoke(action: .jumpToNextTab)
-            XCTAssertTrue(waitForStringValueEqual(card2, webView.getDestinationCardElement(), BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(waitForStringValueEqual(card2, webView.getDestinationNoteElement(), BaseTest.minimumWaitTimeout))
         }
        
     }
     
     func assertDestinationCard(_ cardName: String) {
-        XCTAssertTrue(waitForStringValueEqual(cardName, webView.getDestinationCardElement()), "Destination note is not \(cardName), but \(String(describing: webView.getDestinationCardElement().value))")
+        XCTAssertTrue(waitForStringValueEqual(cardName, webView.getDestinationNoteElement()), "Destination note is not \(cardName), but \(String(describing: webView.getDestinationNoteElement().value))")
     }
 }

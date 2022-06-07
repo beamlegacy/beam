@@ -11,21 +11,21 @@ import XCTest
 class OmniboxDestinationTests: BaseTest {
     
     //Workaround for https://linear.app/beamapp/issue/BE-1900/default-card-name-format-is-flexible-depending-on-users-locationdate
-    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
-    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
-    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
+    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.noteViewCreation)
+    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.noteViewTitle)
+    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.noteViewCreationNoZeros)
     let cardNameToBeCreated = "One Destination"
     let partialSearchKeyword = "One"
     let expectedNumberOfAutocompletedCards = 1
     let omniboxView = OmniBoxTestView()
-    let destinationCardTitle = OmniBoxTestView().staticText(ToolbarLocators.Labels.cardTitleLabel.accessibilityIdentifier)
+    let destinationCardTitle = OmniBoxTestView().staticText(ToolbarLocators.Labels.noteTitleLabel.accessibilityIdentifier)
     let destinationCardSearchField = OmniBoxTestView().searchField(ToolbarLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier)
     let helper = OmniBoxUITestsHelper(OmniBoxTestView().app)
     
     func createDestinationNote(_ journalView: JournalTestView, _ cardNameToBeCreated: String) {
         journalView.app.terminate()
         journalView.app.launch()
-        _ = journalView.createCardViaOmniboxSearch(cardNameToBeCreated).waitForCardViewToLoad()
+        _ = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated).waitForCardViewToLoad()
     }
     
     func SKIPtestTodayCardDisplayedByDefault() throws {
@@ -93,7 +93,7 @@ class OmniboxDestinationTests: BaseTest {
         }
 
         step("When I switch to note view and back to web"){
-            let cardView = omniboxView.navigateToCardViaPivotButton()
+            let cardView = omniboxView.navigateToNoteViaPivotButton()
             cardView.navigateToWebView()
         }
 
