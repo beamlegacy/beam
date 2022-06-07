@@ -664,12 +664,6 @@ import Promises
             let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
             let fetchedFormattedURLString = NSMutableAttributedString()
             fetchedFormattedURLString.append(NSAttributedString(string: fetchedTitle.text, attributes: [.link: url]))
-
-            if let host = url.minimizedHost, let hostUrl = url.domain {
-                fetchedFormattedURLString.append(NSAttributedString(string: " - "))
-                fetchedFormattedURLString.append(NSAttributedString(string: host, attributes: [.link: hostUrl.absoluteString]))
-            }
-
             pasteboard.clearContents()
             pasteboard.setData(fetchedFormattedURLString.data(.rtf), forType: .rtf)
             pasteboard.setData(url.absoluteString.asData, forType: .string)
