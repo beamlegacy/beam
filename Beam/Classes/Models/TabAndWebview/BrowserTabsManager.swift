@@ -187,7 +187,11 @@ class BrowserTabsManager: ObservableObject {
         if let request = request, request.url != nil {
             tab.load(request: request)
         }
-        if let tabIndex = index, tabs.count > tabIndex {
+        if var tabIndex = index, tabIndex >= 0, tabs.count > tabIndex {
+            if !tab.isPinned, tabIndex < tabs.count - 1, tabs[tabIndex].isPinned {
+                // Adding inside pinned tabs is impossible, moving to first unpinned
+                tabIndex = tabs.firstIndex { !$0.isPinned } ?? tabIndex
+            }
             tabs.insert(tab, at: tabIndex)
         } else {
             tabs.append(tab)
@@ -227,11 +231,9 @@ extension BrowserTabsManager {
 
     /// This is now the only entry point to add a tab
     func addNewTabAndNeighborhood(_ tab: BrowserTab, setCurrent: Bool = true, withURLRequest request: URLRequest? = nil, at tabIndex: Int? = nil) {
-        if tabIndex == nil {
-            addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: indexForNewTabInNeighborhood)
-        } else {
-            addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: tabIndex)
-        }
+
+        let at = tabIndex ?? indexForNewTabInNeighborhood
+        addNewTab(tab, setCurrent: setCurrent, withURLRequest: request, at: at)
 
         guard !tab.isPinned else { return }
         if let currentTabNeighborhoodKey = currentTabNeighborhoodKey, (request?.url != nil || tab.preloadUrl != nil) {
@@ -355,20 +357,37 @@ extension BrowserTabsManager {
         }
     }
 
-    public func removeTab(tabId: UUID, suggestedNextCurrentTab: BrowserTab?) {
+    public func removeTab(tabId: UUID, suggestedNextCurrentTab: BrowserTab? = nil) {
         guard let index = tabs.firstIndex(where: { $0.id == tabId }) else { return }
+        let tab = tabs[index]
         tabs.remove(at: index)
         let nextTabIdFromNeighborhood = removeFromTabNeighborhood(tabId: tabId)
         let nextTabIndex = min(index, tabs.count - 1)
 
         if currentTab?.id == tabId {
             var newCurrentTab: BrowserTab?
-            if let suggestedNextCurrentTab = suggestedNextCurrentTab, nextTabIdFromNeighborhood == nil {
+
+            if let suggestedNextCurrentTab = suggestedNextCurrentTab {
                 newCurrentTab = suggestedNextCurrentTab
-            } else if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
-                newCurrentTab = tabs.first(where: {$0.id == nextTabIdFromNeighborhood})
-            } else if nextTabIndex >= 0 {
-                newCurrentTab = tabs[nextTabIndex]
+            } else {
+                var browsingTreeParentTab: BrowserTab?
+                switch tab.browsingTreeOrigin {
+                case .browsingNode(_, _, _, let rootId):
+                    // If user cmd+click from a tab we want to go back to this tab
+                    browsingTreeParentTab = tabs.first(where: {$0.browsingTree.rootId == rootId})
+                case .searchBar(_, referringRootId: let referringRootId):
+                    // If user cmd+T from a current tab we want to comeback to that origin tab
+                    browsingTreeParentTab = tabs.first(where: {$0.browsingTree.rootId == referringRootId})
+                default: break
+                }
+
+                if let browsingTreeParentTab = browsingTreeParentTab, !browsingTreeParentTab.isPinned {
+                    newCurrentTab = browsingTreeParentTab
+                } else if let nextTabIdFromNeighborhood = nextTabIdFromNeighborhood {
+                    newCurrentTab = tabs.first(where: {$0.id == nextTabIdFromNeighborhood})
+                } else if nextTabIndex >= 0 {
+                    newCurrentTab = tabs[nextTabIndex]
+                }
             }
             setCurrentTab(newCurrentTab)
         }

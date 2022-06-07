@@ -69,19 +69,8 @@ class CloseTab: WebCommand {
 
         if let i = context.browserTabsManager.tabs.firstIndex(of: tab) {
             self.tabIndex = i
-
-            var tabParentToGo: BrowserTab?
-            switch tab.browsingTreeOrigin {
-            case .browsingNode(_, _, _, let rootId):
-                // If user cmd+click from a tab we want to go back to this tab
-                tabParentToGo = context.browserTabsManager.tabs.first(where: {$0.browsingTree.rootId == rootId})
-            case .searchBar(_, referringRootId: let referringRootId):
-                // If user cmd+T from a current tab we want to comeback to that origin tab
-                tabParentToGo = context.browserTabsManager.tabs.first(where: {$0.browsingTree.rootId == referringRootId})
-            default: break
-            }
             wasCurrentTab = context.browserTabsManager.currentTab === tab
-            context.browserTabsManager.removeTab(tabId: tab.id, suggestedNextCurrentTab: tabParentToGo)
+            context.browserTabsManager.removeTab(tabId: tab.id)
         }
         context.browserTabsManager.resetFirstResponderAfterClosingTab()
         return true
