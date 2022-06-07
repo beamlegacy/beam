@@ -10,7 +10,7 @@ import XCTest
 
 class NotePublishTests: BaseTest {
     
-    var cardView: CardTestView!
+    var cardView: NoteTestView!
     var allCardsView: AllNotesTestView!
     let shortcuts = ShortcutsHelper()
     let dialogView = DialogTestView()
@@ -51,7 +51,7 @@ class NotePublishTests: BaseTest {
         }
         
         step("When I open a default card") {
-            cardView = allCardsView.openFirstCard()
+            cardView = allCardsView.openFirstNote()
         }
         
         step("Then by default there is no copy link button"){
@@ -92,7 +92,7 @@ class NotePublishTests: BaseTest {
         let cardNameToBeCreated = "Note publish"
         
         step("Given I create \(cardNameToBeCreated) note"){
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("When I publish the note") {

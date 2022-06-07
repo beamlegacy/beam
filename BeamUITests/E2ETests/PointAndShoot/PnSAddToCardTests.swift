@@ -20,7 +20,7 @@ class PnSAddToCardTests: BaseTest {
         "Point And Shoot Test Fixture Cursor"
     ]
     var cardNotes: [XCUIElement]!
-    var cardView: CardTestView!
+    var cardView: NoteTestView!
 
     func SKIPtestAddTextToTodaysCard() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
@@ -40,15 +40,15 @@ class PnSAddToCardTests: BaseTest {
             let linkText = "UITests-1"
             let parent = pnsView.app.webViews.containing(.staticText, identifier: linkText).element
             let textElement = parent.staticTexts[prefix].firstMatch
-            pnsView.addToTodayCard(textElement)
-            todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+            pnsView.addToTodayNote(textElement)
+            todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
         }
         
         step("Then it is successfully added to the note"){
-            XCTAssertTrue(pnsView.assertAddedToCardSuccessfully(todaysDateInCardTitleFormat!))
-            OmniBoxTestView().navigateToCardViaPivotButton()
+            XCTAssertTrue(pnsView.assertAddedToNoteSuccessfully(todaysDateInCardTitleFormat!))
+            OmniBoxTestView().navigateToNoteViaPivotButton()
             journalView.waitForJournalViewToLoad()
-            cardNotes = CardTestView().getCardNotesForVisiblePart()
+            cardNotes = NoteTestView().getCardNotesForVisiblePart()
         }
         
         step("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the note"){
@@ -67,12 +67,12 @@ class PnSAddToCardTests: BaseTest {
         step("Given I open Test page"){
             helper.openTestPage(page: .page3)
             let textElementToAdd = pnsView.staticText(" capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime")
-            pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated, true)
+            pnsView.addToNoteByName(textElementToAdd, cardNameToBeCreated, true)
         }
     
         step("Then it is successfully added to the note"){
-            OmniBoxTestView().navigateToCardViaPivotButton()
-            cardView = CardTestView()
+            OmniBoxTestView().navigateToNoteViaPivotButton()
+            cardView = NoteTestView()
             _ = cardView.waitForCardViewToLoad()
             cardNotes = cardView.getCardNotesForVisiblePart()
         }
@@ -89,18 +89,18 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
         step("Given I create \(cardNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("Given I open Test page"){
             helper.openTestPage(page: .page3)
             let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
-            pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
+            pnsView.addToNoteByName(textElementToAdd, cardNameToBeCreated)
         }
     
         step("Then it is successfully added to the note"){
             XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            OmniBoxTestView().navigateToCardViaPivotButton()
+            OmniBoxTestView().navigateToNoteViaPivotButton()
             _ = cardView.waitForCardViewToLoad()
             cardNotes = cardView.getCardNotesForVisiblePart()
         }
@@ -124,7 +124,7 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(pnsView.app)
         step("Given I create \(cardNameToBeCreated) note"){
             //To be replaced with UITests helper - note creation
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("Given I open Test page"){
@@ -133,11 +133,11 @@ class PnSAddToCardTests: BaseTest {
         
         step ("When I collect a text via PnS"){
             let textElementToAdd = pnsView.staticText(". The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.")
-            pnsView.addToCardByName(textElementToAdd, cardNameToBeCreated)
+            pnsView.addToNoteByName(textElementToAdd, cardNameToBeCreated)
         }
 
         step("Then it is successfully added to the note"){
-            OmniBoxTestView().navigateToCardViaPivotButton()
+            OmniBoxTestView().navigateToNoteViaPivotButton()
             _ = cardView.waitForCardViewToLoad()
             cardNotes = cardView.getCardNotesForVisiblePart()
             XCTAssertTrue(cardNotes.count == 2 || cardNotes.count == 3) //CI specific issue handling
@@ -150,23 +150,23 @@ class PnSAddToCardTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         helper.tapCommand(.resizeSquare1000)
         step("Given I create \(cardNameToBeCreated) note"){
-            journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step ("Then I successfully collect gif"){
             helper.openTestPage(page: .page2)
             let webView = WebTestView()
             let gifItemToAdd = pnsView.image("File:Beam mode 2.gif")
-            pnsView.addToCardByName(gifItemToAdd, cardNameToBeCreated)
-            cardView = webView.openDestinationCard()
+            pnsView.addToNoteByName(gifItemToAdd, cardNameToBeCreated)
+            cardView = webView.openDestinationNote()
             XCTAssertTrue(waitForCountValueEqual(timeout: cardView.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView!.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
         }
 
         step ("Then I successfully collect image"){
             helper.openTestPage(page: .page4)
             let imageItemToAdd = pnsView.image("forest")
-            pnsView.addToCardByName(imageItemToAdd, cardNameToBeCreated)
-            webView.openDestinationCard()
+            pnsView.addToNoteByName(imageItemToAdd, cardNameToBeCreated)
+            webView.openDestinationNote()
             XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 2, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
         }
 
@@ -178,10 +178,10 @@ class PnSAddToCardTests: BaseTest {
         helper.openTestPage(page: .media)
         
         let itemToCollect = pnsView.app.groups.containing(.button, identifier:"Play Video").children(matching: .group).element.children(matching: .group).element
-        pnsView.addToTodayCard(itemToCollect)
+        pnsView.addToTodayNote(itemToCollect)
 
         step ("Then switch to journal"){
-            cardView = OmniBoxTestView().navigateToCardViaPivotButton()
+            cardView = OmniBoxTestView().navigateToNoteViaPivotButton()
             journalView.waitForJournalViewToLoad()
         }
 
@@ -204,8 +204,8 @@ class PnSAddToCardTests: BaseTest {
         
         step ("THEN SVG image is succeffully captured"){
             let itemToCollect = webView.image("svgimage")
-            pnsView.addToTodayCard(itemToCollect)
-            cardView = webView.openDestinationCard()
+            pnsView.addToTodayNote(itemToCollect)
+            cardView = webView.openDestinationNote()
             XCTAssertTrue(waitForCountValueEqual(timeout: cardView!.implicitWaitTimeout, expectedNumber: 1, elementQuery: cardView.getImageNotesElementsQuery()), "Image note didn't appear within \(cardView.implicitWaitTimeout) seconds")
         }
         //Blocked by https://linear.app/beamapp/issue/BE-4180/empty-node-item-is-added-to-a-note-when-capturing-svg-with-no-height
@@ -220,7 +220,7 @@ class PnSAddToCardTests: BaseTest {
             shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
             let itemToCollect = webView.image("partialsvgimage")
             _ = itemToCollect.waitForExistence(timeout: pnsView.minimumWaitTimeout)
-            XCTAssertTrue(pnsView.addToTodayCard(itemToCollect).getSendBugReportButtonElement().waitForExistence(timeout: pnsView.minimumWaitTimeout))
+            XCTAssertTrue(pnsView.addToTodayNote(itemToCollect).getSendBugReportButtonElement().waitForExistence(timeout: pnsView.minimumWaitTimeout))
         }
     }
 
@@ -231,26 +231,26 @@ class PnSAddToCardTests: BaseTest {
         helper.tapCommand(.resetCollectAlert)
 
         step ("When the journal is first loaded the note is empty by default"){
-            cardView = CardTestView()
+            cardView = NoteTestView()
             let beforeCardNotes = cardView.getCardNotesForVisiblePart()
             XCTAssertEqual(beforeCardNotes.count, 1)
             XCTAssertEqual(cardView.getElementStringValue(element: beforeCardNotes[0]), emptyString)
             helper.openTestPage(page: .media)
             let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
-            pnsView.addToTodayCard(itemToCollect)
+            pnsView.addToTodayNote(itemToCollect)
         }
 
 
         step ("Then Failed to collect message appears"){
             pnsView.passFailedToCollectPopUpAlert()
             XCTAssertTrue(pnsView.staticText(PnSViewLocators.StaticTexts.failedCollectPopup.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            OmniBoxTestView().navigateToCardViaPivotButton()
+            OmniBoxTestView().navigateToNoteViaPivotButton()
             journalView.waitForJournalViewToLoad()
         }
 
 
         step ("Then the note is still empty"){
-            cardNotes = CardTestView().getCardNotesForVisiblePart()
+            cardNotes = NoteTestView().getCardNotesForVisiblePart()
             XCTAssertEqual(cardNotes.count, 1)
             XCTAssertTrue(cardView.getElementStringValue(element: cardNotes[0]) == emptyString || cardView.getElementStringValue(element: cardNotes[0]) == "Media Player Test Page") //CI specific issue handling
         }
@@ -275,7 +275,7 @@ class PnSAddToCardTests: BaseTest {
         }
         
         step ("Then I see \(expectedNoteText) as collected link"){
-            cardView = CardTestView()
+            cardView = NoteTestView()
             cardNotes = cardView.getCardNotesForVisiblePart()
             //To be refactored once BE-2117 merged
             XCTAssertEqual(cardNotes.count, 1)

@@ -26,7 +26,7 @@ class OmniBoxTestView: BaseView {
     }
 
     @discardableResult
-    func enterCreateCardMode() -> OmniBoxTestView {
+    func enterCreateNoteMode() -> OmniBoxTestView {
         getOmniBoxSearchField().typeKey(.enter, modifierFlags: .option)
         _ = getOmniBoxSearchField().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return OmniBoxTestView()
@@ -65,9 +65,9 @@ class OmniBoxTestView: BaseView {
     }
     
     @discardableResult
-    func navigateToCardViaPivotButton() -> CardTestView {
-        button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).click()
-        return CardTestView()
+    func navigateToNoteViaPivotButton() -> NoteTestView {
+        button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).click()
+        return NoteTestView()
     }
     
     @discardableResult

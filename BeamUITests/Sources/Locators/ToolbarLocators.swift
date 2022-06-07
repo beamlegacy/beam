@@ -18,17 +18,17 @@ enum ToolbarLocators {
         case backButton = "goBack"
         case forwardButton = "goForward"
         case homeButton = "journal"
-        case openCardButton = "pivot-card"
+        case openNoteButton = "pivot-card"
         case openWebButton = "pivot-web"
         case downloadsButton = "downloads"
         case downloadDoneButton = "nav-downloads_done"
-        case cardSwitcher = "card-switcher"
-        case cardSwitcherJournal = "card-switcher-journal"
-        case cardSwitcherAllCards = "card-switcher-all-cards"
+        case noteSwitcher = "card-switcher"
+        case noteSwitcherJournal = "card-switcher-journal"
+        case noteSwitcherAllCards = "card-switcher-all-cards"
     }
     
     enum Labels: String, CaseIterable, UIElement {
-        case cardTitleLabel = "DestinationNoteTitle"
+        case noteTitleLabel = "DestinationNoteTitle"
     }
     
 }

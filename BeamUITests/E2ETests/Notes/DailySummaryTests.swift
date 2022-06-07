@@ -11,7 +11,7 @@ import SwiftUI
 
 class DailySummaryTests: BaseTest {
     
-    var cardView: CardTestView!
+    var cardView: NoteTestView!
     var journalView: JournalTestView!
     var helper: BeamUITestsHelper!
     let webView = WebTestView()
@@ -76,11 +76,11 @@ class DailySummaryTests: BaseTest {
         }
     }
     func testDailySummaryInTodayNote() {
-        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
         
         step("When I go to Today Note"){
             shortcuts.shortcutActionInvoke(action: .showAllNotes)
-            cardView = allNotes.openCardByName(cardTitle: todaysDateInCardTitleFormat)
+            cardView = allNotes.openNoteByName(noteTitle: todaysDateInCardTitleFormat)
         }
         
         verifyDailySummaryInView(view: cardView)

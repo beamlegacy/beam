@@ -35,7 +35,7 @@ class UpdateViewTests: BaseTest {
         step ("Given I enable Update for the app"){
             helper.tapCommand(.setAutoUpdateToMock)
             XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            journalView.createCardViaOmniboxSearch("Update")
+            journalView.createNoteViaOmniboxSearch("Update")
         }
 
         step ("Then it is visible in note view"){
@@ -43,7 +43,7 @@ class UpdateViewTests: BaseTest {
         }
 
         step ("Then it is visible in All notes view"){
-            let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllCardsMenu()
+            let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllNotesMenu()
             XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
