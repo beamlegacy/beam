@@ -396,6 +396,7 @@ struct TabView: View {
                             .simultaneousGesture(TapGesture().onEnded {
                                 onTap?()
                             })
+                            .accessibilityHidden(true)
                     )
                     .background(!isSingleTab || isDragging ? nil : GeometryReader { prxy in
                         Color.clear.preference(key: SingleTabGlobalFrameKey.self, value: prxy.safeTopLeftGlobalFrame(in: nil).rounded())
