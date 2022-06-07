@@ -15,16 +15,16 @@ class TextEditorContextTestView: BaseView {
     }
 
     @discardableResult
-    func selectFormatterOption(_ option: TextEditorContextViewLocators.Formatters) -> CardTestView {
+    func selectFormatterOption(_ option: TextEditorContextViewLocators.Formatters) -> NoteTestView {
         app.images[option.accessibilityIdentifier].clickOnExistence()
-        return CardTestView()
+        return NoteTestView()
     }
 
     @discardableResult
-    func confirmBidiLinkCreation(cardName: String) -> CardTestView {
+    func confirmBidiLinkCreation(cardName: String) -> NoteTestView {
         let helper = OmniBoxUITestsHelper(app)
         app.otherElements.matching(helper.autocompleteCreateCardPredicate).firstMatch.clickOnExistence()
-        return CardTestView()
+        return NoteTestView()
     }
 
     func getLinkTitleTextFieldElement() -> XCUIElement {
@@ -61,15 +61,15 @@ class TextEditorContextTestView: BaseView {
     }
     
     @discardableResult
-    func openBiDiLink(_ linkName: String) -> CardTestView {
+    func openBiDiLink(_ linkName: String) -> NoteTestView {
         app.windows.scrollViews.buttons[linkName].firstMatch.tapInTheMiddle()
-        return CardTestView()
+        return NoteTestView()
     }
     
     @discardableResult
-    func openBiDiLink(_ index: Int) -> CardTestView {
+    func openBiDiLink(_ index: Int) -> NoteTestView {
         app.buttons.matching(identifier: "internalLink").element(boundBy: index).tapInTheMiddle()
-        return CardTestView()
+        return NoteTestView()
     }
     
     @discardableResult

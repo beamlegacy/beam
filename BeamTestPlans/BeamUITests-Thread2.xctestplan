@@ -138,6 +138,7 @@
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
         "TextEditorContextViewTests",
+        "TodayNoteTests",
         "TrackersBlockerTests",
         "UpdateViewTests",
         "WaitHelper",

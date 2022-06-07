@@ -10,7 +10,7 @@ import XCTest
 
 class NotesNavigationHistoryTests: BaseTest {
     
-    var noteView: CardTestView!
+    var noteView: NoteTestView!
     
     private func assertJournalIsOpened() {
         XCTAssertTrue(JournalTestView()
@@ -19,7 +19,7 @@ class NotesNavigationHistoryTests: BaseTest {
     }
     
     private func assertAllNotesIsOpened() {
-        XCTAssertTrue(AllNotesTestView().waitForAllCardsViewToLoad())
+        XCTAssertTrue(AllNotesTestView().waitForAllNotesViewToLoad())
     }
     
     private func assertNoteIsOpened() {
@@ -30,7 +30,7 @@ class NotesNavigationHistoryTests: BaseTest {
         launchApp()
         
         step("GIVEN I open All notes and default note") {
-            noteView = openFirstCardInAllCardsList()
+            noteView = openFirstNoteInAllNotesList()
         }
         
         step("THEN forward button is disabled and All Notes opened on Back button click"){

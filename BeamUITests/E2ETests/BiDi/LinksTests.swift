@@ -12,18 +12,18 @@ class LinksTests: BaseTest {
     
     let cardName1 = "Note Link 1"
     let cardName2 = "Note Link 2"
-    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.cardViewCreation)
-    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.cardViewCreationNoZeros)
-    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.cardViewTitle)
+    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.noteViewCreation)
+    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.noteViewCreationNoZeros)
+    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.noteViewTitle)
     let shortcutsHelper = ShortcutsHelper()
     
-    var cardView: CardTestView?
+    var cardView: NoteTestView?
     
-    private func createCardsAndLinkThem() -> CardTestView {
+    private func createCardsAndLinkThem() -> NoteTestView {
         let journalView = launchApp()
         step("Given I create 2 notes"){
-            journalView.createCardViaOmniboxSearch(cardName1)
-            cardView = journalView.createCardViaOmniboxSearch(cardName2)
+            journalView.createNoteViaOmniboxSearch(cardName1)
+            cardView = journalView.createNoteViaOmniboxSearch(cardName2)
         }
 
         
@@ -65,7 +65,7 @@ class LinksTests: BaseTest {
         }
 
         step("When I open \(cardName2)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
         }
         
         step("Then note 2 has no links available"){
@@ -73,14 +73,14 @@ class LinksTests: BaseTest {
         }
         
         step("Given I open \(cardName1) and I link \(cardName2)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             cardView!.createBiDiLink(cardName2)
         }
 
         step("Given I refresh the view switching notes"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
             XCTAssertEqual(cardView!.getLinksNamesNumber(), 1)
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
         }
 
         step("When I delete the link between \(cardName2) and \(cardName1)"){
@@ -90,7 +90,7 @@ class LinksTests: BaseTest {
         }
 
         step("Then note 2 has no links available"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), emptyString)
         }
         
@@ -99,9 +99,9 @@ class LinksTests: BaseTest {
         }
         
         step("Given I refresh the view switching notes"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertEqual(cardView!.getLinksNamesNumber(), 1)
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
         }
         
         step("When I delete note 1"){
@@ -135,7 +135,7 @@ class LinksTests: BaseTest {
         }
        
         step("And note name changes are applied for note 2 note"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
             XCTAssertEqual(cardView!.getNumberOfVisibleNotes(), 1)
             XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), expectedEditedName1)
         }
@@ -143,7 +143,7 @@ class LinksTests: BaseTest {
         step("When I change \(cardName2) name to \(cardName2)\(textToType)"){
             cardView!.makeCardTitleEditable().typeText(textToType)
             cardView!.typeKeyboardKey(.enter)
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1 + textToType)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1 + textToType)
         }
 
         step("Then note name changes are applied in links for note 1"){
@@ -161,12 +161,12 @@ class LinksTests: BaseTest {
         let editedValue = "Level0"
 
         step("Then by default there is no breadcrumb available"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertFalse(cardView!.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }
 
         step("When I create indentation level for the links"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
                 .typeKeyboardKey(.upArrow)
             cardView!.app.typeText(additionalNote)
             cardView!.typeKeyboardKey(.enter)
@@ -174,7 +174,7 @@ class LinksTests: BaseTest {
         }
 
         step("Then the breadcrumb appears in links section"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertTrue(cardView!.waitForBreadcrumbs(), "Breadcrumbs didn't load/appear")
             XCTAssertEqual(cardView!.getBreadCrumbElementsNumber(), 1)
             XCTAssertEqual(cardView!.getBreadCrumbTitleByIndex(0), additionalNote)
@@ -182,13 +182,13 @@ class LinksTests: BaseTest {
 
         
         step("When I edit parent of indentation level"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2).getCardNoteElementByIndex(0).tapInTheMiddle()
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2).getCardNoteElementByIndex(0).tapInTheMiddle()
             cardView!.typeKeyboardKey(.delete, 1)
             cardView!.app.typeText("0")
         }
 
         step("Then breadcrumb title is changed in accordance to previous changes"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertTrue(cardView!.waitForBreadcrumbs(), "Breadcrumbs didn't load/appear")
             XCTAssertEqual(cardView!.getBreadCrumbElementsNumber(), 1)
             XCTAssertEqual(cardView!.getBreadCrumbTitleByIndex(0), editedValue)
@@ -196,14 +196,14 @@ class LinksTests: BaseTest {
 
         
         step("When delete indentation level"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2).getCardNoteElementByIndex(1).tapInTheMiddle()
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2).getCardNoteElementByIndex(1).tapInTheMiddle()
             shortcutsHelper.shortcutActionInvoke(action: .beginOfLine)
             cardView!.typeKeyboardKey(.delete)
             cardView!.typeKeyboardKey(.space)
         }
         
         step("Then there are no breadcrumbs in links section"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertFalse(cardView!.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }
 

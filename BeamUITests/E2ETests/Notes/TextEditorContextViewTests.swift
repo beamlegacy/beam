@@ -14,7 +14,7 @@ class TextEditorContextViewTests: BaseTest {
     let textEditorContext = TextEditorContextTestView()
     let webView = WebTestView()
     let allCardsView = AllNotesTestView()
-    var cardView: CardTestView?
+    var cardView: NoteTestView?
     
     func testCreateCardViaContextView() {
         let textToType = "text before a new note"
@@ -24,8 +24,8 @@ class TextEditorContextViewTests: BaseTest {
         
         step("Given open today's note"){
             cardView = launchApp()
-                .openAllCardsMenu()
-                .openFirstCard()
+                .openAllNotesMenu()
+                .openFirstNote()
         }
         
         step("When I create a bidi link out of typed text: \(textToType)"){
@@ -38,8 +38,8 @@ class TextEditorContextViewTests: BaseTest {
         step("Then the note text is remained: \(textToType)"){
             XCTAssertEqual(textToType + " ", cardView!.getCardNoteValueByIndex(0))
             shortcutsHelper.shortcutActionInvoke(action: .showAllNotes)
-            XCTAssertTrue(allCardsView.waitForCardTitlesToAppear(), "Card titles didn't load during the timeout")
-            allCardsView.openCardByName(cardTitle: cardName)
+            XCTAssertTrue(allCardsView.waitForNoteTitlesToAppear(), "Card titles didn't load during the timeout")
+            allCardsView.openNoteByName(noteTitle: cardName)
         }
         
         step("Then new note is created"){
@@ -60,7 +60,7 @@ class TextEditorContextViewTests: BaseTest {
         
         step("Given I create \(cardName)"){
             let journalView = launchApp()
-            cardView = journalView.createCardViaOmniboxSearch(cardName)
+            cardView = journalView.createNoteViaOmniboxSearch(cardName)
         }
         
         step("When I type in note: \(composedText)"){
@@ -77,7 +77,7 @@ class TextEditorContextViewTests: BaseTest {
         }
         
         step("Then BiDi link appears for: \(cardName)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName)
             XCTAssertEqual(cardName, cardView!.getCardTitle())
             XCTAssertEqual(1, cardView!.getLinksContentNumber())
             XCTAssertEqual(composedText, cardView!.getLinkContentByIndex(0))
@@ -93,8 +93,8 @@ class TextEditorContextViewTests: BaseTest {
         
         step("Given open today's note"){
             cardView = launchApp()
-                .openAllCardsMenu()
-                .openFirstCard()
+                .openAllNotesMenu()
+                .openFirstNote()
         }
 
         //create an empty link
@@ -136,8 +136,8 @@ class TextEditorContextViewTests: BaseTest {
         let text = "THE_text 2 TE$t"
         step("Given open today's note"){
             cardView = launchApp()
-                .openAllCardsMenu()
-                .openFirstCard()
+                .openAllNotesMenu()
+                .openFirstNote()
         }
 
         step("When I type: \(text)"){

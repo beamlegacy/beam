@@ -11,7 +11,7 @@ import XCTest
 class PnSTestView: BaseView {
     
     @discardableResult
-    func triggerAddToCardPopup(_ element: XCUIElement) -> PnSTestView {
+    func triggerAddToNotePopup(_ element: XCUIElement) -> PnSTestView {
         XCUIElement.perform(withKeyModifiers: .option) {
             let elementMiddle = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             // click at middle of element1 to make sure the page has focus
@@ -33,8 +33,8 @@ class PnSTestView: BaseView {
         }
     }
     
-    func addToCardByName(_ elementToAdd: XCUIElement, _ cardName: String, _ isNewCard: Bool = false) {
-        triggerAddToCardPopup(elementToAdd)
+    func addToNoteByName(_ elementToAdd: XCUIElement, _ cardName: String, _ isNewCard: Bool = false) {
+        triggerAddToNotePopup(elementToAdd)
         
         let destinationCard = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
         destinationCard.clickOnExistence()
@@ -50,7 +50,7 @@ class PnSTestView: BaseView {
     }
     
     @discardableResult
-    func addToTodayCard(_ elementToAdd: XCUIElement) -> PnSTestView {
+    func addToTodayNote(_ elementToAdd: XCUIElement) -> PnSTestView {
         XCUIElement.perform(withKeyModifiers: .option) {
             let elementMiddle = elementToAdd.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
             // click at middle of element1 to make sure the page has focus
@@ -82,10 +82,10 @@ class PnSTestView: BaseView {
     }
     
     //Too unstable due to fast pop-up disappearing, could cause false failures
-    func openCardFromSuccessWithoutAddedItemsPopUp(_ cardName: String) -> CardTestView {
-        _ = staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + cardName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
-        staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + cardName).click()
-        return CardTestView()
+    func openNoteFromSuccessWithoutAddedItemsPopUp(_ noteName: String) -> NoteTestView {
+        _ = staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+        staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).click()
+        return NoteTestView()
     }
     
     func getShootFrameSelection() -> XCUIElementQuery {
@@ -96,12 +96,12 @@ class PnSTestView: BaseView {
         return app.staticTexts.matching(identifier: PnSViewLocators.Other.shootFrameSelectionLabel.accessibilityIdentifier).element
     }
     
-    func assertAddedNumberOfItemsToCardSuccessfully(_ numberOfItemsAdded: String, _ cardName: String) -> Bool {
-        return staticText(numberOfItemsAdded + PnSViewLocators.StaticTexts.addedToPopupPartWithNumber.accessibilityIdentifier + cardName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+    func assertAddedNumberOfItemsToNoteSuccessfully(_ numberOfItemsAdded: String, _ noteName: String) -> Bool {
+        return staticText(numberOfItemsAdded + PnSViewLocators.StaticTexts.addedToPopupPartWithNumber.accessibilityIdentifier + noteName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
-    func assertAddedToCardSuccessfully(_ cardName: String) -> Bool {
-        return staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + cardName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+    func assertAddedToNoteSuccessfully(_ noteName: String) -> Bool {
+        return staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     func assertPointFrameExists() -> Bool {

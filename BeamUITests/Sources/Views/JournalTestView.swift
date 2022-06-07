@@ -15,20 +15,20 @@ class JournalTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func openAllCardsMenu() -> AllNotesTestView {
-        let allCardsMenuButton = button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier)
+    func openAllNotesMenu() -> AllNotesTestView {
+        let allCardsMenuButton = button(ToolbarLocators.Buttons.noteSwitcherAllCards.accessibilityIdentifier)
         waitFor(PredicateFormat.isHittable.rawValue, allCardsMenuButton)
         allCardsMenuButton.click()
         return AllNotesTestView()
     }
     
     @discardableResult
-    func openRecentCardByName(_ cardName: String) -> CardTestView {
-        let button = app.buttons.matching(identifier: ToolbarLocators.Buttons.cardSwitcher.accessibilityIdentifier)
-            .matching(NSPredicate(format: "value = '\(cardName)'")).firstMatch
+    func openRecentNoteByName(_ noteName: String) -> NoteTestView {
+        let button = app.buttons.matching(identifier: ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)
+            .matching(NSPredicate(format: "value = '\(noteName)'")).firstMatch
         waitFor(PredicateFormat.isHittable.rawValue, button)
         button.click()
-        return CardTestView()
+        return NoteTestView()
     }
     
     @discardableResult
@@ -38,10 +38,10 @@ class JournalTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func createCardViaOmniboxSearch(_ cardNameToBeCreated: String) -> CardTestView {
-        searchInOmniBox(cardNameToBeCreated, false)
+    func createNoteViaOmniboxSearch(_ noteNameToBeCreated: String) -> NoteTestView {
+        searchInOmniBox(noteNameToBeCreated, false)
         app.typeKey(.enter, modifierFlags: .option)
-        return CardTestView()
+        return NoteTestView()
     }
     
     @discardableResult
