@@ -10,7 +10,11 @@ import XCTest
 import WebKit
 
 class FaviconProviderTests: XCTestCase {
-    
+
+    override class func setUp() {
+        FaviconProvider().clearCache()
+    }
+
     override class func tearDown() {
         FaviconProvider().clearCache()
     }
