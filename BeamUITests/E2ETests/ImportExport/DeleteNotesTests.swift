@@ -32,7 +32,7 @@ class DeleteNotesTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         step("Given I populate the app with random notes"){
             ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
-            allCards.openFirstCard()
+            allCards.openFirstNote()
             helper.tapCommand(.insertTextInCurrentNote)
             helper.tapCommand(.create10Notes)
         }
@@ -42,7 +42,7 @@ class DeleteNotesTests: BaseTest {
         }
         
         step("Then there is \(expectedNumberOfCardsAfterPopulatingDB) notes"){
-            XCTAssertTrue(allCards.getNumberOfCards() > expectedNumberOfCardsAfterClearingDB, "Error occurred when populating the DB")
+            XCTAssertTrue(allCards.getNumberOfNotes() > expectedNumberOfCardsAfterClearingDB, "Error occurred when populating the DB")
         }
         
         step("When I click clear notes option"){
@@ -51,9 +51,9 @@ class DeleteNotesTests: BaseTest {
         
         step("Then notes are cleared"){
             launchApp()
-            XCTAssertEqual(CardTestView().getNumberOfVisibleNotes(), 1, "Local data hasn't been cleared")
+            XCTAssertEqual(NoteTestView().getNumberOfVisibleNotes(), 1, "Local data hasn't been cleared")
             ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
-            XCTAssertEqual(allCards.getNumberOfCards(), expectedNumberOfCardsAfterClearingDB, "Local data hasn't been cleared")
+            XCTAssertEqual(allCards.getNumberOfNotes(), expectedNumberOfCardsAfterClearingDB, "Local data hasn't been cleared")
         }
     }
 }

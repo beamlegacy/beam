@@ -11,33 +11,33 @@ import XCTest
 class AllNotesTestView: BaseView {
 
     @discardableResult
-    func waitForAllCardsViewToLoad() -> Bool {
+    func waitForAllNotesViewToLoad() -> Bool {
         return app.tables.firstMatch.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).firstMatch
             .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     @discardableResult
-    func waitForCardTitlesToAppear() -> Bool {
+    func waitForNoteTitlesToAppear() -> Bool {
         return staticText(AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 
     @discardableResult
-    func deleteAllCards() -> AllNotesTestView {
-        triggerAllCardsMenuOptionAction(.deleteNotes)
+    func deleteAllNotes() -> AllNotesTestView {
+        triggerAllNotesMenuOptionAction(.deleteNotes)
         AlertTestView().confirmDeletion()
         return self
     }
     
     @discardableResult
-    func deleteCardByIndex(_ index: Int) -> AllNotesTestView {
-        getCardsNamesElements()[index].hover()
-        triggerSingleCardMenuOptionAction(.deleteNotes)
+    func deleteNoteByIndex(_ index: Int) -> AllNotesTestView {
+        getNotesNamesElements()[index].hover()
+        triggerSingleNoteMenuOptionAction(.deleteNotes)
         AlertTestView().confirmDeletion()
         return self
     }
     
     @discardableResult
-    func triggerAllCardsMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
+    func triggerAllNotesMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
         app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).element(boundBy: 1).clickOnExistence()
         //Old way to click editor option
         //image(AllNotesViewLocators.Images.allCardsEditor.accessibilityIdentifier).clickOnExistence()
@@ -46,7 +46,7 @@ class AllNotesTestView: BaseView {
     }
     
     @discardableResult
-    func triggerSingleCardMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
+    func triggerSingleNoteMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
         app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
         //Old way to click editor option
         //image(AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).clickOnExistence()
@@ -54,24 +54,37 @@ class AllNotesTestView: BaseView {
         return self
     }
     
-    func getCardsNamesElements() -> [XCUIElement]{
+    @discardableResult
+    func openMenuForSingleNote(_ index: Int) -> AllNotesTestView {
+        let singleNoteMenu = app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).element(boundBy: 1)
+        getNotesNamesElements()[index].hover()
+        singleNoteMenu.hover()
+        singleNoteMenu.clickOnExistence()
+        return self
+    }
+    
+    func isElementAvailableInSingleNoteMenu(_ action: AllNotesViewLocators.MenuItems) -> Bool {
+        return app.windows.menuItems[action.accessibilityIdentifier].exists
+    }
+    
+    func getNotesNamesElements() -> [XCUIElement]{
         return app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).allElementsBoundByIndex
     }
     
-    func getCardsNamesElementQuery() -> XCUIElementQuery {
+    func getNotesNamesElementQuery() -> XCUIElementQuery {
         return app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier)
     }
     
-    func getCardNameValueByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element: getCardsNamesElements()[index])
+    func getNoteNameValueByIndex(_ index: Int) -> String {
+        return self.getElementStringValue(element: getNotesNamesElements()[index])
     }
     
-    func getNumberOfCards() -> Int {
-        getCardsNamesElements().count
+    func getNumberOfNotes() -> Int {
+        getNotesNamesElements().count
     }
     
     @discardableResult
-    func addNewCard(_ cardName: String) -> AllNotesTestView {
+    func addNewNote(_ cardName: String) -> AllNotesTestView {
         XCTContext.runActivity(named: "Create a note named '\(cardName)' using + icon") {_ in
             tableTextField(AllNotesViewLocators.TextFields.newPrivateNote.accessibilityIdentifier).doubleClick()
             app.typeText(" " + cardName) //Workaround for CI that skips chars in the end
@@ -80,12 +93,12 @@ class AllNotesTestView: BaseView {
         }
     }
     
-    func isCardNameAvailable(_ cardName: String) -> Bool {
-        let cards = getCardsNamesElements()
-        var i = cards.count
+    func isNoteNameAvailable(_ noteName: String) -> Bool {
+        let notes = getNotesNamesElements()
+        var i = notes.count
         repeat {
-            let cardInList = self.getElementStringValue(element: cards[i - 1])
-            if cardInList == cardName {
+            let noteInList = self.getElementStringValue(element: notes[i - 1])
+            if noteInList == noteName {
                 return true
             }
             i -= 1
@@ -94,23 +107,23 @@ class AllNotesTestView: BaseView {
     }
     
     @discardableResult
-    func openFirstCard() -> CardTestView {
+    func openFirstNote() -> NoteTestView {
         app.windows.tables.staticTexts[AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
-        return CardTestView()
+        return NoteTestView()
     }
     
     @discardableResult
-    func openCardByName(cardTitle: String) -> CardTestView {
+    func openNoteByName(noteTitle: String) -> NoteTestView {
         var elementFound = false
-        mainLoop: for element in self.getCardsNamesElements(){
-            if getElementStringValue(element: element) == cardTitle {
+        mainLoop: for element in self.getNotesNamesElements(){
+            if getElementStringValue(element: element) == noteTitle {
                 element.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
                 elementFound = true
                 break mainLoop
             }
         }
-        XCTAssertTrue(elementFound, "\(cardTitle) was not found in All Notes list")
-        return CardTestView()
+        XCTAssertTrue(elementFound, "\(noteTitle) was not found in All Notes list")
+        return NoteTestView()
     }
     
     @discardableResult

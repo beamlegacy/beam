@@ -20,17 +20,17 @@ class AllNotesDeleteTests: BaseTest {
         journalView = launchApp()
         
         step ("Given I create 2 notes"){
-            journalView.createCardViaOmniboxSearch(cardName1)
-            journalView.createCardViaOmniboxSearch(cardName2)
+            journalView.createNoteViaOmniboxSearch(cardName1)
+            journalView.createNoteViaOmniboxSearch(cardName2)
                 .shortcutsHelper.shortcutActionInvoke(action: .showAllNotes)
             //Workaround for a random issue where Today's card duplicates are created
             //main thing is to make sure there are some multiple notes available for deletion
-            XCTAssertTrue(allCardsView.getNumberOfCards() >= 3)
+            XCTAssertTrue(allCardsView.getNumberOfNotes() >= 3)
         }
 
         step ("Then I successfully delete all notes"){
-            allCardsView.deleteAllCards()
-            XCTAssertEqual(allCardsView.getNumberOfCards(), 1) // Today's note will still be there
+            allCardsView.deleteAllNotes()
+            XCTAssertEqual(allCardsView.getNumberOfNotes(), 1) // Today's note will still be there
         }
 
     }
@@ -43,20 +43,20 @@ class AllNotesDeleteTests: BaseTest {
         var cardsBeforeDeletion: Int!
         
         step ("Given I create 2 notes") {
-            journalView.createCardViaOmniboxSearch(cardName1)
-            journalView.createCardViaOmniboxSearch(cardName2)
+            journalView.createNoteViaOmniboxSearch(cardName1)
+            journalView.createNoteViaOmniboxSearch(cardName2)
                 .shortcutsHelper.shortcutActionInvoke(action: .showAllNotes)
             //Workaround for a random issue where Today's card duplicates are created
             //main thing is to make sure there are some multiple notes available for deletion
-            cardsBeforeDeletion = allCardsView.getNumberOfCards()
+            cardsBeforeDeletion = allCardsView.getNumberOfNotes()
             XCTAssertTrue(cardsBeforeDeletion >= 3)
         }
 
         step ("Then I successfully delete all notes"){
-            let cardName = allCardsView.getCardNameValueByIndex(indexOfCard)
-            allCardsView.deleteCardByIndex(indexOfCard)
-            XCTAssertEqual(allCardsView.getNumberOfCards(), cardsBeforeDeletion - 1)
-            XCTAssertFalse(allCardsView.isCardNameAvailable(cardName))
+            let cardName = allCardsView.getNoteNameValueByIndex(indexOfCard)
+            allCardsView.deleteNoteByIndex(indexOfCard)
+            XCTAssertEqual(allCardsView.getNumberOfNotes(), cardsBeforeDeletion - 1)
+            XCTAssertFalse(allCardsView.isNoteNameAvailable(cardName))
         }
 
     }
@@ -69,22 +69,22 @@ class AllNotesDeleteTests: BaseTest {
         var cardsBeforeDeletion: Int!
         
         step ("Given I create a note") {
-            journalView.createCardViaOmniboxSearch(cardName1)
+            journalView.createNoteViaOmniboxSearch(cardName1)
                 .shortcutsHelper.shortcutActionInvoke(action: .showAllNotes)
-            cardsBeforeDeletion = allCardsView.getNumberOfCards()
+            cardsBeforeDeletion = allCardsView.getNumberOfNotes()
         }
         
         step ("When I delete created note from All Cards view and undo it") {
-            cardName = allCardsView.getCardNameValueByIndex(indexOfCard)
-            allCardsView.deleteCardByIndex(indexOfCard)
+            cardName = allCardsView.getNoteNameValueByIndex(indexOfCard)
+            allCardsView.deleteNoteByIndex(indexOfCard)
             ShortcutsHelper().shortcutActionInvoke(action: .undo)
         }
         
         step ("Then deleted note appears in the list again") {
-            allCardsView.waitForAllCardsViewToLoad()
-            allCardsView.waitForCardTitlesToAppear()
-            XCTAssertEqual(allCardsView.getNumberOfCards(), cardsBeforeDeletion)
-            XCTAssertTrue(allCardsView.isCardNameAvailable(cardName))
+            allCardsView.waitForAllNotesViewToLoad()
+            allCardsView.waitForNoteTitlesToAppear()
+            XCTAssertEqual(allCardsView.getNumberOfNotes(), cardsBeforeDeletion)
+            XCTAssertTrue(allCardsView.isNoteNameAvailable(cardName))
         }
     }
 }

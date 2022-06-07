@@ -115,7 +115,7 @@ class BaseView {
         populateOmniboxWith(searchText)
         if typeReturnButton {
             typeKeyboardKey(.enter)
-            _ = button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            _ = button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         }
         return WebTestView()
     }
@@ -198,11 +198,11 @@ class BaseView {
     }
     
     @discardableResult
-    func openCardFromRecentsList(cardTitleToOpen: String) -> CardTestView {
-        let cardView = CardTestView()
-        let cardSwitcherButton = cardView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.cardSwitcher.accessibilityIdentifier)' AND value = '\(cardTitleToOpen)'")).firstMatch
-        cardSwitcherButton.clickOnExistence()
-        XCTAssertTrue(cardView.waitForCardToOpen(cardTitle: cardTitleToOpen), "\(cardTitleToOpen) note is failed to load")
-        return cardView
+    func openNoteFromRecentsList(noteTitleToOpen: String) -> NoteTestView {
+        let noteView = NoteTestView()
+        let noteSwitcherButton = noteView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(noteTitleToOpen)'")).firstMatch
+        noteSwitcherButton.clickOnExistence()
+        XCTAssertTrue(noteView.waitForCardToOpen(cardTitle: noteTitleToOpen), "\(noteTitleToOpen) note is failed to load")
+        return noteView
     }
 }

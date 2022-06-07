@@ -12,7 +12,7 @@ class BlockReferenceTests: BaseTest {
     
     let cardName1 = "Block 1"
     let cardName2 = "Block 2"
-    var cardView = CardTestView()
+    var cardView = NoteTestView()
     var noteForReference: String?
     
     func SKIPtestCreateBlockReference() throws {
@@ -88,7 +88,7 @@ class BlockReferenceTests: BaseTest {
         }
 
         step("Then removing block reference doesn't remove the source text"){
-            journalView.openRecentCardByName(cardName2)
+            journalView.openRecentNoteByName(cardName2)
             let currentSourceNote = cardView.getElementStringValue(element:  cardView.getCardNotesForVisiblePart()[1])
             XCTAssertEqual(currentSourceNote, noteForReference!)
         }
@@ -97,15 +97,15 @@ class BlockReferenceTests: BaseTest {
     
     @discardableResult
     func createBlockRefForTwoCards(_ view: JournalTestView, _ cardName1: String, _ cardName2: String) -> String {
-        view.createCardViaOmniboxSearch(cardName1)
-        view.createCardViaOmniboxSearch(cardName2)
+        view.createNoteViaOmniboxSearch(cardName1)
+        view.createNoteViaOmniboxSearch(cardName2)
         let helper = BeamUITestsHelper(view.app)
         helper.tapCommand(.insertTextInCurrentNote)
         
         let noteForReference = cardView.getElementStringValue(element:cardView.getCardNotesForVisiblePart()[1])
         let referencePart = (noteForReference.substring(from: 0, to: 6))
         
-        view.openRecentCardByName(cardName1)
+        view.openRecentNoteByName(cardName1)
         cardView.addTestRef(referencePart)
         return noteForReference
     }

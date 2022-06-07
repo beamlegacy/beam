@@ -11,7 +11,7 @@ import XCTest
 class SlashMenuTests: BaseTest {
     
     let datePicker = DatePickerTestView()
-    var cardTestView: CardTestView!
+    var cardTestView: NoteTestView!
     let dayToSelect = "11"
     let monthToSelect = "June"
     let yearToSelect = "2025"
@@ -20,7 +20,7 @@ class SlashMenuTests: BaseTest {
     func testDatePickerCardCreation() {
         let localDateFormat = "\(dayToSelect) \(monthToSelect) \(yearToSelect)"
         let ciDateFormat = "\(monthToSelect) \(dayToSelect), \(yearToSelect)"
-        cardTestView = launchAppAndOpenFirstCard()
+        cardTestView = launchAppAndOpenFirstNote()
         
         let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
 
@@ -46,7 +46,7 @@ class SlashMenuTests: BaseTest {
     func testNoteDividerCreation() {
         let row1Text = "row 1"
         let row2Text = "row 2"
-        cardTestView = launchAppAndOpenFirstCard()
+        cardTestView = launchAppAndOpenFirstNote()
         
         step("Given I populate 2 notes accordingly with texts: \(row1Text) & \(row2Text)"){
             cardTestView
@@ -73,7 +73,7 @@ class SlashMenuTests: BaseTest {
     }
     
     func testCheckBoxCreationMovementDeletion() {
-        cardTestView = launchAppAndOpenFirstCard()
+        cardTestView = launchAppAndOpenFirstNote()
 
         step("Then I can successfuly create a checkbox using a shortcut") {
             cardTestView.createCheckboxAtNote(1)
@@ -137,12 +137,12 @@ class SlashMenuTests: BaseTest {
     func testSlashMenuTextFormatShortcutsApplying() {
         
         step("GIVEN I type text in first note") {
-            cardTestView = launchAppAndOpenFirstCard()
+            cardTestView = launchAppAndOpenFirstNote()
             cardTestView.app.typeText(textToFormat)
         }
         
         step("THEN Text content remains same after applying text format") {
-            for item in CardTestView.TextFormat.allCases {
+            for item in NoteTestView.TextFormat.allCases {
             
             cardTestView.nodeLineFormatChange(item)
             XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), textToFormat)

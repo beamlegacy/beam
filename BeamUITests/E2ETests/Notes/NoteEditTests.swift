@@ -10,7 +10,7 @@ import XCTest
 
 class NoteEditTests: BaseTest {
     
-    var cardView: CardTestView!
+    var cardView: NoteTestView!
     let shortcutsHelper = ShortcutsHelper()
     
     func testRenameCardSuccessfully() {
@@ -24,7 +24,7 @@ class NoteEditTests: BaseTest {
                                                 
         step("Given I create \(cardNameToBeCreated) note"){
             //To be replaced with UITests helper - card creation
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("When I delete \(numberOfLetterToBeDeleted) letters from the title"){
@@ -57,12 +57,12 @@ class NoteEditTests: BaseTest {
         
         step("Given I create \(cardNameToBeCreated) note"){
             //To be replaced with UITests helper - card creation
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("When I delete last letter from the title"){
             journalView.searchInOmniBox(cardTwoNameToBeCreated, false)
-            WebTestView().selectCreateCard(cardTwoNameToBeCreated)
+            WebTestView().selectCreateNote(cardTwoNameToBeCreated)
             cardView.makeCardTitleEditable()
             cardView.typeKeyboardKey(.delete)
         }
@@ -78,7 +78,7 @@ class NoteEditTests: BaseTest {
         
         step("Given I create \(cardNameToBeCreated) note"){
             //To be replaced with UITests helper - card creation
-            cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         }
         
         step("When I try to delete \(cardNameToBeCreated) and cancel it"){
@@ -98,7 +98,7 @@ class NoteEditTests: BaseTest {
         }
         
         step("Then the note is deleted"){
-            XCTAssertFalse(journalView.openAllCardsMenu().isCardNameAvailable(cardNameToBeCreated), "\(cardNameToBeCreated) card is not deleted")
+            XCTAssertFalse(journalView.openAllNotesMenu().isNoteNameAvailable(cardNameToBeCreated), "\(cardNameToBeCreated) card is not deleted")
         }
     }
     
@@ -109,12 +109,12 @@ class NoteEditTests: BaseTest {
         step("When I add image to a note"){
             BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
             let imageItemToAdd = pnsView.image("forest")
-            pnsView.addToTodayCard(imageItemToAdd)
+            pnsView.addToTodayNote(imageItemToAdd)
         }
         
         step("Then it has a source icon"){
             shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            cardView = CardTestView()
+            cardView = NoteTestView()
             let imageNote = cardView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
             XCTAssertTrue(cardView.button(CardViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -135,12 +135,12 @@ class NoteEditTests: BaseTest {
         step("When I add image to a note"){
             BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
             let imageItemToAdd = pnsView.image("forest")
-            pnsView.addToTodayCard(imageItemToAdd)
+            pnsView.addToTodayNote(imageItemToAdd)
         }
 
         step("Then it has a move handle"){
             shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            cardView = CardTestView()
+            cardView = NoteTestView()
             let imageNote = cardView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
             XCTAssertTrue(cardView.handle(CardViewLocators.Buttons.moveHandle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -151,7 +151,7 @@ class NoteEditTests: BaseTest {
         var nodesBeforeChange = [String]()
         step("GIVEN I populate today's note with the rows") {
             let journalView = launchApp()
-            cardView = journalView.createCardViaOmniboxSearch("Bullets")
+            cardView = journalView.createNoteViaOmniboxSearch("Bullets")
             BeamUITestsHelper(journalView.app).tapCommand(.insertTextInCurrentNote)
             nodesBeforeChange = cardView.getCardNotesTextForVisiblePart()
         }
@@ -185,7 +185,7 @@ class NoteEditTests: BaseTest {
         let secondPart = "to be "
         let thirdPart = "deleted"
         let journalView = launchApp()
-        cardView = journalView.createCardViaOmniboxSearch(cardNameToBeCreated)
+        cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
         
         step("When I use Option+backspace and CMD+backspace on empty note"){
             shortcutsHelper.shortcutActionInvoke(action: .removeLastWord)
