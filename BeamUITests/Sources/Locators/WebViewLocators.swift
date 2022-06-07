@@ -22,7 +22,7 @@ enum WebViewLocators {
     }
     
     enum Tabs: String, CaseIterable, UIElement {
-        case tabPrefix = "browserTab-"
+        case tabPrefix = "TabItem-BrowserTab-"
         case tabURL = "browserTabURL"
         case tabTitle = "browserTabTitle"
     }
