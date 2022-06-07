@@ -145,9 +145,9 @@ class DeleteDocument: DocumentCommand {
                             break
                         }
                     }
+                } else {
+                    BeamNoteSharingUtils.unpublishNote(with: doc.id, completion: { _ in })
                 }
-            } else {
-                BeamNoteSharingUtils.unpublishNote(with: doc.id, completion: { _ in })
             }
         }
     }
