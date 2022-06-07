@@ -353,11 +353,7 @@ extension BeamTextEdit {
         if let url = URL(string: node.elementText.text) {
             Task.detached(priority: .background) { @MainActor [weak self] in
                 guard let self = self else { return }
-                var fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
-                if let host = url.minimizedHost, let hostUrl = url.domain {
-                    fetchedTitle.append(BeamText(" - "))
-                    fetchedTitle.append(BeamText(host, attributes: [.link(hostUrl.absoluteString)]))
-                }
+                let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
                 let cursorIsStillAtEndOfLink = self.rootNode?.cursorPosition == range.end
                 let endRange = range.position + fetchedTitle.wholeRange.upperBound
                 self.disableInputDetector()
