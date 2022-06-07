@@ -25,18 +25,14 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
             .populateCreditCardsDB()
     }
     
-    private func navigateToPayment(page: String) {
-        navigateToPayment(absoluteURL: mockBaseUrl + page)
-    }
-
-    private func navigateToPayment(absoluteURL: String) {
-        step("Given I navigate to \(absoluteURL)") {
-            OmniBoxTestView().searchInOmniBox(absoluteURL, true)
+    private func navigateToPayment(page: MockHTTPWebPages.MockPageLink) {
+        step("Given I navigate to \(mockPage.getMockPageUrl(page))") {
+            mockPage.openMockPage(page)
         }
     }
 
     func testKiwiAutofill() {
-        navigateToPayment(page: "payment-kiwi")
+        navigateToPayment(page: .paymentKiwiForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateYearLabel)
@@ -45,7 +41,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testOplataAutofill() {
-        navigateToPayment(page: "payment-oplata")
+        navigateToPayment(page: .paymentOplataForm)
         verifyAutoFillIsDisplayed(title: "Mobile Number: ", autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password: true, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
@@ -53,7 +49,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testBookingAutofill() {
-        navigateToPayment(page: "payment-booking")
+        navigateToPayment(page: .paymentBookingForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
@@ -62,7 +58,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testSportDecouverteAutofill() {
-        navigateToPayment(page: "payment-sport-decouverte")
+        navigateToPayment(page: .paymentSportDecouverteForm)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateYearLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateMonthLabel, autocomplete: false)
@@ -70,7 +66,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testAmazonAutofill() {
-        navigateToPayment(page: "payment-amazon")
+        navigateToPayment(page: .paymentAmazonForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password: true, autocomplete: false)
         // Selecting any of these fields triggers the autofill menu to be displayed below the field menu.
@@ -81,7 +77,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testEbayAutofill() {
-        navigateToPayment(page: "payment-ebay")
+        navigateToPayment(page: .paymentEbayForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -90,7 +86,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testWalmartAutofill() {
-        navigateToPayment(page: "payment-walmart")
+        navigateToPayment(page: .paymentWalmartForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -101,7 +97,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testEtsySearsAutofill() {
-        navigateToPayment(page: "payment-etsy-sears")
+        navigateToPayment(page: .paymentEtsySearsForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
@@ -110,14 +106,14 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testWishAutofill() {
-        navigateToPayment(page: "payment-wish")
+        navigateToPayment(page: .paymentWishForm)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
     }
     
     func testBestBuyAutofill() {
-        navigateToPayment(page: "payment-bestbuy")
+        navigateToPayment(page: .paymentBestBuyForm)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
@@ -125,14 +121,14 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testTargetAutofill() {
-        navigateToPayment(page: "payment-target")
+        navigateToPayment(page: .paymentTargetForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, autocomplete: false)
     }
     
     func testKohlsAirBnbAutofill() {
-        navigateToPayment(page: "payment-kohls-airbnb")
+        navigateToPayment(page: .paymentKohlsAirbnbForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel, autocomplete: false)
@@ -140,7 +136,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testHotelsAutofill() {
-        navigateToPayment(page: "payment-hotels")
+        navigateToPayment(page: .paymentHotelsForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -150,7 +146,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testExpediaAutofill() {
-        navigateToPayment(page: "payment-expedia")
+        navigateToPayment(page: .paymentExpediaForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
@@ -159,7 +155,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testPricelineAutofill() {
-        navigateToPayment(page: "payment-priceline")
+        navigateToPayment(page: .paymentPricelineForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel, autocomplete: false)
@@ -167,7 +163,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testHotwireAutofill() {
-        navigateToPayment(page: "payment-hotwire")
+        navigateToPayment(page: .paymentHotwireForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -177,7 +173,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testKayakAutofill() {
-        navigateToPayment(page: "payment-kayak")
+        navigateToPayment(page: .paymentKayakForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateYearLabel, autocomplete: false)
         verifyCCAutofillNotDisplayedDropdown(title: creditCardExpDateMonthLabel, autocomplete: false)
@@ -185,7 +181,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testAgodaAutofill() {
-        navigateToPayment(page: "payment-agoda")
+        navigateToPayment(page: .paymentAgodaForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, password:true, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
@@ -201,7 +197,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testNetflixAutofill() {
-        navigateToPayment(absoluteURL: "http://payment-netflix.form.lvh.me:8080/") // must be dedicated domain name to apply rule for netflix.com
+        navigateToPayment(page: .paymentNetflixShortForm) // must be dedicated domain name to apply rule for netflix.com
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -218,7 +214,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testDisneyAutofill() {
-        navigateToPayment(page: "payment-disney")
+        navigateToPayment(page: .paymentDisneyForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel, autocomplete: false)
@@ -226,7 +222,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testHboMaxAutofill() {
-        navigateToPayment(page: "payment-hbomax")
+        navigateToPayment(page: .paymentHboMaxForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
@@ -234,7 +230,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testYoutubeAutofill() {
-        navigateToPayment(page: "payment-youtube")
+        navigateToPayment(page: .paymentYoutubeForm)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateYearLabel)
         verifyAutoFillIsDisplayed(title: creditCardExpDateMonthLabel)
@@ -242,14 +238,14 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testSpotifyAutofill() {
-        navigateToPayment(page: "payment-spotify")
+        navigateToPayment(page: .paymentSpotifyForm)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
     }
     
     func testAppleAutofill() {
-        navigateToPayment(page: "payment-apple")
+        navigateToPayment(page: .paymentAppleForm)
         verifyAutoFillIsDisplayed(title: creditCardOwnerFamilyNameLabel)
         verifyAutoFillIsDisplayed(title: creditCardOwnerGivenNameLabel, autocomplete: false) // in this case, autofill only proposed for Family name
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
@@ -266,7 +262,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testUberAutofill() {
-        navigateToPayment(page: "payment-uber")
+        navigateToPayment(page: .paymentUberForm)
         verifyAutoFillIsDisplayed(title: "Nickname: ", autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)
@@ -274,7 +270,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     }
     
     func testDoordashAutofill() {
-        navigateToPayment(page: "payment-doordash")
+        navigateToPayment(page: .paymentDoordashForm)
         verifyAutoFillIsDisplayed(title: "ZIP Code: ", autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardSecCodeLabel, autocomplete: false)
         verifyAutoFillIsDisplayed(title: creditCardExpDateLabel)

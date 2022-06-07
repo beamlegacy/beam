@@ -32,7 +32,7 @@ class PDFFilesBrowserViewTests: BaseTest {
         let expectedDefaultZoomRatio = "100%"
         
         step("When I open a PDF file") {
-            OmniBoxTestView().searchInOmniBox("http://www.lvh.me:8080/static/test.pdf", true)
+            MockHTTPWebPages().openMockPage(.testPdfFile)
         }
         
         step("Then I see print, download and zoom in/out buttons and correct zoom ratio value as") {
