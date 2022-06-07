@@ -7,6 +7,7 @@
 
 import XCTest
 @testable import Beam
+@testable import BeamCore
 
 class BrowserTabsManagerTests: XCTestCase {
 
@@ -17,8 +18,12 @@ class BrowserTabsManagerTests: XCTestCase {
         sut = BrowserTabsManager(with: state.data, state: state)
     }
 
-    private func tab(_ title: String) -> BrowserTab {
-        let tab = BrowserTab(state: state, browsingTreeOrigin: nil, originMode: .web, note: nil)
+    override func tearDown() {
+        state.data.savePinnedTabs([])
+    }
+
+    private func tab(_ title: String, origin: BrowsingTreeOrigin? = nil) -> BrowserTab {
+        let tab = BrowserTab(state: state, browsingTreeOrigin: origin, originMode: .web, note: nil)
         tab.title = title
         return tab
     }
@@ -236,4 +241,101 @@ class BrowserTabsManagerTests: XCTestCase {
         XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
         XCTAssertEqual(sut.listItems.allItems[3].tab, tabs[3])
     }
+
+    func testAddingAUnpinnedTabInsidePinnedTabIsNotPossible() {
+        let (tabA, tabB, tabC, tabD) = (tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC])
+        XCTAssertEqual(sut.currentTab, tabC)
+        sut.pinTab(tabA)
+
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true, at: 0)
+        XCTAssertEqual(sut.tabs, [tabA, tabD, tabB, tabC])
+        XCTAssertFalse(tabD.isPinned)
+    }
+}
+
+// MARK: - Tabs Neighbooring
+extension BrowserTabsManagerTests {
+    func testRemoveTabSetClosestTabAsCurrent() {
+        let (tabA, tabB, tabC, tabD) = (tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC, tabD])
+        XCTAssertEqual(sut.currentTab, tabD)
+
+        sut.setCurrentTab(at: 2)
+        sut.removeTab(tabId: tabC.id)
+        XCTAssertEqual(sut.currentTab, tabD)
+        sut.removeTab(tabId: tabD.id)
+        XCTAssertEqual(sut.currentTab, tabB)
+        sut.removeTab(tabId: tabB.id)
+        XCTAssertEqual(sut.currentTab, tabA)
+        sut.removeTab(tabId: tabA.id)
+        XCTAssertNil(sut.currentTab)
+    }
+
+    func testRemoveTabSetParentTabAsCurrent() {
+        let (tabA, tabB, tabC) = (tab("Tab A"), tab("Tab B"), tab("Tab C"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC])
+        XCTAssertEqual(sut.currentTab, tabC)
+
+        // Opening Tab D from cmd-click in tab A
+        let tabD = tab("Tab D", origin: .browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: tabA.browsingTree.origin.rootOrigin, rootId: tabA.browsingTree.rootId))
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true)
+        XCTAssertEqual(sut.currentTab, tabD)
+        sut.removeTab(tabId: tabD.id)
+        XCTAssertEqual(sut.currentTab, tabA)
+
+        // Opening Tab E from cmd-T in tab B
+        let tabE = tab("Tab E", origin: .searchBar(query: "E", referringRootId: tabB.browsingTree.rootId))
+        sut.addNewTabAndNeighborhood(tabE, setCurrent: true)
+        XCTAssertEqual(sut.currentTab, tabE)
+        sut.removeTab(tabId: tabE.id)
+        XCTAssertEqual(sut.currentTab, tabB)
+    }
+
+    func testRemoveTabDoesntSetPinnedTabAsCurrent() {
+        let (tabA, tabB, tabC) = (tab("Tab A"), tab("Tab B"), tab("Tab C"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC])
+        XCTAssertEqual(sut.currentTab, tabC)
+        sut.pinTab(tabA)
+
+        // Opening Tab D from cmd-click in tab A
+        let tabD = tab("Tab D", origin: .browsingNode(id: UUID(), pageLoadId: nil, rootOrigin: tabA.browsingTree.origin.rootOrigin, rootId: tabA.browsingTree.rootId))
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true)
+        XCTAssertEqual(sut.currentTab, tabD)
+        sut.removeTab(tabId: tabD.id)
+        // tab A is not selected because it's Pinned
+        XCTAssertNotEqual(sut.currentTab, tabA)
+        XCTAssertEqual(sut.currentTab, tabC)
+
+        sut.setCurrentTab(tabB)
+        sut.removeTab(tabId: tabB.id)
+        XCTAssertNotEqual(sut.currentTab, tabA)
+        XCTAssertEqual(sut.currentTab, tabC)
+    }
+
+    func testRemoveTabSetSuggestedTabAsCurrent() {
+        let (tabA, tabB, tabC, tabD) = (tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D"))
+        sut.addNewTabAndNeighborhood(tabA, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabB, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabC, setCurrent: true)
+        sut.addNewTabAndNeighborhood(tabD, setCurrent: true)
+        XCTAssertEqual(sut.tabs, [tabA, tabB, tabC, tabD])
+        XCTAssertEqual(sut.currentTab, tabD)
+        sut.removeTab(tabId: tabD.id, suggestedNextCurrentTab: tabB)
+        XCTAssertEqual(sut.currentTab, tabB)
+    }
+
 }
