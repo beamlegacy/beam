@@ -245,7 +245,8 @@ struct TabsListView: View {
         .disabled(isDraggingATab && !isTheDraggedTab)
         .id(id)
         .accessibilityElement(children: .contain)
-        .accessibilityIdentifier(id)
+        .accessibilityAddTraits(selected ? .isSelected : [])
+        .accessibility(identifier: accessibilityIdentifier(for: item))
         .transition(isAnimatingDrop ? .identity : tabTransition)
     }
 
@@ -494,6 +495,22 @@ extension TabsListView {
 
     private func tabViewId(for tab: BrowserTab) -> String {
         return "browserTab-\(tab.id)"
+    }
+
+    private func accessibilityIdentifier(for item: TabsListItem) -> String {
+        var groupSuffix = ""
+        if let group = item.group {
+            groupSuffix = "-Group(\(group.title ?? "untitled"))"
+        }
+        if item.isATab, let tab = item.tab {
+            let pinSuffix = tab.isPinned ? "-pinned" : ""
+            return "TabItem-BrowserTab\(pinSuffix)\(groupSuffix)-(\(tab.title))"
+        } else if item.isAGroupCapsule, let group = item.group {
+            let collapsedSuffix = group.collapsed ? "-collapsed" : ""
+            return "TabItem-GroupCapsule\(groupSuffix)\(collapsedSuffix)-\(group.title ?? "untitled")"
+        } else {
+            return "TabItem-Unknown"
+        }
     }
 
     private func scrollToTabIfNeeded(_ tab: BrowserTab,
