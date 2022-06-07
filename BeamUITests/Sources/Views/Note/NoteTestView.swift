@@ -8,7 +8,7 @@
 import Foundation
 import XCTest
 
-class CardTestView: TextEditorContextTestView {
+class NoteTestView: TextEditorContextTestView {
     
     var cardTitle: XCUIElement {
         return app.windows.scrollViews[CardViewLocators.ScrollViews.noteView.accessibilityIdentifier].textFields[CardViewLocators.TextFields.noteTitle.accessibilityIdentifier]
@@ -85,13 +85,13 @@ class CardTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func publishCard() -> CardTestView {
+    func publishCard() -> NoteTestView {
         button(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
     @discardableResult
-    func unpublishCard() -> CardTestView {
+    func unpublishCard() -> NoteTestView {
         image(CardViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
         app.staticTexts[CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
         app.windows.sheets["alert"].buttons[CardViewLocators.Buttons.unpublishCardButton.accessibilityIdentifier].clickOnHittable()
@@ -148,7 +148,7 @@ class CardTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func clickNoteExpandButtonByIndex(noteIndex: Int) -> CardTestView {
+    func clickNoteExpandButtonByIndex(noteIndex: Int) -> NoteTestView {
         self.getNoteExpandButtonByIndex(noteIndex: noteIndex).coordinate(withNormalizedOffset: CGVector(dx: 0.1, dy: 0.1)).tap()
         return self
     }
@@ -221,13 +221,13 @@ class CardTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func openLinkByIndex(_ index: Int) -> CardTestView {
+    func openLinkByIndex(_ index: Int) -> NoteTestView {
         self.getLinksNames()[index].tapInTheMiddle()
         return self
     }
     
     @discardableResult
-    func createBiDiLink(_ cardName: String, _ noteNumber: Int = 0) -> CardTestView {
+    func createBiDiLink(_ cardName: String, _ noteNumber: Int = 0) -> NoteTestView {
         let noteToBeTypedIn = getCardNotesForVisiblePart()[noteNumber]
         app.typeText("@" + cardName)
         waitForStringValueEqual("@" + cardName, noteToBeTypedIn)
@@ -236,7 +236,7 @@ class CardTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func createReference(_ cardName: String, _ noteNumber: Int = 0) -> CardTestView {
+    func createReference(_ cardName: String, _ noteNumber: Int = 0) -> NoteTestView {
         let noteToBeTypedIn = getCardNotesForVisiblePart()[noteNumber]
         app.typeText(cardName)
         waitForStringValueEqual(cardName, noteToBeTypedIn)
@@ -265,13 +265,13 @@ class CardTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func expandReferenceSection() -> CardTestView {
+    func expandReferenceSection() -> NoteTestView {
         self.getRefereceSectionCounterElement().tapInTheMiddle()
         return self
     }
     
     @discardableResult
-    func linkAllReferences() -> CardTestView {
+    func linkAllReferences() -> NoteTestView {
         button(CardViewLocators.Buttons.linkAllButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
@@ -305,13 +305,13 @@ class CardTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func removeBlockRef(blockRefNumber: Int = 1) -> CardTestView {
+    func removeBlockRef(blockRefNumber: Int = 1) -> NoteTestView {
         self.blockReferenceMenuActionTrigger(.blockRefRemove, blockRefNumber: blockRefNumber)
         return self
     }
     
     @discardableResult
-    func addTestRef(_ referenceText: String) -> CardTestView {
+    func addTestRef(_ referenceText: String) -> NoteTestView {
         app.typeText("((\(referenceText))\r")
         return self
     }

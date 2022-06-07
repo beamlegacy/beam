@@ -14,14 +14,14 @@ class WebTestView: BaseView {
         staticText("webview-status-text")
     }
     
-    func getDestinationCardElement() -> XCUIElement {
+    func getDestinationNoteElement() -> XCUIElement {
         let element = staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)
         _ = element.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return element
     }
     
-    func getDestinationCardTitle() -> String {
-        return getElementStringValue(element: getDestinationCardElement())
+    func getDestinationNoteTitle() -> String {
+        return getElementStringValue(element: getDestinationNoteElement())
     }
     
     func getBrowserTabTitleValueByIndex(index: Int) -> String {
@@ -33,28 +33,28 @@ class WebTestView: BaseView {
     }
     
     @discardableResult
-    func openAllCardsMenu() -> AllNotesTestView {
-        button(ToolbarLocators.Buttons.cardSwitcherAllCards.accessibilityIdentifier).click()
+    func openAllNotesMenu() -> AllNotesTestView {
+        button(ToolbarLocators.Buttons.noteSwitcherAllCards.accessibilityIdentifier).click()
         return AllNotesTestView()
     }
     
-    func searchForCardByTitle(_ title: String) {
+    func searchForNoteByTitle(_ title: String) {
         XCTContext.runActivity(named: "Search for '\(title)' note in notes search drop-down") {_ in
-        self.getDestinationCardElement().clickOnHittable()
+        self.getDestinationNoteElement().clickOnHittable()
         searchField(WebViewLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
         app.otherElements.matching(predicate).firstMatch.click()
         }
     }
     
-    func openDestinationCardSearch() -> XCUIElement {
-        let element = self.getDestinationCardElement()
+    func openDestinationNoteSearch() -> XCUIElement {
+        let element = self.getDestinationNoteElement()
         element.clickOnHittable()
         return element
     }
     
     @discardableResult
-    func selectCreateCard(_ searchText: String) -> CardTestView {
+    func selectCreateNote(_ searchText: String) -> NoteTestView {
         XCTContext.runActivity(named: "Click on proposed New note option for '\(searchText)' search keyword") {_ in
         // The mouse could overlap the autocomplete result so we should also match on "selected" results
         let predicate = NSCompoundPredicate(
@@ -64,18 +64,18 @@ class WebTestView: BaseView {
                 NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-" + searchText + "-createNote'")
             ]
         )
-        let cardCreationElement = app.otherElements.matching(predicate).firstMatch
+        let noteCreationElement = app.otherElements.matching(predicate).firstMatch
         //Try out to replace additional waiting
         //XCTAssertTrue(cardCreationElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
-        cardCreationElement.clickOnExistence()
-        return CardTestView()
+        noteCreationElement.clickOnExistence()
+        return NoteTestView()
         }
     }
     
     @discardableResult
-    func openDestinationCard() -> CardTestView {
-        button(ToolbarLocators.Buttons.openCardButton.accessibilityIdentifier).clickOnHittable()
-        let cardView = CardTestView()
+    func openDestinationNote() -> NoteTestView {
+        button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).clickOnHittable()
+        let cardView = NoteTestView()
         cardView.waitForCardViewToLoad()
         return cardView
     }

@@ -10,7 +10,7 @@ import XCTest
 
 class JournalTest: BaseTest {
     
-    let cardView = CardTestView()
+    let cardView = NoteTestView()
     
     func testJournalScrollViewExistence() {
         let journalView = launchApp()

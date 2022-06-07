@@ -10,7 +10,7 @@ import XCTest
 
 class NoteViewEmbedsTests: BaseTest {
     
-    var cardView: CardTestView?
+    var cardView: NoteTestView?
     
     func testEmbedsCollapseExpandIcons() throws {
         let toLinkTitle = "to Link"
@@ -22,11 +22,11 @@ class NoteViewEmbedsTests: BaseTest {
         step("When I add image to a note"){
             BeamUITestsHelper(launchApp().app).openTestPage(page: .page4)
             let imageItemToAdd = pnsView.image("forest")
-            pnsView.addToTodayCard(imageItemToAdd)
+            pnsView.addToTodayNote(imageItemToAdd)
         }
         
         step("Then I see collapse button"){
-            cardView = webView.openDestinationCard()
+            cardView = webView.openDestinationNote()
             expandButton = cardView!.getNoteExpandButtonByIndex(noteIndex: 0)
             XCTAssertEqual(cardView!.getNotesExpandButtonsCount(), 1)
             XCTAssertEqual(expandButton!.title, toLinkTitle)
@@ -88,8 +88,8 @@ class NoteViewEmbedsTests: BaseTest {
         
         step("Given open today's card"){
             cardView = journalView
-                .openAllCardsMenu()
-                .openFirstCard()
+                .openAllNotesMenu()
+                .openFirstNote()
         }
 
         step("When I type a video url"){
@@ -99,7 +99,7 @@ class NoteViewEmbedsTests: BaseTest {
         step("And right click on it to show as embed"){
             let textNode = cardView!.getTextNodeByIndex(nodeIndex: 0)
             textNode.rightClick()
-            CardTestView().menuItem(NoteViewLocators.RightClickMenuItems.showAsEmbed.accessibilityIdentifier).tapInTheMiddle()
+            NoteTestView().menuItem(NoteViewLocators.RightClickMenuItems.showAsEmbed.accessibilityIdentifier).tapInTheMiddle()
         }
         
         let youtubeButtons = cardView!.app.webViews.buttons
@@ -126,11 +126,11 @@ class NoteViewEmbedsTests: BaseTest {
             XCTAssertTrue(youtubePlayPauseButton.exists)
         }
        
-        let allCardsView = journalView.openAllCardsMenu()
+        let allCardsView = journalView.openAllNotesMenu()
         step("When I leave note and come back"){
             XCTAssertTrue(mediaPlayingButton.exists)
             XCTAssertFalse(youtubePlayPauseButton.exists)
-            allCardsView.openFirstCard()
+            allCardsView.openFirstNote()
         }
        
         step("Then the video is still playing"){

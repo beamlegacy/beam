@@ -139,6 +139,7 @@
         "SlashMenuTests",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "TextEditorContextViewTests",
+        "TodayNoteTests",
         "UpdateViewTests\/testUpdateAvailableEverywhereInCardView()",
         "WaitHelper",
         "WebsiteAuthTest"

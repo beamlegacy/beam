@@ -128,6 +128,7 @@
         "SignUpAutocompleteTests",
         "SigninTests",
         "TextEditorContextViewTests",
+        "TodayNoteTests",
         "TrackersBlockerTests",
         "UpdateViewTests",
         "WebsiteAuthTest"

@@ -13,14 +13,14 @@ class ReferencesTests: BaseTest {
     let cardName1 = "Note Reference 1"
     let cardName2 = "Note Reference 2"
     let shortcutsHelper = ShortcutsHelper()
-    var cardView: CardTestView?
+    var cardView: NoteTestView?
 
-    private func createCardsAndReferenceThem() -> CardTestView {
+    private func createCardsAndReferenceThem() -> NoteTestView {
         let journalView = launchApp()
         
         step ("Given I create 2 notes"){
-            journalView.createCardViaOmniboxSearch(cardName1)
-            cardView = journalView.createCardViaOmniboxSearch(cardName2)
+            journalView.createNoteViaOmniboxSearch(cardName1)
+            cardView = journalView.createNoteViaOmniboxSearch(cardName2)
         }
 
         step ("Then I reference note 2 to note 1"){
@@ -32,7 +32,7 @@ class ReferencesTests: BaseTest {
     
     func testCreateCardReference() {
         cardView = createCardsAndReferenceThem()
-        cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+        cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
 
         XCTAssertEqual(cardView!.getLinksNamesNumber(), 0) //Link ONLY
         XCTAssertEqual(cardView!.getLinksContentNumber(), 0)
@@ -55,7 +55,7 @@ class ReferencesTests: BaseTest {
     
     func testReferenceDeletion() {
         cardView = createCardsAndReferenceThem()
-        cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+        cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             .expandReferenceSection()
         
         step ("When I delete the reference between \(cardName2) and \(cardName1)"){
@@ -66,7 +66,7 @@ class ReferencesTests: BaseTest {
 
         
         step ("When I open \(cardName2)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
         }
 
         step ("Then note 2 has no references available"){
@@ -76,15 +76,15 @@ class ReferencesTests: BaseTest {
 
         
         step ("Given I open \(cardName1) and I reference \(cardName2)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertFalse(cardView!.doesReferenceSectionExist())
             cardView!.createReference(cardName2)
         }
 
         step ("Given I refresh the view switching notes"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
             XCTAssertTrue(cardView!.doesReferenceSectionExist())
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
         }
 
         step ("When I delete the reference between \(cardName2) and \(cardName1)"){
@@ -94,7 +94,7 @@ class ReferencesTests: BaseTest {
         }
 
         step ("Then note 2 has no references available"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
             XCTAssertFalse(cardView!.doesReferenceSectionExist())
         }
 
@@ -103,9 +103,9 @@ class ReferencesTests: BaseTest {
         }
 
         step ("Given I refresh the view switching notes"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             XCTAssertTrue(cardView!.doesReferenceSectionExist())
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
         }
 
         
@@ -125,7 +125,7 @@ class ReferencesTests: BaseTest {
         let renamedCard1 = cardName1 + textToType
         cardView = createCardsAndReferenceThem()
         BeamUITestsHelper(cardView!.app).tapCommand(.resizeWindowLandscape)
-        cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+        cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
         
         step ("Given I rename note 1 to \(cardName1)\(textToType)"){
             cardView!.makeCardTitleEditable().typeText(textToType)
@@ -137,14 +137,14 @@ class ReferencesTests: BaseTest {
         }
         
         step ("Given I rename the note in note 2 to \(renamedCard1)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
                 .getCardNoteElementByIndex(0)
                 .clickOnExistence()
             cardView!.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
         }
 
         step ("Then in note 1 all the reference appears again"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: renamedCard1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: renamedCard1)
             XCTAssertTrue(cardView!.doesReferenceSectionExist())
         }
 
@@ -153,7 +153,7 @@ class ReferencesTests: BaseTest {
                 .getLinkContentElementByIndex(0)
                 .clickOnExistence()
             cardView!.typeKeyboardKey(.delete, textToType.count)
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
         }
 
         step ("Then in note 2 the note is renamed as in note 1"){
@@ -162,7 +162,7 @@ class ReferencesTests: BaseTest {
         }
 
         step ("And in note 1 the reference is gone"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: renamedCard1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: renamedCard1)
             XCTAssertFalse(cardView!.doesReferenceSectionExist())
         }
 
@@ -182,7 +182,7 @@ class ReferencesTests: BaseTest {
 
         
         step ("Given I open \(cardName1)"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
             cardView!.expandReferenceSection()
         }
 
@@ -213,13 +213,13 @@ class ReferencesTests: BaseTest {
         let editedValue = "Level0"
 
         step ("Then by default there is no breadcrumb available"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
                 .expandReferenceSection()
             XCTAssertFalse(cardView!.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }
 
         step ("When I create indentation level for the reference"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2)
                 .typeKeyboardKey(.upArrow)
             cardView!.app.typeText(additionalNote)
             cardView!.typeKeyboardKey(.enter)
@@ -227,7 +227,7 @@ class ReferencesTests: BaseTest {
         }
 
         step ("Then the breadcrumb appears in references section"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
                 .expandReferenceSection()
             XCTAssertTrue(cardView!.waitForBreadcrumbs(), "Breadcrumbs didn't load/appear")
             XCTAssertEqual(cardView!.getBreadCrumbElementsNumber(), 1)
@@ -235,13 +235,13 @@ class ReferencesTests: BaseTest {
         }
 
         step ("When I edit parent of indentation level"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2).getCardNoteElementByIndex(0).tapInTheMiddle()
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2).getCardNoteElementByIndex(0).tapInTheMiddle()
             cardView!.typeKeyboardKey(.delete, 1)
             cardView!.app.typeText("0")
         }
 
         step ("Then breadcrumb title is changed in accordance to previous changes"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
                 .expandReferenceSection()
             XCTAssertTrue(cardView!.waitForBreadcrumbs(), "Breadcrumbs didn't load/appear")
             XCTAssertEqual(cardView!.getBreadCrumbElementsNumber(), 1)
@@ -249,14 +249,14 @@ class ReferencesTests: BaseTest {
         }
 
         step ("When delete indentation level"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName2).getCardNoteElementByIndex(1).tapInTheMiddle()
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName2).getCardNoteElementByIndex(1).tapInTheMiddle()
             shortcutsHelper.shortcutActionInvoke(action: .beginOfLine)
             cardView!.typeKeyboardKey(.delete)
             cardView!.typeKeyboardKey(.space)
         }
 
         step ("Then there are no breadcrumbs in reference section"){
-            cardView!.openCardFromRecentsList(cardTitleToOpen: cardName1)
+            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName1)
                 .expandReferenceSection()
             XCTAssertFalse(cardView!.waitForBreadcrumbs(), "Breadcrumbs are available though shouldn't be")
         }

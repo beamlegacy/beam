@@ -51,7 +51,7 @@ class HelpAndFeedbackTests: BaseTest {
 
         step("When I open Feature request"){
             let omnibox = OmniBoxTestView()
-            omnibox.navigateToCardViaPivotButton()
+            omnibox.navigateToNoteViaPivotButton()
             journalView.openHelpMenu().openFeatureRequest()
         }
 
