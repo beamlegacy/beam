@@ -42,6 +42,22 @@ extension ElementNode {
         createIndentLayer()
         let bulletPoint = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         createDisclosureLayer(at: bulletPoint)
+
+        // I have to add this fallback since nowadays we don't really allow bullet settings per note per say
+        // And NoteSettings is in BeamCore and can't have access to the PreferencesManager
+        // Also we don't want to change all the notes metadata when we change the alwaysShowBullets settings
+        switch self.editor?.note.note?.noteSettings?.bulletPointVisibility {
+        case .regular:
+            if !PreferencesManager.alwaysShowBullets {
+                self.editor?.note.note?.noteSettings?.bulletPointVisibility = .empty
+            }
+        case .empty:
+            if PreferencesManager.alwaysShowBullets {
+                self.editor?.note.note?.noteSettings?.bulletPointVisibility = .regular
+            }
+        case .none:
+            self.editor?.note.note?.noteSettings?.bulletPointVisibility = PreferencesManager.alwaysShowBullets ? .regular : .empty
+        }
         createBulletPointLayer(at: bulletPoint)
 
         createMoveHandleLayer(at: moveHandlePosition)
@@ -171,7 +187,8 @@ extension ElementNode {
         if bulletLayer.frame.origin.y != bulletLayerPositionY {
             bulletLayer.frame.origin = CGPoint(x: Self.bulletLayerPositionX, y: bulletLayerPositionY)
         }
-        bulletLayer.layer.opacity = Float((showDisclosureButton || !PreferencesManager.alwaysShowBullets) ? 0 : 1)
+        let showBullet = self.editor?.note.note?.noteSettings?.bulletPointVisibility == .regular
+        bulletLayer.layer.opacity = Float((showDisclosureButton || !showBullet) ? 0 : 1)
         bulletLayer.layer.isHidden = !self.isFocused && self.elementText.isEmpty && element.kind.isText
         if let placeHolder = (self as? TextNode)?.placeholder, !placeHolder.isEmpty, !(editor?.hasFocus ?? false) {
             bulletLayer.layer.isHidden = false
