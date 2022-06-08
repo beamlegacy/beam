@@ -9,8 +9,8 @@ import Foundation
 import BeamCore
 import UniformTypeIdentifiers
 
+// swiftlint:disable file_length
 extension BeamTextEdit {
-
     // Disable detection during copy / paste
     private func disableInputDetector() {
         inputDetectorState -= 1
@@ -39,7 +39,6 @@ extension BeamTextEdit {
         attachment.attachmentCell = attachmentCell
         let attrString: NSAttributedString = NSAttributedString(attachment: attachment)
         return attrString
-
     }
 
     func buildStringFrom(node: ElementNode) -> NSAttributedString {
@@ -84,7 +83,6 @@ extension BeamTextEdit {
                 strNodes.append(buildStringFrom(node: node))
             }
         }
-
         return strNodes
     }
 
@@ -183,7 +181,7 @@ extension BeamTextEdit {
             } else if let fileUrl = objects?.first as? NSURL {
                 paste(url: fileUrl as URL)
             } else if let attributedStr = objects?.first as? NSAttributedString {
-                paste(attributedStrings: attributedStr.split(seperateBy: "\n"))
+                paste(attributedStrings: attributedStr.split(separateBy: "\n"))
             } else if let pastedStr: String = objects?.first as? String {
                 var lines = [NSAttributedString]()
                 pastedStr.enumerateLines { line, _ in
@@ -193,9 +191,30 @@ extension BeamTextEdit {
             }
         }
     }
-    private func paste(beamTextHolder: BeamTextHolder) {
-        rootNode?.insertText(text: beamTextHolder.bText, replacementRange: nil)
+
+    private func paste(beamTextHolder: BeamTextHolder, fromRawPaste: Bool = false) {
+        if fromRawPaste {
+            rootNode?.insertText(string: beamTextHolder.bText.text, replacementRange: nil)
+        } else {
+            rootNode?.insertText(text: beamTextHolder.bText, replacementRange: nil)
+        }
         addNoteSourceFrom(text: beamTextHolder.bText)
+    }
+
+    @objc func pasteAsPlainText(_ sender: Any) {
+        guard NSPasteboard.general.canReadObject(forClasses: supportedPasteAsPlainTextObjects, options: nil) else {
+            return
+        }
+        disableAnimationAtNextLayout()
+        let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteAsPlainTextObjects, options: nil)
+        if let bTextHolder: BeamTextHolder = objects?.first as? BeamTextHolder {
+            paste(beamTextHolder: bTextHolder, fromRawPaste: true)
+        } else if let attributedStr = objects?.first as? NSAttributedString {
+            paste(attributedStrings: attributedStr.split(separateBy: "\n"), fromRawPaste: true)
+        } else if let pastedStr: String = objects?.first as? String {
+            let attributedStrings = pastedStr.split(whereSeparator: \.isNewline).map { NSAttributedString(string: String($0)) }
+            paste(attributedStrings: attributedStrings, fromRawPaste: true)
+        }
     }
 
     // swiftlint:disable:next cyclomatic_complexity
@@ -258,7 +277,6 @@ extension BeamTextEdit {
 
                   return
               }
-
         paste(image: image, with: url.lastPathComponent)
     }
 
@@ -301,7 +319,7 @@ extension BeamTextEdit {
         }
     }
 
-    private func paste(attributedStrings: [NSAttributedString]) {
+    private func paste(attributedStrings: [NSAttributedString], fromRawPaste: Bool = false) {
         guard let rootNode = rootNode else { return }
         guard let mngrNode = focusedWidget else {
             Logger.shared.logError("Cannot paste contents in an editor without a focused bullet", category: .noteEditor)
@@ -316,7 +334,12 @@ extension BeamTextEdit {
         for (idx, attributedString) in attributedStrings.enumerated() {
             guard !attributedString.string.isEmpty else { continue }
             let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))
-            let beamText = BeamText(attributedString: cleanedText)
+            let beamText: BeamText
+            if fromRawPaste {
+                beamText = BeamText(cleanedText.string, attributes: rootNode.state.attributes)
+            } else {
+                beamText = BeamText(attributedString: cleanedText)
+            }
             insertedElements.append(beamText)
             if idx == 0 {
                 disableInputDetector()
@@ -372,5 +395,17 @@ extension BeamTextEdit {
             self.enableInputDetector()
         }
     }
+}
 
+extension BeamTextEdit: NSMenuItemValidation {
+    public func validateMenuItem(_ menuItem: NSMenuItem) -> Bool {
+        guard menuItem.action == #selector(Self.pasteAsPlainText(_:)) else { return true }
+        guard let objects = NSPasteboard.general.readObjects(forClasses: supportedPasteAsPlainTextObjects), !objects.isEmpty else {
+            return false
+        }
+        if let attrString = objects.first as? NSAttributedString, attrString.containsAttachments {
+            return false
+        }
+        return true
+    }
 }
