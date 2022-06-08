@@ -176,7 +176,6 @@ struct CalendarView: View {
                 guard !attendee.name.isEmpty else { return }
                 let name = attendee.name
                 let attendeeNote = BeamNote.fetchOrCreate(title: name)
-                saveContacts(for: attendee, and: attendeeNote)
                 text.insert(name, at: position, withAttributes: [.internalLink(attendeeNote.id)])
                 position += name.count
                 if index < meeting.attendees.count - 1 {
@@ -197,12 +196,6 @@ struct CalendarView: View {
 
         guard let lastElement = note.children.last, let root = viewModel.textRoot else { return }
         note.cmdManager.focus(lastElement, in: root)
-    }
-
-    private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
-        guard let contactRecord = ContactsManager.shared.save(email: attendee.email, to: attendeeNote.id, networkCompletion: { _ in }) else { return }
-        attendeeNote.contactId = contactRecord.uuid
-        attendeeNote.save()
     }
 }
 

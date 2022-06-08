@@ -282,11 +282,23 @@ extension MeetingModalView {
 
         func addMeeting() {
             let meeting = Meeting(name: meetingName, startTime: startTime, attendees: attendees, linkCards: linkCards)
+            meeting.attendees.forEach { attendee in
+                guard !attendee.name.isEmpty else { return }
+                let name = attendee.name
+                let attendeeNote = BeamNote.fetchOrCreate(title: name)
+                saveContacts(for: attendee, and: attendeeNote)
+            }
             onFinish?(meeting)
         }
 
         func cancel() {
             onFinish?(nil)
+        }
+
+        private func saveContacts(for attendee: Meeting.Attendee, and attendeeNote: BeamNote) {
+            guard let contactRecord = ContactsManager.shared.save(email: attendee.email, to: attendeeNote.id, networkCompletion: { _ in }) else { return }
+            attendeeNote.contactId = contactRecord.uuid
+            attendeeNote.save()
         }
     }
 }
