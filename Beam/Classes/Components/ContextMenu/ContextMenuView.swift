@@ -161,7 +161,7 @@ struct ContextMenuItemView: View {
         }
         .padding(.horizontal, item.allowPadding ? BeamSpacing._50 : 0)
         .frame(maxWidth: .infinity)
-        .accessibilityElement()
+        .accessibilityElement(children: item.customContent != nil ? .contain : .ignore)
         .accessibility(addTraits: highlight ? [.isSelected, .isStaticText] : .isStaticText)
         .accessibility(identifier: "ContextMenuItem-\(item.title.lowercased())")
     }
