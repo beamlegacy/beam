@@ -60,6 +60,7 @@ class BeamWebView: WKWebView {
 
         monitor = NSEvent.addLocalMonitorForEvents(matching: [.keyDown, .flagsChanged]) { [weak self] event in
             guard let self = self, self.page != nil else { return event }
+            guard self.window?.isKeyWindow == true && self.window?.firstResponder == self else { return event }
             self.optionKeyToggle(event.modifierFlags)
             if event.modifierFlags.contains(.control) && event.keyCode == KeyCode.tab.rawValue {
                 self.window?.keyDown(with: event)
