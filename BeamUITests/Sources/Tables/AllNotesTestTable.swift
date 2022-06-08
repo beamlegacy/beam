@@ -48,4 +48,24 @@ class AllNotesTestTable: BaseView, Rowable {
         return self
     }
     
+    //TBD using BaseTable class accepting accepting generic tables
+    func isEqualTo(_ externalTable: AllNotesTestTable) -> (Bool, String) {
+        var failedValues = [String]()
+        if (self.numberOfVisibleItems != externalTable.numberOfVisibleItems) {
+            return (false, "Tables rows number is different")
+        }
+        for index in 0..<numberOfVisibleItems {
+            let rowComparisonResult =  self.rows[index].isEqualTo(externalTable.rows[index])
+            if !rowComparisonResult.0 {
+                failedValues.append("Row number:\(index+1) comparison failed, where:\(rowComparisonResult.0)")
+            }
+        }
+        return (failedValues.count == 0, failedValues.joined(separator: " || "))
+    }
+    
+    //TBD using BaseTable class accepting accepting generic tables
+    func containsRows() -> Bool {
+        //TBD with next Sync tests
+        return false
+    }
 }

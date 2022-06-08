@@ -28,7 +28,10 @@ class BaseTest: XCTestCase {
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
     let mockBaseUrl = "http://form.lvh.me:8080/"
-
+    let uiTestMenu = UITestsMenuBar()
+    
+    var deletePK = false
+    var deleteRemoteAccount = false
 
     override func tearDownWithError() throws {
         super.tearDown()
@@ -38,7 +41,13 @@ class BaseTest: XCTestCase {
     override func tearDown() {
         if isAppRunning() {
             storeScreenshot()
-            UITestsMenuBar().destroyDB()
+            uiTestMenu.destroyDB()
+        }
+        if deletePK {
+            uiTestMenu.deletePrivateKeys()
+        }
+        if deleteRemoteAccount {
+            uiTestMenu.deleteRemoteAccount().resetAPIEndpoints()
         }
         super.tearDown()
         terminateAppInstance()
@@ -121,5 +130,19 @@ class BaseTest: XCTestCase {
     func isBigSurOS() -> Bool {
         let osVersion = ProcessInfo.processInfo.operatingSystemVersion.majorVersion
         return osVersion < 12
+    }
+    
+    @discardableResult
+    func setupStaging(withRandomAccount: Bool = false) -> JournalTestView {
+        deleteRemoteAccount = true
+        deletePK = true
+        
+        let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
+        
+        uiTestMenu.setAPIEndpointsToStaging()
+        if withRandomAccount {
+            uiTestMenu.signUpWithRandomTestAccount()
+        }
+        return journalView
     }
 }
