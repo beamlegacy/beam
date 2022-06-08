@@ -199,7 +199,7 @@ struct ContextMenuView: View {
     static let defaultWidth: CGFloat = 160
     static let largeWidth: CGFloat = 240
 
-    static func idealSizeForItems(_ items: [ContextMenuItem]) -> CGSize {
+    static func idealSizeForItems(_ items: [ContextMenuItem], forcedWidth: CGFloat? = nil) -> CGSize {
         guard items.count > 0 else { return .zero }
         let spacing = Self.itemsSpacing
         var itemsNeedLargeWidth = false
@@ -208,7 +208,7 @@ struct ContextMenuView: View {
             let itemHeight = Self.height(forItem: item)
             return result + itemHeight + spacing
         }
-        let width = itemsNeedLargeWidth ? self.largeWidth : self.defaultWidth
+        let width = forcedWidth ?? (itemsNeedLargeWidth ? self.largeWidth : self.defaultWidth)
         return CGSize(width: width, height: height)
     }
 
@@ -233,10 +233,7 @@ struct ContextMenuView: View {
     }
 
     var body: some View {
-        var computedSize = Self.idealSizeForItems(viewModel.items)
-        if let forcedWidth = viewModel.forcedWidth, !viewModel.sizeToFit {
-            computedSize.width = forcedWidth
-        }
+        let computedSize = Self.idealSizeForItems(viewModel.items, forcedWidth: !viewModel.sizeToFit ? viewModel.forcedWidth : nil)
         return ZStack {
             FormatterViewBackground {
                 VStack(alignment: .leading, spacing: Self.itemsSpacing) {
