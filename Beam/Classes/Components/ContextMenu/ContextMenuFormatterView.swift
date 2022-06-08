@@ -73,7 +73,7 @@ class ContextMenuFormatterView: FormatterView {
         self.onSelectMenuItem = onSelectHandler
         self.onClosing = onClosing
         self._handlesTyping = handlesTyping
-        self.lastComputedSize = ContextMenuView.idealSizeForItems(items)
+        self.lastComputedSize = ContextMenuView.idealSizeForItems(items, forcedWidth: forcedWidth)
         self.origin = origin
         self.canBecomeKey = canBecomeKey
         super.init(key: key, viewType: .inline)
@@ -138,7 +138,7 @@ class ContextMenuFormatterView: FormatterView {
     }
 
     private func updateSize() {
-        let newSize = ContextMenuView.idealSizeForItems(displayedItems)
+        let newSize = ContextMenuView.idealSizeForItems(displayedItems, forcedWidth: forcedWidth)
         if let window = window as? PopoverWindow {
             var newWindowFrame = window.frame
             sizeUpdateDispatchedBlock?.cancel()
