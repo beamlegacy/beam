@@ -18,16 +18,16 @@ extension NSAttributedString {
         return NSRange(location: 0, length: self.length)
     }
 
-    func split(seperateBy: String) -> [NSAttributedString] {
+    func split(separateBy: String) -> [NSAttributedString] {
         let input = self.string
-        let separatedInput = input.components(separatedBy: seperateBy)
+        let separatedInput = input.components(separatedBy: separateBy)
         var output = [NSAttributedString]()
         var start = 0
         for sub in separatedInput {
             let range = NSRange(location: start, length: sub.utf16.count)
             let attribStr = self.attributedSubstring(from: range)
             output.append(attribStr)
-            start += range.length + seperateBy.count
+            start += range.length + separateBy.count
         }
         return output
     }
