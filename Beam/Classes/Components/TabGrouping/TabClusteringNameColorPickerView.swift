@@ -83,12 +83,14 @@ struct TabClusteringNameColorPickerView: View {
                 }, onEscape: {
                     isEditing = false
                 })
+                .accessibility(identifier: "TabGroupNameTextField")
                 .transition(.opacity.animation(BeamAnimation.easingBounce(duration: 0.2)))
             }
             if isEditing && !groupName.isEmpty {
                 Icon(name: "shortcut-return", width: 12, color: BeamColor.LightStoneGray.swiftUI)
             } else {
                 colorPicker
+                    .accessibility(identifier: "TabGroupColorPicker")
                     .frame(maxWidth: isPickingColor ? .infinity : 16)
             }
         }
