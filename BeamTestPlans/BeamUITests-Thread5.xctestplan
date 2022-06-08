@@ -138,6 +138,7 @@
         "SigninTests",
         "SlashMenuTests",
         "SlashMenuTests\/testDatePickerCardCreation()",
+        "SyncTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "UpdateViewTests\/testUpdateAvailableEverywhereInCardView()",

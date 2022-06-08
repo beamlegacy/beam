@@ -16,9 +16,7 @@ class OnboardingTests: BaseTest {
     var onboardingImportDataTestView: OnboardingImportDataTestView!
     var onboardingLostPKTestView: OnboardingLostPKTestView!
     var journalView: JournalTestView!
-    var webView: WebTestView!
-    var deletePK = false
-    var cleanupStaging = false
+    var webView = WebTestView()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -26,16 +24,6 @@ class OnboardingTests: BaseTest {
             launchAppWithArgument(uiTestModeLaunchArgument)
             UITestsMenuBar().resetAPIEndpoints()
                             .showOnboarding()
-        }
-    }
-    
-    override func tearDown() {
-        super.tearDown()
-        if deletePK {
-            UITestsMenuBar().deletePrivateKeys()
-        }
-        if cleanupStaging {
-            UITestsMenuBar().deleteRemoteAccount().resetAPIEndpoints()
         }
     }
     
@@ -432,15 +420,10 @@ class OnboardingTests: BaseTest {
     }
     
     func testOnboardingWelcomeAppearance() {
-        deletePK = true
-        cleanupStaging = true
         let expectedTabs = 1
         let expectedTabTitle = "Welcome to beam"
         step("GIVEN I sign up an account") {
-            UITestsMenuBar()
-                .setAPIEndpointsToStaging()
-                .signUpWithRandomTestAccount()
-            webView = WebTestView()
+            setupStaging(withRandomAccount: true)
         }
         
         step("THEN \(expectedTabs) tab with '\(expectedTabTitle)' is displayed") {
@@ -452,8 +435,6 @@ class OnboardingTests: BaseTest {
     
     func testOnboardingWelcomeWebViewsCorrectness() throws {
         try XCTSkipIf(true, "The test scenario is NOT for MRs as far as welcome web pages are not a part of mac app. The scenario is created to be ran during release activities manually, to make sure the copies are correct and in correct sequence, to avoid making it manually")
-        deletePK = true
-        cleanupStaging = true
         let page1 = ["Welcome to beam", "beam is a new way to navigate the web, ", "gather knowledge and share with others."]
         let page2 = ["Beneath your ", "browser", "…"]
         let page3 = ["A ", "powerful note", " app…"]
@@ -466,22 +447,17 @@ class OnboardingTests: BaseTest {
         let page8 = ["Press ", "⌘", "D", "Or ", " to toggle between the web and your notes"]
         let welcomePages = [page1, page2, page3, page4, page5, page6, page7, page8]
         
-        launchAppWithArgument(uiTestModeLaunchArgument)
-        let view = WebTestView()
-        
         step("GIVEN I sign up a new account") {
-            UITestsMenuBar()
-                .setAPIEndpointsToStaging()
-                .signUpWithRandomTestAccount()
+            setupStaging(withRandomAccount: true)
         }
         
         step("THEN welcome web views display correct content") {
             welcomePages.forEach {page in
                 page.forEach {staticText in
-                    XCTAssertTrue(view.staticText(staticText).waitForExistence(timeout: BaseTest.implicitWaitTimeout), "'\(staticText)' doesn't exist on the page")
+                    XCTAssertTrue(webView.staticText(staticText).waitForExistence(timeout: BaseTest.implicitWaitTimeout), "'\(staticText)' doesn't exist on the page")
                 }
-                if (!view.staticText("Play again").exists) {
-                    view.staticText("⏎").hoverAndTapInTheMiddle()
+                if (!webView.staticText("Play again").exists) {
+                    webView.staticText("⏎").hoverAndTapInTheMiddle()
                 }
             }
         }
