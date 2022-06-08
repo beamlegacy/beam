@@ -849,6 +849,7 @@
 		A0125A0626DE8AF300590CB5 /* WebCommand.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0125A0526DE8AF300590CB5 /* WebCommand.swift */; };
 		A0129BD32758E87900522183 /* NSApplication+Relaunch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0129BD22758E87900522183 /* NSApplication+Relaunch.swift */; };
 		A0184F7126AF56AB00993C32 /* PreferencesManager+Advanced.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */; };
+		A01EB6BC2840DE430032962D /* NoteMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = A01EB6BB2840DE430032962D /* NoteMetadata.swift */; };
 		A0208F8225D6BB1C00CA054C /* AppDelegate+BeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */; };
 		A02E837127AEDE6500CEF688 /* OnboardingLostPrivateKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = A02E837027AEDE6500CEF688 /* OnboardingLostPrivateKey.swift */; };
 		A032BD33261F4677009A3576 /* ShortcutLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A032BD32261F4677009A3576 /* ShortcutLayer.swift */; };
@@ -2718,6 +2719,7 @@
 		A0129BD22758E87900522183 /* NSApplication+Relaunch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSApplication+Relaunch.swift"; sourceTree = "<group>"; };
 		A0137B3425B6DFE100E65208 /* CommandManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommandManager.swift; sourceTree = "<group>"; usesTabs = 0; };
 		A0184F7026AF56AB00993C32 /* PreferencesManager+Advanced.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "PreferencesManager+Advanced.swift"; sourceTree = "<group>"; };
+		A01EB6BB2840DE430032962D /* NoteMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoteMetadata.swift; sourceTree = "<group>"; };
 		A0208F8125D6BB1C00CA054C /* AppDelegate+BeamTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+BeamTests.swift"; sourceTree = "<group>"; };
 		A02E837027AEDE6500CEF688 /* OnboardingLostPrivateKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPrivateKey.swift; sourceTree = "<group>"; };
 		A032BD32261F4677009A3576 /* ShortcutLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutLayer.swift; sourceTree = "<group>"; };
@@ -6382,6 +6384,7 @@
 				DAEEA73A26A5C4A600AE72DE /* NoteSource.swift */,
 				969CE3E926CB7B01000AEF37 /* BeamNoteType.swift */,
 				DA8D947E27FF17D90073AD2D /* NoteScores.swift */,
+				A01EB6BB2840DE430032962D /* NoteMetadata.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -8584,6 +8587,7 @@
 				96319D432616233E00D1CF31 /* String+Split.swift in Sources */,
 				96319D4A2616233E00D1CF31 /* String+Localization.swift in Sources */,
 				521351D027737303001922FD /* Array+Chunked.swift in Sources */,
+				A01EB6BC2840DE430032962D /* NoteMetadata.swift in Sources */,
 				BAA679844CE644AE293FDA04 /* BrowsingSession.swift in Sources */,
 				96A5DAF227C056F700746719 /* BeamText+Merge.swift in Sources */,
 			);

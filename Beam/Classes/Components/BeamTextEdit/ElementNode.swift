@@ -224,7 +224,11 @@ public class ElementNode: Widget {
                 updateTextChildren(elements: elements)
             }.store(in: &scope)
 
-        PreferencesManager.$alwaysShowBullets.sink { [unowned self] _ in
+        PreferencesManager.$alwaysShowBullets.sink { [unowned self] alwaysShowBullets in
+            self.editor?.note.note?.noteSettings?.bulletPointVisibility = alwaysShowBullets ? .regular : .empty
+        }.store(in: &scope)
+
+        self.editor?.note.note?.$noteSettings.sink { [unowned self] _ in
             invalidateLayout()
         }.store(in: &scope)
 
