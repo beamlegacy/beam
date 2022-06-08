@@ -138,6 +138,8 @@ public class BeamNote: BeamElement {
     @Published public var updateAttempts: Int = 0
     @Published public var updates: Int = 0
     public var contactId: UUID? { didSet { change(.meta) } }
+    @Published public var noteSettings: NoteMetadata? = NoteMetadata() { didSet { change(.meta) } }
+
     /// Tombstones is an array containing all the beamelement that once where in this note but that have been erased from it at some point.
     public var tombstones = Set<UUID>()
 
@@ -197,6 +199,7 @@ public class BeamNote: BeamElement {
         case browsingSessionIds
         case contactId
         case tombstones
+        case noteSettings
     }
 
     public required init(from decoder: Decoder) throws {
@@ -237,6 +240,7 @@ public class BeamNote: BeamElement {
         browsingSessionIds = (try container.decodeIfPresent([UUID].self, forKey: .browsingSessionIds) ?? [UUID]())
         contactId = try? container.decodeIfPresent(UUID.self, forKey: .contactId)
         tombstones = (try? container.decodeIfPresent(Set<UUID>.self, forKey: .tombstones)) ?? tombstones
+        noteSettings = (try? container.decodeIfPresent(NoteMetadata.self, forKey: .noteSettings)) ?? NoteMetadata()
         switch type {
         case .note:
             break
@@ -259,6 +263,7 @@ public class BeamNote: BeamElement {
         try container.encode(publicationStatus, forKey: .publicationStatus)
         try container.encode(browsingSessionIds, forKey: .browsingSessionIds)
         try container.encode(contactId, forKey: .contactId)
+        try container.encode(noteSettings, forKey: .noteSettings)
         try super.encode(to: encoder)
     }
 
@@ -275,6 +280,7 @@ public class BeamNote: BeamElement {
         newNote.version.store(version.load(ordering: .relaxed), ordering: .relaxed)
         newNote.savedVersion = savedVersion
         newNote.publicationStatus = publicationStatus
+        newNote.noteSettings = noteSettings
         if !withNewId { // We don't need to copy the tombstones if we create a separate new note
             newNote.tombstones = tombstones
         }
