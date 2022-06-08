@@ -138,6 +138,7 @@
         "SigninTests",
         "SlashMenuTests",
         "SlashMenuTests\/testNoteDividerCreation()",
+        "SyncTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",

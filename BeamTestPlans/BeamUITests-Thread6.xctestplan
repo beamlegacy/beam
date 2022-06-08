@@ -127,6 +127,7 @@
         "SignInSucessfullyTests",
         "SignUpAutocompleteTests",
         "SigninTests",
+        "SyncTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
