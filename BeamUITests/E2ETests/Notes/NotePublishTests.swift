@@ -12,20 +12,9 @@ class NotePublishTests: BaseTest {
     
     var cardView: NoteTestView!
     var allCardsView: AllNotesTestView!
+    var journalView: JournalTestView!
     let shortcuts = ShortcutsHelper()
     let dialogView = DialogTestView()
-    var deletePK = false
-    var deleteRemoteAccount = false
-    
-    override func tearDown() {
-        super.tearDown()
-        if deletePK {
-            UITestsMenuBar().deletePrivateKeys()
-        }
-        if deleteRemoteAccount {
-            UITestsMenuBar().deleteRemoteAccount().resetAPIEndpoints()
-        }
-    }
     
     private func switchReloadAndAssert(cardName: String, isPublished: Bool = true) {
         shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
@@ -80,12 +69,7 @@ class NotePublishTests: BaseTest {
     }
     
     func testPublishUnpublishNote() throws {
-        deleteRemoteAccount = true
-        deletePK = true
-        let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
-        UITestsMenuBar()
-            .setAPIEndpointsToStaging()
-            .signUpWithRandomTestAccount()
+        journalView = setupStaging(withRandomAccount: true)
         
         XCTAssertTrue(WebTestView().waitForWebViewToLoad(), "Webview is not loaded")
         journalView.shortcutsHelper.shortcutActionInvoke(action: .switchBetweenCardWeb)

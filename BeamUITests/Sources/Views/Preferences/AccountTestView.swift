@@ -56,4 +56,8 @@ class AccountTestView: PreferencesBaseView {
     func getConnectToBeamButtonElement() -> XCUIElement {
         return button(AccountViewLocators.Buttons.connectBeamButton.accessibilityIdentifier)
     }
+    
+    func signOutButtonClick() {
+        button(AccountViewLocators.Buttons.signOutButton.accessibilityIdentifier).clickOnExistence()
+    }
 }
