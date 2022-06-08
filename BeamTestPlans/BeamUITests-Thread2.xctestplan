@@ -136,6 +136,7 @@
         "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
+        "SyncTests",
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
