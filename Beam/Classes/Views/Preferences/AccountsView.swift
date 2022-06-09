@@ -328,7 +328,7 @@ struct AccountsView: View {
                 } .overlay(
                     ZStack(alignment: .trailing) {
                         if encryptionKeyIsCopied {
-                            Tooltip(title: "Encryption Key Copied !")
+                            Tooltip(title: "Encryption Key Copied!")
                                 .fixedSize()
                                 .offset(x: 140, y: -25)
                                 .transition(Tooltip.defaultTransition)
