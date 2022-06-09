@@ -344,7 +344,7 @@ public class TextRoot: ElementNode {
         if let note = self.note, note.fastLinksAndReferences.isEmpty,
             note.isTodaysNote && element.children.count == 1 && element.children.first?.text.isEmpty ?? false {
             let first = children.first as? TextNode
-            first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World !")
+            first?.placeholder = BeamText(text: BeamPlaceholder.allPlaceholders.randomElement() ?? "Hello World!")
         }
     }
 
