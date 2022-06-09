@@ -1,5 +1,5 @@
 //
-//  AllCardsViewTests.swift
+//  AllNotesViewTests.swift
 //  BeamUITests
 //
 //  Created by Andrii on 22.09.2021.
@@ -18,7 +18,7 @@ class AllNotesViewTests: BaseTest {
         
         step ("GIVEN I open All notes") {
             launchAppWithArgument(self.uiTestModeLaunchArgument) //to be used for future account creation and publishing
-            ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView = AllNotesTestView()
         }
         

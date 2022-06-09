@@ -11,14 +11,14 @@ enum WebViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case closeTabButton = "tabs-close_xs"
-        case destinationCard = "DestinationNoteTitle"
+        case destinationNote = "DestinationNoteTitle"
         case goToJournalButton = "journal"
         case goBackButton = "goBack"
         case goForwardButton = "goForward"
     }
     
     enum SearchFields: String, CaseIterable, UIElement {
-        case destinationCardSearchField = "DestinationNoteSearchField"
+        case destinationNoteSearchField = "DestinationNoteSearchField"
     }
     
     enum Tabs: String, CaseIterable, UIElement {

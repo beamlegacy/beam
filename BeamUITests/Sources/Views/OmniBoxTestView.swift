@@ -12,7 +12,7 @@ class OmniBoxTestView: BaseView {
 
 
     func focusOmniBoxSearchField(forCurrenTab: Bool = false) {
-        shortcutsHelper.shortcutActionInvoke(action: forCurrenTab ? .openLocation : .newTab)
+        shortcutHelper.shortcutActionInvoke(action: forCurrenTab ? .openLocation : .newTab)
     }
 
     func getOmniBoxSearchField() -> XCUIElement {

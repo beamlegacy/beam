@@ -146,7 +146,7 @@ class SearchOnWebTests: BaseTest {
         }
         
         step("When I clean the text field"){
-            searchView.shortcutsHelper
+            searchView.shortcutHelper
                 .shortcutActionInvoke(action: .selectAll)
                 .typeKeyboardKey(.delete)
         }

@@ -15,7 +15,7 @@ class IncognitoModeTests: BaseTest {
         let journalView = launchApp()
         
         step ("Given I enable an incognito mode"){
-            ShortcutsHelper().shortcutActionInvoke(action: .incognitoModeOn)
+            shortcutHelper.shortcutActionInvoke(action: .incognitoModeOn)
         }
         
         step ("Then I see incognito mode is enabled on UI"){

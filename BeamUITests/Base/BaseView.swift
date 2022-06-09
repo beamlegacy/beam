@@ -18,7 +18,9 @@ class BaseView {
     let minimumWaitTimeout = TimeInterval(2)
     let defaultPressDurationSeconds = 1.5
     let errorFetchStringValue = "ERROR:failed to fetch string value from "
-    let shortcutsHelper = ShortcutsHelper()
+    let shortcutHelper = ShortcutsHelper()
+    let uiMenu = UITestsMenuBar()
+
     //Wrapper over the elements
     func label(_ element: String) -> XCUIElement {
         return app.windows.staticTexts[element]
@@ -128,7 +130,7 @@ class BaseView {
     func populateOmniboxWith(_ text: String) -> OmniBoxTestView {
         let omniSearchField = searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
         if !omniSearchField.exists {
-            shortcutsHelper.shortcutActionInvoke(action: .openLocation)
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
         }
         omniSearchField.clickClearAndType(text)
         BaseTest.waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), BaseTest.minimumWaitTimeout)
@@ -147,19 +149,19 @@ class BaseView {
         let text = textToPaste
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
-        shortcutsHelper.shortcutActionInvoke(action: .paste)
+        shortcutHelper.shortcutActionInvoke(action: .paste)
         return self
     }
     
     @discardableResult
     func triggerSearchField() -> SearchTestView {
-        shortcutsHelper.shortcutActionInvoke(action: .search)
+        shortcutHelper.shortcutActionInvoke(action: .search)
         return SearchTestView()
     }
     
     @discardableResult
     func selectAllAndDelete() -> BaseView {
-        ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+        shortcutHelper.shortcutActionInvoke(action: .selectAll)
         typeKeyboardKey(.delete)
         return self
     }
@@ -202,7 +204,7 @@ class BaseView {
         let noteView = NoteTestView()
         let noteSwitcherButton = noteView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(noteTitleToOpen)'")).firstMatch
         noteSwitcherButton.clickOnExistence()
-        XCTAssertTrue(noteView.waitForCardToOpen(cardTitle: noteTitleToOpen), "\(noteTitleToOpen) note is failed to load")
+        XCTAssertTrue(noteView.waitForNoteToOpen(noteTitle: noteTitleToOpen), "\(noteTitleToOpen) note is failed to load")
         return noteView
     }
 }

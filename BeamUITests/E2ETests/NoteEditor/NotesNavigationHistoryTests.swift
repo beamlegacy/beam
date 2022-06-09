@@ -23,7 +23,7 @@ class NotesNavigationHistoryTests: BaseTest {
     }
     
     private func assertNoteIsOpened() {
-        XCTAssertTrue(noteView.waitForCardViewToLoad())
+        XCTAssertTrue(noteView.waitForNoteViewToLoad())
     }
     
     func testNotesNavigationHistory() {
@@ -40,7 +40,7 @@ class NotesNavigationHistoryTests: BaseTest {
         }
         
         step("THEN Journal is opened on CMD+[ shortcuts click and Back button is disabled"){
-            noteView.shortcutsHelper.shortcutActionInvoke(action: .browserHistoryBack)
+            noteView.shortcutHelper.shortcutActionInvoke(action: .browserHistoryBack)
             self.assertJournalIsOpened()
             XCTAssertFalse(noteView.button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).exists)
         }
@@ -51,7 +51,7 @@ class NotesNavigationHistoryTests: BaseTest {
         }
         
         step("THEN Today's note is opened on CMD+] shortcuts call"){
-            noteView.shortcutsHelper.shortcutActionInvoke(action: .browserHistoryForward)
+            noteView.shortcutHelper.shortcutActionInvoke(action: .browserHistoryForward)
             self.assertNoteIsOpened()
         }
         

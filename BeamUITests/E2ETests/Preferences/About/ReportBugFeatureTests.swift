@@ -11,11 +11,10 @@ import XCTest
 class ReportBugFeatureTests: BaseTest {
     
     var aboutPreferencesView: AboutPreferencesTestView?
-    var webView: WebTestView?
     
     @discardableResult
     private func openAboutPreferences() -> AboutPreferencesTestView {
-        ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
+        shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         PreferencesBaseView().navigateTo(preferenceView: .about)
         return AboutPreferencesTestView()
     }
@@ -32,12 +31,11 @@ class ReportBugFeatureTests: BaseTest {
         
         step ("WHEN I click Report Feature button") {
             aboutPreferencesView?.clickFeatureRequestButton()
-            ShortcutsHelper().shortcutActionInvoke(action: .close)
-            webView = WebTestView()
+            shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
         step ("THEN I see \(expectedFeaturesUrl) URL opened") {
-            XCTAssertTrue(webView!
+            XCTAssertTrue(webView
                             .activateSearchFieldFromTab(index: 0)
                             .waitForSearchFieldValueToEqual(expectedValue: expectedFeaturesUrl))
         }
@@ -45,11 +43,11 @@ class ReportBugFeatureTests: BaseTest {
         step ("WHEN I click Report Bug button") {
             self.openAboutPreferences()
             aboutPreferencesView?.clickReportBugButton()
-            ShortcutsHelper().shortcutActionInvoke(action: .close)
+            shortcutHelper.shortcutActionInvoke(action: .close)
         }
         
         step ("THEN I see \(expectedBugsUrl) URL opened") {
-            XCTAssertTrue(webView!
+            XCTAssertTrue(webView
                             .activateSearchFieldFromTab(index: 1)
                             .waitForSearchFieldValueToEqual(expectedValue: expectedBugsUrl))
         }

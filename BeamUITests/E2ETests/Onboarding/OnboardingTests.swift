@@ -16,13 +16,12 @@ class OnboardingTests: BaseTest {
     var onboardingImportDataTestView: OnboardingImportDataTestView!
     var onboardingLostPKTestView: OnboardingLostPKTestView!
     var journalView: JournalTestView!
-    var webView = WebTestView()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I enable onboarding"){
             launchAppWithArgument(uiTestModeLaunchArgument)
-            UITestsMenuBar().resetAPIEndpoints()
+            uiMenu.resetAPIEndpoints()
                             .showOnboarding()
         }
     }
@@ -148,7 +147,7 @@ class OnboardingTests: BaseTest {
         
         step("Then correct password is accepted"){
             onboardingUsernameView.getPasswordTextField().click()
-            ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
             onboardingUsernameView.typeKeyboardKey(.delete)
             onboardingUsernameView.getPasswordTextField().tapInTheMiddle()
             onboardingUsernameView.getPasswordTextField().typeText(correctPassword)
@@ -300,7 +299,7 @@ class OnboardingTests: BaseTest {
     
     func testOnboardingPrivateKeyVerification() {
         deletePK = true
-        UITestsMenuBar().deletePrivateKeys()
+        uiMenu.deletePrivateKeys()
         
         step("When I pass autorisation views") {
             onboardingPrivateKeyView = passAuthorisationViews(email: self.correctEmail, password: self.correctPassword)
@@ -350,7 +349,7 @@ class OnboardingTests: BaseTest {
     
     func testSignInSuccessfullyFromOnboarding() {
         deletePK = true
-        UITestsMenuBar().deletePrivateKeys()
+        uiMenu.deletePrivateKeys()
         step("When I pass authorisation") {
             onboardingImportDataTestView = passAuthorisationViews(email: self.correctEmail, password: self.correctPassword).setPKAndClickContinueButton(privateKey: self.correctEncKey)
         }

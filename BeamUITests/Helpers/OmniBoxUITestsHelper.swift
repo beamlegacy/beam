@@ -12,7 +12,7 @@ class OmniBoxUITestsHelper : BeamUITestsHelper {
     let searchField: XCUIElement
     let autocompleteResultPredicate = NSPredicate(format: "identifier CONTAINS 'autocompleteResult'")
     let autocompleteSelectedPredicate = NSPredicate(format: "identifier CONTAINS '-selected'")
-    let autocompleteCreateCardPredicate = NSPredicate(format: "identifier CONTAINS '-createNote'")
+    let autocompleteCreateNotePredicate = NSPredicate(format: "identifier CONTAINS '-createNote'")
     let autocompleteNotePredicate = NSPredicate(format: "identifier CONTAINS '-note'")
 
     let allAutocompleteResults: XCUIElementQuery

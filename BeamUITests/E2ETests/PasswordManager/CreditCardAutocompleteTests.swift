@@ -12,13 +12,10 @@ import SwiftUI
 class CreditCardAutocompleteTests: BaseCreditCardTest {
     
     let alertView = AlertTestView()
-    let uiMenu = UITestsMenuBar()
     var ccPrefView = AutoFillCCTestView()
     var passwordPreferencesView = PasswordPreferencesTestView()
     let view = "Payment"
-    
-    var creditCardsTable: CreditCardsTestTable!
-    
+        
     override func setUpWithError() throws {
         launchApp()
         uiMenu.destroyDB()
@@ -53,7 +50,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, inView: view)
         
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: johnCCName)
+            passwordManagerHelper.clickPopupLoginText(login: johnCCName)
         }
         
         step("Then CC is succesfully populated") {
@@ -78,7 +75,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         uiMenu.populateCreditCardsDB()
         
         step ("WHEN I deactivate Autofill password setting"){
-            ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             if (!passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillCCSettingElement())) {
                 passwordPreferencesView.clickAutofillCC()
@@ -90,13 +87,13 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, inView: view)
         
         step("When I click on Other CC") {
-            helper.getOtherCCOptionElement().clickOnExistence()
+            passwordManagerHelper.getOtherCCOptionElement().clickOnExistence()
         }
         
-        verifyDBCCCards(otherCCAvailable: true)
+        verifyDBCCNotes(otherCCAvailable: true)
         
         step("When I click on Other CC") {
-            ccPrefView = helper.openCCPreferences()
+            ccPrefView = passwordManagerHelper.openCCPreferences()
         }
         
         step("Then CC preferences is displayed") {
@@ -122,8 +119,8 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         }
 
         step("Then CC number autofill is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName))
-            XCTAssertFalse(helper.getOtherCCOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCName))
+            XCTAssertFalse(passwordManagerHelper.getOtherCCOptionElement().exists)
         }
         
         verifyCCIsPopulated(number: creditCardNumberLabel, expDate: creditCardExpDateLabel, ownerName: creditCardOwnerNameLabel, secCode: creditCardSecCodeLabel)
@@ -145,16 +142,16 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel, inView: view)
         
         step("When I click on Other CC") {
-            helper.getOtherCCOptionElement().clickOnExistence()
+            passwordManagerHelper.getOtherCCOptionElement().clickOnExistence()
         }
         
-        verifyDBCCCards()
+        verifyDBCCNotes()
     }
     
     func skipAutoFillDeactivated() {
 
         step ("WHEN I deactivate Autofill password setting"){
-            ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             if (passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillCCSettingElement())) {
                 passwordPreferencesView.clickAutofillCC()

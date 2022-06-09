@@ -13,11 +13,10 @@ class BrowserStatusBarTests: BaseTest {
             helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         }
 
-        let webView = WebTestView()
         let link = webView.staticText("on Twitter")
 
         step("Given I enable the status bar"){
-            UITestsMenuBar().menuItem("Show Status Bar").clickIfExists()
+            uiMenu.menuItem("Show Status Bar").clickIfExists()
         }
 
         step("When hovering over a link"){
@@ -41,11 +40,10 @@ class BrowserStatusBarTests: BaseTest {
             helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         }
 
-        let webView = WebTestView()
         let link = webView.staticText("new-tab-beam")
 
         step("Given I enable the status bar"){
-            UITestsMenuBar().menuItem("Show Status Bar").clickIfExists()
+            uiMenu.menuItem("Show Status Bar").clickIfExists()
         }
 
         step("When hovering over a link opening in a new tab"){
@@ -70,11 +68,10 @@ class BrowserStatusBarTests: BaseTest {
             helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.page1)
         }
 
-        let webView = WebTestView()
         let opensInNewTabLink = webView.staticText("new-tab-beam")
 
         step("Given I disable the status bar"){
-            UITestsMenuBar().menuItem("Hide Status Bar").clickIfExists()
+            uiMenu.menuItem("Hide Status Bar").clickIfExists()
         }
 
         step("When hovering over a link"){

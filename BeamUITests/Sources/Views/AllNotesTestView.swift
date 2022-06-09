@@ -1,5 +1,5 @@
 //
-//  AllCardsView.swift
+//  AllNotesView.swift
 //  BeamUITests
 //
 //  Created by Andrii on 23.07.2021.
@@ -12,13 +12,13 @@ class AllNotesTestView: BaseView {
 
     @discardableResult
     func waitForAllNotesViewToLoad() -> Bool {
-        return app.tables.firstMatch.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).firstMatch
+        return app.tables.firstMatch.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier).firstMatch
             .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     @discardableResult
     func waitForNoteTitlesToAppear() -> Bool {
-        return staticText(AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+        return staticText(AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 
     @discardableResult
@@ -38,25 +38,25 @@ class AllNotesTestView: BaseView {
     
     @discardableResult
     func triggerAllNotesMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
-        app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).element(boundBy: 1).clickOnExistence()
+        app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 1).clickOnExistence()
         //Old way to click editor option
-        //image(AllNotesViewLocators.Images.allCardsEditor.accessibilityIdentifier).clickOnExistence()
+        //image(AllNotesViewLocators.Images.allNotesEditor.accessibilityIdentifier).clickOnExistence()
         menuItem(action.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
     @discardableResult
     func triggerSingleNoteMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
-        app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
+        app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
         //Old way to click editor option
-        //image(AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).clickOnExistence()
+        //image(AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).clickOnExistence()
         menuItem(action.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
     @discardableResult
     func openMenuForSingleNote(_ index: Int) -> AllNotesTestView {
-        let singleNoteMenu = app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleCardEditor.accessibilityIdentifier).element(boundBy: 1)
+        let singleNoteMenu = app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 1)
         getNotesNamesElements()[index].hover()
         singleNoteMenu.hover()
         singleNoteMenu.clickOnExistence()
@@ -68,11 +68,11 @@ class AllNotesTestView: BaseView {
     }
     
     func getNotesNamesElements() -> [XCUIElement]{
-        return app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func getNotesNamesElementQuery() -> XCUIElementQuery {
-        return app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier)
+        return app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier)
     }
     
     func getNoteNameValueByIndex(_ index: Int) -> String {
@@ -84,11 +84,11 @@ class AllNotesTestView: BaseView {
     }
     
     @discardableResult
-    func addNewNote(_ cardName: String) -> AllNotesTestView {
-        XCTContext.runActivity(named: "Create a note named '\(cardName)' using + icon") {_ in
+    func addNewNote(_ noteName: String) -> AllNotesTestView {
+        XCTContext.runActivity(named: "Create a note named '\(noteName)' using + icon") {_ in
             tableTextField(AllNotesViewLocators.TextFields.newPrivateNote.accessibilityIdentifier).doubleClick()
-            app.typeText(" " + cardName) //Workaround for CI that skips chars in the end
-            tableImage(AllNotesViewLocators.Buttons.newCardButton.accessibilityIdentifier).click()
+            app.typeText(" " + noteName) //Workaround for CI that skips chars in the end
+            tableImage(AllNotesViewLocators.Buttons.newNoteButton.accessibilityIdentifier).click()
             return self
         }
     }
@@ -108,7 +108,7 @@ class AllNotesTestView: BaseView {
     
     @discardableResult
     func openFirstNote() -> NoteTestView {
-        app.windows.tables.staticTexts[AllNotesViewLocators.ColumnCells.cardTitleColumnCell.accessibilityIdentifier].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
+        app.windows.tables.staticTexts[AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier].firstMatch.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
         return NoteTestView()
     }
     
@@ -138,7 +138,7 @@ class AllNotesTestView: BaseView {
     
     @discardableResult
     func openTableView(_ item: AllNotesViewLocators.ViewMenuItems) -> AllNotesTestTable {
-        image(AllNotesViewLocators.Images.allCardsEditor.accessibilityIdentifier).tapInTheMiddle()
+        image(AllNotesViewLocators.Images.allNotesEditor.accessibilityIdentifier).tapInTheMiddle()
         menuItem(item.accessibilityIdentifier).clickOnExistence()
         return AllNotesTestTable()
     }

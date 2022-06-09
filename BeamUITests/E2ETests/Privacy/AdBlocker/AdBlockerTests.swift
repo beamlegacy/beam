@@ -10,11 +10,7 @@ import XCTest
 
 class AdBlockerTests: BaseTest {
     
-    let mockHttpPage = MockHTTPWebPages()
-    let uiMenu = UITestsMenuBar()
     let adBlockerPage = AdBlockerTestView()
-    let shortcutHelper = ShortcutsHelper()
-    var webTestView = WebTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.fullSiteAdBlock)
     let hostUrl = "a-stat.test.adblock.lvh.me"
     let tabTitleOfTestPage = "AdBlock"
@@ -30,57 +26,57 @@ class AdBlockerTests: BaseTest {
     
     private func verifyWebsiteIsBlocked(index: Int, url: String, hostUrl: String) {
         step("Then \(url) is blocked") {
-            XCTAssertEqual(webTestView.getNumberOfTabs(), index + 1)
+            XCTAssertEqual(webView.getNumberOfTabs(), index + 1)
             XCTAssertTrue(adBlockerPage.isWebsiteBlocked())
             helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
-            XCTAssertEqual(webTestView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfAdBlocker)
-            XCTAssertEqual(webTestView.getElementStringValue(element: adBlockerPage.getBlockedUrlElement()), "The site “\(url)”")
-            XCTAssertEqual(webTestView.getElementStringValue(element: adBlockerPage.getBlockedHostElement()), "Disable blocking for \(hostUrl)")
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfAdBlocker)
+            XCTAssertEqual(webView.getElementStringValue(element: adBlockerPage.getBlockedUrlElement()), "The site “\(url)”")
+            XCTAssertEqual(webView.getElementStringValue(element: adBlockerPage.getBlockedHostElement()), "Disable blocking for \(hostUrl)")
         }
     }
     
     private func verifyWebsiteIsNotBlocked(index: Int) {
         step("Then \(url) is not blocked") {
-            XCTAssertEqual(webTestView.getNumberOfTabs(), index + 1)
+            XCTAssertEqual(webView.getNumberOfTabs(), index + 1)
             XCTAssertFalse(adBlockerPage.isWebsiteBlocked())
             helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
-            XCTAssertEqual(webTestView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfTestPage)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfTestPage)
         }
     }
     
     func testBlockedWebsiteAllowOnce() {
         step("Given I navigate to blocked test page \(url)") {
-            mockHttpPage.openMockPage(.fullSiteAdBlock)
+            mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostUrl)
         
         step("When I allow the website \(url) once") {
-            webTestView = adBlockerPage.allowWebSiteOnce()
+            webView = adBlockerPage.allowWebSiteOnce()
         }
         
         step("Then website \(url) is displayed") {
-            XCTAssertEqual(webTestView.getNumberOfTabs(), 1)
-            XCTAssertEqual(webTestView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
+            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
         }
         
         step("When I relaunch \(url) in the same tab") {
-            mockHttpPage.openMockPage(.fullSiteAdBlock)
+            mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 0)
         
         step("When I relaunch \(url) in another tab") {
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            webTestView = mockHttpPage.openMockPage(.fullSiteAdBlock)
+            webView = mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsBlocked(index: 1, url: url, hostUrl: hostUrl)
         
         step("When I allow the website \(url) once") {
-            webTestView = adBlockerPage.allowWebSiteOnce()
-            XCTAssertEqual(webTestView.getNumberOfTabs(), 2)
-            XCTAssertEqual(webTestView.getBrowserTabTitleValueByIndex(index: 1), tabTitleOfTestPage)
+            webView = adBlockerPage.allowWebSiteOnce()
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 1), tabTitleOfTestPage)
         }
         
         step("And I reload the tab") {
@@ -94,7 +90,7 @@ class AdBlockerTests: BaseTest {
     func testBlockedWebsitePermanentlyAllowed() {
         
         step("Given I navigate to blocked test page \(url)") {
-            mockHttpPage.openMockPage(.fullSiteAdBlock)
+            mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsBlocked(index: 0, url: url, hostUrl: hostUrl)
@@ -112,23 +108,23 @@ class AdBlockerTests: BaseTest {
         }
         
         step("When I allow the website permanently") {
-            webTestView = adBlockerPage.allowWebSitePermanently()
+            webView = adBlockerPage.allowWebSitePermanently()
         }
         
         step("Then website \(url) is displayed") {
-            XCTAssertEqual(webTestView.getNumberOfTabs(), 1)
-            XCTAssertEqual(webTestView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
+            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
         }
         
         step("When I relaunch \(url) in the same tab") {
-            mockHttpPage.openMockPage(.fullSiteAdBlock)
+            mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 0)
         
         step("When I relaunch \(url) in another tab") {
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            webTestView = mockHttpPage.openMockPage(.fullSiteAdBlock)
+            webView = mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 1)
@@ -167,7 +163,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("And I navigate to blocked test page \(url)") {
-            mockHttpPage.openMockPage(.fullSiteAdBlock)
+            mockPage.openMockPage(.fullSiteAdBlock)
         }
         
         verifyWebsiteIsNotBlocked(index: 0)

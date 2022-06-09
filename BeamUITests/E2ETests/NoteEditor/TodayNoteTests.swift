@@ -10,14 +10,13 @@ import XCTest
 
 class TodayNoteTests: BaseTest {
     
-    let shortcuts = ShortcutsHelper()
     let allNotesView = AllNotesTestView()
     let noteTestView = NoteTestView()
     
     func testCannotDeleteTodayNoteInAllNote() {
         step ("Given I navigate to All Note") {
             launchApp()
-            shortcuts.shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         }
         
         step ("Then I cannot delete Today Note from All Notes") {
@@ -39,7 +38,7 @@ class TodayNoteTests: BaseTest {
         let helper = BeamUITestsHelper(journalView.app)
         
         step ("Given I navigate to All Note") {
-            shortcuts.shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             helper.tapCommand(.create10Notes)
         }
         

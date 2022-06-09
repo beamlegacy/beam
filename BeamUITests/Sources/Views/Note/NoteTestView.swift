@@ -1,5 +1,5 @@
 //
-//  CardView.swift
+//  NoteTestView.swift
 //  BeamUITests
 //
 //  Created by Andrii on 26.07.2021.
@@ -10,22 +10,22 @@ import XCTest
 
 class NoteTestView: TextEditorContextTestView {
     
-    var cardTitle: XCUIElement {
-        return app.windows.scrollViews[CardViewLocators.ScrollViews.noteView.accessibilityIdentifier].textFields[CardViewLocators.TextFields.noteTitle.accessibilityIdentifier]
+    var noteTitle: XCUIElement {
+        return app.windows.scrollViews[NoteViewLocators.ScrollViews.noteView.accessibilityIdentifier].textFields[NoteViewLocators.TextFields.noteTitle.accessibilityIdentifier]
     }
-    var cardTitleStatic: XCUIElement {
-        return app.windows.scrollViews[CardViewLocators.ScrollViews.noteView.accessibilityIdentifier].staticTexts[CardViewLocators.TextFields.noteTitle.accessibilityIdentifier]
+    var noteTitleStatic: XCUIElement {
+        return app.windows.scrollViews[NoteViewLocators.ScrollViews.noteView.accessibilityIdentifier].staticTexts[NoteViewLocators.TextFields.noteTitle.accessibilityIdentifier]
     }
     
     @discardableResult
-    func waitForCardViewToLoad() -> Bool {
-        return scrollView(CardViewLocators.ScrollViews.noteView.accessibilityIdentifier)
+    func waitForNoteViewToLoad() -> Bool {
+        return scrollView(NoteViewLocators.ScrollViews.noteView.accessibilityIdentifier)
             .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
 
     @discardableResult
-    func waitForCardTitleToBeVisible() -> Bool {
-        return scrollView(CardViewLocators.TextFields.noteTitle.accessibilityIdentifier)
+    func waitForNoteTitleToBeVisible() -> Bool {
+        return scrollView(NoteViewLocators.TextFields.noteTitle.accessibilityIdentifier)
             .waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
@@ -46,19 +46,19 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getNumberOfDisclosureTriangles() -> Int {
-        return app.disclosureTriangles.matching(identifier: CardViewLocators.DisclosureTriangles.indentationArrow.accessibilityIdentifier).count
+        return app.disclosureTriangles.matching(identifier: NoteViewLocators.DisclosureTriangles.indentationArrow.accessibilityIdentifier).count
     }
     
-    func getCardTitle() -> String {
-        return self.getElementStringValue(element: cardTitle)
+    func getNoteTitle() -> String {
+        return self.getElementStringValue(element: noteTitle)
     }
     
-    func getCardStaticTitle() -> String {
-        return self.getElementStringValue(element: cardTitleStatic)
+    func getNoteStaticTitle() -> String {
+        return self.getElementStringValue(element: noteTitleStatic)
     }
     
     func getDeleteNoteButton() -> XCUIElement {
-        return image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier)
+        return image(NoteViewLocators.Buttons.deleteNoteButton.accessibilityIdentifier)
     }
     
     func clickDeleteButton() -> AlertTestView {
@@ -67,15 +67,15 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func makeCardTitleEditable() -> XCUIElement {
-        self.cardTitle.tapInTheMiddle()
+    func makeNoteTitleEditable() -> XCUIElement {
+        self.noteTitle.tapInTheMiddle()
         sleep(1) //to be removed when handling coursor appearance at card title
-        self.cardTitle.tapInTheMiddle()
-        return cardTitle
+        self.noteTitle.tapInTheMiddle()
+        return noteTitle
     }
     
     func getNewNoteCreationButton() -> XCUIElement {
-        return staticText(CardViewLocators.Buttons.newNoteCreation.accessibilityIdentifier)
+        return staticText(NoteViewLocators.Buttons.newNoteCreation.accessibilityIdentifier)
     }
     
     @discardableResult
@@ -85,25 +85,25 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func publishCard() -> NoteTestView {
-        button(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).clickOnExistence()
+    func publishNote() -> NoteTestView {
+        button(NoteViewLocators.Buttons.publishNoteButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
     @discardableResult
-    func unpublishCard() -> NoteTestView {
-        image(CardViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
-        app.staticTexts[CardViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
-        app.windows.sheets["alert"].buttons[CardViewLocators.Buttons.unpublishCardButton.accessibilityIdentifier].clickOnHittable()
+    func unpublishNote() -> NoteTestView {
+        image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
+        app.staticTexts[NoteViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
+        app.windows.sheets["alert"].buttons[NoteViewLocators.Buttons.unpublishNoteButton.accessibilityIdentifier].clickOnHittable()
         return self
     }
     
-    func getCardNotesElementQueryForVisiblePart() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)
+    func getNoteElementsQueryForVisiblePart() -> XCUIElementQuery {
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
     
-    func getCardNotesTextForVisiblePart() -> [String] {
-        let notesElements = getCardNotesForVisiblePart()
+    func getNoteTextsForVisiblePart() -> [String] {
+        let notesElements = getNoteNodesForVisiblePart()
         var names = [String]()
         for elem in notesElements {
             names.append(getElementStringValue(element: elem))
@@ -112,7 +112,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getNumberOfVisibleNotes() -> Int {
-        return self.getCardNotesForVisiblePart().count
+        return self.getNoteNodesForVisiblePart().count
     }
     
     func navigateToWebView() {
@@ -128,7 +128,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getImageNotesElementsQuery() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.imageNode.accessibilityIdentifier)
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.imageNode.accessibilityIdentifier)
     }
     
     func getImageNodeByIndex(nodeIndex: Int) -> XCUIElement {
@@ -136,7 +136,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getNotesExpandButtons() -> [XCUIElement] {
-        return app.windows.buttons.matching(identifier:  CardViewLocators.Buttons.expandButton.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.buttons.matching(identifier:  NoteViewLocators.Buttons.expandButton.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func getNotesExpandButtonsCount() -> Int {
@@ -162,7 +162,7 @@ class NoteTestView: TextEditorContextTestView {
     }
 
     func getTextNodesElementsQuery() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier)
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
     }
 
     func getTextNodeByIndex(nodeIndex: Int) -> XCUIElement {
@@ -174,7 +174,7 @@ class NoteTestView: TextEditorContextTestView {
     }
 
     func getEmbedNodesElementsQuery() -> XCUIElementQuery {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.embedNode.accessibilityIdentifier)
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.embedNode.accessibilityIdentifier)
     }
 
     func getEmbedNodeByIndex(nodeIndex: Int) -> XCUIElement {
@@ -182,15 +182,15 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getLinksNames() -> [XCUIElement] {
-        return app.windows.buttons.matching(identifier: CardViewLocators.Buttons.linkNamesButton.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.buttons.matching(identifier: NoteViewLocators.Buttons.linkNamesButton.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func getLinksContentElement() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier).allElementsBoundByIndex
     }
 
     func getFirstLinksContentElement() -> XCUIElement {
-        let firstLink = app.windows.textViews.matching(identifier: CardViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier)
+        let firstLink = app.windows.textViews.matching(identifier: NoteViewLocators.TextViews.linksRefsLabel.accessibilityIdentifier)
             .element
         XCTAssertTrue(firstLink.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         return firstLink
@@ -217,7 +217,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getReferences() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     @discardableResult
@@ -227,19 +227,19 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     @discardableResult
-    func createBiDiLink(_ cardName: String, _ noteNumber: Int = 0) -> NoteTestView {
-        let noteToBeTypedIn = getCardNotesForVisiblePart()[noteNumber]
-        app.typeText("@" + cardName)
-        waitForStringValueEqual("@" + cardName, noteToBeTypedIn)
+    func createBiDiLink(_ noteName: String, _ noteNumber: Int = 0) -> NoteTestView {
+        let noteToBeTypedIn = getNoteNodesForVisiblePart()[noteNumber]
+        app.typeText("@" + noteName)
+        waitForStringValueEqual("@" + noteName, noteToBeTypedIn)
         typeKeyboardKey(.enter)
         return self
     }
     
     @discardableResult
-    func createReference(_ cardName: String, _ noteNumber: Int = 0) -> NoteTestView {
-        let noteToBeTypedIn = getCardNotesForVisiblePart()[noteNumber]
-        app.typeText(cardName)
-        waitForStringValueEqual(cardName, noteToBeTypedIn)
+    func createReference(_ noteName: String, _ noteNumber: Int = 0) -> NoteTestView {
+        let noteToBeTypedIn = getNoteNodesForVisiblePart()[noteNumber]
+        app.typeText(noteName)
+        waitForStringValueEqual(noteName, noteToBeTypedIn)
         typeKeyboardKey(.enter)
         return self
     }
@@ -255,13 +255,13 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getReferencesCounterElement() -> XCUIElement {
-        _ = otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-        return otherElement(CardViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
+        _ = otherElement(NoteViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: NoteViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return otherElement(NoteViewLocators.Buttons.referencesSection.accessibilityIdentifier).buttons.matching(identifier: NoteViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
     }
     
     func getLinksCounterElement() -> XCUIElement {
-        _ = otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-        return otherElement(CardViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
+        _ = otherElement(NoteViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: NoteViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return otherElement(NoteViewLocators.Buttons.linksSection.accessibilityIdentifier).buttons.matching(identifier: NoteViewLocators.Buttons.linkReferenceCounterTitle.accessibilityIdentifier).firstMatch
     }
     
     @discardableResult
@@ -272,7 +272,7 @@ class NoteTestView: TextEditorContextTestView {
     
     @discardableResult
     func linkAllReferences() -> NoteTestView {
-        button(CardViewLocators.Buttons.linkAllButton.accessibilityIdentifier).clickOnExistence()
+        button(NoteViewLocators.Buttons.linkAllButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
@@ -285,8 +285,8 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getBlockRefs() -> XCUIElementQuery {
-        _ = textView(CardViewLocators.TextViews.blockReference.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-        return app.textViews.matching(identifier: CardViewLocators.TextViews.blockReference.accessibilityIdentifier)
+        _ = textView(NoteViewLocators.TextViews.blockReference.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return app.textViews.matching(identifier: NoteViewLocators.TextViews.blockReference.accessibilityIdentifier)
     }
     
     func getBlockRefByIndex(_ index: Int) -> XCUIElement {
@@ -297,7 +297,7 @@ class NoteTestView: TextEditorContextTestView {
         return self.getBlockRefs().count
     }
     
-    func blockReferenceMenuActionTrigger(_ action: CardViewLocators.StaticTexts, blockRefNumber: Int = 1) {
+    func blockReferenceMenuActionTrigger(_ action: NoteViewLocators.StaticTexts, blockRefNumber: Int = 1) {
         XCUIElement.perform(withKeyModifiers: .control) {
             self.getBlockRefs().element(boundBy: blockRefNumber - 1).tapInTheMiddle()
         }
@@ -322,23 +322,23 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func isImageNodeCollapsed(nodeIndex: Int) -> Bool {
-        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[NoteViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getImageNodeCollapsedTitle(nodeIndex: Int) -> String {
-        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[CardViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].firstMatch.title
+        return getImageNodeByIndex(nodeIndex: nodeIndex).buttons[NoteViewLocators.Buttons.imageNoteCollapsedView.accessibilityIdentifier].firstMatch.title
     }
     
-    func waitForCardToOpen(cardTitle: String) -> Bool {
-        return waitForStringValueEqual(cardTitle, self.cardTitle, BaseTest.implicitWaitTimeout)
+    func waitForNoteToOpen(noteTitle: String) -> Bool {
+        return waitForStringValueEqual(noteTitle, self.noteTitle, BaseTest.implicitWaitTimeout)
     }
     
     func getBreadCrumbElements() -> [XCUIElement] {
-        return otherElement(CardViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).allElementsBoundByIndex
+        return otherElement(NoteViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: NoteViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func waitForBreadcrumbs() -> Bool {
-        return otherElement(CardViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: CardViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        return otherElement(NoteViewLocators.OtherElements.breadCrumb.accessibilityIdentifier).buttons.matching(identifier: NoteViewLocators.Buttons.breadcrumbTitle.accessibilityIdentifier).firstMatch.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
     func getBreadCrumbElementsNumber() -> Int {
@@ -351,14 +351,14 @@ class NoteTestView: TextEditorContextTestView {
     
     func getCheckboxAtTextNote(_ noteNumber: Int) -> XCUIElement {
         let index = noteNumber - 1
-        return getTextNodeByIndex(nodeIndex: index).buttons[CardViewLocators.Buttons.checkbox.accessibilityIdentifier]
+        return getTextNodeByIndex(nodeIndex: index).buttons[NoteViewLocators.Buttons.checkbox.accessibilityIdentifier]
     }
     
     @discardableResult
     func createCheckboxAtNote(_ noteNumber: Int) -> XCUIElement {
         let index = noteNumber - 1
         let checkboxShortcut = "-[]"
-        typeInCardNoteByIndex(noteIndex: index, text: checkboxShortcut, needsActivation: true)
+        typeInNoteNodeByIndex(noteIndex: index, text: checkboxShortcut, needsActivation: true)
         return getTextNodeByIndex(nodeIndex: index)
     }
     
@@ -373,20 +373,20 @@ class NoteTestView: TextEditorContextTestView {
         case .underline:
             self.nodeLineFormatTrigger("_")
         case .heading1:
-            shortcutsHelper.shortcutActionInvoke(action: .beginOfNote)
+            shortcutHelper.shortcutActionInvoke(action: .beginOfNote)
             self.app.typeText("#")
             self.typeKeyboardKey(.space)
         case .heading2:
-            shortcutsHelper.shortcutActionInvoke(action: .beginOfNote)
+            shortcutHelper.shortcutActionInvoke(action: .beginOfNote)
             self.app.typeText("##")
             self.typeKeyboardKey(.space)
         }
     }
     
     private func nodeLineFormatTrigger(_ key: String) {
-        shortcutsHelper.shortcutActionInvoke(action: .beginOfNote)
+        shortcutHelper.shortcutActionInvoke(action: .beginOfNote)
         app.typeText(key)
-        shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
+        shortcutHelper.shortcutActionInvoke(action: .endOfLine)
         app.typeText(key)
     }
     

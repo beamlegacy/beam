@@ -50,6 +50,6 @@ class AddLinkView: BaseView {
     }
     
     func isLinkCopiedLabelDisplayed() -> Bool {
-        return XCUIApplication().dialogs.staticTexts[CardViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier].exists
+        return XCUIApplication().dialogs.staticTexts[NoteViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier].exists
     }
 }

@@ -10,15 +10,12 @@ import XCTest
 
 class SignInAutocompleteTests: BaseTest {
     
-    let signUpPageURL = MockHTTPWebPages().getMockPageUrl(.signupShortForm)
-    let signInPageURL = MockHTTPWebPages().getMockPageUrl(.signinShortForm)
-    let uiMenu = UITestsMenuBar()
-    let mockPage = MockHTTPWebPages()
-    let helper = PasswordManagerHelper()
+    let signInPageURL = "http://signin.form.lvh.me:8080/"
+    let signUpPageURL = "http://signup.form.lvh.me:8080/"
     
     private func credentialsAutocompleteAssertion(login: String) {
         step("THEN after clicking on pop-up login text the credentials are successfully populated"){
-            helper.clickPopupLoginText(login: login)
+            passwordManagerHelper.clickPopupLoginText(login: login)
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Username: ")), login)
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(false)), "••••••••••")
         }
@@ -37,7 +34,7 @@ class SignInAutocompleteTests: BaseTest {
         }
 
         self.credentialsAutocompleteAssertion(login: login)
-        ShortcutsHelper().shortcutActionInvoke(action: .reloadPage)
+        shortcutHelper.shortcutActionInvoke(action: .reloadPage)
         
         step("GIVEN I click on email field"){
             mockPage.getUsernameFieldElement(title: "Username: ").clickOnExistence()
@@ -58,23 +55,23 @@ class SignInAutocompleteTests: BaseTest {
         }
         
         step("Then the key icon is visible"){
-            XCTAssertTrue(helper.getKeyIconElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getKeyIconElement().exists)
         }
 
         step("When I show the omnibox"){
-            ShortcutsHelper().shortcutActionInvoke(action: .showOmnibox)
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
         }
         
         step("Then the key icon is hidden"){
-            XCTAssertFalse(helper.getKeyIconElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().exists)
         }
 
         step("When I dismiss the omnibox"){
-            helper.typeKeyboardKey(.escape)
+            passwordManagerHelper.typeKeyboardKey(.escape)
         }
         
         step("Then the key icon is visible again"){
-            XCTAssertTrue(helper.getKeyIconElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 
@@ -90,21 +87,21 @@ class SignInAutocompleteTests: BaseTest {
         }
         
         step("Then the key icon is visible"){
-            XCTAssertTrue(helper.getKeyIconElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getKeyIconElement().exists)
         }
 
         step("When I show the omnibox"){
-            ShortcutsHelper().shortcutActionInvoke(action: .showOmnibox)
+            shortcutHelper.shortcutActionInvoke(action: .showOmnibox)
         }
         step("Then the key icon is hidden"){
-            XCTAssertFalse(helper.getKeyIconElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().exists)
         }
 
         step("When I open a new tab"){
             OmniBoxTestView().searchInOmniBox(signUpPageURL, true)
         }
         step("Then the key icon is still hidden"){
-            XCTAssertFalse(helper.getKeyIconElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 
@@ -122,27 +119,27 @@ class SignInAutocompleteTests: BaseTest {
             passwordPage.clickInputField(.password)
         }
         step("Then the menu is not displayed") {
-            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
 
         step("When I click key icon") {
-            helper.clickKeyIcon()
+            passwordManagerHelper.clickKeyIcon()
         }
 
         var passPrefView: AutoFillPasswordsTestView!
         step("And I click Other passwords option") {
-            passPrefView = helper.openPasswordPreferences()
+            passPrefView = passwordManagerHelper.openPasswordPreferences()
         }
 
         step("Then Password preferences window is opened, and menu isn't visible anymore"){
             XCTAssertTrue(passPrefView.isPasswordPreferencesOpened())
-            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
 
         step("Then Password preferences window is closed on cancel click"){
             passPrefView.clickCancel()
             XCTAssertTrue(passPrefView.waitForPreferenceToClose())
-            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
 
         step("Then authentication fields are NOT auto-populated"){
@@ -151,15 +148,15 @@ class SignInAutocompleteTests: BaseTest {
         }
 
         step("When I click key icon") {
-            helper.clickKeyIcon()
+            passwordManagerHelper.clickKeyIcon()
         }
 
         step("Then passwords menu is visible again") {
-            XCTAssertTrue(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
 
         step("When I open Other passwords option and cancel password remove"){
-            helper.openPasswordPreferences()
+            passwordManagerHelper.openPasswordPreferences()
             passPrefView.staticTextTables("apple.com").clickOnExistence()
         }
 
@@ -202,21 +199,21 @@ class SignInAutocompleteTests: BaseTest {
             passwordPage.clickInputField(.password)
         }
         step("Then the menu is not displayed") {
-            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
 
         step("When I click key icon") {
-            helper.clickKeyIcon()
+            passwordManagerHelper.clickKeyIcon()
         }
 
         var passPrefView: AutoFillPasswordsTestView!
         step("And I click Other passwords option") {
-            passPrefView = helper.openPasswordPreferences()
+            passPrefView = passwordManagerHelper.openPasswordPreferences()
         }
 
         step("Then Password preferences window is opened, and menu isn't visible anymore"){
             XCTAssertTrue(passPrefView.isPasswordPreferencesOpened())
-            XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
 
         step("Then the list shows entries for apple.com and facebook.com"){
@@ -234,11 +231,11 @@ class SignInAutocompleteTests: BaseTest {
         }
 
         step("When I empty the search field"){
-            helper.typeKeyboardKey(.delete)
-            helper.typeKeyboardKey(.delete)
-            helper.typeKeyboardKey(.delete)
-            helper.typeKeyboardKey(.delete)
-            helper.typeKeyboardKey(.delete)
+            passwordManagerHelper.typeKeyboardKey(.delete)
+            passwordManagerHelper.typeKeyboardKey(.delete)
+            passwordManagerHelper.typeKeyboardKey(.delete)
+            passwordManagerHelper.typeKeyboardKey(.delete)
+            passwordManagerHelper.typeKeyboardKey(.delete)
         }
 
         step("Then the list shows apple.com and facebook.com again"){
