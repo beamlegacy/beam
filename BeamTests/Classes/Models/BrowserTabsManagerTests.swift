@@ -53,8 +53,8 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[1].id: groupA,
             tabs[2].id: groupA
         ]
-        sut._testSetTabsClusteringGroup(tabGroups)
         sut.tabs = tabs
+        sut._testSetTabsClusteringGroup(tabGroups)
 
         XCTAssertEqual(sut.listItems.allItems.count, 5)
         XCTAssertTrue(sut.listItems.allItems[1].isAGroupCapsule)
@@ -129,8 +129,8 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[1].id: groupA,
             tabs[2].id: groupA
         ]
-        sut._testSetTabsClusteringGroup(tabGroups)
         sut.tabs = tabs
+        sut._testSetTabsClusteringGroup(tabGroups)
         sut.setCurrentTab(at: 0)
         sut.showNextTab()
         sut.showNextTab()
@@ -154,8 +154,8 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[1].id: groupA,
             tabs[2].id: groupA
         ]
-        sut._testSetTabsClusteringGroup(tabGroups)
         sut.tabs = tabs
+        sut._testSetTabsClusteringGroup(tabGroups)
         sut.toggleGroupCollapse(groupA.id)
         XCTAssertEqual(sut.listItems.allItems.count, 3)
         sut.setCurrentTab(at: 0)
@@ -198,8 +198,8 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[1].id: groupA,
             tabs[2].id: groupA
         ]
-        sut._testSetTabsClusteringGroup(tabGroups)
         sut.tabs = tabs
+        sut._testSetTabsClusteringGroup(tabGroups)
         sut.toggleGroupCollapse(groupA.id)
         sut.setCurrentTab(at: 0)
         XCTAssertEqual(sut.currentTab, tabs[0])
@@ -227,8 +227,8 @@ class BrowserTabsManagerTests: XCTestCase {
             tabs[1].id: groupA,
             tabs[3].id: groupA
         ]
-        sut._testSetTabsClusteringGroup(tabGroups)
         sut.tabs = tabs
+        sut._testSetTabsClusteringGroup(tabGroups)
         XCTAssertEqual(sut.listItems.allItems.count, 5)
         XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
         XCTAssertEqual(sut.listItems.allItems[4].tab, tabs[3])
