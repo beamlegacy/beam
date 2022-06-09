@@ -50,6 +50,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     var clusteredPagesId: [[PageID]] = [[]] {
         didSet {
             transformToClusteredPages()
+            if clusteredPagesId.count > 1 && PreferencesManager.showTabsColoring {
+                updateTabColors()
+            }
         }
     }
     var clusteredNotesId: [[UUID]] = [[]] {
@@ -57,9 +60,6 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
             transformToClusteredNotes()
             if clusteredNotesId.count > 1 {
                 updateNoteSources()
-                if PreferencesManager.showTabsColoring {
-                    updateTabColors()
-                }
             }
         }
     }
