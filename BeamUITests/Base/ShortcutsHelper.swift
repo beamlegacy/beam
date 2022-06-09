@@ -67,7 +67,7 @@ class ShortcutsHelper {
         case showJournal
         case showAllNotes
         case instantSearch
-        case switchBetweenCardWeb
+        case switchBetweenNoteWeb
         case foldBullet
         case unfoldBullet
         case newTab
@@ -79,7 +79,7 @@ class ShortcutsHelper {
         case jumpToLastTab
         case zoomIn
         case zoomOut
-        case changeDestinationCard
+        case changeDestinationNote
         case quitApp
         case close
         case closeWindow
@@ -126,7 +126,7 @@ class ShortcutsHelper {
         case .showJournal: invokeCMDShiftKey("j")
         case .showAllNotes: invokeCMDShiftKey("h")
         case .instantSearch: invokeCMDKey(.return)
-        case .switchBetweenCardWeb: invokeCMDKey("d")
+        case .switchBetweenNoteWeb: invokeCMDKey("d")
         case .foldBullet: invokeCMDKey(.upArrow)
         case .unfoldBullet: invokeCMDKey(.downArrow)
         case .newTab: invokeCMDKey("t")
@@ -138,7 +138,7 @@ class ShortcutsHelper {
         case .jumpToLastTab: invokeCMDKey("9")
         case .zoomIn: invokeCMDKey("+")
         case .zoomOut: invokeCMDKey("-")
-        case .changeDestinationCard: invokeCMDShiftKey("d")
+        case .changeDestinationNote: invokeCMDShiftKey("d")
         case .quitApp: invokeCMDKey("q")
         case .close: invokeCMDKey("w")
         case .closeWindow: invokeCMDShiftKey("w")

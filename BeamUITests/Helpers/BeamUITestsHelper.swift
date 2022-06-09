@@ -23,6 +23,8 @@ extension XCUIElementQuery: Sequence {
 class BeamUITestsHelper {
     var app: XCUIApplication!
 
+    let helper = ShortcutsHelper()
+
     init(_ app: XCUIApplication) {
         self.app = app
     }
@@ -88,7 +90,7 @@ class BeamUITestsHelper {
     }
 
     func showJournal() {
-        ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
+        helper.shortcutActionInvoke(action: .showJournal)
     }
 
     // Doesn't work 
@@ -151,7 +153,6 @@ class BeamUITestsHelper {
     }
     
     func typeAndEditHardcodedText (_ view: BaseView) -> String {
-        let helper = ShortcutsHelper()
         view.app.typeText("Typed Text at the row")
         view.typeKeyboardKey(.leftArrow, 4)
         helper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 4)

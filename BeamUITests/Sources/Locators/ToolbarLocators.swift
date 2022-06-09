@@ -11,7 +11,7 @@ enum ToolbarLocators {
     
     enum SearchFields: String, CaseIterable, UIElement {
         case omniSearchField = "OmniboxSearchField"
-        case destinationCardSearchField = "DestinationNoteSearchField"
+        case destinationNoteSearchField = "DestinationNoteSearchField"
     }
     
     enum Buttons: String, CaseIterable, UIElement {
@@ -24,7 +24,7 @@ enum ToolbarLocators {
         case downloadDoneButton = "nav-downloads_done"
         case noteSwitcher = "card-switcher"
         case noteSwitcherJournal = "card-switcher-journal"
-        case noteSwitcherAllCards = "card-switcher-all-cards"
+        case noteSwitcherAllNotes = "card-switcher-all-cards"
     }
     
     enum Labels: String, CaseIterable, UIElement {

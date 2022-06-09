@@ -28,7 +28,12 @@ class BaseTest: XCTestCase {
     let username = "AutomationTestSignin"
     let host = "form.lvh.me"
     let mockBaseUrl = "http://form.lvh.me:8080/"
-    let uiTestMenu = UITestsMenuBar()
+    
+    let uiMenu = UITestsMenuBar()
+    let shortcutHelper = ShortcutsHelper()
+    let mockPage = MockHTTPWebPages()
+    let passwordManagerHelper = PasswordManagerHelper()
+    var webView = WebTestView()
     
     var deletePK = false
     var deleteRemoteAccount = false
@@ -41,13 +46,13 @@ class BaseTest: XCTestCase {
     override func tearDown() {
         if isAppRunning() {
             storeScreenshot()
-            uiTestMenu.destroyDB()
+            uiMenu.destroyDB()
         }
         if deletePK {
-            uiTestMenu.deletePrivateKeys()
+            uiMenu.deletePrivateKeys()
         }
         if deleteRemoteAccount {
-            uiTestMenu.deleteRemoteAccount().resetAPIEndpoints()
+            uiMenu.deleteRemoteAccount().resetAPIEndpoints()
         }
         super.tearDown()
         terminateAppInstance()
@@ -90,7 +95,7 @@ class BaseTest: XCTestCase {
     func restartApp(terminateImmediately: Bool = false) -> JournalTestView {
         let app = XCUIApplication()
         if !terminateImmediately {
-            ShortcutsHelper().shortcutActionInvoke(action: .quitApp)
+            shortcutHelper.shortcutActionInvoke(action: .quitApp)
         } else {
             app.terminate()
         }
@@ -106,7 +111,7 @@ class BaseTest: XCTestCase {
     
     @discardableResult
     func openFirstNoteInAllNotesList() -> NoteTestView {
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         return AllNotesTestView().openFirstNote()
     }
 
@@ -123,7 +128,7 @@ class BaseTest: XCTestCase {
     @discardableResult
     func launchAppAndOpenFirstNote() -> NoteTestView {
         launchApp()
-        ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         return AllNotesTestView().openFirstNote()
     }
     
@@ -139,9 +144,9 @@ class BaseTest: XCTestCase {
         
         let journalView = launchAppWithArgument(uiTestModeLaunchArgument)
         
-        uiTestMenu.setAPIEndpointsToStaging()
+        uiMenu.setAPIEndpointsToStaging()
         if withRandomAccount {
-            uiTestMenu.signUpWithRandomTestAccount()
+            uiMenu.signUpWithRandomTestAccount()
         }
         return journalView
     }

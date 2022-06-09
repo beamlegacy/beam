@@ -33,19 +33,19 @@ class PnSTestView: BaseView {
         }
     }
     
-    func addToNoteByName(_ elementToAdd: XCUIElement, _ cardName: String, _ isNewCard: Bool = false) {
+    func addToNoteByName(_ elementToAdd: XCUIElement, _ noteName: String, _ isNewNote: Bool = false) {
         triggerAddToNotePopup(elementToAdd)
         
-        let destinationCard = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
-        destinationCard.clickOnExistence()
+        let destinationNote = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
+        destinationNote.clickOnExistence()
         typeKeyboardKey(.delete)
-        destinationCard.typeText(cardName)
+        destinationNote.typeText(noteName)
         
         //WIP, TBD in next PnS tests
         /*if isNewCard {
         }*/
-        let cardsDropDown = otherElement(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier)
-        XCTAssertTrue(cardsDropDown.waitForExistence(timeout: BaseTest.implicitWaitTimeout), "PnS Note picker drop down didn't appear")
+        let notesDropDown = otherElement(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier)
+        XCTAssertTrue(notesDropDown.waitForExistence(timeout: BaseTest.implicitWaitTimeout), "PnS Note picker drop down didn't appear")
         app.windows.children(matching: .other).matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
     }
     

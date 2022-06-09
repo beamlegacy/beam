@@ -9,16 +9,12 @@ import XCTest
 
 class BrowserOpenModalTests: BaseTest {
 
-    let shortcutsHelper = ShortcutsHelper()
-    let mockPage = MockHTTPWebPages()
-    let uiMenuBar = UITestsMenuBar()
-    let webView = WebTestView()
     let testPage = UITestPageBrowserWindow()
 
     override func setUpWithError() throws {
         try super.setUpWithError()
         launchApp()
-        uiMenuBar.destroyDB()
+        uiMenu.destroyDB()
             .startMockHTTPServer()
     }
 

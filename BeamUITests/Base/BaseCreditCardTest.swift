@@ -33,9 +33,6 @@ class BaseCreditCardTest: BaseTest {
     let creditCardSecCodeLabelMockPage  = "cc-security"
     let creditCardOwnerNameLabelMockPage  = "cc-name"
     
-    let mockPage = MockHTTPWebPages()
-    let helper = PasswordManagerHelper()
-    
     var creditCardView: CreditCardTestView!
 
     func verifyAutoFillIsDisplayed(title: String, inView: String = "Payment", password: Bool = false, autocomplete: Bool = true){
@@ -51,30 +48,30 @@ class BaseCreditCardTest: BaseTest {
         
         if autocomplete {
             step("Then CC number autofill is displayed") {
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
-                XCTAssertTrue(helper.getOtherCCOptionElement().exists)
+                XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
+                XCTAssertTrue(passwordManagerHelper.getOtherCCOptionElement().exists)
             }
         } else {
             step("Then CC number autofill is not displayed") {
-                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName))
-                XCTAssertFalse(helper.getOtherCCOptionElement().exists)
-                XCTAssertFalse(helper.getOtherPasswordsOptionElement().exists)
+                XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertFalse(passwordManagerHelper.getOtherCCOptionElement().exists)
+                XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
             }
         }
         
     }
     
-    func verifyDBCCCards(otherCCAvailable: Bool = false) {
+    func verifyDBCCNotes(otherCCAvailable: Bool = false) {
         step("Then Jane and John's cards are displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCName))
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: janeCCHiddenNumber))
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCName))
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: janeCCName))
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: janeCCHiddenNumber))
             if otherCCAvailable {
-                XCTAssertTrue(helper.getOtherCCOptionElement().exists)
+                XCTAssertTrue(passwordManagerHelper.getOtherCCOptionElement().exists)
             } else {
-                XCTAssertFalse(helper.getOtherCCOptionElement().exists)
+                XCTAssertFalse(passwordManagerHelper.getOtherCCOptionElement().exists)
             }
         }
     }
@@ -99,14 +96,14 @@ class BaseCreditCardTest: BaseTest {
         
         if autocomplete {
             step("Then CC number autofill is displayed") {
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCName))
-                XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
-                XCTAssertTrue(helper.getOtherCCOptionElement().exists)
+                XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCHiddenNumber))
+                XCTAssertTrue(passwordManagerHelper.getOtherCCOptionElement().exists)
             }
         } else {
             step("Then CC number autofill is not displayed") {
-                XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: johnCCName))
-                XCTAssertFalse(helper.getOtherCCOptionElement().exists)
+                XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: johnCCName))
+                XCTAssertFalse(passwordManagerHelper.getOtherCCOptionElement().exists)
             }
         }
         mockPage.typeKeyboardKey(.escape) // Close dropdown
