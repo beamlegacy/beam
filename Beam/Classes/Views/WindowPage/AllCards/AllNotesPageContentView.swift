@@ -44,7 +44,7 @@ struct AllNotesPageContentView: View {
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
         TableViewColumn(key: ColumnID.title.rawValue, title: loc("Title"),
                         editable: true, isLink: true,
-                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 370, font: BeamFont.light(size: 13).nsFont),
+                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 380, font: BeamFont.light(size: 13).nsFont),
         TableViewColumn(key: ColumnID.url.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: false, resizable: false,
                         width: 43, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
@@ -57,7 +57,7 @@ struct AllNotesPageContentView: View {
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: ColumnID.updatedAt.rawValue, title: loc("Updated"),
-                        isInitialSortDescriptor: true, width: 95, font: secondaryCellFont,
+                        isInitialSortDescriptor: true, width: 85, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -250,7 +250,7 @@ struct AllNotesPageContentView: View {
                     .padding(.leading, -64) // shifted for hover options menu
             )
         }
-        .frame(minWidth: 600, maxWidth: 900)
+        .frame(minWidth: 617, maxWidth: 900)
         .padding(.horizontal, compactWindowWidth == true ? 100 : 214)
         .id(model.id)
         .onAppear {
