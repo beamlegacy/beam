@@ -24,25 +24,6 @@ class NoteDailySummaryTest: XCTestCase {
         helper.deleteAllDocuments()
     }
 
-    func testSort() {
-        let now = BeamDate.now
-        let after = now + 10.0
-
-        let scoredDocuments = [
-            ScoredDocument(noteId: UUID(), title: "", createdAt: now, updatedAt: now, created: false, score: 0, captureToCount: 0),
-            ScoredDocument(noteId: UUID(), title: "", createdAt: now, updatedAt: after, created: false, score: nil, captureToCount: 0),
-            ScoredDocument(noteId: UUID(), title: "", createdAt: now, updatedAt: now, created: false, score: nil, captureToCount: 0),
-            ScoredDocument(noteId: UUID(), title: "", createdAt: now, updatedAt: now, created: false, score: 10, captureToCount: 0)
-        ]
-        let sorted = scoredDocuments.sorted(by: <)
-        //when score is nil, sorted by updatedAt
-        XCTAssertEqual(sorted[0].noteId, scoredDocuments[2].noteId)
-        XCTAssertEqual(sorted[1].noteId, scoredDocuments[1].noteId)
-        //otherwise sorted by score
-        XCTAssertEqual(sorted[2].noteId, scoredDocuments[0].noteId)
-        XCTAssertEqual(sorted[3].noteId, scoredDocuments[3].noteId)
-    }
-
     func testGetSummary() throws {
         let cal = Calendar(identifier: .iso8601)
         BeamDate.freeze("2001-01-01T00:01:00+000")

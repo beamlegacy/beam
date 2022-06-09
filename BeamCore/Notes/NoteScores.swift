@@ -13,9 +13,9 @@ public class NoteScore: Codable {
     var maxWordCount: Int = 0
     var firstWordCount: Int?
     var lastWordCount: Int = 0
-    var addedBidiLinkToCount: Int = 0
+    public var addedBidiLinkToCount: Int = 0
     public var captureToCount: Int = 0
-    var visitCount: Int = 0
+    public var visitCount: Int = 0
 
     public init(noteId: UUID) {
         self.noteId = noteId
