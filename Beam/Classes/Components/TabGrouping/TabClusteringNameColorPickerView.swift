@@ -15,6 +15,7 @@ struct TabClusteringNameColorPickerView: View {
         }
     }
     var onChange: (((name: String, color: TabGroupingColor?)) -> Void)?
+    var onFinish: (() -> Void)?
 
     @State private var isEditing = false
     @State private var isPickingColor = false
@@ -79,9 +80,9 @@ struct TabClusteringNameColorPickerView: View {
                               caretColor: selectedColor,
                               onCommit: { _ in
                     onChange?((groupName, selectedTabGroupingColor))
-                    isEditing = false
+                    onFinish?()
                 }, onEscape: {
-                    isEditing = false
+                    onFinish?()
                 })
                 .transition(.opacity.animation(BeamAnimation.easingBounce(duration: 0.2)))
             }
