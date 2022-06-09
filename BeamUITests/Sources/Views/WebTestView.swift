@@ -15,7 +15,7 @@ class WebTestView: BaseView {
     }
     
     func getDestinationNoteElement() -> XCUIElement {
-        let element = staticText(WebViewLocators.Buttons.destinationCard.accessibilityIdentifier)
+        let element = staticText(WebViewLocators.Buttons.destinationNote.accessibilityIdentifier)
         _ = element.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         return element
     }
@@ -34,14 +34,14 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openAllNotesMenu() -> AllNotesTestView {
-        button(ToolbarLocators.Buttons.noteSwitcherAllCards.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier).click()
         return AllNotesTestView()
     }
     
     func searchForNoteByTitle(_ title: String) {
         XCTContext.runActivity(named: "Search for '\(title)' note in notes search drop-down") {_ in
         self.getDestinationNoteElement().clickOnHittable()
-        searchField(WebViewLocators.SearchFields.destinationCardSearchField.accessibilityIdentifier).typeText(title)
+        searchField(WebViewLocators.SearchFields.destinationNoteSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
         app.otherElements.matching(predicate).firstMatch.click()
         }
@@ -66,7 +66,7 @@ class WebTestView: BaseView {
         )
         let noteCreationElement = app.otherElements.matching(predicate).firstMatch
         //Try out to replace additional waiting
-        //XCTAssertTrue(cardCreationElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(searchText) is NOT in the create card autocomplete result")
+        //XCTAssertTrue(noteCreationElement.waitForExistence(timeout: BaseTest.minimumWaitTimeout), "\(searchText) is NOT in the create note autocomplete result")
         noteCreationElement.clickOnExistence()
         return NoteTestView()
         }
@@ -75,9 +75,9 @@ class WebTestView: BaseView {
     @discardableResult
     func openDestinationNote() -> NoteTestView {
         button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).clickOnHittable()
-        let cardView = NoteTestView()
-        cardView.waitForCardViewToLoad()
-        return cardView
+        let noteView = NoteTestView()
+        noteView.waitForNoteViewToLoad()
+        return noteView
     }
     
     func getNumberOfTabs(wait: Bool = true) -> Int {
@@ -85,7 +85,7 @@ class WebTestView: BaseView {
     }
 
     func getNumberOfWebViewInMemory() -> Int {
-        UITestsMenuBar().showWebViewCount()
+        uiMenu.showWebViewCount()
         let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
         var intValue: Int?
         if let value = self.getElementStringValue(element: element).split(separator: ":").last {
@@ -159,7 +159,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func closeTab() -> WebTestView {
-        shortcutsHelper.shortcutActionInvoke(action: .closeTab)
+        shortcutHelper.shortcutActionInvoke(action: .closeTab)
         return self
     }
     

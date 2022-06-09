@@ -10,9 +10,6 @@ import XCTest
 
 class TrackersBlockerTests: BaseTest {
     
-    let mockHttpPage = MockHTTPWebPages()
-    let uiMenu = UITestsMenuBar()
-    let shortcutHelper = ShortcutsHelper()
     let privacyWindow = PrivacyPreferencesTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.socialMediaAdBlock)
     let app = XCUIApplication().windows["AdBlock"]
@@ -65,7 +62,7 @@ class TrackersBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            mockHttpPage.openMockPage(.socialMediaAdBlock)
+            mockPage.openMockPage(.socialMediaAdBlock)
         }
         
         step ("Then social media buttons are not displayed"){
@@ -83,7 +80,7 @@ class TrackersBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            mockHttpPage.openMockPage(.socialMediaAdBlock)
+            mockPage.openMockPage(.socialMediaAdBlock)
         }
         
         step ("Then social media buttons are displayed"){

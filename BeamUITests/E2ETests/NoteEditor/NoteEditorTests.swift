@@ -10,8 +10,7 @@ import XCTest
 
 class NoteEditorTests: BaseTest {
     
-    let cardTestView = NoteTestView()
-    let shortcuts = ShortcutsHelper()
+    let noteTestView = NoteTestView()
     let texts = [
         "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.",
     
@@ -27,7 +26,7 @@ class NoteEditorTests: BaseTest {
     
     private func cmdClickFirstNote() {
         XCUIElement.perform(withKeyModifiers: .command) {
-            cardTestView.getTextNodes()[0].coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
+            noteTestView.getTextNodes()[0].coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.5)).tap()
         }
     }
     
@@ -39,20 +38,20 @@ class NoteEditorTests: BaseTest {
         firstJournalEntry.clear()
         
         step("Then note displays typed text correctly"){
-            cardTestView.getCardNotesForVisiblePart().first?.click()
+            noteTestView.getNoteNodesForVisiblePart().first?.click()
             journalView.app.typeText(texts[0])
             XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
         }
 
         step("Then note displays typed text from the beginning of the note correctly"){
-            shortcuts.shortcutActionInvoke(action: .beginOfNote)
+            shortcutHelper.shortcutActionInvoke(action: .beginOfNote)
             journalView.app.typeText(texts[1])
             XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + texts[0])
         }
 
         
         step("Then note displays replaced typed text correctly"){
-            shortcuts.shortcutActionInvoke(action: .selectAll)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
             journalView.app.typeText(texts[2])
             XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[2])
         }
@@ -72,12 +71,12 @@ class NoteEditorTests: BaseTest {
         launchApp()
         
         step("Given I type \(contextMenuTriggerKey) char"){
-            cardTestView.getCardNotesForVisiblePart().first?.click()
+            noteTestView.getNoteNodesForVisiblePart().first?.click()
             let firstJournalEntry = journalView.getNoteByIndex(1)
             firstJournalEntry.tapInTheMiddle()
             firstJournalEntry.clear()
         }
-        let contextMenuView = cardTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
+        let contextMenuView = noteTestView.triggerContextMenu(key:  NoteViewLocators.Groups.contextMenu.accessibilityIdentifier)
         
         step("Then Context menu is displayed"){
             XCTAssertTrue(contextMenuView.menuElement().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
@@ -119,13 +118,13 @@ class NoteEditorTests: BaseTest {
         
         step("Given I open a note") {
             launchApp()
-            shortcuts.shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             AllNotesTestView().waitForAllNotesViewToLoad()
             AllNotesTestView().openFirstNote()
         }
         
         step("Given I type a URL in text editor"){
-            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: "youtube.com ", needsActivation: true)
+            noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "youtube.com ", needsActivation: true)
         }
         
         step("When I CMD+click on URL"){
@@ -133,16 +132,16 @@ class NoteEditorTests: BaseTest {
         }
         
         step("Then I see pivot button value is incremented") {
-            XCTAssertTrue(cardTestView.staticText(CardViewLocators.StaticTexts.backgroundTabOpened.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertEqual(cardTestView.getPivotButtonCounter(), "1")
+            XCTAssertTrue(noteTestView.staticText(NoteViewLocators.StaticTexts.backgroundTabOpened.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertEqual(noteTestView.getPivotButtonCounter(), "1")
             
             self.cmdClickFirstNote()
-            XCTAssertEqual(cardTestView.getPivotButtonCounter(), "2")
+            XCTAssertEqual(noteTestView.getPivotButtonCounter(), "2")
         }
         
         step("Then correct number of tabs is opened"){
-            shortcuts.shortcutActionInvoke(action: .switchBetweenCardWeb)
-            XCTAssertEqual(WebTestView().getNumberOfTabs(), 2)
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            XCTAssertEqual(webView.getNumberOfTabs(), 2)
         }
     }
     
@@ -150,116 +149,115 @@ class NoteEditorTests: BaseTest {
         launchAppAndOpenFirstNote()
         
         step("Given I create indentation levels") {
-            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
-            cardTestView.typeKeyboardKey(.return)
-            cardTestView.typeKeyboardKey(.tab)
+            noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "row1",  needsActivation: true)
+            noteTestView.typeKeyboardKey(.return)
+            noteTestView.typeKeyboardKey(.tab)
             
-            cardTestView.app.typeText("row2")
-            cardTestView.typeKeyboardKey(.return)
+            noteTestView.app.typeText("row2")
+            noteTestView.typeKeyboardKey(.return)
             
-            cardTestView.app.typeText("row3")
-            cardTestView.typeKeyboardKey(.return)
-            cardTestView.typeKeyboardKey(.tab)
+            noteTestView.app.typeText("row3")
+            noteTestView.typeKeyboardKey(.return)
+            noteTestView.typeKeyboardKey(.tab)
             
-            cardTestView.app.typeText("row4")
-            cardTestView.typeKeyboardKey(.return)
+            noteTestView.app.typeText("row4")
+            noteTestView.typeKeyboardKey(.return)
             
-            cardTestView.app.typeText("row5")
-            cardTestView.typeKeyboardKey(.tab)
-            cardTestView.typeKeyboardKey(.return)
+            noteTestView.app.typeText("row5")
+            noteTestView.typeKeyboardKey(.tab)
+            noteTestView.typeKeyboardKey(.return)
             
-            cardTestView.app.typeText("row6")
+            noteTestView.app.typeText("row6")
         }
         
         step("Then there are 3 indentation disclosure triangles appeared for row 1, 3 and 4") {
-            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 3)
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 2))
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 3))
+            XCTAssertEqual(noteTestView.getNumberOfDisclosureTriangles(), 3)
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 2))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 3))
         }
         
         step("When I unindent row5 2 times") {
-            cardTestView.typeKeyboardKey(.upArrow)
-            shortcuts.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            noteTestView.typeKeyboardKey(.upArrow)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
         }
         
         step("Then row5 and row6 positions are swapped") {
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(4), "row6")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(5), "row5")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(4), "row6")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(5), "row5")
         }
         
         step("When I close row3") {
-            cardTestView.getIndentationTriangleAtNode(nodeIndex: 2).tapInTheMiddle()
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 2).tapInTheMiddle()
         }
         
         step("Then the number of disclosure tirangles is 2 available for row 1 and 3, rows 4 and 5 are hidden") {
-            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 2)
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
-            XCTAssertTrue(cardTestView.isIndentationTriangleClosed(nodeIndex: 2))
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), "row1")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), "row2")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), "row3")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(3), "row5")
+            XCTAssertEqual(noteTestView.getNumberOfDisclosureTriangles(), 2)
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(noteTestView.isIndentationTriangleClosed(nodeIndex: 2))
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(0), "row1")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(1), "row2")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(2), "row3")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(3), "row5")
         }
         
         step("When I indent row5") {
-            cardTestView.typeKeyboardKey(.tab)
+            noteTestView.typeKeyboardKey(.tab)
         }
         
         step("Then number of disclosure tirangles is 3") {
-            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 3)
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 2))
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 3))
+            XCTAssertEqual(noteTestView.getNumberOfDisclosureTriangles(), 3)
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 2))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 3))
         }
         
         step("When I unindent row5 and close row1") {
-            shortcuts.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
-            cardTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
         }
         
         step("Then number of disclosure tirangles is 1 available for row 1") {
-            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 1)
-            XCTAssertTrue(cardTestView.isIndentationTriangleClosed(nodeIndex: 0))
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), "row5")
+            XCTAssertEqual(noteTestView.getNumberOfDisclosureTriangles(), 1)
+            XCTAssertTrue(noteTestView.isIndentationTriangleClosed(nodeIndex: 0))
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(1), "row5")
         }
         
         step("When I open row1 and close row4") {
-            cardTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
-            cardTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 0).tapInTheMiddle()
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
         }
         
         step("Then number of disclosure tirangles is 2 available for row 3") {
-            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 3)
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 2))
-            XCTAssertTrue(cardTestView.isIndentationTriangleClosed(nodeIndex: 3))
+            XCTAssertEqual(noteTestView.getNumberOfDisclosureTriangles(), 3)
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 2))
+            XCTAssertTrue(noteTestView.isIndentationTriangleClosed(nodeIndex: 3))
         }
         
         step("When I unindent row4 and row6") {
-            cardTestView.getTextNodeByIndex(nodeIndex: 3).tapInTheMiddle()
-            shortcuts.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
-            cardTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
-            cardTestView.getTextNodeByIndex(nodeIndex: 4).tapInTheMiddle()
-            shortcuts.shortcutActionInvoke(action: .unindent)
+            noteTestView.getTextNodeByIndex(nodeIndex: 3).tapInTheMiddle()
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .unindent, numberOfTimes: 2)
+            noteTestView.getIndentationTriangleAtNode(nodeIndex: 3).tapInTheMiddle()
+            noteTestView.getTextNodeByIndex(nodeIndex: 4).tapInTheMiddle()
+            shortcutHelper.shortcutActionInvoke(action: .unindent)
         }
         
         step("Then number of disclosure tirangles is 1 available for row 1 and all rows are visible") {
-            XCTAssertEqual(cardTestView.getNumberOfDisclosureTriangles(), 1)
-            XCTAssertTrue(cardTestView.isIndentationTriangleOpened(nodeIndex: 0))
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), "row1")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(1), "row2")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(2), "row3")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(3), "row4")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(4), "row6")
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(5), "row5")
+            XCTAssertEqual(noteTestView.getNumberOfDisclosureTriangles(), 1)
+            XCTAssertTrue(noteTestView.isIndentationTriangleOpened(nodeIndex: 0))
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(0), "row1")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(1), "row2")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(2), "row3")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(3), "row4")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(4), "row6")
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(5), "row5")
         }
     }
     
     func testInsertLinkPopUp() {
 
         let addLinkView = AddLinkView()
-        let webView = WebTestView()
         let textToAddLink = "Test Link"
         let urlAdded = "beamapp.co/"
         let textAppended = " Updated"
@@ -268,12 +266,12 @@ class NoteEditorTests: BaseTest {
         launchAppAndOpenFirstNote()
         
         step("Given I add text in a note") {
-            cardTestView.typeInCardNoteByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
+            noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: textToAddLink,  needsActivation: true)
         }
         
         step("When I access to Link editor") {
-            shortcuts.shortcutActionInvoke(action: .selectAll)
-            shortcuts.shortcutActionInvoke(action: .insertLink)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
+            shortcutHelper.shortcutActionInvoke(action: .insertLink)
             addLinkView.waitForLinkEditorPopUpAppear()
         }
         
@@ -300,16 +298,16 @@ class NoteEditorTests: BaseTest {
         
         step("Then Note is updated with link correctly inserted") {
             addLinkView.typeKeyboardKey(.enter)
-            XCTAssertEqual(cardTestView.getCardNoteValueByIndex(0), expectedBiDiLink)
-            cardTestView.openBiDiLink(expectedBiDiLink)
+            XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(0), expectedBiDiLink)
+            noteTestView.openBiDiLink(expectedBiDiLink)
             XCTAssertEqual(webView.getNumberOfTabs(), 1)
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), urlAdded)
         }
         
         step("And link is copied") {
-            cardTestView.shortcutsHelper.shortcutActionInvoke(action: .newTab)
-            cardTestView.shortcutsHelper.shortcutActionInvoke(action: .paste)
-            cardTestView.typeKeyboardKey(.enter)
+            noteTestView.shortcutHelper.shortcutActionInvoke(action: .newTab)
+            noteTestView.shortcutHelper.shortcutActionInvoke(action: .paste)
+            noteTestView.typeKeyboardKey(.enter)
             XCTAssertEqual(webView.getNumberOfTabs(), 2)
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 1), urlAdded)
         }

@@ -23,14 +23,14 @@ class SyncTests: BaseTest {
             XCTAssertTrue(OnboardingLandingTestView().waitForLandingViewToLoad(), "Onboarding view wasn't loaded")
             OnboardingLandingTestView().signUpLater().clickSkipButton()
             helper.tapCommand(.create10Notes)
-            ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             notesBeforeSync = AllNotesTestTable()
         }
         
         step("WHEN close the app and I sign up with a new account") {
-            UITestsMenuBar().signUpWithRandomTestAccount()
-            ShortcutsHelper().shortcutActionInvoke(action: .switchBetweenCardWeb)
-            ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+            uiMenu.signUpWithRandomTestAccount()
+            shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         }
         
         step("THEN the notes are merged correctly for the newly created account") {

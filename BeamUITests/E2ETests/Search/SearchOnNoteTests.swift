@@ -1,5 +1,5 @@
 //
-//  SearchOnCardTests.swift
+//  SearchOnNoteTests.swift
 //  BeamUITests
 //
 //  Created by Andrii on 04/10/2021.
@@ -8,10 +8,10 @@
 import Foundation
 import XCTest
 
-class SearchOnCardTests: BaseTest {
+class SearchOnNoteTests: BaseTest {
     
     func testSearchViewAppearace() {
-        let searchView = prepareTest(populateCardTimes: 2)
+        let searchView = prepareTest(populateNoteTimes: 2)
         
         step("Then by default search field is unavailable"){
             XCTAssertFalse(searchView.textField(SearchViewLocators.TextFields.searchField.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -49,7 +49,7 @@ class SearchOnCardTests: BaseTest {
     }
     
     func testSearchResultsCounter() {
-        let searchView = prepareTest(populateCardTimes: 5)
+        let searchView = prepareTest(populateNoteTimes: 5)
         
         step("When I search for available letter in text"){
             searchView.triggerSearchField()
@@ -113,7 +113,7 @@ class SearchOnCardTests: BaseTest {
     
     func testSearchKeywordCaseSensitivity() {
         //Impossible to locate highlighted elements, highlight is covered only for web
-        let searchView = prepareTest(populateCardTimes: 2)
+        let searchView = prepareTest(populateNoteTimes: 2)
         let firstSearch = "TeST"
 
         step("When I search for \(firstSearch)"){
@@ -127,7 +127,7 @@ class SearchOnCardTests: BaseTest {
     }
     
     func testSearchFieldPasteAndTypeText() {
-        let searchView = prepareTest(populateCardTimes: 1)
+        let searchView = prepareTest(populateNoteTimes: 1)
         let textToPaste = "test 0: "
         
         step("When I paste \(textToPaste) in the search field"){
@@ -141,19 +141,19 @@ class SearchOnCardTests: BaseTest {
     }
     
     func testSearchFieldUpdateInstantly() {
-        let searchView = prepareTest(populateCardTimes: 1)
-        let cardView = NoteTestView()
+        let searchView = prepareTest(populateNoteTimes: 1)
+        let noteView = NoteTestView()
         let textToType = "test"
         
         searchView.activateSearchField(isWebSearch: false).typeInSearchField(textToType, true)
-        cardView.typeInCardNoteByIndex(noteIndex: 0, text: textToType, needsActivation: true)
+        noteView.typeInNoteNodeByIndex(noteIndex: 0, text: textToType, needsActivation: true)
         
         step("Then I see number of results is updated correctly"){
             XCTAssertTrue(searchView.assertResultsCounterNumber("1/5"))
         }
         
         step("When I delete the last char"){
-            cardView.typeKeyboardKey(.delete)
+            noteView.typeKeyboardKey(.delete)
         }
         
         step("Then I see number of results is updated correctly"){
@@ -161,7 +161,7 @@ class SearchOnCardTests: BaseTest {
         }
         
         step("When I add one more char"){
-            cardView.typeInCardNoteByIndex(noteIndex: 0, text: "t")
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: "t")
         }
         
         step("Then I see number of results is updated correctly"){
@@ -169,7 +169,7 @@ class SearchOnCardTests: BaseTest {
         }
         
         step("When I add one more char"){
-            cardView.typeInCardNoteByIndex(noteIndex: 0, text: "t")
+            noteView.typeInNoteNodeByIndex(noteIndex: 0, text: "t")
         }
         
         step("Then I see number of results is not changed"){
@@ -177,7 +177,7 @@ class SearchOnCardTests: BaseTest {
         }
         
         step("When I delete the last char"){
-            cardView.typeKeyboardKey(.delete)
+            noteView.typeKeyboardKey(.delete)
         }
         
         step("Then I see number of results is not changed"){
@@ -189,12 +189,12 @@ class SearchOnCardTests: BaseTest {
         try XCTSkipIf(true, "WIP once https://linear.app/beamapp/issue/BE-2085/card-search-includes-links-and-references is implemented")
     }
     
-    func prepareTest(populateCardTimes: Int) -> SearchTestView {
+    func prepareTest(populateNoteTimes: Int) -> SearchTestView {
         let helper = BeamUITestsHelper(launchApp().app)
         let searchView = SearchTestView()
         JournalTestView().createNoteViaOmniboxSearch("SearchNote") //backspace is not typed sometimes on CI machines, camel case is used instead
         step("Given I populate the note"){
-            for _ in 1...populateCardTimes {
+            for _ in 1...populateNoteTimes {
                 helper.tapCommand(.insertTextInCurrentNote)
             }
         }

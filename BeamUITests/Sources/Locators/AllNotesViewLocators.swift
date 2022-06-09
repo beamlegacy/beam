@@ -1,5 +1,5 @@
 //
-//  AllCardsViewLocators.swift
+//  AllNotesViewLocators.swift
 //  BeamUITests
 //
 //  Created by Andrii on 23.07.2021.
@@ -10,7 +10,7 @@ import Foundation
 enum AllNotesViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
-        case newCardButton = "tool new"
+        case newNoteButton = "tool new"
         case journalButton = "journal"
     }
     
@@ -23,12 +23,12 @@ enum AllNotesViewLocators {
     }
     
     enum ColumnCells: String, CaseIterable, UIElement {
-        case cardTitleColumnCell = "Title"
+        case noteTitleColumnCell = "Title"
     }
     
     enum Images: String, CaseIterable, UIElement {
-        case singleCardEditor = "editor-options"
-        case allCardsEditor = "editor-breadcrumb_down"
+        case singleNoteEditor = "editor-options"
+        case allNotesEditor = "editor-breadcrumb_down"
     }
     
     enum MenuItems: String, CaseIterable, UIElement {
