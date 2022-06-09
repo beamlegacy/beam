@@ -202,7 +202,10 @@ public class BeamNote: BeamElement {
         case noteSettings
     }
 
+    private var isInitializingFromDecoder = false
+
     public required init(from decoder: Decoder) throws {
+        isInitializingFromDecoder = true
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
         let ttl = try container.decode(String.self, forKey: .title)
@@ -250,6 +253,7 @@ public class BeamNote: BeamElement {
         }
         open = true
         checkHasNote()
+        isInitializingFromDecoder = false
     }
 
     override public func encode(to encoder: Encoder) throws {
@@ -378,7 +382,7 @@ public class BeamNote: BeamElement {
         if var note = note as? BeamNoteDocument {
             note.lastChangedElement = child
         }
-        recordScoreWordCount()
+        if !isInitializingFromDecoder { recordScoreWordCount() }
     }
 
     public static func unloadAllNotes() {
@@ -515,7 +519,7 @@ public class BeamNote: BeamElement {
     }
     override public func change(_ type: BeamElement.ChangeType) {
         super.change(type)
-        recordScoreWordCount()
+        if !isInitializingFromDecoder { recordScoreWordCount() }
     }
 }
 

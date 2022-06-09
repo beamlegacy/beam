@@ -53,14 +53,14 @@ public protocol DailyUrlScoreStoreProtocol {
 }
 
 public struct AggregatedURLScore {
-    var visitCount: Int = 0
-    var readingTimeToLastEvent: CFTimeInterval = 0
-    var textSelections: Int = 0
-    var scrollRatioX: Float = 0
-    var scrollRatioY: Float = 0
-    var textAmount: Int = 0
-    var area: Float = 0
-    var isPinned: Bool = false //true if isPinned at least once during period
+    public var visitCount: Int = 0
+    public var readingTimeToLastEvent: CFTimeInterval = 0
+    public var textSelections: Int = 0
+    public var scrollRatioX: Float = 0
+    public var scrollRatioY: Float = 0
+    public var textAmount: Int = 0
+    public var area: Float = 0
+    public var isPinned: Bool = false //true if isPinned at least once during period
 
     public var score: Float {
         return scrollRatioY
@@ -73,7 +73,7 @@ public struct AggregatedURLScore {
 public struct ScoredURL {
     public let url: URL
     public var title: String?
-    let score: AggregatedURLScore
+    public let score: AggregatedURLScore
 
     public func displayText(maxUrlLength: Int) -> String {
         guard let title = title, !title.isEmpty else {
@@ -181,7 +181,7 @@ public class DailyUrlScorer {
         self.store = store
         self.minReadingTime = minReadingTime
     }
-    public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5) -> [ScoredURL] {
+    public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5, filtered: Bool = true) -> [ScoredURL] {
         let scores = store.getScores(daysAgo: daysAgo)
         let links = LinkStore.shared.getLinks(for: Array(scores.keys))
             .filter { (id, link) in id != Link.missing.id || link.url != Link.missing.url }
@@ -191,7 +191,7 @@ public class DailyUrlScorer {
         let aggregatedScores = schemeGroups.aggregate(scores: scores)
         return Array(
             aggregatedScores
-                .filter { (url, score) in !(score.isPinned || url.isSearchEngineResultPage || score.readingTimeToLastEvent < minReadingTime) }
+                .filter { (url, score) in !(score.isPinned || url.isSearchEngineResultPage || score.readingTimeToLastEvent < minReadingTime) || !filtered }
                 .sorted { (lhs, rhs) in lhs.value.score > rhs.value.score }
                 .map { ScoredURL(url: $0.key, title: mostRecentTitle[$0.key], score: $0.value) }
                 .prefix(topN)
