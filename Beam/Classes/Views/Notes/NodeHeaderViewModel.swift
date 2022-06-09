@@ -15,7 +15,7 @@ extension NoteHeaderView {
         case fromPublishButton
     }
 
-    class ViewModel: ObservableObject {
+    final class ViewModel: ObservableObject {
         @Published var note: BeamNote? {
             didSet {
                 guard note != oldValue else { return }
@@ -27,9 +27,9 @@ extension NoteHeaderView {
         // title editing
         @Published var titleText: String = ""
         @Published var titleSelectedRange: Range<Int>?
-        @Published var isEditingTitle = false
-        @Published var isTitleTaken = false
-        @Published var wiggleValue = CGFloat(0)
+        @Published var isEditingTitle: Bool = false
+        @Published var isTitleTaken: (value: Bool, animated: Bool) = (false, true)
+        @Published var wiggleValue: CGFloat = .zero
 
         // publishing
         @Published var publishState: NoteHeaderPublishButton.PublishButtonState = .isPrivate
@@ -62,7 +62,7 @@ extension NoteHeaderView {
                     self?.titleText = newTitle
                 }.store(in: &noteObservers)
             }
-            self.titleText = note?.title ?? ""
+            resetEditingState(animated: false)
             self.publishState = note?.publicationStatus.isPublic == true ? .isPublic : .isPrivate
             self.isOnUserProfile = note?.publicationStatus.isOnPublicProfile ?? false
         }
@@ -71,13 +71,13 @@ extension NoteHeaderView {
             titleSelectedRange = nil
             let newTitle = formatToValidTitle(titleText)
             let existingNote = DocumentManager().loadDocumentByTitle(title: newTitle)
-            self.isTitleTaken = existingNote != nil && existingNote?.id != note?.id
+            self.isTitleTaken = (existingNote != nil && existingNote?.id != note?.id, true)
         }
 
-        func resetEditingState() {
+        func resetEditingState(animated: Bool = true) {
             titleText = note?.title ?? ""
             isEditingTitle = false
-            isTitleTaken = false
+            isTitleTaken = (false, animated)
             wiggleValue = 0
         }
 
@@ -87,8 +87,8 @@ extension NoteHeaderView {
 
         func commitRenameCard(fromTextField: Bool) {
             let newTitle = formatToValidTitle(titleText)
-            guard !newTitle.isEmpty, newTitle != note?.title, !isTitleTaken, canEditTitle else {
-                if fromTextField && isTitleTaken {
+            guard !newTitle.isEmpty, newTitle != note?.title, !isTitleTaken.value, canEditTitle else {
+                if fromTextField && isTitleTaken.value {
                     wiggleValue += 1
                 } else {
                     resetEditingState()
