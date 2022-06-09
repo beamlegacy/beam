@@ -10,9 +10,6 @@ import XCTest
 
 class AdvancedSignInPasswordAutofillTests: BaseTest {
 
-    let uiMenu = UITestsMenuBar()
-    let mockPage = MockHTTPWebPages()
-    let helper = PasswordManagerHelper()
     let passwordUsername = "somePass@0"
     let passwordEmail = "somePass@1"
     let passwordEscape = "s.o'm\"e!P\\a&s?s@2/"
@@ -38,7 +35,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
             mockPage.getPasswordFieldElement(title: "Current Password: ").clickOnExistence()
         }
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: loginUsername)
+            passwordManagerHelper.clickPopupLoginText(login: loginUsername)
         }
         step("Then the credentials are successfully populated") {
             XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Current Username: ")), loginUsername)
@@ -78,17 +75,17 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         
         if !autocomplete {
             step("Then create a new password is proposed") {
-                XCTAssertTrue(helper.doesSuggestNewPasswordExist())
+                XCTAssertTrue(passwordManagerHelper.doesSuggestNewPasswordExist())
             }
         } else {
             step("Then create a new password is not proposed") {
-                XCTAssertFalse(helper.doesSuggestNewPasswordExist())
+                XCTAssertFalse(passwordManagerHelper.doesSuggestNewPasswordExist())
             }
         }
         
         step("When I click on pop-up suggestion") {
-            helper.getOtherPasswordsOptionElementFor(hostName: host).clickOnExistence()
-            helper.clickPopupLoginText(login: login)
+            passwordManagerHelper.getOtherPasswordsOptionElementFor(hostName: host).clickOnExistence()
+            passwordManagerHelper.clickPopupLoginText(login: login)
         }
         
         step("Then the credentials are successfully populated") {
@@ -114,11 +111,11 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         
         step("When I click on username field") {
             mockPage.getUsernameFieldElement(title: "Email: ").clickOnExistence()
-            helper.getOtherPasswordsOptionElementFor(hostName: host).clickOnExistence()
+            passwordManagerHelper.getOtherPasswordsOptionElementFor(hostName: host).clickOnExistence()
         }
         
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: login)
+            passwordManagerHelper.clickPopupLoginText(login: login)
         }
         
         step("Then the login is successfully populated") {
@@ -130,7 +127,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then Sign in Step 2 is displayed") {
-            ShortcutsHelper().shortcutActionInvoke(action: .openLocation)
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
             let url = OmniBoxTestView().getSearchFieldValue()
             XCTAssertTrue(url.contains(mockPage.getMockPageUrl(.mockBaseUrl) + passwordPage))
         }
@@ -140,11 +137,11 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password suggestion is proposed with correct login") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: login))
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: login))
         }
         
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: login)
+            passwordManagerHelper.clickPopupLoginText(login: login)
         }
         
         step("Then the password is successfully populated") {
@@ -188,8 +185,8 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginEmail))
-            XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
+            XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginEmail))
+            XCTAssertFalse(passwordManagerHelper.doesOtherPasswordsPopupExist())
         }
         
         step("When I fill username and I continue to display password") {
@@ -202,8 +199,8 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginEmail))
-            XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
+            XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginEmail))
+            XCTAssertFalse(passwordManagerHelper.doesOtherPasswordsPopupExist())
         }
     }
     
@@ -235,8 +232,8 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginEmail))
-            XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
+            XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginEmail))
+            XCTAssertFalse(passwordManagerHelper.doesOtherPasswordsPopupExist())
             mockPage.getUsernameFieldElement(title: "Name: ").clickClearAndType(testData)
             mockPage.typeKeyboardKey(.escape) // Do not choose autocomplete
         }
@@ -246,8 +243,8 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is not displayed") {
-            XCTAssertFalse(helper.doesAutofillPopupExist(autofillText: loginUsername))
-            XCTAssertFalse(helper.doesOtherPasswordsPopupExist())
+            XCTAssertFalse(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginUsername))
+            XCTAssertFalse(passwordManagerHelper.doesOtherPasswordsPopupExist())
             mockPage.getUsernameFieldElement(title: "Lastname: ").clickClearAndType(testData)
             mockPage.typeKeyboardKey(.escape) // Do not choose autocomplete
         }
@@ -257,8 +254,8 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: loginUsername))
-            XCTAssertTrue(helper.doesSuggestNewPasswordExist())
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginUsername))
+            XCTAssertTrue(passwordManagerHelper.doesSuggestNewPasswordExist())
         }
         
         step("When I click on Email field") {
@@ -266,11 +263,11 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then password manager is displayed") {
-            XCTAssertTrue(helper.doesAutofillPopupExist(autofillText: loginUsername))
+            XCTAssertTrue(passwordManagerHelper.doesAutofillPopupExist(autofillText: loginUsername))
         }
         
         step("When I fill information") {
-            helper.clickPopupLoginText(login: loginUsername)
+            passwordManagerHelper.clickPopupLoginText(login: loginUsername)
         }
         
         step("And I submit the form") {
@@ -296,11 +293,11 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
 
         step("And I click on Other Passwords option") {
-            helper.getOtherPasswordsOptionElementFor(hostName: "form.lvh.me").clickOnExistence()
+            passwordManagerHelper.getOtherPasswordsOptionElementFor(hostName: "form.lvh.me").clickOnExistence()
         }
 
         step("When I fill information") {
-            helper.clickPopupLoginText(login: loginEscape)
+            passwordManagerHelper.clickPopupLoginText(login: loginEscape)
         }
 
         step("And I submit the form") {

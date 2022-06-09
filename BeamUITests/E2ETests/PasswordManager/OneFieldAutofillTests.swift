@@ -10,9 +10,6 @@ import XCTest
 
 class OneFieldAutofillTests: BaseTest {
 
-    let uiMenu = UITestsMenuBar()
-    let mockPage = MockHTTPWebPages()
-    let helper = PasswordManagerHelper()
     let baseURL = "http://form.lvh.me:8080/custom"
 
     override func setUpWithError() throws {
@@ -29,7 +26,7 @@ class OneFieldAutofillTests: BaseTest {
             mockPage.getUsernameFieldElement(title: "Field: ").clickOnExistence()
         }
         step("Then the key icon is not displayed"){
-            XCTAssertFalse(helper.getKeyIconElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 
@@ -41,7 +38,7 @@ class OneFieldAutofillTests: BaseTest {
             mockPage.getUsernameFieldElement(title: "Field: ").clickOnExistence()
         }
         step("Then the key icon is not displayed"){
-            XCTAssertFalse(helper.getKeyIconElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 
@@ -53,7 +50,7 @@ class OneFieldAutofillTests: BaseTest {
             mockPage.getUsernameFieldElement(title: "Field: ").clickOnExistence()
         }
         step("Then the key icon is not displayed"){
-            XCTAssertFalse(helper.getKeyIconElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 
@@ -64,7 +61,7 @@ class OneFieldAutofillTests: BaseTest {
             mockPage.getUsernameFieldElement(title: "Field: ").clickOnExistence()
         }
         step("Then the key icon is displayed"){
-            XCTAssertTrue(helper.getKeyIconElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 
@@ -75,7 +72,7 @@ class OneFieldAutofillTests: BaseTest {
             mockPage.getUsernameFieldElement(title: "Field: ").clickOnExistence()
         }
         step("Then the key icon is displayed"){
-            XCTAssertTrue(helper.getKeyIconElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getKeyIconElement().exists)
         }
     }
 }

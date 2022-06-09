@@ -10,9 +10,9 @@ import XCTest
 
 class BlockReferenceTests: BaseTest {
     
-    let cardName1 = "Block 1"
-    let cardName2 = "Block 2"
-    var cardView = NoteTestView()
+    let noteName1 = "Block 1"
+    let noteName2 = "Block 2"
+    var noteView = NoteTestView()
     var noteForReference: String?
     
     func SKIPtestCreateBlockReference() throws {
@@ -20,12 +20,12 @@ class BlockReferenceTests: BaseTest {
         let journalView = launchApp()
 
         step("Given I create I create a block reference"){
-            noteForReference = createBlockRefForTwoCards(journalView, cardName1, cardName2)
+            noteForReference = createBlockRefForTwoNotes(journalView, noteName1, noteName2)
         }
 
         step("Then it has correct number and content"){
-            XCTAssertEqual(cardView.getNumberOfBlockRefs(), 1)
-            XCTAssertEqual(cardView.getElementStringValue(element:  cardView.getBlockRefByIndex(0)), noteForReference!)
+            XCTAssertEqual(noteView.getNumberOfBlockRefs(), 1)
+            XCTAssertEqual(noteView.getElementStringValue(element:  noteView.getBlockRefByIndex(0)), noteForReference!)
         }
 
     }
@@ -35,10 +35,10 @@ class BlockReferenceTests: BaseTest {
         let journalView = launchApp()
         let textToAdd = " additional text"
         step("Given I create I create a block reference"){
-            noteForReference = createBlockRefForTwoCards(journalView, cardName1, cardName2)
+            noteForReference = createBlockRefForTwoNotes(journalView, noteName1, noteName2)
         }
         
-        let blockRef = cardView.getBlockRefByIndex(0)
+        let blockRef = noteView.getBlockRefByIndex(0)
         step("Then the block reference is locked by default"){
             blockRef.tapInTheMiddle()
             blockRef.doubleClick() //Double click is just for sure the field is not editable
@@ -46,16 +46,16 @@ class BlockReferenceTests: BaseTest {
         }
 
         step("When I unlock the block reference"){
-            cardView.blockReferenceMenuActionTrigger(.blockRefUnlock, blockRefNumber: 1)
+            noteView.blockReferenceMenuActionTrigger(.blockRefUnlock, blockRefNumber: 1)
         }
         
         step("Then it can be changed"){
             blockRef.tapInTheMiddle()
             XCTAssertTrue(waitForKeyboardFocus(blockRef))
             blockRef.typeText("\(textToAdd)\r")
-            XCTAssertEqual(cardView.getElementStringValue(element: blockRef), noteForReference! + textToAdd)
-            cardView.typeKeyboardKey(.delete, textToAdd.count)
-            XCTAssertEqual(cardView.getElementStringValue(element: blockRef), noteForReference!)
+            XCTAssertEqual(noteView.getElementStringValue(element: blockRef), noteForReference! + textToAdd)
+            noteView.typeKeyboardKey(.delete, textToAdd.count)
+            XCTAssertEqual(noteView.getElementStringValue(element: blockRef), noteForReference!)
         }
     }
     
@@ -64,12 +64,12 @@ class BlockReferenceTests: BaseTest {
         let journalView = launchApp()
         
         step("Given I create 2 notes"){
-            createBlockRefForTwoCards(journalView, cardName1, cardName2)
+            createBlockRefForTwoNotes(journalView, noteName1, noteName2)
         }
 
         step("Then I can see correct origin of the reference"){
-            cardView.blockReferenceMenuActionTrigger(.blockRefOrigin, blockRefNumber: 1)
-            XCTAssertTrue(waitForStringValueEqual(cardName1, cardView.cardTitle), "Actual note name is \(cardView.cardTitle)")
+            noteView.blockReferenceMenuActionTrigger(.blockRefOrigin, blockRefNumber: 1)
+            XCTAssertTrue(waitForStringValueEqual(noteName1, noteView.noteTitle), "Actual note name is \(noteView.noteTitle)")
         }
 
     }
@@ -79,34 +79,34 @@ class BlockReferenceTests: BaseTest {
         let journalView = launchApp()
         
         step("Given I create 2 notes"){
-            noteForReference = createBlockRefForTwoCards(journalView, cardName1, cardName2)
+            noteForReference = createBlockRefForTwoNotes(journalView, noteName1, noteName2)
         }
 
         step("Then I can successfully remove it"){
-            cardView.blockReferenceMenuActionTrigger(.blockRefRemove, blockRefNumber: 1)
-            XCTAssertTrue(waitForDoesntExist( cardView.textView(CardViewLocators.TextViews.blockReference.accessibilityIdentifier)))
+            noteView.blockReferenceMenuActionTrigger(.blockRefRemove, blockRefNumber: 1)
+            XCTAssertTrue(waitForDoesntExist( noteView.textView(NoteViewLocators.TextViews.blockReference.accessibilityIdentifier)))
         }
 
         step("Then removing block reference doesn't remove the source text"){
-            journalView.openRecentNoteByName(cardName2)
-            let currentSourceNote = cardView.getElementStringValue(element:  cardView.getCardNotesForVisiblePart()[1])
+            journalView.openRecentNoteByName(noteName2)
+            let currentSourceNote = noteView.getElementStringValue(element:  noteView.getNoteNodesForVisiblePart()[1])
             XCTAssertEqual(currentSourceNote, noteForReference!)
         }
 
     }
     
     @discardableResult
-    func createBlockRefForTwoCards(_ view: JournalTestView, _ cardName1: String, _ cardName2: String) -> String {
-        view.createNoteViaOmniboxSearch(cardName1)
-        view.createNoteViaOmniboxSearch(cardName2)
+    func createBlockRefForTwoNotes(_ view: JournalTestView, _ noteName1: String, _ noteName2: String) -> String {
+        view.createNoteViaOmniboxSearch(noteName1)
+        view.createNoteViaOmniboxSearch(noteName2)
         let helper = BeamUITestsHelper(view.app)
         helper.tapCommand(.insertTextInCurrentNote)
         
-        let noteForReference = cardView.getElementStringValue(element:cardView.getCardNotesForVisiblePart()[1])
+        let noteForReference = noteView.getElementStringValue(element:noteView.getNoteNodesForVisiblePart()[1])
         let referencePart = (noteForReference.substring(from: 0, to: 6))
         
-        view.openRecentNoteByName(cardName1)
-        cardView.addTestRef(referencePart)
+        view.openRecentNoteByName(noteName1)
+        noteView.addTestRef(referencePart)
         return noteForReference
     }
 }

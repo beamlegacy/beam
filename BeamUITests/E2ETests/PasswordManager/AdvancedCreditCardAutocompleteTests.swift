@@ -12,12 +12,9 @@ import SwiftUI
 class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
     
     let alertView = AlertTestView()
-    let uiMenu = UITestsMenuBar()
     var ccPrefView = AutoFillCCTestView()
     var passwordPreferencesView = PasswordPreferencesTestView()
-    
-    var creditCardsTable: CreditCardsTestTable!
-    
+        
     override func setUpWithError() throws {
         launchApp()
         uiMenu.destroyDB()
@@ -188,7 +185,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
         
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: johnCCName)
+            passwordManagerHelper.clickPopupLoginText(login: johnCCName)
         }
         
         step("Then CC is succesfully populated") {
@@ -205,7 +202,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
         
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: johnCCName)
+            passwordManagerHelper.clickPopupLoginText(login: johnCCName)
         }
         
         step("Then CC is succesfully populated") {
@@ -253,7 +250,7 @@ class AdvancedCreditCardAutocompleteTests: BaseCreditCardTest {
         verifyAutoFillIsDisplayed(title: creditCardNumberLabel)
         
         step("When I click on pop-up suggestion") {
-            helper.clickPopupLoginText(login: johnCCName)
+            passwordManagerHelper.clickPopupLoginText(login: johnCCName)
         }
         
         step("Then CC is succesfully populated") {

@@ -10,17 +10,13 @@ import XCTest
 
 class BrowserHistoryTests: BaseTest {
     
-    let mockPage = MockHTTPWebPages()
-    let uiMenuBar = UITestsMenuBar()
-    let webView = WebTestView()
-    let shortcuts = ShortcutsHelper()
     let omnibox = OmniBoxTestView()
     let linkToOpen = MockHTTPWebPages().getMockPageUrl(.ambiguousShortForm).dropLast()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
         launchApp()
-        uiMenuBar.destroyDB()
+        uiMenu.destroyDB()
             .startMockHTTPServer()
     }
     
@@ -52,14 +48,14 @@ class BrowserHistoryTests: BaseTest {
         }
         
         step("THEN \(url1) is opened on CMD+[ shortcuts click and Back button is disabled"){
-            shortcuts.shortcutActionInvoke(action: .browserHistoryBack)
+            shortcutHelper.shortcutActionInvoke(action: .browserHistoryBack)
             XCTAssertTrue(webView.activateAndWaitForSearchFieldToEqual(url1))
             XCTAssertFalse(webView.button(WebViewLocators.Buttons.goBackButton.accessibilityIdentifier).isEnabled)
             webView.typeKeyboardKey(.escape) //unfocus omnibox
         }
         
         step("THEN \(url2) is opened on browser history forward button click"){
-            shortcuts.shortcutActionInvoke(action: .browserHistoryForward)
+            shortcutHelper.shortcutActionInvoke(action: .browserHistoryForward)
             XCTAssertTrue(webView.activateAndWaitForSearchFieldToEqual(url2))
             webView.typeKeyboardKey(.escape) //unfocus omnibox
         }
@@ -77,7 +73,7 @@ class BrowserHistoryTests: BaseTest {
         }
         
         step("THEN \(url1) is opened on CMD+left arrow"){
-            shortcuts.shortcutActionInvokeRepeatedly(action: .browserHistoryBackArrow, numberOfTimes: 2)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .browserHistoryBackArrow, numberOfTimes: 2)
             XCTAssertTrue(webView.activateAndWaitForSearchFieldToEqual(url1))
             webView.typeKeyboardKey(.escape) //unfocus omnibox
         }
@@ -89,7 +85,7 @@ class BrowserHistoryTests: BaseTest {
         }
         
         step("THEN \(url3) is opened on CMD+right arrow"){
-            shortcuts.shortcutActionInvokeRepeatedly(action: .browserHistoryForwardArrow, numberOfTimes: 2)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .browserHistoryForwardArrow, numberOfTimes: 2)
             XCTAssertTrue(webView.activateAndWaitForSearchFieldToEqual(url3))
         }
         

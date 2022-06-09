@@ -1,5 +1,5 @@
 //
-//  CardViewTests.swift
+//  NoteViewTests.swift
 //  BeamUITests
 //
 //  Created by Andrii on 03.08.2021.
@@ -10,46 +10,46 @@ import XCTest
 
 class NoteViewTests: BaseTest {
     
-    let todayCardNameCreationViewFormat = DateHelper().getTodaysDateString(.noteViewCreation)
-    let todayCardNameTitleViewFormat = DateHelper().getTodaysDateString(.noteViewTitle)
-    let todayCardNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.noteViewCreationNoZeros)
+    let todayNoteNameCreationViewFormat = DateHelper().getTodaysDateString(.noteViewCreation)
+    let todayNoteNameTitleViewFormat = DateHelper().getTodaysDateString(.noteViewTitle)
+    let todayNoteNameCreationViewFormatWithout0InDays = DateHelper().getTodaysDateString(.noteViewCreationNoZeros)
     
-    func SKIPtestDefaultCardView() throws {
+    func SKIPtestDefaultNoteView() throws {
         try XCTSkipIf(true, "Workaround to open a note from journal/all notes menu is pending")
-        let defaultNumberOfCardsAtFreshInstallation = 1
+        let defaultNumberOfNotesAtFreshInstallation = 1
         let journalView = launchApp()
-        var cardView: NoteTestView?
-        var allCardsView: AllNotesTestView?
+        var noteView: NoteTestView?
+        var allNotesView: AllNotesTestView?
         
         step("Given I open All Notes view"){
-            allCardsView = journalView.openAllNotesMenu()
+            allNotesView = journalView.openAllNotesMenu()
         }
         
-        step("Then number of notes available by default is \(defaultNumberOfCardsAtFreshInstallation)"){
-            XCTAssertEqual(defaultNumberOfCardsAtFreshInstallation, allCardsView!.getNumberOfNotes())
+        step("Then number of notes available by default is \(defaultNumberOfNotesAtFreshInstallation)"){
+            XCTAssertEqual(defaultNumberOfNotesAtFreshInstallation, allNotesView!.getNumberOfNotes())
         }
         
-        let todaysDateInCardTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
-        let todaysDateInCardCreationDateFormat = DateHelper().getTodaysDateString(.noteViewCreation)
-        step("When I open \(todaysDateInCardTitleFormat) from All notes view"){
-            cardView = allCardsView!.openJournal()
-                                        .openRecentNoteByName(todaysDateInCardTitleFormat)
+        let todaysDateInNoteTitleFormat = DateHelper().getTodaysDateString(.noteViewTitle)
+        let todaysDateInNoteCreationDateFormat = DateHelper().getTodaysDateString(.noteViewCreation)
+        step("When I open \(todaysDateInNoteTitleFormat) from All notes view"){
+            noteView = allNotesView!.openJournal()
+                                        .openRecentNoteByName(todaysDateInNoteTitleFormat)
         }
 
-        step("Then the title of the note is \(todaysDateInCardTitleFormat) and its creation date is \(todaysDateInCardCreationDateFormat)"){
-            cardView!.waitForCardViewToLoad()
-            let cardTitle = cardView!.getCardTitle()
-            XCTAssertTrue(cardTitle == todayCardNameTitleViewFormat || cardTitle == todayCardNameCreationViewFormat || cardTitle == todayCardNameCreationViewFormatWithout0InDays)
-            XCTAssertTrue(cardView!.staticText(CardViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            XCTAssertTrue(cardView!.staticText(todaysDateInCardCreationDateFormat).exists)
-            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.deleteCardButton.accessibilityIdentifier).exists)
-            XCTAssertTrue(cardView!.image(CardViewLocators.Buttons.publishCardButton.accessibilityIdentifier).exists)
-            XCTAssertTrue(cardView!.staticText(todaysDateInCardTitleFormat).exists)
+        step("Then the title of the note is \(todaysDateInNoteTitleFormat) and its creation date is \(todaysDateInNoteCreationDateFormat)"){
+            noteView!.waitForNoteViewToLoad()
+            let noteTitle = noteView!.getNoteTitle()
+            XCTAssertTrue(noteTitle == todayNoteNameTitleViewFormat || noteTitle == todayNoteNameCreationViewFormat || noteTitle == todayNoteNameCreationViewFormatWithout0InDays)
+            XCTAssertTrue(noteView!.staticText(NoteViewLocators.StaticTexts.privateLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(noteView!.staticText(todaysDateInNoteCreationDateFormat).exists)
+            XCTAssertTrue(noteView!.image(NoteViewLocators.Buttons.deleteNoteButton.accessibilityIdentifier).exists)
+            XCTAssertTrue(noteView!.image(NoteViewLocators.Buttons.publishNoteButton.accessibilityIdentifier).exists)
+            XCTAssertTrue(noteView!.staticText(todaysDateInNoteTitleFormat).exists)
         }
         
         let defaultNotesCount = 1
         step("Then number of notes available by default is \(defaultNotesCount) and it is empty"){
-            let notes = cardView!.getCardNotesForVisiblePart()
+            let notes = noteView!.getNoteNodesForVisiblePart()
             XCTAssertEqual(notes.count, defaultNotesCount)
             XCTAssertEqual(notes.first?.value as! String, emptyString)
         }

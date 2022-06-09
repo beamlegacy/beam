@@ -10,7 +10,7 @@ import Foundation
 enum PnSViewLocators {
     
     enum TextFields: String, CaseIterable, UIElement  {
-        case destinationCardToday = "Today"
+        case destinationNoteToday = "Today"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement  {

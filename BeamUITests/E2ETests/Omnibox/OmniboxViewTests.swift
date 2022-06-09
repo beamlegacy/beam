@@ -10,15 +10,13 @@ import XCTest
 
 class OmniboxViewTests: BaseTest {
     
-    let webView = WebTestView()
     let omniboxView = OmniBoxTestView()
-    let mockPage = MockHTTPWebPages()
-    let cardView = NoteTestView()
+    let noteView = NoteTestView()
     var stopMockServer = false
     
     override func tearDown() {
         if stopMockServer {
-            UITestsMenuBar().stopMockHTTPServer()
+            uiMenu.stopMockHTTPServer()
         }
         super.tearDown()
     }
@@ -56,7 +54,7 @@ class OmniboxViewTests: BaseTest {
         }
         
         step("When I delete all input: \(partiallyDeletedSearchText)") {
-            ShortcutsHelper().shortcutActionInvoke(action: .selectAll)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
             omniboxView.typeKeyboardKey(.delete)
         }
         
@@ -84,7 +82,7 @@ class OmniboxViewTests: BaseTest {
         }
 
         step("When I click on pivot button"){
-            WebTestView().openDestinationNote()
+            webView.openDestinationNote()
         }
         
         step("Then journal view is opened"){
@@ -209,7 +207,7 @@ class OmniboxViewTests: BaseTest {
         let expectedReplacedSourceToSearchURL = "http://nestediframe.form.lvh.me:8080/"
         
         launchApp()
-        UITestsMenuBar().startMockHTTPServer()
+        uiMenu.startMockHTTPServer()
         stopMockServer = true
         
         step("GIVEN I open \(initialSearch)"){
@@ -232,7 +230,7 @@ class OmniboxViewTests: BaseTest {
             webView.activateSearchFieldFromTab(index: 0)
             omniboxView.typeKeyboardKey(.rightArrow)
             omniboxView.typeKeyboardKey(.leftArrow, 6)
-            ShortcutsHelper().shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 9)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: 9)
             omniboxView.typeInOmnibox(editedSourceToSearch)
         }
 
@@ -313,7 +311,7 @@ class OmniboxViewTests: BaseTest {
             XCTAssertEqual(results.count, 2)
             XCTAssertEqual(results.element(boundBy: 0).label, OmniboxLocators.Labels.createNotePrefix.accessibilityIdentifier)
             XCTAssertEqual(results.element(boundBy: 1).label, noteATitle)
-            XCTAssertEqual(results.matching(omniboxHelper.autocompleteCreateCardPredicate).count, 1)
+            XCTAssertEqual(results.matching(omniboxHelper.autocompleteCreateNotePredicate).count, 1)
         }
         
         step("When I press enter"){
@@ -321,8 +319,8 @@ class OmniboxViewTests: BaseTest {
         }
         
         step("Then the note is created"){
-            XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertEqual(cardView.getCardTitle(), secondNoteTitle)
+            XCTAssertTrue(noteView.waitForNoteViewToLoad())
+            XCTAssertEqual(noteView.getNoteTitle(), secondNoteTitle)
         }
         
     }

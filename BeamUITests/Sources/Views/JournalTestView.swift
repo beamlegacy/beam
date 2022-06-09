@@ -16,9 +16,9 @@ class JournalTestView: TextEditorContextTestView {
     
     @discardableResult
     func openAllNotesMenu() -> AllNotesTestView {
-        let allCardsMenuButton = button(ToolbarLocators.Buttons.noteSwitcherAllCards.accessibilityIdentifier)
-        waitFor(PredicateFormat.isHittable.rawValue, allCardsMenuButton)
-        allCardsMenuButton.click()
+        let allNotesMenuButton = button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier)
+        waitFor(PredicateFormat.isHittable.rawValue, allNotesMenuButton)
+        allNotesMenuButton.click()
         return AllNotesTestView()
     }
     
@@ -55,7 +55,7 @@ class JournalTestView: TextEditorContextTestView {
     @discardableResult
     func getNoteByIndex(_ i: Int) -> XCUIElement {
         let index = i - 1
-        return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).children(matching: .textView).matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).element(boundBy: index)
+        return scrollView(JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier).children(matching: .textView).matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier).element(boundBy: index)
     }
     
     @discardableResult
@@ -74,7 +74,7 @@ class JournalTestView: TextEditorContextTestView {
     }
     
     func getImageNodes() -> [XCUIElement] {
-        return app.windows.scrollViews[JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier].textViews.matching(identifier: CardViewLocators.TextFields.imageNode.accessibilityIdentifier).allElementsBoundByIndex
+        return app.windows.scrollViews[JournalViewLocators.ScrollViews.journalScrollView.accessibilityIdentifier].textViews.matching(identifier: NoteViewLocators.TextFields.imageNode.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     func getImageNodesCount() -> Int {

@@ -10,20 +10,18 @@ import XCTest
 
 class PDFFilesBrowserViewTests: BaseTest {
     
-    let webView = WebTestView()
-    
     override func setUpWithError() throws {
         try super.setUpWithError()
         step("Given I start mock server") {
             launchApp()
-            UITestsMenuBar().destroyDB()
+            uiMenu.destroyDB()
                 .startMockHTTPServer()
         }
     }
     
     override func tearDown() {
         step("Given I stop mock server") {
-            UITestsMenuBar().stopMockHTTPServer()
+            uiMenu.stopMockHTTPServer()
             super.tearDown()
         }
     }

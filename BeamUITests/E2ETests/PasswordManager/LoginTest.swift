@@ -12,7 +12,6 @@ class LoginTest: BaseTest {
     
     let testPage = UITestPagePasswordManager()
     let alert = AlertTestView()
-    let shortcutsHelper = ShortcutsHelper()
     let passwordsWindow = PasswordPreferencesTestView()
 
     var email: String = ""
@@ -27,7 +26,7 @@ class LoginTest: BaseTest {
         testPage.enterInput(password, .password) //password first to avoid Other Passwords cover over the Submit button
         testPage.enterInput(email, .username)
         // close Other Passwords if it still covers Submit button
-        if PasswordManagerHelper().getOtherPasswordsOptionElement().exists {
+        if passwordManagerHelper.getOtherPasswordsOptionElement().exists {
             testPage.typeKeyboardKey(.escape)
         }
         testPage.tapSubmit()
@@ -44,7 +43,7 @@ class LoginTest: BaseTest {
         }
 
         step ("AND it is saved in password preferences"){
-            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(testUrl))
             XCTAssertTrue(passwordsWindow.isPasswordDisplayedBy(email))
@@ -65,7 +64,7 @@ class LoginTest: BaseTest {
         }
 
         step ("AND it is not saved in password preferences"){
-            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             XCTAssertFalse(passwordsWindow.isPasswordDisplayed())
         }
