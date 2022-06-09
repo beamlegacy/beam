@@ -39,7 +39,8 @@ class BrowserTabsManager: ObservableObject {
             self.delegate?.tabsManagerDidUpdateTabs(tabs)
 
             if let state = state, !state.isIncognito {
-                self.updateClusteringOpenPages()
+                updateClusteringOpenPages()
+                updateTabsClusteringGroupsAfterTabsChange(withTabs: tabs)
             }
             if !pauseListItemsUpdate {
                 updateListItems()
@@ -62,8 +63,6 @@ class BrowserTabsManager: ObservableObject {
         didSet {
             guard tabsClusteringGroups != oldValue else { return }
             cleanForcedGroups()
-            guard !pauseListItemsUpdate else { return }
-            updateListItems()
         }
     }
     /// We collapsed only the tabs visible when collapsing a group.
@@ -140,12 +139,14 @@ class BrowserTabsManager: ObservableObject {
             let forcedGroup = Self.forcedTabsInGroup[tab.id]
             let forcedOutOfGroup = Self.forcedTabsOutOfGroup[tab.id]
             let suggestedGroup = groups[tab.id]
-
             var currentGroup: TabClusteringGroup?
             if forcedGroup != nil {
                 currentGroup = forcedGroup
-            } else if forcedOutOfGroup == nil && suggestedGroup != nil {
-                currentGroup = suggestedGroup
+            } else if forcedOutOfGroup == nil, let suggestedGroup = suggestedGroup {
+                let tabsCountInThatGroup = groups.filter { $0.value == suggestedGroup }.count
+                if suggestedGroup.hasBeenModified || tabsCountInThatGroup > 1 {
+                    currentGroup = suggestedGroup
+                }
             }
 
             if tab.isPinned {
@@ -473,17 +474,33 @@ extension BrowserTabsManager {
     private static var forcedTabsInGroup = [UUID: TabClusteringGroup]()
     private static var forcedTabsOutOfGroup = [UUID: TabClusteringGroup]()
 
+    private func updateTabsClusteringGroupsAfterTabsChange(withTabs tabs: [BrowserTab]) {
+        self.tabsClusteringGroups = tabsClusteringGroups.filter { (key, _) in
+            guard let tab = tabs.first(where: { $0.id == key }) else { return false }
+            return !tab.isPinned
+        }
+    }
+
+    private func updateReceivedTabsClusteringGroups(withTabs tabs: [BrowserTab], pagesGroups: [ClusteringManager.PageID: TabClusteringGroup]) {
+        let tabsPerPageId = Dictionary(grouping: tabs, by: { $0.browsingTree.current.link })
+        var tabsGroups = [UUID: TabClusteringGroup]()
+        pagesGroups.forEach { (pageID, group) in
+            tabsPerPageId[pageID]?.forEach { tab in
+                guard !tab.isPinned else { return }
+                tabsGroups[tab.id] = group
+            }
+        }
+        self.tabsClusteringGroups = tabsGroups
+    }
+
     private func setupTabsClustering() {
         data.clusteringManager.tabGroupingUpdater.$builtPagesGroups.sink { [weak self] pagesGroups in
             guard let self = self else { return }
-            let tabsPerPageId = Dictionary(grouping: self.tabs, by: { $0.browsingTree.current.link })
-            var tabsGroups = [UUID: TabClusteringGroup]()
-            pagesGroups.forEach { (pageID, group) in
-                tabsPerPageId[pageID]?.forEach { tab in
-                    tabsGroups[tab.id] = group
-                }
+            let previousGroups = self.tabsClusteringGroups
+            self.updateReceivedTabsClusteringGroups(withTabs: self.tabs, pagesGroups: pagesGroups)
+            if previousGroups != self.tabsClusteringGroups {
+                self.updateListItems()
             }
-            self.tabsClusteringGroups = tabsGroups
         }.store(in: &dataScope)
     }
 
@@ -507,7 +524,7 @@ extension BrowserTabsManager {
         for tab in tabs where !tab.isPinned {
             openTabs.append(ClusteringManager.BrowsingTreeOpenInTab(browsingTree: tab.browsingTree, browserTabManagerId: self.browserTabManagerId))
         }
-        self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (self.data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + openTabs
+        data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + openTabs
     }
 
     /// After receiving new groups, let's clean up the unnecessary forced group in/out
@@ -643,5 +660,6 @@ extension BrowserTabsManager {
 extension BrowserTabsManager {
     internal func _testSetTabsClusteringGroup(_ tabsClusteringGroups: [UUID: TabClusteringGroup]) {
         self.tabsClusteringGroups = tabsClusteringGroups
+        self.updateListItems()
     }
 }
