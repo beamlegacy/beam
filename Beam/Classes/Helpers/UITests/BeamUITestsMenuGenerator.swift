@@ -430,6 +430,7 @@ class BeamUITestsMenuGenerator {
     private func createFakeDailySummary() {
         let now = BeamDate.now
         let cal = Calendar(identifier: .iso8601)
+        let sem = DispatchSemaphore(value: 0)
 
         guard let pastday = cal.date(byAdding: .day, value: -2, to: now) else { return }
         BeamDate.freeze(pastday)
@@ -449,8 +450,10 @@ class BeamUITestsMenuGenerator {
         createNotes(with: ["Triplego", "Laylow"])
 
         for pastdayNote in pastdayNotes {
-            pastdayNote.updateDate = BeamDate.now
-            pastdayNote.save()
+            pastdayNote.recordScoreWordCount()
+            pastdayNote.addChild(BeamElement("Some text"))
+            pastdayNote.save(completion: { _ in sem.signal() })
+            sem.wait()
         }
 
         let urlsAndTitlesToday = [

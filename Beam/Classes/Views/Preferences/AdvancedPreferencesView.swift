@@ -28,6 +28,7 @@ struct AdvancedPreferencesView: View {
     @State private var stateRestorationEnabled = Configuration.stateRestorationEnabled
     @State private var loading: Bool = false
     @State private var showPrivateKeysSection = false
+    @State private var dailyStatsExportDaysAgo: String = "0"
 
     @State var showPNSView = PreferencesManager.showPNSView
     @State var pnsJSIsOn = PreferencesManager.PnsJSIsOn
@@ -545,8 +546,17 @@ struct AdvancedPreferencesView: View {
                 Preferences.Section(title: "Create 10 random notes", bottomDivider: true) {
                     Create10RandomNotes
                 }
-                Preferences.Section(title: "Daily Summary") {
+                Preferences.Section(title: "Daily Summary", bottomDivider: true) {
                     enableDailySummaryView
+                }
+                Preferences.Section(title: "Daily Summary Debug: ") {
+                    HStack {
+                        TextField("", text: $dailyStatsExportDaysAgo)
+                            .frame(width: 50, height: 25, alignment: .center)
+                        Text("Days ago")
+                    }
+                    ExportDailyUrlStats
+                    ExportDailyNoteStats
                 }
             }.onAppear {
                 startObservers()
@@ -948,6 +958,42 @@ struct AdvancedPreferencesView: View {
             BeamUITestsMenuGenerator.createNotes(count: 10, journalRatio: 1.0, futureRatio: 0.05)
         }, label: {
             Text("Create 10 Random notes")
+        })
+    }
+    private var ExportDailyNoteStats: some View {
+        Button(action: {
+            let panel = NSSavePanel()
+            let daysAgo = Int(dailyStatsExportDaysAgo) ?? 0
+            panel.canCreateDirectories = true
+            panel.nameFieldStringValue = DailyStatsExporter.noteStatsDefaultFileName(daysAgo: daysAgo)
+            panel.showsTagField = false
+            panel.begin { (result) in
+                guard result == .OK, let url = panel.url else {
+                    panel.close()
+                    return
+                }
+                DailyStatsExporter.exportNoteStats(daysAgo: daysAgo, to: url)
+            }
+        }, label: {
+            Text("Export note stats").frame(minWidth: 100)
+        })
+    }
+    private var ExportDailyUrlStats: some View {
+        Button(action: {
+            let panel = NSSavePanel()
+            let daysAgo = Int(dailyStatsExportDaysAgo) ?? 0
+            panel.canCreateDirectories = true
+            panel.nameFieldStringValue = DailyStatsExporter.urlStatsDefaultFileName(daysAgo: daysAgo)
+            panel.showsTagField = false
+            panel.begin { (result) in
+                guard result == .OK, let url = panel.url else {
+                    panel.close()
+                    return
+                }
+                DailyStatsExporter.exportUrlStats(daysAgo: daysAgo, to: url)
+            }
+        }, label: {
+            Text("Export url stats").frame(minWidth: 100)
         })
     }
 
