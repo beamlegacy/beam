@@ -10,7 +10,6 @@ import XCTest
 
 class BrowserTabViewTests: BaseTest {
     
-    let webView = WebTestView()
     let linkToOpen = "released his perhaps still-in-progress album"
     let uiTestPage1Title = "Point And Shoot Test Fixture Ultralight Beam"
     var journalView: JournalTestView!

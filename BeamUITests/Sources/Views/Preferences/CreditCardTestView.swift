@@ -37,7 +37,7 @@ class CreditCardTestView: BaseView {
         
         if appendChanges {
             textField.tapInTheMiddle()
-            shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
+            shortcutHelper.shortcutActionInvoke(action: .endOfLine)
             textField.typeText(value)
         } else {
             textField.click()

@@ -13,7 +13,6 @@ class SigninTests: BaseTest {
     let onboardingView = OnboardingLandingTestView()
     let onboardingUsernameView = OnboardingUsernameTestView()
     let onboardingImportView = OnboardingImportDataTestView()
-    let shortcuts = ShortcutsHelper()
     
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -42,7 +41,7 @@ class SigninTests: BaseTest {
         }
             
         step("THEN I'm not in signed in state"){
-            shortcuts.shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
         }
             
         step("THEN there is no sign up later button on appeared sign in pop-up"){

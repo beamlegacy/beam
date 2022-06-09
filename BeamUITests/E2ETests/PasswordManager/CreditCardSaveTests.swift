@@ -11,7 +11,6 @@ import XCTest
 class CreditCardSaveTests: BaseCreditCardTest {
     
     let alertView = AlertTestView()
-    let uiMenu = UITestsMenuBar()
     var ccPrefView = AutoFillCCTestView()
     let view = "Payment"
     let fakeCardNumber = "5425233430109903"
@@ -53,7 +52,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
         
         step("Then CC is saved in Preferences") {
-            ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             creditCardView = PasswordPreferencesTestView().clickEditCreditCardButton()
             let expectedCreditCardRow = RowCreditCardsTestTable(expectedCardOwnerName, expectedCardOwnerName, expectedCardHiddenNumber, expectedCardExpDate)
@@ -81,7 +80,7 @@ class CreditCardSaveTests: BaseCreditCardTest {
         }
         
         step("Then CC is not saved in Preferences") {
-            ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             PasswordPreferencesTestView().clickEditCreditCardButton()
             XCTAssertEqual(CreditCardsTestTable().getNumberOfVisibleItems(), 0)

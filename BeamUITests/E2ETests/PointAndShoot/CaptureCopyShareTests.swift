@@ -15,10 +15,10 @@ class CaptureCopyShareTests: BaseTest {
     let textToCapture = " capital letter \"I\". The purpose of this cursor is to indicate that the text beneath the cursor can be highlighted, and sometime"
     
     private func switchToJournalAndPasteToFirstNode() {
-        ShortcutsHelper().shortcutActionInvoke(action: .switchBetweenCardWeb)
+        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         journalView.waitForJournalViewToLoad()
         journalView.getNoteByIndex(1).tapInTheMiddle()
-        ShortcutsHelper().shortcutActionInvoke(action: .paste)
+        shortcutHelper.shortcutActionInvoke(action: .paste)
     }
     
     private func triggerShareOption(elementToAdd: XCUIElement, title: String, clickMenuItem: Bool = true) {
@@ -93,7 +93,7 @@ class CaptureCopyShareTests: BaseTest {
                     pnsView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)
                     )
                 
-                ShortcutsHelper().shortcutActionInvoke(action: .close)
+                shortcutHelper.shortcutActionInvoke(action: .close)
             }
         }
         

@@ -13,14 +13,14 @@ class DatePickerTestView: BaseView {
     @discardableResult
     func selectMonth(month: String) -> DatePickerTestView {
         app.dialogs.staticTexts[DatePickerViewLocators.StaticTexts.monthDropdown.accessibilityIdentifier].clickOnExistence()
-        app.staticTexts["\(NoteViewLocators.Others.beginningPartOfContextItem.accessibilityIdentifier)\(month.lowercased())"].click()
+        app.staticTexts["\(NoteViewLocators.OtherElements.beginningPartOfContextItem.accessibilityIdentifier)\(month.lowercased())"].click()
         return self
     }
     
     @discardableResult
     func selectYear(year: String) -> DatePickerTestView {
         app.dialogs.staticTexts[DatePickerViewLocators.StaticTexts.yearDropdown.accessibilityIdentifier].clickOnExistence()
-        app.staticTexts["\(NoteViewLocators.Others.beginningPartOfContextItem.accessibilityIdentifier)\(year)"].click()
+        app.staticTexts["\(NoteViewLocators.OtherElements.beginningPartOfContextItem.accessibilityIdentifier)\(year)"].click()
         return self
     }
     

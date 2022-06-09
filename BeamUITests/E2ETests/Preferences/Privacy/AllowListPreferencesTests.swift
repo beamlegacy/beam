@@ -10,8 +10,6 @@ import XCTest
 
 class AllowListPreferencesTests: BaseTest {
     
-    let uiMenu = UITestsMenuBar()
-    let shortcutHelper = ShortcutsHelper()
     let hostUrl = "a-stat.test.adblock.lvh.me"
     let hostUrlGoogle = "google.com"
     let hostUrlFacebook = "facebook.com"

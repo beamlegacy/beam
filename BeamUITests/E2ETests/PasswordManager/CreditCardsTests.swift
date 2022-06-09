@@ -25,10 +25,10 @@ class CreditCardsTests: BaseTest {
             launchApp()
             
             if populateCardsDB {
-                UITestsMenuBar().populateCreditCardsDB()
+                uiMenu.populateCreditCardsDB()
             }
             
-            ShortcutsHelper().shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             creditCardView = PasswordPreferencesTestView().clickEditCreditCardButton()
         }
@@ -38,19 +38,19 @@ class CreditCardsTests: BaseTest {
     private func openAndEditFirstCreditCardFromDB() -> RowCreditCardsTestTable {
         
         creditCardView.getCardTextFieldElement(.description).tapInTheMiddle()
-        creditCardView.shortcutsHelper.shortcutActionInvoke(action: .selectAll)
+        creditCardView.shortcutHelper.shortcutActionInvoke(action: .selectAll)
         creditCardView.typeKeyboardKey(.delete)
         creditCardView.app.typeSlowly("test", everyNChar: 2)
         
         creditCardView.populateCreditCardField(.cardHolder, "edited", true)
         
         creditCardView.getCardTextFieldElement(.cardNumber).tapInTheMiddle()
-        creditCardView.shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
+        creditCardView.shortcutHelper.shortcutActionInvoke(action: .endOfLine)
         creditCardView.typeKeyboardKey(.delete, 4)
         creditCardView.app.typeSlowly("0008", everyNChar: 2)
         
         creditCardView.getCardTextFieldElement(.expirationDate).tapInTheMiddle()
-        creditCardView.shortcutsHelper.shortcutActionInvoke(action: .endOfLine)
+        creditCardView.shortcutHelper.shortcutActionInvoke(action: .endOfLine)
         creditCardView.typeKeyboardKey(.leftArrow, 5)
         creditCardView.typeKeyboardKey(.delete)
         creditCardView.app.typeText("9")

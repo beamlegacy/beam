@@ -10,77 +10,75 @@ import XCTest
 
 class TextEditorContextViewTests: BaseTest {
     
-    let shortcutsHelper = ShortcutsHelper()
     let textEditorContext = TextEditorContextTestView()
-    let webView = WebTestView()
-    let allCardsView = AllNotesTestView()
-    var cardView: NoteTestView?
+    let allNotesView = AllNotesTestView()
+    var noteView: NoteTestView?
     
-    func testCreateCardViaContextView() {
+    func testCreateNoteViaContextView() {
         let textToType = "text before a new note"
         let numberOfCharsToSelect = 8
         let index = textToType.index(textToType.endIndex, offsetBy: -numberOfCharsToSelect)
-        let cardName = String(textToType[index...])
+        let noteName = String(textToType[index...])
         
         step("Given open today's note"){
-            cardView = launchApp()
+            noteView = launchApp()
                 .openAllNotesMenu()
                 .openFirstNote()
         }
         
         step("When I create a bidi link out of typed text: \(textToType)"){
-            cardView!.typeInCardNoteByIndex(noteIndex: 0, text: textToType)
-            shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: numberOfCharsToSelect)
+            noteView!.typeInNoteNodeByIndex(noteIndex: 0, text: textToType)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: numberOfCharsToSelect)
             textEditorContext.selectFormatterOption(.bidi)
-            textEditorContext.confirmBidiLinkCreation(cardName: cardName)
+            textEditorContext.confirmBidiLinkCreation(noteName: noteName)
         }
         
         step("Then the note text is remained: \(textToType)"){
-            XCTAssertEqual(textToType + " ", cardView!.getCardNoteValueByIndex(0))
-            shortcutsHelper.shortcutActionInvoke(action: .showAllNotes)
-            XCTAssertTrue(allCardsView.waitForNoteTitlesToAppear(), "Card titles didn't load during the timeout")
-            allCardsView.openNoteByName(noteTitle: cardName)
+            XCTAssertEqual(textToType + " ", noteView!.getNoteNodeValueByIndex(0))
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+            XCTAssertTrue(allNotesView.waitForNoteTitlesToAppear(), "Note titles didn't load during the timeout")
+            allNotesView.openNoteByName(noteTitle: noteName)
         }
         
         step("Then new note is created"){
-            _ = cardView!.waitForCardToOpen(cardTitle: cardName)
-            XCTAssertEqual(cardName, cardView!.getCardTitle())
-            XCTAssertEqual(1, cardView!.getLinksContentNumber())
-            XCTAssertEqual(textToType + " ", cardView!.getLinkContentByIndex(0))
+            _ = noteView!.waitForNoteToOpen(noteTitle: noteName)
+            XCTAssertEqual(noteName, noteView!.getNoteTitle())
+            XCTAssertEqual(1, noteView!.getLinksContentNumber())
+            XCTAssertEqual(textToType + " ", noteView!.getLinkContentByIndex(0))
         }
        
     }
     
     func testBidiLinkViaContextView() {
         let notePrefix = "prefix"
-        let cardName = "BiDi note"
+        let noteName = "BiDi note"
         let notePostix = "postfix"
-        let cardName1 = "BiDied note"
-        let composedText = notePrefix + cardName + notePostix
+        let noteName1 = "BiDied note"
+        let composedText = notePrefix + noteName + notePostix
         
-        step("Given I create \(cardName)"){
+        step("Given I create \(noteName)"){
             let journalView = launchApp()
-            cardView = journalView.createNoteViaOmniboxSearch(cardName)
+            noteView = journalView.createNoteViaOmniboxSearch(noteName)
         }
         
         step("When I type in note: \(composedText)"){
-            cardView!.createBiDiLink(cardName1)
+            noteView!.createBiDiLink(noteName1)
                 .openBiDiLink(0)
-                .typeInCardNoteByIndex(noteIndex: 0, text: composedText)
+                .typeInNoteNodeByIndex(noteIndex: 0, text: composedText)
                 .typeKeyboardKey(.leftArrow, notePostix.count)
-            shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: cardName.count)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: noteName.count)
         }
         
-        step("When I create a BiDi link for: \(cardName)"){
+        step("When I create a BiDi link for: \(noteName)"){
             textEditorContext.selectFormatterOption(.bidi)
             XCTAssertFalse(textEditorContext.getLinkTitleTextFieldElement().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
         
-        step("Then BiDi link appears for: \(cardName)"){
-            cardView!.openNoteFromRecentsList(noteTitleToOpen: cardName)
-            XCTAssertEqual(cardName, cardView!.getCardTitle())
-            XCTAssertEqual(1, cardView!.getLinksContentNumber())
-            XCTAssertEqual(composedText, cardView!.getLinkContentByIndex(0))
+        step("Then BiDi link appears for: \(noteName)"){
+            noteView!.openNoteFromRecentsList(noteTitleToOpen: noteName)
+            XCTAssertEqual(noteName, noteView!.getNoteTitle())
+            XCTAssertEqual(1, noteView!.getLinksContentNumber())
+            XCTAssertEqual(composedText, noteView!.getLinkContentByIndex(0))
         }
         
     }
@@ -92,7 +90,7 @@ class TextEditorContextViewTests: BaseTest {
         let expectedTabURL = "google.com/"
         
         step("Given open today's note"){
-            cardView = launchApp()
+            noteView = launchApp()
                 .openAllNotesMenu()
                 .openFirstNote()
         }
@@ -101,14 +99,14 @@ class TextEditorContextViewTests: BaseTest {
         //TBD once https://linear.app/beamapp/issue/BE-2791/it-is-possible-to-create-an-empty-link-in-card-note-via-text-editor is fixed
         
         step("When I create a hyperlink out of typed text: \(linkTitle)"){
-            cardView!.typeInCardNoteByIndex(noteIndex: 0, text: linkTitle)
-            shortcutsHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: linkTitle.count)
+            noteView!.typeInNoteNodeByIndex(noteIndex: 0, text: linkTitle)
+            shortcutHelper.shortcutActionInvokeRepeatedly(action: .selectOnLeft, numberOfTimes: linkTitle.count)
             textEditorContext.selectFormatterOption(.link)
         }
         
         step("Then I see hyperlink creation pop-up appeared"){
-            XCTAssertEqual(cardView!.getElementStringValue(element:  textEditorContext.getLinkTitleTextFieldElement()), linkTitle)
-            XCTAssertEqual(cardView!.getElementStringValue(element:  textEditorContext.getLinkURLTextFieldElement()), emptyString)
+            XCTAssertEqual(noteView!.getElementStringValue(element:  textEditorContext.getLinkTitleTextFieldElement()), linkTitle)
+            XCTAssertEqual(noteView!.getElementStringValue(element:  textEditorContext.getLinkURLTextFieldElement()), emptyString)
         }
       
         step("When I a hyperlink to: \(linkURL)"){
@@ -118,11 +116,11 @@ class TextEditorContextViewTests: BaseTest {
        
         step("Then the pop-up is closed and the note value is still: \(linkURL)"){
             waitForDoesntExist(textEditorContext.getLinkTitleTextFieldElement())
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), linkTitle)
+            XCTAssertEqual(noteView!.getNoteNodeValueByIndex(0), linkTitle)
         }
 
         step("When I click on created hyperlink"){
-            cardView!.getCardNoteElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5)).tap()
+            noteView!.getNoteNodeElementByIndex(0).coordinate(withNormalizedOffset: CGVector(dx: 0.05, dy: 0.5)).tap()
         }
         
         step("Then the webview is opened and \(linkURL) is searched"){
@@ -135,14 +133,14 @@ class TextEditorContextViewTests: BaseTest {
     func testFormatTextViaContextView() {
         let text = "THE_text 2 TE$t"
         step("Given open today's note"){
-            cardView = launchApp()
+            noteView = launchApp()
                 .openAllNotesMenu()
                 .openFirstNote()
         }
 
         step("When I type: \(text)"){
-            cardView!.typeInCardNoteByIndex(noteIndex: 0, text: text)
-            shortcutsHelper.shortcutActionInvoke(action: .selectAll)
+            noteView!.typeInNoteNodeByIndex(noteIndex: 0, text: text)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
         }
         
         step("Then I select bold, italic, h1, h2"){
@@ -154,19 +152,19 @@ class TextEditorContextViewTests: BaseTest {
        
         step("Then text remains the same"){ //there is no other ways so far to assert it is applied correctly
             //Could be done by using screenshots of the element in future
-            XCTAssertEqual(cardView!.getCardNoteValueByIndex(0), text)
+            XCTAssertEqual(noteView!.getNoteNodeValueByIndex(0), text)
         }
 
         step("Then I can dismiss text editor context menu by ESC"){
-            shortcutsHelper.shortcutActionInvoke(action: .selectAll)
-            cardView!.typeKeyboardKey(.escape)
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
+            noteView!.typeKeyboardKey(.escape)
             waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
             self.assertFormatterOptionsDontExist()
         }
         
         step("Then I can dismiss text editor context menu by clicking outside"){
-            shortcutsHelper.shortcutActionInvoke(action: .selectAll)
-            cardView!.getCardNoteElementByIndex(0).tapInTheMiddle()
+            shortcutHelper.shortcutActionInvoke(action: .selectAll)
+            noteView!.getNoteNodeElementByIndex(0).tapInTheMiddle()
             waitForDoesntExist(textEditorContext.image(TextEditorContextViewLocators.Formatters.h2.accessibilityIdentifier))
             self.assertFormatterOptionsDontExist()
         }

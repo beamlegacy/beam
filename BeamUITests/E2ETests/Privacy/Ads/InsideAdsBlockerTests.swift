@@ -10,9 +10,6 @@ import XCTest
 
 class InsideAdsBlockerTests: BaseTest {
     
-    let mockHttpPage = MockHTTPWebPages()
-    let uiMenu = UITestsMenuBar()
-    let shortcutHelper = ShortcutsHelper()
     let privacyWindow = PrivacyPreferencesTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.insideAdBlock)
     let adLinkText = "Featured Deals made easy all year long. Free shipping. Best prices. Get your thing Get your thing"
@@ -38,7 +35,7 @@ class InsideAdsBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            mockHttpPage.openMockPage(.insideAdBlock)
+            mockPage.openMockPage(.insideAdBlock)
         }
         
         step ("Then inside ad is displayed"){
@@ -56,7 +53,7 @@ class InsideAdsBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            mockHttpPage.openMockPage(.insideAdBlock)
+            mockPage.openMockPage(.insideAdBlock)
         }
         
         step ("Then inside ad is not displayed"){
