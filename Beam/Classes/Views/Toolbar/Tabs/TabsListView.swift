@@ -254,8 +254,9 @@ struct TabsListView: View {
         GeometryReader { geometry in
             let widthProvider = widthProvider(for: geometry, sections: sections)
             let selectedIndex = selectedIndex
-            let hasSingleOtherTab = sections.unpinnedItems.count == 1
+            let hasSingleOtherTab = sections.unpinnedItems.count == 1 && sections.unpinnedItems.first?.isATab == true
             let tabsShouldScroll = !widthProvider.hasEnoughSpaceForAllTabs
+            let hasUnpinnedTabs = sections.unpinnedItems.contains { $0.isATab }
             ZStack(alignment: .leading) {
                 HStack(spacing: 0) {
                     // Fixed Pinned Tabs
@@ -293,6 +294,9 @@ struct TabsListView: View {
                                     }
                                 }
                                 .frame(maxHeight: .infinity)
+                                .background(hasUnpinnedTabs ? nil : GeometryReader { prxy in
+                                    Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: selectedIndex, frame: .zero))
+                                })
                                 .onAppear {
                                     viewModel.singleTabCenteringAdjustment = singleTabCenteringAdjustment
                                     guard tabsShouldScroll, let currentTab = currentTab, !currentTab.isPinned else { return }
@@ -351,24 +355,24 @@ struct TabsListView: View {
             .onAppear {
                 startOtherMouseDownMonitor()
                 externalDragModel.setup(withState: state, tabsMananger: browserTabsManager)
-                updateDraggableTabsAreas(with: geometry, tabsSections: sections, singleTabFrame: viewModel.singleTabCurrentFrame)
+                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame)
             }
             .onDisappear {
                 removeMouseMonitors()
-                updateDraggableTabsAreas(with: nil, tabsSections: sections)
+                updateDraggableTabsAreas(with: nil, tabsSections: sections, widthProvider: widthProvider)
             }
             .onPreferenceChange(CurrentTabGlobalFrameKey.self) { [weak state] newValue in
                 guard !isDraggingATab && newValue != nil else { return }
                 guard newValue?.index == selectedIndex else { return }
                 state?.browserTabsManager.currentTabUIFrame = newValue?.frame
-                guard !isSingleTab(atIndex: selectedIndex, in: sections) else { return }
-                updateDraggableTabsAreas(with: geometry, tabsSections: sections, singleTabFrame: viewModel.singleTabCurrentFrame)
+                guard !isSingleTab(atIndex: selectedIndex, in: sections) || !hasUnpinnedTabs else { return }
+                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: viewModel.singleTabCurrentFrame)
             }
             .onPreferenceChange(SingleTabGlobalFrameKey.self) { newValue in
                 guard !isDraggingATab else { return }
                 viewModel.singleTabCurrentFrame = newValue
                 guard let newValue = newValue else { return }
-                updateDraggableTabsAreas(with: geometry, tabsSections: sections, singleTabFrame: newValue)
+                updateDraggableTabsAreas(with: geometry, tabsSections: sections, widthProvider: widthProvider, singleTabFrame: newValue)
             }
             .onChange(of: sections.allItems.count) { _ in
                 guard hoveredIndex != nil else { return }
@@ -382,7 +386,8 @@ struct TabsListView: View {
 
 // MARK: - Actions
 extension TabsListView {
-    private func updateDraggableTabsAreas(with geometry: GeometryProxy?, tabsSections: TabsListItemsSections, singleTabFrame: CGRect? = nil) {
+    private func updateDraggableTabsAreas(with geometry: GeometryProxy?, tabsSections: TabsListItemsSections,
+                                          widthProvider: TabsListWidthProvider, singleTabFrame: CGRect? = nil) {
         guard let geometry = geometry else {
             draggableTabsAreas = []
             return
@@ -392,15 +397,27 @@ extension TabsListView {
         globalFrame.size.height = TabView.height
 
         var areas: [CGRect] = []
+        var pinnedFrame: CGRect = .zero
         if tabsSections.pinnedItems.count > 0 {
-            var pinnedFrame = globalFrame
-            pinnedFrame.size.width = CGFloat(tabsSections.pinnedItems.count) * (TabView.pinnedWidth + 4)
+            pinnedFrame = globalFrame
+            let pinWidth = widthProvider.width(forItem: nil, selected: false, pinned: true)
+            pinnedFrame.size.width = CGFloat(tabsSections.pinnedItems.count) * (pinWidth + widthProvider.separatorWidth)
             areas.append(pinnedFrame)
         }
         if tabsSections.unpinnedItems.count == 1, let singleTabFrame = singleTabFrame {
             areas.append(singleTabFrame)
         } else if tabsSections.unpinnedItems.count != 0 {
-            areas = [globalFrame]
+            if tabsSections.unpinnedItems.contains(where: { $0.isATab }) {
+                areas = [globalFrame]
+            } else {
+                let itemsWidth = tabsSections.unpinnedItems.reduce(0, { partialResult, item in
+                    return partialResult + widthProvider.width(forItem: item, selected: false, pinned: false)
+                })
+                let pinnedMaxX = pinnedFrame.maxX + (pinnedFrame != .zero ? widthProvider.separatorBetweenPinnedAndOther - widthProvider.separatorWidth : 0)
+                let itemsMinX = max(globalFrame.minX, pinnedMaxX)
+                let itemsArea = CGRect(x: itemsMinX, y: globalFrame.minY, width: itemsWidth, height: globalFrame.height)
+                areas.append(itemsArea)
+            }
         }
         draggableTabsAreas = areas
     }
@@ -630,14 +647,14 @@ extension TabsListView {
             CustomPopoverPresenter.shared.dismissPopovers(key: menuKey)
         }
         let nameAndColorView = TabClusteringNameColorPickerView(groupName: group.title ?? "",
-                                                                selectedColorIndex: group.color?.userColorIndex ?? 0) { [weak state] newValues in
+                                                                selectedColorIndex: group.color?.userColorIndex ?? 0, onChange: { [weak state] newValues in
             if group.title != newValues.name {
                 state?.browserTabsManager.renameGroup(group.id, title: newValues.name)
             }
             if group.color != newValues.color {
                 state?.browserTabsManager.changeGroupColor(group.id, color: newValues.color)
             }
-        }
+        }, onFinish: dismiss)
         let items = [
             ContextMenuItem(title: "Name and Color",
                             customContent: AnyView(nameAndColorView)) { },
