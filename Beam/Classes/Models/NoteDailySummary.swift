@@ -8,28 +8,14 @@
 import Foundation
 import BeamCore
 
-struct ScoredDocument: Comparable {
-    let noteId: UUID
-    let title: String
-    let createdAt: Date
-    let updatedAt: Date
-    let created: Bool
-    let score: Float?
-    let captureToCount: Int
-
-    static func < (lhs: ScoredDocument, rhs: ScoredDocument) -> Bool {
-        if let lScore = lhs.score,
-           let rScore = rhs.score {
-            return lScore < rScore
-        }
-        if lhs.score == nil {
-            return true
-        }
-        if rhs.score == nil {
-            return false
-        }
-        return lhs.updatedAt < rhs.updatedAt
-    }
+struct ScoredDocument {
+    public let noteId: UUID
+    public let title: String
+    public let createdAt: Date
+    public let updatedAt: Date
+    public let created: Bool
+    public let score: NoteScore
+    public let captureToCount: Int
 }
 
 class NoteDailySummary {
@@ -48,7 +34,7 @@ class NoteDailySummary {
         return (start, end)
     }
 
-    func get(daysAgo: Int = 1) throws -> [ScoredDocument] {
+    func get(daysAgo: Int = 1, filtered: Bool = true) throws -> [ScoredDocument] {
         let documentManager = DocumentManager()
         let (start, end) = dayBounds(daysAgo: daysAgo)
         let updatedDocuments = try documentManager.fetchAllNotesUpdatedBetween(date0: start, date1: end)
@@ -56,11 +42,11 @@ class NoteDailySummary {
         let scoredDocuments = updatedDocuments.compactMap { (doc) -> ScoredDocument? in
             let created = doc.created_at > start
             guard let score = scores[doc.id],
-                  (score.minToMaxDeltaWordCount != 0) || created else { return nil }
+                  (score.minToMaxDeltaWordCount != 0) || created || !filtered else { return nil }
             return ScoredDocument(noteId: doc.id, title: doc.title, createdAt: doc.created_at, updatedAt: doc.updated_at,
-                           created: created, score: score.logScore,
+                           created: created, score: score,
                            captureToCount: score.captureToCount)
         }
-        return scoredDocuments.sorted { (lhs, rhs) in lhs > rhs }
+        return scoredDocuments.sorted { (lhs, rhs) in lhs.score.logScore > rhs.score.logScore }
     }
 }

@@ -1434,6 +1434,7 @@
 		DAF51C4F26CE63DE007BB121 /* BrowsingTreeTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF51C4E26CE63DE007BB121 /* BrowsingTreeTest.swift */; };
 		DAF8DF842837E2E8005F24B0 /* AnalyticsCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAF8DF832837E2E8005F24B0 /* AnalyticsCollector.swift */; };
 		DAFAEE812770CA4200BCAE4F /* BrowsingTreeProcessorTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFAEE802770CA4200BCAE4F /* BrowsingTreeProcessorTest.swift */; };
+		DAFB0B16284A09990011B5AB /* ExportDailyStats.swift in Sources */ = {isa = PBXBuildFile; fileRef = DAFB0B15284A09990011B5AB /* ExportDailyStats.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -3303,6 +3304,7 @@
 		DAF8DF832837E2E8005F24B0 /* AnalyticsCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalyticsCollector.swift; sourceTree = "<group>"; };
 		DAF9C18826E61FCA00C350B5 /* BeamTextEditTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeamTextEditTests.swift; sourceTree = "<group>"; };
 		DAFAEE802770CA4200BCAE4F /* BrowsingTreeProcessorTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowsingTreeProcessorTest.swift; sourceTree = "<group>"; };
+		DAFB0B15284A09990011B5AB /* ExportDailyStats.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportDailyStats.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -4125,6 +4127,7 @@
 				370794C227D7A90B00D2768B /* Incrementor.swift */,
 				873A9FFB27E3B4A20092A834 /* URLProvider.swift */,
 				8718E15E2805E63A00CFF53D /* ExclusiveRunner.swift */,
+				DAFB0B15284A09990011B5AB /* ExportDailyStats.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -8928,6 +8931,7 @@
 				A0CB7E5D268E733400D15AFD /* PreferencesManager+Browser.swift in Sources */,
 				A52B5022271DCB950078670C /* TabsDragModel.swift in Sources */,
 				3330D7CB265E466D008C9E20 /* ToolbarDownloadButton.swift in Sources */,
+				DAFB0B16284A09990011B5AB /* ExportDailyStats.swift in Sources */,
 				87F11BD9266533C1003BE98E /* PasswordGenerator.swift in Sources */,
 				A52596E5273EB83B004B27E4 /* OnboardingWelcomeView.swift in Sources */,
 				5224CD7C2686034200D4179E /* BeamObject.swift in Sources */,
