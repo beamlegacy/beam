@@ -10,9 +10,24 @@ class TabClusteringGroup: Identifiable, Equatable {
     var id = GroupID()
     /// List of Clustering Link ids
     var pageIDs: [ClusteringManager.PageID]
-    var title: String?
-    var color: TabGroupingColor?
+    var title: String? {
+        didSet {
+            if title?.isEmpty == false {
+                hasBeenModified = true
+            }
+        }
+    }
+    var color: TabGroupingColor? {
+        didSet {
+            if color != nil && oldValue != nil {
+                hasBeenModified = true
+            }
+        }
+    }
     var collapsed = false
+
+    /// Whether or not the group has been interacted with by the user and should therefore be persisted
+    private(set) var hasBeenModified = false
 
     init(pageIDs: [ClusteringManager.PageID]) {
         self.pageIDs = pageIDs
@@ -23,6 +38,7 @@ class TabClusteringGroup: Identifiable, Equatable {
         self.title = from.title
         self.color = from.color
         self.collapsed = from.collapsed
+        self.hasBeenModified = from.hasBeenModified
     }
 
     func copy() -> TabClusteringGroup? {
@@ -30,6 +46,7 @@ class TabClusteringGroup: Identifiable, Equatable {
         newGroup.copyProperties(from: self)
         return newGroup
     }
+    
 }
 
 class TabGroupingUpdater {
