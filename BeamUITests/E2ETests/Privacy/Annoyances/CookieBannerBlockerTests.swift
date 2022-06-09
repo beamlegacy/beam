@@ -10,9 +10,6 @@ import XCTest
 
 class CookieBannerBlockerTests: BaseTest {
     
-    let mockHttpPage = MockHTTPWebPages()
-    let uiMenu = UITestsMenuBar()
-    let shortcutHelper = ShortcutsHelper()
     let privacyWindow = PrivacyPreferencesTestView()
     let url = MockHTTPWebPages().getMockPageUrl(.cookieBannerAdBlock)
     let app = XCUIApplication().windows["AdBlock"].webViews["AdBlock"]
@@ -47,7 +44,7 @@ class CookieBannerBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            mockHttpPage.openMockPage(.cookieBannerAdBlock)
+            mockPage.openMockPage(.cookieBannerAdBlock)
         }
         
         step ("Then cookie banner is enabled displayed"){
@@ -65,7 +62,7 @@ class CookieBannerBlockerTests: BaseTest {
         }
         
         step ("When I navigate to \(url)"){
-            mockHttpPage.openMockPage(.cookieBannerAdBlock)
+            mockPage.openMockPage(.cookieBannerAdBlock)
         }
         
         step ("Then cookie banner is displayed"){

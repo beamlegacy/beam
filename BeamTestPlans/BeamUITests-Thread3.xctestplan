@@ -17,6 +17,9 @@
     {
       "skippedTests" : [
         "AdBlockerTests",
+        "AdvancedCreditCardAutocompleteTests\/testAgodaAutofill()",
+        "AdvancedCreditCardAutocompleteTests\/testAmazonAutofill()",
+        "AdvancedCreditCardAutocompleteTests\/testAppleAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testBookingAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testDisneyAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testDoordashAutofill()",
@@ -28,7 +31,7 @@
         "AdvancedCreditCardAutocompleteTests\/testHotwireAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testKayakAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testKiwiAutofill()",
-        "AdvancedCreditCardAutocompleteTests\/testKohlsAirBnbAutofill()",
+        "AdvancedCreditCardAutocompleteTests\/testNetflixAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testOplataAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testPricelineAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testSportDecouverteAutofill()",
@@ -123,6 +126,7 @@
         "ReferencesTests",
         "ReportBugFeatureTests",
         "SearchOnCardTests",
+        "SearchOnNoteTests",
         "SearchOnPDFTests",
         "SearchOnPdfTests",
         "SearchOnWebTests",

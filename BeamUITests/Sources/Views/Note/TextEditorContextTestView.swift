@@ -21,9 +21,9 @@ class TextEditorContextTestView: BaseView {
     }
 
     @discardableResult
-    func confirmBidiLinkCreation(cardName: String) -> NoteTestView {
+    func confirmBidiLinkCreation(noteName: String) -> NoteTestView {
         let helper = OmniBoxUITestsHelper(app)
-        app.otherElements.matching(helper.autocompleteCreateCardPredicate).firstMatch.clickOnExistence()
+        app.otherElements.matching(helper.autocompleteCreateNotePredicate).firstMatch.clickOnExistence()
         return NoteTestView()
     }
 
@@ -48,16 +48,16 @@ class TextEditorContextTestView: BaseView {
         return app.textViews.containing(.button, identifier: "Continue").element.exists
     }
     
-    func getCardNoteValueByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element:  getCardNoteElementByIndex(index))
+    func getNoteNodeValueByIndex(_ index: Int) -> String {
+        return self.getElementStringValue(element:  getNoteNodeElementByIndex(index))
     }
     
-    func getCardNoteElementByIndex(_ index: Int) -> XCUIElement {
-        return self.getCardNotesForVisiblePart()[index]
+    func getNoteNodeElementByIndex(_ index: Int) -> XCUIElement {
+        return self.getNoteNodesForVisiblePart()[index]
     }
     
-    func getCardNotesForVisiblePart() -> [XCUIElement] {
-        return app.windows.textViews.matching(identifier: CardViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
+    func getNoteNodesForVisiblePart() -> [XCUIElement] {
+        return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier).allElementsBoundByIndex
     }
     
     @discardableResult
@@ -73,9 +73,9 @@ class TextEditorContextTestView: BaseView {
     }
     
     @discardableResult
-    func typeInCardNoteByIndex(noteIndex: Int, text: String, needsActivation: Bool = false) -> TextEditorContextTestView {
+    func typeInNoteNodeByIndex(noteIndex: Int, text: String, needsActivation: Bool = false) -> TextEditorContextTestView {
         if needsActivation {
-            getCardNotesForVisiblePart()[noteIndex].tapInTheMiddle()
+            getNoteNodesForVisiblePart()[noteIndex].tapInTheMiddle()
         }
         app.typeText(text)
         return self

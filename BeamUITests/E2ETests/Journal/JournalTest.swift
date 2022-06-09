@@ -10,7 +10,7 @@ import XCTest
 
 class JournalTest: BaseTest {
     
-    let cardView = NoteTestView()
+    let noteView = NoteTestView()
     
     func testJournalScrollViewExistence() {
         let journalView = launchApp()
@@ -21,7 +21,7 @@ class JournalTest: BaseTest {
         }
         
         step("When I open All notes and restart the app"){
-            ShortcutsHelper().shortcutActionInvoke(action: .showAllNotes)
+            shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             restartApp()
         }
 
@@ -35,8 +35,8 @@ class JournalTest: BaseTest {
         let journalView = launchApp()
         step("When the journal is first loaded the note is empty by default"){
             journalView.waitForJournalViewToLoad()
-            let beforeCardNotes = cardView.getCardNotesForVisiblePart()
-            XCTAssertEqual(cardView.getElementStringValue(element: beforeCardNotes[0]), emptyString)
+            let beforeNoteNodes = noteView.getNoteNodesForVisiblePart()
+            XCTAssertEqual(noteView.getElementStringValue(element: beforeNoteNodes[0]), emptyString)
         }
     }
 }

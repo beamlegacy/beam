@@ -27,7 +27,7 @@ class BrowserFancyUrlTests: BaseTest {
                 journalView.openWebsite(urlToTest)
             }
             step("Then Google is not launching a search"){
-                ShortcutsHelper().shortcutActionInvoke(action: .openLocation)
+                shortcutHelper.shortcutActionInvoke(action: .openLocation)
                 url = OmniBoxTestView().getSearchFieldValue()
                 XCTAssertFalse(url!.contains("google"))
             }

@@ -1,5 +1,5 @@
 //
-//  CardCreation.swift
+//  NoteCreationTests.swift
 //  BeamUITests
 //
 //  Created by Andrii on 23.07.2021.
@@ -10,22 +10,22 @@ import XCTest
 
 class NoteCreationTests: BaseTest {
     
-    let cardNameToBeCreated = "CardCreation"
-    var cardView: NoteTestView!
+    let noteNameToBeCreated = "NoteCreation"
+    var noteView: NoteTestView!
     
-    func testCreateCardFromAllCards() {
+    func testCreateNoteFromAllNotes() {
         let journalView = launchApp()
         
-        step("Given I get number of cards in All Notes view"){
-            waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.noteSwitcherAllCards.accessibilityIdentifier))
+        step("Given I get number of notes in All Notes view"){
+            waitFor(PredicateFormat.isHittable.rawValue,    journalView.button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier))
         }
-        let numberOfCardsBeforeAdding = journalView.openAllNotesMenu().getNumberOfNotes()
-        var allCardsView: AllNotesTestView?
-        step("When I create a card from All Notes view"){
-            allCardsView = AllNotesTestView().addNewNote(cardNameToBeCreated)
+        let numberOfNotesBeforeAdding = journalView.openAllNotesMenu().getNumberOfNotes()
+        var allNotesView: AllNotesTestView?
+        step("When I create a note from All Notes view"){
+            allNotesView = AllNotesTestView().addNewNote(noteNameToBeCreated)
             var timeout = 5 //temp solution while looking for an elegant way to wait
             repeat {
-                if numberOfCardsBeforeAdding != allCardsView!.getNumberOfNotes() {
+                if numberOfNotesBeforeAdding != allNotesView!.getNumberOfNotes() {
                     return
                 }
                 sleep(1)
@@ -34,93 +34,93 @@ class NoteCreationTests: BaseTest {
         }
 
         step("Then number of notes is increased to +1 in All Notes list"){
-            XCTAssertEqual(numberOfCardsBeforeAdding + 1, allCardsView!.getNumberOfNotes())
+            XCTAssertEqual(numberOfNotesBeforeAdding + 1, allNotesView!.getNumberOfNotes())
         }
     }
     
-    func SKIPtestCreateCardUsingCardsSearchList() throws {
+    func SKIPtestCreateNoteUsingNotesSearchList() throws {
         try XCTSkipIf(true, "Destination Note Picker UI is currently hidden")
         let journalView = launchApp()
-        step("When I create \(cardNameToBeCreated) a note from Webview cards search results"){
-            let webView = journalView.searchInOmniBox(cardNameToBeCreated, true)
-            webView.searchForNoteByTitle(cardNameToBeCreated)
-            XCTAssertTrue(waitForStringValueEqual(cardNameToBeCreated, webView.getDestinationNoteElement()), "Destination note is not \(cardNameToBeCreated), but \(String(describing: webView.getDestinationNoteElement().value))")
-            cardView = webView.openDestinationNote()
+        step("When I create \(noteNameToBeCreated) a note from Webview notes search results"){
+            let webView = journalView.searchInOmniBox(noteNameToBeCreated, true)
+            webView.searchForNoteByTitle(noteNameToBeCreated)
+            XCTAssertTrue(waitForStringValueEqual(noteNameToBeCreated, webView.getDestinationNoteElement()), "Destination note is not \(noteNameToBeCreated), but \(String(describing: webView.getDestinationNoteElement().value))")
+            noteView = webView.openDestinationNote()
             
         }
 
-        step("Then note with \(cardNameToBeCreated) is opened"){
-            XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertTrue(cardView.textField(cardNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        step("Then note with \(noteNameToBeCreated) is opened"){
+            XCTAssertTrue(noteView.waitForNoteViewToLoad())
+            XCTAssertTrue(noteView.textField(noteNameToBeCreated).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
     }
     
-    func testCreateCardUsingCardReference() {
+    func testCreateNoteUsingNoteReference() {
         let journalView = launchApp()
         
-        step("When I create \(cardNameToBeCreated) a note referencing it from another Note"){
-            journalView.textView(CardViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.click()
-            journalView.app.typeText("@" + cardNameToBeCreated)
+        step("When I create \(noteNameToBeCreated) a note referencing it from another Note"){
+            journalView.textView(NoteViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.click()
+            journalView.app.typeText("@" + noteNameToBeCreated)
             journalView.typeKeyboardKey(.enter)
         }
 
-        step("Then note with \(cardNameToBeCreated) name appears in All notes menu list"){
-            let allCardsMenu = journalView.openAllNotesMenu()
-            XCTAssertTrue(allCardsMenu.isNoteNameAvailable(cardNameToBeCreated))
+        step("Then note with \(noteNameToBeCreated) name appears in All notes menu list"){
+            let allNotesMenu = journalView.openAllNotesMenu()
+            XCTAssertTrue(allNotesMenu.isNoteNameAvailable(noteNameToBeCreated))
         }
     }
     
-    func testCreateCardOmniboxSearch() {
+    func testCreateNoteOmniboxSearch() {
         let journalView = launchApp()
         
-        step("When I create \(cardNameToBeCreated) a note from Omnibox search results"){
-            cardView = journalView.createNoteViaOmniboxSearch(cardNameToBeCreated)
+        step("When I create \(noteNameToBeCreated) a note from Omnibox search results"){
+            noteView = journalView.createNoteViaOmniboxSearch(noteNameToBeCreated)
         }
         
-        step("Then note with \(cardNameToBeCreated) is opened"){
-            XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
+        step("Then note with \(noteNameToBeCreated) is opened"){
+            XCTAssertTrue(noteView.waitForNoteViewToLoad())
+            XCTAssertEqual(noteView.getNoteTitle(), noteNameToBeCreated)
         }
 
         step("Then Journal has no mentions for created note"){
-            ShortcutsHelper().shortcutActionInvoke(action: .showJournal)
+            shortcutHelper.shortcutActionInvoke(action: .showJournal)
             journalView.waitForJournalViewToLoad()
-            XCTAssertEqual(cardView.getNumberOfVisibleNotes(), 2)
-            XCTAssertEqual(cardView.getCardNoteValueByIndex(0), emptyString )
+            XCTAssertEqual(noteView.getNumberOfVisibleNotes(), 2)
+            XCTAssertEqual(noteView.getNoteNodeValueByIndex(0), emptyString )
         }
 
     }
     
-    func testCreateCardOmniboxOptionEnter() {
+    func testCreateNoteOmniboxOptionEnter() {
         let journalView = launchApp()
         
-        step("When I create \(cardNameToBeCreated) a note from Omnibox search results via Option+Enter"){
-            journalView.searchInOmniBox(cardNameToBeCreated, false)
+        step("When I create \(noteNameToBeCreated) a note from Omnibox search results via Option+Enter"){
+            journalView.searchInOmniBox(noteNameToBeCreated, false)
             _ = journalView.app.otherElements.matching(NSPredicate(format: "identifier CONTAINS '\(WebViewLocators.Other.autocompleteResult.accessibilityIdentifier)'")).firstMatch.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             journalView.app.typeKey("\r", modifierFlags: .option)
         }
 
-        step("Then note with \(cardNameToBeCreated) is opened"){
-            cardView = NoteTestView()
-            XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
+        step("Then note with \(noteNameToBeCreated) is opened"){
+            noteView = NoteTestView()
+            XCTAssertTrue(noteView.waitForNoteViewToLoad())
+            XCTAssertEqual(noteView.getNoteTitle(), noteNameToBeCreated)
         }
 
     }
     
     func testCreateNoteViewIcon() {
         launchApp()
-        cardView = NoteTestView()
+        noteView = NoteTestView()
         
         step("When I click New note icon") {
-            cardView.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(cardNameToBeCreated)
-            cardView.typeKeyboardKey(.enter)
+            noteView.clickNewNoteCreationButton().getOmniBoxSearchField().typeText(noteNameToBeCreated)
+            noteView.typeKeyboardKey(.enter)
         }
         
         step("Then I can sucessfully create a note") {
-            XCTAssertTrue(cardView.waitForCardViewToLoad())
-            XCTAssertEqual(cardView.getCardTitle(), cardNameToBeCreated)
+            XCTAssertTrue(noteView.waitForNoteViewToLoad())
+            XCTAssertEqual(noteView.getNoteTitle(), noteNameToBeCreated)
         }
     }
     

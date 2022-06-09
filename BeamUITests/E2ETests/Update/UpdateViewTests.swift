@@ -31,7 +31,7 @@ class UpdateViewTests: BaseTest {
         }
     }
     
-    func testUpdateAvailableEverywhereInCardView() {
+    func testUpdateAvailableEverywhereInNoteView() {
         step ("Given I enable Update for the app"){
             helper.tapCommand(.setAutoUpdateToMock)
             XCTAssertTrue(journalView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
@@ -43,8 +43,8 @@ class UpdateViewTests: BaseTest {
         }
 
         step ("Then it is visible in All notes view"){
-            let allCardsView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllNotesMenu()
-            XCTAssertTrue(allCardsView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            let allNotesView = OmniBoxTestView().navigateToJournalViaHomeButton().openAllNotesMenu()
+            XCTAssertTrue(allNotesView.staticText(JournalViewLocators.StaticTexts.updateNowButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
         }
     }
 }

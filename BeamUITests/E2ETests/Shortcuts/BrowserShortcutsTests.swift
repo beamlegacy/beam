@@ -10,18 +10,15 @@ import XCTest
 
 class BrowserShortcutsTests: BaseTest {
     
-    let shortcutHelper = ShortcutsHelper()
-    let webView = WebTestView()
     let omniboxView = OmniBoxTestView()
     let testPage = UITestPagePasswordManager()
-    let uiMenuBar = UITestsMenuBar()
     var journalView = JournalTestView()
     var testHelper = BeamUITestsHelper(JournalTestView().app)
     
     override func setUpWithError() throws{
         try super.setUpWithError()
         journalView = launchApp()
-        uiMenuBar.destroyDB()
+        uiMenu.destroyDB()
         testHelper = BeamUITestsHelper(journalView.app)
     }
     

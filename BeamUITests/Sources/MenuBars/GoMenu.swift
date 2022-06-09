@@ -12,7 +12,7 @@ class GoMenu: BaseMenuBar {
     
     let menuBarTitle = "Go"
     
-    func changeCard() {
+    func changeNote() {
         menuBarItem(menuBarTitle).click()
         menuItem("Change Note").click()
     }

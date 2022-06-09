@@ -10,8 +10,6 @@ import XCTest
 
 class PasswordPreferencesTests: BaseTest {
     
-    let shortcutsHelper = ShortcutsHelper()
-    let uiMenu = UITestsMenuBar()
     let passwordPreferencesView = PasswordPreferencesTestView()
     let testPage = UITestPagePasswordManager()
     let hostnameGoogle = "google.com"
@@ -25,7 +23,7 @@ class PasswordPreferencesTests: BaseTest {
     func setup() {
         step ("GIVEN I open password preferences"){
             launchApp()
-            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
         }
     }
@@ -270,7 +268,7 @@ class PasswordPreferencesTests: BaseTest {
         let helper = BeamUITestsHelper(launchApp().app)
         
         step ("GIVEN I open password preferences"){
-            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             uiMenu.populatePasswordsDB()
         }
@@ -290,22 +288,11 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN Autofill is proposed"){
-            XCTAssertTrue(PasswordManagerHelper().getOtherPasswordsOptionElement().exists)
+            XCTAssertTrue(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
-        
-//        Not doing following steps with real website because of https://linear.app/beamapp/issue/BE-3291/pwmanager-not-proposed-directly-to-user-on-google
-//        step ("WHEN I go to Facebook Login page"){
-//            testPage.openWebsite("facebook.com")
-//            XCUIApplication().windows/*@START_MENU_TOKEN@*/.webViews["Facebook – log in or sign up"].textFields["Email address or phone number"]/*[[".groups",".scrollViews.webViews[\"Facebook – log in or sign up\"]",".groups.textFields[\"Email address or phone number\"]",".textFields[\"Email address or phone number\"]",".webViews[\"Facebook – log in or sign up\"]"],[[[-1,4,2],[-1,1,2],[-1,0,1]],[[-1,4,2],[-1,1,2]],[[-1,3],[-1,2]]],[0,0]]@END_MENU_TOKEN@*/.clickOnExistence()
-//        }
-//
-//        step ("THEN Autofill is proposed"){
-//          XCTAssertTrue(PasswordManagerHelper().getOtherPasswordsOptionElement().exists)
-//          XCTAssertTrue(PasswordManagerHelper().doesAutofillPopupExist(login: "qa@beamapp.co"))
-//        }
 
         step ("WHEN I deactivate Autofill password setting"){
-            shortcutsHelper.shortcutActionInvoke(action: .openPreferences)
+            shortcutHelper.shortcutActionInvoke(action: .openPreferences)
             PreferencesBaseView().navigateTo(preferenceView: .passwords)
             passwordPreferencesView.clickAutofillPassword()
         }
@@ -318,7 +305,7 @@ class PasswordPreferencesTests: BaseTest {
         step ("AND Autofill is not proposed anymore"){
             helper.openTestPage(page: BeamUITestsHelper.UITestsPageCommand.password)
             testPage.clickInputField(.username)
-            XCTAssertFalse(PasswordManagerHelper().getOtherPasswordsOptionElement().exists)
+            XCTAssertFalse(passwordManagerHelper.getOtherPasswordsOptionElement().exists)
         }
     }
     
