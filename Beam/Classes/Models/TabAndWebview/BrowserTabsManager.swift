@@ -258,6 +258,7 @@ extension BrowserTabsManager {
     func setCurrentTab(at index: Int) {
         var index = index
         guard var tab = index < tabs.count ? tabs[index] : tabs.last else { return }
+        guard !visibleTabs.isEmpty else { return }
         while !visibleTabs.contains(tab) && index < tabs.count-1 {
             index += 1
             tab = tabs[index]
