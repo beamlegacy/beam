@@ -76,4 +76,26 @@ class NoteScoreTest: XCTestCase {
         XCTAssertEqual(score.lastWordCount, 4)
         BeamDate.reset()
     }
+    func testWordCountAfterDeserialization() throws {
+        BeamDate.freeze("2001-01-01T00:00:00+000")
+
+        let note = BeamNote(title: "Fruits")
+        note.addChild(BeamElement("Apple banana strawberry"))
+        let data = try JSONEncoder().encode(note)
+
+        //reloading the note on a new day
+        BeamDate.travel(2 * 24 * 60 * 60)
+        let deserialized = try JSONDecoder().decode(BeamNote.self, from: data)
+        deserialized.recordScoreWordCount() //need to trigger a word count record at least once to write a dailyscore
+        let score = try XCTUnwrap(NoteScorer.shared.getLocalDailyScore(noteId: note.id, daysAgo: 0))
+
+        //as we did not record word count during deserialization
+        //min and first word count are not equal to 0 but are equal to
+        //size after deserialization
+        XCTAssertEqual(score.firstWordCount, 3) //
+        XCTAssertEqual(score.minWordCount, 3)
+        XCTAssertEqual(score.lastWordCount, 3)
+        XCTAssertEqual(score.maxWordCount, 3)
+        BeamDate.reset()
+    }
 }
