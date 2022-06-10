@@ -12,8 +12,8 @@ import XCTest
 class BaseView {
     
     var app: XCUIApplication { XCUIApplication() }
-    /// 10 seconds
-    let implicitWaitTimeout = TimeInterval(10)
+    /// 5 seconds
+    let implicitWaitTimeout = TimeInterval(5)
     /// 2 seconds
     let minimumWaitTimeout = TimeInterval(2)
     let defaultPressDurationSeconds = 1.5
