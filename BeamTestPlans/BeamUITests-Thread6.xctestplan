@@ -69,6 +69,7 @@
         "BlockReferenceTests",
         "BrowserFancyUrlTests",
         "BrowserHistoryTests",
+        "BrowserPinnedTabTests",
         "BrowserShortcutsTests",
         "BrowserShortcutsTests\/testJumpBetweenWebTabs()",
         "BrowserShortcutsTests\/testReopenTabsCmdT()",

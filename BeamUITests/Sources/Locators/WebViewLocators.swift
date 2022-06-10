@@ -22,7 +22,8 @@ enum WebViewLocators {
     }
     
     enum Tabs: String, CaseIterable, UIElement {
-        case tabPrefix = "TabItem-BrowserTab-"
+        case tabPrefix = "TabItem-BrowserTab-("
+        case tabPinnedPrefix = "TabItem-BrowserTab-pinned-("
         case tabURL = "browserTabURL"
         case tabTitle = "browserTabTitle"
     }
@@ -37,6 +38,12 @@ enum WebViewLocators {
         case zoomInButton = "download-file_zoomin"
         case zoomOutButton = "download-file_zoomout"
         case zoomRatio = "pdf-toolbar"
+    }
+    
+    enum MenuItem: String, CaseIterable, UIElement {
+        case pinTab = "Pin Tab"
+        case unpinTab = "Unpin Tab"
+        case closeTab = "Close Tab"
     }
     
 }
