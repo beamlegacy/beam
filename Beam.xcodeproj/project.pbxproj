@@ -1346,6 +1346,7 @@
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
+		D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */; };
 		D7858BC6283BB5A000D0336A /* CreditCardAutocompleteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BC5283BB5A000D0336A /* CreditCardAutocompleteTests.swift */; };
 		D7858BCD283BC4C700D0336A /* AutoFillCCTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BCC283BC4C700D0336A /* AutoFillCCTestView.swift */; };
 		D7858BCF283BC4E000D0336A /* AutoFillCCViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */; };
@@ -3216,6 +3217,7 @@
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
 		D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread6.xctestplan"; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
+		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
 		D7858BC5283BB5A000D0336A /* CreditCardAutocompleteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardAutocompleteTests.swift; sourceTree = "<group>"; };
 		D7858BCC283BC4C700D0336A /* AutoFillCCTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCCTestView.swift; sourceTree = "<group>"; };
 		D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AutoFillCCViewLocators.swift; sourceTree = "<group>"; };
@@ -7279,6 +7281,7 @@
 				8AA6D91C27FAF9AB00F42FAB /* BrowserOpenModalTests.swift */,
 				A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */,
 				A310949A281D9F7C003B96D1 /* BrowserHistoryTests.swift */,
+				D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -9640,6 +9643,7 @@
 				D7E38CED282A93580059F60D /* AdBlockerTests.swift in Sources */,
 				D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */,
 				D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */,
+				D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */,
 				B5E8010E26AEA63300C8BD61 /* WebTestView.swift in Sources */,
 				B5DC1FC226B9608D00A4C94B /* DownloadTestView.swift in Sources */,
 				B5056A8F26F88AB000FFD2A2 /* HelpTestView.swift in Sources */,

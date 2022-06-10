@@ -83,6 +83,10 @@ class WebTestView: BaseView {
     func getNumberOfTabs(wait: Bool = true) -> Int {
         return getTabs(wait: wait).count
     }
+    
+    func getNumberOfPinnedTabs(wait: Bool = true) -> Int {
+        return getPinnedTabs(wait: wait).count
+    }
 
     func getNumberOfWebViewInMemory() -> Int {
         uiMenu.showWebViewCount()
@@ -99,8 +103,17 @@ class WebTestView: BaseView {
         getTabs().element(boundBy: index)
     }
     
-    func focusTabByIndex(index: Int) -> XCUIElement {
-        let tab = getTabByIndex(index: index)
+    func getPinnedTabByIndex(index: Int) -> XCUIElement {
+        getPinnedTabs().element(boundBy: index)
+    }
+    
+    func focusTabByIndex(index: Int, isPinnedTab: Bool = false) -> XCUIElement {
+        let tab: XCUIElement
+        if isPinnedTab {
+            tab = getPinnedTabByIndex(index: index)
+        } else {
+            tab = getTabByIndex(index: index)
+        }
         waitForIsHittable(tab)
         getCenterOfElement(element: tab).hover()
         return tab
@@ -145,12 +158,24 @@ class WebTestView: BaseView {
     func getAnyTab() -> XCUIElement {
         app.groups.matching(tabPredicate).firstMatch
     }
+        
+    private let tabPinnedPredicate = NSPredicate(format: "identifier BEGINSWITH '\(WebViewLocators.Tabs.tabPinnedPrefix.accessibilityIdentifier)'")
+    func getAnyPinnedTab() -> XCUIElement {
+        app.groups.matching(tabPinnedPredicate).firstMatch
+    }
     
     func getTabs(wait: Bool = true) -> XCUIElementQuery {
         if wait {
-            _ = getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            _ = getAnyTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
         }
         return app.groups.matching(tabPredicate)
+    }
+    
+    func getPinnedTabs(wait: Bool = true) -> XCUIElementQuery {
+        if wait {
+            _ = getAnyPinnedTab().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        }
+        return app.groups.matching(tabPinnedPredicate)
     }
 
     func getNumberOfWindows() -> Int {
@@ -228,6 +253,16 @@ class WebTestView: BaseView {
     
     func activateAndWaitForSearchFieldToEqual(_ expectedUrl: String, tabIndex: Int = 0) -> Bool {
         return self.activateSearchFieldFromTab(index:tabIndex).waitForSearchFieldValueToEqual(expectedValue: expectedUrl)
+    }
+    
+    @discardableResult
+    func openTabMenu(tabIndex: Int = 0, isPinnedTab: Bool = false) -> WebTestView {
+        self.focusTabByIndex(index:tabIndex, isPinnedTab: isPinnedTab).rightClick()
+        return self
+    }
+
+    func selectTabMenuItem(_ menuAction: WebViewLocators.MenuItem) {
+        menuItem(menuAction.accessibilityIdentifier).tapInTheMiddle()
     }
 
 }

@@ -70,6 +70,7 @@
         "BaseTest",
         "BrowserFancyUrlTests",
         "BrowserOpenModalTests",
+        "BrowserPinnedTabTests",
         "CaptureCopyShareTests",
         "CardEditTests",
         "CardPublishTests",
