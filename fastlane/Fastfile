@@ -245,6 +245,9 @@ platform :mac do
     when "develop"
       # Secret channel name so that curious beta users can't easily guess it and get our internal builds
       "bluepineapple"
+    when "develop-grdb"
+      # Secret channel name for develop-grdb branch
+      "greencanary"
     when /\Abeta-.*/
       "beta"
     when /\Arelease-.*/
@@ -258,6 +261,8 @@ platform :mac do
     case Actions.git_branch
     when "develop"
       "develop"
+    when "develop-grdb"
+      "develop-grdb"
     when /\Abeta-.*/
       "beta"
     when /\Arelease-.*/
@@ -271,6 +276,8 @@ platform :mac do
     case Actions.git_branch
     when "develop"
       "beam develop"
+    when "develop-grdb"
+      "beam develop grdb"
     when /\Abeta-.*/
       "beam beta"
     else
@@ -283,7 +290,7 @@ platform :mac do
   end
 
   def publish_channel_internal?
-    review_build? || build_type() == "develop"
+    review_build? || build_type() == "develop" || build_type() == "develop-grdb"
   end
 
   def publish_channel_external?
