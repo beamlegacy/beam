@@ -15,7 +15,7 @@ class CreditCardTestView: BaseView {
     
     @discardableResult
     func clickAddCreditCardButton() -> CreditCardTestView {
-        if ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 12 {
+        if BaseTest().isBigSurOS() {
             button(PasswordPreferencesViewLocators.Buttons.addCreditCardButton.accessibilityIdentifier).clickOnExistence()
         } else {
         app.windows["Passwords"].sheets.groups.children(matching: .button).element(boundBy: 0).clickOnExistence()
@@ -97,7 +97,7 @@ class CreditCardTestView: BaseView {
     }
     
     func getDeleteCreditCardButton() -> XCUIElement {
-        if ProcessInfo.processInfo.operatingSystemVersion.majorVersion < 12 {
+        if BaseTest().isBigSurOS() {
             return button(PasswordPreferencesViewLocators.Buttons.removeCreditCardButton.accessibilityIdentifier)
         } else {
         return app.windows["Passwords"].sheets.groups.children(matching: .button).element(boundBy: 1)
