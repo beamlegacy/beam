@@ -99,6 +99,7 @@
         "NoteEditTests",
         "NoteEditorTests",
         "NotePublishTests\/testDefaultPublishStatus()",
+        "NotePublishTests\/testPublishUnpublishNote()",
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "NotesNavigationHistoryTests",
