@@ -9,46 +9,66 @@ import SwiftUI
 
 struct ClickCatchingView: NSViewRepresentable {
 
-    private class ClickCatchingNSView: NSView {
+    var onTap: ((NSEvent) -> Void)?
+    var onRightTap: ((NSEvent) -> Void)?
+    var onDoubleTap: ((NSEvent) -> Void)?
 
-        var onTap: ((NSEvent) -> Void)?
-        var onRightTap: ((NSEvent) -> Void)?
-        var onDoubleTap: ((NSEvent) -> Void)?
+    func makeCoordinator() -> Coordinator {
+        Coordinator(parent: self)
+    }
+
+    func makeNSView(context: Context) -> NSView {
+        let view = ClickCatchingNSView()
+        view.delegate = context.coordinator
+        return view
+    }
+
+    func updateNSView(_ nsView: NSView, context: Context) { }
+
+    private class ClickCatchingNSView: NSView {
+        weak var delegate: ClickCatchingNSViewDelegate?
 
         override func mouseDown(with event: NSEvent) {
             super.mouseDown(with: event)
             if event.clickCount == 2 {
-                onDoubleTap?(event)
-            } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control,
-                      let onRightTap = onRightTap {
-                onRightTap(event)
+                delegate?.viewDidClick(ofType: .doubleClick, withEvent: event)
+            } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control {
+                delegate?.viewDidClick(ofType: .rightClick, withEvent: event)
             } else {
-                onTap?(event)
+                delegate?.viewDidClick(ofType: .click, withEvent: event)
             }
         }
 
         override func rightMouseDown(with event: NSEvent) {
             super.rightMouseDown(with: event)
-            onRightTap?(event)
+            delegate?.viewDidClick(ofType: .rightClick, withEvent: event)
         }
     }
 
-    var onTap: ((NSEvent) -> Void)?
-    var onRightTap: ((NSEvent) -> Void)?
-    var onDoubleTap: ((NSEvent) -> Void)?
+    class Coordinator: ClickCatchingNSViewDelegate {
+        let parent: ClickCatchingView
+        init(parent: ClickCatchingView) {
+            self.parent = parent
+        }
 
-    func makeNSView(context: Context) -> NSView {
-        let view = ClickCatchingNSView()
-        view.onTap = onTap
-        view.onRightTap = onRightTap
-        view.onDoubleTap = onDoubleTap
-        return view
+        fileprivate func viewDidClick(ofType type: ClickType, withEvent event: NSEvent) {
+            switch type {
+            case .click:
+                parent.onTap?(event)
+            case .doubleClick:
+                parent.onDoubleTap?(event)
+            case .rightClick:
+                parent.onRightTap?(event)
+            }
+        }
     }
+}
 
-    func updateNSView(_ nsView: NSView, context: Context) {
-        guard let view = nsView as? ClickCatchingNSView else { return }
-        view.onTap = onTap
-        view.onRightTap = onRightTap
-        view.onDoubleTap = onDoubleTap
-    }
+
+private enum ClickType {
+    case click, doubleClick, rightClick
+}
+
+private protocol ClickCatchingNSViewDelegate: AnyObject {
+    func viewDidClick(ofType type: ClickType, withEvent event: NSEvent)
 }
