@@ -312,10 +312,12 @@ extension BeamTextEdit {
         guard let node = focusedWidget as? TextNode else { return }
         var lastInserted: ElementNode? = node
         let parent = node.parent as? ElementNode ?? node
+        var insertedElements: [BeamText] = []
         for (idx, attributedString) in attributedStrings.enumerated() {
             guard !attributedString.string.isEmpty else { continue }
             let cleanedText = attributedString.clean(with: "\\s\u{2022}\\s", in: NSRange(0..<3))
             let beamText = BeamText(attributedString: cleanedText)
+            insertedElements.append(beamText)
             if idx == 0 {
                 disableInputDetector()
                 rootNode.insertText(text: beamText, replacementRange: selectedTextRange)
@@ -330,15 +332,14 @@ extension BeamTextEdit {
         }
         cmdManager.endGroup()
 
-        if let lastInsertedNode = lastInserted as? TextNode,
-           let insertedElement = lastInserted?.elementText,
-           insertedElement.linkRanges.count == 1,
-           let linkRange = insertedElement.linkRanges.first {
-
-            let embedable = showLinkEmbedPasteMenu(for: linkRange)
-            if !embedable {
-                updateLinkToFormattedLink(in: lastInsertedNode, at: linkRange, with: cmdManager)
-            }
+        guard let lastInsertedNode = lastInserted as? TextNode,
+              insertedElements.count == 1, let lastInsertedElement = insertedElements.last  else { return }
+        // let's find the newly inserted BeamText.Range using the cursor.
+        let rangeAtCursor = lastInsertedNode.elementText.rangeAt(position: lastInsertedNode.cursorPosition)
+        guard rangeAtCursor.string == lastInsertedElement.text, rangeAtCursor.attributes == lastInsertedElement.ranges.first?.attributes else { return }
+        let embedable = showLinkEmbedPasteMenu(for: rangeAtCursor)
+        if !embedable {
+            updateLinkToFormattedLink(in: lastInsertedNode, at: rangeAtCursor, with: cmdManager)
         }
     }
 
@@ -350,22 +351,25 @@ extension BeamTextEdit {
     ///   - range: Range of node that contains the link
     ///   - cmdManager: CommandManager<Widget> to execute text edit events with
     public func updateLinkToFormattedLink(in node: TextNode, at range: BeamText.Range, with cmdManager: CommandManager<Widget>) {
-        if let url = URL(string: node.elementText.text) {
-            Task.detached(priority: .background) { @MainActor [weak self] in
-                guard let self = self else { return }
-                let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
-                let cursorIsStillAtEndOfLink = self.rootNode?.cursorPosition == range.end
-                let endRange = range.position + fetchedTitle.wholeRange.upperBound
-                self.disableInputDetector()
-                cmdManager.beginGroup(with: "UpdateLinkToFormattedLink")
-                cmdManager.replaceText(in: node, for: range.range, with: fetchedTitle)
-                cmdManager.insertText(BeamText(text: " ", attributes: []), in: node, at: endRange)
-                if cursorIsStillAtEndOfLink {
-                    cmdManager.focusElement(node, cursorPosition: endRange + 1)
-                }
-                cmdManager.endGroup()
-                self.enableInputDetector()
+        let urls: [String] = range.attributes.compactMap { attribute in
+            guard case let .link(url) = attribute else { return nil }
+            return url
+        }
+        guard urls.count == 1, let url = URL(string: urls.first ?? "") else { return }
+        Task.detached(priority: .background) { @MainActor [weak self] in
+            guard let self = self else { return }
+            let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
+            let cursorIsStillAtEndOfLink = self.rootNode?.cursorPosition == range.end
+            let endRange = range.position + fetchedTitle.wholeRange.upperBound
+            self.disableInputDetector()
+            cmdManager.beginGroup(with: "UpdateLinkToFormattedLink")
+            cmdManager.replaceText(in: node, for: range.range, with: fetchedTitle)
+            cmdManager.insertText(BeamText(text: " ", attributes: []), in: node, at: endRange)
+            if cursorIsStillAtEndOfLink {
+                cmdManager.focusElement(node, cursorPosition: endRange + 1)
             }
+            cmdManager.endGroup()
+            self.enableInputDetector()
         }
     }
 
