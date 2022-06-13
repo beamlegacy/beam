@@ -13,6 +13,8 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
 
     private struct PersistedState {
         var sortDescriptor: NSSortDescriptor?
+        var listType: ListType?
+        var showDailyNotes: Bool?
     }
     static private var persistedState = PersistedState()
 
@@ -32,9 +34,22 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     @Published var onProfileNotesItems = [NoteTableViewItem]()
     @Published var shouldReloadData: Bool? = false
     @Published var publishingNoteTitle: String?
-    @Published var showDailyNotes: Bool = true {
+    @Published var showDailyNotes: Bool {
         didSet {
             updateNoteItemsFromAllNotes()
+            Self.persistedState.showDailyNotes = showDailyNotes
+        }
+    }
+
+    enum ListType {
+        case allNotes
+        case privateNotes
+        case publicNotes
+        case onProfileNotes
+    }
+    @Published var listType: ListType {
+        didSet {
+            Self.persistedState.listType = listType
         }
     }
 
@@ -53,6 +68,9 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
     }
 
     init() {
+        listType = Self.persistedState.listType ?? .allNotes
+        showDailyNotes = Self.persistedState.showDailyNotes ?? true
+
         CoreDataContextObserver.shared
             .publisher(for: .anyDocumentChange)
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
@@ -79,7 +97,7 @@ class AllNotesPageViewModel: ObservableObject, Identifiable {
         allNotes = DocumentManager().loadAll()
     }
 
-    func getCurrentNotesList(for type: AllNotesPageContentView.ListType) -> [NoteTableViewItem] {
+    func getCurrentNotesList(for type: ListType) -> [NoteTableViewItem] {
         switch type {
         case .publicNotes:
             return publicNotesItems
