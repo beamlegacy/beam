@@ -643,30 +643,22 @@ import Promises
     /// from the proxy-api, clear and set the pasteboard with the correct title.
     ///
     /// - Parameters:
-    ///   - url: url to write to pastebaord
-    ///   - title: string to use as url title, if nil the url.absoluteString is used
-    internal func writeURLToPasteboard(url: URL, title: String? = nil) {
-        let linkTitle = title ?? url.absoluteString
-
-        let formattedURLString = NSMutableAttributedString()
-        formattedURLString.append(NSAttributedString(string: linkTitle, attributes: [.link: url]))
-
-        if let host = url.minimizedHost, let hostUrl = url.domain {
-            formattedURLString.append(NSAttributedString(string: " - "))
-            formattedURLString.append(NSAttributedString(string: host, attributes: [.link: hostUrl.absoluteString]))
-        }
+    ///   - url: url to write to pasteboard
+    ///   - fetchTitle: automatically/asynchronously fetch the page's title and add it in the pasteboard
+    private func writeURLToPasteboard(url: URL, fetchTitle: Bool = true) {
 
         let pasteboard = NSPasteboard.general
         pasteboard.clearContents()
-        pasteboard.writeObjects([formattedURLString])
+        let urlString = url.absoluteString
+        pasteboard.setString(urlString, forType: .string)
 
+        guard fetchTitle else { return }
         Task.detached(priority: .background) {
             let fetchedTitle = await WebNoteController.convertURLToBeamTextLink(url: url)
-            let fetchedFormattedURLString = NSMutableAttributedString()
-            fetchedFormattedURLString.append(NSAttributedString(string: fetchedTitle.text, attributes: [.link: url]))
-            pasteboard.clearContents()
-            pasteboard.setData(fetchedFormattedURLString.data(.rtf), forType: .rtf)
-            pasteboard.setData(url.absoluteString.asData, forType: .string)
+            guard pasteboard.string(forType: .string) == urlString else { return }
+            let bTextHolder = BeamTextHolder(bText: fetchedTitle)
+            let beamTextData = try PropertyListEncoder().encode(bTextHolder)
+            pasteboard.setData(beamTextData, forType: .bTextHolder)
         }
     }
 
@@ -675,12 +667,6 @@ import Promises
 
         // First write the plain url to the pasteboard
         writeURLToPasteboard(url: url)
-
-        // Then query proxy API to retrieve the page title and update the pasteboard
-        Task.detached(priority: .background) { [weak self] in
-            let title = await WebNoteController.convertURLToBeamTextLink(url: url)
-            self?.writeURLToPasteboard(url: url, title: title.text)
-        }
 
         guard !hasCopiedURL else {
             // if it was already copied, let's dismiss right away.
