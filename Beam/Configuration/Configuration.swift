@@ -44,8 +44,10 @@ struct Configuration {
     static private(set) var restApiHostnameDefault = "https://api-rust.prod.beamapp.co"
 
     static private(set) var apiHostnameDefaultStaging = "https://api.staging.beamapp.co"
+    static private(set) var restApiHostnameDefaultStaging = "https://api.staging.beamapp.co"
 
     static private(set) var apiHostnameDefaultDev = "https://api.beam.lvh.me"
+    static private(set) var restApiHostnameDefaultDev = "https://api.beam.lvh.me"
 
     static private(set) var beamObjectsPageSizeDefault = 1000
 
@@ -250,14 +252,14 @@ struct Configuration {
 
     static func setAPIEndPointsToStaging() {
         Self.apiHostname = apiHostnameDefaultStaging
-        UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
+        Self.restApiHostname = restApiHostnameDefaultStaging
         Self.publicAPIpublishServer = "https://staging-web-server.ew.r.appspot.com"
         Self.publicAPIembed = "https://staging-proxy-api.netlify.app/.netlify/functions/embed"
     }
 
     static func setAPIEndPointsToDevelopment() {
         Self.apiHostname = apiHostnameDefaultDev
-        UserDefaults.standard.removeObject(forKey: restApiHostnameKey)
+        Self.restApiHostname = restApiHostnameDefaultDev
     }
 
     static private func value<T>(for key: String) -> T {
