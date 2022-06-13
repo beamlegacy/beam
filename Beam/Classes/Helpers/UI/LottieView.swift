@@ -101,6 +101,7 @@ struct LottieView: NSViewRepresentable {
         init(animationSize: CGSize?) {
             animationView = AnimationView()
             animationView.contentMode = .scaleAspectFit
+            animationView.loopMode = loopMode
 
             super.init(frame: .zero)
 
