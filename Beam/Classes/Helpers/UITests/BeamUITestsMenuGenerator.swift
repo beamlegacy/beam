@@ -62,6 +62,10 @@ class BeamUITestsMenuGenerator {
         case .setAPIEndpointsToStaging: connectToStagingServer()
         case .deleteRemoteAccount: deleteRemoteAccount()
         case .createFakeDailySummary: createFakeDailySummary()
+        case .createNote: createNote()
+        case .createAndOpenNote: createNote(open: true)
+        case .createPublishedNote: createPublishedNote()
+        case .createAndOpenPublishedNote: createPublishedNote(open: true)
         default: break
         }
     }
@@ -256,7 +260,7 @@ class BeamUITestsMenuGenerator {
         let email = Configuration.testAccountEmail
         let password = Configuration.testAccountPassword
         try? EncryptionManager.shared.replacePrivateKey(for: Configuration.testAccountEmail, with: Configuration.testPrivateKey)
-    
+
         accountManager.signIn(email: email, password: password, runFirstSync: true, completionHandler: { result in
             if case .failure(let error) = result {
                 fatalError(error.localizedDescription)
@@ -489,5 +493,34 @@ class BeamUITestsMenuGenerator {
         for (index, urlId) in urlIdsToday.enumerated() {
             storage.apply(to: urlId) { $0.readingTimeToLastEvent = 100 + Double(index)}
         }
+    }
+
+    var noteCount = 1
+    @discardableResult
+    private func createNote(open: Bool = false) -> BeamNote {
+        let note = BeamNote(title: "Test\(noteCount)")
+        note.type = .note
+        note.save()
+        noteCount += 1
+        if open {
+            self.open(note: note)
+        }
+        return note
+    }
+
+    private func createPublishedNote(open: Bool = false) {
+        let note = createNote()
+        BeamNoteSharingUtils.makeNotePublic(note, becomePublic: true, completion: { _ in
+            if open {
+                DispatchQueue.main.async {
+                    self.open(note: note)
+                }
+            }
+        })
+    }
+
+    private func open(note: BeamNote) {
+        AppDelegate.main.window?.state.mode = .note
+        AppDelegate.main.window?.state.currentNote = note
     }
 }
