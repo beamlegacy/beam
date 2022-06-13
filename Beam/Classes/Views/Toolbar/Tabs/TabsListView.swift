@@ -655,31 +655,32 @@ extension TabsListView {
                 state?.browserTabsManager.changeGroupColor(group.id, color: newValues.color)
             }
         }, onFinish: dismiss)
+        weak var state = self.state
         let items = [
             ContextMenuItem(title: "Name and Color",
                             customContent: AnyView(nameAndColorView)) { },
             ContextMenuItem.separator(allowPadding: false),
             ContextMenuItem(title: "New Tab in Group", icon: "tool-new") {
-                state.browserTabsManager.createNewTab(inGroup: group)
+                state?.browserTabsManager.createNewTab(inGroup: group)
                 dismiss()
             },
             ContextMenuItem(title: "Move Group in New Window", icon: "tabs-group_move") {
                 dismiss()
-                state.browserTabsManager.moveGroupToNewWindow(group)
+                state?.browserTabsManager.moveGroupToNewWindow(group)
             },
             ContextMenuItem.separator(),
             ContextMenuItem(title: group.collapsed ? "Expand Group" : "Collapse Group",
                             icon: group.collapsed ? "tabs-group_expand" : "tabs-group_collapse") {
                                 dismiss()
-                                state.browserTabsManager.toggleGroupCollapse(group.id)
+                                state?.browserTabsManager.toggleGroupCollapse(group.id)
                             },
             ContextMenuItem(title: "Ungroup", icon: "tabs-group_ungroup") {
                 dismiss()
-                state.browserTabsManager.ungroupTabsInGroup(group)
+                state?.browserTabsManager.ungroupTabsInGroup(group)
             },
             ContextMenuItem(title: "Close Group", icon: "tool-close") {
                 dismiss()
-                state.browserTabsManager.closeTabsInGroup(group)
+                state?.browserTabsManager.closeTabsInGroup(group)
             }
         ]
         let menu = ContextMenuFormatterView(key: menuKey, items: items, canBecomeKey: true)
