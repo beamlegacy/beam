@@ -48,6 +48,7 @@ import Promises
         }
     }
     var preloadUrl: URL?
+    var restoredInteractionState: Any?
     var backForwardUrlList: [URL]?
     var originMode: Mode
     let uiDelegateController = BeamWebkitUIDelegateController()
@@ -267,6 +268,7 @@ import Promises
         case title
         case originalQuery
         case url
+        case interactionState
         case backForwardUrlList
         case browsingTree
         case privateMode
@@ -281,7 +283,10 @@ import Promises
         title = try container.decode(String.self, forKey: .title)
         originalQuery = try? container.decode(String.self, forKey: .originalQuery)
         preloadUrl = try? container.decode(URL.self, forKey: .url)
-        backForwardUrlList = try container.decode([URL].self, forKey: .backForwardUrlList)
+        backForwardUrlList = try? container.decode([URL].self, forKey: .backForwardUrlList)
+        if #available(macOS 12.0, *), let interactionState = try? container.decode(Data.self, forKey: .interactionState) {
+            restoredInteractionState = interactionState
+        }
 
         let tree: BrowsingTree = try container.decode(BrowsingTree.self, forKey: .browsingTree)
         browsingTree = tree
@@ -308,11 +313,13 @@ import Promises
         if let currentURL = webView.url {
             try container.encode(currentURL, forKey: .url)
         }
-        var backForwardUrlList = [URL]()
-        for backForwardListItem in webView.backForwardList.backList {
-            backForwardUrlList.append(backForwardListItem.url)
+
+        if #available(macOS 12.0, *), let interactionStateData = webView.interactionState as? Data {
+            try container.encode(interactionStateData, forKey: .interactionState)
+        } else {
+            let backForwardUrlList: [URL] = webView.backForwardList.backList.map { $0.url }
+            try container.encode(backForwardUrlList, forKey: .backForwardUrlList)
         }
-        try container.encode(backForwardUrlList, forKey: .backForwardUrlList)
 
         try container.encode(browsingTree, forKey: .browsingTree)
         try container.encode(privateMode, forKey: .privateMode)
@@ -461,19 +468,24 @@ import Promises
         addTreeToNote()
         observeWebView()
 
-        // Load the url
-        if let backForwardListUrl = backForwardUrlList {
-            for url in backForwardListUrl {
+        // Reload the state and url
+        if #available(macOS 12.0, *), let restoredInteractionState = restoredInteractionState {
+            self.webView.interactionState = restoredInteractionState
+        } else {
+            // This doesn't really work. We could manipulate history with JS like Firefox does
+            // https://github.com/mozilla-mobile/firefox-ios/wiki/History-Restoration-in-WKWebView-(and-Error-Pages)
+            backForwardUrlList?.forEach { url in
                 self.webView.load(URLRequest(url: url))
             }
-            self.backForwardUrlList = nil
-        }
-        if let suppliedPreloadURL = preloadUrl {
-            preloadUrl = nil
-            DispatchQueue.main.async { [weak self] in
-                self?.load(request: URLRequest(url: suppliedPreloadURL))
+            if let suppliedPreloadURL = preloadUrl {
+                DispatchQueue.main.async { [weak self] in
+                    self?.load(request: URLRequest(url: suppliedPreloadURL))
+                }
             }
         }
+        restoredInteractionState = nil
+        backForwardUrlList = nil
+        preloadUrl = nil
     }
 
     fileprivate func tabWillLeaveCurrentPage() {
