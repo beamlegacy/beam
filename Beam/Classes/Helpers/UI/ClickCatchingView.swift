@@ -19,6 +19,9 @@ struct ClickCatchingView: NSViewRepresentable {
             super.mouseDown(with: event)
             if event.clickCount == 2 {
                 onDoubleTap?(event)
+            } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control,
+                      let onRightTap = onRightTap {
+                onRightTap(event)
             } else {
                 onTap?(event)
             }
