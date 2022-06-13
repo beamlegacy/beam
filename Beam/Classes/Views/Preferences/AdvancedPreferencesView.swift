@@ -770,6 +770,7 @@ struct AdvancedPreferencesView: View {
             Configuration.setAPIEndPointsToDevelopment()
             apiHostname = Configuration.apiHostname
             restApiHostname = Configuration.restApiHostname
+            promptEraseAllDataAlert()
         }, label: {
             // TODO: loc
             Text("Set API Endpoints to local server").frame(minWidth: 100)
