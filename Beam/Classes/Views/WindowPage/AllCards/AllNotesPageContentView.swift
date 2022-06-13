@@ -16,7 +16,7 @@ struct AllNotesPageContentView: View {
     @Environment(\.undoManager) var undoManager
 
     private var currentNotesList: [NoteTableViewItem] {
-        return model.getCurrentNotesList(for: listType)
+        return model.getCurrentNotesList(for: model.listType)
     }
 
     @StateObject private var model = AllNotesPageViewModel()
@@ -67,16 +67,8 @@ struct AllNotesPageContentView: View {
         })
     ]
 
-    enum ListType {
-        case allNotes
-        case privateNotes
-        case publicNotes
-        case onProfileNotes
-    }
-    @State private var listType: ListType = .allNotes
-
     private var cardsFilters: some View {
-        switch self.listType {
+        switch self.model.listType {
         case .allNotes:
             return Text("All (\(model.getCurrentNotesList(for: .allNotes).count))")
         case .privateNotes:
@@ -100,11 +92,11 @@ struct AllNotesPageContentView: View {
             return loc("Publishing '\(publishingNoteTitle)'...")
         }
 
-        if listType == .publicNotes {
+        if model.listType == .publicNotes {
             return model.publicNotesItems.count == 0 ? loc("You haven’t published any note yet. Start today!") : loc("New Published Note")
         }
 
-        if listType == .onProfileNotes {
+        if model.listType == .onProfileNotes {
             return model.onProfileNotesItems.count == 0 ? loc("You haven’t published any note to your profile yet. Start today!") : loc("New Published on Profile Note")
         }
 
@@ -308,9 +300,7 @@ struct AllNotesPageContentView: View {
             notes.append(note)
         }
 
-        let menu = AllNotesPageFiltersContextualMenu(viewModel: model, selectedListType: listType) { newlySelectedListType in
-            self.listType = newlySelectedListType
-        }
+        let menu = AllNotesPageFiltersContextualMenu(viewModel: model)
         menu.presentMenu(at: CGPoint(x: buttonFrame.origin.x, y: buttonFrame.maxY + 6))
     }
 
@@ -320,8 +310,8 @@ struct AllNotesPageContentView: View {
         }
         if row >= notesList.count {
             let newNote = state.fetchOrCreateNoteForQuery(title)
-            let isPublic = listType == .publicNotes
-            let publishOnProfile = listType == .onProfileNotes
+            let isPublic = model.listType == .publicNotes
+            let publishOnProfile = model.listType == .onProfileNotes
 
             //If we create a public note, publish it right after creation, else just save it
             if isPublic || publishOnProfile {
@@ -335,7 +325,7 @@ struct AllNotesPageContentView: View {
                             // Saving the private note at least and showing it to user.
                             newNote.publicationStatus = .unpublished
                             newNote.save()
-                            listType = .privateNotes
+                            model.listType = .privateNotes
                         case .success:
                             model.refreshAllNotes()
                         }
