@@ -45,6 +45,20 @@ class AllNotesPageContextualMenu {
             let count = selectedNotes.count
             countSuffix = count == 1 ? "" : " \(count) Notes"
 
+            guard let pinnedManager = AppDelegate.main.window?.state.data.pinnedManager else { return }
+
+            if selectedNotes.allSatisfy({ !pinnedManager.isPinned($0) }) {
+                menu.addItem(NSMenuItem(title: "Pin",
+                                        action: #selector(pin),
+                                        keyEquivalent: ""))
+            }
+
+            if selectedNotes.allSatisfy({ pinnedManager.isPinned($0) }) {
+                menu.addItem(NSMenuItem(title: "Unpin",
+                                        action: #selector(unpin),
+                                        keyEquivalent: ""))
+            }
+
             if let first = selectedNotes.first, first.publicationStatus.isPublic {
                 menu.addItem(NSMenuItem(
                     title: "Unpublish\(countSuffix)",
@@ -331,6 +345,16 @@ class AllNotesPageContextualMenu {
         }
         AllNotesMenuUndoRegisterer(undoManager: undoManager, cmdManager: cmdManager, menuDelegate: delegate)
             .registerUndo(redo: redo, actionName: actionName)
+    }
+
+    @objc private func pin() {
+        guard let window = AppDelegate.main.window else { return }
+        window.state.data.pinnedManager.pin(notes: selectedNotes)
+    }
+
+    @objc private func unpin() {
+        guard let state = AppDelegate.main.window?.state else { return }
+        state.data.pinnedManager.unpin(notes: selectedNotes)
     }
 }
 

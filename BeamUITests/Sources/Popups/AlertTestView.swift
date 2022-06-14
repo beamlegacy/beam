@@ -89,6 +89,12 @@ class AlertTestView: BaseView {
         return self
     }
     
+    @discardableResult
+    func okClick() -> BaseView {
+        self.getAlertDialog().buttons[AlertViewLocators.Buttons.okButton.accessibilityIdentifier].clickOnExistence()
+        return self
+    }
+    
     private func getAlertFromSheets() -> XCUIElement {
         return app.sheets[alert]
     }

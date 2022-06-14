@@ -16,7 +16,13 @@ struct SidebarView: View {
 
     @State private var dismissTimerCancellable: Cancellable?
     @State private var didAppear = false
+    @ObservedObject var pinnedManager: PinnedNotesManager
+
     private var shouldAutodismiss = false
+
+    init(pinnedManager: PinnedNotesManager) {
+        self.pinnedManager = pinnedManager
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3.0) {
@@ -30,7 +36,7 @@ struct SidebarView: View {
                         .blendModeLightMultiplyDarkScreen()
                     ScrollView {
                         VStack(spacing: 3.0) {
-//                            pinned
+                            pinned
                             recents
                         }
                         .padding(.top, 10)
@@ -73,7 +79,7 @@ struct SidebarView: View {
             state.showSidebar = false
             state.navigateToJournal(note: nil)
         }
-        .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription, alignment: .center)
+        .tooltipOnHover(Shortcut.AvailableShortcut.showJournal.keysDescription, alignment: .top)
         .accessibilityIdentifier("sidebar-journal")
     }
 
@@ -82,12 +88,20 @@ struct SidebarView: View {
             state.showSidebar = false
             state.navigateToPage(.allNotesWindowPage)
         }
-        .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription, alignment: .center)
+        .tooltipOnHover(Shortcut.AvailableShortcut.showAllNotes.keysDescription, alignment: .top)
         .accessibilityIdentifier("sidebar-all-notes")
     }
 
     @ViewBuilder private var pinned: some View {
-        SidebarListSectionTitle(title: "Pinned", iconName: "editor-pin")
+        if pinnedManager.pinnedNotes.count > 0 {
+            SidebarListSectionTitle(title: "Pinned", iconName: "sidebar-pin")
+            ForEach(pinnedManager.pinnedNotes) { note in
+                let isActive = note.id == state.currentNote?.id
+                SidebarListNoteButton(note: note, pinnedManager: state.data.pinnedManager, isSelected: isActive) {
+                    navigateTo(note: note)
+                }
+            }
+        }
     }
 
     @ViewBuilder private var recents: some View {
@@ -96,10 +110,9 @@ struct SidebarView: View {
             ForEach(state.recentsManager.recentNotes) { note in
                 let isToday = state.mode == .today
                 let isActive = !isToday && note.id == state.currentNote?.id
-                SidebarListNoteButton(note: note, isSelected: isActive, action: {
-                    state.showSidebar = false
-                    state.navigateToNote(note)
-                })
+                SidebarListNoteButton(note: note, pinnedManager: state.data.pinnedManager, isSelected: isActive) {
+                    navigateTo(note: note)
+                }
             }
         }
     }
@@ -143,13 +156,18 @@ struct SidebarView: View {
         .overlay(sideStroke, alignment: .trailing)
         .shadow(color: .black.opacity(shadowOpacity), radius: 5, x: 1, y: 0)
     }
+
+    private func navigateTo(note: BeamNote) {
+        state.showSidebar = false
+        state.navigateToNote(note)
+    }
 }
 
 struct SidebarView_Previews: PreviewProvider {
     static var state = BeamState()
     static var previews: some View {
         let recent = state.recentsManager
-        SidebarView()
+        SidebarView(pinnedManager: state.data.pinnedManager)
             .environmentObject(state)
             .environmentObject(recent)
     }

@@ -21,6 +21,7 @@ extension PreferencesManager {
     private static let showTabsColoringKey = "showTabsColoring"
     private static let showWebOnLaunchIfTabsKey = "showWebOnLaunchIfTabs"
     private static let createJournalOncePerWindowKey = "createJournalOncePerWindow"
+    private static let useSidebarKey = "useSidebar"
     private static let includeHistoryContentsInOmniBoxKey = "includeHistoryContentsInOmniBox"
     private static let enableDailySummaryKey = "enableDailySummary"
 }
@@ -41,6 +42,7 @@ extension PreferencesManager {
     private static let showTabsColoringDefault = Configuration.branchType == .develop
     private static let showWebOnLaunchIfTabsDefault = true
     private static let createJournalOncePerWindowDefault = true
+    private static let useSidebarDefault = false
     static let includeHistoryContentsInOmniBoxDefault = false
     private static let enableDailySummaryDefault: Bool = Configuration.branchType == .develop
 }
@@ -78,6 +80,9 @@ extension PreferencesManager {
 
     @UserDefault(key: createJournalOncePerWindowKey, defaultValue: createJournalOncePerWindowDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var createJournalOncePerWindow: Bool
+
+    @UserDefault(key: useSidebarKey, defaultValue: useSidebarDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
+    static var useSidebar: Bool
 
     @UserDefault(key: includeHistoryContentsInOmniBoxKey, defaultValue: includeHistoryContentsInOmniBoxDefault, suiteName: BeamUserDefaults.advancedPreferences.suiteName)
     static var includeHistoryContentsInOmniBox: Bool

@@ -14,6 +14,7 @@ struct NoteHeaderView: View {
     private static let leadingPadding: CGFloat = 18
     static let topPadding: CGFloat = PreferencesManager.editorHeaderTopPadding
     @ObservedObject var model: NoteHeaderView.ViewModel
+    @ObservedObject var pinnedManager: PinnedNotesManager
     @EnvironmentObject var data: BeamData
 
     var topPadding: CGFloat = Self.topPadding
@@ -212,7 +213,7 @@ struct NoteHeaderView: View {
             ContextMenuItem(title: "Add to profile",
                             subtitleButton: model.getProfileLink()?.urlStringWithoutScheme, showSubtitleButton: model.isOnUserProfile,
                             type: .itemWithToggle, action: nil, isToggleOn: model.isOnUserProfile, toggleAction: { _ in
-                model.togglePublishOnProfile() { _ in }
+                model.togglePublishOnProfile { _ in }
             }),
             ContextMenuItem(title: "Share", icon: "editor-arrow_right", iconPlacement: ContextMenuItem.IconPlacement.trailing, iconSize: 16, iconColor: BeamColor.AlphaGray, type: .itemWithDisclosure, action: { }, subMenuModel: SocialShareContextMenu(urlToShare: model.getLink(), of: model.note?.title).socialShareMenuViewModel),
             ContextMenuItem.separator(),
@@ -226,9 +227,16 @@ struct NoteHeaderView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: BeamSpacing._40) {
-                dateView
-                    .opacity(model.note?.type.isJournal == true ? 0 : 1)
-                    .offset(x: 1, y: 0) // compensate for different font size leading alignment
+                HStack(spacing: 6) {
+                    ButtonLabel(icon: model.isPinned ? "sidebar-pin_fill" : "sidebar-pin", customStyle: buttonLabelStyle) {
+                        model.togglePin()
+                    }
+                    .accessibilityLabel("pin-unpin-button")
+                    .frame(width: 16, height: 16)
+                    .tooltipOnHover(model.isPinned ? "Unpin" : "Pin", alignment: .leading)
+                    dateView
+                        .opacity(model.note?.type.isJournal == true ? 0 : 1)
+                }
                 HStack {
                     titleView
                     Spacer()
@@ -239,6 +247,10 @@ struct NoteHeaderView: View {
         }
         .padding(.top, self.topPadding)
         .padding(.leading, Self.leadingPadding)
+    }
+
+    private var buttonLabelStyle: ButtonLabelStyle {
+        ButtonLabelStyle(iconSize: 12, activeBackgroundColor: .clear)
     }
 }
 
@@ -253,8 +265,8 @@ struct NoteHeaderView_Previews: PreviewProvider {
     }
     static var previews: some View {
         VStack {
-            NoteHeaderView(model: classicModel, topPadding: 20)
-            NoteHeaderView(model: titleTakenModel, topPadding: 60)
+            NoteHeaderView(model: classicModel, pinnedManager: PinnedNotesManager(with: DocumentManager()), topPadding: 20)
+            NoteHeaderView(model: titleTakenModel, pinnedManager: PinnedNotesManager(with: DocumentManager()), topPadding: 60)
         }
         .border(Color.green)
         .padding(.vertical)

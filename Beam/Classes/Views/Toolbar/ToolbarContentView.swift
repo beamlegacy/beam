@@ -38,7 +38,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     private func cardSwitcherView(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(containerGeometry: containerGeometry) {
             if !state.useSidebar {
-                CardSwitcher(currentNote: state.currentNote)
+                CardSwitcher(currentNote: state.currentNote, pinnedManager: state.data.pinnedManager)
                     .frame(maxHeight: .infinity)
                     .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
                     .environmentObject(state.recentsManager)

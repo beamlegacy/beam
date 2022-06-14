@@ -13,8 +13,12 @@ struct CardSwitcher: View {
     @EnvironmentObject var recentsManager: RecentsManager
 
     var currentNote: BeamNote?
+    @ObservedObject var pinnedManager: PinnedNotesManager
 
     private let maxNoteTitleLength = 40
+    private var usePinnedInsteadOfRecentsNotes: Bool {
+        true
+    }
 
     private func titleForNote(_ note: BeamNote) -> String {
         guard let journalDate = note.type.journalDate else {
@@ -63,20 +67,45 @@ struct CardSwitcher: View {
 
             separator
 
-            if recentsManager.recentNotes.count > 0 {
-                HStack(spacing: 0) {
-                    ForEach(recentsManager.recentNotes) { note in
-                        let isToday = state.mode == .today
-                        let isActive = !isToday && note.id == currentNote?.id
-                        let text = titleForNote(note)
-                        ToolbarCapsuleButton(text: text, isSelected: isActive) {
-                            state.navigateToNote(note)
-                        }
-                        .accessibilityIdentifier("card-switcher")
-                    }
-                }
+            if usePinnedInsteadOfRecentsNotes {
+                pinnedNotes
+            } else {
+                recentNotes
             }
             Spacer(minLength: 0)
+        }
+    }
+
+    @ViewBuilder private var pinnedNotes: some View {
+        if pinnedManager.pinnedNotes.count > 0 {
+            HStack(spacing: 0) {
+                ForEach(pinnedManager.pinnedNotes) { note in
+                    let isToday = state.mode == .today
+                    let isActive = !isToday && note.id == currentNote?.id
+                    let text = titleForNote(note)
+                    ToolbarCapsuleButton(text: text, isSelected: isActive) {
+                        state.navigateToNote(note)
+                    }
+                    .accessibilityIdentifier("card-switcher")
+                    .contextMenu { SidebarListNoteButton.contextualMenu(for: note, state: state) }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var recentNotes: some View {
+        if recentsManager.recentNotes.count > 0 {
+            HStack(spacing: 0) {
+                ForEach(recentsManager.recentNotes) { note in
+                    let isToday = state.mode == .today
+                    let isActive = !isToday && note.id == currentNote?.id
+                    let text = titleForNote(note)
+                    ToolbarCapsuleButton(text: text, isSelected: isActive) {
+                        state.navigateToNote(note)
+                    }
+                    .accessibilityIdentifier("card-switcher")
+                }
+            }
         }
     }
 }
@@ -84,15 +113,10 @@ struct CardSwitcher: View {
 struct CardSwitcher_Previews: PreviewProvider {
     static let state = BeamState()
     static var previews: some View {
-        let recentsManager = state.recentsManager
+        let pinnedManager = state.data.pinnedManager
         state.mode = .today
-        recentsManager.currentNoteChanged(BeamNote(title: "Note D"))
-        recentsManager.currentNoteChanged(BeamNote(title: "Note C"))
-        recentsManager.currentNoteChanged(BeamNote(title: "Note B"))
-        recentsManager.currentNoteChanged(BeamNote(title: "Note A"))
-        return CardSwitcher()
+        return CardSwitcher(pinnedManager: pinnedManager)
             .environmentObject(state)
-            .environmentObject(recentsManager)
             .frame(width: 700, height: 80)
     }
 }

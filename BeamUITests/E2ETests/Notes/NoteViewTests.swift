@@ -33,7 +33,7 @@ class NoteViewTests: BaseTest {
         let todaysDateInNoteCreationDateFormat = DateHelper().getTodaysDateString(.noteViewCreation)
         step("When I open \(todaysDateInNoteTitleFormat) from All notes view"){
             noteView = allNotesView!.openJournal()
-                                        .openRecentNoteByName(todaysDateInNoteTitleFormat)
+                .openNoteFromAllNotesList(noteTitleToOpen: todaysDateInNoteTitleFormat)
         }
 
         step("Then the title of the note is \(todaysDateInNoteTitleFormat) and its creation date is \(todaysDateInNoteCreationDateFormat)"){
