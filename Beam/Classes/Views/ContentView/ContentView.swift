@@ -46,7 +46,7 @@ struct ContentView: View {
 
     @ViewBuilder var sidebar: some View {
         if state.useSidebar && state.showSidebar {
-            SidebarView()
+            SidebarView(pinnedManager: state.data.pinnedManager)
         }
     }
 

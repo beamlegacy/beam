@@ -398,4 +398,16 @@ class NoteTestView: TextEditorContextTestView {
         case heading1
         case heading2
     }
+    
+    @discardableResult
+    func pinUnpinNote() -> NoteTestView {
+        image(NoteViewLocators.Buttons.pinUnpinButton.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
+    @discardableResult
+    func getNumberOfPinnedNotes() -> Int {
+        let number = app.buttons.matching(identifier: ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier).count
+        return number
+    }
 }
