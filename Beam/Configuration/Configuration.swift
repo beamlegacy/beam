@@ -38,6 +38,9 @@ struct Configuration {
 
     static var shouldDeleteEmptyDatabase = true
 
+    /// Max number of beam objects for a checksums query
+    static private(set) var checksumsChunkSize = 10_000
+
     // Runtime configuration
     // Set to "http://api.beam.lvh.me:5000" for running on a local API instance
     static private(set) var apiHostnameDefault = "https://api.prod.beamapp.co"
@@ -267,6 +270,14 @@ struct Configuration {
             fatalError("Invalid or missing Info.plist key: \(key)")
         }
         return value
+    }
+
+    static func setChecksumsChunkSize(_ size: Int) {
+        guard Configuration.env == .test else {
+            fatalError("This parameter can only be set in test mode")
+        }
+
+        Self.checksumsChunkSize = size
     }
 }
 
