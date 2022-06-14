@@ -94,6 +94,7 @@
         "LoginTest",
         "NoteEditTests",
         "NoteEditorTests",
+        "NotePinUnpinTests",
         "NotePublishTests",
         "NotesNavigationHistoryTests",
         "OmniboxAutocompleteTests",

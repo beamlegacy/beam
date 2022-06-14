@@ -44,6 +44,7 @@ struct AdvancedPreferencesView: View {
     @State var restBeamObject = Configuration.beamObjectOnRest
     @State var showWebOnLaunchIfTabs = PreferencesManager.showWebOnLaunchIfTabs
     @State var createJournalOncePerWindow = PreferencesManager.createJournalOncePerWindow
+    @State var useSidebar = PreferencesManager.useSidebar
     @State var includeHistoryContentsInOmniBox = PreferencesManager.includeHistoryContentsInOmniBox
     @State var enableDailySummary = PreferencesManager.enableDailySummary
 
@@ -515,6 +516,14 @@ struct AdvancedPreferencesView: View {
                         .foregroundColor(BeamColor.Generic.text.swiftUI)
                 } content: {
                     createJournalOncePerWindowView
+                }
+
+                Preferences.Section(bottomDivider: true) {
+                    Text("Use sidebar")
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                } content: {
+                    useSidebarView
                 }
 
                 Preferences.Section(title: "Actions", bottomDivider: true) {
@@ -1131,6 +1140,17 @@ struct AdvancedPreferencesView: View {
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([createJournalOncePerWindow].publisher.first()) {
                 PreferencesManager.createJournalOncePerWindow = $0
+            }
+    }
+
+    private var useSidebarView: some View {
+        return Toggle(isOn: $useSidebar) {
+            Text("Enabled")
+        }.toggleStyle(CheckboxToggleStyle())
+            .font(BeamFont.regular(size: 13).swiftUI)
+            .foregroundColor(BeamColor.Generic.text.swiftUI)
+            .onReceive([useSidebar].publisher.first()) {
+                PreferencesManager.useSidebar = $0
             }
     }
 

@@ -29,7 +29,7 @@ struct WindowBottomToolBar: View {
 
     private func recentsStack(containerGeometry: GeometryProxy) -> some View {
         GlobalCenteringContainer(containerGeometry: containerGeometry) {
-            CardSwitcher(currentNote: currentNote)
+            CardSwitcher(currentNote: currentNote, pinnedManager: state.data.pinnedManager)
                 .environmentObject(state.recentsManager)
         }
         .animation(animationEnabled ? .easeInOut(duration: 0.3) : nil)

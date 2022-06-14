@@ -101,6 +101,7 @@ class ShortcutsHelper {
         case browserHistoryForward
         case browserHistoryBack
         case insertLink
+        case pinUnpinNote
     }
     
     @discardableResult
@@ -160,6 +161,7 @@ class ShortcutsHelper {
         case .browserHistoryForward: invokeCMDKey("]")
         case .browserHistoryBack: invokeCMDKey("[")
         case .insertLink: invokeCntrlCMDKey("k")
+        case .pinUnpinNote: invokeCMDOptionKey("p")
         }
         return BaseView()
     }

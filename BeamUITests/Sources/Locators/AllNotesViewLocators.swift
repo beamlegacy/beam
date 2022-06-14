@@ -33,6 +33,8 @@ enum AllNotesViewLocators {
     
     enum MenuItems: String, CaseIterable, UIElement {
         case deleteNotes = "deleteNotes"
+        case pinNote = "pin"
+        case unpinNote = "unpin"
     }
     
     enum ViewMenuItems: String, CaseIterable, UIElement {
