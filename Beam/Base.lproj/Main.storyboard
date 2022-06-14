@@ -417,7 +417,14 @@
                                                 <action selector="openLocation:" target="Ady-hI-5gd" id="HM6-VX-pQz"/>
                                             </connections>
                                         </menuItem>
-                                        <menuItem isSeparatorItem="YES" id="xzN-76-ztW"/>
+                                        <menuItem isSeparatorItem="YES" tag="2" id="xzN-76-ztW"/>
+                                        <menuItem title="Pin note" tag="2" keyEquivalent="p" identifier="toggle_pin_note" id="Z7W-ez-LtU" userLabel="Pin note">
+                                            <modifierMask key="keyEquivalentModifierMask" option="YES" command="YES"/>
+                                            <connections>
+                                                <action selector="togglePinNote:" target="Ady-hI-5gd" id="JGU-sw-ttT"/>
+                                            </connections>
+                                        </menuItem>
+                                        <menuItem isSeparatorItem="YES" id="tcS-4s-DGt"/>
                                         <menuItem title="Close Window" keyEquivalent="W" id="bvf-vf-Qoo" userLabel="Close Beam">
                                             <connections>
                                                 <action selector="performHardClose:" target="Ady-hI-5gd" id="0rF-Pr-VsW"/>
@@ -1400,13 +1407,13 @@
                         <autoresizingMask key="autoresizingMask"/>
                         <subviews>
                             <scrollView autohidesScrollers="YES" horizontalLineScroll="24" horizontalPageScroll="10" verticalLineScroll="24" verticalPageScroll="10" usesPredominantAxisScrolling="NO" translatesAutoresizingMaskIntoConstraints="NO" id="oXk-Ey-8xs">
-                                <rect key="frame" x="0.0" y="0.0" width="800" height="659"/>
+                                <rect key="frame" x="0.0" y="0.0" width="800" height="654"/>
                                 <clipView key="contentView" id="DvU-s3-Ha3">
-                                    <rect key="frame" x="1" y="1" width="798" height="657"/>
+                                    <rect key="frame" x="1" y="1" width="798" height="652"/>
                                     <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                     <subviews>
                                         <tableView verticalHuggingPriority="750" allowsExpansionToolTips="YES" columnAutoresizingStyle="lastColumnOnly" tableStyle="inset" alternatingRowBackgroundColors="YES" columnReordering="NO" columnResizing="NO" multipleSelection="NO" autosaveColumns="NO" rowHeight="24" viewBased="YES" id="fld-jj-1Ba">
-                                            <rect key="frame" x="0.0" y="0.0" width="908" height="657"/>
+                                            <rect key="frame" x="0.0" y="0.0" width="908" height="652"/>
                                             <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                                             <size key="intercellSpacing" width="17" height="0.0"/>
                                             <color key="backgroundColor" name="controlBackgroundColor" catalog="System" colorSpace="catalog"/>
@@ -1568,7 +1575,7 @@
                                     </subviews>
                                 </clipView>
                                 <scroller key="horizontalScroller" wantsLayer="YES" verticalHuggingPriority="750" horizontal="YES" id="0zW-aA-Txg">
-                                    <rect key="frame" x="1" y="642" width="798" height="16"/>
+                                    <rect key="frame" x="1" y="637" width="798" height="16"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                 </scroller>
                                 <scroller key="verticalScroller" hidden="YES" wantsLayer="YES" verticalHuggingPriority="750" horizontal="NO" id="sMU-KD-F4T">

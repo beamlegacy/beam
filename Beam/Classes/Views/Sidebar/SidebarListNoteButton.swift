@@ -13,6 +13,8 @@ struct SidebarListNoteButton: View {
     private let maxNoteTitleLength = 40
 
     @ObservedObject var note: BeamNote
+    @ObservedObject var pinnedManager: PinnedNotesManager
+
     @EnvironmentObject var state: BeamState
 
     var isSelected = false
@@ -27,11 +29,12 @@ struct SidebarListNoteButton: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        HStack {
-            if false { // This is preliminary work for BE-4114
-                ButtonLabel(icon: "editor-pin", customStyle: smallButtonLabelStyle) {
-
-                }
+        HStack(spacing: 6) {
+            if isHovering { // This is preliminary work for BE-4114
+                let isPinned = pinnedManager.isPinned(note)
+                ButtonLabel(icon: isPinned ? "sidebar-pin_fill" : "sidebar-pin", customStyle: smallButtonLabelStyle) {
+                    pinnedManager.togglePin(note)
+                }.frame(width: 12, height: 12)
             } else {
                 Spacer()
                     .frame(width: 12, height: 12)
@@ -69,14 +72,18 @@ struct SidebarListNoteButton: View {
             if !$0 {
                 isPressed = false
             }
-        }.contextMenu { contextualMenu }
+        }.contextMenu { Self.contextualMenu(for: note, state: state) }
         .overlay(!isHoveringTrailingIcon ? nil : Tooltip(title: justCopied ? "Link Copied" : "Copy Link", icon: justCopied ? "tool-keep" : nil)
                     .fixedSize()
                     .offset(x: -30, y: 0)
                     .transition(Tooltip.defaultTransition), alignment: .trailing)
     }
 
-    @ViewBuilder private var contextualMenu: some View {
+    @ViewBuilder static func contextualMenu(for note: BeamNote, state: BeamState) -> some View {
+        let isPinned = state.data.pinnedManager.isPinned(note)
+        Button(isPinned ? "Unpin" : "Pin") {
+            state.data.pinnedManager.togglePin(note)
+        }
         Button(note.publicationStatus.isPublic ? "Unpublish" : "Publish") {
             BeamNoteSharingUtils.makeNotePublic(note, becomePublic: !note.publicationStatus.isPublic) { _ in }
         }
@@ -127,6 +134,6 @@ struct SidebarListNoteButton_Previews: PreviewProvider {
     static var note = BeamNote(title: "Baudrillard")
 
     static var previews: some View {
-        SidebarListNoteButton(note: note)
+        SidebarListNoteButton(note: note, pinnedManager: PinnedNotesManager(with: DocumentManager()))
     }
 }

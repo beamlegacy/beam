@@ -111,6 +111,7 @@
         "NoteCreationTests",
         "NoteEditTests",
         "NoteEditorTests",
+        "NotePinUnpinTests",
         "NotePublishTests",
         "NoteViewEmbedsTests",
         "NoteViewTests",

@@ -4,7 +4,7 @@ import BeamCore
 
 // Inspired from https://www.avanderlee.com/swift/property-wrappers/
 
-enum Persistence {
+struct Persistence {    
     enum Authentication {
         @KeychainStorable("authentication.accessToken") static var accessToken: String?
         @KeychainStorable("authentication.refreshToken") static var refreshToken: String?
@@ -57,9 +57,15 @@ enum Persistence {
     enum Database {
         @StandardStorable("currentDatabaseId") static var currentDatabaseId: UUID?
     }
+
     enum TabPinSuggestion {
         @StandardStorable("tabPinSuggestion.hasPinned") static var hasPinned: Bool?
     }
+
+    enum PinnedNotes {
+        @StandardStorable("pinnedNotesId") static var pinnedNotesId: [String]?
+    }
+
     enum ImportedBrowserHistory {
         @StandardStorable("importedBrowserHistory.maxDateByBrowser") static var maxDateByBrowser: Data?
 
