@@ -101,6 +101,7 @@
         "NoteCreationTests",
         "NoteEditTests",
         "NoteEditorTests",
+        "NotePinUnpinTests",
         "NotePublishTests\/testPublishUnpublishNote()",
         "NoteViewEmbedsTests",
         "NoteViewTests",

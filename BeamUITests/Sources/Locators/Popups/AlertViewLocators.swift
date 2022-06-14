@@ -11,6 +11,7 @@ enum AlertViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
         case deleteButton = "Delete"
+        case okButton = "OK"
         case cancelButton = "Cancel"
         case connectButton = "Connect"
         case removeButton = "Remove"
@@ -22,6 +23,8 @@ enum AlertViewLocators {
     enum StaticTexts: String, CaseIterable, UIElement {
         case connectBeam = "Connect to Beam"
         case connectDescription = "Connect to Beam to sync, encrypt and publish your notes."
+        case tooManyPinnedNotes = "Too many pinned notes"
+        case fivePinnedNotesMax = "You can only have 5 pinned notes.\nUnpin some notes to pin new ones."
     }
 
 }

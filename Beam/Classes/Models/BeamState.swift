@@ -83,9 +83,7 @@ import Sentry
 
     @Published var showHelpAndFeedback = false
     @Published var showSidebar = false
-    var useSidebar: Bool {
-        Configuration.branchType == .develop && Configuration.env != .test
-    }
+    @Published var useSidebar: Bool = false
 
     @Published var destinationCardIsFocused = false
     @Published var destinationCardName: String = ""
@@ -798,6 +796,10 @@ import Sentry
                     }
                 }
             }.store(in: &cancellables)
+
+        PreferencesManager.$useSidebar.sink { [unowned self] value in
+            useSidebar = value
+        }.store(in: &cancellables)
     }
 
 }

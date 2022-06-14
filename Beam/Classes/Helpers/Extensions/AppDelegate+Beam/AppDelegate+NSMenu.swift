@@ -106,6 +106,9 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             case Self.sidebarItemIdentifier:
                 updateSideBarMenu(item)
 
+            case Self.togglePinNoteIdentifier:
+                updatePinNoteMenu(item)
+
             default: break
             }
 
@@ -141,6 +144,18 @@ extension AppDelegate: NSMenuDelegate, NSMenuItemValidation {
             title = NSLocalizedString("Hide Sidebar", comment: "Hide Sidebar menu item")
         } else {
             title = NSLocalizedString("Show Sidebar", comment: "Show Sidebar Menu item")
+        }
+        menuItem.title = title
+    }
+
+    private func updatePinNoteMenu(_ menuItem: NSMenuItem) {
+        guard let currentNote = window?.state.currentNote, let isPinned = window?.state.data.pinnedManager.isPinned(currentNote) else { return }
+
+        let title: String
+        if isPinned {
+            title = NSLocalizedString("Unpin Note", comment: "Unpin note menu item")
+        } else {
+            title = NSLocalizedString("Pin Note", comment: "Pin note Menu item")
         }
         menuItem.title = title
     }
@@ -198,7 +213,7 @@ extension AppDelegate {
     private static let collectPageToCardItemIdentifier = NSUserInterfaceItemIdentifier("collect_page")
     private static let collectPageToCardAlternateItemIdentifier = NSUserInterfaceItemIdentifier("collect_page_alternate")
     private static let sidebarItemIdentifier = NSUserInterfaceItemIdentifier("toggle_sidebar")
-
+    private static let togglePinNoteIdentifier = NSUserInterfaceItemIdentifier("toggle_pin_note")
 }
 
 // MARK: - Custom Item Validation

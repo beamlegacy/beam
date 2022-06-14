@@ -63,6 +63,12 @@ class AllNotesTestView: BaseView {
         return self
     }
     
+    @discardableResult
+    func selectActionInMenu(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
+        menuItem(action.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
     func isElementAvailableInSingleNoteMenu(_ action: AllNotesViewLocators.MenuItems) -> Bool {
         return app.windows.menuItems[action.accessibilityIdentifier].exists
     }
