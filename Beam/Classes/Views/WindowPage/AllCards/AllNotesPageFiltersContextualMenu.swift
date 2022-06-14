@@ -9,15 +9,10 @@ import Foundation
 import BeamCore
 
 class AllNotesPageFiltersContextualMenu {
-    private let selectedListType: AllNotesPageContentView.ListType
-    private let newlySelectedListType: ((AllNotesPageContentView.ListType) -> Void)
-
     private var viewModel: AllNotesPageViewModel
 
-    init(viewModel: AllNotesPageViewModel, selectedListType: AllNotesPageContentView.ListType, newlySelectedListType: @escaping ((AllNotesPageContentView.ListType) -> Void)) {
+    init(viewModel: AllNotesPageViewModel) {
         self.viewModel = viewModel
-        self.selectedListType = selectedListType
-        self.newlySelectedListType = newlySelectedListType
     }
 
     func presentMenu(at origin: CGPoint) {
@@ -31,7 +26,7 @@ class AllNotesPageFiltersContextualMenu {
             keyEquivalent: ""
         )
         allNotesItem.isEnabled = true
-        allNotesItem.state = selectedListType == .allNotes ? .on : .off
+        allNotesItem.state = viewModel.listType == .allNotes ? .on : .off
         menu.addItem(allNotesItem)
 
         let privateNotesItem = NSMenuItem(
@@ -39,7 +34,7 @@ class AllNotesPageFiltersContextualMenu {
             action: #selector(selectPrivateNotes),
             keyEquivalent: ""
         )
-        privateNotesItem.state = selectedListType == .privateNotes ? .on : .off
+        privateNotesItem.state = viewModel.listType == .privateNotes ? .on : .off
         menu.addItem(privateNotesItem)
 
         let publishedNotesItem = NSMenuItem(
@@ -47,7 +42,7 @@ class AllNotesPageFiltersContextualMenu {
             action: #selector(selectPublishedNotes),
             keyEquivalent: ""
         )
-        publishedNotesItem.state = selectedListType == .publicNotes ? .on : .off
+        publishedNotesItem.state = viewModel.listType == .publicNotes ? .on : .off
         menu.addItem(publishedNotesItem)
 
         let onProfileNotesItem = NSMenuItem(
@@ -55,7 +50,7 @@ class AllNotesPageFiltersContextualMenu {
             action: #selector(selectOnProfileNotes),
             keyEquivalent: ""
         )
-        onProfileNotesItem.state = selectedListType == .onProfileNotes ? .on : .off
+        onProfileNotesItem.state = viewModel.listType == .onProfileNotes ? .on : .off
         menu.addItem(onProfileNotesItem)
 
         menu.addItem(NSMenuItem.separator())
@@ -89,22 +84,22 @@ class AllNotesPageFiltersContextualMenu {
 
     @objc
     private func selectAllNotes() {
-        newlySelectedListType(.allNotes)
+        viewModel.listType = .allNotes
     }
 
     @objc
     private func selectPrivateNotes() {
-        newlySelectedListType(.privateNotes)
+        viewModel.listType = .privateNotes
     }
 
     @objc
     private func selectPublishedNotes() {
-        newlySelectedListType(.publicNotes)
+        viewModel.listType = .publicNotes
     }
 
     @objc
     private func selectOnProfileNotes() {
-        newlySelectedListType(.onProfileNotes)
+        viewModel.listType = .onProfileNotes
     }
 
     @objc
