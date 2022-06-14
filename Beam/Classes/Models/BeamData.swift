@@ -56,6 +56,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     var versionChecker: VersionChecker
     var onboardingManager = OnboardingManager()
     private var pinnedTabsManager = PinnedBrowserTabsManager()
+    private(set) lazy var pinnedManager: PinnedNotesManager = {
+        PinnedNotesManager(with: DocumentManager())
+    }()
     let signpost = SignPost("BeamData")
     var analyticsCollector = AnalyticsCollector()
 

@@ -200,10 +200,14 @@ class BaseView {
     }
     
     @discardableResult
-    func openNoteFromRecentsList(noteTitleToOpen: String) -> NoteTestView {
+    func openNoteFromAllNotesList(noteTitleToOpen: String) -> NoteTestView {
+        shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
+        AllNotesTestView().openNoteByName(noteTitle: noteTitleToOpen)
+
         let noteView = NoteTestView()
-        let noteSwitcherButton = noteView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(noteTitleToOpen)'")).firstMatch
-        noteSwitcherButton.clickOnExistence()
+// Keep this code in case we restore the recent notes topbar
+//        let noteSwitcherButton = noteView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(noteTitleToOpen)'")).firstMatch
+//        noteSwitcherButton.clickOnExistence()
         XCTAssertTrue(noteView.waitForNoteToOpen(noteTitle: noteTitleToOpen), "\(noteTitleToOpen) note is failed to load")
         return noteView
     }

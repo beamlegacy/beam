@@ -119,13 +119,14 @@ private struct HeaderViewContainer: View {
 
     @ObservedObject var layoutModel: HeaderViewContainer.LayoutModel
     @ObservedObject var headerViewModel: NoteHeaderView.ViewModel
+    @EnvironmentObject var state: BeamState
 
     var body: some View {
         GeometryReader { geoProxy in
             let headerWidth = BeamTextEdit.textNodeWidth(for: geoProxy.size)
             let leadingPadding = layoutModel.centerText ? 0 : (geoProxy.size.width - headerWidth) * (layoutModel.leadingPercentage / 100)
             Group {
-                NoteHeaderView(model: headerViewModel)
+                NoteHeaderView(model: headerViewModel, pinnedManager: state.data.pinnedManager)
                     .frame(maxWidth: headerWidth)
             }
             .frame(maxWidth: .infinity, alignment: layoutModel.centerText ? .center : .bottomLeading)

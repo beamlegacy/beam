@@ -90,8 +90,13 @@ struct TooltipHoverModifier: ViewModifier {
                 var offset = CGSize(width: 0, height: 0)
                 if alignment.vertical == .top {
                     offset.height = -(tooltipSize?.height ?? 0)
-                } else {
+                } else if alignment.vertical == .bottom {
                     offset.height = tooltipSize?.height ?? 0
+                }
+                if alignment.horizontal == .leading {
+                    offset.width = -(tooltipSize?.width ?? 0)
+                } else if alignment.horizontal == .trailing {
+                    offset.width = tooltipSize?.width ?? 0
                 }
                 let parentFrame = containerGeometry.frame(in: .global)
                 let tooltipMaxX = parentFrame.midX + (tooltipSize?.width ?? 0) / 2 + tooltipMargin

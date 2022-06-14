@@ -103,6 +103,7 @@
 		3315DC942667859A002A47CF /* PromisesTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 52E5297325CD980B00307858 /* PromisesTestHelpers */; };
 		3315DC952667859A002A47CF /* GRDB in Frameworks */ = {isa = PBXBuildFile; productRef = 964FE5E02625D8AA00966E03 /* GRDB */; };
 		3315DC962667859A002A47CF /* OAuthSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 52CA277B26401D7000146A00 /* OAuthSwift */; };
+		3320D92B283D0D5D002A2CA4 /* PinnedNotesManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */; };
 		332AB2F026FE17D6007717D8 /* AppDelegate+UserInfos.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */; };
 		332AB2F626FE2461007717D8 /* PublishNoteAPITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */; };
 		3330D7CB265E466D008C9E20 /* ToolbarDownloadButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3330D7CA265E466D008C9E20 /* ToolbarDownloadButton.swift */; };
@@ -117,6 +118,7 @@
 		33353EDE26F372D700063078 /* KeyboardFeature.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EDD26F372D700063078 /* KeyboardFeature.swift */; };
 		33353EE026F374B400063078 /* SectionFeaturesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EDF26F374B400063078 /* SectionFeaturesView.swift */; };
 		33353EE226F3D0BA00063078 /* ActionableButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 33353EE126F3D0BA00063078 /* ActionableButton.swift */; };
+		3338064228510808002D1EB3 /* PinNoteTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3338064128510808002D1EB3 /* PinNoteTests.swift */; };
 		333A0A20268C4EED004B7905 /* KeyEventHandlingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */; };
 		333E4F8D270AE2B7005B72CD /* BeamTextEdit+Search.swift in Sources */ = {isa = PBXBuildFile; fileRef = 333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */; };
 		333E61842707094000847A0C /* Swime in Frameworks */ = {isa = PBXBuildFile; productRef = 333E61832707094000847A0C /* Swime */; };
@@ -1344,6 +1346,7 @@
 		D76EF67427BE378D00F229B3 /* BrowserFancyUrlTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */; };
 		D76EF68227BE843700F229B3 /* PasswordPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */; };
 		D76EF68427BE853A00F229B3 /* PasswordPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */; };
+		D775219A2852262B007408DA /* NotePinUnpinTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77521992852262B007408DA /* NotePinUnpinTests.swift */; };
 		D77D4789282269640006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D77D4792282273940006847A /* CrossTargetBeeper.swift in Sources */ = {isa = PBXBuildFile; fileRef = D77D4788282269640006847A /* CrossTargetBeeper.swift */; };
 		D780BA54285083E600F5CBC8 /* BrowserPinnedTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */; };
@@ -1670,6 +1673,7 @@
 		330D3823265FC6B200A2536B /* DownloadCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DownloadCell.swift; sourceTree = "<group>"; };
 		3312203328097382006A5EA1 /* UpdatePanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdatePanel.swift; sourceTree = "<group>"; };
 		331220352809BFEB006A5EA1 /* SimpleHostingWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleHostingWindow.swift; sourceTree = "<group>"; };
+		3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinnedNotesManager.swift; sourceTree = "<group>"; };
 		332AB2EF26FE17D6007717D8 /* AppDelegate+UserInfos.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AppDelegate+UserInfos.swift"; sourceTree = "<group>"; };
 		332AB2F526FE2461007717D8 /* PublishNoteAPITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PublishNoteAPITests.swift; sourceTree = "<group>"; };
 		3330D7CA265E466D008C9E20 /* ToolbarDownloadButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarDownloadButton.swift; sourceTree = "<group>"; };
@@ -1684,6 +1688,7 @@
 		33353EDD26F372D700063078 /* KeyboardFeature.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardFeature.swift; sourceTree = "<group>"; };
 		33353EDF26F374B400063078 /* SectionFeaturesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionFeaturesView.swift; sourceTree = "<group>"; };
 		33353EE126F3D0BA00063078 /* ActionableButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionableButton.swift; sourceTree = "<group>"; };
+		3338064128510808002D1EB3 /* PinNoteTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PinNoteTests.swift; sourceTree = "<group>"; };
 		333A0A1F268C4EED004B7905 /* KeyEventHandlingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyEventHandlingView.swift; sourceTree = "<group>"; };
 		333E4F8C270AE2B7005B72CD /* BeamTextEdit+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamTextEdit+Search.swift"; sourceTree = "<group>"; };
 		3343794227037578004EF5A4 /* BeamWindow+Search.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWindow+Search.swift"; sourceTree = "<group>"; };
@@ -3215,6 +3220,7 @@
 		D76EF67327BE378D00F229B3 /* BrowserFancyUrlTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserFancyUrlTests.swift; sourceTree = "<group>"; };
 		D76EF68127BE843700F229B3 /* PasswordPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		D76EF68327BE853A00F229B3 /* PasswordPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTestView.swift; sourceTree = "<group>"; };
+		D77521992852262B007408DA /* NotePinUnpinTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotePinUnpinTests.swift; sourceTree = "<group>"; };
 		D77A5153280FC3110045F603 /* BeamUITests-Thread6.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread6.xctestplan"; sourceTree = "<group>"; };
 		D77D4788282269640006847A /* CrossTargetBeeper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CrossTargetBeeper.swift; sourceTree = "<group>"; };
 		D780BA53285083E600F5CBC8 /* BrowserPinnedTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPinnedTabTests.swift; sourceTree = "<group>"; };
@@ -4365,6 +4371,7 @@
 				96F53559271DADDD00B719C6 /* BeamLinkDB.swift */,
 				A062DD32275FC5EE0033DB6E /* ContactsManager.swift */,
 				A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */,
+				3320D92A283D0D5D002A2CA4 /* PinnedNotesManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -6546,6 +6553,7 @@
 				9686B47A26D6B9A400749455 /* NoteIndexingTests.swift */,
 				5227B2CE26DD12EF0006FA7D /* ZZZTests.swift */,
 				33551D6227FF74AD00598164 /* IncognitoTests.swift */,
+				3338064128510808002D1EB3 /* PinNoteTests.swift */,
 			);
 			path = BeamTests;
 			sourceTree = "<group>";
@@ -7502,6 +7510,7 @@
 				B5FAE2DA270C842700EAC8A3 /* NotePublishTests.swift */,
 				B58A174F27514E0100A588C4 /* NoteViewEmbedsTests.swift */,
 				A3DA64E227706FCB0086C142 /* TextEditorContextViewTests.swift */,
+				D77521992852262B007408DA /* NotePinUnpinTests.swift */,
 			);
 			path = Notes;
 			sourceTree = "<group>";
@@ -8836,6 +8845,7 @@
 				96FACC6C2604F2650088DD67 /* FocusElement.swift in Sources */,
 				A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */,
 				335CBA9127CF617A005FE658 /* MouseCursorManager.swift in Sources */,
+				3320D92B283D0D5D002A2CA4 /* PinnedNotesManager.swift in Sources */,
 				33353ED426F3672F00063078 /* ShortcutModifier.swift in Sources */,
 				8775C5F32613212C00A26CAC /* StoredPasswordCell.swift in Sources */,
 				A0EFCFF527162499004A7C7B /* CalendarManager.swift in Sources */,
@@ -9564,6 +9574,7 @@
 				963DBB3D2698655C00080928 /* BeamElementLinksTests.swift in Sources */,
 				A519F0732721A68100BB42E2 /* CacheTests.swift in Sources */,
 				96C9CC3E2535CE2C00D70AA6 /* LexerTests.swift in Sources */,
+				3338064228510808002D1EB3 /* PinNoteTests.swift in Sources */,
 				8768566D27723A6E002A8069 /* PasswordListViewModelTests.swift in Sources */,
 				8A7F949A26A8750A00270A74 /* PointAndShootCreateTargetTest.swift in Sources */,
 				A00F5A262656965900D338E1 /* PasswordsDBTests.swift in Sources */,
@@ -9628,6 +9639,7 @@
 				A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */,
 				B58A175027514E0100A588C4 /* NoteViewEmbedsTests.swift in Sources */,
 				B54D934726CA6A07006BBDEE /* BrowserTabViewTests.swift in Sources */,
+				D775219A2852262B007408DA /* NotePinUnpinTests.swift in Sources */,
 				B5A76EB927FB3E1100964340 /* OnboardingSignupWithEmailViewLocators.swift in Sources */,
 				B5FB3A2227E8D30C00037FD5 /* OnboardingImportDataTestView.swift in Sources */,
 				A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */,

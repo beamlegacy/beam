@@ -271,5 +271,20 @@ extension NoteHeaderView {
             guard let note = note, let state = state else { return }
             note.promptConfirmDelete(for: state)
         }
+
+        // MARK: - Pin note
+        var isPinned: Bool {
+            guard let state = state, let note = note else {
+                return false
+            }
+            return state.data.pinnedManager.isPinned(note)
+        }
+
+        func togglePin() {
+            guard let state = state, let note = note else {
+                return
+            }
+            state.data.pinnedManager.togglePin(note)
+        }
     }
 }

@@ -97,6 +97,7 @@
         "InsideAdsBlockerTests",
         "NoteCreationTests",
         "NoteEditTests",
+        "NotePinUnpinTests",
         "NotePublishTests",
         "NoteViewEmbedsTests",
         "NoteViewTests",

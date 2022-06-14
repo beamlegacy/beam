@@ -107,6 +107,11 @@ extension BeamWindow {
         }
     }
 
+    @IBAction func togglePinNote(_ sender: Any?) {
+        guard let note = state.currentNote else { return }
+        state.data.pinnedManager.togglePin(note)
+    }
+
     @IBAction func openDocument(_ sender: Any?) {
         state.startNewSearch()
     }

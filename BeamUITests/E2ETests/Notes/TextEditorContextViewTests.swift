@@ -75,7 +75,7 @@ class TextEditorContextViewTests: BaseTest {
         }
         
         step("Then BiDi link appears for: \(noteName)"){
-            noteView!.openNoteFromRecentsList(noteTitleToOpen: noteName)
+            noteView!.openNoteFromAllNotesList(noteTitleToOpen: noteName)
             XCTAssertEqual(noteName, noteView!.getNoteTitle())
             XCTAssertEqual(1, noteView!.getLinksContentNumber())
             XCTAssertEqual(composedText, noteView!.getLinkContentByIndex(0))
