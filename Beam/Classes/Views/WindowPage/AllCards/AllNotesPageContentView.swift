@@ -44,9 +44,9 @@ struct AllNotesPageContentView: View {
                         sortable: false, resizable: false, width: 25, visibleOnlyOnRowHoverOrSelected: true),
         TableViewColumn(key: ColumnID.title.rawValue, title: loc("Title"),
                         editable: true, isLink: true,
-                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 380, font: BeamFont.light(size: 13).nsFont),
-        TableViewColumn(key: ColumnID.url.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: false, resizable: false,
-                        width: 43, font: Self.secondaryCellFont,
+                        sortableDefaultAscending: true, sortableCaseInsensitive: true, width: 360, font: BeamFont.light(size: 13).nsFont),
+        TableViewColumn(key: ColumnID.isPublic.rawValue, title: "URL", type: .IconButton, editable: false, isLink: false, sortable: true,
+                        resizable: false, width: 53, font: Self.secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor),
         TableViewColumn(key: ColumnID.words.rawValue, title: loc("Words"),
                         width: 58, font: secondaryCellFont,
@@ -57,7 +57,7 @@ struct AllNotesPageContentView: View {
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: Self.loadingIntValueString),
         TableViewColumn(key: ColumnID.updatedAt.rawValue, title: loc("Updated"),
-                        isInitialSortDescriptor: true, width: 85, font: secondaryCellFont,
+                        isInitialSortDescriptor: true, width: 95, font: secondaryCellFont,
                         foregroundColor: Self.secondaryCellTextColor, selectedForegroundColor: Self.secondaryCellSelectedColor,
                         stringFromKeyValue: { value in
             if let date = value as? Date {
@@ -368,7 +368,7 @@ struct AllNotesPageContentView_Previews: PreviewProvider {
 private enum ColumnID: String {
     case checkbox
     case title
-    case url
+    case isPublic
     case words
     case mentions
     case createdAt
