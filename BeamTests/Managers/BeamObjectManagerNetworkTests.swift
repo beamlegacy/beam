@@ -111,6 +111,66 @@ class BeamObjectManagerNetworkTests: QuickSpec {
             }
         }
 
+        context("fetchAllFromAPI() with paginated checksum queries") {
+            let uuid1 = "115d94e1-e0df-4eca-93e6-7778984bcd58".uuid ?? UUID()
+            let uuid2 = "115d84e1-efdf-4eca-93e6-7778984bcd58".uuid ?? UUID()
+            let title1 = "my title - 1"
+            let title2 = "my title - 2"
+            var object1: MyRemoteObject!
+            var object2: MyRemoteObject!
+            let checksumsChunkSize = Configuration.checksumsChunkSize
+
+            beforeEach {
+                Configuration.setChecksumsChunkSize(1)
+                object1 = MyRemoteObject(beamObjectId: uuid1,
+                                            createdAt: BeamDate.now,
+                                            updatedAt: BeamDate.now,
+                                            deletedAt: nil,
+                                            title: title1)
+                object2 = MyRemoteObject(beamObjectId: uuid2,
+                                            createdAt: BeamDate.now,
+                                            updatedAt: BeamDate.now,
+                                            deletedAt: nil,
+                                            title: title2)
+
+                _ = beamObjectHelper.saveOnAPI(object1)
+                _ = beamObjectHelper.saveOnAPI(object2)
+            }
+
+            afterEach {
+                let semaphore = DispatchSemaphore(value: 0)
+                _ = try? sut.delete(object: object1) { _ in
+                    semaphore.signal()
+                }
+
+                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+
+                _ = try? sut.delete(object: object2) { _ in
+                    semaphore.signal()
+                }
+
+                _ = semaphore.wait(timeout: DispatchTime.now() + .seconds(5))
+                Configuration.setChecksumsChunkSize(checksumsChunkSize)
+            }
+
+            it("fetches all objects") {
+                waitUntil(timeout: .seconds(Self.networkTimeout)) { done in
+                    do {
+                        try sut.fetchAllFromAPI { result in
+                            done()
+                        }
+                    } catch {
+                        fail(error.localizedDescription)
+                        done()
+                    }
+                }
+
+                expect(Persistence.Sync.BeamObjects.last_received_at).toNot(beNil())
+                expect(MyRemoteObjectManager.receivedMyRemoteObjects).to(haveCount(2))
+            }
+        }
+
+
         describe("saveAllToAPI()") {
             afterEach {
                 let semaphore = DispatchSemaphore(value: 0)
