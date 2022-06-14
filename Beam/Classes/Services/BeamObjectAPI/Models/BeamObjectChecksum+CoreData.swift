@@ -52,15 +52,16 @@ extension BeamObjectChecksum {
 
     /// I use `BeamObject` as the result key because the 100% way to be unique is a combined object type + object id
     static func previousChecksums(beamObjects: [BeamObject]) -> [BeamObject: String] {
-        let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
         var result: [BeamObject: String] = [:]
+        for chunkedBeamObjects in beamObjects.chunked(into: Configuration.checksumsChunkSize) {
+            let (checksums, context) = findChecksumsForBeamObjects(beamObjects: chunkedBeamObjects)
 
-        context.performAndWait {
-            checksums.forEach { (key, value) in
-                result[key] = value.previous_checksum
+            context.performAndWait {
+                checksums.forEach { (key, value) in
+                    result[key] = value.previous_checksum
+                }
             }
         }
-
         return result
     }
 
@@ -202,60 +203,44 @@ extension BeamObjectChecksum {
             return
         }
 
-        // swiftlint:disable:next date_init
-        var localTimer = Date()
+        Logger.shared.logDebug("Saving previous checksums: \(beamObjects.count) beamObjects",
+                               category: .beamObjectChecksum)
+        for chunkedBeamObjects in beamObjects.chunked(into: Configuration.checksumsChunkSize) {
+            // swiftlint:disable:next date_init
+            var localTimer = Date()
 
-        let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
+            let (checksums, context) = findChecksumsForBeamObjects(beamObjects: chunkedBeamObjects)
 
-        Logger.shared.logDebug("Found or created previous checksum objects for \(beamObjects.count) beamObjects",
-                               category: .beamObjectChecksum,
-                               localTimer: localTimer)
-
-        // swiftlint:disable:next date_init
-        localTimer = Date()
-
-        try context.performAndWait {
-            var idx = 0
-
-            for beamObject in beamObjects {
-                let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
-
-                checksum.id = checksum.id ?? beamObject.id
-                checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
-                checksum.previous_checksum = beamObject.dataChecksum
-                checksum.updated_at = BeamDate.now
-
-                idx += 1
-
-                /*
-                 I had non-expected blocking when calling `CoreDataManager.save(context)` after changing 250k checksums.
-                 I don't understand why, but looping and saving every 10k objects fixes that issue...
-                 */
-                if idx >= 10000 {
-                    // swiftlint:disable:next date_init
-                    let localTimer = Date()
-                    try CoreDataManager.save(context)
-
-                    Logger.shared.logDebug("Saved context with \(idx) checksums",
-                                           category: .beamObjectChecksum,
-                                           localTimer: localTimer)
-
-                    idx = 0
-                }
-            }
-
-            Logger.shared.logDebug("About to save context \(beamObjects.count) checksums",
-                                   category: .beamObjectChecksum)
-
-            try CoreDataManager.save(context)
-
-            Logger.shared.logDebug("Saved context with \(beamObjects.count) checksums",
-                                   category: .beamObjectChecksum)
-
-            let objectTypes = Array(Set(beamObjects.map { $0.beamObjectType }))
-            Logger.shared.logDebug("Saved previous checksums for \(beamObjects.count) \(objectTypes) beamObjects",
+            Logger.shared.logDebug("Found or created previous checksum objects for \(chunkedBeamObjects.count) beamObjects",
                                    category: .beamObjectChecksum,
                                    localTimer: localTimer)
+
+            // swiftlint:disable:next date_init
+            localTimer = Date()
+
+            try context.performAndWait {
+                for beamObject in chunkedBeamObjects {
+                    let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
+
+                    checksum.id = checksum.id ?? beamObject.id
+                    checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
+                    checksum.previous_checksum = beamObject.dataChecksum
+                    checksum.updated_at = BeamDate.now
+                }
+
+                Logger.shared.logDebug("About to save context \(chunkedBeamObjects.count) checksums",
+                                       category: .beamObjectChecksum)
+
+                try CoreDataManager.save(context)
+
+                Logger.shared.logDebug("Saved context with \(chunkedBeamObjects.count) checksums",
+                                       category: .beamObjectChecksum)
+
+                let objectTypes = Array(Set(chunkedBeamObjects.map { $0.beamObjectType }))
+                Logger.shared.logDebug("Saved previous checksums for \(chunkedBeamObjects.count) \(objectTypes) beamObjects",
+                                       category: .beamObjectChecksum,
+                                       localTimer: localTimer)
+            }
         }
     }
 
@@ -271,36 +256,38 @@ extension BeamObjectChecksum {
         // swiftlint:disable:next date_init
         var localTimer = Date()
 
-        let (checksums, context) = findChecksumsForBeamObjects(beamObjects: beamObjects)
-        // swiftlint:disable:next date_init
-        localTimer = Date()
+        for chunkedBeamObjects in beamObjects.chunked(into: Configuration.checksumsChunkSize) {
+            let (checksums, context) = findChecksumsForBeamObjects(beamObjects: chunkedBeamObjects)
+            // swiftlint:disable:next date_init
+            localTimer = Date()
 
-        try context.performAndWait {
-            for beamObject in beamObjects {
-                guard beamObject.beamObjectType == BeamObjectObjectType.document.rawValue else {
-                    continue
+            try context.performAndWait {
+                for beamObject in chunkedBeamObjects {
+                    guard beamObject.beamObjectType == BeamObjectObjectType.document.rawValue else {
+                        continue
+                    }
+
+                    let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
+
+                    // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
+                    // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
+                    if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
+                        checksum.data_sent = try encoder.encode(beamObject)
+                    }
+
+                    checksum.id = checksum.id ?? beamObject.id
+                    checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
+                    checksum.previous_checksum = beamObject.dataChecksum
+                    checksum.updated_at = BeamDate.now
                 }
 
-                let checksum = checksums[beamObject] ?? BeamObjectChecksum(context: context)
+                try CoreDataManager.save(context)
 
-                // Note: This is slow, we only store previousData for `Document` type, which is using smart merge.
-                // Other beam objects use automatic merge (we overwrite the full data) and don't need previous saved data
-                if beamObject.beamObjectType == BeamObjectObjectType.document.rawValue {
-                    checksum.data_sent = try encoder.encode(beamObject)
-                }
-
-                checksum.id = checksum.id ?? beamObject.id
-                checksum.object_type = checksum.object_type ?? beamObject.beamObjectType
-                checksum.previous_checksum = beamObject.dataChecksum
-                checksum.updated_at = BeamDate.now
+                let objectTypes = Array(Set(chunkedBeamObjects.map { $0.beamObjectType }))
+                Logger.shared.logDebug("Saved previous data for \(chunkedBeamObjects.count) \(objectTypes) beamObjects",
+                                       category: .beamObjectChecksum,
+                                       localTimer: localTimer)
             }
-
-            try CoreDataManager.save(context)
-
-            let objectTypes = Array(Set(beamObjects.map { $0.beamObjectType }))
-            Logger.shared.logDebug("Saved previous data for \(beamObjects.count) \(objectTypes) beamObjects",
-                                   category: .beamObjectChecksum,
-                                   localTimer: localTimer)
         }
     }
 
