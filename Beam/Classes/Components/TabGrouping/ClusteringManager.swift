@@ -51,7 +51,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         didSet {
             transformToClusteredPages()
             if clusteredPagesId.count > 1 && PreferencesManager.showTabsColoring {
-                updateTabColors()
+                updateTabGroupsWithOpenPages()
             }
         }
     }
@@ -269,6 +269,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
 
     // swiftlint:disable:next cyclomatic_complexity function_body_length
     func addPage(id: UUID, parentId: UUID?, value: TabIndexingInfo?, newContent: String?) {
+        // Temporary test to see if it improves the tabgrouping
+        guard let isGoogle = value?.url.string.contains("google"),
+                let isSearch = value?.url.string.contains("search?"), !isGoogle || !isSearch else { return }
         var pageToAdd: Page?
         if let value = value {
             pageToAdd = Page(id: id, parentId: parentId, url: value.url, title: value.document.title, originalContent: value.cleanedTextContentForClustering)
@@ -487,7 +490,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         })
     }
 
-    private func updateTabColors() {
+    public func updateTabGroupsWithOpenPages() {
         self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.openBrowsing.allOpenBrowsingPages)
     }
 
