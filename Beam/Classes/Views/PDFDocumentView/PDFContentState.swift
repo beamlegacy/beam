@@ -91,7 +91,9 @@ final class PDFContentState: ObservableObject {
             saveLocationURL.appendPathExtension("pdf")
         }
 
-        pdfDocument?.write(to: saveLocationURL)
+        if pdfDocument?.write(to: saveLocationURL) == true {
+            try? NSWorkspace.shared.bounceDockStack(with: saveLocationURL)
+        }
     }
 
     func setCurrentSelection(_ selection: String?) {
