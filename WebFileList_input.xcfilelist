@@ -28,6 +28,15 @@
 ./Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web/src/MouseOverAndSelectionUI.ts
 ./Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web/src/MouseOverAndSelection.ts
 ./Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web/src/MouseOverAndSelectionUI_web.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/dist/src/ContextMenu.d.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/dist/src/ContextMenuUI.d.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/dist/src/ContextMenuUI_native.d.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/dist/src/ContextMenuUI_web.d.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/tests/ContextMenuUIMock.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenu.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenuUI_web.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenuUI.ts
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenuUI_native.ts
 ./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocusUI_web.d.ts
 ./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocus.d.ts
 ./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocusUI.d.ts
@@ -166,6 +175,7 @@
 ./Beam/Classes/Components/PointAndShoot/Web/src/index_web.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/PopupUI_web.scss
 ./Beam/Classes/Components/PointAndShoot/Web/src/PointAndShootUI_web.scss
+./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenu.css
 ./Beam/Classes/Components/MediaPlayer/Web/src/MediaPlayer.css
 ./Beam/Classes/Components/BeamTextEdit/EmbedNode/Web/src/EmbedNode.css
 ./Beam/Classes/Components/PointAndShoot/Web/tests/Fixtures/Beam.css

@@ -42,6 +42,7 @@ protocol WebPage: AnyObject, Scorable {
     var searchViewModel: SearchViewModel? { get set }
     var mouseHoveringLocation: MouseHoveringLocation { get set }
     var textSelection: String? { get set }
+    var pendingContextMenuPayload: ContextMenuMessageHandlerPayload? { get set }
 
     @discardableResult
     func executeJS(_ jsCode: String, objectName: String?, frameInfo: WKFrameInfo?, successLogCategory: LogCategory) -> Promise<Any?>

@@ -1,10 +1,3 @@
-//
-//  NSMenu+Beam.swift
-//  Beam
-//
-//  Created by Adam Viaud on 18/05/2022.
-//
-
 import AppKit
 import BeamCore
 
@@ -30,8 +23,11 @@ final class HandlerMenuItem: NSMenuItem {
 
 extension NSMenu {
 
-    func addItem(withTitle title: String, keyEquivalent: String = "", handler: @escaping HandlerMenuItem.Handler) {
-        addItem(HandlerMenuItem(title: title, keyEquivalent: keyEquivalent, handler: handler))
+    @discardableResult
+    func addItem(withTitle title: String, keyEquivalent: String = "", handler: @escaping HandlerMenuItem.Handler) -> NSMenuItem {
+        let item = HandlerMenuItem(title: title, keyEquivalent: keyEquivalent, handler: handler)
+        addItem(item)
+        return item
     }
 
 }

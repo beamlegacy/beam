@@ -52,6 +52,7 @@ class TestWebPage: WebPage {
     var searchViewModel: SearchViewModel?
     var mouseHoveringLocation: MouseHoveringLocation = .none
     var textSelection: String?
+    var pendingContextMenuPayload: ContextMenuMessageHandlerPayload?
 
     init(browsingScorer: BrowsingScorer?, passwordOverlayController: WebAutofillController?, pns: PointAndShoot?,
          fileStorage: BeamFileStorage?, downloadManager: DownloadManager?, navigationHandler: WebViewNavigationHandler?) {
