@@ -17,7 +17,11 @@
 @end
 
 @interface WKWebView ()
+@property (nonatomic, readonly) NSString *_MIMEType;
+
 - (void)_setAddsVisitedLinks:(BOOL)addsVisitedLinks;
+
+- (void)_getMainResourceDataWithCompletionHandler:(void (^)(NSData *, NSError *))completionHandler;
 
 -(CGFloat)_topContentInset;
 -(void)_setTopContentInset:(CGFloat)inset;

@@ -50,5 +50,6 @@ class WebPageBaseImpl: WebPage {
     var searchViewModel: SearchViewModel?
     var mouseHoveringLocation: MouseHoveringLocation = .none
     var textSelection: String?
+    var pendingContextMenuPayload: ContextMenuMessageHandlerPayload?
 
 }
