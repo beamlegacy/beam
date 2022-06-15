@@ -96,6 +96,7 @@
         "NoteEditorTests",
         "NotePinUnpinTests",
         "NotePublishTests",
+        "NotePublishTests\/testDefaultPublishStatus()",
         "NotesNavigationHistoryTests",
         "OmniboxAutocompleteTests",
         "OmniboxDestinationTests",
