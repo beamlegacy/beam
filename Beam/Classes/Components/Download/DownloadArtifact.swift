@@ -101,6 +101,8 @@ final class DownloadArtifact {
 
         moveTemporaryFileToDestinationDirectory()
         deleteDownloadDocumentFromDisk()
+
+        try? NSWorkspace.shared.bounceDockStack(with: artifactURL)
     }
 
     /// Deletes the temporary download file and the download document, but preserves the completed download file.
