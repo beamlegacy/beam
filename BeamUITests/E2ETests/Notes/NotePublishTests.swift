@@ -85,7 +85,7 @@ class NotePublishTests: BaseTest {
         }
         
         step("Then I can open it in the web") {
-            XCTAssertTrue(noteView.staticText(NoteViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(noteView.staticText(NoteViewLocators.StaticTexts.linkCopiedLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.maximumWaitTimeout))
             noteView.shortcutHelper.shortcutActionInvoke(action: .newTab)
             noteView.shortcutHelper.shortcutActionInvoke(action: .paste)
             noteView.typeKeyboardKey(.enter)
