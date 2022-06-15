@@ -10,7 +10,7 @@
 
 <h2>Browser:</h2>
 <ul>
-{% for browser in params.browser %}
+{% for browser in params.browsers %}
 <li>
 <a href="http://{{ browser }}.browser.lvh.me:{{ params.port }}">http://{{ browser }}.browser.lvh.me:{{ params.port }}</a>
 </li>
