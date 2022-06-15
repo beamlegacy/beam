@@ -102,6 +102,7 @@
         "NoteCreationTests",
         "NoteEditorTests",
         "NotePublishTests",
+        "NotePublishTests\/testDefaultPublishStatus()",
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "NotesNavigationHistoryTests",
