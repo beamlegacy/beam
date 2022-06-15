@@ -1,0 +1,36 @@
+{
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    "lib": [
+      "ES2017",
+      "dom"
+    ],
+    "composite": true,
+    "target": "ES2017",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "outDir": "./dist",
+    "allowJs": true,
+    "strict": false,
+    "skipLibCheck": true,
+    "strictNullChecks": false, // should be true
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "inlineSources": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true,
+    "isolatedModules": true,
+  },
+  "exclude": ["dist/**", "tests/**"],
+  "references": [
+    {
+      "path": "../../../Helpers/Utils/Web/TestMock"
+    },
+    {
+      "path": "../../../Helpers/Utils/Web/Utils"
+    },
+    {
+      "path": "../../../Helpers/Utils/Web/BeamTypes"
+    }
+  ],
+}

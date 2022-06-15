@@ -512,6 +512,11 @@
 		56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3025CC680E00ED7C50 /* url.stopwords */; };
 		56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3625CCAFA400ED7C50 /* english.stopwords */; };
 		6633BA5E283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */; };
+		6635D9832853E73A00F4B775 /* BeamWebContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */; };
+		6635D9842853E73A00F4B775 /* ContextMenuMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */; };
+		6635D9852853E73A00F4B775 /* ContextMenu_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 6635D9612853E73A00F4B775 /* ContextMenu_prod.js */; };
+		6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */; };
+		6635D9A02853E8AD00F4B775 /* Result+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99E2853E8AD00F4B775 /* Result+Beam.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
 		66F9AEBE283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */; };
 		66F9AEBF283E215100C28EE3 /* MouseOverAndSelection_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */; };
@@ -2103,6 +2108,26 @@
 		56A5BD3025CC680E00ED7C50 /* url.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = url.stopwords; sourceTree = "<group>"; };
 		56A5BD3625CCAFA400ED7C50 /* english.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = english.stopwords; sourceTree = "<group>"; };
 		6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandlerTests.swift; sourceTree = "<group>"; };
+		6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebContextMenu.swift; sourceTree = "<group>"; };
+		6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenuMessageHandler.swift; sourceTree = "<group>"; };
+		6635D9612853E73A00F4B775 /* ContextMenu_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = ContextMenu_prod.js; sourceTree = "<group>"; };
+		6635D9632853E73A00F4B775 /* ContextMenu.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenu.d.ts; sourceTree = "<group>"; };
+		6635D9642853E73A00F4B775 /* ContextMenuUI.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUI.d.ts; sourceTree = "<group>"; };
+		6635D9652853E73A00F4B775 /* ContextMenuUI_native.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUI_native.d.ts; sourceTree = "<group>"; };
+		6635D9662853E73A00F4B775 /* ContextMenuUI_web.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUI_web.d.ts; sourceTree = "<group>"; };
+		6635D9672853E73A00F4B775 /* jest.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
+		6635D9692853E73A00F4B775 /* ContextMenuUIMock.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUIMock.ts; sourceTree = "<group>"; };
+		6635D96A2853E73A00F4B775 /* webpack.config.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = webpack.config.js; sourceTree = "<group>"; };
+		6635D96B2853E73A00F4B775 /* package.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
+		6635D9762853E73A00F4B775 /* tsconfig.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = tsconfig.json; sourceTree = "<group>"; };
+		6635D9782853E73A00F4B775 /* ContextMenu.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenu.ts; sourceTree = "<group>"; };
+		6635D9792853E73A00F4B775 /* ContextMenuUI_web.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUI_web.ts; sourceTree = "<group>"; };
+		6635D97A2853E73A00F4B775 /* index.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
+		6635D97B2853E73A00F4B775 /* ContextMenuUI.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUI.ts; sourceTree = "<group>"; };
+		6635D97C2853E73A00F4B775 /* ContextMenuUI_native.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ContextMenuUI_native.ts; sourceTree = "<group>"; };
+		6635D97D2853E73A00F4B775 /* ContextMenu.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = ContextMenu.css; sourceTree = "<group>"; };
+		6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSWorkspace+Beam.swift"; sourceTree = "<group>"; };
+		6635D99E2853E8AD00F4B775 /* Result+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Beam.swift"; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
 		66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandler.swift; sourceTree = "<group>"; };
 		66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = MouseOverAndSelection_prod.js; sourceTree = "<group>"; };
@@ -4196,6 +4221,8 @@
 				37520B0E27EAA43800A1C20B /* BeamElement+DisplaySizePreferencesStorage.swift */,
 				3779AC5E27FC5503006A6473 /* AnimationView+Beam.swift */,
 				66D77CA028351612004D03E9 /* NSMenu+Beam.swift */,
+				6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */,
+				6635D99E2853E8AD00F4B775 /* Result+Beam.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -5056,6 +5083,79 @@
 				56A5BD3625CCAFA400ED7C50 /* english.stopwords */,
 			);
 			path = Stopwords;
+			sourceTree = "<group>";
+		};
+		6635D95B2853E73A00F4B775 /* ContextMenu */ = {
+			isa = PBXGroup;
+			children = (
+				6635D95C2853E73A00F4B775 /* Native */,
+				6635D95F2853E73A00F4B775 /* Web */,
+			);
+			path = ContextMenu;
+			sourceTree = "<group>";
+		};
+		6635D95C2853E73A00F4B775 /* Native */ = {
+			isa = PBXGroup;
+			children = (
+				6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */,
+				6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */,
+			);
+			path = Native;
+			sourceTree = "<group>";
+		};
+		6635D95F2853E73A00F4B775 /* Web */ = {
+			isa = PBXGroup;
+			children = (
+				6635D9602853E73A00F4B775 /* dist */,
+				6635D9672853E73A00F4B775 /* jest.config.js */,
+				6635D9682853E73A00F4B775 /* tests */,
+				6635D96A2853E73A00F4B775 /* webpack.config.js */,
+				6635D96B2853E73A00F4B775 /* package.json */,
+				6635D9762853E73A00F4B775 /* tsconfig.json */,
+				6635D9772853E73A00F4B775 /* src */,
+			);
+			path = Web;
+			sourceTree = "<group>";
+		};
+		6635D9602853E73A00F4B775 /* dist */ = {
+			isa = PBXGroup;
+			children = (
+				6635D9612853E73A00F4B775 /* ContextMenu_prod.js */,
+				6635D9622853E73A00F4B775 /* src */,
+			);
+			path = dist;
+			sourceTree = "<group>";
+		};
+		6635D9622853E73A00F4B775 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				6635D9632853E73A00F4B775 /* ContextMenu.d.ts */,
+				6635D9642853E73A00F4B775 /* ContextMenuUI.d.ts */,
+				6635D9652853E73A00F4B775 /* ContextMenuUI_native.d.ts */,
+				6635D9662853E73A00F4B775 /* ContextMenuUI_web.d.ts */,
+			);
+			path = src;
+			sourceTree = "<group>";
+		};
+		6635D9682853E73A00F4B775 /* tests */ = {
+			isa = PBXGroup;
+			children = (
+				6635D9692853E73A00F4B775 /* ContextMenuUIMock.ts */,
+			);
+			path = tests;
+			sourceTree = "<group>";
+		};
+		6635D9772853E73A00F4B775 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				6635D9782853E73A00F4B775 /* ContextMenu.ts */,
+				6635D9792853E73A00F4B775 /* ContextMenuUI_web.ts */,
+				6635D97A2853E73A00F4B775 /* index.js */,
+				6635D97B2853E73A00F4B775 /* ContextMenuUI.ts */,
+				6635D97C2853E73A00F4B775 /* ContextMenuUI_native.ts */,
+				6635D97D2853E73A00F4B775 /* ContextMenu.css */,
+			);
+			path = src;
 			sourceTree = "<group>";
 		};
 		66F9AE9C283E215100C28EE3 /* MouseOverAndSelection */ = {
@@ -7030,6 +7130,7 @@
 				370794D827D7AB0E00D2768B /* BrowserContentDescription.swift */,
 				370794D927D7AB0E00D2768B /* WebContentDescription.swift */,
 				370794D727D7AB0E00D2768B /* PDFContentDescription.swift */,
+				6635D95B2853E73A00F4B775 /* ContextMenu */,
 			);
 			path = TabAndWebview;
 			sourceTree = "<group>";
@@ -8201,6 +8302,7 @@
 				A52A559227592E9A002D0C99 /* Inter-SemiBold.otf in Resources */,
 				5224CD462685FF7E00D4179E /* update_beam_objects.graphql in Resources */,
 				8A27DCA427EDC8CA0044A9A2 /* PasswordManager_prod.js in Resources */,
+				6635D9852853E73A00F4B775 /* ContextMenu_prod.js in Resources */,
 				8A27DCA327EDC8CA0044A9A2 /* EmbedNode_prod.js in Resources */,
 				874111A9282592D60024C348 /* autofill-display.json in Resources */,
 				66F9AEC1283E215100C28EE3 /* MouseOverAndSelectionUI.d.ts in Resources */,
@@ -8736,6 +8838,7 @@
 				418172532581107C00317ED8 /* ToolbarChevrons.swift in Sources */,
 				A5E2938A2746C6C300638ABA /* FlippedGeometryHelper.swift in Sources */,
 				33AC9D9A26B01A60004E7EF4 /* AuthenticationViewModel.swift in Sources */,
+				6635D9A02853E8AD00F4B775 /* Result+Beam.swift in Sources */,
 				8AF4F7CF275A674B0081B6B5 /* EmbedContentStrategy.swift in Sources */,
 				DAF063EF27D10CAD000406DE /* DomainPath0ReadingDay.swift in Sources */,
 				A07FFBCD282D66BF00AFCB02 /* NSWindow+Beam.swift in Sources */,
@@ -8999,6 +9102,7 @@
 				87CF1CB828211DE800FB0530 /* OtherCreditCardsModal.swift in Sources */,
 				418172222581107C00317ED8 /* NSView+Beam.swift in Sources */,
 				370794DC27D7AB0E00D2768B /* WebContentDescription.swift in Sources */,
+				6635D9842853E73A00F4B775 /* ContextMenuMessageHandler.swift in Sources */,
 				A504430F281C36A900C91204 /* View+Snapshot.swift in Sources */,
 				4181744325812C5F00317ED8 /* NSColor+Beam.swift in Sources */,
 				9635C96D276945CD00015575 /* OldJournalStackView.swift in Sources */,
@@ -9268,6 +9372,7 @@
 				4181722F2581107C00317ED8 /* BeamWindow.swift in Sources */,
 				418172602581107C00317ED8 /* ThirdPartyLibrariesManager.swift in Sources */,
 				032562B126051D3B006513E4 /* RBStat.m in Sources */,
+				6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */,
 				0325629026051D3B006513E4 /* RBCodeSignature.m in Sources */,
 				33353ED826F367FF00063078 /* ShortcutView.swift in Sources */,
 				52019A7326DE47C1005E8278 /* DatabaseManager+Foundation.swift in Sources */,
@@ -9408,6 +9513,7 @@
 				BAA67ACD35DACF0E03ED520B /* DownloadManager.swift in Sources */,
 				8768D5EC2735A1100079DEC6 /* AppDelegate+BrowserImport.swift in Sources */,
 				BAA67F0398B7B9D2CA9ADE25 /* ContentTypes.swift in Sources */,
+				6635D9832853E73A00F4B775 /* BeamWebContextMenu.swift in Sources */,
 				A055CE7A274E8DD5003DB3D0 /* RestoreTabsManager.swift in Sources */,
 				A5D88585274E4E2100F37859 /* BlendModePerColorScheme.swift in Sources */,
 				BAA679A5A0853E5E53ACD3F1 /* BeamDownloadManager.swift in Sources */,

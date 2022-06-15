@@ -40,6 +40,10 @@
     "name": "@beam/native-navigation"
   },
   {
+    "location": "Beam/Classes/Models/TabAndWebview/ContextMenu/Web",
+    "name": "@beam/native-contextmenu"
+  },
+  {
     "location": "Beam/Classes/Models/TabAndWebview/MouseOverAndSelection/Web",
     "name": "@beam/native-mouseoverandselection"
   },
