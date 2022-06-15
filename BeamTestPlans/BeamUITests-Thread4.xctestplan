@@ -113,6 +113,7 @@
         "NoteEditorTests",
         "NotePinUnpinTests",
         "NotePublishTests",
+        "NotePublishTests\/testDefaultPublishStatus()",
         "NoteViewEmbedsTests",
         "NoteViewTests",
         "OmniboxAutocompleteTests",
