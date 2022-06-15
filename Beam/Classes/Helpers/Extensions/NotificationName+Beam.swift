@@ -9,4 +9,6 @@ extension Notification.Name {
     static let databaseListUpdate = Notification.Name("databaseListUpdate")
     static let defaultDatabaseUpdate = Notification.Name("defaultDatabaseUpdate")
     static let loggerInsert = Notification.Name("loggerInsert")
+
+    static let downloadFinished = NSNotification.Name("com.apple.DownloadFileFinished")
 }

@@ -31,6 +31,10 @@ import Sentry
 
     private let searchEngine: SearchEngineDescription = PreferredSearchEngine()
 
+    var searchEngineName: String {
+        return searchEngine.name
+    }
+
     @Published var currentNote: BeamNote? {
         didSet {
             EventsTracker.logBreadcrumb(message: "currentNote changed to \(String(describing: currentNote))", category: "BeamState")
