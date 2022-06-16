@@ -14,6 +14,14 @@ enum AllNotesViewLocators {
         case journalButton = "journal"
     }
     
+    enum SortButtons: String, CaseIterable, UIElement {
+        case title = "Title"
+        case url = "URL"
+        case words = "Words"
+        case links = "Links"
+        case updated = "Updated"
+    }
+    
     enum TextFields: String, CaseIterable, UIElement {
         case newPrivateNote = "New Private Note"
         case newPublishedNote = "New Published Note"
