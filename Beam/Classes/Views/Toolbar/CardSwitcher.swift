@@ -65,7 +65,9 @@ struct CardSwitcher: View {
                 .accessibilityIdentifier("card-switcher-all-cards")
             }
 
-            separator
+            if shouldDisplaySeparator {
+                separator
+            }
 
             if usePinnedInsteadOfRecentsNotes {
                 pinnedNotes
@@ -107,6 +109,10 @@ struct CardSwitcher: View {
                 }
             }
         }
+    }
+
+    private var shouldDisplaySeparator: Bool {
+        usePinnedInsteadOfRecentsNotes ? !pinnedManager.pinnedNotes.isEmpty : !recentsManager.recentNotes.isEmpty
     }
 }
 
