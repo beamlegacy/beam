@@ -1010,6 +1010,7 @@
 		A3E7B4C027AC462E0074C9BB /* PasswordPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3E7B4BF27AC462E0074C9BB /* PasswordPreferencesTests.swift */; };
 		A3EE7D5C284F23CC00DD3EBB /* SyncTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EE7D5B284F23CC00DD3EBB /* SyncTests.swift */; };
 		A3EFB0F5283F62D300A0A128 /* String+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3EFB0F4283F62D300A0A128 /* String+Beam.swift */; };
+		A3FB63512859CBA500CFE363 /* AllNotesSortingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3FB63502859CBA500CFE363 /* AllNotesSortingTests.swift */; };
 		A5011E4A2754E6E800A76667 /* ToolbarCapsuleButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = A5011E492754E6E800A76667 /* ToolbarCapsuleButton.swift */; };
 		A501B4CF2734397E00407F3E /* EmbedContentLocalStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */; };
 		A501B4D1273439C500407F3E /* EmbedContentAPIStrategyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A501B4D0273439C500407F3E /* EmbedContentAPIStrategyTests.swift */; };
@@ -2899,6 +2900,7 @@
 		A3E7B4BF27AC462E0074C9BB /* PasswordPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PasswordPreferencesTests.swift; sourceTree = "<group>"; };
 		A3EE7D5B284F23CC00DD3EBB /* SyncTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncTests.swift; sourceTree = "<group>"; };
 		A3EFB0F4283F62D300A0A128 /* String+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Beam.swift"; sourceTree = "<group>"; };
+		A3FB63502859CBA500CFE363 /* AllNotesSortingTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesSortingTests.swift; sourceTree = "<group>"; };
 		A5011E492754E6E800A76667 /* ToolbarCapsuleButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolbarCapsuleButton.swift; sourceTree = "<group>"; };
 		A501B4CE2734397E00407F3E /* EmbedContentLocalStrategyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentLocalStrategyTests.swift; sourceTree = "<group>"; };
 		A501B4D0273439C500407F3E /* EmbedContentAPIStrategyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmbedContentAPIStrategyTests.swift; sourceTree = "<group>"; };
@@ -7416,6 +7418,7 @@
 			children = (
 				B557156226FAF18200F6C9D4 /* AllNotesViewTests.swift */,
 				B557156426FAF1BA00F6C9D4 /* AllNotesDeleteTests.swift */,
+				A3FB63502859CBA500CFE363 /* AllNotesSortingTests.swift */,
 			);
 			path = AllNotesMenu;
 			sourceTree = "<group>";
@@ -9741,6 +9744,7 @@
 				A38D1A29284A11B6007EBB25 /* Equalable.swift in Sources */,
 				B5EB9A6A26C25FB8004C798A /* OmniboxDestinationTests.swift in Sources */,
 				52FC002425E4244200ABECB0 /* MenuAvailableCommands.swift in Sources */,
+				A3FB63512859CBA500CFE363 /* AllNotesSortingTests.swift in Sources */,
 				A312851027707C870051EECE /* TextEditorContextTestView.swift in Sources */,
 				A3E7B4B727AC172B0074C9BB /* PasswordSuggestionPopupViewLocators.swift in Sources */,
 				B58A175027514E0100A588C4 /* NoteViewEmbedsTests.swift in Sources */,
