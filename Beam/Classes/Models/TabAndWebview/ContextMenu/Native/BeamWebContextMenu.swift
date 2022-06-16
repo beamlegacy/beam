@@ -258,7 +258,7 @@ extension BeamWebContextMenuItem {
     }
 
     private func openURLInNewTab(_ url: URL) -> Result<Void, Error> {
-        AppDelegate.main.window?.state.createTab(withURLRequest: .init(url: url))
+        AppDelegate.main.window?.state.createTab(withURLRequest: .init(url: url), setCurrent: false)
         return .success(())
     }
 
