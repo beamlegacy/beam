@@ -156,4 +156,10 @@ class AllNotesTestView: BaseView {
         return Int(viewStringValue) ?? 0
     }
     
+    @discardableResult
+    func sortTableBy(_ column: AllNotesViewLocators.SortButtons) -> AllNotesTestView {
+        app.windows.buttons[column.accessibilityIdentifier].firstMatch.tapInTheMiddle()
+        return self
+    }
+    
 }
