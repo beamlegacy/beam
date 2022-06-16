@@ -250,7 +250,7 @@ struct NoteHeaderView: View {
     }
 
     private var buttonLabelStyle: ButtonLabelStyle {
-        ButtonLabelStyle(iconSize: 12, activeBackgroundColor: .clear)
+        ButtonLabelStyle(iconSize: 12, foregroundColor: BeamColor.AlphaGray.swiftUI, activeBackgroundColor: .clear)
     }
 }
 
