@@ -512,6 +512,7 @@
 		56A5BD3125CC680E00ED7C50 /* url.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3025CC680E00ED7C50 /* url.stopwords */; };
 		56A5BD3725CCAFA400ED7C50 /* english.stopwords in Resources */ = {isa = PBXBuildFile; fileRef = 56A5BD3625CCAFA400ED7C50 /* english.stopwords */; };
 		660325A7285B5278008F4471 /* BeamWebContextMenu+Actions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660325A6285B5278008F4471 /* BeamWebContextMenu+Actions.swift */; };
+		660325B6285B7D32008F4471 /* BeamWebContextMenu+Data.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660325B5285B7D32008F4471 /* BeamWebContextMenu+Data.swift */; };
 		6633BA5E283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */; };
 		6635D9832853E73A00F4B775 /* BeamWebContextMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */; };
 		6635D9842853E73A00F4B775 /* ContextMenuMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */; };
@@ -2109,6 +2110,7 @@
 		56A5BD3025CC680E00ED7C50 /* url.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = url.stopwords; sourceTree = "<group>"; };
 		56A5BD3625CCAFA400ED7C50 /* english.stopwords */ = {isa = PBXFileReference; lastKnownFileType = text; path = english.stopwords; sourceTree = "<group>"; };
 		660325A6285B5278008F4471 /* BeamWebContextMenu+Actions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWebContextMenu+Actions.swift"; sourceTree = "<group>"; };
+		660325B5285B7D32008F4471 /* BeamWebContextMenu+Data.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "BeamWebContextMenu+Data.swift"; sourceTree = "<group>"; };
 		6633BA5D283E2520007A1F4C /* MouseOverAndSelectionMessageHandlerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandlerTests.swift; sourceTree = "<group>"; };
 		6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BeamWebContextMenu.swift; sourceTree = "<group>"; };
 		6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContextMenuMessageHandler.swift; sourceTree = "<group>"; };
@@ -5102,6 +5104,7 @@
 				6635D95D2853E73A00F4B775 /* BeamWebContextMenu.swift */,
 				660325A6285B5278008F4471 /* BeamWebContextMenu+Actions.swift */,
 				6635D95E2853E73A00F4B775 /* ContextMenuMessageHandler.swift */,
+				660325B5285B7D32008F4471 /* BeamWebContextMenu+Data.swift */,
 			);
 			path = Native;
 			sourceTree = "<group>";
@@ -8763,6 +8766,7 @@
 				522D48A62719D1F20038DB81 /* LoggerSplitViewController.swift in Sources */,
 				0325629326051D3B006513E4 /* RBKVO.m in Sources */,
 				032562FD26051DCB006513E4 /* RBMockClient.m in Sources */,
+				660325B6285B7D32008F4471 /* BeamWebContextMenu+Data.swift in Sources */,
 				A5D88596274E919300F37859 /* NodeHeaderViewModel.swift in Sources */,
 				96FD761B25B1C43500B04ED3 /* BrowsingNodeWidget.swift in Sources */,
 				521EEDFB2593927100BA2485 /* Int+ByteSize.swift in Sources */,
