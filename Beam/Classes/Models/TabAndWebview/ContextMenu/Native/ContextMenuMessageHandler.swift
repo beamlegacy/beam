@@ -48,6 +48,21 @@ extension ContextMenuMessageHandlerPayload {
         }
     }
 
+    var base64: (data: Data, mimeType: String)? {
+        switch self {
+        case .image(let src), .linkPlusImage(_, let src):
+            let array = src.split(separator: ",").map(String.init)
+            guard array.count == 2, let base64 = Data(base64Encoded: array[1]) else {
+                return nil
+            }
+            var mimeType = array[0].replacingOccurrences(of: "data:", with: "", options: [.anchored])
+            mimeType = mimeType.replacingOccurrences(of: ";base64", with: "")
+            return (base64, mimeType)
+        default:
+            return nil
+        }
+    }
+
 }
 
 /// Message handler used to manage context menus apparitions and items in the web page.
