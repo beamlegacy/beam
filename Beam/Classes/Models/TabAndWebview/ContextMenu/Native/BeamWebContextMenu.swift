@@ -69,7 +69,7 @@ extension BeamWebContextMenuItem {
                 .separator,
                 .textCopy, .textCapture,
                 .separator,
-                .systemShare, .systemSpeech
+                .systemShare, .separator, .systemSpeech
             ]
         case .link:
             return [
@@ -164,7 +164,7 @@ extension BeamWebContextMenuItem {
                 result(openURLInNewWindow(src))
             case .imageSaveToDownloads:
                 guard let dstURL = getDestinationURL(for: payload) else { return result(.failure(BeamWebContextMenuItemError.unexpectedError)) }
-                retrieveAndSaveImage(to: dstURL, payload: payload, webView: webView, bounceDownloadsStack: true, completion: result)
+                retrieveAndSaveImage(to: dstURL, payload: payload, webView: webView, completion: result)
             case .imageSaveAs:
                 showSaveAsPanel(payload: payload, webView: webView, completion: result)
             case .imageCopyAddress:
@@ -228,23 +228,17 @@ extension BeamWebContextMenuItem {
 
     private var isHidden: Bool {
         switch self {
-        case .pageCapture, .textCapture, .linkCapture, .imageCapture:
-            return true
-        default:
-            return false
+        case .pageCapture, .textCapture, .linkCapture, .imageCapture:   return true
+        default:                                                        return false
         }
     }
 
     private func isEnabled(context: BeamWebView, payload: ContextMenuMessageHandlerPayload) -> Bool {
         switch self {
-        case .pageCapture, .textCapture, .linkCapture, .imageCapture:
-            return false
-        case .pageBack:
-            return context.canGoBack
-        case .pageForward:
-            return context.canGoForward
-        default:
-            return true
+        case .pageCapture, .textCapture, .linkCapture, .imageCapture:   return false
+        case .pageBack:                                                 return context.canGoBack
+        case .pageForward:                                              return context.canGoForward
+        default:                                                        return true
         }
     }
 }
@@ -299,21 +293,24 @@ extension BeamWebContextMenuItem {
         overwrite: Bool = false,
         payload: ContextMenuMessageHandlerPayload,
         webView: BeamWebView,
-        bounceDownloadsStack: Bool,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        func writeData(_ data: Data, dstURL: URL, overwrite: Bool, bounce: Bool) -> Result<Void, Error> {
+        func writeData(_ data: Data, dstURL: URL, fileName: String? = nil, fileExtension: String? = nil, overwrite: Bool) -> Result<Void, Error> {
             do {
-                let availableDstURL = overwrite ? dstURL : dstURL.availableFileURL()
-                let scopedURL = availableDstURL.deletingLastPathComponent()
+                var availableDstURL: URL = dstURL
+                fileName.map { availableDstURL.appendPathComponent($0) }
+                fileExtension.map { availableDstURL.appendPathExtension($0) }
 
+                if !overwrite {
+                    availableDstURL = availableDstURL.availableFileURL()
+                }
+
+                let scopedURL = availableDstURL.deletingLastPathComponent()
                 _ = scopedURL.startAccessingSecurityScopedResource() // below write will fail anyway if this returns false
                 try data.write(to: availableDstURL)
                 scopedURL.stopAccessingSecurityScopedResource()
 
-                if bounce {
-                    try? NSWorkspace.shared.bounceDockStack(with: availableDstURL)
-                }
+                try? NSWorkspace.shared.bounceDockStack(with: availableDstURL)
 
                 return .success(())
             } catch {
@@ -321,10 +318,10 @@ extension BeamWebContextMenuItem {
             }
         }
 
-        func dispatchResult(_ result: Result<Data, Error>) {
+        func dispatchResult(_ result: Result<Data, Error>, fileName: String? = nil, fileExtension: String? = nil) {
             switch result {
             case .success(let data):
-                completion(writeData(data, dstURL: dstURL, overwrite: overwrite, bounce: bounceDownloadsStack))
+                completion(writeData(data, dstURL: dstURL, fileName: fileName, fileExtension: fileExtension, overwrite: overwrite))
             case .failure(let error):
                 completion(.failure(error))
             }
@@ -341,6 +338,10 @@ extension BeamWebContextMenuItem {
         // Let's check if we're displaying a raw image and we have data available
         if inferMimeType, let mimeType = webView._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
             webView._getMainResourceData { dispatchResult(Result($0, $1)) }
+        }
+        // Otherwise, let's check if the image is base64 encoded, passing an Unknown fileName and a preferred file extension
+        else if let (data, mimeType) = payload.base64 {
+            dispatchResult(.success(data), fileName: "Unknown", fileExtension: UTType(mimeType: mimeType)?.preferredFilenameExtension)
         }
         // Otherwise, let's download the data
         else if let imageSrcURL = payload.imageSrcURL {
@@ -371,14 +372,7 @@ extension BeamWebContextMenuItem {
                 guard let url = savePanel?.url else {
                     completion(.failure(BeamWebContextMenuItemError.unexpectedError)); return
                 }
-                retrieveAndSaveImage(
-                    to: url,
-                    overwrite: true,
-                    payload: payload,
-                    webView: webView,
-                    bounceDownloadsStack: true,
-                    completion: completion
-                )
+                retrieveAndSaveImage(to: url, overwrite: true, payload: payload, webView: webView, completion: completion)
             } else if response == NSApplication.ModalResponse.cancel {
                 completion(.success(())) // showing the panel was a success, user just decided to cancel...
             } else {
@@ -394,5 +388,4 @@ extension BeamWebContextMenuItem {
             }
         }.resume()
     }
-
 }
