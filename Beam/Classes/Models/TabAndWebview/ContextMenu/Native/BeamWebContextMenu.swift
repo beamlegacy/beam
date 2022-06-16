@@ -37,6 +37,7 @@ enum BeamWebContextMenuItem {
     case systemTranslate
     case systemSpeech
     case systemShare
+    case systemInspectElement
 }
 
 /// Errors possibly thrown when interacting with items within Context Menu from webviews.
