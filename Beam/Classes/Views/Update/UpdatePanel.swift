@@ -125,7 +125,7 @@ private struct ReleaseNoteWebView: View, NSViewRepresentable {
         webView.navigationDelegate = context.coordinator
         webView.load(URLRequest(url: url))
 
-        let style = "body { padding-top: 0 } .main-header { display: none }".data(using: .utf8)!.base64EncodedString()
+        let style = "body { padding-top: 0 } .main-header { display: none } header .date { display: none; }".data(using: .utf8)!.base64EncodedString()
         let cssStyle = """
                     javascript:(function() {
                     var parent = document.getElementsByTagName('head').item(0);
