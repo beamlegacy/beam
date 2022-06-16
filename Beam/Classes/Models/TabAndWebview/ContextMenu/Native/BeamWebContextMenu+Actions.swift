@@ -10,7 +10,8 @@ import UniformTypeIdentifiers
 
 extension BeamWebContextMenuItem {
     static func items(with payload: ContextMenuMessageHandlerPayload, from webView: BeamWebView, menu: NSMenu) -> [NSMenuItem] {
-        return content(for: payload).compactMap { $0.nsMenuItem(from: webView, payload: payload, menu: menu) }
+        let items = content(for: payload) + [.separator, .systemInspectElement]
+        return items.compactMap { $0.nsMenuItem(from: webView, payload: payload, menu: menu) }
     }
 
     private static func content(for payload: ContextMenuMessageHandlerPayload) -> [Self] {
@@ -52,10 +53,8 @@ extension BeamWebContextMenuItem {
         case .linkPlusImage(let href, let src):
             var items = Self.content(for: .image(src: src)) + [.separator] + Self.content(for: .link(href: href))
             // Making sure share item is the last one
-            guard let shareItemIndex = items.firstIndex(where: { $0.systemItemIdentifierEquivalent == .webKitSharing })
-            else { return items }
-            let shareItem = items.remove(at: shareItemIndex)
-            return items + [shareItem]
+            items.removeAll { $0 == .systemShare }
+            return items + [.systemShare]
         }
     }
 }
@@ -68,7 +67,7 @@ extension BeamWebContextMenuItem {
         switch self {
         case .separator:
             menuItem = .separator()
-        case .systemImageCopy, .systemLookUp, .systemTranslate, .systemSpeech, .systemShare:
+        case .systemImageCopy, .systemLookUp, .systemTranslate, .systemSpeech, .systemShare, .systemInspectElement:
             guard let identifierEquivalent = systemItemIdentifierEquivalent else { return nil }
             guard let equivalentItem = menu.items.first(where: { $0.identifier == identifierEquivalent }) else { return nil }
             menuItem = equivalentItem
@@ -140,7 +139,7 @@ extension BeamWebContextMenuItem {
             case .separator:
                 assertionFailure("This action shouldn't have any action associated to it")
                 result(.failure(BeamWebContextMenuItemError.unexpectedError))
-            case .systemImageCopy, .systemShare, .systemSpeech, .systemLookUp, .systemTranslate:
+            case .systemImageCopy, .systemShare, .systemSpeech, .systemLookUp, .systemTranslate, .systemInspectElement:
                 assertionFailure("This action shouldn't be called since it's a system action")
                 result(.success(()))
             }
@@ -149,12 +148,13 @@ extension BeamWebContextMenuItem {
 
     private var systemItemIdentifierEquivalent: NSUserInterfaceItemIdentifier? {
         switch self {
-        case .systemImageCopy:  return .webKitCopyImage
-        case .systemLookUp:     return .webKitTextLookUp
-        case .systemTranslate:  return .webKitTextTranslate
-        case .systemSpeech:     return .webKitSpeech
-        case .systemShare:      return .webKitSharing
-        default:                return nil
+        case .systemImageCopy:      return .webKitCopyImage
+        case .systemLookUp:         return .webKitTextLookUp
+        case .systemTranslate:      return .webKitTextTranslate
+        case .systemSpeech:         return .webKitSpeech
+        case .systemShare:          return .webKitSharing
+        case .systemInspectElement: return .webKitInspectElement
+        default:                    return nil
         }
     }
 
@@ -181,7 +181,7 @@ extension BeamWebContextMenuItem {
         case .textSearch:           return "Search with \(AppDelegate.main.window?.state.searchEngineName ?? "Google")"
         case .textCopy:             return "Copy"
         case .textCapture:          return "Capture Text Selection"
-        case .separator, .systemImageCopy, .systemShare, .systemSpeech, .systemLookUp, .systemTranslate:
+        case .separator, .systemImageCopy, .systemShare, .systemSpeech, .systemLookUp, .systemTranslate, .systemInspectElement:
             return nil
         }
     }
