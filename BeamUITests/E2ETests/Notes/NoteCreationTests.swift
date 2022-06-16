@@ -22,7 +22,7 @@ class NoteCreationTests: BaseTest {
         let numberOfNotesBeforeAdding = journalView.openAllNotesMenu().getNumberOfNotes()
         var allNotesView: AllNotesTestView?
         step("When I create a note from All Notes view"){
-            allNotesView = AllNotesTestView().addNewNote(noteNameToBeCreated)
+            allNotesView = AllNotesTestView().addNewPrivateNote(noteNameToBeCreated)
             var timeout = 5 //temp solution while looking for an elegant way to wait
             repeat {
                 if numberOfNotesBeforeAdding != allNotesView!.getNumberOfNotes() {
