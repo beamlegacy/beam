@@ -43,6 +43,10 @@ enum AllNotesViewLocators {
         case deleteNotes = "deleteNotes"
         case pinNote = "pin"
         case unpinNote = "unpin"
+        case publish = "makePublic"
+        case unpublish = "makePrivate"
+        case publishOnProfile = "publishOnProfile"
+        case unpublishFromProfile = "unpublishFromProfile"
     }
     
     enum ViewMenuItems: String, CaseIterable, UIElement {
