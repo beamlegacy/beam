@@ -67,6 +67,7 @@ enum NoteViewLocators {
         case blockRefUnlock = "ContextMenuItem-unlock"
         case blockRefRemove = "ContextMenuItem-remove"
         case blockRefOrigin = "ContextMenuItem-view origin"
+        case addToProfile = "ContextMenuItem-add to profile"
         case backgroundTabOpened = "Opened in background"
     }
     

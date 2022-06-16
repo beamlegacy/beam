@@ -25,25 +25,26 @@ class BaseRow: Equalable {
             
             let typeName = String(describing: type(of: item.value))
             switch typeName {
-            case "Optional<String>":
+            case "Optional<String>", "String":
                 let v1 = item.value as? String
                 let v2 = external!.value as? String
                 if (v1 != v2) {
                     failedValues.append("'\(String(describing: itemLabel))' value:\(String(describing: v1)) is not equal to value:\(String(describing: v2))")
                 }
-            case "Optional<Int>":
+            case "Optional<Int>", "Int":
                 let v1 = item.value as? Int
                 let v2 = external!.value as? Int
                 if (v1 != v2) {
                     failedValues.append("'\(String(describing: itemLabel))' value:\(String(describing: v1)) is not equal to value:\(String(describing: v2))")
                 }
-            case "Optional<Bool>":
+            case "Optional<Bool>", "Bool":
                 let v1 = item.value as? Bool
                 let v2 = external!.value as? Bool
                 if (v1 != v2) {
                     failedValues.append("'\(String(describing: itemLabel))' value:\(String(describing: v1)) is not equal to value:\(String(describing: v2))")
                 }
-            default: break
+            default:
+                return (failedValues.append("\(typeName) type is NOT FOUND"))
             }
         }
         return (failedValues.count == 0, failedValues.joined(separator: " || "))

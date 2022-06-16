@@ -10,6 +10,8 @@ import XCTest
 
 class AllNotesTestView: BaseView {
 
+    var sortingCournterValues: SortingCounterValues!
+    
     @discardableResult
     func waitForAllNotesViewToLoad() -> Bool {
         return app.tables.firstMatch.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier).firstMatch
@@ -19,6 +21,11 @@ class AllNotesTestView: BaseView {
     @discardableResult
     func waitForNoteTitlesToAppear() -> Bool {
         return staticText(AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+    }
+    
+    @discardableResult
+    func waitForNotesNumberEqualTo(_ number: Int) -> Bool {
+        waitForCountValueEqual(timeout: implicitWaitTimeout, expectedNumber: number, elementQuery: app.windows.staticTexts.matching(identifier: AllNotesViewLocators.ColumnCells.noteTitleColumnCell.accessibilityIdentifier))
     }
 
     @discardableResult
@@ -90,13 +97,21 @@ class AllNotesTestView: BaseView {
     }
     
     @discardableResult
-    func addNewNote(_ noteName: String) -> AllNotesTestView {
+    func addNewPrivateNote(_ noteName: String) -> AllNotesTestView {
         XCTContext.runActivity(named: "Create a note named '\(noteName)' using + icon") {_ in
             tableTextField(AllNotesViewLocators.TextFields.newPrivateNote.accessibilityIdentifier).doubleClick()
             app.typeText(" " + noteName) //Workaround for CI that skips chars in the end
             tableImage(AllNotesViewLocators.Buttons.newNoteButton.accessibilityIdentifier).click()
             return self
         }
+    }
+    
+    @discardableResult
+    func typeCardNameAndClickAddFor(sortType: AllNotesViewLocators.TextFields, noteName: String) -> AllNotesTestView {
+        _ = tableTextField(sortType.accessibilityIdentifier).waitForExistence(timeout: implicitWaitTimeout)
+        tableTextField(sortType.accessibilityIdentifier).clickAndType(" " + noteName)
+        tableImage(AllNotesViewLocators.Buttons.newNoteButton.accessibilityIdentifier).click()
+        return self
     }
     
     func isNoteNameAvailable(_ noteName: String) -> Bool {
@@ -144,9 +159,17 @@ class AllNotesTestView: BaseView {
     
     @discardableResult
     func openTableView(_ item: AllNotesViewLocators.ViewMenuItems) -> AllNotesTestTable {
-        image(AllNotesViewLocators.Images.allNotesEditor.accessibilityIdentifier).tapInTheMiddle()
+        if !menuItem(item.accessibilityIdentifier).exists {
+            self.clickSortingDropDownExpandTriangle()
+        }
         menuItem(item.accessibilityIdentifier).clickOnExistence()
         return AllNotesTestTable()
+    }
+    
+    @discardableResult
+    func clickSortingDropDownExpandTriangle() -> AllNotesTestView {
+        image(AllNotesViewLocators.Images.allNotesEditor.accessibilityIdentifier).tapInTheMiddle()
+        return self
     }
     
     func getViewCountValue() -> Int {
@@ -160,6 +183,42 @@ class AllNotesTestView: BaseView {
     func sortTableBy(_ column: AllNotesViewLocators.SortButtons) -> AllNotesTestView {
         app.windows.buttons[column.accessibilityIdentifier].firstMatch.tapInTheMiddle()
         return self
+    }
+    
+    func getAllSortingCounterValues() -> AllNotesTestView {
+        self.clickSortingDropDownExpandTriangle()
+        sortingCournterValues = SortingCounterValues(
+            all: getSortingCounterValue(.allNotes),
+            privat: getSortingCounterValue(.privateNotes),
+            published: getSortingCounterValue(.publishedNotes),
+            publishedProfile: getSortingCounterValue(.profileNotes))
+        return self
+    }
+    
+    func getSortingCounterValue(_ item: AllNotesViewLocators.ViewMenuItems) -> Int {
+        let value = menuItem(item.accessibilityIdentifier).title
+        let integerValue = Int(value.slice(from: "(", to: ")") ?? "-1")!
+        return integerValue
+    }
+    
+    func waitForPublishingProcessToStartAndFinishFor(_ noteName: String) -> Bool {
+        let publishStatusElement = textField("Publishing '\(noteName)'...")
+        _ = publishStatusElement.waitForExistence(timeout: minimumWaitTimeout)
+        return waitForDoesntExist(publishStatusElement)
+    }
+    
+    class SortingCounterValues: BaseRow {
+        var all: Int!
+        var privat: Int!
+        var published: Int!
+        var publishedProfile: Int!
+        
+        init(all: Int, privat: Int, published: Int, publishedProfile: Int) {
+            self.all = all
+            self.privat = privat
+            self.published = published
+            self.publishedProfile = publishedProfile
+        }
     }
     
 }
