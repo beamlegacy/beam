@@ -60,6 +60,7 @@
         "AdvancedSignUpPasswordAutofillTests\/testSignUpPageCombination4()",
         "AllCardsDeleteTests",
         "AllNotesDeleteTests",
+        "AllNotesPublishProfileTests",
         "AllNotesViewTests",
         "AllowListPreferencesTests\/testAddAllowUrlItem()",
         "AllowListPreferencesTests\/testRemoveAllowUrlItem()",

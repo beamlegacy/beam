@@ -1000,6 +1000,7 @@
 		A38D1A25284A10DC007EBB25 /* RowCreditCardsTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A24284A10DC007EBB25 /* RowCreditCardsTestTable.swift */; };
 		A38D1A27284A10F3007EBB25 /* RowAllNotesTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A26284A10F3007EBB25 /* RowAllNotesTestTable.swift */; };
 		A38D1A29284A11B6007EBB25 /* Equalable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A28284A11B6007EBB25 /* Equalable.swift */; };
+		A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */; };
 		A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3A89D942837CD2E00A47B2E /* test_SVG.svg */; };
 		A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */; };
 		A3D289922808715900FA0D3A /* OnboardingLostPKViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */; };
@@ -2891,6 +2892,7 @@
 		A38D1A24284A10DC007EBB25 /* RowCreditCardsTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowCreditCardsTestTable.swift; sourceTree = "<group>"; };
 		A38D1A26284A10F3007EBB25 /* RowAllNotesTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowAllNotesTestTable.swift; sourceTree = "<group>"; };
 		A38D1A28284A11B6007EBB25 /* Equalable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Equalable.swift; sourceTree = "<group>"; };
+		A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPublishProfileTests.swift; sourceTree = "<group>"; };
 		A3A89D942837CD2E00A47B2E /* test_SVG.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test_SVG.svg; sourceTree = "<group>"; };
 		A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKTestView.swift; sourceTree = "<group>"; };
 		A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKViewLocators.swift; sourceTree = "<group>"; };
@@ -7425,6 +7427,7 @@
 				B557156226FAF18200F6C9D4 /* AllNotesViewTests.swift */,
 				B557156426FAF1BA00F6C9D4 /* AllNotesDeleteTests.swift */,
 				A3FB63502859CBA500CFE363 /* AllNotesSortingTests.swift */,
+				A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */,
 			);
 			path = AllNotesMenu;
 			sourceTree = "<group>";
@@ -9895,6 +9898,7 @@
 				8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* NoteEditTests.swift in Sources */,
 				B5BA078626AF3B4400D31FED /* NoteViewLocators.swift in Sources */,
+				A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */,
 				B5D2A1872805EAA600C833B9 /* OnboardingPrivateKeyTestView.swift in Sources */,
 				B57A9B3126AB06AD002C954D /* BaseTest.swift in Sources */,
 				A310949B281D9F7C003B96D1 /* BrowserHistoryTests.swift in Sources */,
