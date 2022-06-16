@@ -10,4 +10,6 @@ extension NSUserInterfaceItemIdentifier {
     static let webKitSharing = NSUserInterfaceItemIdentifier("WKMenuItemIdentifierShareMenu")
 
     static let webKitSpeech = NSUserInterfaceItemIdentifier("WKMenuItemIdentifierSpeechMenu")
+
+    static let webKitInspectElement = NSUserInterfaceItemIdentifier("WKMenuItemIdentifierInspectElement")
 }
