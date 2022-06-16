@@ -92,14 +92,30 @@ class NoteTestView: TextEditorContextTestView {
     
     @discardableResult
     func unpublishNote() -> NoteTestView {
-        image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
+        clickPublishedMenuDisclosureTriangle()
         app.staticTexts[NoteViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
         app.windows.sheets["alert"].buttons[NoteViewLocators.Buttons.unpublishNoteButton.accessibilityIdentifier].clickOnHittable()
         return self
     }
     
+    func clickPublishedMenuDisclosureTriangle() -> NoteTestView {
+        image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
+        return self
+    }
+    
+    @discardableResult
+    func clickAddToProfileToggle() -> NoteTestView {
+        app.staticTexts[NoteViewLocators.StaticTexts.addToProfile.accessibilityIdentifier].clickOnExistence()
+        return self
+    }
+    
     func getNoteElementsQueryForVisiblePart() -> XCUIElementQuery {
         return app.windows.textViews.matching(identifier: NoteViewLocators.TextFields.textNode.accessibilityIdentifier)
+    }
+
+    func addNoteToProfile() -> NoteTestView {
+        image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
+        return self
     }
     
     func getNoteTextsForVisiblePart() -> [String] {
