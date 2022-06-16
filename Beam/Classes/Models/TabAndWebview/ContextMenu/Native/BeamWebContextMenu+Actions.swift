@@ -246,26 +246,34 @@ extension BeamWebContextMenuItem {
         return downloadsFolderURL.appendingPathComponent(src.lastPathComponent)
     }
 
+    private var inferMimeType: Bool {
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        return true
+        #else
+        return false
+        #endif
+    }
+
     private func retrieveAndSaveImage(
         to dstURL: URL,
-        overwrite: Bool = false,
+        fromSaveAsMenu: Bool = false,
         payload: ContextMenuMessageHandlerPayload,
         webView: BeamWebView,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        func writeData(_ data: Data, dstURL: URL, fileName: String? = nil, fileExtension: String? = nil, overwrite: Bool) -> Result<Void, Error> {
+        func writeData(_ data: Data, dstURL: URL, fileName: String? = nil, fileExtension: String? = nil) -> Result<Void, Error> {
             do {
                 var availableDstURL: URL = dstURL
-                fileName.map { availableDstURL.appendPathComponent($0) }
-                fileExtension.map { availableDstURL.appendPathExtension($0) }
 
-                if !overwrite {
+                if !fromSaveAsMenu {
+                    fileName.map { availableDstURL.appendPathComponent($0) }
+                    fileExtension.map { availableDstURL.appendPathExtension($0) }
                     availableDstURL = availableDstURL.availableFileURL()
                 }
 
                 let scopedURL = availableDstURL.deletingLastPathComponent()
                 _ = scopedURL.startAccessingSecurityScopedResource() // below write will fail anyway if this returns false
-                try data.write(to: availableDstURL)
+                try data.write(to: availableDstURL, options: [.withoutOverwriting])
                 scopedURL.stopAccessingSecurityScopedResource()
 
                 try? NSWorkspace.shared.bounceDockStack(with: availableDstURL)
@@ -279,18 +287,10 @@ extension BeamWebContextMenuItem {
         func dispatchResult(_ result: Result<Data, Error>, fileName: String? = nil, fileExtension: String? = nil) {
             switch result {
             case .success(let data):
-                completion(writeData(data, dstURL: dstURL, fileName: fileName, fileExtension: fileExtension, overwrite: overwrite))
+                completion(writeData(data, dstURL: dstURL, fileName: fileName, fileExtension: fileExtension))
             case .failure(let error):
                 completion(.failure(error))
             }
-        }
-
-        var inferMimeType: Bool {
-            #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
-            return true
-            #else
-            return false
-            #endif
         }
 
         // Let's check if we're displaying a raw image and we have data available
@@ -327,7 +327,12 @@ extension BeamWebContextMenuItem {
             completion(.failure(BeamWebContextMenuItemError.unexpectedError)); return
         }
 
-        let nameFieldStringValue = payload.imageSrcURL?.lastPathComponent ?? ""
+        let nameFieldStringValue: String
+        if let lastPathComponent = payload.imageSrcURL?.lastPathComponent, !lastPathComponent.isEmpty {
+            nameFieldStringValue = lastPathComponent
+        } else {
+            nameFieldStringValue = "Unknown"
+        }
 
         let savePanel = NSSavePanel()
         savePanel.canCreateDirectories = true
@@ -339,7 +344,7 @@ extension BeamWebContextMenuItem {
                 guard let url = savePanel?.url else {
                     completion(.failure(BeamWebContextMenuItemError.unexpectedError)); return
                 }
-                retrieveAndSaveImage(to: url, overwrite: true, payload: payload, webView: webView, completion: completion)
+                retrieveAndSaveImage(to: url, fromSaveAsMenu: true, payload: payload, webView: webView, completion: completion)
             } else if response == NSApplication.ModalResponse.cancel {
                 completion(.success(())) // showing the panel was a success, user just decided to cancel...
             } else {
@@ -354,45 +359,5 @@ extension BeamWebContextMenuItem {
                 completion(Result(data, error))
             }
         }.resume()
-    }
-}
-
-// Adapted from: https://stackoverflow.com/questions/29644168/get-image-file-type-programmatically-in-swift
-extension Data {
-    private enum ImageHeaderData: UInt8 {
-        case jpeg = 0xFF
-        case png = 0x89
-        case gif = 0x47
-        case tiff_01 = 0x49
-        case tiff_02 = 0x4D
-        case webp = 0x52
-        case heic = 0x00
-    }
-
-    var preferredFileExtension: String? {
-        switch self[0] {
-        case ImageHeaderData.jpeg.rawValue:
-            return UTType.jpeg.preferredFilenameExtension
-        case ImageHeaderData.png.rawValue:
-            return UTType.png.preferredFilenameExtension
-        case ImageHeaderData.gif.rawValue:
-            return UTType.gif.preferredFilenameExtension
-        case ImageHeaderData.tiff_01.rawValue, ImageHeaderData.tiff_02.rawValue:
-            return UTType.tiff.preferredFilenameExtension
-        case ImageHeaderData.webp.rawValue where count >= 12:
-            guard let header = String(data: self[0...11], encoding: .ascii), header.hasPrefix("RIFF"), header.hasSuffix("WEBP")
-            else {
-                return nil
-            }
-            return UTType.webP.preferredFilenameExtension
-        case ImageHeaderData.webp.rawValue where count >= 12:
-            guard let header = String(data: self[8...11], encoding: .ascii), Set(["heic", "heix", "hevc", "hevx"]).contains(header)
-            else {
-                return nil
-            }
-            return UTType.heic.preferredFilenameExtension
-        default:
-            return nil
-        }
     }
 }
