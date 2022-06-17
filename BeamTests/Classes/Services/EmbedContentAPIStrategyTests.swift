@@ -10,9 +10,17 @@ import XCTest
 @testable import Beam
 
 class EmbedContentAPIStrategyTests: XCTestCase {
+    let st = EmbedContentAPIStrategy()
+
+    override func setUp() {
+        Configuration.setAPIEndPointsToStaging()
+    }
+
+    override class func tearDown() {
+        Configuration.reset()
+    }
 
     func testCanEmbed() {
-        let st = EmbedContentAPIStrategy()
         let strings = [
             "https://twitter.com/getonbeam/status/1461351986209562631",
             "https://open.spotify.com/artist/6sFIWsNpZYqfjUpaCgueju?si=9j3YkSZsSDilNJmgI8WOow",
@@ -43,7 +51,6 @@ class EmbedContentAPIStrategyTests: XCTestCase {
     }
 
     func testCannotEmbed() {
-        let st = EmbedContentAPIStrategy()
         let strings = [
             "https://beamapp.co/dl/app",
             "https://apple.com/macbook",
@@ -56,6 +63,13 @@ class EmbedContentAPIStrategyTests: XCTestCase {
             let url = URL(string: string)!
             XCTAssertFalse(st.canBuildEmbeddableContent(for: url))
         }
+    }
+
+    func testURLEncodingOfEmbeddableURLQueryParams() {
+        let input = URL(string: "https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F293&show_artwork=true")!
+
+        let embedURL = st.embedMatchURL(for: input)
+        XCTAssertEqual(embedURL?.absoluteString, "https://api.soundcloud.com/tracks/293&show_artwork=true")
     }
 }
 

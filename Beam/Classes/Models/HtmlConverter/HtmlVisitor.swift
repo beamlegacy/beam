@@ -265,11 +265,11 @@ class HtmlVisitor {
               EmbedContentBuilder().canBuildEmbed(for: url),
               // Use the Embed Provider matcher to cleanup the embed url
               let embedUrl = EmbedContentBuilder().embedMatchURL(for: url) else {
-            return nil
-        }
+                return nil
+            }
 
-        return embedUrl
-    }
+            return embedUrl
+        }
 
     /// Utility to convert BeamElement containing a single embedable url to embed kind
     private func convertElementToEmbed(_ element: BeamElement) -> BeamElement {
