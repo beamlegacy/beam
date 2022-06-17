@@ -104,7 +104,6 @@ class PopoverWindow: NSWindow {
     override func resignMain() {
         super.resignMain()
         if _autocloseIfNotMoved && !didMove {
-            self.close()
             NotificationCenter.default.removeObserver(self, name: .init("NSWindowDidMoveNotification"), object: nil)
         }
     }
