@@ -63,6 +63,7 @@
         "AllCardsDeleteTests",
         "AllCardsViewTests",
         "AllNotesDeleteTests",
+        "AllNotesSortingTests",
         "AllNotesViewTests",
         "AllowListPreferencesTests",
         "BaseTest",
