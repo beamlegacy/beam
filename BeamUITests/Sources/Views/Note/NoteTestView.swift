@@ -61,6 +61,10 @@ class NoteTestView: TextEditorContextTestView {
         return image(NoteViewLocators.Buttons.deleteNoteButton.accessibilityIdentifier)
     }
     
+    func getNoteSwitcherButton(noteName: String) -> XCUIElement {
+        return app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(noteName)'"))
+    }
+    
     func clickDeleteButton() -> AlertTestView {
         getDeleteNoteButton().clickOnHittable()
         return AlertTestView()

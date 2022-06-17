@@ -15,7 +15,6 @@ class NotePinUnpinTests: BaseTest {
     let todaysNoteName = DateHelper().getTodaysDateString(.allNotesViewDates)
     
     func testPinUnpinTest() {
-        let noteSwitcherButton = noteTestView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(todaysNoteName)'"))
         
         launchAppAndOpenFirstNote()
 
@@ -24,7 +23,7 @@ class NotePinUnpinTests: BaseTest {
         }
         
         step("Then note is correctly pinned") {
-            XCTAssertTrue(noteSwitcherButton.exists)
+            XCTAssertTrue(noteTestView.getNoteSwitcherButton(noteName: todaysNoteName).exists)
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 1)
         }
         
@@ -33,7 +32,7 @@ class NotePinUnpinTests: BaseTest {
         }
         
         step("Then note is correctly unpinned") {
-            XCTAssertFalse(noteSwitcherButton.exists)
+            XCTAssertFalse(noteTestView.getNoteSwitcherButton(noteName: todaysNoteName).exists)
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 0)
         }
     }
@@ -61,7 +60,6 @@ class NotePinUnpinTests: BaseTest {
     }
     
     func testShortcutPinNote() {
-        let noteSwitcherButton = noteTestView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(todaysNoteName)'"))
         
         launchAppAndOpenFirstNote()
         
@@ -70,7 +68,7 @@ class NotePinUnpinTests: BaseTest {
         }
         
         step("Then note is correctly pinned") {
-            XCTAssertTrue(noteSwitcherButton.exists)
+            XCTAssertTrue(noteTestView.getNoteSwitcherButton(noteName: todaysNoteName).exists)
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 1)
         }
         
@@ -79,40 +77,35 @@ class NotePinUnpinTests: BaseTest {
         }
         
         step("Then note is correctly unpinned") {
-            XCTAssertFalse(noteSwitcherButton.exists)
+            XCTAssertFalse(noteTestView.getNoteSwitcherButton(noteName: todaysNoteName).exists)
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 0)
         }
     }
     
     func testPinFromAllNotes() {
-        let noteSwitcherButton = noteTestView.app.buttons.element(matching: NSPredicate(format: "identifier = '\(ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)' AND value = '\(todaysNoteName)'"))
         
         step ("Given I navigate to All Note") {
             launchApp()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
         }
         
-        step ("Then I can pin a note from All Notes") {
+        step ("When I pin a note from All Notes") {
             allNotesView.openMenuForSingleNote(0)
-            XCTAssertTrue(allNotesView.isElementAvailableInSingleNoteMenu(AllNotesViewLocators.MenuItems.pinNote))
-            allNotesView.typeKeyboardKey(.escape) // close the menu
-            allNotesView.triggerAllNotesMenuOptionAction(.pinNote)
+                        .menuItem(AllNotesViewLocators.MenuItems.pinNote.accessibilityIdentifier).clickOnExistence()
         }
         
         step("Then note is correctly pinned") {
-            XCTAssertTrue(noteSwitcherButton.exists)
+            XCTAssertTrue(noteTestView.getNoteSwitcherButton(noteName: todaysNoteName).exists)
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 1)
         }
         
         step("When I unpin a note from All Notes") {
             allNotesView.openMenuForSingleNote(0)
-            XCTAssertTrue(allNotesView.isElementAvailableInSingleNoteMenu(AllNotesViewLocators.MenuItems.unpinNote))
-            allNotesView.typeKeyboardKey(.escape) // close the menu
-            allNotesView.triggerAllNotesMenuOptionAction(.unpinNote)
+                        .menuItem(AllNotesViewLocators.MenuItems.unpinNote.accessibilityIdentifier).clickOnExistence()
         }
         
         step("Then note is correctly unpinned") {
-            XCTAssertFalse(noteSwitcherButton.exists)
+            XCTAssertFalse(noteTestView.getNoteSwitcherButton(noteName: todaysNoteName).exists)
             XCTAssertEqual(noteTestView.getNumberOfPinnedNotes(), 0)
         }
     }
