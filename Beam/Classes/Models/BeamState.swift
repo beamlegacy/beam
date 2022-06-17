@@ -484,11 +484,30 @@ import Sentry
 
     func startQuery(_ node: TextNode, animated: Bool) {
         EventsTracker.logBreadcrumb(message: "startQuery \(node)", category: "BeamState")
-        let query = node.currentSelectionWithFullSentences()
-        let (url, _) = urlFor(query: query)
-        guard !query.isEmpty, let url = url else { return }
-        self.createTabFromNode(node, withURL: url)
-        self.mode = .web
+        // if no links create link from search query
+        if node.element.outLinks.isEmpty {
+            let query = node.currentSelectionWithFullSentences()
+            let (url, _) = urlFor(query: query.trimmingCharacters(in: .whitespaces))
+            guard !query.isEmpty, let url = url else { return }
+            self.createTabFromNode(node, withURL: url)
+            self.mode = .web
+            return
+        }
+
+        // if link at cursor open tab with link
+        if let url = node.linkAt(index: node.cursorPosition) {
+            self.createTabFromNode(node, withURL: url)
+            self.mode = .web
+            return
+        }
+
+        // if link in element open tab with link closest to the end
+        if let link = node.element.outLinks.first,
+                  let url = URL(string: link) {
+            self.createTabFromNode(node, withURL: url)
+            self.mode = .web
+            return
+        }
     }
 
     // swiftlint:disable:next cyclomatic_complexity
