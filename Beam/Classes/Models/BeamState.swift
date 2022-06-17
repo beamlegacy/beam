@@ -433,6 +433,13 @@ import Sentry
         return cmdManager.run(command: CloseTab(tab: tab, tabIndex: tabIndex, wasCurrentTab: browserTabsManager.currentTab === tab), on: self, needsToBeSaved: tab.url != nil)
     }
 
+    /// Reloads all tabs which have a `.network` error
+    func reloadOfflineTabs() {
+        for tab in browserTabsManager.tabs where tab.errorPageManager?.error == .network {
+            tab.reload()
+        }
+    }
+
     func createNewUntitledNote() -> BeamNote {
         let title = BeamNote.availableTitle(withPrefix: loc("New Note"))
         return BeamNote.create(title: title)
