@@ -67,5 +67,9 @@ class GoogleEventAttendee: Codable {
     let displayName: String?
     let organizer: Bool?
     let responseStatus: String?
-    let `self`: Bool?
+    let isSelf: Bool?
+
+    private enum CodingKeys: String, CodingKey {
+        case email, displayName, organizer, responseStatus, isSelf = "self"
+    }
 }
