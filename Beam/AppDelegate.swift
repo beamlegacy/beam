@@ -182,6 +182,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             case .reachable:
                 self?.isNetworkReachable = true
                 self?.checkPrivateKey()
+                self?.window?.state.reloadOfflineTabs()
             }
         }.store(in: &cancellableScope)
     }
