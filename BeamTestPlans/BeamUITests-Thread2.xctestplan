@@ -64,6 +64,7 @@
         "AllCardsViewTests",
         "AllNotesDeleteTests",
         "AllNotesPublishProfileTests",
+        "AllNotesSortingTests",
         "AllNotesViewTests",
         "AllowListPreferencesTests",
         "BaseCreditCardTest",
