@@ -245,12 +245,12 @@ export class PointAndShootUI_native implements PointAndShootUI {
    */
   elementBounds(el: BeamHTMLElement | BeamElement, area?: BeamRect, clippingArea?: BeamRect, count = 5): BeamElementBounds {
     const {win} = this.native
-
     // If we are inside an embeddable iframe, collect the whole frame
     if (this.embedHelper.isOnFullEmbeddablePage()) {
       const { width, height } = win.visualViewport
+      const linkTarget = this.embedHelper.getEmbeddableWindowLocation()
       return {
-        element: el,
+        element: this.embedHelper.createLinkElement(linkTarget),
         rect: {
           x: 0,
           y: 0,
