@@ -45,9 +45,14 @@ class AllNotesTestView: BaseView {
     
     @discardableResult
     func triggerAllNotesMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
-        app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 1).clickOnExistence()
-        //Old way to click editor option
-        //image(AllNotesViewLocators.Images.allNotesEditor.accessibilityIdentifier).clickOnExistence()
+        //Sometimes the curosr stays on a note in a table making '...' editor appears confusing XCUITests so it click a wrong element
+        button(AllNotesViewLocators.SortButtons.title.accessibilityIdentifier).hover()
+        waitForAllNotesViewToLoad()
+        if BaseTest().isBigSurOS() {
+            image(AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).clickOnExistence()
+        } else {
+            app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 1).clickOnExistence()
+        }
         menuItem(action.accessibilityIdentifier).clickOnExistence()
         return self
     }
@@ -55,8 +60,6 @@ class AllNotesTestView: BaseView {
     @discardableResult
     func triggerSingleNoteMenuOptionAction(_ action: AllNotesViewLocators.MenuItems) -> AllNotesTestView {
         app.windows.children(matching: .image).matching(identifier: AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).element(boundBy: 0).clickOnExistence()
-        //Old way to click editor option
-        //image(AllNotesViewLocators.Images.singleNoteEditor.accessibilityIdentifier).clickOnExistence()
         menuItem(action.accessibilityIdentifier).clickOnExistence()
         return self
     }
