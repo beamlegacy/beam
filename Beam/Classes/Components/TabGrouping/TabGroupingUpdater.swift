@@ -46,7 +46,7 @@ class TabClusteringGroup: Identifiable, Equatable {
         newGroup.copyProperties(from: self)
         return newGroup
     }
-    
+
 }
 
 class TabGroupingUpdater {
