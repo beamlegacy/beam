@@ -9,6 +9,9 @@ import Foundation
 
 /// Can build embed content from local synchronous parsing
 struct EmbedContentLocalStrategy: EmbedContentStrategy {
+    /// Uses the Embed strategy to parse the input URL and return the matching output URL.
+    /// - Parameter url: Input URL to find matches
+    /// - Returns: Output URL match
     func embedMatchURL(for url: URL) -> URL? {
         var embedUrl: URL?
         embeddableContent(for: url) { embedContent, _ in

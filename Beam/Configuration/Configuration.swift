@@ -206,6 +206,8 @@ struct Configuration {
         set {
             if newValue != publicAPIembed && newValue != EnvironmentVariables.PublicAPI.embed {
                 UserDefaults.standard.set(newValue, forKey: publicAPIembedKey)
+                SupportedEmbedDomains.shared.clearCache()
+                SupportedEmbedDomains.shared.updateDomainsSupportedByAPI()
             }
         }
     }

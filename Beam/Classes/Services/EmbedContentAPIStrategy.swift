@@ -132,6 +132,12 @@ struct EmbedContentAPIStrategy: EmbedContentStrategy {
         }
 
         let matchUrl = url.absoluteString.substring(range: range)
+
+        if range.startIndex != 0,
+           let cleanedUpMatchUrl = matchUrl.removingPercentEncoding {
+            return URL(string: cleanedUpMatchUrl)
+        }
+
         return URL(string: matchUrl)
     }
 
