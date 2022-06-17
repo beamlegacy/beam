@@ -84,7 +84,7 @@ enum DOMInputAutocomplete: String, Codable {
 extension DOMInputAutocomplete {
     private static let matchingDict: [String: Self] = [
         "cardholder-name": .creditCardFullName,
-        "cc-expiry": .creditCardExpirationDate,
+        "cc-expiry": .creditCardExpirationDate
     ]
 
     static func fromString(_ string: String) -> Self? {

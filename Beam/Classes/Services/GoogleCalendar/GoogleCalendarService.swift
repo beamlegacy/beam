@@ -291,7 +291,7 @@ final class GoogleCalendarService {
 
         let acceptedEventList = eventList.events.filter { event in
             guard let attendees = event.attendees else { return true }
-            return attendees.contains(where: {$0.`self` == true && $0.responseStatus == "accepted"})
+            return attendees.contains(where: {$0.isSelf == true && $0.responseStatus == "accepted"})
         }
 
         for event in acceptedEventList {
@@ -315,7 +315,7 @@ final class GoogleCalendarService {
 
             var meetingAttendees: [Meeting.Attendee] = []
             if let attendees = event.attendees {
-                for attendee in attendees where attendee.`self` != true {
+                for attendee in attendees where attendee.isSelf != true {
                     meetingAttendees.append(Meeting.Attendee(email: attendee.email ?? "", name: attendee.displayName ?? ""))
                 }
             }

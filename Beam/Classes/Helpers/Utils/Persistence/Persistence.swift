@@ -4,7 +4,7 @@ import BeamCore
 
 // Inspired from https://www.avanderlee.com/swift/property-wrappers/
 
-struct Persistence {    
+struct Persistence {
     enum Authentication {
         @KeychainStorable("authentication.accessToken") static var accessToken: String?
         @KeychainStorable("authentication.refreshToken") static var refreshToken: String?

@@ -64,7 +64,6 @@ struct ClickCatchingView: NSViewRepresentable {
     }
 }
 
-
 private enum ClickType {
     case click, doubleClick, rightClick
 }
