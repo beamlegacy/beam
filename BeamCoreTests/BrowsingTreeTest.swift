@@ -4,11 +4,12 @@
 //
 //  Created by Paul Lefkopoulos on 19/08/2021.
 //
-// swiftlint:disable:next file_length
+// swiftlint:disable file_length
 
 import XCTest
 @testable import BeamCore
 
+// swiftlint:disable:next type_body_length
 class BrowsingTreeTest: XCTestCase {
     override func setUpWithError() throws {
         super.setUp()
