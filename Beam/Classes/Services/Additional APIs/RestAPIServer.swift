@@ -17,16 +17,13 @@ class RestAPIServer {
         case updatePublicationGroup(note: BeamNote, publicationGroups: [String])
         case embed(url: URL)
         case providers
+        case iframeProviders
 
         func bodyParameters() throws -> (Data, String)? {
             switch self {
             case .publishNote(let note, let publicationGroups):
                 return createBody(for: note, and: publicationGroups)
-            case .unpublishNote:
-                return nil
-            case .embed:
-                return nil
-            case .providers:
+            case .unpublishNote, .embed, .providers, .iframeProviders:
                 return nil
             case .updatePublicationGroup(let note, let publicationGroups):
                 return createBody(for: note, and: publicationGroups)
@@ -37,9 +34,7 @@ class RestAPIServer {
             switch self {
             case .publishNote, .unpublishNote, .updatePublicationGroup:
                 return URL(string: Configuration.publicAPIpublishServer)!
-            case .embed:
-                return URL(string: Configuration.publicAPIembed)!
-            case .providers:
+            case .embed, .providers, .iframeProviders:
                 return URL(string: Configuration.publicAPIembed)!
             }
         }
@@ -54,12 +49,14 @@ class RestAPIServer {
                 return "/parseContent"
             case .providers:
                 return "/providers"
+            case .iframeProviders:
+                return "/iframeProviders"
             }
         }
 
         var queryParameters: [String: String]? {
             switch self {
-            case .publishNote, .unpublishNote, .updatePublicationGroup, .providers:
+            case .publishNote, .unpublishNote, .updatePublicationGroup, .providers, .iframeProviders:
                 return nil
             case .embed(let url):
                 let content = url.absoluteString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? url.absoluteString
@@ -83,7 +80,7 @@ class RestAPIServer {
                 return "POST"
             case .unpublishNote:
                 return "DELETE"
-            case .embed, .providers:
+            case .embed, .providers, .iframeProviders:
                 return "GET"
             }
         }

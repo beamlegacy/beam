@@ -31,6 +31,11 @@ class HtmlNoteAdapterTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
+        Configuration.setAPIEndPointsToStaging()
+    }
+
+    override class func tearDown() {
+        Configuration.reset()
     }
 
     /// Setup the required mock classes
@@ -569,6 +574,33 @@ class HtmlNoteAdapterTests: XCTestCase {
                 XCTAssertEqual(testFileStorage.events.count, 0)
 
                 XCTAssertEqual(firstEl.text.text, "If you can wait and not be tired by waiting, Or, being lied about, don’t deal in lies, Or, being hated, don’t give way to hating, And yet don’t look too good, nor talk too wise;")
+            } else {
+                XCTFail("expected at least one element")
+            }
+            expectation.fulfill()
+        }
+        wait(for: [expectation], timeout: 10.0)
+    }
+
+    func testSoundCloudEmbedElement() {
+        let html = """
+            <a href="https://w.soundcloud.com/player/?visual=true&url=https%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F293&show_artwork=true">retweets</a>
+        """
+        let htmlNoteAdapter = setupTestMocks("https://public.beamapp.co/beam/note")
+        let expectation = XCTestExpectation(description: "convert html to BeamElements")
+        htmlNoteAdapter.convert(html: html) { (results: [BeamElement]) in
+            if let testDownloadManager = self.testDownloadManager,
+               let testFileStorage = self.testFileStorage,
+               let firstEl = results.first {
+                XCTAssertEqual(results.count, 1)
+                XCTAssertEqual(testDownloadManager.events.count, 0)
+                XCTAssertEqual(testFileStorage.events.count, 0)
+                XCTAssertTrue(firstEl.kind.isEmbed)
+                if case let .embed(url, _, _) = firstEl.kind {
+                    XCTAssertEqual(url.absoluteString, "https://api.soundcloud.com/tracks/293&show_artwork=true")
+                } else {
+                    XCTFail()
+                }
             } else {
                 XCTFail("expected at least one element")
             }
