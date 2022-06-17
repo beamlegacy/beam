@@ -119,4 +119,10 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.showOnboarding.rawValue)
         return self
     }
+    
+    @discardableResult
+    func createNote() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.createNote.rawValue)
+        return self
+    }
 }
