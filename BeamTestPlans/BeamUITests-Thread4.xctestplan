@@ -68,6 +68,7 @@
         "AllCardsViewTests",
         "AllNotesDeleteTests",
         "AllNotesPublishProfileTests",
+        "AllNotesSortingTests",
         "AllNotesViewTests",
         "AllowListPreferencesTests",
         "BaseTest",
