@@ -786,6 +786,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationWillHide(_ notification: Notification) {
+        CustomPopoverPresenter.shared.dismissPopovers(animated: false)
         for window in windows {
             window.state.browserTabsManager.currentTab?.switchToBackground()
         }
