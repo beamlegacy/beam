@@ -6,13 +6,16 @@ import {
 } from "@beam/native-beamtypes"
 
 export class BeamEmbedHelper {
-  pattern = "__EMBEDPATTERN__"
-  regex: RegExp
+  embedPattern = "__EMBEDPATTERN__"
+  embedRegex: RegExp
+  // Used when the embed iframe navigates after loading the first url
+  firstLocationLoaded?: Location
   win: BeamWindow<MessageHandlers>
 
   constructor(win: BeamWindow) {
     this.win = win
-    this.regex = new RegExp(this.pattern, "i")
+    this.embedRegex = new RegExp(this.embedPattern, "i")
+    this.firstLocationLoaded = this.win.location
   }
 
   /**
@@ -23,13 +26,13 @@ export class BeamEmbedHelper {
    * @return {*}  {boolean}
    * @memberof BeamEmbedHelper
    */
-   isEmbeddableElement(element: BeamElement): boolean {
-     const isInsideIframe = this.isInsideIframe()
+   isEmbeddableElement(element: any): boolean {
+     const isInsideIframe = this.isOnFullEmbeddablePage()
      // Check if current window location is matching embed url and is inside an iframe context
-     if (this.urlMatchesEmbedProvider([this.win.location.href]), isInsideIframe) {
+     if (isInsideIframe) {
        return isInsideIframe
-     }
-     
+      }
+      
     // check the element if it's embeddable
     switch (this.win.location.hostname) {
       case "twitter.com":
@@ -48,9 +51,26 @@ export class BeamEmbedHelper {
     }
   }
 
+  /**
+   * Returns the window location or first loaded location that matches 
+   * the embed or iframe regex
+   *
+   * @return {*}  {(string | undefined)}
+   * @memberof BeamEmbedHelper
+   */
+  getEmbeddableWindowLocation(): string | undefined {
+    const urls = [ this.win.location.href, this.firstLocationLoaded.href ]
+
+    return urls.find(url => {
+      return this.embedRegex.test(url)
+    })
+  }
+
   isOnFullEmbeddablePage() {
     return (
-      this.urlMatchesEmbedProvider([this.win.location.href]) &&
+      (
+        this.urlMatchesEmbedProvider([this.win.location.href, this.firstLocationLoaded.href])
+      ) &&
       this.isInsideIframe()
     )
   }
@@ -65,10 +85,16 @@ export class BeamEmbedHelper {
   urlMatchesEmbedProvider(urls: string[]): boolean {
     return urls.some((url) => {
       if (!url) return false
-      return this.regex.test(url) || url.includes("youtube.com/embed")
+      return this.embedRegex.test(url) || url.includes("youtube.com/embed")
     })
   }
 
+  /**
+   * Returns true if current window context is not the top level window context
+   *
+   * @return {*}  {boolean}
+   * @memberof BeamEmbedHelper
+   */
   isInsideIframe(): boolean {
     try {
       return window.self !== window.top
@@ -90,6 +116,7 @@ export class BeamEmbedHelper {
 
     switch (hostname) {
       case "twitter.com":
+        // see if we target the tweet html
         return this.parseTwitterElementForEmbed(element)
         break
       case "www.youtube.com":
@@ -102,7 +129,9 @@ export class BeamEmbedHelper {
         return this.parseYouTubeThumbnailForEmbed(element)
         break
       default:
-        return
+        if (this.urlMatchesEmbedProvider([element.src])) {
+          return this.createLinkElement(element.src)
+        }
         break
     }
   }
@@ -131,6 +160,7 @@ export class BeamEmbedHelper {
 
     return
   }
+
   /**
    * Returns if the provided element is a tweet. Should only be run on twitter.com
    *
@@ -186,7 +216,6 @@ export class BeamEmbedHelper {
    * Parse html element into a Anchortag if it's a youtube thumbnail
    *
    * @param {BeamElement} element
-   * @param {BeamWindow<any>} win
    * @return {*}  {BeamHTMLElement}
    * @memberof this
    */
@@ -213,7 +242,6 @@ export class BeamEmbedHelper {
    * Return BeamHTMLElement of an Anchortag with provided href attribute
    *
    * @param {string} href
-   * @param {BeamWindow} win
    * @return {*}  {BeamHTMLElement}
    * @memberof this
    */
