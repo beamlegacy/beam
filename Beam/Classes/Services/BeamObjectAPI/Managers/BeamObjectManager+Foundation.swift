@@ -98,7 +98,7 @@ extension BeamObjectManager {
                     Logger.shared.logDebug("saveAllToAPI using \(manager)",
                                            category: .beamObjectNetwork)
 
-                    let request = try manager.saveAllOnBeamObjectApi(force: force) { result in
+                    _ = try manager.saveAllOnBeamObjectApi(force: force) { result in
                         switch result {
                         case .failure(let error):
                             Logger.shared.logError("Can't saveAll: \(error.localizedDescription)", category: .beamObjectNetwork)
@@ -937,8 +937,6 @@ extension BeamObjectManager {
             }
         }
 
-
-
         return request
     }
 
@@ -1177,8 +1175,6 @@ extension BeamObjectManager {
             }
         }
 
-
-
         return request
     }
 
@@ -1361,8 +1357,6 @@ extension BeamObjectManager {
                 }
             }
         }
-
-
 
         return request
     }
@@ -1574,8 +1568,6 @@ extension BeamObjectManager {
             }
         }
 
-
-
         return request
     }
 
@@ -1629,8 +1621,6 @@ extension BeamObjectManager {
                 }
             }
         }
-
-
 
         return request
     }

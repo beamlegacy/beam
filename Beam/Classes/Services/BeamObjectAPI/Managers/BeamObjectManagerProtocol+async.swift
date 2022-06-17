@@ -408,4 +408,3 @@ extension BeamObjectManagerDelegate {
         return goodObjects + newObjectsSaved
     }
 }
-

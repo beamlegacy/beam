@@ -294,7 +294,7 @@ struct TabsListView: View {
                                     }
                                 }
                                 .frame(maxHeight: .infinity)
-                                .background(hasUnpinnedTabs ? nil : GeometryReader { prxy in
+                                .background(hasUnpinnedTabs ? nil : GeometryReader { _ in
                                     Color.clear.preference(key: CurrentTabGlobalFrameKey.self, value: .init(index: selectedIndex, frame: .zero))
                                 })
                                 .onAppear {
