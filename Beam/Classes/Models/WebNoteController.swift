@@ -216,9 +216,13 @@ class WebNoteController: Encodable, Decodable {
         }
     }
 
+    /// Will replace search with searchlink
+    /// - Parameters:
+    ///   - search: search description
+    ///   - url: url description
     public func replaceSearchWithSearchLink(_ search: String, url: URL) async {
         guard noteOrDefault.text.text != search,
-              !element.outLinks.contains(url.absoluteString) else {
+              element.outLinks.isEmpty else {
             return
         }
         let text = await WebNoteController.convertURLToBeamTextLink(url: url)
