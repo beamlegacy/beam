@@ -334,6 +334,10 @@ final class GoogleCalendarService {
 }
 
 extension GoogleCalendarService: CalendarService {
+    var hasAuthorization: Bool {
+        return !inNeedOfPermission
+    }
+
     func getAccountName(completionHandler: @escaping (Result<String, CalendarError>) -> Void) {
         getGoogleUserEmail { result in
             completionHandler(result)
