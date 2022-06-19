@@ -35,6 +35,7 @@ protocol CalendarService {
     var name: String { get }
     var scope: String? { get }
     var inNeedOfPermission: Bool { get }
+    var hasAuthorization: Bool { get }
 
     func requestAccess(completionHandler: @escaping (Bool) -> Void)
     func getMeetings(for dateMin: Date, and dateMax: Date?, onlyToday: Bool, query: String?, completionHandler: @escaping (Result<[Meeting]?, CalendarError>) -> Void)
@@ -106,13 +107,15 @@ class CalendarManager: ObservableObject {
             }
         case .appleCalendar:
             let appleCalendar = connectedSources.first(where: { $0.service == .appleCalendar }) ?? AppleCalendarService()
-            appleCalendar.requestAccess { [weak self] connected in
-                guard let self = self else { return }
-                if connected && !self.isConnected(calendarService: .appleCalendar) {
-                    Persistence.Authentication.hasAppleCalendarConnection = true
-                    self.connectedSources.append(appleCalendar)
+            if appleCalendar.hasAuthorization {
+                appleCalendar.requestAccess { [weak self] connected in
+                    guard let self = self else { return }
+                    if connected && !self.isConnected(calendarService: .appleCalendar) {
+                        Persistence.Authentication.hasAppleCalendarConnection = true
+                        self.connectedSources.append(appleCalendar)
+                    }
+                    completionHandler(connected)
                 }
-                completionHandler(connected)
             }
         }
     }

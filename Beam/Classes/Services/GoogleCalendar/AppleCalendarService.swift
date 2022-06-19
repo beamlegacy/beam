@@ -85,6 +85,23 @@ private extension EKParticipant {
 }
 
 extension AppleCalendarService: CalendarService {
+    internal var hasAuthorization: Bool {
+        let status = EKEventStore.authorizationStatus(for: EKEntityType.event)
+        switch status {
+        case EKAuthorizationStatus.restricted, EKAuthorizationStatus.denied:
+            UserAlert.showMessage(message: "Beam would like to access you calendar", informativeText: nil, buttonTitle: "Ok", secondaryButtonTitle: "Cancel") {
+                let prefsURL = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Calendars")!
+                NSWorkspace.shared.open(prefsURL)
+            }
+            return false
+        case .authorized, .notDetermined:
+            return true
+        @unknown default:
+            break
+        }
+        return false
+    }
+
     func getAccountName(completionHandler: @escaping (Result<String, CalendarError>) -> Void) {
         completionHandler(.success("macOS Calendar"))
     }
