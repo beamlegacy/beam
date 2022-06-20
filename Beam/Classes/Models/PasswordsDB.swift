@@ -12,9 +12,7 @@ import GRDB
 
 enum PasswordDBError: Error {
     case cantReadDB(errorMsg: String)
-    case cantDecryptPassword(errorMsg: String)
     case cantSavePassword(errorMsg: String)
-    case cantEncryptPassword
     case cantDeletePassword(errorMsg: String)
     case errorFetchingPassword(errorMsg: String)
     case errorSearchingPassword(errorMsg: String)
@@ -320,29 +318,13 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func password(hostname: String, username: String) throws -> String? {
-        guard let passwordRecord = try passwordRecord(hostname: hostname, username: username) else {
-            return nil
-        }
-        do {
-            let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password, EncryptionManager.shared.localPrivateKey())
-            return decryptedPassword
-        } catch let error {
-            throw PasswordDBError.cantDecryptPassword(errorMsg: error.localizedDescription)
-        }
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String) throws -> PasswordRecord {
+        try save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: nil)
     }
 
-    func save(hostname: String, username: String, password: String) throws -> PasswordRecord {
-        try save(hostname: hostname, username: username, password: password, uuid: nil)
-    }
-
-    func save(hostname: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
-                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password, EncryptionManager.shared.localPrivateKey()) else {
-                    throw PasswordDBError.cantEncryptPassword
-                }
-                let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
                 var passwordRecord = PasswordRecord(
                     uuid: uuid ?? UUID(),
                     entryId: id(for: hostname, and: username),
@@ -370,13 +352,9 @@ class PasswordsDB: PasswordStore {
         }
     }
 
-    func update(record: PasswordRecord, hostname: String, username: String, password: String, uuid: UUID? = nil) throws -> PasswordRecord {
+    func update(record: PasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID? = nil) throws -> PasswordRecord {
         do {
             return try dbPool.write { db in
-                guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password, EncryptionManager.shared.localPrivateKey()) else {
-                    throw PasswordDBError.cantEncryptPassword
-                }
-                let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
                 var updatedRecord = record
                 if let uuid = uuid {
                     updatedRecord.uuid = uuid

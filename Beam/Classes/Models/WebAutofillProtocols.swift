@@ -47,11 +47,10 @@ protocol PasswordStore {
     func find(_ searchString: String) throws -> [PasswordRecord]
     func fetchAll() throws -> [PasswordRecord]
     func allRecords(_ updatedSince: Date?) throws -> [PasswordRecord]
-    func password(hostname: String, username: String) throws -> String?
     func passwordRecord(hostname: String, username: String) throws -> PasswordRecord?
-    func save(hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord
     func save(passwords: [PasswordRecord]) throws
-    func update(record: PasswordRecord, hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord
+    func update(record: PasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord
     @discardableResult func markDeleted(hostname: String, username: String) throws -> PasswordRecord
     @discardableResult func markAllDeleted() throws -> [PasswordRecord]
     @discardableResult func deleteAll() throws -> [PasswordRecord]

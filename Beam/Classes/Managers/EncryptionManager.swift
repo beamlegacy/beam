@@ -107,23 +107,12 @@ class EncryptionManager {
                let privateKeyData = privateKeys[email],
                let result = SymmetricKey(base64EncodedString: privateKeyData) {
                 return result
-            } else if let privateKeys = Persistence.Encryption.privateKeys,
-                      let oldPrivateKey = Persistence.Encryption.privateKey,
-                      !privateKeys.contains(where: { $0.value == oldPrivateKey }),
-                      let oldSymmetricKey = SymmetricKey(base64EncodedString: oldPrivateKey) {
-                Logger.shared.logWarning("Private key for user \(email) doesn't exist, fetching old private key",
-                                         category: .encryption)
-
-                self.savePrivateKey(for: email, with: oldPrivateKey)
-
-                return oldSymmetricKey
-            } else {
-                Logger.shared.logWarning("Private key for user \(email) doesn't exist, creating new one",
-                                         category: .encryption)
-                let key = self.generateKey()
-                self.savePrivateKey(for: email, with: key.asString())
-                return key
             }
+            Logger.shared.logWarning("Private key for user \(email) doesn't exist, creating new one",
+                                     category: .encryption)
+            let key = self.generateKey()
+            self.savePrivateKey(for: email, with: key.asString())
+            return key
         }
     }
 
@@ -158,14 +147,7 @@ class EncryptionManager {
             }
             Logger.shared.logWarning("Local Private key doesn't exist or has a wrong format: \(Persistence.Encryption.localPrivateKey ?? "-"), creating new one",
                                      category: .encryption)
-
-            var key: SymmetricKey
-            if let dataKey = Persistence.Encryption.privateKey,
-               let privateKey = SymmetricKey(base64EncodedString: dataKey) {
-                key = privateKey
-            } else {
-                key = self.generateKey()
-            }
+            let key = self.generateKey()
             Persistence.Encryption.localPrivateKey = key.asString()
             return key
         }
