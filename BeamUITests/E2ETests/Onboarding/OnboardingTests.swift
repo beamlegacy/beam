@@ -146,7 +146,7 @@ class OnboardingTests: BaseTest {
         }
         
         step("Then correct password is accepted"){
-            onboardingUsernameView.getPasswordTextField().click()
+            onboardingUsernameView.getPasswordTextField().clickOnExistence()
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
             onboardingUsernameView.typeKeyboardKey(.delete)
             onboardingUsernameView.getPasswordTextField().tapInTheMiddle()
@@ -428,7 +428,7 @@ class OnboardingTests: BaseTest {
         step("THEN \(expectedTabs) tab with '\(expectedTabTitle)' is displayed") {
             XCTAssertTrue(webView.waitForWebViewToLoad(), "Web view wasn't loaded")
             XCTAssertTrue(webView.waitForTabTitleToEqual(index: 0, expectedString: expectedTabTitle))
-            XCTAssertEqual(webView.getNumberOfTabs(), expectedTabs)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), expectedTabs)
         }
     }
     

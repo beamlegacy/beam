@@ -44,7 +44,7 @@ class HelpAndFeedbackTests: BaseTest {
         }
 
         step("Then a tab with \(expectedCannyLink) is opened"){
-            XCTAssertEqual(webView!.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView!.getNumberOfTabs(wait: true), 1)
             let firstTabURL = webView!.getTabUrlAtIndex(index: 0)
             XCTAssertTrue(firstTabURL.hasPrefix(expectedCannyLink), "Actual web url is \(firstTabURL)")
         }
@@ -56,7 +56,7 @@ class HelpAndFeedbackTests: BaseTest {
         }
 
         step("Then a tab with \(expectedCannyLink) is opened"){
-            XCTAssertEqual(webView!.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView!.getNumberOfTabs(wait: true), 2)
             let secondTabURL = webView!.getTabUrlAtIndex(index: 1)
             XCTAssertTrue(secondTabURL.hasPrefix(expectedCannyLink), "Actual web url is \(secondTabURL)")
         }

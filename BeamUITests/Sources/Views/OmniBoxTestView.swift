@@ -13,6 +13,7 @@ class OmniBoxTestView: BaseView {
 
     func focusOmniBoxSearchField(forCurrenTab: Bool = false) {
         shortcutHelper.shortcutActionInvoke(action: forCurrenTab ? .openLocation : .newTab)
+        _ = getOmniBoxSearchField().waitForExistence(timeout: BaseTest.maximumWaitTimeout)
     }
 
     func getOmniBoxSearchField() -> XCUIElement {
@@ -51,28 +52,28 @@ class OmniBoxTestView: BaseView {
     }
     
     func clickBackButton() {
-        button(ToolbarLocators.Buttons.backButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.backButton.accessibilityIdentifier).clickOnExistence()
     }
     
     func clickForwardButton() {
-        button(ToolbarLocators.Buttons.forwardButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.forwardButton.accessibilityIdentifier).clickOnExistence()
     }
     
     @discardableResult
     func navigateToJournalViaHomeButton() -> JournalTestView {
-        button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).clickOnExistence()
         return JournalTestView()
     }
     
     @discardableResult
     func navigateToNoteViaPivotButton() -> NoteTestView {
-        button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).clickOnExistence()
         return NoteTestView()
     }
     
     @discardableResult
     func navigateToWebView()  -> WebTestView {
-        button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).clickOnExistence()
         return WebTestView()
     }
     

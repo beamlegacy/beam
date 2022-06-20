@@ -11,31 +11,26 @@ import XCTest
 class PnSTestView: BaseView {
     
     @discardableResult
-    func triggerAddToNotePopup(_ element: XCUIElement) -> PnSTestView {
-        XCUIElement.perform(withKeyModifiers: .option) {
-            let elementMiddle = element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            // click at middle of element1 to make sure the page has focus
-            elementMiddle.hover()
-            _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-            elementMiddle.click()
-        }
-        return PnSTestView()
-    }
-    
-    @discardableResult
     func waitForCollectPopUpAppear() -> Bool {
         return self.textField(PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
     }
     
-    func pointAndShootElement(_ element: XCUIElement) {
-        XCUIElement.perform(withKeyModifiers: .option) {
-            element.click()
+    @discardableResult
+    func pointAndShootElement(_ element: XCUIElement) -> PnSTestView {
+        element.hoverInTheMiddle()
+        XCUIApplication.perform(withKeyModifiers: .option) {
+            // sometimes UITest does not do the focus on the screen, need to add additional click on PnS area
+            element.clickInTheMiddle()
+            if !waitForCollectPopUpAppear(){
+                otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).clickOnExistence()
+            }
         }
+        waitForCollectPopUpAppear()
+        return self
     }
     
     func addToNoteByName(_ elementToAdd: XCUIElement, _ noteName: String, _ isNewNote: Bool = false) {
-        triggerAddToNotePopup(elementToAdd)
-        
+        pointAndShootElement(elementToAdd)
         let destinationNote = app.windows.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
         destinationNote.clickOnExistence()
         typeKeyboardKey(.delete)
@@ -51,17 +46,12 @@ class PnSTestView: BaseView {
     
     @discardableResult
     func addToTodayNote(_ elementToAdd: XCUIElement) -> PnSTestView {
-        XCUIElement.perform(withKeyModifiers: .option) {
-            let elementMiddle = elementToAdd.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5))
-            // click at middle of element1 to make sure the page has focus
-            elementMiddle.hover()
-            _ = otherElement(PnSViewLocators.Other.pointFrame.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout)
-            elementMiddle.click()
-            let destinationCard = app.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
-            destinationCard.clickOnExistence()
-            typeKeyboardKey(.delete)
-            destinationCard.typeText("\r")
-        }
+        pointAndShootElement(elementToAdd)
+        let destinationCard = app.textFields.matching(identifier: PnSViewLocators.Other.shootCardPicker.accessibilityIdentifier).firstMatch
+        _ = destinationCard.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+        destinationCard.clickOnExistence()
+        typeKeyboardKey(.delete)
+        typeKeyboardKey(.enter)
         return self
     }
     
@@ -84,7 +74,7 @@ class PnSTestView: BaseView {
     //Too unstable due to fast pop-up disappearing, could cause false failures
     func openNoteFromSuccessWithoutAddedItemsPopUp(_ noteName: String) -> NoteTestView {
         _ = staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
-        staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).click()
+        staticText(PnSViewLocators.StaticTexts.addedToPopup.accessibilityIdentifier + noteName).clickOnExistence()
         return NoteTestView()
     }
     
@@ -163,10 +153,12 @@ class PnSTestView: BaseView {
     }
     
     func getCopyButton() -> XCUIElement {
+        waitForCollectPopUpAppear()
         return staticText(PnSViewLocators.StaticTexts.copy.accessibilityIdentifier)
     }
     
     func getShareButton() -> XCUIElement {
+        waitForCollectPopUpAppear()
         return app.windows.children(matching: .image).matching(identifier: PnSViewLocators.StaticTexts.share.accessibilityIdentifier).element(boundBy: 0)
     }
     

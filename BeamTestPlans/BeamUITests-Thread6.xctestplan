@@ -10,7 +10,9 @@
   ],
   "defaultOptions" : {
     "testRepetitionMode" : "retryOnFailure",
-    "testTimeoutsEnabled" : true
+    "testTimeoutsEnabled" : true,
+    "uiTestingScreenshotsLifetime" : "keepNever",
+    "userAttachmentLifetime" : "keepNever"
   },
   "testTargets" : [
     {

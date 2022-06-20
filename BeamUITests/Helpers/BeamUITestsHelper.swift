@@ -79,7 +79,7 @@ class BeamUITestsHelper {
         case .svg:
             tapCommand(.loadUITestSVG)
         }
-        
+        _ = WebTestView().waitForWebViewToLoad()
         let centerOfPage = self.app.webViews.element.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.1))
         centerOfPage.hover()
     }
@@ -96,7 +96,7 @@ class BeamUITestsHelper {
     // Doesn't work 
     func logsValue() -> String? {
         let allLogsWindow = XCUIApplication().windows["All Logs"]
-        allLogsWindow.click()
+        allLogsWindow.clickOnExistence()
         return BaseView().getElementStringValue(element:  allLogsWindow.scrollViews.containing(.button, identifier: "Bottom").element)
     }
 
