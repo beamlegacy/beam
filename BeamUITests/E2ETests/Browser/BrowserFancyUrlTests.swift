@@ -11,6 +11,7 @@ import XCTest
 class BrowserFancyUrlTests: BaseTest {
     
     func testFancyUrlOpening() throws {
+        let omniboxTestView = OmniBoxTestView()
         let journalView = launchApp()
 
         let urlsToTest = [
@@ -25,11 +26,14 @@ class BrowserFancyUrlTests: BaseTest {
         for urlToTest in urlsToTest {
             step("Given I open \(urlToTest) web page"){
                 journalView.openWebsite(urlToTest)
+                _ = webView.waitForWebViewToLoad()
             }
             step("Then Google is not launching a search"){
                 shortcutHelper.shortcutActionInvoke(action: .openLocation)
-                url = OmniBoxTestView().getSearchFieldValue()
+                _ = omniboxTestView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+                url = omniboxTestView.getSearchFieldValue()
                 XCTAssertFalse(url!.contains("google"))
+                webView.typeKeyboardKey(.escape)
             }
             if (!urlToTest.contains("localhost")){ // localhost is http
                 step("And \(urlToTest) is opened"){

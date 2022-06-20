@@ -60,6 +60,7 @@ class NoteEditTests: BaseTest {
         }
         
         step("When I delete last letter from the title"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             journalView.searchInOmniBox(noteTwoNameToBeCreated, false)
             webView.selectCreateNote(noteTwoNameToBeCreated)
             noteView.makeNoteTitleEditable()

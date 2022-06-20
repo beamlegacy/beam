@@ -17,6 +17,7 @@ class OmniboxAutocompleteTests: BaseTest {
     func testAutocompleteSelection() {
         launchApp()
         step("Given I search in Omnibox"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox("everest", false)
         }
         
@@ -81,6 +82,7 @@ class OmniboxAutocompleteTests: BaseTest {
             var webView: WebTestView?
 
         step("Given I open website: \(urlToOpen)"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             webView = omniboxView.searchInOmniBox(urlToOpen, true)
         }
 
