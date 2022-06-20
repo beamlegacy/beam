@@ -30,7 +30,7 @@ class PDFFilesBrowserViewTests: BaseTest {
         let expectedDefaultZoomRatio = "100%"
         
         step("When I open a PDF file") {
-            MockHTTPWebPages().openMockPage(.testPdfFile)
+            mockPage.openMockPage(.testPdfFile)
         }
         
         step("Then I see print, download and zoom in/out buttons and correct zoom ratio value as") {

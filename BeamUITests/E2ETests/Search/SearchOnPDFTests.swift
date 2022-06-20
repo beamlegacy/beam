@@ -22,7 +22,7 @@ class SearchOnPDFTests: BaseTest {
         let searchText = "Beam"
         
         step("When I open a PDF file") { 
-            MockHTTPWebPages().openMockPage(.testPdfFile)
+            mockPage.openMockPage(.testPdfFile)
         }
         
         step("When I use CMD+F") {

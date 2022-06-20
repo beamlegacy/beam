@@ -46,6 +46,7 @@ class AdBlockerTests: BaseTest {
     
     func testBlockedWebsiteAllowOnce() {
         step("Given I navigate to blocked test page \(url)") {
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         
@@ -61,6 +62,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("When I relaunch \(url) in the same tab") {
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         
@@ -90,6 +92,7 @@ class AdBlockerTests: BaseTest {
     func testBlockedWebsitePermanentlyAllowed() {
         
         step("Given I navigate to blocked test page \(url)") {
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         
@@ -117,6 +120,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("When I relaunch \(url) in the same tab") {
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         
@@ -159,10 +163,11 @@ class AdBlockerTests: BaseTest {
         
         step("When I add \(hostUrl) in Allow List") {
             privacyWindow.addAllowUrl().fillNewUrl(hostUrl).saveAllowList()
-            shortcutHelper.shortcutActionInvoke(action: .closeTab)
+            shortcutHelper.shortcutActionInvoke(action: .closeTab) // close
         }
         
         step("And I navigate to blocked test page \(url)") {
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             mockPage.openMockPage(.fullSiteAdBlock)
         }
         

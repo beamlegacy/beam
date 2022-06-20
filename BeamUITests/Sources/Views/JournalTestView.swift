@@ -39,6 +39,7 @@ class JournalTestView: TextEditorContextTestView {
     
     @discardableResult
     func createNoteViaOmniboxSearch(_ noteNameToBeCreated: String) -> NoteTestView {
+        shortcutHelper.shortcutActionInvoke(action: .newTab)
         searchInOmniBox(noteNameToBeCreated, false)
         app.typeKey(.enter, modifierFlags: .option)
         waitForDoesntExist(searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier))
