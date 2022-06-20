@@ -111,7 +111,8 @@ struct DownloaderView<List: DownloadListProtocol>: View {
                             })
                                 .padding(.trailing, (download.state == .completed && download.errorMessage == nil) ? 20 : 40)
                                 .frame(height: cellHeight) //Force the height to fix a bug on Monterey were the ClickCatchingView is not getting the good height
-                            }
+                        }
+                        .onDragIf(provider: itemProvider(for: download))
                     }
                     .padding(.horizontal, cellRegularPadding)
                     .padding(.bottom, cellRegularPadding)
@@ -132,6 +133,14 @@ struct DownloaderView<List: DownloadListProtocol>: View {
         } else {
             return false
         }
+    }
+
+    private func itemProvider(for download: List.Element) -> NSItemProvider? {
+        guard download.state == .completed,
+              download.errorMessage == nil,
+              let artifactURL = download.artifactURL,
+              FileManager.default.fileExists(atPath: artifactURL.path) else { return nil }
+        return NSItemProvider(contentsOf: artifactURL)
     }
 
     private var foregroundColor: Color {
@@ -187,5 +196,18 @@ struct DownloaderView_Previews: PreviewProvider {
         return Group {
             DownloaderView(downloadList: downloadList, onCloseButtonTap: {})
         }.preferredColorScheme(.dark)
+    }
+}
+
+extension View {
+    @ViewBuilder
+    fileprivate func onDragIf(provider: NSItemProvider?) -> some View {
+        if let provider = provider {
+            self.onDrag {
+                provider
+            }
+        } else {
+            self
+        }
     }
 }
