@@ -98,6 +98,10 @@ class BaseView {
         return app.windows.menuItems[element]
     }
     
+    func isSettingEnabled(element: XCUIElement) -> Bool {
+        return (element.value as? Int == 1)
+    }
+    
     func typeKeyboardKey(_ key: XCUIKeyboardKey, _ numberOfTimes: Int = 1) {
         for _ in 1...numberOfTimes {
             self.app.typeKey(key, modifierFlags: [])

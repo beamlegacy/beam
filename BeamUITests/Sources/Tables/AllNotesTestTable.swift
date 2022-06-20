@@ -64,8 +64,18 @@ class AllNotesTestTable: BaseView, Rowable {
     }
     
     //TBD using BaseTable class accepting accepting generic tables
-    func containsRows() -> Bool {
-        //TBD with next Sync tests
-        return false
+    func containsRows(_ externalTableRows: [RowAllNotesTestTable]) -> (Bool, String) {
+        var failedValues = [String]()
+        for externalRow in externalTableRows {
+            for i in 0..<rows.count {
+                let rowComparisonResult =  rows[i].isEqualTo(externalRow)
+                if rowComparisonResult.0 {
+                    break
+                } else if i == rows.count - 1 {
+                    failedValues.append("Row with '\(externalRow.title)' title wasn't found")
+                }
+            }
+        }
+        return (failedValues.count == 0, failedValues.joined(separator: " || "))
     }
 }

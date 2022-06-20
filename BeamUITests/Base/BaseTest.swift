@@ -45,15 +45,15 @@ class BaseTest: XCTestCase {
     }
     
     override func tearDown() {
+        if deleteRemoteAccount {
+            uiMenu.deleteRemoteAccount().resetAPIEndpoints()
+        }
         if isAppRunning() {
             storeScreenshot()
             uiMenu.destroyDB()
         }
         if deletePK {
             uiMenu.deletePrivateKeys()
-        }
-        if deleteRemoteAccount {
-            uiMenu.deleteRemoteAccount().resetAPIEndpoints()
         }
         super.tearDown()
         terminateAppInstance()

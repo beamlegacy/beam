@@ -145,6 +145,7 @@
         "SignInAutocompleteTests",
         "SignInSucessfullyTests",
         "SignInTests",
+        "SignOutTests",
         "SignUpAutocompleteTests",
         "SigninTests",
         "SlashMenuTests",
