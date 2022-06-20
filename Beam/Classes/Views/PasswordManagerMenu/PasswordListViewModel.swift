@@ -27,6 +27,8 @@ final class PasswordListViewModel: ObservableObject {
                     message = "Could not read password from database."
                 case .decryptionError:
                     message = "Could not decrypt password."
+                case .encryptionError:
+                    message = "Could not encrypt password."
                 }
             } else {
                 message = error.localizedDescription
