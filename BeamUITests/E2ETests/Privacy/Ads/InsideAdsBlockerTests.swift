@@ -32,6 +32,7 @@ class InsideAdsBlockerTests: BaseTest {
                 privacyWindow.clickInsideAdBlockerSetting()
             }
             XCTAssertFalse(privacyWindow.isSettingEnabled(element: privacyWindow.getInsideAdBlockerSettingElement()))
+            shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
         step ("When I navigate to \(url)"){
@@ -50,6 +51,7 @@ class InsideAdsBlockerTests: BaseTest {
                 privacyWindow.clickInsideAdBlockerSetting()
             }
             XCTAssertTrue(privacyWindow.isSettingEnabled(element: privacyWindow.getInsideAdBlockerSettingElement()))
+            shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
         step ("When I navigate to \(url)"){

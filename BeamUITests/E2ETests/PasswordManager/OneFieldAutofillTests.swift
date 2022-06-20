@@ -17,6 +17,7 @@ class OneFieldAutofillTests: BaseTest {
         uiMenu.destroyDB()
             .startMockHTTPServer()
             .populatePasswordsDB()
+        shortcutHelper.shortcutActionInvoke(action: .newTab)
     }
 
     func testTextFieldAloneDoesNotTriggerAutofill() {

@@ -44,6 +44,7 @@ class BrowserPinnedTabTests: BaseTest {
         }
         
         step("When I open a new tab"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             OmniBoxTestView().searchInOmniBox(newTabToOpen, true)
         }
         
