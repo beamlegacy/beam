@@ -54,6 +54,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
             mockPage.getContinueButtonElement().clickOnExistence()
         }
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
             XCTAssertEqual(mockPage.getResultValue(label: "username1"), loginUsername)
             XCTAssertEqual(mockPage.getResultValue(label: "password1"), passwordUsername)
             XCTAssertNil(mockPage.getResultValue(label: "username2"))
@@ -98,6 +99,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
             XCTAssertEqual(mockPage.getResultValue(label: "username"), login)
             XCTAssertEqual(mockPage.getResultValue(label: "password"), password)
         }
@@ -153,6 +155,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
             XCTAssertEqual(mockPage.getResultValue(label: "username"), login)
             XCTAssertEqual(mockPage.getResultValue(label: "password"), password)
         }
@@ -275,6 +278,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
             XCTAssertEqual(mockPage.getResultValue(label: "firstname"), testData)
             XCTAssertEqual(mockPage.getResultValue(label: "lastname"), testData)
             XCTAssertEqual(mockPage.getResultValue(label: "username"), loginUsername)
@@ -305,6 +309,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
 
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear()
             XCTAssertEqual(mockPage.getResultValue(label: "username"), loginEscape)
             XCTAssertEqual(mockPage.getResultValue(label: "password"), passwordEscape)
         }

@@ -41,7 +41,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("Then I'm redirected to a new tab and the note has not been changed"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             webView.openDestinationNote()
             XCTAssertTrue(noteView!.waitForNoteViewToLoad())
             XCTAssertEqual(noteView!.getNumberOfVisibleNotes(), 1)

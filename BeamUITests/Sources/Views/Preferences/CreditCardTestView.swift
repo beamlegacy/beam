@@ -40,7 +40,7 @@ class CreditCardTestView: BaseView {
             shortcutHelper.shortcutActionInvoke(action: .endOfLine)
             textField.typeText(value)
         } else {
-            textField.click()
+            textField.clickOnExistence()
         }
         //reduces flakiness for Big Sur card number typing
         if typeSlowly {

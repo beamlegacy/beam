@@ -171,7 +171,7 @@ class OmniboxAutocompleteTests: BaseTest {
         helper.tapCommand(.omniboxFillHistory)
 
         step("When I type: \(partiallyTypedSearchText)"){
-            omniboxView.getOmniBoxSearchField().click()
+            omniboxView.getOmniBoxSearchField().clickOnExistence()
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
         
@@ -241,7 +241,7 @@ class OmniboxAutocompleteTests: BaseTest {
         helper.tapCommand(.omniboxFillHistory)
 
         step("When I type: \(partiallyTypedSearchText)"){
-            omniboxView.getOmniBoxSearchField().click()
+            omniboxView.getOmniBoxSearchField().clickOnExistence()
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
         
@@ -264,7 +264,7 @@ class OmniboxAutocompleteTests: BaseTest {
         helper.tapCommand(.omniboxFillHistory)
 
         step("When I type: \(partiallyTypedSearchText)"){
-            omniboxView.getOmniBoxSearchField().click()
+            omniboxView.getOmniBoxSearchField().clickOnExistence()
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
         

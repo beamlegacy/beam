@@ -18,7 +18,6 @@ class BrowserShortcutsTests: BaseTest {
     override func setUpWithError() throws{
         try super.setUpWithError()
         journalView = launchApp()
-        uiMenu.destroyDB()
         testHelper = BeamUITestsHelper(journalView.app)
     }
     
@@ -36,19 +35,19 @@ class BrowserShortcutsTests: BaseTest {
         step ("Then I can open tabs using shortcuts"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox(testHelper.randomSearchTerm(), true)
-            XCTAssertEqual(webView.getNumberOfTabs(), 3)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 3)
             XCTAssertFalse(testPage.isPasswordPageOpened())
         }
         
         step ("Then I can close tabs using shortcuts"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .closeTab, numberOfTimes: 2)
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }
         
         step ("Then I can reopen tabs using shortcuts"){
             shortcutHelper.shortcutActionInvokeRepeatedly(action: .reOpenClosedTab, numberOfTimes: 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertTrue(testPage.isPasswordPageOpened())
         }
 
@@ -94,6 +93,7 @@ class BrowserShortcutsTests: BaseTest {
             testPage.enterInput("xyz", .username)
             XCTAssertNotEqual(testPage.getInputValue(.username), emptyString)
             shortcutHelper.shortcutActionInvoke(action: .reloadPage)
+            _ = webView.waitForWebViewToLoad()
             XCTAssertEqual(testPage.getInputValue(.username), emptyString)
         }
         
@@ -157,7 +157,7 @@ class BrowserShortcutsTests: BaseTest {
         }
         
         step("THEN new tab is opened and it has search text of  \(expectedSearchTextPart1) and \(expectedSearchTextPart2)") {
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertTrue(webView.waitForTabTitleToContain(index: 1, expectedString: expectedSearchTextPart1))
             XCTAssertTrue(webView.waitForTabTitleToContain(index: 1, expectedString: expectedSearchTextPart2))
         }

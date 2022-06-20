@@ -62,6 +62,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         }
         
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear(inView: view)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardNumberLabelMockPage), johnCCNumber)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardExpDateLabelMockPage), johnCCExpDate)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardOwnerNameLabelMockPage), johnCCOwnerName)
@@ -130,6 +131,7 @@ class CreditCardAutocompleteTests: BaseCreditCardTest {
         }
         
         step("Then the results page is populated with sign in data") {
+            mockPage.waitForContinueButtonToDisappear(inView: view)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardNumberLabelMockPage), johnCCNumber)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardExpDateLabelMockPage), johnCCExpDate)
             XCTAssertEqual(mockPage.getResultValue(label: creditCardOwnerNameLabelMockPage), johnCCOwnerName)

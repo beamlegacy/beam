@@ -13,18 +13,18 @@ class GoMenu: BaseMenuBar {
     let menuBarTitle = "Go"
     
     func changeNote() {
-        menuBarItem(menuBarTitle).click()
-        menuItem("Change Note").click()
+        menuBarItem(menuBarTitle).clickOnExistence()
+        menuItem("Change Note").clickOnExistence()
     }
     
     func goBack() {
-        menuBarItem(menuBarTitle).click()
-        menuItem("Back").click()
+        menuBarItem(menuBarTitle).clickOnExistence()
+        menuItem("Back").clickOnExistence()
     }
     
     func goForward() {
-        menuBarItem(menuBarTitle).click()
-        menuItem("Forward").click()
+        menuBarItem(menuBarTitle).clickOnExistence()
+        menuItem("Forward").clickOnExistence()
     }
     
 }

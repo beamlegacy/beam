@@ -104,7 +104,7 @@ class AllNotesTestView: BaseView {
         XCTContext.runActivity(named: "Create a note named '\(noteName)' using + icon") {_ in
             tableTextField(AllNotesViewLocators.TextFields.newPrivateNote.accessibilityIdentifier).doubleClick()
             app.typeText(" " + noteName) //Workaround for CI that skips chars in the end
-            tableImage(AllNotesViewLocators.Buttons.newNoteButton.accessibilityIdentifier).click()
+            tableImage(AllNotesViewLocators.Buttons.newNoteButton.accessibilityIdentifier).clickOnExistence()
             return self
         }
     }
@@ -152,7 +152,7 @@ class AllNotesTestView: BaseView {
     
     @discardableResult
     func openJournal() -> JournalTestView {
-        button(AllNotesViewLocators.Buttons.journalButton.accessibilityIdentifier).click()
+        button(AllNotesViewLocators.Buttons.journalButton.accessibilityIdentifier).clickOnExistence()
         return JournalTestView()
     }
     
