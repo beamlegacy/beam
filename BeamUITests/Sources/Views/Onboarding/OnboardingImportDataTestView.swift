@@ -70,7 +70,7 @@ class OnboardingImportDataTestView: BaseView {
     @discardableResult
     func selectBrowser(_ browser: OnboardingImportDataViewLocators.Browsers) -> OnboardingImportDataTestView {
         image(OnboardingImportDataViewLocators.Images.browsersDropDownIcon.accessibilityIdentifier).tapInTheMiddle()
-        app.windows.menus.menuItems[browser.rawValue].click()
+        app.windows.menus.menuItems[browser.rawValue].clickOnExistence()
         return self
     }
     

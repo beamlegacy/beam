@@ -39,6 +39,10 @@ class MockHTTPWebPages: BaseView {
         return app.windows.webViews[viewAccessibility].buttons["Continue"]
     }
     
+    func waitForContinueButtonToDisappear(inView viewAccessibility: String = "Sign In") {
+        waitForDoesntExist(app.windows.webViews[viewAccessibility].buttons["Continue"])
+    }
+    
     func getNextButtonElement(inView viewAccessibility: String = "Sign In") -> XCUIElement {
         return app.windows.webViews[viewAccessibility].staticTexts["Next"]
     }
@@ -48,7 +52,7 @@ class MockHTTPWebPages: BaseView {
     }
     
     func setDropdownFieldElement(value: String, inView viewAccessibility: String = "Sign In") -> Void {
-        app.windows.menuItems[value].click()
+        app.windows.menuItems[value].clickOnExistence()
     }
     
     func getResultValue(label: String) -> String? {

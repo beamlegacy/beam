@@ -38,7 +38,7 @@ class NoteEditorTests: BaseTest {
         firstJournalEntry.clear()
         
         step("Then note displays typed text correctly"){
-            noteTestView.getNoteNodesForVisiblePart().first?.click()
+            noteTestView.getNoteNodesForVisiblePart().first?.clickOnExistence()
             journalView.app.typeText(texts[0])
             XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
         }
@@ -71,7 +71,7 @@ class NoteEditorTests: BaseTest {
         launchApp()
         
         step("Given I type \(contextMenuTriggerKey) char"){
-            noteTestView.getNoteNodesForVisiblePart().first?.click()
+            noteTestView.getNoteNodesForVisiblePart().first?.clickOnExistence()
             let firstJournalEntry = journalView.getNoteByIndex(1)
             firstJournalEntry.tapInTheMiddle()
             firstJournalEntry.clear()
@@ -141,7 +141,7 @@ class NoteEditorTests: BaseTest {
         
         step("Then correct number of tabs is opened"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
         }
     }
     
@@ -300,7 +300,7 @@ class NoteEditorTests: BaseTest {
             addLinkView.typeKeyboardKey(.enter)
             XCTAssertEqual(noteTestView.getNoteNodeValueByIndex(0), expectedBiDiLink)
             noteTestView.openBiDiLink(expectedBiDiLink)
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), urlAdded)
         }
         
@@ -308,7 +308,7 @@ class NoteEditorTests: BaseTest {
             noteTestView.shortcutHelper.shortcutActionInvoke(action: .newTab)
             noteTestView.shortcutHelper.shortcutActionInvoke(action: .paste)
             noteTestView.typeKeyboardKey(.enter)
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 1), urlAdded)
         }
     }

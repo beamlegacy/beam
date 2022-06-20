@@ -21,7 +21,7 @@ class FileMenu: BaseMenuBar {
     }
     
     func openMenu() -> FileMenu {
-        menuBarItem(menuBarTitle).click()
+        menuBarItem(menuBarTitle).clickOnExistence()
         return self
     }
     

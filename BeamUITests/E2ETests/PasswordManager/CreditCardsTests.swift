@@ -109,11 +109,11 @@ class CreditCardsTests: BaseTest {
     }
     
     func testCancelCreditCardItemEditing() {
-        
+        var rowBeforeEdit = RowCreditCardsTestTable()
         launchAppAndOpenEditCreditCardsTable(populateCardsDB: true)
-        let rowBeforeEdit = CreditCardsTestTable().rows[0]
         
         step("WHEN edit Credit card data and click Cancel") {
+            rowBeforeEdit = CreditCardsTestTable().rows[0]
             creditCardsTable = CreditCardsTestTable().openEditCardView(index: 0)
             self.openAndEditFirstCreditCardFromDB()
             creditCardView.cancelCreditCardDeletion()

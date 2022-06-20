@@ -18,7 +18,7 @@ class JournalTestView: TextEditorContextTestView {
     func openAllNotesMenu() -> AllNotesTestView {
         let allNotesMenuButton = button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier)
         waitFor(PredicateFormat.isHittable.rawValue, allNotesMenuButton)
-        allNotesMenuButton.click()
+        allNotesMenuButton.clickOnExistence()
         return AllNotesTestView()
     }
     
@@ -27,7 +27,7 @@ class JournalTestView: TextEditorContextTestView {
         let button = app.buttons.matching(identifier: ToolbarLocators.Buttons.noteSwitcher.accessibilityIdentifier)
             .matching(NSPredicate(format: "value = '\(noteName)'")).firstMatch
         waitFor(PredicateFormat.isHittable.rawValue, button)
-        button.click()
+        button.clickOnExistence()
         return NoteTestView()
     }
     
@@ -41,6 +41,7 @@ class JournalTestView: TextEditorContextTestView {
     func createNoteViaOmniboxSearch(_ noteNameToBeCreated: String) -> NoteTestView {
         searchInOmniBox(noteNameToBeCreated, false)
         app.typeKey(.enter, modifierFlags: .option)
+        waitForDoesntExist(searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier))
         return NoteTestView()
     }
     

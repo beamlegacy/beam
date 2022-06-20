@@ -113,6 +113,7 @@ class NoteEditTests: BaseTest {
         step("Then it has a source icon"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView = NoteTestView()
+            noteView.waitForNoteViewToLoad()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
             XCTAssertTrue(noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
@@ -120,7 +121,7 @@ class NoteEditTests: BaseTest {
         
         step("Then I'm redirected to the source page when clicking on the icon"){
             noteView.button(NoteViewLocators.Buttons.sourceButton.accessibilityIdentifier).tapInTheMiddle()
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             let webPageUrl = webView.getTabUrlAtIndex(index: 1)
             XCTAssertTrue(webPageUrl.hasSuffix("/UITests-4.html"), "Actual web page is \(webPageUrl)")
         }
@@ -139,6 +140,7 @@ class NoteEditTests: BaseTest {
         step("Then it has a move handle"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             noteView = NoteTestView()
+            noteView.waitForNoteViewToLoad()
             let imageNote = noteView.getImageNodeByIndex(nodeIndex: 0)
             imageNote.hover()
             XCTAssertTrue(noteView.handle(NoteViewLocators.Buttons.moveHandle.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))

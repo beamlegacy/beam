@@ -51,6 +51,7 @@ class CreditCardsTestTable: BaseView, Rowable {
     }
     
     func openEditCardView(index: Int) -> CreditCardsTestTable {
+        getCardIconElement(index: index).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         getCardIconElement(index: index).doubleTapInTheMiddle()
         return self
     }
