@@ -139,6 +139,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("When I search in web and switch to note view"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
@@ -152,6 +153,7 @@ class EditorShortcutsTests: BaseTest {
         }
         
         step ("When I search in web and switch to note view"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             journalView.searchInOmniBox(testHelper.randomSearchTerm(), true)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         }
