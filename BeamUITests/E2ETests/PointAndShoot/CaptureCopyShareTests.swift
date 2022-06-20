@@ -22,8 +22,7 @@ class CaptureCopyShareTests: BaseTest {
     }
     
     private func triggerShareOption(elementToAdd: XCUIElement, title: String, clickMenuItem: Bool = true) {
-        pnsView
-            .triggerAddToNotePopup(elementToAdd)
+        pnsView.pointAndShootElement(elementToAdd)
             .getShareButton()
             .clickOnExistence()
         if clickMenuItem {
@@ -38,7 +37,7 @@ class CaptureCopyShareTests: BaseTest {
         
         step ("When I capture text and click Copy") {
             let textElementToAdd = pnsView.staticText(textToCapture)
-            pnsView.triggerAddToNotePopup(textElementToAdd)
+            pnsView.pointAndShootElement(textElementToAdd)
         }
         
         step ("Then I see copied label") {
@@ -61,8 +60,9 @@ class CaptureCopyShareTests: BaseTest {
         step ("When I capture text and click Copy") {
             helper.openTestPage(page: .page4)
             let imageItemToAdd = pnsView.image("forest")
-            pnsView.triggerAddToNotePopup(imageItemToAdd)
-            pnsView.getCopyButton().tapInTheMiddle()
+            pnsView.pointAndShootElement(imageItemToAdd)
+                .getCopyButton()
+                .tapInTheMiddle()
         }
            
         step ("Then I see copied label") {
@@ -87,12 +87,12 @@ class CaptureCopyShareTests: BaseTest {
         for windowTitle in windows {
             step ("Then \(windowTitle) window is opened using Share option") {
                 self.triggerShareOption(elementToAdd: textElementToAdd, title: windowTitle)
-                
+                _ = webView.waitForWebViewToLoad()
+                waitForIntValueEqual(timeout: BaseTest.maximumWaitTimeout, expectedNumber: 2, query: webView.getNumberOfWindows())
                 XCTAssertTrue(
                     pnsView.isWindowOpenedWithContaining(title: windowTitle) ||
                     pnsView.isWindowOpenedWithContaining(title: windowTitle, isLowercased: true)
                     )
-                
                 shortcutHelper.shortcutActionInvoke(action: .close)
             }
         }

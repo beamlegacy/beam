@@ -17,7 +17,7 @@ class SearchTestView: BaseView {
     @discardableResult
     func typeInSearchField(_ searchText: String, _ pressEnter: Bool = false) -> SearchTestView {
         let searchField = self.getSearchFieldElement()
-        searchField.click()
+        searchField.clickOnExistence()
         searchField.typeText(searchText)
         if pressEnter {
             typeKeyboardKey(.enter)
@@ -26,13 +26,14 @@ class SearchTestView: BaseView {
     }
     
     func closeSearchField() {
-        self.image(SearchViewLocators.Buttons.closeButton.accessibilityIdentifier).click()
+        self.image(SearchViewLocators.Buttons.closeButton.accessibilityIdentifier).clickOnExistence()
+        waitForDoesntExist(image(SearchViewLocators.Buttons.closeButton.accessibilityIdentifier))
     }
     
     @discardableResult
     func navigateForward(numberOfTimes: Int = 1) -> SearchTestView {
         for _ in 1...numberOfTimes {
-            self.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).click()
+            self.image(SearchViewLocators.Buttons.forwardButton.accessibilityIdentifier).clickOnExistence()
         }
         return self
     }
@@ -40,7 +41,7 @@ class SearchTestView: BaseView {
     @discardableResult
     func navigateBackward(numberOfTimes: Int = 1) -> SearchTestView {
         for _ in 1...numberOfTimes {
-            self.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).click()
+            self.image(SearchViewLocators.Buttons.backwardButton.accessibilityIdentifier).clickOnExistence()
         }
         return self
     }

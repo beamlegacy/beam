@@ -98,9 +98,9 @@ class PasswordManagerHelper: BaseView {
         searchField("Email or phone").typeText(login)
         let nextButton = button("Next")
         nextButton.clickOnHittable()
-        secureTextField("Enter your password").click()
+        secureTextField("Enter your password").clickOnExistence()
         secureTextField("Enter your password").typeText(password)
-        nextButton.click()
+        nextButton.clickOnExistence()
         return button("Google Account: qa none  \n(qa@beamapp.co)").waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     

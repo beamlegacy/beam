@@ -129,6 +129,7 @@ class PasswordPreferencesTestView: PreferencesBaseView {
     @discardableResult
     func clickEditCreditCardButton() -> CreditCardTestView {
         button(PasswordPreferencesViewLocators.Buttons.editButton.accessibilityIdentifier).clickOnExistence()
+        _ = staticText(PasswordPreferencesViewLocators.Other.creditCards.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         return CreditCardTestView()
     }
     

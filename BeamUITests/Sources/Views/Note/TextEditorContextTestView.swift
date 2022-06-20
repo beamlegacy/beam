@@ -62,7 +62,9 @@ class TextEditorContextTestView: BaseView {
     
     @discardableResult
     func openBiDiLink(_ linkName: String) -> NoteTestView {
-        app.windows.scrollViews.buttons[linkName].firstMatch.tapInTheMiddle()
+        let link = app.windows.scrollViews.buttons[linkName].firstMatch
+        link.hoverInTheMiddle()
+        link.tapInTheMiddle()
         return NoteTestView()
     }
     

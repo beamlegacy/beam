@@ -100,6 +100,8 @@ class BaseTest: XCTestCase {
         } else {
             app.terminate()
         }
+        let background = app.wait(for: .notRunning, timeout: 5)
+        XCTAssertTrue(background)
         app.launch()
         return JournalTestView()
     }

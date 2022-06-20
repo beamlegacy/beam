@@ -24,7 +24,7 @@ class WebsiteAuthPopupTestView: BaseView {
     }
     
     func cancelAuthentication() -> AppWebsiteTestView {
-        staticText(WebsiteAuthPopupViewLocators.Buttons.cancelButton.accessibilityIdentifier).click()
+        staticText(WebsiteAuthPopupViewLocators.Buttons.cancelButton.accessibilityIdentifier).clickOnExistence()
         return AppWebsiteTestView()
     }
 }

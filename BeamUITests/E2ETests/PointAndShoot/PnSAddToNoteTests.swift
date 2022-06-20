@@ -23,7 +23,6 @@ class PnSAddToNoteTests: BaseTest {
     func SKIPtestAddTextToTodaysNote() throws {
         try XCTSkipIf(true, "Skipped so far, to replace NavigationCollectUITests")
         let journalView = launchApp()
-        uiMenu.destroyDB()
         let helper = BeamUITestsHelper(pnsView.app)
         let expectedItemText1 = "Point And Shoot Test Fixture Cursor"
         let expectedItemText2 = "Go to UITests-1"
@@ -59,7 +58,6 @@ class PnSAddToNoteTests: BaseTest {
     
     func testAddTextToNewNote() {
         launchApp()
-        uiMenu.destroyDB()
         let helper = BeamUITestsHelper(pnsView.app)
         
         step("Given I open Test page"){
@@ -493,21 +491,7 @@ class PnSAddToNoteTests: BaseTest {
         // Get locations of the text
         let parent = journalView.app.webViews.containing(.staticText, identifier: linkText).element
         let textElement = parent.staticTexts[prefix].firstMatch
-        // click at middle of element1 to make sure the page has focus
-        textElement.tapInTheMiddle()
-        // Hold option
-        XCUIElement.perform(withKeyModifiers: .option) {
-            // While holding option
-            // 1 point frame should be visible
-            let shootSelections = journalView.app.otherElements.matching(identifier:"PointFrame")
-            XCTAssertEqual(shootSelections.count, 1)
-            // Clicking element to trigger shooting mode
-            textElement.tapInTheMiddle()
-            // Release option
-        }
-        
-        // Add to today's note
-        helper.addNote()
+        pnsView.addToTodayNote(textElement)
         // Confirm text is saved in Journal
         helper.showJournal()
         let title3Predicate = NSPredicate(format: "value = %@", prefix + linkText)

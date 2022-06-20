@@ -34,7 +34,7 @@ class WebTestView: BaseView {
     
     @discardableResult
     func openAllNotesMenu() -> AllNotesTestView {
-        button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.noteSwitcherAllNotes.accessibilityIdentifier).clickOnExistence()
         return AllNotesTestView()
     }
     
@@ -43,7 +43,7 @@ class WebTestView: BaseView {
         self.getDestinationNoteElement().clickOnHittable()
         searchField(WebViewLocators.SearchFields.destinationNoteSearchField.accessibilityIdentifier).typeText(title)
         let predicate = NSPredicate(format: "identifier BEGINSWITH 'autocompleteResult-selected-'")
-        app.otherElements.matching(predicate).firstMatch.click()
+        app.otherElements.matching(predicate).firstMatch.clickOnExistence()
         }
     }
     
@@ -95,7 +95,7 @@ class WebTestView: BaseView {
         if let value = self.getElementStringValue(element: element).split(separator: ":").last {
             intValue = Int(value)
         }
-        app.dialogs.buttons.firstMatch.click()
+        app.dialogs.buttons.firstMatch.clickOnExistence()
         return intValue ?? -1
     }
     
@@ -179,7 +179,7 @@ class WebTestView: BaseView {
     }
 
     func getNumberOfWindows() -> Int {
-        self.app.windows.count
+        return self.app.windows.count
     }
     
     @discardableResult
@@ -238,7 +238,7 @@ class WebTestView: BaseView {
     }
     
     func getCurrentPDFZoomRatio() -> String {
-        return getElementStringValue(element: staticText(WebViewLocators.PDFElements.zoomRatio.accessibilityIdentifier))
+        return getElementStringValue(element: staticText(WebViewLocators.PDFElements.zoomRatio.accessibilityIdentifier).firstMatch)
     }
     
     func browseHistoryForwardButtonClick() -> WebTestView {

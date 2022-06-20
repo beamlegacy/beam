@@ -60,7 +60,7 @@ class NoteCreationTests: BaseTest {
         let journalView = launchApp()
         
         step("When I create \(noteNameToBeCreated) a note referencing it from another Note"){
-            journalView.textView(NoteViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.click()
+            journalView.textView(NoteViewLocators.TextFields.textNode.accessibilityIdentifier).firstMatch.clickOnExistence()
             journalView.app.typeText("@" + noteNameToBeCreated)
             journalView.typeKeyboardKey(.enter)
         }

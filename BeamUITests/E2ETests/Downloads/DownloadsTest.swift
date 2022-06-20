@@ -35,7 +35,7 @@ class DownloadsTest: BaseTest {
         }
 
         step("When I stop downloading process"){
-            downloadsView!.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).click()
+            downloadsView!.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).clickOnExistence()
         }
         
         step("Then resume download button exists and stop download button doesn't exist"){
@@ -57,7 +57,7 @@ class DownloadsTest: BaseTest {
                 journalView.searchInOmniBox(downloadLink, true)
                 omniBoxView.openDownloadsView()
             }
-            downloadsView!.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).click()
+            downloadsView!.button(DownloadViewLocators.Buttons.stopDownloadButton.accessibilityIdentifier).clickOnExistence()
         }
 
         step("Then I can see Clear button available"){
@@ -65,7 +65,7 @@ class DownloadsTest: BaseTest {
         }
         
         step("When I click Clear button"){
-            downloadsView!.staticText(DownloadViewLocators.Buttons.clearButton.accessibilityIdentifier).click()
+            downloadsView!.staticText(DownloadViewLocators.Buttons.clearButton.accessibilityIdentifier).clickOnExistence()
         }
         
         step("Then Downloads option is unavailable anymore"){
