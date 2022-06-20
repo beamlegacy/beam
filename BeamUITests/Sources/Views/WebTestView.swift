@@ -150,6 +150,7 @@ class WebTestView: BaseView {
         return app.windows.scrollViews.webViews["\(noteName) - beam"].waitForExistence(timeout: implicitWaitTimeout)
     }
     
+    @discardableResult
     func waitForWebViewToLoad() -> Bool {
         return app.windows.scrollViews.webViews.firstMatch.waitForExistence(timeout: implicitWaitTimeout)
     }

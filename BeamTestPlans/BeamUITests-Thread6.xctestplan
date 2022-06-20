@@ -137,6 +137,7 @@
         "SearchOnWebTests",
         "SignInAutocompleteTests",
         "SignInSucessfullyTests",
+        "SignOutTests",
         "SignUpAutocompleteTests",
         "SigninTests",
         "SyncTests",
