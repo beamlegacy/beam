@@ -14,5 +14,4 @@ final class DownloadListFake: DownloadListProtocol, PopoverWindowPresented {
     func remove(_ download: DownloadListItemFake) {}
     func openFile(_ download: DownloadListItemFake) {}
     func showInFinder(_ download: DownloadListItemFake) {}
-
 }
