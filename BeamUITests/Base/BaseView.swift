@@ -134,9 +134,6 @@ class BaseView {
     @discardableResult
     func populateOmniboxWith(_ text: String) -> OmniBoxTestView {
         let omniSearchField = searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier)
-        if !omniSearchField.exists {
-            shortcutHelper.shortcutActionInvoke(action: .openLocation)
-        }
         _ = omniSearchField.waitForExistence(timeout: BaseTest.maximumWaitTimeout)
         omniSearchField.clickClearAndType(text)
         BaseTest.waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), BaseTest.minimumWaitTimeout)
@@ -145,6 +142,7 @@ class BaseView {
     
     @discardableResult
     func openWebsite(_ url: String) -> WebTestView {
+        shortcutHelper.shortcutActionInvoke(action: .openLocation)
         _ = populateOmniboxWith(url)
         self.typeKeyboardKey(.enter)
         return WebTestView()

@@ -41,6 +41,7 @@ class CookieBannerBlockerTests: BaseTest {
                 privacyWindow.clickCookieBannerBlockerSetting()
             }
             XCTAssertTrue(privacyWindow.isSettingEnabled(element: privacyWindow.getCookieBannerBlockerSettingElement()))
+            shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
         step ("When I navigate to \(url)"){
@@ -59,6 +60,7 @@ class CookieBannerBlockerTests: BaseTest {
                 privacyWindow.clickCookieBannerBlockerSetting()
             }
             XCTAssertFalse(privacyWindow.isSettingEnabled(element: privacyWindow.getCookieBannerBlockerSettingElement()))
+            shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
         step ("When I navigate to \(url)"){
