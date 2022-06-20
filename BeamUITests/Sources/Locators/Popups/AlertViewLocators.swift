@@ -18,6 +18,7 @@ enum AlertViewLocators {
         case notNowButton = "Not Now"
         case savePasswordButton = "Save Password"
         case saveCCButton = "Save Credit Card"
+        case signOutButton = "Sign Out"
     }
     
     enum StaticTexts: String, CaseIterable, UIElement {
@@ -25,6 +26,11 @@ enum AlertViewLocators {
         case connectDescription = "Connect to Beam to sync, encrypt and publish your notes."
         case tooManyPinnedNotes = "Too many pinned notes"
         case fivePinnedNotesMax = "You can only have 5 pinned notes.\nUnpin some notes to pin new ones."
+        case signOutConfirmation = "Are you sure you want to sign out?"
+    }
+    
+    enum Checkboxes: String, CaseIterable, UIElement {
+        case deleteAllCheckbox = "Delete all data on this device"
     }
 
 }
