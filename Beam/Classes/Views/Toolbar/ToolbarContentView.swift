@@ -149,7 +149,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     private func onDownloadButtonPressed(containerGeometry: GeometryProxy) {
         if let downloaderWindow = downloadList.presentingWindow {
             downloaderWindow.close()
-        } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true) {
+        } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true, movable: false) {
             let downloaderView = DownloaderView(downloadList: downloadList) { [weak window] in
                 window?.close()
             }
