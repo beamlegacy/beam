@@ -22,10 +22,21 @@ class AlertTestView: BaseView {
     }
     
     @discardableResult
-    func cancelDeletion() -> BaseView {
+    func cancelButtonClick() -> BaseView {
         let cancelButton = button(AlertViewLocators.Buttons.cancelButton.accessibilityIdentifier).clickOnHittable()
         waitForDoesntExist(cancelButton)
         return self
+    }
+    
+    @discardableResult
+    func signOutButtonClick() -> BaseView {
+        let cancelButton = button(AlertViewLocators.Buttons.signOutButton.accessibilityIdentifier).clickOnHittable()
+        waitForDoesntExist(cancelButton)
+        return self
+    }
+    
+    func getDeleteAllCheckbox() -> XCUIElement {
+        return checkBox("Delete all data on this device")
     }
     
     @discardableResult
