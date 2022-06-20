@@ -28,16 +28,16 @@ class BrowserTabViewTests: BaseTest {
         let uiTestPageLink = webView.staticText("new-tab-beam")
         
         step("Then 1 tab is opened"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
         }
         
         step("When I open another from the link on the web page"){
-            uiTestPageLink.click()
+            uiTestPageLink.clickOnExistence()
         }
         
         step("Then 2 tabs are available"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 2)
         }
 
@@ -46,7 +46,7 @@ class BrowserTabViewTests: BaseTest {
         }
         
         step("Then 1 tab is opened"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 1)
         }
         
@@ -65,12 +65,12 @@ class BrowserTabViewTests: BaseTest {
         
         step("When I open a link with CMD+Click"){
             XCUIElement.perform(withKeyModifiers: .command) {
-                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].click()
+                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].clickOnExistence()
             }
         }
         
         step("Then 2 tabs are opened"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertEqual(webView.getNumberOfWebViewInMemory(), 2)
         }
         

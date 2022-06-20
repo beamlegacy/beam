@@ -124,7 +124,7 @@ class TextEditorContextViewTests: BaseTest {
         }
         
         step("Then the webview is opened and \(linkURL) is searched"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), expectedTabURL)
         }
         

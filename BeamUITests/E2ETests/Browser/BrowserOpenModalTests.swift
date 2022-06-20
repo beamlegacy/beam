@@ -28,6 +28,8 @@ class BrowserOpenModalTests: BaseTest {
         }
 
         step("THEN I see two windows"){
+            // wait for window to open
+            waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: webView.getNumberOfWindows())
             XCTAssertEqual(webView.getNumberOfWindows(), 2)
         }
 
@@ -53,6 +55,8 @@ class BrowserOpenModalTests: BaseTest {
         }
 
         step("THEN I see two windows"){
+            // wait for window to open
+            waitForIntValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 2, query: webView.getNumberOfWindows())
             XCTAssertEqual(webView.getNumberOfWindows(), 2)
         }
 
