@@ -38,6 +38,7 @@ class OmniboxDestinationTests: BaseTest {
 
         step("When I search in omnibox and click on destination note"){
             omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).clickOnExistence()
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
             _ = destinationNoteTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             destinationNoteTitle.clickOnExistence()
@@ -111,6 +112,7 @@ class OmniboxDestinationTests: BaseTest {
         }
 
         step("When I search in omnibox change note using shortcut"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
             _ = destinationNoteTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             shortcutHelper.shortcutActionInvoke(action: .changeDestinationNote)

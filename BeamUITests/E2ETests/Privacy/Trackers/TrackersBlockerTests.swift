@@ -59,6 +59,7 @@ class TrackersBlockerTests: BaseTest {
                 privacyWindow.clickInsideSocialMediaButtonBlockerSetting()
             }
             XCTAssertTrue(privacyWindow.isSettingEnabled(element: privacyWindow.getSocialMediaButtonBlockerSettingElement()))
+            shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
         step ("When I navigate to \(url)"){
@@ -77,6 +78,7 @@ class TrackersBlockerTests: BaseTest {
                 privacyWindow.clickInsideSocialMediaButtonBlockerSetting()
             }
             XCTAssertFalse(privacyWindow.isSettingEnabled(element: privacyWindow.getSocialMediaButtonBlockerSettingElement()))
+            shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
         step ("When I navigate to \(url)"){
