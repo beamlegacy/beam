@@ -270,6 +270,7 @@ class PnSAddToNoteTests: BaseTest {
         
         step ("Then I see \(expectedNoteText) as collected link"){
             noteView = NoteTestView()
+            noteView.waitForNoteViewToLoad()
             noteNodes = noteView.getNoteNodesForVisiblePart()
             //To be refactored once BE-2117 merged
             XCTAssertEqual(noteNodes.count, 1)

@@ -83,7 +83,7 @@ class NoteEditTests: BaseTest {
         step("When I try to delete \(noteNameToBeCreated) and cancel it"){
             noteView
                 .clickDeleteButton()
-                .cancelDeletion()
+                .cancelButtonClick()
         }
         
         step("Then the note is not deleted"){
