@@ -49,6 +49,12 @@ class BeamWebView: WKWebView {
     var monitor: Any?
     fileprivate var currentConfiguration: WKWebViewConfiguration
 
+    override var frame: NSRect {
+        didSet {
+            subviews.first?.frame = frame // only subview should be a WKFlippedView instance, sometimes not in sync with its parent frame
+        }
+    }
+
     override init(frame: CGRect, configuration: WKWebViewConfiguration) {
         Self.setURLSchemeHandlers(in: configuration)
         currentConfiguration = configuration
