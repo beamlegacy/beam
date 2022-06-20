@@ -15,8 +15,15 @@ extension XCUIElement: WaitHelper {
     }
     
     @discardableResult
+    public func clickInTheMiddle() -> XCUIElement {
+        self.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.5)).click()
+        return self
+    }
+    
+    @discardableResult
     public func clickMultipleTimes(times: Int) -> XCUIElement {
         for _ in 1...times {
+            waitForIsHittable(self)
             self.tapInTheMiddle()
         }
         return self

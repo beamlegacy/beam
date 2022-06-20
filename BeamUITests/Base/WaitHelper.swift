@@ -46,6 +46,9 @@ protocol WaitHelper {
     func waitForCountValueEqual(timeout: TimeInterval, expectedNumber: Int, elementQuery: XCUIElementQuery) -> Bool
 
     @discardableResult
+    func waitForIntValueEqual(timeout: TimeInterval, expectedNumber: Int, query: Int) -> Bool
+
+    @discardableResult
     func waitForIdentifierEqual(_ expectedIdentifier: String, _ element: XCUIElement) -> Bool
 
     @discardableResult
@@ -166,6 +169,16 @@ extension WaitHelper {
     func waitForCountValueEqual(timeout: TimeInterval, expectedNumber: Int, elementQuery: XCUIElementQuery) -> Bool {
         var count: TimeInterval = 0
         while elementQuery.count != expectedNumber && count < timeout {
+            sleep(1)
+            count += 1
+        }
+        return count < timeout
+    }
+    
+    @discardableResult
+    func waitForIntValueEqual(timeout: TimeInterval, expectedNumber: Int, query: Int) -> Bool {
+        var count: TimeInterval = 0
+        while query != expectedNumber && count < timeout {
             sleep(1)
             count += 1
         }

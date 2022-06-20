@@ -37,10 +37,10 @@ class OmniboxDestinationTests: BaseTest {
         }
 
         step("When I search in omnibox and click on destination note"){
-            omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).click()
+            omniboxView.button(ToolbarLocators.Buttons.homeButton.accessibilityIdentifier).clickOnExistence()
             omniboxView.searchInOmniBox(helper.randomSearchTerm(), true)
             _ = destinationNoteTitle.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
-            destinationNoteTitle.click()
+            destinationNoteTitle.clickOnExistence()
         }
 
         step("Then destination note has a focus, empty search field and a note name"){

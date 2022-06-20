@@ -108,7 +108,7 @@ class BaseView {
     @discardableResult
     func clickOmniBoxSearchField() -> OmniBoxTestView {
         let omniboxView = OmniBoxTestView()
-        omniboxView.getOmniBoxSearchField().click()
+        omniboxView.getOmniBoxSearchField().clickOnExistence()
         return omniboxView
     }
     
@@ -118,6 +118,7 @@ class BaseView {
         if typeReturnButton {
             typeKeyboardKey(.enter)
             _ = button(ToolbarLocators.Buttons.openNoteButton.accessibilityIdentifier).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            _ = WebTestView().waitForWebViewToLoad()
         }
         return WebTestView()
     }
@@ -132,6 +133,7 @@ class BaseView {
         if !omniSearchField.exists {
             shortcutHelper.shortcutActionInvoke(action: .openLocation)
         }
+        _ = omniSearchField.waitForExistence(timeout: BaseTest.maximumWaitTimeout)
         omniSearchField.clickClearAndType(text)
         BaseTest.waitForStringValueEqual(text, OmniBoxTestView().getOmniBoxSearchField(), BaseTest.minimumWaitTimeout)
         return OmniBoxTestView()

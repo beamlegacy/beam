@@ -79,13 +79,13 @@ class AlertTestView: BaseView {
     
     @discardableResult
     func exitNowClick() -> BaseView {
-        self.getAlertDialog().buttons[exitButtonText].click()
+        self.getAlertDialog().buttons[exitButtonText].clickOnExistence()
         return self
     }
 
     @discardableResult
     func restartNowClick() -> BaseView {
-        self.getAlertDialog().buttons[restartButtonText].click()
+        self.getAlertDialog().buttons[restartButtonText].clickOnExistence()
         return self
     }
     

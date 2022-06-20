@@ -26,7 +26,7 @@ class AdBlockerTests: BaseTest {
     
     private func verifyWebsiteIsBlocked(index: Int, url: String, hostUrl: String) {
         step("Then \(url) is blocked") {
-            XCTAssertEqual(webView.getNumberOfTabs(), index + 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), index + 1)
             XCTAssertTrue(adBlockerPage.isWebsiteBlocked())
             helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfAdBlocker)
@@ -37,7 +37,7 @@ class AdBlockerTests: BaseTest {
     
     private func verifyWebsiteIsNotBlocked(index: Int) {
         step("Then \(url) is not blocked") {
-            XCTAssertEqual(webView.getNumberOfTabs(), index + 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), index + 1)
             XCTAssertFalse(adBlockerPage.isWebsiteBlocked())
             helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfTestPage)
@@ -56,7 +56,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("Then website \(url) is displayed") {
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
         }
         
@@ -75,7 +75,7 @@ class AdBlockerTests: BaseTest {
         
         step("When I allow the website \(url) once") {
             webView = adBlockerPage.allowWebSiteOnce()
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 1), tabTitleOfTestPage)
         }
         
@@ -112,7 +112,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("Then website \(url) is displayed") {
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: 0), tabTitleOfTestPage)
         }
         

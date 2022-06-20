@@ -31,7 +31,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 0)
         }
         
         step("When I reload the pin tab"){
@@ -40,7 +40,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is still pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 0)
         }
         
         step("When I open a new tab"){
@@ -49,7 +49,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then new tab is not pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
         }
     }
     
@@ -61,7 +61,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 0)
         }
         
         step("When I unpin the tab"){
@@ -70,7 +70,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is unpinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
         }
     }
     
@@ -79,7 +79,7 @@ class BrowserPinnedTabTests: BaseTest {
         step("And I open a second tab"){
             helper.openTestPage(page: .page1)
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 0)
-            XCTAssertEqual(webView.getNumberOfTabs(), 2)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 2)
         }
         
         step("When I pin both tabs"){
@@ -89,7 +89,7 @@ class BrowserPinnedTabTests: BaseTest {
                 
         step("Then both tabs are pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 2)
-            XCTAssertEqual(webView.getNumberOfTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 0)
         }
         
         step("When I unpin one tab"){
@@ -98,7 +98,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is unpinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
         }
     }
     
@@ -115,7 +115,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is still pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 0)
         }
     }
     
@@ -130,13 +130,13 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("And I open a link with CMD+Click"){
             XCUIElement.perform(withKeyModifiers: .command) {
-                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].click()
+                XCUIApplication().webViews[uiTestPage1Title].staticTexts[linkToOpen].clickOnExistence()
             }
         }
         
         step("Then opened tab is not pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
         }
     }
     
@@ -161,7 +161,7 @@ class BrowserPinnedTabTests: BaseTest {
         
         step("Then tab is still pinned"){
             XCTAssertEqual(webView.getNumberOfPinnedTabs(), 1)
-            XCTAssertEqual(webView.getNumberOfTabs(), 0)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 0)
         }
     }
 }

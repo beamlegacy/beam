@@ -48,23 +48,26 @@ class DailySummaryTests: BaseTest {
         
         step("When I open BiDi link Pitchfork"){
             view.openBiDiLink(linkToOpen)
+            _ = webView.waitForWebViewToLoad()
         }
         
         step("Then the webview is opened and Pitchfork is searched"){
-            XCTAssertEqual(webView.getNumberOfTabs(), 1)
+            XCTAssertEqual(webView.getNumberOfTabs(wait: true), 1)
             XCTAssertEqual(webView.getTabUrlAtIndex(index: 0), pitchForkUrl)
         }
         
         step("When I switch back to my note"){
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+            XCTAssertTrue(view.doesStartedDailySummaryExist())
+            XCTAssertTrue(view.doesContinueOnDailySummaryExist())
         }
         
-        step("And I open BiDi link Prince Waly"){
+        step("And I open BiDi link Triplego"){
             noteView = view.openBiDiLink(noteToOpen)
+            noteView.waitForNoteViewToLoad()
         }
         
-        step("Then note Prince Waly is opened"){
-            noteView.waitForNoteViewToLoad()
+        step("Then note Triplego is opened"){
             XCTAssertEqual(noteView.getNoteTitle(), noteToOpen)
         }
         

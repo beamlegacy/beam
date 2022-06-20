@@ -11,7 +11,9 @@
   "defaultOptions" : {
     "maximumTestExecutionTimeAllowance" : 120,
     "testRepetitionMode" : "retryOnFailure",
-    "testTimeoutsEnabled" : true
+    "testTimeoutsEnabled" : true,
+    "uiTestingScreenshotsLifetime" : "keepNever",
+    "userAttachmentLifetime" : "keepNever"
   },
   "testTargets" : [
     {

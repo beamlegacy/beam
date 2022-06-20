@@ -136,7 +136,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func navigateToWebView() {
-        button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).click()
+        button(ToolbarLocators.Buttons.openWebButton.accessibilityIdentifier).clickOnExistence()
     }
     
     func getNumberOfImageNodes() -> Int {
