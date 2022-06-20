@@ -392,7 +392,6 @@ extension BrowserTabsManager {
                 }
             }
             setCurrentTab(newCurrentTab)
-            data.clusteringManager.updateTabGroupsWithOpenPages()
         }
     }
 }
