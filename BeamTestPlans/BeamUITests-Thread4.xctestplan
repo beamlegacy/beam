@@ -154,6 +154,7 @@
         "SearchOnWebTests",
         "SignInSucessfullyTests",
         "SignInTests",
+        "SignOutTests",
         "SlashMenuTests",
         "SlashMenuTests\/testCheckBoxCreationMovementDeletion()",
         "SlashMenuTests\/testDatePickerCardCreation()",

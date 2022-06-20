@@ -9,7 +9,10 @@ import Foundation
 
 extension AppDelegate {
     func getUserInfos(_ completionHandler: ((Result<Bool, Error>) -> Void)? = nil) {
-        guard Configuration.env != .test,
+        let uiTestsAreRunning = ProcessInfo().arguments.contains(Configuration.uiTestModeLaunchArgument)
+        let testsAreRunning = Configuration.env == .test && !uiTestsAreRunning
+
+        guard !testsAreRunning,
               AuthenticationManager.shared.isAuthenticated,
               Configuration.networkEnabled else {
                   completionHandler?(.success(false))

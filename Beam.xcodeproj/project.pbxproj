@@ -980,6 +980,7 @@
 		A0F558F526BD8F260024C47E /* DebugSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F558F426BD8F260024C47E /* DebugSection.swift */; };
 		A0F8775127BF7BE0007F451D /* OnboardingNoteCreator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */; };
 		A0FB59BF2809D074001A1850 /* SummaryEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A0FB59BE2809D074001A1850 /* SummaryEngine.swift */; };
+		A307FBE6285A776F001DE30D /* SignOutTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A307FBE5285A776F001DE30D /* SignOutTests.swift */; };
 		A310949B281D9F7C003B96D1 /* BrowserHistoryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A310949A281D9F7C003B96D1 /* BrowserHistoryTests.swift */; };
 		A311436D280D2ADE00BB74F4 /* DialogTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A311436C280D2ADE00BB74F4 /* DialogTestView.swift */; };
 		A312850D277076A30051EECE /* TextEditorContextViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */; };
@@ -2872,6 +2873,7 @@
 		A0F558F426BD8F260024C47E /* DebugSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSection.swift; sourceTree = "<group>"; };
 		A0F8775027BF7BE0007F451D /* OnboardingNoteCreator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingNoteCreator.swift; sourceTree = "<group>"; };
 		A0FB59BE2809D074001A1850 /* SummaryEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SummaryEngine.swift; sourceTree = "<group>"; };
+		A307FBE5285A776F001DE30D /* SignOutTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignOutTests.swift; sourceTree = "<group>"; };
 		A310949A281D9F7C003B96D1 /* BrowserHistoryTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserHistoryTests.swift; sourceTree = "<group>"; };
 		A311436C280D2ADE00BB74F4 /* DialogTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DialogTestView.swift; sourceTree = "<group>"; };
 		A312850C277076A30051EECE /* TextEditorContextViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextEditorContextViewLocators.swift; sourceTree = "<group>"; };
@@ -7789,6 +7791,7 @@
 			isa = PBXGroup;
 			children = (
 				B5FB3A1D27E8C18400037FD5 /* SignInTests.swift */,
+				A307FBE5285A776F001DE30D /* SignOutTests.swift */,
 			);
 			path = SignInOut;
 			sourceTree = "<group>";
@@ -9793,6 +9796,7 @@
 				B52744CD270B03730045805F /* SearchOnNoteTests.swift in Sources */,
 				B507CB34275F8CB800DFF11A /* SlashMenuTests.swift in Sources */,
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
+				A307FBE6285A776F001DE30D /* SignOutTests.swift in Sources */,
 				B51DC76C26F44F990074ACCA /* PnSAddToNoteTests.swift in Sources */,
 				D7D6F016284A0A7900C3EE7F /* CookieBannerBlockerTests.swift in Sources */,
 				B557155A26FA259000F6C9D4 /* UpdateViewLocators.swift in Sources */,
