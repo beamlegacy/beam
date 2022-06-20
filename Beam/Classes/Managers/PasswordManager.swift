@@ -7,6 +7,7 @@ class PasswordManager {
     enum Error: Swift.Error {
         case databaseError(errorMsg: String)
         case decryptionError(errorMsg: String)
+        case encryptionError(errorMsg: String)
     }
 
     static let shared = PasswordManager()
@@ -88,11 +89,14 @@ class PasswordManager {
 
     func password(hostname: String, username: String) throws -> String {
         do {
-            guard let password = try passwordsDB.password(hostname: hostname, username: username) else {
+            guard let passwordRecord = try passwordsDB.passwordRecord(hostname: hostname, username: username) else {
                 throw PasswordDBError.cantReadDB(errorMsg: "Database returned no entry")
             }
-            return password
-        } catch PasswordDBError.cantDecryptPassword(let errorMsg) {
+            guard let decryptedPassword = try EncryptionManager.shared.decryptString(passwordRecord.password, EncryptionManager.shared.localPrivateKey()) else {
+                throw Error.decryptionError(errorMsg: "Decrypting password returned nil")
+            }
+            return decryptedPassword
+        } catch Error.decryptionError(let errorMsg) {
             Logger.shared.logError("Error while decrypting password for \(hostname) - \(username): \(errorMsg)", category: .encryption)
             throw Error.decryptionError(errorMsg: errorMsg)
         } catch PasswordDBError.cantReadDB(let errorMsg) {
@@ -121,11 +125,15 @@ class PasswordManager {
                 previousHostname = hostname
                 previousUsername = username
             }
+            guard let encryptedPassword = try? EncryptionManager.shared.encryptString(password, EncryptionManager.shared.localPrivateKey()) else {
+                throw Error.encryptionError(errorMsg: "encryption failed")
+            }
+            let privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
             let passwordRecord: PasswordRecord
             if let previousRecord = try? passwordsDB.passwordRecord(hostname: previousHostname, username: previousUsername) {
-                passwordRecord = try passwordsDB.update(record: previousRecord, hostname: hostname, username: username, password: password, uuid: uuid)
+                passwordRecord = try passwordsDB.update(record: previousRecord, hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: uuid)
             } else {
-                passwordRecord = try passwordsDB.save(hostname: hostname, username: username, password: password, uuid: uuid)
+                passwordRecord = try passwordsDB.save(hostname: hostname, username: username, encryptedPassword: encryptedPassword, privateKeySignature: privateKeySignature, uuid: uuid)
             }
             changeSubject.send()
             if AuthenticationManager.shared.isAuthenticated {
@@ -136,7 +144,7 @@ class PasswordManager {
             return passwordRecord
         } catch PasswordDBError.cantSavePassword(let errorMsg) {
             Logger.shared.logError("Error while saving password for \(hostname): \(errorMsg)", category: .passwordsDB)
-        } catch PasswordDBError.cantEncryptPassword {
+        } catch Error.encryptionError {
             Logger.shared.logError("Error while encrypting password for \(hostname) - \(username)", category: .encryption)
         } catch {
             Logger.shared.logError("Unexpected error: \(error.localizedDescription).", category: .passwordsDB)
@@ -224,11 +232,8 @@ extension PasswordManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ passwords: [PasswordRecord]) throws {
-        var encryptedsPasswords: [PasswordRecord] = []
-        for password in passwords {
-            encryptedsPasswords.append(reEncrypt(password, encryptKey: EncryptionManager.shared.localPrivateKey()))
-        }
-        try self.passwordsDB.save(passwords: encryptedsPasswords)
+        let encryptedPasswords = try passwords.map(reEncryptAfterReceive)
+        try self.passwordsDB.save(passwords: encryptedPasswords)
         changeSubject.send()
     }
 
@@ -238,12 +243,8 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
-        var encryptedsPasswords: [PasswordRecord] = []
-        for password in passwords {
-            encryptedsPasswords.append(reEncrypt(password, encryptKey: EncryptionManager.shared.localPrivateKey()))
-        }
-
-        try self.passwordsDB.save(passwords: encryptedsPasswords)
+        let encryptedPasswords = try passwords.map(reEncryptAfterReceive)
+        try self.passwordsDB.save(passwords: encryptedPasswords)
         changeSubject.send()
     }
 
@@ -252,13 +253,10 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func saveAllOnNetwork(_ passwords: [PasswordRecord], _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) throws {
-        let encryptedsPasswords = passwords.map { password in
-            reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
-        }
-
+        let encryptedPasswords = try passwords.map(reEncryptBeforeSend)
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
-                try await self?.saveOnBeamObjectsAPI(encryptedsPasswords)
+                try await self?.saveOnBeamObjectsAPI(encryptedPasswords)
                 Logger.shared.logDebug("Saved passwords on the BeamObject API",
                                        category: .passwordNetwork)
                 networkCompletion?(.success(true))
@@ -271,7 +269,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     private func saveOnNetwork(_ password: PasswordRecord, _ networkCompletion: ((Result<Bool, Swift.Error>) -> Void)? = nil) throws {
-        let encryptedPassword = reEncrypt(password, decryptKey: EncryptionManager.shared.localPrivateKey())
+        let encryptedPassword = try reEncryptBeforeSend(password)
         Task.detached(priority: .userInitiated) { [weak self] in
             do {
                 try await self?.saveOnBeamObjectAPI(encryptedPassword)
@@ -279,19 +277,44 @@ extension PasswordManager: BeamObjectManagerDelegate {
                                        category: .passwordNetwork)
                 networkCompletion?(.success(true))
             } catch {
-                Logger.shared.logDebug("Error when saving the password on the BeamObject API with error: \(error.localizedDescription)",
-                                       category: .passwordNetwork)
+                Logger.shared.logWarning("Saving the password on the BeamObject API failed with error: \(error.localizedDescription)",
+                                         category: .passwordNetwork)
                 networkCompletion?(.failure(error))
             }
         }
     }
 
-    private func reEncrypt(_ password: PasswordRecord, decryptKey: SymmetricKey? = nil, encryptKey: SymmetricKey? = nil) -> PasswordRecord {
-        var passwordRecord = password
-        if let decryptedPassword = try? EncryptionManager.shared.decryptString(passwordRecord.password, decryptKey),
-           let newlyEncryptedPassword = try? EncryptionManager.shared.encryptString(decryptedPassword, encryptKey) {
-               passwordRecord.password = newlyEncryptedPassword
+    private func reEncryptAfterReceive(_ networkPassword: PasswordRecord) throws -> PasswordRecord {
+        do {
+            var localPassword = networkPassword
+            localPassword.password = try reEncrypt(networkPassword.password, encryptKey: EncryptionManager.shared.localPrivateKey())
+            return localPassword
+        } catch {
+            Logger.shared.logError("Converting received password failed for \(networkPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
+            EventsTracker.sendManualReport(forError: error)
+            throw error
         }
-        return passwordRecord
+    }
+
+    private func reEncryptBeforeSend(_ localPassword: PasswordRecord) throws -> PasswordRecord {
+        do {
+            var networkPassword = localPassword
+            networkPassword.password = try reEncrypt(localPassword.password, decryptKey: EncryptionManager.shared.localPrivateKey())
+            return networkPassword
+        } catch {
+            Logger.shared.logError("Converting password before sending failed for \(localPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
+            EventsTracker.sendManualReport(forError: error)
+            throw error
+        }
+    }
+
+    private func reEncrypt(_ password: String, decryptKey: SymmetricKey? = nil, encryptKey: SymmetricKey? = nil) throws -> String {
+        guard let decryptedPassword = try EncryptionManager.shared.decryptString(password, decryptKey) else {
+            throw Error.decryptionError(errorMsg: "Decrypted data is not valid UTF-8")
+        }
+        guard let newlyEncryptedPassword = try EncryptionManager.shared.encryptString(decryptedPassword, encryptKey) else {
+            throw Error.encryptionError(errorMsg: "Invalid AES GCM seal")
+        }
+        return newlyEncryptedPassword
     }
 }

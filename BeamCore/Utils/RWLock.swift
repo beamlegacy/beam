@@ -59,15 +59,13 @@ public extension RWLockable {
 
     func read<R>(_ block: @escaping () throws -> R) throws -> R {
         readLock()
-        let res = try block()
-        readUnlock()
-        return res
+        defer { readUnlock() }
+        return try block()
     }
 
     func write<R>(_ block: @escaping () throws -> R) throws -> R {
         writeLock()
-        let res = try block()
-        writeUnlock()
-        return res
+        defer { writeUnlock() }
+        return try block()
     }
 }

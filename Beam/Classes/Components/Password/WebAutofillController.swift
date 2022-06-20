@@ -703,6 +703,9 @@ extension WebAutofillController: PasswordManagerMenuDelegate {
                 case .decryptionError(errorMsg: let message):
                     alert.messageText = "Could not decrypt password."
                     alert.informativeText = message
+                case .encryptionError(errorMsg: let message):
+                    alert.messageText = "Could not encrypt password."
+                    alert.informativeText = message
                 }
                 alert.runModal()
             } else {
