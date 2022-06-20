@@ -44,18 +44,14 @@ final class MockPasswordsDB: PasswordStore {
         }
     }
 
-    func password(hostname: String, username: String) throws -> String? {
-        try passwordRecord(hostname: hostname, username: username)?.password
-    }
-
     func passwordRecord(hostname: String, username: String) throws -> PasswordRecord? {
         passwords.first { record in
             record.hostname == hostname && record.username == username
         }
     }
 
-    func save(hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord {
-        let record = PasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: password, createdAt: Date(), updatedAt: Date())
+    func save(hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord {
+        let record = PasswordRecord(entryId: UUID().uuidString, hostname: hostname, username: username, password: encryptedPassword, createdAt: Date(), updatedAt: Date())
         passwords.append(record)
         return record
     }
@@ -64,11 +60,11 @@ final class MockPasswordsDB: PasswordStore {
         self.passwords = passwords
     }
 
-    func update(record: PasswordRecord, hostname: String, username: String, password: String, uuid: UUID?) throws -> PasswordRecord {
+    func update(record: PasswordRecord, hostname: String, username: String, encryptedPassword: String, privateKeySignature: String, uuid: UUID?) throws -> PasswordRecord {
         var newRecord = record
         newRecord.hostname = hostname
         newRecord.username = username
-        newRecord.password = password
+        newRecord.password = encryptedPassword
         if let uuid = uuid {
             newRecord.uuid = uuid
         }
