@@ -12,6 +12,7 @@ enum AllNotesViewLocators {
     enum Buttons: String, CaseIterable, UIElement {
         case newNoteButton = "tool new"
         case journalButton = "journal"
+        case urlIcon = "URL-row"
     }
     
     enum SortButtons: String, CaseIterable, UIElement {
