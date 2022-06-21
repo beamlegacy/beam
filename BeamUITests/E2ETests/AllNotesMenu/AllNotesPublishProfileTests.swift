@@ -24,7 +24,7 @@ class AllNotesPublishProfileTests: BaseTest {
     }
     
     private func assertSortingCounterValues(expectedValues: AllNotesTestView.SortingCounterValues) {
-        let actualValues = allNotes.getAllSortingCounterValues().sortingCournterValues!
+        let actualValues = allNotes.getAllSortingCounterValues().sortingCounterValues!
         let result = actualValues.isEqualTo(expectedValues)
         XCTAssertTrue(result.0, result.1)
     }
@@ -83,7 +83,7 @@ class AllNotesPublishProfileTests: BaseTest {
             XCTAssertTrue(allNotes
                 .openMenuForSingleNote(0)
                 .selectActionInMenu(.publishOnProfile).waitForNotesNumberEqualTo(1), "The notes count changed after Adding to Profile")
-            sleep(2) // wait for note to be published on profile
+            sleep(3) // wait for note to be published on profile
         }
         
         step("THEN Add to Profile sorting counter is increased and other counters remain the same and ") {
