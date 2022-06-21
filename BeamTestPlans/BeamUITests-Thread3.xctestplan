@@ -148,6 +148,7 @@
         "TextEditorContextViewTests",
         "TodayNoteTests",
         "TrackersBlockerTests",
+        "UITestFrameworkTests",
         "UpdateViewTests",
         "WaitHelper",
         "WebsiteAuthTest",
