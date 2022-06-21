@@ -198,6 +198,10 @@ class AllNotesTestView: BaseView {
         return self
     }
     
+    func getURLiconElementFor(rowIndex: Int) -> XCUIElement {
+        return button(AllNotesViewLocators.Buttons.urlIcon.accessibilityIdentifier + String(rowIndex))
+    }
+    
     func getSortingCounterValue(_ item: AllNotesViewLocators.ViewMenuItems) -> Int {
         let value = menuItem(item.accessibilityIdentifier).title
         let integerValue = Int(value.slice(from: "(", to: ")") ?? "-1")!
