@@ -160,6 +160,7 @@
         "SlashMenuTests\/testDatePickerCardCreation()",
         "SlashMenuTests\/testNoteDividerCreation()",
         "TrackersBlockerTests",
+        "UITestFrameworkTests",
         "UpdateViewTests\/testUpdateViewAppearance()",
         "WaitHelper",
         "dummytests"

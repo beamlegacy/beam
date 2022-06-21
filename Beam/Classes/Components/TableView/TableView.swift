@@ -512,7 +512,7 @@ extension TableViewCoordinator: NSTableViewDelegate {
             iconButtonViewCell.hasPopover = item?.hasPopover ?? false
             iconButtonViewCell.popoverAlignment = item?.popoverAlignment ?? .bottom
             iconButtonViewCell.buttonAction = action
-
+            iconButtonViewCell.iconButton.setAccessibilityIdentifier("\(column.title)-row\(row)")
             return iconButtonViewCell
         }
 
