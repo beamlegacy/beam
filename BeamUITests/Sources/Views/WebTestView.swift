@@ -90,6 +90,7 @@ class WebTestView: BaseView {
 
     func getNumberOfWebViewInMemory() -> Int {
         uiMenu.showWebViewCount()
+        _ = AlertTestView().isAlertDialogDisplayed()
         let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
         var intValue: Int?
         if let value = self.getElementStringValue(element: element).split(separator: ":").last {
@@ -147,6 +148,7 @@ class WebTestView: BaseView {
     }
     
     func waitForPublishedNoteToLoad(noteName: String) -> Bool {
+        waitForWebViewToLoad()
         return app.windows.scrollViews.webViews["\(noteName) - beam"].waitForExistence(timeout: implicitWaitTimeout)
     }
     

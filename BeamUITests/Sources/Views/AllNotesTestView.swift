@@ -10,7 +10,7 @@ import XCTest
 
 class AllNotesTestView: BaseView {
 
-    var sortingCournterValues: SortingCounterValues!
+    var sortingCounterValues: SortingCounterValues!
     
     @discardableResult
     func waitForAllNotesViewToLoad() -> Bool {
@@ -190,7 +190,7 @@ class AllNotesTestView: BaseView {
     
     func getAllSortingCounterValues() -> AllNotesTestView {
         self.clickSortingDropDownExpandTriangle()
-        sortingCournterValues = SortingCounterValues(
+        sortingCounterValues = SortingCounterValues(
             all: getSortingCounterValue(.allNotes),
             privat: getSortingCounterValue(.privateNotes),
             published: getSortingCounterValue(.publishedNotes),
@@ -206,7 +206,7 @@ class AllNotesTestView: BaseView {
     
     func waitForPublishingProcessToStartAndFinishFor(_ noteName: String) -> Bool {
         let publishStatusElement = textField("Publishing '\(noteName)'...")
-        _ = publishStatusElement.waitForExistence(timeout: minimumWaitTimeout)
+        _ = publishStatusElement.waitForExistence(timeout: implicitWaitTimeout)
         return waitForDoesntExist(publishStatusElement)
     }
     
