@@ -90,18 +90,21 @@ class NoteTestView: TextEditorContextTestView {
     
     @discardableResult
     func publishNote() -> NoteTestView {
+        waitForNoteViewToLoad()
         button(NoteViewLocators.Buttons.publishNoteButton.accessibilityIdentifier).clickOnExistence()
         return self
     }
     
     @discardableResult
     func unpublishNote() -> NoteTestView {
+        waitForNoteViewToLoad()
         clickPublishedMenuDisclosureTriangle()
         app.staticTexts[NoteViewLocators.StaticTexts.unpublishLabel.accessibilityIdentifier].clickOnExistence()
         app.windows.sheets["alert"].buttons[NoteViewLocators.Buttons.unpublishNoteButton.accessibilityIdentifier].clickOnHittable()
         return self
     }
     
+    @discardableResult
     func clickPublishedMenuDisclosureTriangle() -> NoteTestView {
         image(NoteViewLocators.DisclosureTriangles.editorArrowDown.accessibilityIdentifier).clickOnExistence()
         return self

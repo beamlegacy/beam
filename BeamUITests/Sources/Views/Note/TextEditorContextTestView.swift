@@ -41,11 +41,13 @@ class TextEditorContextTestView: BaseView {
     }
     
     func doesStartedDailySummaryExist() -> Bool {
-        return app.textViews.containing(.button, identifier: "Started").element.exists
+        let dailySummary = app.textViews.containing(.button, identifier: "Started").element
+        return dailySummary.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     func doesContinueOnDailySummaryExist() -> Bool {
-        return app.textViews.containing(.button, identifier: "Continue").element.exists
+        let dailySummary = app.textViews.containing(.button, identifier: "Continue").element
+        return dailySummary.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
     }
     
     func getNoteNodeValueByIndex(_ index: Int) -> String {
