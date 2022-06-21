@@ -43,6 +43,7 @@ class JournalTestView: TextEditorContextTestView {
         searchInOmniBox(noteNameToBeCreated, false)
         app.typeKey(.enter, modifierFlags: .option)
         waitForDoesntExist(searchField(ToolbarLocators.SearchFields.omniSearchField.accessibilityIdentifier))
+        NoteTestView().waitForNoteViewToLoad()
         return NoteTestView()
     }
     

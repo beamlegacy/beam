@@ -43,8 +43,10 @@ class LinksTests: BaseTest {
 
         step("And I can navigate to a note by Link both sides"){
             noteView!.openLinkByIndex(0)
+            noteView!.waitForNoteViewToLoad()
             XCTAssertEqual(noteView!.getLinksNamesNumber(), 0)
             noteView!.openBiDiLink(0)
+            noteView!.waitForNoteViewToLoad()
             XCTAssertEqual(noteView!.getLinksNamesNumber(), 1)
             XCTAssertEqual(noteView!.getLinkContentByIndex(0), noteName1 + " ")
         }
