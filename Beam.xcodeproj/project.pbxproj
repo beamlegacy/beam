@@ -1003,6 +1003,7 @@
 		A38D1A29284A11B6007EBB25 /* Equalable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A28284A11B6007EBB25 /* Equalable.swift */; };
 		A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */; };
 		A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3A89D942837CD2E00A47B2E /* test_SVG.svg */; };
+		A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */; };
 		A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */; };
 		A3D289922808715900FA0D3A /* OnboardingLostPKViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */; };
 		A3D421322837B0F0002DB9A4 /* UITests-SVG.html in Resources */ = {isa = PBXBuildFile; fileRef = A3D421312837B0F0002DB9A4 /* UITests-SVG.html */; };
@@ -2896,6 +2897,7 @@
 		A38D1A28284A11B6007EBB25 /* Equalable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Equalable.swift; sourceTree = "<group>"; };
 		A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPublishProfileTests.swift; sourceTree = "<group>"; };
 		A3A89D942837CD2E00A47B2E /* test_SVG.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test_SVG.svg; sourceTree = "<group>"; };
+		A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFrameworkTests.swift; sourceTree = "<group>"; };
 		A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKTestView.swift; sourceTree = "<group>"; };
 		A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKViewLocators.swift; sourceTree = "<group>"; };
 		A3D2BB2D2812F1BD00CCCE40 /* BeamUITests-Thread7.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread7.xctestplan"; sourceTree = "<group>"; };
@@ -6928,6 +6930,14 @@
 			path = TableRows;
 			sourceTree = "<group>";
 		};
+		A3B6C9602861C48900E7F78C /* HelpersTests */ = {
+			isa = PBXGroup;
+			children = (
+				A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */,
+			);
+			path = HelpersTests;
+			sourceTree = "<group>";
+		};
 		A3E7B4AD27AC16C70074C9BB /* Popups */ = {
 			isa = PBXGroup;
 			children = (
@@ -7587,6 +7597,7 @@
 		B57A9B3E26AB091A002C954D /* E2ETests */ = {
 			isa = PBXGroup;
 			children = (
+				A3B6C9602861C48900E7F78C /* HelpersTests */,
 				A3EE7D55284F236B00DD3EBB /* Synchronization */,
 				D71D7485282B9C7600D8D6F5 /* Privacy */,
 				B51C99A82805C44100A2577E /* Incognito mode */,
@@ -9811,6 +9822,7 @@
 				D7D6F02A284E2BA100C3EE7F /* AddLinkViewLocators.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
 				B5DC1FBE26B92A8800A4C94B /* NoteViewTests.swift in Sources */,
+				A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */,
 				A3E7B4BD27AC23D50074C9BB /* SignInAutocompleteTests.swift in Sources */,
 				B5D2A1802805E91E00C833B9 /* OnboardingPrivateKeyViewLocators.swift in Sources */,
 				D7E38CF1282A96BA0059F60D /* AdBlockerTestView.swift in Sources */,
