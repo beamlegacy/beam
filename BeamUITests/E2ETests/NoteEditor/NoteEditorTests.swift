@@ -124,6 +124,7 @@ class NoteEditorTests: BaseTest {
         }
         
         step("Given I type a URL in text editor"){
+            noteTestView.waitForNoteViewToLoad()
             noteTestView.typeInNoteNodeByIndex(noteIndex: 0, text: "youtube.com ", needsActivation: true)
         }
         

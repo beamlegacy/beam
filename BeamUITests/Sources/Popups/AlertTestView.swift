@@ -117,4 +117,8 @@ class AlertTestView: BaseView {
     func getAlertDialog() -> XCUIElement {
         return app.dialogs[alert]
     }
+    
+    func isAlertDialogDisplayed() -> Bool {
+        return getAlertDialog().waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+    }
 }

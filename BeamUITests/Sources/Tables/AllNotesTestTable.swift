@@ -72,7 +72,7 @@ class AllNotesTestTable: BaseView, Rowable {
                 if rowComparisonResult.0 {
                     break
                 } else if i == rows.count - 1 {
-                    failedValues.append("Row with '\(externalRow.title)' title wasn't found")
+                    failedValues.append("Row with '\(String(describing: externalRow.title))' title wasn't found, we found '\(String(describing: rows[i].title))' instead")
                 }
             }
         }
