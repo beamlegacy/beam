@@ -71,6 +71,7 @@ class CreditCardsTests: BaseTest {
                 .populateCreditCardField(.cardNumber, expectedCardNumber, true)
                 .populateCreditCardField(.expirationDate, expectedCardDueDate, true)
                 .clickAddCreditCardCreationButton()
+            waitForDoesntExist(creditCardView.getAddCreditCardCreationButton())
         }
         
         step("Then it is successfully displayed in Credit cards table") {
