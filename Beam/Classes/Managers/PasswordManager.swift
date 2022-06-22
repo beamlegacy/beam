@@ -253,7 +253,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
     }
 
     func receivedObjects(_ passwords: [PasswordRecord]) throws {
-        let encryptedPasswords = passwords.compactMap(tryReEncryptAfterReceive)
+        let encryptedPasswords = passwords.map(laxReEncryptAfterReceive)
         if encryptedPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - encryptedPasswords.count)/\(passwords.count)"))
         }
