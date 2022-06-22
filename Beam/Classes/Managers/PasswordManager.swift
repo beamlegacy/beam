@@ -239,7 +239,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
     func willSaveAllOnBeamObjectApi() {}
 
     func saveObjectsAfterConflict(_ passwords: [PasswordRecord]) throws {
-        let encryptedPasswords = passwords.compactMap(tryReEncryptAfterReceive)
+        let encryptedPasswords = passwords.map(laxReEncryptAfterReceive)
         if encryptedPasswords.count != passwords.count {
             EventsTracker.sendManualReport(forError: Error.decryptionError(errorMsg: "Key mismatch, affected passwords: \(passwords.count - encryptedPasswords.count)/\(passwords.count)"))
         }
@@ -305,6 +305,10 @@ extension PasswordManager: BeamObjectManagerDelegate {
         }
     }
 
+    private func laxReEncryptAfterReceive(_ networkPassword: PasswordRecord) -> PasswordRecord {
+        tryReEncryptAfterReceive(networkPassword) ?? networkPassword
+    }
+
     private func tryReEncryptAfterReceive(_ networkPassword: PasswordRecord) -> PasswordRecord? {
         try? reEncryptAfterReceive(networkPassword)
     }
@@ -313,6 +317,7 @@ extension PasswordManager: BeamObjectManagerDelegate {
         do {
             var localPassword = networkPassword
             localPassword.password = try reEncrypt(networkPassword.password, encryptKey: EncryptionManager.shared.localPrivateKey())
+            localPassword.privateKeySignature = try EncryptionManager.shared.localPrivateKey().asString().SHA256()
             return localPassword
         } catch {
             Logger.shared.logError("Converting received password failed for \(networkPassword.hostname): \(error.localizedDescription)", category: .passwordNetwork)
