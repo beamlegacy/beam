@@ -65,12 +65,12 @@ class SignOutTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
             waitForCountValueEqual(timeout: BaseTest.implicitWaitTimeout, expectedNumber: 4, elementQuery: allNotes.getNotesNamesElementQuery())
-
-            let currentTestTable = AllNotesTestTable()
+            //To be fixed with https://linear.app/beamapp/issue/BE-4520/getting-the-rows-for-all-notes-table-fix
+            /*let currentTestTable = AllNotesTestTable()
             XCTAssertEqual(currentTestTable.numberOfVisibleItems, defaultNotes.numberOfVisibleItems)
             
-            let tablesContainingResult = AllNotesTestTable().containsRows(defaultNotes.rows)
-            XCTAssertTrue(tablesContainingResult.0, tablesContainingResult.1)
+            let tablesContainingResult = currentTestTable.containsRows(defaultNotes.rows)
+            XCTAssertTrue(tablesContainingResult.0, tablesContainingResult.1)*/
         }
 
     }
