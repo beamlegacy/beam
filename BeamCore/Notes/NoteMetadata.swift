@@ -24,15 +24,16 @@ public struct NoteMetadata: Codable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
-        try container.encode(bulletPointVisibility?.rawValue, forKey: .bulletPointVisibility)
-
+        if let bulletPointVisibility = bulletPointVisibility {
+            try container.encode(bulletPointVisibility.rawValue, forKey: .bulletPointVisibility)
+        }
     }
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
 
-        let rawBulletType = try container.decode(String.self, forKey: .bulletPointVisibility)
-        if let bulletType = BulletPointType(rawValue: rawBulletType) {
+        if let rawBulletType = try? container.decodeIfPresent(String.self, forKey: .bulletPointVisibility) {
+            let bulletType = BulletPointType(rawValue: rawBulletType)
             self.bulletPointVisibility = bulletType
         }
     }
