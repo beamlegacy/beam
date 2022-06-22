@@ -18,6 +18,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
+        "AccountPreferencesTests",
         "AdBlockerTests",
         "AdvancedCreditCardAutocompleteTests\/testAmazonAutofill()",
         "AdvancedCreditCardAutocompleteTests\/testAppleAutofill()",

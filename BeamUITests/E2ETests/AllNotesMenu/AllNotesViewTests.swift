@@ -15,7 +15,6 @@ class AllNotesViewTests: BaseTest {
     override func setUp() {
         step ("GIVEN I open All notes") {
             setupStaging(withRandomAccount: true)
-            _ = webView.waitForWebViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotesView = AllNotesTestView()
             allNotesView.waitForAllNotesViewToLoad()
