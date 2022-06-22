@@ -141,7 +141,7 @@ class BaseTest: XCTestCase {
     }
     
     @discardableResult
-    func setupStaging(withRandomAccount: Bool = false) -> JournalTestView {
+    func setupStaging(withRandomAccount: Bool = false, waitingForWebViewToLoad: Bool = true) -> JournalTestView {
         deleteRemoteAccount = true
         deletePK = true
         
@@ -150,6 +150,9 @@ class BaseTest: XCTestCase {
         uiMenu.setAPIEndpointsToStaging()
         if withRandomAccount {
             uiMenu.signUpWithRandomTestAccount()
+            if waitingForWebViewToLoad {
+                webView.waitForWebViewToLoad()
+            }
         }
         return journalView
     }

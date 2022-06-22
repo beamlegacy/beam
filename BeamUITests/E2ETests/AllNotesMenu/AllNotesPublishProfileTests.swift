@@ -17,7 +17,6 @@ class AllNotesPublishProfileTests: BaseTest {
     override func setUp() {
         step("GIVEN I sign up") {
             setupStaging(withRandomAccount: true)
-            _ = webView.waitForWebViewToLoad()
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
         }

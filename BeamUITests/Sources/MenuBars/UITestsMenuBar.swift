@@ -131,4 +131,10 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.create10Notes.rawValue)
         return self
     }
+    
+    @discardableResult
+    func resizeSquare1000() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.resizeSquare1000.rawValue)
+        return self
+    }
 }

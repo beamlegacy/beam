@@ -60,4 +60,17 @@ class AccountTestView: PreferencesBaseView {
     func signOutButtonClick() {
         button(AccountViewLocators.Buttons.signOutButton.accessibilityIdentifier).clickOnExistence()
     }
+    
+    func clickSavePKButton() {
+        button(AccountViewLocators.Buttons.savePKButton.accessibilityIdentifier).clickOnExistence()
+    }
+    
+    func clickDeleteDBButton() -> AlertTestView {
+        button(AccountViewLocators.Buttons.deleteDBButton.accessibilityIdentifier).clickOnExistence()
+        return AlertTestView()
+    }
+    
+    func getEncryptionKeyLabel() -> XCUIElement {
+        return button(AccountViewLocators.Buttons.pkLabelButton.accessibilityIdentifier)
+    }
 }
