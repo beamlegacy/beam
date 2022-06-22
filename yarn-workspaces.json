@@ -48,10 +48,6 @@
     "name": "@beam/native-mouseoverandselection"
   },
   {
-    "location": "Beam/Classes/Models/TabAndWebview/WebViewFocus/Web",
-    "name": "@beam/native-webviewfocus"
-  },
-  {
     "location": "Beam/Classes/Models/WebPositions/Web",
     "name": "@beam/native-webpositions"
   },
