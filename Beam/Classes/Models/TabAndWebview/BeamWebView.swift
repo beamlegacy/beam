@@ -44,7 +44,7 @@ class BeamWebView: WKWebView {
 #endif
 
     weak var page: WebPage?
-    private let automaticallyResignResponder = true
+    private var automaticallyResignResponder = false
 
     var monitor: Any?
     fileprivate var currentConfiguration: WKWebViewConfiguration
@@ -159,6 +159,7 @@ class BeamWebView: WKWebView {
 
     public func setupForEmbed() {
         preventScrolling = true
+        automaticallyResignResponder = true
     }
 
     var optionKeyToggle: (NSEvent.ModifierFlags) -> Void = { _ in
