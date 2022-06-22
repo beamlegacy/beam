@@ -277,7 +277,7 @@ extension BeamWebContextMenuItem {
 
                 let scopedURL = availableDstURL.deletingLastPathComponent()
                 _ = scopedURL.startAccessingSecurityScopedResource() // below write will fail anyway if this returns false
-                try data.write(to: availableDstURL, options: [.withoutOverwriting])
+                try data.write(to: availableDstURL, options: fromSaveAsMenu ? [] : [.withoutOverwriting])
                 scopedURL.stopAccessingSecurityScopedResource()
 
                 try? NSWorkspace.shared.bounceDockStack(with: availableDstURL)
@@ -298,14 +298,17 @@ extension BeamWebContextMenuItem {
         }
 
         // Let's check if we're displaying a raw image and we have data available
-        if inferMimeType, let mimeType = webView._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        if let mimeType = webView._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
             webView._getMainResourceData {
                 let fileExtension = payload.imageSrcURL?.pathExtension.isEmpty == true ? uti.preferredFilenameExtension : nil
                 dispatchResult(Result($0, $1), fileExtension: fileExtension)
             }
+            return
         }
+        #endif
         // Otherwise, let's check if the image is base64 encoded, passing an Unknown fileName and a preferred file extension
-        else if let (data, mimeType) = payload.base64 {
+        if let (data, mimeType) = payload.base64 {
             dispatchResult(.success(data), fileName: "Unknown", fileExtension: UTType(mimeType: mimeType)?.preferredFilenameExtension)
         }
         // Otherwise, let's download the data
@@ -331,18 +334,22 @@ extension BeamWebContextMenuItem {
             completion(.failure(BeamWebContextMenuItemError.unexpectedError)); return
         }
 
-        let nameFieldStringValue: String
+        let savePanel = NSSavePanel()
+
         if let lastPathComponent = payload.imageSrcURL?.lastPathComponent, !lastPathComponent.isEmpty {
-            nameFieldStringValue = lastPathComponent
+            savePanel.nameFieldStringValue = lastPathComponent
         } else {
-            nameFieldStringValue = "Unknown"
+            savePanel.nameFieldStringValue = "Unknown"
         }
 
-        let savePanel = NSSavePanel()
+        if let uti = payload.inferredUTType(with: webView) {
+            savePanel.allowedContentTypes = [uti]
+        }
+
         savePanel.canCreateDirectories = true
         savePanel.showsTagField = false
-        savePanel.nameFieldStringValue = nameFieldStringValue
         savePanel.level = .modalPanel
+
         savePanel.beginSheetModal(for: window) { [weak savePanel] response in
             if response == NSApplication.ModalResponse.OK {
                 guard let url = savePanel?.url else {
@@ -364,4 +371,21 @@ extension BeamWebContextMenuItem {
             }
         }.resume()
     }
+}
+
+private extension ContextMenuMessageHandlerPayload {
+
+    // to be used only within the save panel
+    func inferredUTType(with webView: BeamWebView? = nil) -> UTType? {
+        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+        if let mimeType = webView?._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
+            return uti
+        }
+        #endif
+        if let (_, mimeType) = base64 {
+            return UTType(mimeType: mimeType)
+        }
+        return imageSrcURL.flatMap { UTType(mimeType: $0.pathExtension) }
+    }
+
 }
