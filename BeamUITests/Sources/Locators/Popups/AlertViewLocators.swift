@@ -27,6 +27,7 @@ enum AlertViewLocators {
         case tooManyPinnedNotes = "Too many pinned notes"
         case fivePinnedNotesMax = "You can only have 5 pinned notes.\nUnpin some notes to pin new ones."
         case signOutConfirmation = "Are you sure you want to sign out?"
+        case deleteDBConfirmation = "Are you sure you want to delete all your graphs?"
     }
     
     enum Checkboxes: String, CaseIterable, UIElement {
