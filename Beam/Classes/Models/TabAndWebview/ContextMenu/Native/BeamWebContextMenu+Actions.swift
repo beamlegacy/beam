@@ -50,13 +50,17 @@ extension BeamWebContextMenuItem {
                 .separator,
                 .systemShare
             ]
-        case .linkPlusImage(let href, let src):
-            var items = Self.content(for: .image(src: src)) + [.separator] + Self.content(for: .link(href: href))
-            // Making sure share item is the last one
+        case .multiple(let payloads):
+            var items: [BeamWebContextMenuItem] = []
+            for payload in payloads {
+                items.append(contentsOf: Self.content(for: payload))
+                items.append(.separator)
+            }
             items.removeAll { $0 == .systemShare }
             return items + [.systemShare]
         }
     }
+
 }
 
 extension BeamWebContextMenuItem {
@@ -132,7 +136,7 @@ extension BeamWebContextMenuItem {
             case .textSearch:
                 result(search(with: payload))
             case .textCopy:
-                guard case .textSelection(let contents) = payload else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
+                guard let contents = payload.contents else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(copy(contents, toPasteboard: .general, forType: .string))
             case .textCapture, .imageCapture, .linkCapture, .pageCapture:
                 result(.failure(BeamWebContextMenuItemError.unimplemented))
@@ -224,7 +228,7 @@ extension BeamWebContextMenuItem {
 
     private func search(with payload: ContextMenuMessageHandlerPayload) -> Result<Void, Error> {
         let state = AppDelegate.main.window?.state
-        guard case .textSelection(let contents) = payload, let tuple = state?.urlFor(query: contents), let url = tuple.0 else {
+        guard let contents = payload.contents, let tuple = state?.urlFor(query: contents), let url = tuple.0 else {
             return .failure(BeamWebContextMenuItemError.unexpectedError)
         }
         state?.createTab(withURLRequest: .init(url: url))
