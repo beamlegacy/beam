@@ -70,9 +70,7 @@ class NotePublishTests: BaseTest {
     func testPublishUnpublishNote() throws {
 
         journalView = setupStaging(withRandomAccount: true)
-        
-        XCTAssertTrue(webView.waitForWebViewToLoad(), "Webview is not loaded")
-        journalView.shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
+        shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
         let noteNameToBeCreated = "Note publish"
         
         step("Given I create \(noteNameToBeCreated) note"){

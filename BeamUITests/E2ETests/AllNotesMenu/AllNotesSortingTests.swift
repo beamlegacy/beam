@@ -48,7 +48,6 @@ class AllNotesSortingTests: BaseTest {
         
         step("GIVEN I setup staging environment and open All cards") {
             helper = BeamUITestsHelper(setupStaging(withRandomAccount: true).app)
-            _ = webView.waitForWebViewToLoad()
             helper.tapCommand(.create10Notes)
             shortcutHelper.shortcutActionInvoke(action: .switchBetweenNoteWeb)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
