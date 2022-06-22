@@ -261,6 +261,7 @@ public enum ElementKind: Codable, Equatable {
         }
     }
 
+    // swiftlint:disable:next cyclomatic_complexity
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
 
@@ -291,7 +292,9 @@ public enum ElementKind: Codable, Equatable {
             /// information use sourceMetadata instead
             /// TODO: Rename .source to be descriptive e.g. "imageId"
             try container.encode(imageId, forKey: .source)
-            try container.encode(sourceMetadata, forKey: .sourceMetadata)
+            if let sourceMetadata = sourceMetadata {
+                try container.encode(sourceMetadata, forKey: .sourceMetadata)
+            }
             try container.encode(displayInfo, forKey: .displayInfos)
         case let .embed(url, sourceMetadata, displayInfo):
             try container.encode("embed", forKey: .type)
@@ -299,7 +302,9 @@ public enum ElementKind: Codable, Equatable {
             /// information use sourceMetadata instead
             /// TODO: Rename .source to be descriptive e.g. "url"
             try container.encode(url, forKey: .source)
-            try container.encode(sourceMetadata, forKey: .sourceMetadata)
+            if let sourceMetadata = sourceMetadata {
+                try container.encode(sourceMetadata, forKey: .sourceMetadata)
+            }
             try container.encode(displayInfo, forKey: .displayInfos)
         case let .blockReference(noteId, elementId, sourceMetadata):
             try container.encode("blockReference", forKey: .type)
@@ -309,7 +314,9 @@ public enum ElementKind: Codable, Equatable {
             /// information use sourceMetadata instead
             /// TODO: Rename .source to be descriptive e.g. "elementId"
             try container.encode(elementId, forKey: .source)
-            try container.encode(sourceMetadata, forKey: .sourceMetadata)
+            if let sourceMetadata = sourceMetadata {
+                try container.encode(sourceMetadata, forKey: .sourceMetadata)
+            }
         case .dailySummary:
             try container.encode("dailySummary", forKey: .type)
 
