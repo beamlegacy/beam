@@ -504,27 +504,43 @@ extension BeamObjectManager {
         localTimer = Date()
         var totalSize = 0
 
-        for beamObjectsUploadChunk in beamObjectsUpload.chunked(into: 10) {
-            for beamObjectUpload in beamObjectsUploadChunk {
-                let headers: [String: String] = try decoder.decode([String: String].self,
-                                                                   from: beamObjectUpload.uploadHeaders.asData)
+        try await withThrowingTaskGroup(of: Error?.self, body: { group in
+            var chunkSize = 10
+            if Configuration.env == .test {
+                // Order is not guaranteed, so we disable parallel upload when recording it with Vinyl
+                chunkSize = 1
+            }
+            for beamObjectsUploadChunk in beamObjectsUpload.chunked(into: chunkSize) {
+                for beamObjectUpload in beamObjectsUploadChunk {
+                    let headers: [String: String] = try decoder.decode([String: String].self,
+                                                                       from: beamObjectUpload.uploadHeaders.asData)
 
-                guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
-                    assert(false)
-                    Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
-                    continue
+                    guard let data = objectsToSave.first(where: { $0.id == beamObjectUpload.id })?.data else {
+                        assert(false)
+                        Logger.shared.logError("Couldn't find data", category: .beamObjectNetwork)
+                        continue
+                    }
+
+                    totalSize += data.count
+
+                    group.addTask {
+                        do {
+                            try await request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
+                                                            putHeaders: headers,
+                                                            data: data)
+                            return nil
+                        } catch {
+                            return error
+                        }
+                    }
                 }
-
-                totalSize += data.count
-                do {
-                    try await request.sendDataToUrl(urlString: beamObjectUpload.uploadUrl,
-                                                    putHeaders: headers,
-                                                    data: data)
-                } catch {
-                    errors.append(error)
+                for try await error in group {
+                    if let error = error {
+                        errors.append(error)
+                    }
                 }
             }
-        }
+        })
 
         Logger.shared.logDebug("\(objectsToSave.count) \(T.beamObjectType) direct uploads: finished uploading \(totalSize.byteSize)",
                                category: .beamObjectNetwork,
