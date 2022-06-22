@@ -63,6 +63,11 @@ class CreditCardTestView: BaseView {
     }
     
     @discardableResult
+    func getAddCreditCardCreationButton() -> XCUIElement {
+        return app.windows[passwordsWindowTitle].sheets.sheets.buttons[PasswordPreferencesViewLocators.Buttons.addCardButton.accessibilityIdentifier]
+    }
+    
+    @discardableResult
     func clickCancelCreditCardCreationButton() -> CreditCardTestView {
         button(PasswordPreferencesViewLocators.Buttons.cancelButton.accessibilityIdentifier).clickOnHittable()
         return self
