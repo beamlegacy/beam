@@ -1004,6 +1004,7 @@
 		A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */; };
 		A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3A89D942837CD2E00A47B2E /* test_SVG.svg */; };
 		A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */; };
+		A3B6C9722861F15600E7F78C /* AccountPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */; };
 		A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */; };
 		A3D289922808715900FA0D3A /* OnboardingLostPKViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */; };
 		A3D421322837B0F0002DB9A4 /* UITests-SVG.html in Resources */ = {isa = PBXBuildFile; fileRef = A3D421312837B0F0002DB9A4 /* UITests-SVG.html */; };
@@ -2898,6 +2899,7 @@
 		A39F7258284F92970085DDCA /* AllNotesPublishProfileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllNotesPublishProfileTests.swift; sourceTree = "<group>"; };
 		A3A89D942837CD2E00A47B2E /* test_SVG.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test_SVG.svg; sourceTree = "<group>"; };
 		A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFrameworkTests.swift; sourceTree = "<group>"; };
+		A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPreferencesTests.swift; sourceTree = "<group>"; };
 		A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKTestView.swift; sourceTree = "<group>"; };
 		A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKViewLocators.swift; sourceTree = "<group>"; };
 		A3D2BB2D2812F1BD00CCCE40 /* BeamUITests-Thread7.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread7.xctestplan"; sourceTree = "<group>"; };
@@ -6938,6 +6940,14 @@
 			path = HelpersTests;
 			sourceTree = "<group>";
 		};
+		A3B6C96B2861F13E00E7F78C /* Account */ = {
+			isa = PBXGroup;
+			children = (
+				A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */,
+			);
+			path = Account;
+			sourceTree = "<group>";
+		};
 		A3E7B4AD27AC16C70074C9BB /* Popups */ = {
 			isa = PBXGroup;
 			children = (
@@ -7782,6 +7792,7 @@
 		B5FAE2F1270ECEC500EAC8A3 /* Preferences */ = {
 			isa = PBXGroup;
 			children = (
+				A3B6C96B2861F13E00E7F78C /* Account */,
 				D7E38CE6282A93460059F60D /* Privacy */,
 				B52C147627FF04EE00D67EE5 /* About */,
 				A3E7B4BE27AC45FD0074C9BB /* Passwords */,
@@ -9913,6 +9924,7 @@
 				A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */,
 				8AA6D92427FB4E3400F42FAB /* UITestPageBrowserWindow.swift in Sources */,
 				B5BA078D26B0027A00D31FED /* NoteEditTests.swift in Sources */,
+				A3B6C9722861F15600E7F78C /* AccountPreferencesTests.swift in Sources */,
 				B5BA078626AF3B4400D31FED /* NoteViewLocators.swift in Sources */,
 				A39F7259284F92970085DDCA /* AllNotesPublishProfileTests.swift in Sources */,
 				B5D2A1872805EAA600C833B9 /* OnboardingPrivateKeyTestView.swift in Sources */,
