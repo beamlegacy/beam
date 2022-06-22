@@ -625,8 +625,6 @@
 		8A27DCA327EDC8CA0044A9A2 /* EmbedNode_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC6127EDC7A50044A9A2 /* EmbedNode_prod.js */; };
 		8A27DCA427EDC8CA0044A9A2 /* PasswordManager_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC8F27EDC86A0044A9A2 /* PasswordManager_prod.js */; };
 		8A27DCA527EDC8CA0044A9A2 /* WebPositions_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DC6B27EDC7E50044A9A2 /* WebPositions_prod.js */; };
-		8A27DCC427EE1D5E0044A9A2 /* WebViewFocusMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A27DCA827EE1D570044A9A2 /* WebViewFocusMessageHandler.swift */; };
-		8A27DCC527EE1D640044A9A2 /* WebViewFocus_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A27DCAB27EE1D570044A9A2 /* WebViewFocus_prod.js */; };
 		8A2A398726F24F9E0084A073 /* Debounce.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A2A398626F24F9E0084A073 /* Debounce.swift */; };
 		8A34EADC27C7AF750063DAF6 /* TransientWebViewWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */; };
 		8A34EAE327C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */; };
@@ -2454,22 +2452,6 @@
 		8A27DC9F27EDC86A0044A9A2 /* PasswordManagerUI.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PasswordManagerUI.ts; sourceTree = "<group>"; };
 		8A27DCA027EDC86A0044A9A2 /* PasswordManager.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PasswordManager.ts; sourceTree = "<group>"; };
 		8A27DCA127EDC86A0044A9A2 /* PasswordManagerHelper.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = PasswordManagerHelper.ts; sourceTree = "<group>"; };
-		8A27DCA827EE1D570044A9A2 /* WebViewFocusMessageHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewFocusMessageHandler.swift; sourceTree = "<group>"; };
-		8A27DCAB27EE1D570044A9A2 /* WebViewFocus_prod.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = WebViewFocus_prod.js; sourceTree = "<group>"; };
-		8A27DCAD27EE1D570044A9A2 /* WebViewFocusUI_web.d.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocusUI_web.d.ts; sourceTree = "<group>"; };
-		8A27DCAE27EE1D570044A9A2 /* WebViewFocus.d.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocus.d.ts; sourceTree = "<group>"; };
-		8A27DCAF27EE1D570044A9A2 /* WebViewFocusUI.d.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocusUI.d.ts; sourceTree = "<group>"; };
-		8A27DCB027EE1D570044A9A2 /* WebViewFocusUI_native.d.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocusUI_native.d.ts; sourceTree = "<group>"; };
-		8A27DCB127EE1D570044A9A2 /* jest.config.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = jest.config.js; sourceTree = "<group>"; };
-		8A27DCB327EE1D570044A9A2 /* WebViewFocus.test.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocus.test.ts; sourceTree = "<group>"; };
-		8A27DCB427EE1D570044A9A2 /* webpack.config.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = webpack.config.js; sourceTree = "<group>"; };
-		8A27DCB527EE1D570044A9A2 /* package.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = package.json; sourceTree = "<group>"; };
-		8A27DCBD27EE1D570044A9A2 /* tsconfig.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = tsconfig.json; sourceTree = "<group>"; };
-		8A27DCBF27EE1D570044A9A2 /* WebViewFocus.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocus.ts; sourceTree = "<group>"; };
-		8A27DCC027EE1D570044A9A2 /* index.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = index.js; sourceTree = "<group>"; };
-		8A27DCC127EE1D570044A9A2 /* WebViewFocusUI_native.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocusUI_native.ts; sourceTree = "<group>"; };
-		8A27DCC227EE1D570044A9A2 /* WebViewFocusUI.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocusUI.ts; sourceTree = "<group>"; };
-		8A27DCC327EE1D570044A9A2 /* WebViewFocusUI_web.ts */ = {isa = PBXFileReference; lastKnownFileType = text; path = WebViewFocusUI_web.ts; sourceTree = "<group>"; };
 		8A2A398626F24F9E0084A073 /* Debounce.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debounce.swift; sourceTree = "<group>"; };
 		8A34EADB27C7AF750063DAF6 /* TransientWebViewWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransientWebViewWindow.swift; sourceTree = "<group>"; };
 		8A34EAE227C7B7F20063DAF6 /* WKWindowFeatures+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WKWindowFeatures+Beam.swift"; sourceTree = "<group>"; };
@@ -5912,77 +5894,6 @@
 			path = src;
 			sourceTree = "<group>";
 		};
-		8A27DCA627EE1D570044A9A2 /* WebViewFocus */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCA727EE1D570044A9A2 /* Native */,
-				8A27DCA927EE1D570044A9A2 /* Web */,
-			);
-			path = WebViewFocus;
-			sourceTree = "<group>";
-		};
-		8A27DCA727EE1D570044A9A2 /* Native */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCA827EE1D570044A9A2 /* WebViewFocusMessageHandler.swift */,
-			);
-			path = Native;
-			sourceTree = "<group>";
-		};
-		8A27DCA927EE1D570044A9A2 /* Web */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCB127EE1D570044A9A2 /* jest.config.js */,
-				8A27DCB427EE1D570044A9A2 /* webpack.config.js */,
-				8A27DCB527EE1D570044A9A2 /* package.json */,
-				8A27DCBD27EE1D570044A9A2 /* tsconfig.json */,
-				8A27DCAA27EE1D570044A9A2 /* dist */,
-				8A27DCBE27EE1D570044A9A2 /* src */,
-				8A27DCB227EE1D570044A9A2 /* tests */,
-			);
-			path = Web;
-			sourceTree = "<group>";
-		};
-		8A27DCAA27EE1D570044A9A2 /* dist */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCAB27EE1D570044A9A2 /* WebViewFocus_prod.js */,
-				8A27DCAC27EE1D570044A9A2 /* src */,
-			);
-			path = dist;
-			sourceTree = "<group>";
-		};
-		8A27DCAC27EE1D570044A9A2 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCAD27EE1D570044A9A2 /* WebViewFocusUI_web.d.ts */,
-				8A27DCAE27EE1D570044A9A2 /* WebViewFocus.d.ts */,
-				8A27DCAF27EE1D570044A9A2 /* WebViewFocusUI.d.ts */,
-				8A27DCB027EE1D570044A9A2 /* WebViewFocusUI_native.d.ts */,
-			);
-			path = src;
-			sourceTree = "<group>";
-		};
-		8A27DCB227EE1D570044A9A2 /* tests */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCB327EE1D570044A9A2 /* WebViewFocus.test.ts */,
-			);
-			path = tests;
-			sourceTree = "<group>";
-		};
-		8A27DCBE27EE1D570044A9A2 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				8A27DCBF27EE1D570044A9A2 /* WebViewFocus.ts */,
-				8A27DCC027EE1D570044A9A2 /* index.js */,
-				8A27DCC127EE1D570044A9A2 /* WebViewFocusUI_native.ts */,
-				8A27DCC227EE1D570044A9A2 /* WebViewFocusUI.ts */,
-				8A27DCC327EE1D570044A9A2 /* WebViewFocusUI_web.ts */,
-			);
-			path = src;
-			sourceTree = "<group>";
-		};
 		8A7C80F326F9E03F00D3BA72 /* Omnibar */ = {
 			isa = PBXGroup;
 			children = (
@@ -7145,7 +7056,6 @@
 		A58645DD26FB10BD00D7FF86 /* TabAndWebview */ = {
 			isa = PBXGroup;
 			children = (
-				8A27DCA627EE1D570044A9A2 /* WebViewFocus */,
 				418171822581107C00317ED8 /* BrowserTab.swift */,
 				A510580F2786E7E600E4F1F2 /* BrowserTab+WebPage.swift */,
 				A5E04DEA263BEDA600BFB4C1 /* BrowserTabsManager.swift */,
@@ -8455,7 +8365,6 @@
 				A52A559627592EB7002D0C99 /* Inter-MediumItalic.otf in Resources */,
 				66F9AED4283E215100C28EE3 /* MouseOverAndSelection.ts in Resources */,
 				52EA56D7274F8FDC00F092C8 /* subscription_beam_objects_updated_data_url.graphql in Resources */,
-				8A27DCC527EE1D640044A9A2 /* WebViewFocus_prod.js in Resources */,
 				8AEF14AE27F1C8ED00A27C1B /* SearchWebPage_prod.js in Resources */,
 				8AE3EA9127F36D5E0010A42C /* audio.mp3 in Resources */,
 			);
@@ -8858,7 +8767,6 @@
 				37C413172785529300954FD7 /* DuckDuckGo.swift in Sources */,
 				37278A4C27EDB3FF00D495FD /* EmbedProvider.swift in Sources */,
 				A56DF8F12625D27500F1CF55 /* TextFormatterView.swift in Sources */,
-				8A27DCC427EE1D5E0044A9A2 /* WebViewFocusMessageHandler.swift in Sources */,
 				A5946826265D29350044A892 /* CGPath+Union.swift in Sources */,
 				418172522581107C00317ED8 /* OmniboxSearchField.swift in Sources */,
 				418172392581107C00317ED8 /* Lexer.swift in Sources */,
