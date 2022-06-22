@@ -9,61 +9,6 @@ import AppKit
 import UniformTypeIdentifiers
 
 extension BeamWebContextMenuItem {
-    static func items(with payload: ContextMenuMessageHandlerPayload, from webView: BeamWebView, menu: NSMenu) -> [NSMenuItem] {
-        let items = content(for: payload) + [.separator, .systemInspectElement]
-        return items.compactMap { $0.nsMenuItem(from: webView, payload: payload, menu: menu) }
-    }
-
-    private static func content(for payload: ContextMenuMessageHandlerPayload) -> [Self] {
-        switch payload {
-        case .page:
-            return [
-                .pageBack, .pageForward, .pageReload,
-                .separator,
-                .pagePrint,
-                .separator,
-                .pageCopyAddress, .pageCapture
-            ]
-        case .textSelection:
-            return [
-                .systemLookUp, .systemTranslate, .textSearch,
-                .separator,
-                .textCopy, .textCapture,
-                .separator,
-                .systemShare, .separator, .systemSpeech
-            ]
-        case .link:
-            return [
-                .linkOpenInNewTab, .linkOpenInNewWindow,
-                .separator,
-                .linkCopy, .linkCapture,
-                .separator,
-                .systemShare
-            ]
-        case .image:
-            return [
-                .imageOpenInNewTab, .imageOpenInNewWindow,
-                .separator,
-                .imageSaveToDownloads, .imageSaveAs,
-                .separator,
-                .imageCopyAddress, .systemImageCopy, .imageCapture,
-                .separator,
-                .systemShare
-            ]
-        case .multiple(let payloads):
-            var items: [BeamWebContextMenuItem] = []
-            for payload in payloads {
-                items.append(contentsOf: Self.content(for: payload))
-                items.append(.separator)
-            }
-            items.removeAll { $0 == .systemShare }
-            return items + [.systemShare]
-        }
-    }
-
-}
-
-extension BeamWebContextMenuItem {
     typealias ActionHandler = (BeamWebView, ContextMenuMessageHandlerPayload, (@escaping (Result<Void, Error>) -> Void)) -> Void
 
     func nsMenuItem(from webView: BeamWebView, payload: ContextMenuMessageHandlerPayload, menu: NSMenu) -> NSMenuItem? {
@@ -116,6 +61,13 @@ extension BeamWebContextMenuItem {
             case .linkOpenInNewWindow:
                 guard let url = payload.linkHrefURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(openURLInNewWindow(url))
+            case .linkDownloadLinkedFile:
+                guard let dstURL = getDestinationURL(forImageResource: false, payload: payload) else {
+                    return result(.failure(BeamWebContextMenuItemError.unexpectedError))
+                }
+                retrieveAndSaveFile(imageResource: false, to: dstURL, payload: payload, webView: webView, completion: result)
+            case .linkDownloadLinkedFileAs:
+                showSaveAsPanel(imageResource: false, payload: payload, webView: webView, completion: result)
             case .linkCopy:
                 guard let url = payload.linkHrefURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(copy(url.absoluteString, toPasteboard: .general, forType: .URL))
@@ -126,10 +78,12 @@ extension BeamWebContextMenuItem {
                 guard let src = payload.imageSrcURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(openURLInNewWindow(src))
             case .imageSaveToDownloads:
-                guard let dstURL = getDestinationURL(for: payload) else { return result(.failure(BeamWebContextMenuItemError.unexpectedError)) }
-                retrieveAndSaveImage(to: dstURL, payload: payload, webView: webView, completion: result)
+                guard let dstURL = getDestinationURL(forImageResource: true, payload: payload) else {
+                    return result(.failure(BeamWebContextMenuItemError.unexpectedError))
+                }
+                retrieveAndSaveFile(imageResource: true, to: dstURL, payload: payload, webView: webView, completion: result)
             case .imageSaveAs:
-                showSaveAsPanel(payload: payload, webView: webView, completion: result)
+                showSaveAsPanel(imageResource: true, payload: payload, webView: webView, completion: result)
             case .imageCopyAddress:
                 guard let src = payload.imageSrcURL else { return result(.failure(BeamWebContextMenuItemError.invalidPayload)) }
                 result(copy(src.absoluteString, toPasteboard: .general, forType: .URL))
@@ -164,27 +118,29 @@ extension BeamWebContextMenuItem {
 
     private var title: String? {
         switch self {
-        case .pageBack:             return "Back"
-        case .pageForward:          return "Forward"
-        case .pageReload:           return "Reload Page"
-        case .pagePrint:            return "Print Page..."
-        case .pageCopyAddress:      return "Copy Page Address"
-        case .pageCapture:          return "Capture Page"
-        case .linkOpenInNewTab:     return "Open Link in New Tab"
-        case .linkOpenInNewWindow:  return "Open Link in New Window"
-        case .linkCopy:             return "Copy Link"
-        case .linkCapture:          return "Capture Link"
-        case .imageOpenInNewTab:    return "Open Image in New Tab"
-        case .imageOpenInNewWindow: return "Open Image in New Window"
+        case .pageBack:                 return "Back"
+        case .pageForward:              return "Forward"
+        case .pageReload:               return "Reload Page"
+        case .pagePrint:                return "Print Page..."
+        case .pageCopyAddress:          return "Copy Page Address"
+        case .pageCapture:              return "Capture Page"
+        case .linkOpenInNewTab:         return "Open Link in New Tab"
+        case .linkOpenInNewWindow:      return "Open Link in New Window"
+        case .linkDownloadLinkedFile:   return "Download Linked File"
+        case .linkDownloadLinkedFileAs: return "Download Linked File As..."
+        case .linkCopy:                 return "Copy Link"
+        case .linkCapture:              return "Capture Link"
+        case .imageOpenInNewTab:        return "Open Image in New Tab"
+        case .imageOpenInNewWindow:     return "Open Image in New Window"
         case .imageSaveToDownloads:
             let downloadsFolder = DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder) ?? .downloads
             return "Save Image to \"\(downloadsFolder.sandboxAccessibleUrl?.lastPathComponent ?? downloadsFolder.name)\""
-        case .imageSaveAs:          return "Save Image as..."
-        case .imageCopyAddress:     return "Copy Image Address"
-        case .imageCapture:         return "Capture Image"
-        case .textSearch:           return "Search with \(AppDelegate.main.window?.state.searchEngineName ?? "Google")"
-        case .textCopy:             return "Copy"
-        case .textCapture:          return "Capture Text Selection"
+        case .imageSaveAs:              return "Save Image As..."
+        case .imageCopyAddress:         return "Copy Image Address"
+        case .imageCapture:             return "Capture Image"
+        case .textSearch:               return "Search with \(AppDelegate.main.window?.state.searchEngineName ?? "Google")"
+        case .textCopy:                 return "Copy"
+        case .textCapture:              return "Capture Text Selection"
         case .separator, .systemImageCopy, .systemShare, .systemSpeech, .systemLookUp, .systemTranslate, .systemInspectElement:
             return nil
         }
@@ -244,88 +200,92 @@ extension BeamWebContextMenuItem {
         return .success(())
     }
 
-    private func getDestinationURL(for payload: ContextMenuMessageHandlerPayload, fileManager: FileManager = .default) -> URL? {
+    private func getDestinationURL(forImageResource: Bool, payload: ContextMenuMessageHandlerPayload) -> URL? {
+        let src = forImageResource ? payload.imageSrcURL : payload.linkHrefURL
         let downloadsFolder = DownloadFolder(rawValue: PreferencesManager.selectedDownloadFolder) ?? .downloads
-        guard let src = payload.imageSrcURL, let downloadsFolderURL = downloadsFolder.sandboxAccessibleUrl else { return nil }
+        guard let src = src, let downloadsFolderURL = downloadsFolder.sandboxAccessibleUrl else { return nil }
         return downloadsFolderURL.appendingPathComponent(src.lastPathComponent)
     }
 
-    private var inferMimeType: Bool {
-        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
-        return true
-        #else
-        return false
-        #endif
+    private func writeData(saveAsMenu: Bool, _ data: Data, dstURL: URL, fileName: String? = nil, fileExtension: String? = nil) -> Result<Void, Error> {
+        do {
+            var availableDstURL: URL = dstURL
+
+            if !saveAsMenu {
+                fileName.map { availableDstURL.appendPathComponent($0) }
+                fileExtension.map { availableDstURL.appendPathExtension($0) }
+                availableDstURL = availableDstURL.availableFileURL()
+            }
+
+            let scopedURL = availableDstURL.deletingLastPathComponent()
+            _ = scopedURL.startAccessingSecurityScopedResource() // below write will fail anyway if this returns false
+            try data.write(to: availableDstURL, options: saveAsMenu ? [] : [.withoutOverwriting])
+            scopedURL.stopAccessingSecurityScopedResource()
+
+            try? NSWorkspace.shared.bounceDockStack(with: availableDstURL)
+
+            return .success(())
+        } catch {
+            return .failure(error)
+        }
     }
 
-    private func retrieveAndSaveImage(
+    private func retrieveAndSaveFile(
+        imageResource: Bool,
         to dstURL: URL,
-        fromSaveAsMenu: Bool = false,
+        saveAsMenu: Bool = false,
         payload: ContextMenuMessageHandlerPayload,
         webView: BeamWebView,
         completion: @escaping (Result<Void, Error>) -> Void
     ) {
-        func writeData(_ data: Data, dstURL: URL, fileName: String? = nil, fileExtension: String? = nil) -> Result<Void, Error> {
-            do {
-                var availableDstURL: URL = dstURL
-
-                if !fromSaveAsMenu {
-                    fileName.map { availableDstURL.appendPathComponent($0) }
-                    fileExtension.map { availableDstURL.appendPathExtension($0) }
-                    availableDstURL = availableDstURL.availableFileURL()
-                }
-
-                let scopedURL = availableDstURL.deletingLastPathComponent()
-                _ = scopedURL.startAccessingSecurityScopedResource() // below write will fail anyway if this returns false
-                try data.write(to: availableDstURL, options: fromSaveAsMenu ? [] : [.withoutOverwriting])
-                scopedURL.stopAccessingSecurityScopedResource()
-
-                try? NSWorkspace.shared.bounceDockStack(with: availableDstURL)
-
-                return .success(())
-            } catch {
-                return .failure(error)
-            }
-        }
-
         func dispatchResult(_ result: Result<Data, Error>, fileName: String? = nil, fileExtension: String? = nil) {
             switch result {
             case .success(let data):
-                completion(writeData(data, dstURL: dstURL, fileName: fileName, fileExtension: fileExtension))
+                completion(writeData(saveAsMenu: saveAsMenu, data, dstURL: dstURL, fileName: fileName, fileExtension: fileExtension))
             case .failure(let error):
                 completion(.failure(error))
             }
         }
 
-        // Let's check if we're displaying a raw image and we have data available
-        #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
-        if let mimeType = webView._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
-            webView._getMainResourceData {
-                let fileExtension = payload.imageSrcURL?.pathExtension.isEmpty == true ? uti.preferredFilenameExtension : nil
-                dispatchResult(Result($0, $1), fileExtension: fileExtension)
-            }
-            return
-        }
-        #endif
-        // Otherwise, let's check if the image is base64 encoded, passing an Unknown fileName and a preferred file extension
-        if let (data, mimeType) = payload.base64 {
-            dispatchResult(.success(data), fileName: "Unknown", fileExtension: UTType(mimeType: mimeType)?.preferredFilenameExtension)
-        }
-        // Otherwise, let's download the data
-        else if let imageSrcURL = payload.imageSrcURL {
-            downloadImage(url: imageSrcURL) { result in
-                if imageSrcURL.pathExtension.isEmpty, case .success(let data) = result, let fileExtension = data.preferredFileExtension {
-                    dispatchResult(result, fileExtension: fileExtension)
-                } else {
-                    dispatchResult(result)
+        if imageResource {
+            #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
+            // Let's check if we're displaying a raw image and we have data available
+            if let mimeType = webView._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
+                webView._getMainResourceData {
+                    let fileExtension = payload.imageSrcURL?.pathExtension.isEmpty == true ? uti.preferredFilenameExtension : nil
+                    dispatchResult(Result($0, $1), fileExtension: fileExtension)
                 }
+                return
+            }
+            #endif
+            // Otherwise, let's check if the image is base64 encoded, passing an Unknown fileName and a preferred file extension
+            if let (data, mimeType) = payload.base64 {
+                dispatchResult(.success(data), fileName: "Unknown", fileExtension: UTType(mimeType: mimeType)?.preferredFilenameExtension)
+            }
+            // Otherwise, let's download the data
+            else if let imageSrcURL = payload.imageSrcURL {
+                downloadResource(url: imageSrcURL) { result in
+                    if imageSrcURL.pathExtension.isEmpty, case .success(let data) = result, let fileExtension = data.preferredFileExtension {
+                        dispatchResult(result, fileExtension: fileExtension)
+                    } else {
+                        dispatchResult(result)
+                    }
+                }
+            } else {
+                completion(.failure(BeamWebContextMenuItemError.invalidPayload))
             }
         } else {
-            completion(.failure(BeamWebContextMenuItemError.invalidPayload))
+            if let linkHrefURL = payload.linkHrefURL, let downloadManager = (webView.window as? BeamWindow)?.data.downloadManager {
+                downloadManager.downloadFile(at: linkHrefURL, destinationURL: dstURL)
+                completion(.success(()))
+            } else {
+                completion(.failure(BeamWebContextMenuItemError.invalidPayload))
+            }
         }
     }
 
     private func showSaveAsPanel(
+        imageResource: Bool,
         payload: ContextMenuMessageHandlerPayload,
         webView: BeamWebView,
         completion: @escaping (Result<Void, Error>) -> Void
@@ -336,13 +296,14 @@ extension BeamWebContextMenuItem {
 
         let savePanel = NSSavePanel()
 
-        if let lastPathComponent = payload.imageSrcURL?.lastPathComponent, !lastPathComponent.isEmpty {
+        let srcURL = imageResource ? payload.imageSrcURL : payload.linkHrefURL
+
+        if let lastPathComponent = srcURL?.lastPathComponent, !lastPathComponent.isEmpty {
             savePanel.nameFieldStringValue = lastPathComponent
         } else {
             savePanel.nameFieldStringValue = "Unknown"
         }
-
-        if let uti = payload.inferredUTType(with: webView) {
+        if imageResource, let uti = payload.inferredImageUTType(with: webView) {
             savePanel.allowedContentTypes = [uti]
         }
 
@@ -353,9 +314,9 @@ extension BeamWebContextMenuItem {
         savePanel.beginSheetModal(for: window) { [weak savePanel] response in
             if response == NSApplication.ModalResponse.OK {
                 guard let url = savePanel?.url else {
-                    completion(.failure(BeamWebContextMenuItemError.unexpectedError)); return
+                   completion(.failure(BeamWebContextMenuItemError.unexpectedError)); return
                 }
-                retrieveAndSaveImage(to: url, fromSaveAsMenu: true, payload: payload, webView: webView, completion: completion)
+                retrieveAndSaveFile(imageResource: imageResource, to: url, saveAsMenu: true, payload: payload, webView: webView, completion: completion)
             } else if response == NSApplication.ModalResponse.cancel {
                 completion(.success(())) // showing the panel was a success, user just decided to cancel...
             } else {
@@ -364,7 +325,7 @@ extension BeamWebContextMenuItem {
         }
     }
 
-    private func downloadImage(url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
+    private func downloadResource(url: URL, completion: @escaping (Result<Data, Error>) -> Void) {
         URLSession.shared.dataTask(with: url) { data, _, error in
             DispatchQueue.main.async {
                 completion(Result(data, error))
@@ -374,9 +335,8 @@ extension BeamWebContextMenuItem {
 }
 
 private extension ContextMenuMessageHandlerPayload {
-
     // to be used only within the save panel
-    func inferredUTType(with webView: BeamWebView? = nil) -> UTType? {
+    func inferredImageUTType(with webView: BeamWebView? = nil) -> UTType? {
         #if BEAM_WEBKIT_ENHANCEMENT_ENABLED
         if let mimeType = webView?._MIMEType, let uti = UTType(mimeType: mimeType), uti.conforms(to: .image) {
             return uti
@@ -387,5 +347,4 @@ private extension ContextMenuMessageHandlerPayload {
         }
         return imageSrcURL.flatMap { UTType(mimeType: $0.pathExtension) }
     }
-
 }
