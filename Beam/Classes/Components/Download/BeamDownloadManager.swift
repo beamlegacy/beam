@@ -148,10 +148,19 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
 
         downloadList.addDownload(downloadItem)
 
-        // We dispatch after to make sure the UI have been updated and that thez download button have been displayed and it's coordinates acquired.
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
-            (NSApp.delegate as? AppDelegate)?.window?.downloadAnimation()
-        }
+        dispatchDownloadAnimation()
+    }
+
+    /// Monitors a download initiated by ourselves, and write a download document to disk.
+    func downloadFile(at url: URL, destinationURL: URL) {
+        let proxy = WebKitManualDownloadProxy(url: url, destinationURL: destinationURL)
+
+        let downloadItem = DownloadItem(downloadProxy: proxy, destinationDirectoryURL: destinationURL.deletingLastPathComponent())
+        downloadList.addDownload(downloadItem)
+
+        proxy.manualDownload(with: url)
+
+        dispatchDownloadAnimation()
     }
 
     /// Attempts to restart a download from a download document.
@@ -184,6 +193,13 @@ public class BeamDownloadManager: NSObject, DownloadManager, ObservableObject {
         }
 
         return nil
+    }
+
+    private func dispatchDownloadAnimation() {
+        // We dispatch after to make sure the UI have been updated and that the download button have been displayed and it's coordinates acquired.
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) {
+            (NSApp.delegate as? AppDelegate)?.window?.downloadAnimation()
+        }
     }
 
 }

@@ -16,6 +16,8 @@ enum BeamWebContextMenuItem {
 
     case linkOpenInNewTab
     case linkOpenInNewWindow
+    case linkDownloadLinkedFile
+    case linkDownloadLinkedFileAs
     case linkCopy
     case linkCapture
 
@@ -48,4 +50,61 @@ enum BeamWebContextMenuItemError: Error {
     case unexpectedError
     /// The item is unimplemented and should have not been visible.
     case unimplemented
+}
+
+extension BeamWebContextMenuItem {
+    static func items(with payload: ContextMenuMessageHandlerPayload, from webView: BeamWebView, menu: NSMenu) -> [NSMenuItem] {
+        let items = content(for: payload) + [.separator, .systemInspectElement]
+        return items.compactMap { $0.nsMenuItem(from: webView, payload: payload, menu: menu) }
+    }
+
+    private static func content(for payload: ContextMenuMessageHandlerPayload) -> [Self] {
+        switch payload {
+        case .page:
+            return [
+                .pageBack, .pageForward, .pageReload,
+                .separator,
+                .pagePrint,
+                .separator,
+                .pageCopyAddress, .pageCapture
+            ]
+        case .textSelection:
+            return [
+                .systemLookUp, .systemTranslate, .textSearch,
+                .separator,
+                .textCopy, .textCapture,
+                .separator,
+                .systemShare, .separator, .systemSpeech
+            ]
+        case .link:
+            return [
+                .linkOpenInNewTab, .linkOpenInNewWindow,
+                .separator,
+                .linkDownloadLinkedFile, .linkDownloadLinkedFileAs,
+                .separator,
+                .linkCopy, .linkCapture,
+                .separator,
+                .systemShare
+            ]
+        case .image:
+            return [
+                .imageOpenInNewTab, .imageOpenInNewWindow,
+                .separator,
+                .imageSaveToDownloads, .imageSaveAs,
+                .separator,
+                .imageCopyAddress, .systemImageCopy, .imageCapture,
+                .separator,
+                .systemShare
+            ]
+        case .multiple(let payloads):
+            var items: [BeamWebContextMenuItem] = []
+            for payload in payloads {
+                items.append(contentsOf: Self.content(for: payload))
+                items.append(.separator)
+            }
+            items.removeAll { $0 == .systemShare }
+            return items + [.systemShare]
+        }
+    }
+
 }
