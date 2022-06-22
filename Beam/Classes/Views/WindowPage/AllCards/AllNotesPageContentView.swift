@@ -242,8 +242,8 @@ struct AllNotesPageContentView: View {
                     .padding(.leading, -64) // shifted for hover options menu
             )
         }
-        .frame(minWidth: 617, maxWidth: 900)
-        .padding(.horizontal, compactWindowWidth == true ? 100 : 214)
+        .frame(minWidth: 616, maxWidth: 900)
+        .padding(.horizontal, compactWindowWidth == true ? 92 : 214)
         .id(model.id)
         .onAppear {
             model.data = data
@@ -351,6 +351,7 @@ struct AllNotesPageContentView_Previews: PreviewProvider {
         AllNotesPageContentView()
             .environmentObject(state)
             .environmentObject(state.data)
+            .environmentObject(BeamWindowInfo())
             .background(BeamColor.Generic.background.swiftUI)
     }
 }
