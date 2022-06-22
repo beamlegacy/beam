@@ -321,7 +321,8 @@ struct AccountsView: View {
                         .foregroundColor(encryptionKeyIsHover ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.subtitle.swiftUI)
                         .frame(width: 12, height: 12, alignment: .top)
                 }
-            }).buttonStyle(PlainButtonStyle())
+            }).accessibilityIdentifier("pk-label")
+                .buttonStyle(PlainButtonStyle())
                 .frame(width: 350, height: 16, alignment: .center)
                 .onHover {
                     encryptionKeyIsHover = $0
