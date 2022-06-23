@@ -84,12 +84,9 @@ class OmniBoxTestView: BaseView {
     @discardableResult
     func openDownloadsView() -> DownloadTestView {
         let downloadViewButton = button(ToolbarLocators.Buttons.downloadsButton.accessibilityIdentifier)
-        _ = downloadViewButton.waitForExistence(timeout: BaseTest.minimumWaitTimeout)
+        _ = downloadViewButton.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         waitFor(PredicateFormat.isHittable.rawValue, downloadViewButton, BaseTest.minimumWaitTimeout)
         downloadViewButton.tapInTheMiddle()
-        if !staticText(DownloadViewLocators.Labels.downloadsLabel.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout) {
-            downloadViewButton.tapInTheMiddle()
-        }
         return DownloadTestView()
     }
     

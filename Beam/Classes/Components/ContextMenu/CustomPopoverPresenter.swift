@@ -126,6 +126,9 @@ final class CustomPopoverPresenter {
 
         if storedInPresenter {
             presentedUnknownWindows.append(window)
+            window.didClose = { [weak self, weak window] in
+                self?.presentedUnknownWindows.removeAll(where: { $0 === window })
+            }
         }
         return window
     }

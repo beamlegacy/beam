@@ -148,10 +148,10 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
 
     private func onDownloadButtonPressed(containerGeometry: GeometryProxy) {
         if let downloaderWindow = downloadList.presentingWindow {
-            downloaderWindow.close()
+            CustomPopoverPresenter.shared.dismissPopoverWindow(downloaderWindow)
         } else if let window = CustomPopoverPresenter.shared.presentPopoverChildWindow(useBeamShadow: true, movable: false) {
-            let downloaderView = DownloaderView(downloadList: downloadList) { [weak window] in
-                window?.close()
+            let downloaderView = DownloaderView(downloadList: downloadList) {
+                CustomPopoverPresenter.shared.dismissPopovers()
             }
             let toolbarFrame = containerGeometry.safeTopLeftGlobalFrame(in: window.parent)
             var origin = CGPoint(x: toolbarFrame.origin.x + toolbarFrame.width - downloaderView.preferredWidth - 18, y: toolbarFrame.maxY)
