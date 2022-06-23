@@ -32,7 +32,7 @@ class WebIndexingController {
 
     private func appendToClustering(url: URL, tabIndexingInfo: TabIndexingInfo, readabilityResult: Readability) {
 
-        self.indexingQueue.async { [unowned self] in
+        self.indexingQueue.async { [weak self] in
             var finalTabInfo = tabIndexingInfo
             let htmlNoteAdapter = HtmlNoteAdapter(url)
             finalTabInfo.cleanedTextContentForClustering = htmlNoteAdapter.convertForClustering(html: readabilityResult.content)
