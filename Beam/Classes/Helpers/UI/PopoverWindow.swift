@@ -27,6 +27,8 @@ class PopoverWindow: NSWindow {
     private var _useBeamShadow: Bool
     private var _autocloseIfNotMoved: Bool
 
+    var didClose: (() -> Void)?
+
     init(canBecomeMain: Bool, canBecomeKey: Bool = true, useBeamShadow: Bool = false, lightBeamShadow: Bool = false, autocloseIfNotMoved: Bool = true) {
         _canBecomeKey = canBecomeKey
         _canBecomeMain = canBecomeMain
@@ -45,6 +47,7 @@ class PopoverWindow: NSWindow {
             }
         }
         self.contentView?.subviews.removeAll()
+        self.didClose?()
     }
 
     func setOrigin(_ point: CGPoint, fromTopLeft: Bool = false) {
@@ -110,7 +113,7 @@ class PopoverWindow: NSWindow {
 
     override func resignKey() {
         if _autocloseIfNotMoved && !didMove {
-            self.close()
+            close()
             NotificationCenter.default.removeObserver(self, name: .init("NSWindowDidMoveNotification"), object: nil)
         }
         super.resignKey()
@@ -161,7 +164,7 @@ class PopoverWindow: NSWindow {
 
     override func keyDown(with event: NSEvent) {
         if event.keyCode == KeyCode.escape.rawValue {
-            self.close()
+            close()
         } else {
             super.keyDown(with: event)
         }
@@ -176,7 +179,7 @@ class PopoverWindow: NSWindow {
     }
 
     override func performClose(_ sender: Any?) {
-        self.close()
+        close()
     }
 
     private func updateViewIfNeeded<Content>(_ view: Content)  -> some View where Content: View {
