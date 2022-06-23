@@ -9,6 +9,8 @@ public class MockHttpServer {
     private static var loggerInitialized = false
     private static var instances: [Int: MockHttpServer] = [:]
 
+    private static let loremipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.\n"
+
     @discardableResult
     public static func start(port: Int = 8080) -> MockHttpServer {
         if !loggerInitialized {
@@ -52,6 +54,7 @@ public class MockHttpServer {
         router.post("/signinpage9-2", handler: step2Handler)
         router.all("/signuppage5-2", middleware: BodyParser())
         router.post("/signuppage5-2", handler: signupStep2Handler)
+        router.get("/:param", handler: fileDownloadHandler)
 
         Kitura.addHTTPServer(onPort: port, with: router)
     }
@@ -96,8 +99,10 @@ public class MockHttpServer {
             renderStencil(request, response, "redirection/\(redirectionTemplateName)")
         } else if let redirectionTemplateName = request.hostname.removingSuffix(".adblock.lvh.me") {
             renderStencil(request, response, "adblock/\(redirectionTemplateName)")
+        } else if request.hostname == "download.lvh.me" {
+            fileDownloadHandler(request: request, response: response, next: next)
         } else {
-            return listHandler(request: request, response: response, next: next)
+            listHandler(request: request, response: response, next: next)
         }
     }
 
@@ -122,6 +127,29 @@ public class MockHttpServer {
             return listHandler(request: request, response: response, next: next)
         }
         renderStencil(request, response, "adblock/\(browser)")
+        next()
+    }
+
+    private func fileDownloadHandler(request: RouterRequest, response: RouterResponse, next: @escaping () -> Void) {
+        guard request.hostname == "download.lvh.me" else {
+            return next()
+        }
+        guard let filename = request.parameters["param"] else {
+            response.status(.notFound).send("Missing filename")
+            return next()
+        }
+        let fileLength = request.queryParameters["length"].flatMap(Int.init) ?? 100_000
+        response.headers.addAttachment(for: filename)
+        response.headers.setType("txt", charset: "utf-8")
+        response.headers["Content-Length"] = String(fileLength)
+        let paragraphLength = Self.loremipsum.unicodeScalars.count
+        var remaining = fileLength
+        while remaining >= paragraphLength {
+            response.send(Self.loremipsum)
+            remaining -= paragraphLength
+        }
+        response.send(String(repeating: "*", count: remaining))
+        try? response.end()
         next()
     }
 
