@@ -37,15 +37,6 @@
 ./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenuUI_web.ts
 ./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenuUI.ts
 ./Beam/Classes/Models/TabAndWebview/ContextMenu/Web/src/ContextMenuUI_native.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocusUI_web.d.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocus.d.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocusUI.d.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/dist/src/WebViewFocusUI_native.d.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/tests/WebViewFocus.test.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/src/WebViewFocus.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/src/WebViewFocusUI_native.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/src/WebViewFocusUI.ts
-./Beam/Classes/Models/TabAndWebview/WebViewFocus/Web/src/WebViewFocusUI_web.ts
 ./Beam/Classes/Components/MediaPlayer/Web/dist/src/MediaPlayerUI_web.d.ts
 ./Beam/Classes/Components/MediaPlayer/Web/dist/src/MediaPlayerUI_native.d.ts
 ./Beam/Classes/Components/MediaPlayer/Web/dist/src/MediaPlayer.d.ts
