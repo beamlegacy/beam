@@ -58,6 +58,9 @@ struct AccountsView: View {
     @State private var encryptionKeyIsHover = false
     @State private var encryptionKeyIsCopied = false
 
+    @State private var testAccountIsHover = false
+    @State private var testAccountIsCopied = false
+
     @ObservedObject var viewModel: AccountsViewModel
 
     private let accountManager = AccountManager()
@@ -74,6 +77,9 @@ struct AccountsView: View {
     private func getAccountViewSections() -> [Preferences.Section] {
         var sections = [accountSection, spacerSection, calendarSection]
         if viewModel.isloggedIn && Persistence.Authentication.email != nil {
+            if Configuration.env == .test {
+                sections.append(testAccountSection)
+            }
             sections.append(contentsOf: [encryptionKeySection, manageAccountSection])
         }
         return sections
@@ -170,6 +176,17 @@ struct AccountsView: View {
             #if DEBUG
             RefreshTokenButton
             #endif
+        }
+    }
+
+    private var testAccountSection: Preferences.Section {
+        Preferences.Section(bottomDivider: viewModel.isloggedIn, verticalAlignment: .firstTextBaseline) {
+            Text("Test account:")
+                .font(BeamFont.regular(size: 13).swiftUI)
+                .foregroundColor(BeamColor.Generic.text.swiftUI)
+                .frame(width: 250, alignment: .trailing)
+        } content: {
+            TestAccountView
         }
     }
 
@@ -357,6 +374,64 @@ struct AccountsView: View {
                 .foregroundColor(BeamColor.Corduroy.swiftUI)
                 .frame(height: 13, alignment: .leading)
         }
+    }
+
+    private var TestAccountView: some View {
+        VStack(alignment: .leading) {
+            Button(action: {
+                testAccountIsCopied.toggle()
+
+                copyTestAccountToPasteboard()
+
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+                    testAccountIsCopied.toggle()
+                }
+            }, label: {
+                HStack {
+                    Text(getTestCredentials())
+                        .font(BeamFont.regular(size: 13).swiftUI)
+                        .foregroundColor(BeamColor.Generic.text.swiftUI)
+                    Image("preferences-account-copy")
+                        .renderingMode(.template)
+                        .foregroundColor(testAccountIsHover ? BeamColor.Generic.text.swiftUI : BeamColor.Generic.subtitle.swiftUI)
+                        .frame(width: 12, height: 12, alignment: .top)
+                }
+            }).accessibilityIdentifier("account-infos")
+                .buttonStyle(PlainButtonStyle())
+                .frame(width: 350, height: 16, alignment: .center)
+                .onHover {
+                    testAccountIsHover = $0
+                } .overlay(
+                    ZStack(alignment: .trailing) {
+                        if testAccountIsCopied {
+                            Tooltip(title: "Information copied!")
+                                .fixedSize()
+                                .offset(x: 140, y: -25)
+                                .transition(Tooltip.defaultTransition)
+                        }
+                    })
+        }
+    }
+
+    fileprivate func getTestCredentials() -> String {
+        guard Configuration.env == .test else { return "" }
+        guard let username = Persistence.Authentication.username else {
+            return ""
+        }
+        let email = Persistence.emailOrRaiseError()
+        let password = Configuration.testAccountPassword
+        let privateKey = EncryptionManager.shared.privateKey(for: email).asString()
+
+        return "\(email)\n\(username)\n\(password)\n\(privateKey)"
+    }
+
+    fileprivate func copyTestAccountToPasteboard() {
+        guard Configuration.env == .test else { return }
+
+        let content = getTestCredentials()
+        let pasteboard = NSPasteboard.general
+        pasteboard.clearContents()
+        pasteboard.setString(content, forType: .string)
     }
 
     private func promptLogoutAlert() {
