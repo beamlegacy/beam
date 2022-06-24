@@ -9,7 +9,7 @@ import BeamCore
 import UniformTypeIdentifiers
 
 /// Payload of an invocation of the context menu in the web view.
-enum ContextMenuMessageHandlerPayload {
+indirect enum ContextMenuMessageHandlerPayload {
 
     /// Menu invoked from the web page with no particular content.
     case page(href: String)
@@ -23,17 +23,30 @@ enum ContextMenuMessageHandlerPayload {
     /// Menu invoked from an image, inline or raw.
     case image(src: String)
 
-    /// Menu invoked from an image contained within a link.
-    case linkPlusImage(href: String, src: String)
+    /// Menu invoked from a combination of invocations.
+    case multiple(items: [ContextMenuMessageHandlerPayload])
 
 }
 
 extension ContextMenuMessageHandlerPayload {
 
+    var contents: String? {
+        switch self {
+        case .textSelection(let contents):
+            return contents
+        case .multiple(let items):
+            return items.compactMap(\.contents).first
+        default:
+            return nil
+        }
+    }
+
     var linkHrefURL: URL? {
         switch self {
-        case .page(let href), .link(let href), .linkPlusImage(let href, _):
+        case .page(let href), .link(let href):
             return URL(string: href)
+        case .multiple(let items):
+            return items.compactMap(\.linkHrefURL).first
         default:
             return nil
         }
@@ -41,8 +54,10 @@ extension ContextMenuMessageHandlerPayload {
 
     var imageSrcURL: URL? {
         switch self {
-        case .image(let src), .linkPlusImage(_, let src):
+        case .image(let src):
             return URL(string: src)
+        case .multiple(let items):
+            return items.compactMap(\.imageSrcURL).first
         default:
             return nil
         }
@@ -50,7 +65,7 @@ extension ContextMenuMessageHandlerPayload {
 
     var base64: (data: Data, mimeType: String)? {
         switch self {
-        case .image(let src), .linkPlusImage(_, let src):
+        case .image(let src):
             let array = src.split(separator: ",").map(String.init)
             guard array.count == 2, let base64 = Data(base64Encoded: array[1]) else {
                 return nil
@@ -58,6 +73,8 @@ extension ContextMenuMessageHandlerPayload {
             var mimeType = array[0].replacingOccurrences(of: "data:", with: "", options: [.anchored])
             mimeType = mimeType.replacingOccurrences(of: ";base64", with: "")
             return (base64, mimeType)
+        case .multiple(let items):
+            return items.compactMap(\.base64).first
         default:
             return nil
         }
@@ -100,20 +117,22 @@ final class ContextMenuMessageHandler: SimpleBeamMessageHandler {
 
 extension ContextMenuMessageHandlerPayload: ScriptMessageBodyDecodable {
 
-    private enum ContextMenuMessageHandlerInvocation: Int {
-        case page
-        case textSelection
-        case link
-        case image
-        case linkPlusImage
+    private struct Invocations: OptionSet {
+
+        let rawValue: Int
+
+        static let page             = Invocations(rawValue: 1 << 0)
+        static let textSelection    = Invocations(rawValue: 1 << 1)
+        static let link             = Invocations(rawValue: 1 << 2)
+        static let image            = Invocations(rawValue: 1 << 3)
+
     }
 
     init(from scriptMessageBody: Any) throws {
         guard
             let dictionary = scriptMessageBody as? [String: Any],
             let params = dictionary[CodingKeys.parameters.rawValue] as? [String: Any],
-            let rawInvocation = dictionary[CodingKeys.invocation.rawValue] as? Int,
-            let invocation = ContextMenuMessageHandlerInvocation(rawValue: rawInvocation)
+            let rawInvocations = dictionary[CodingKeys.invocations.rawValue] as? Int
         else {
             throw ScriptMessageBodyDecodingError.unexpectedFormat
         }
@@ -125,22 +144,47 @@ extension ContextMenuMessageHandlerPayload: ScriptMessageBodyDecodable {
             return contents
         }
 
-        switch invocation {
-        case .page:
+        var invocations = Invocations(rawValue: rawInvocations)
+
+        if invocations.contains(.page) {
+            // pop-count check to be sure that the page invocation is not associated with other invocations
+            guard invocations.rawValue.nonzeroBitCount == 1 else {
+                throw ScriptMessageBodyDecodingError.unexpectedFormat
+            }
+
             self = .page(href: try getValue(for: .href, in: dictionary))
-        case .textSelection:
-            self = .textSelection(contents: try getValue(for: .contents, in: params))
-        case .link:
-            self = .link(href: try getValue(for: .href, in: params))
-        case .image:
-            self = .image(src: try getValue(for: .src, in: params))
-        case .linkPlusImage:
-            self = .linkPlusImage(href: try getValue(for: .href, in: params), src: try getValue(for: .src, in: params))
+        } else {
+            // there may be multiple invocations so let's accumulate them
+            var items: [ContextMenuMessageHandlerPayload] = []
+
+            if invocations.contains(.textSelection) {
+                items.append(.textSelection(contents: try getValue(for: .contents, in: params)))
+                invocations.subtract(.textSelection)
+            }
+            if invocations.contains(.link) {
+                items.append(.link(href: try getValue(for: .href, in: params)))
+                invocations.subtract(.link)
+            }
+            if invocations.contains(.image) {
+                items.append(.image(src: try getValue(for: .src, in: params)))
+                invocations.subtract(.image)
+            }
+
+            // making sure we consumed everything
+            guard invocations.isEmpty, !items.isEmpty else {
+                throw ScriptMessageBodyDecodingError.unexpectedFormat
+            }
+
+            if items.count == 1 {
+                self = items[0]
+            } else {
+                self = .multiple(items: items)
+            }
         }
     }
 
     private enum CodingKeys: String, CodingKey {
-        case invocation, parameters, href, contents, src
+        case invocations, parameters, href, contents, src
     }
 
 }
