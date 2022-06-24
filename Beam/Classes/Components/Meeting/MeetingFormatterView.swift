@@ -257,6 +257,8 @@ class MeetingFormatterView: FormatterView {
         let allMeetings: [Meeting] = subviewModel.meetingsByDay.reduce([Meeting]()) { meetings, meetingForDay in
             return meetings + meetingForDay.meetings
         }
+        guard allMeetings.count > 0 else { return true }
+
         var absoluteMeetingIndex: Int = subviewModel.selectedMeeting == nil ? 0 : allMeetings.firstIndex { $0.id == subviewModel.selectedMeeting?.id } ?? 0
         switch direction {
         case .up:
