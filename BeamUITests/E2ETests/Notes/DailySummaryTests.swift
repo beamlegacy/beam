@@ -16,7 +16,7 @@ class DailySummaryTests: BaseTest {
     var helper: BeamUITestsHelper!
     let allNotes = AllNotesTestView()
     let linkToOpen = "Pitchfork"
-    let pitchForkUrl = "pitchfork.com/"
+    let pitchForkUrl = "pitchfork.com/contact/"
     let noteToOpen = "Triplego"
     let dummyText = "Dummy Text"
     let startedDailySummaryExpected = "Started Triplego, Laylow. Worked on Alpha Wann, Prince Waly and RA Electronic music online, Pitchfork"

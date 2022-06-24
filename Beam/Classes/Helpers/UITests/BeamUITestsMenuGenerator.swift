@@ -446,8 +446,8 @@ class BeamUITestsMenuGenerator {
         createNotes(with: ["Key Glock", "Maxo Kream"])
 
         let urlsAndTitlesYesterday = [
-            ("https://twitter.com", "Twitter"),
-            ("http://lemonde.fr/", "LeMonde")
+            ("https://twitter.com/home", "Twitter"),
+            ("http://lemonde.fr/international/", "LeMonde")
         ]
         createFakeDailyUrl(for: urlsAndTitlesYesterday)
 
@@ -462,8 +462,8 @@ class BeamUITestsMenuGenerator {
         }
 
         let urlsAndTitlesToday = [
-            ("https://pitchfork.com", "Pitchfork"),
-            ("https://ra.co", "RA Electronic music online")
+            ("https://pitchfork.com/contact/", "Pitchfork"),
+            ("https://ra.co/events/fr/paris", "RA Electronic music online")
         ]
         createFakeDailyUrl(for: urlsAndTitlesToday)
     }
@@ -491,7 +491,10 @@ class BeamUITestsMenuGenerator {
             return LinkStore.shared.visit($0.0, title: $0.1, content: nil, destination: nil).id
         }
         for (index, urlId) in urlIdsToday.enumerated() {
-            storage.apply(to: urlId) { $0.readingTimeToLastEvent = 100 + Double(index)}
+            storage.apply(to: urlId) {
+                $0.readingTimeToLastEvent = 100 + Double(index)
+                $0.textAmount = 1000 + index
+            }
         }
     }
 
