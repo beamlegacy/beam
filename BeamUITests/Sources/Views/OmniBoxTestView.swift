@@ -109,4 +109,12 @@ class OmniBoxTestView: BaseView {
     func doesOmniboxAllNotesExist() -> Bool {
         return otherElement(OmniboxLocators.Labels.allNotes.accessibilityIdentifier).exists
     }
+    
+    func getAutocompleteIdentifierFor(domainURL: String) -> String {
+        return "autocompleteResult-selected-" + domainURL
+    }
+    
+    func getAutocompleteURLIdentifierFor(domainURL: String) -> String {
+        return getAutocompleteIdentifierFor(domainURL: domainURL) + "-url"
+    }
 }
