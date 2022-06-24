@@ -42,6 +42,11 @@ class BeamTableCellIconView: NSTableCellView {
     func updateWithIcon(_ icon: NSImage?) {
         _iconView.image = icon
     }
+
+    override var backgroundStyle: NSView.BackgroundStyle {
+        get { .normal }
+        set { _ = newValue }
+    }
 }
 
 class CustomImageView: NSImageView {
