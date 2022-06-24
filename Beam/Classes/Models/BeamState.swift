@@ -812,6 +812,7 @@ import Sentry
                 autocompleteManager.clearAutocompleteResults()
             }
         } else {
+            CustomPopoverPresenter.shared.dismissPopovers(animated: false)
             startFocusOmnibox(fromTab: false)
         }
     }
