@@ -9,7 +9,7 @@ import Foundation
 
 class TabGroupingFeedbackViewModel: ObservableObject {
     @Published var clusteringManager: ClusteringManager
-    @Published var groups: [TabClusteringGroup] = []
+    @Published var groups: [TabGroup] = []
     var correctedPages: [ClusteringManager.PageID: UUID] = [ : ]
 
     init(clusteringManager: ClusteringManager) {
@@ -18,20 +18,20 @@ class TabGroupingFeedbackViewModel: ObservableObject {
     }
 
     private func prepareData() {
-        let pagesGroups = self.clusteringManager.tabGroupingUpdater.builtPagesGroups.values
+        let pagesGroups = (self.clusteringManager.tabGroupingManager?.builtPagesGroups ?? [:]).values
         for pagesGroup in pagesGroups where !self.groups.contains(pagesGroup) {
             guard let pageGroupCopy = pagesGroup.copy() else { continue }
             self.groups.append(pageGroupCopy)
         }
 
         let pages = self.clusteringManager.openBrowsing.allOpenBrowsingPages
-        let pagesGrouped = self.groups.flatMap({ $0.pageIDs })
+        let pagesGrouped = self.groups.flatMap({ $0.pageIds })
         for page in pages where !pagesGrouped.contains(where: { $0 == page }) {
             guard let pageId = page,
-                  !self.groups.flatMap({ $0.pageIDs }).contains(pageId) else { continue }
+                  !self.groups.flatMap({ $0.pageIds }).contains(pageId) else { continue }
 
-            let group = TabClusteringGroup(pageIDs: [pageId])
-            group.color = getNewColor()
+            let group = TabGroup(pageIds: [pageId])
+            group.changeColor(getNewColor())
             self.groups.append(group)
         }
     }
@@ -49,7 +49,7 @@ class TabGroupingFeedbackViewModel: ObservableObject {
 
     // MARK: - Groups reorganization 
     func getNewColor() -> TabGroupingColor {
-        clusteringManager.tabGroupingUpdater.colorGenerator.generateNewColor()
+        clusteringManager.tabGroupingManager?.colorGenerator.generateNewColor() ?? .init()
     }
 
     func updateCorrectedPages(with pageId: ClusteringManager.PageID, in groupId: UUID) {
@@ -59,20 +59,22 @@ class TabGroupingFeedbackViewModel: ObservableObject {
     func remove(tabId: UUID) -> Int? {
         var tabIdx: Int = 0
         let groupIdx = groups.firstIndex { group in
-            if let idx = group.pageIDs.firstIndex(where: { $0 == tabId}) {
+            if let idx = group.pageIds.firstIndex(where: { $0 == tabId}) {
                 tabIdx = idx
                 return true
             }
             return false
         }
         guard let groupIdx = groupIdx else { return nil }
-        groups[groupIdx].pageIDs.remove(at: tabIdx)
+        var newPageIDs = groups[groupIdx].pageIds
+        newPageIDs.remove(at: tabIdx)
+        groups[groupIdx].updatePageIds(newPageIDs)
 
         return groupIdx
     }
 
     func remove(group: Int) {
-        if groups[group].pageIDs.isEmpty {
+        if groups[group].pageIds.isEmpty {
             groups.remove(at: group)
         }
         objectWillChange.send()
@@ -96,8 +98,9 @@ class TabGroupingFeedbackWindow: NSWindow, NSWindowDelegate {
     }
 
     override func close() {
-        let usedColors = Array(Set(AppDelegate.main.data.clusteringManager.tabGroupingUpdater.builtPagesGroups.compactMap { $0.value.color }))
-        AppDelegate.main.data.clusteringManager.tabGroupingUpdater.colorGenerator.updateUsedColor(usedColors)
+        guard let tabGroupingManager = AppDelegate.main.data.clusteringManager.tabGroupingManager else { return }
+        let usedColors = Array(Set(tabGroupingManager.builtPagesGroups.compactMap { $0.value.color }))
+        tabGroupingManager.colorGenerator.updateUsedColor(usedColors)
         AppDelegate.main.tabGroupingFeedbackWindow = nil
         super.close()
     }

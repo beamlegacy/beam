@@ -43,7 +43,7 @@ struct Omnibox: View {
         isInsideNote &&
         autocompleteManager.autocompleteResults.isEmpty &&
         autocompleteManager.searchQuery.isEmpty &&
-        (autocompleteManager.mode == .general && !autocompleteManager.isPreparingForAnimatingToMode && autocompleteManager.animatingToMode == nil)
+        (autocompleteManager.mode.isGeneral && !autocompleteManager.isPreparingForAnimatingToMode && autocompleteManager.animatingToMode == nil)
     }
 
     private var showPressedState: Bool {
@@ -73,9 +73,12 @@ struct Omnibox: View {
                          alignment: .bottom)
                 .frame(height: Self.defaultHeight, alignment: .top)
                 if shouldShowAutocompleteResults {
-                    AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
-                                         elements: autocompleteManager.autocompleteResults,
-                                         modifierFlagsPressed: modifierFlagsPressed)
+                    ScrollView {
+                        AutocompleteListView(selectedIndex: $autocompleteManager.autocompleteSelectedIndex,
+                                             elements: autocompleteManager.autocompleteResults,
+                                             modifierFlagsPressed: modifierFlagsPressed)
+                    }
+                    .frame(maxHeight: 380)
                 } else if state.isIncognito && isInsideNote {
                     OmniboxIncognitoExplanation()
                 }

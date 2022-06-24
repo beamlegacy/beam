@@ -48,7 +48,7 @@ class BrowserTabsManagerTests: XCTestCase {
         let tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
         ]
-        let groupA = TabClusteringGroup(pageIDs: [])
+        let groupA = TabGroup(pageIds: [])
         var tabGroups = [
             tabs[1].id: groupA,
             tabs[2].id: groupA
@@ -124,7 +124,7 @@ class BrowserTabsManagerTests: XCTestCase {
         let tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
         ]
-        let groupA = TabClusteringGroup(pageIDs: [])
+        let groupA = TabGroup(pageIds: [])
         let tabGroups = [
             tabs[1].id: groupA,
             tabs[2].id: groupA
@@ -149,14 +149,14 @@ class BrowserTabsManagerTests: XCTestCase {
         let tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
         ]
-        let groupA = TabClusteringGroup(pageIDs: [])
+        let groupA = TabGroup(pageIds: [])
         let tabGroups = [
             tabs[1].id: groupA,
             tabs[2].id: groupA
         ]
         sut.tabs = tabs
         sut._testSetTabsClusteringGroup(tabGroups)
-        sut.toggleGroupCollapse(groupA.id)
+        sut.toggleGroupCollapse(groupA)
         XCTAssertEqual(sut.listItems.allItems.count, 3)
         sut.setCurrentTab(at: 0)
         sut.showNextTab()
@@ -193,14 +193,14 @@ class BrowserTabsManagerTests: XCTestCase {
         let tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
         ]
-        let groupA = TabClusteringGroup(pageIDs: [])
+        let groupA = TabGroup(pageIds: [])
         let tabGroups = [
             tabs[1].id: groupA,
             tabs[2].id: groupA
         ]
         sut.tabs = tabs
         sut._testSetTabsClusteringGroup(tabGroups)
-        sut.toggleGroupCollapse(groupA.id)
+        sut.toggleGroupCollapse(groupA)
         sut.setCurrentTab(at: 0)
         XCTAssertEqual(sut.currentTab, tabs[0])
 
@@ -222,7 +222,7 @@ class BrowserTabsManagerTests: XCTestCase {
         let tabs = [
             tab("Tab A"), tab("Tab B"), tab("Tab C"), tab("Tab D")
         ]
-        let groupA = TabClusteringGroup(pageIDs: [])
+        let groupA = TabGroup(pageIds: [])
         let tabGroups = [
             tabs[1].id: groupA,
             tabs[3].id: groupA
@@ -233,11 +233,11 @@ class BrowserTabsManagerTests: XCTestCase {
         XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
         XCTAssertEqual(sut.listItems.allItems[4].tab, tabs[3])
 
-        sut.toggleGroupCollapse(groupA.id)
+        sut.toggleGroupCollapse(groupA)
         XCTAssertEqual(sut.listItems.allItems.count, 3)
 
         // after uncollapsing, grouped tabs are now next to each other.
-        sut.toggleGroupCollapse(groupA.id)
+        sut.toggleGroupCollapse(groupA)
         XCTAssertEqual(sut.listItems.allItems[2].tab, tabs[1])
         XCTAssertEqual(sut.listItems.allItems[3].tab, tabs[3])
     }

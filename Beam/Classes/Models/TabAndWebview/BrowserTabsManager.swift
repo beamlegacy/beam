@@ -58,19 +58,18 @@ class BrowserTabsManager: ObservableObject {
 
     private var tabPinSuggester = TabPinSuggester(storage: DomainPath0TreeStatsStorage())
 
-    /// Dictionary of `key`: BrowserTab.id, `value`: Group to which this tab belongs
-    @Published private(set) var tabsClusteringGroups = [UUID: TabClusteringGroup]() {
+    /// Dictionary of `key`: BrowserTab.TabID, `value`: Group to which this tab belongs
+    @Published private(set) var tabsClusteringGroups = [BrowserTab.TabID: TabGroup]() {
         didSet {
             guard tabsClusteringGroups != oldValue else { return }
-            cleanForcedGroups()
         }
     }
     /// We collapsed only the tabs visible when collapsing a group.
     /// If a tab is added to the group while it is collapsed, it will still be displayed.
-    private var collapsedTabsInGroup = [TabClusteringGroup.GroupID: [UUID]]()
+    private var collapsedTabsInGroup = [TabGroup.GroupID: [BrowserTab.TabID]]()
 
     /// Groups of tabs by interactions, to help know where to insert new tabs. *Not related to Clustering*
-    private var tabsNeighborhoods: [UUID: [UUID]] = [:]
+    private var tabsNeighborhoods: [BrowserTab.TabID: [BrowserTab.TabID]] = [:]
 
     @Published private(set) var currentTab: BrowserTab? {
         didSet {
@@ -132,19 +131,18 @@ class BrowserTabsManager: ObservableObject {
     private func updateListItems() {
         var sections = TabsListItemsSections()
         let groups = tabsClusteringGroups
-        var previousGroup: TabClusteringGroup?
+        var previousGroup: TabGroup?
         var alreadyAddedGroups: [UUID: Bool] = [:]
         var visibleTabs: [BrowserTab] = []
         tabs.forEach { tab in
-            let forcedGroup = Self.forcedTabsInGroup[tab.id]
-            let forcedOutOfGroup = Self.forcedTabsOutOfGroup[tab.id]
+            let forcedGroups = tabGroupingManager.forcedTabsGroup[tab.id]
             let suggestedGroup = groups[tab.id]
-            var currentGroup: TabClusteringGroup?
-            if forcedGroup != nil {
-                currentGroup = forcedGroup
-            } else if forcedOutOfGroup == nil, let suggestedGroup = suggestedGroup {
+            var currentGroup: TabGroup?
+            if forcedGroups?.inGroup != nil {
+                currentGroup = forcedGroups?.inGroup
+            } else if forcedGroups?.outOfGroup == nil, let suggestedGroup = suggestedGroup {
                 let tabsCountInThatGroup = groups.filter { $0.value == suggestedGroup }.count
-                if suggestedGroup.hasBeenModified || tabsCountInThatGroup > 1 {
+                if suggestedGroup.shouldBePersisted || tabsCountInThatGroup > 1 {
                     currentGroup = suggestedGroup
                 }
             }
@@ -330,7 +328,7 @@ extension BrowserTabsManager {
         return tabs.firstIndex(of: tab)
     }
 
-    func moveListItem(atListIndex: Int, toListIndex: Int, changeGroup destinationGroup: TabClusteringGroup?) {
+    func moveListItem(atListIndex: Int, toListIndex: Int, changeGroup destinationGroup: TabGroup?) {
 
         guard atListIndex < listItems.allItems.count && toListIndex < listItems.allItems.count else { return }
         let movedItem = listItems.allItems[atListIndex]
@@ -359,7 +357,7 @@ extension BrowserTabsManager {
         }
     }
 
-    public func removeTab(tabId: UUID, suggestedNextCurrentTab: BrowserTab? = nil) {
+    public func removeTab(tabId: BrowserTab.TabID, suggestedNextCurrentTab: BrowserTab? = nil) {
         guard let index = tabs.firstIndex(where: { $0.id == tabId }) else { return }
         let tab = tabs[index]
         tabs.remove(at: index)
@@ -399,27 +397,27 @@ extension BrowserTabsManager {
 // MARK: - Tabs Interactions Neighborhoods
 extension BrowserTabsManager {
 
-    private var currentTabNeighborhoodValue: [UUID]? {
+    private var currentTabNeighborhoodValue: [BrowserTab.TabID]? {
         guard let currentTabId = self.currentTab?.id, tabsNeighborhoods[currentTabId] != nil else {
             return tabsNeighborhoods.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.value
         }
         return tabsNeighborhoods[currentTabId]
     }
 
-    public var currentTabNeighborhoodKey: UUID? {
+    public var currentTabNeighborhoodKey: BrowserTab.TabID? {
         guard let currentTabId = self.currentTab?.id, tabsNeighborhoods[currentTabId] != nil else {
             return tabsNeighborhoods.first(where: { $1.contains(where: { $0 == currentTab?.id }) })?.key
         }
         return currentTabId
     }
 
-    public func createNewNeighborhood(for tabId: UUID, with tabs: [UUID] = []) {
+    public func createNewNeighborhood(for tabId: BrowserTab.TabID, with tabs: [BrowserTab.TabID] = []) {
         tabsNeighborhoods[tabId] = tabs
     }
 
     /// Remove the TabId from the Neighborhood and return the next TabId to show
     @discardableResult
-    public func removeFromTabNeighborhood(tabId: UUID) -> UUID? {
+    public func removeFromTabNeighborhood(tabId: BrowserTab.TabID) -> BrowserTab.TabID? {
         guard let neighborhoodKey = currentTabNeighborhoodKey else { return nil }
         if tabId == neighborhoodKey {
             guard var neighborhood = tabsNeighborhoods.removeValue(forKey: neighborhoodKey), !neighborhood.isEmpty else { return nil }
@@ -439,7 +437,7 @@ extension BrowserTabsManager {
         }
     }
 
-    private func nextTabToGo(from index: Int, in neighborhood: [UUID]) -> UUID? {
+    private func nextTabToGo(from index: Int, in neighborhood: [BrowserTab.TabID]) -> BrowserTab.TabID? {
         let afterIdx = neighborhood.index(after: index)
         let beforeIdx = neighborhood.index(before: index)
         if afterIdx < neighborhood.count {
@@ -469,10 +467,10 @@ extension BrowserTabsManager {
 
 // MARK: - Tabs Clustering
 extension BrowserTabsManager {
-    /// The UI might want to temporarily force a tab in or out a group, independently of the Clustering.
-    /// Either for temporary UI states (opening a new tab in group). Or while we're waiting for Clustering to update.
-    private static var forcedTabsInGroup = [UUID: TabClusteringGroup]()
-    private static var forcedTabsOutOfGroup = [UUID: TabClusteringGroup]()
+
+    private var tabGroupingManager: TabGroupingManager {
+        data.tabGroupingManager
+    }
 
     private func updateTabsClusteringGroupsAfterTabsChange(withTabs tabs: [BrowserTab]) {
         self.tabsClusteringGroups = tabsClusteringGroups.filter { (key, _) in
@@ -481,11 +479,11 @@ extension BrowserTabsManager {
         }
     }
 
-    private func updateReceivedTabsClusteringGroups(withTabs tabs: [BrowserTab], pagesGroups: [ClusteringManager.PageID: TabClusteringGroup]) {
-        let tabsPerPageId = Dictionary(grouping: tabs, by: { $0.browsingTree.current.link })
-        var tabsGroups = [UUID: TabClusteringGroup]()
-        pagesGroups.forEach { (pageID, group) in
-            tabsPerPageId[pageID]?.forEach { tab in
+    private func updateReceivedTabsClusteringGroups(withTabs tabs: [BrowserTab], pagesGroups: [ClusteringManager.PageID: TabGroup]) {
+        let tabsPerPageId = Dictionary(grouping: tabs, by: { $0.pageId })
+        var tabsGroups = [BrowserTab.TabID: TabGroup]()
+        pagesGroups.forEach { (pageId, group) in
+            tabsPerPageId[pageId]?.forEach { tab in
                 guard !tab.isPinned else { return }
                 tabsGroups[tab.id] = group
             }
@@ -494,7 +492,7 @@ extension BrowserTabsManager {
     }
 
     private func setupTabsClustering() {
-        data.clusteringManager.tabGroupingUpdater.$builtPagesGroups.sink { [weak self] pagesGroups in
+        tabGroupingManager.$builtPagesGroups.receive(on: DispatchQueue.main).sink { [weak self] pagesGroups in
             guard let self = self else { return }
             let previousGroups = self.tabsClusteringGroups
             self.updateReceivedTabsClusteringGroups(withTabs: self.tabs, pagesGroups: pagesGroups)
@@ -504,18 +502,17 @@ extension BrowserTabsManager {
         }.store(in: &dataScope)
     }
 
-    private func getGroup(_ groupID: TabClusteringGroup.GroupID) -> TabClusteringGroup? {
-        tabsClusteringGroups.values.first { $0.id == groupID }
-    }
-
-    private func tabsIds(inGroup groupID: TabClusteringGroup.GroupID) -> [UUID] {
-        tabsClusteringGroups.compactMap { (key: UUID, value: TabClusteringGroup) in
-            return value.id == groupID ? key : nil
+    private func tabsIds(inGroup group: TabGroup) -> [BrowserTab.TabID] {
+        let clusteringTabs: [BrowserTab.TabID] = tabsClusteringGroups.compactMap { (key: BrowserTab.TabID, value: TabGroup) in
+            guard tabGroupingManager.forcedTabsGroup[key]?.outOfGroup != value else { return nil }
+            return value.id == group.id ? key : nil
         }
+        let forcedTabs = tabGroupingManager.forcedTabsGroup.filter { $0.value.inGroup?.id == group.id }.keys
+        return clusteringTabs + forcedTabs
     }
 
-    private func tabs(inGroup groupID: TabClusteringGroup.GroupID) -> [BrowserTab] {
-        let tabsIDs = tabsIds(inGroup: groupID)
+    private func tabs(inGroup group: TabGroup) -> [BrowserTab] {
+        let tabsIDs = tabsIds(inGroup: group)
         return tabs.filter { tabsIDs.contains($0.id) }
     }
 
@@ -527,29 +524,18 @@ extension BrowserTabsManager {
         data.clusteringManager.openBrowsing.allOpenBrowsingTrees = (data.clusteringManager.openBrowsing.allOpenBrowsingTrees.filter { $0.browserTabManagerId != self.browserTabManagerId }) + openTabs
     }
 
-    /// After receiving new groups, let's clean up the unnecessary forced group in/out
-    private func cleanForcedGroups() {
-        let clusteringGroups = tabsClusteringGroups
-        Self.forcedTabsInGroup = Self.forcedTabsInGroup.filter { forcedIn in
-            clusteringGroups[forcedIn.key] != forcedIn.value
-        }
-        Self.forcedTabsOutOfGroup = Self.forcedTabsOutOfGroup.filter { forcedOut in
-            clusteringGroups[forcedOut.key] == forcedOut.value
-        }
-    }
-
-    func renameGroup(_ groupID: TabClusteringGroup.GroupID, title: String) {
-        getGroup(groupID)?.title = title
+    func renameGroup(_ group: TabGroup, title: String) {
+        tabGroupingManager.renameGroup(group, title: title)
         updateListItems()
     }
 
-    func changeGroupColor(_ groupID: TabClusteringGroup.GroupID, color: TabGroupingColor?) {
-        getGroup(groupID)?.color = color
+    func changeGroupColor(_ group: TabGroup, color: TabGroupingColor) {
+        tabGroupingManager.changeGroupColor(group, color: color)
         updateListItems()
     }
 
-    private func gatherTabsInGroupTogether(_ groupID: TabClusteringGroup.GroupID) {
-        let tabsInGroup = tabsIds(inGroup: groupID)
+    private func gatherTabsInGroupTogether(_ group: TabGroup) {
+        let tabsInGroup = tabsIds(inGroup: group)
         var tabsIndexToMove = IndexSet()
         tabs.enumerated().forEach { (index, tab) in
             if tabsInGroup.contains(tab.id) {
@@ -560,16 +546,15 @@ extension BrowserTabsManager {
         tabs.move(fromOffsets: tabsIndexToMove, toOffset: firstIndexOfGroup)
     }
 
-    func toggleGroupCollapse(_ groupID: TabClusteringGroup.GroupID) {
-        guard let group = getGroup(groupID) else { return }
-        group.collapsed.toggle()
+    func toggleGroupCollapse(_ group: TabGroup) {
+        tabGroupingManager.toggleCollapse(group)
 
         if group.collapsed {
-            let tabsInGroup = tabsIds(inGroup: groupID)
+            let tabsInGroup = tabsIds(inGroup: group)
             pauseListItemsUpdate = true
             defer { pauseListItemsUpdate = false }
             collapsedTabsInGroup[group.id] = tabsInGroup
-            gatherTabsInGroupTogether(group.id)
+            gatherTabsInGroupTogether(group)
             updateListItems()
             if let currentTab = currentTab, tabsInGroup.contains(currentTab.id) {
                 changeCurrentTabIfNotVisible(previousTabsList: tabs)
@@ -580,43 +565,41 @@ extension BrowserTabsManager {
         }
     }
 
-    func ungroupTabsInGroup(_ group: TabClusteringGroup) {
+    func ungroupTabsInGroup(_ group: TabGroup) {
         pauseListItemsUpdate = true
-        let tabsIDs = tabsIds(inGroup: group.id)
+        let tabs = tabs(inGroup: group)
         let beWith: [ClusteringManager.PageID] = []
-        let beApart: [ClusteringManager.PageID] = group.pageIDs
+        let beApart: [ClusteringManager.PageID] = group.pageIds
         let clusteringManager = state?.data.clusteringManager
-        tabsIDs.forEach { tabID in
-            Self.forcedTabsInGroup.removeValue(forKey: tabID)
-            Self.forcedTabsOutOfGroup[tabID] = group
+        tabs.forEach { tab in
+            tabGroupingManager.moveTab(tab, inGroup: nil, outOfGroup: group)
         }
-        beApart.forEach { pageID in
-            clusteringManager?.shouldBeWithAndApart(pageId: pageID, beWith: beWith, beApart: beApart)
+        beApart.forEach { pageId in
+            clusteringManager?.shouldBeWithAndApart(pageId: pageId, beWith: beWith, beApart: beApart)
         }
+        tabGroupingManager.ungroup(group)
         updateListItems()
         pauseListItemsUpdate = false
     }
 
-    func closeTabsInGroup(_ group: TabClusteringGroup) {
-        let tabs = tabs(inGroup: group.id)
+    func closeTabsInGroup(_ group: TabGroup) {
+        let tabs = tabs(inGroup: group)
         guard let state = state else { return }
         state.cmdManager.beginGroup(with: "CloseTabsInGroup")
         state.closeTabs(tabs)
         state.cmdManager.endGroup(forceGroup: true)
     }
 
-    func moveGroupToNewWindow(_ group: TabClusteringGroup) {
-        let tabsIDs = tabsIds(inGroup: group.id)
+    func moveGroupToNewWindow(_ group: TabGroup) {
+        let tabsIDs = tabsIds(inGroup: group)
         let tabs = tabs.filter { tabsIDs.contains($0.id) }
         tabsIDs.forEach { tabID in
             self.removeTab(tabId: tabID, suggestedNextCurrentTab: nil)
-            Self.forcedTabsInGroup.removeValue(forKey: tabID)
-            Self.forcedTabsOutOfGroup.removeValue(forKey: tabID)
         }
         AppDelegate.main.createWindow(withTabs: tabs, at: .zero)
     }
 
-    func createNewTab(inGroup group: TabClusteringGroup) {
+    func createNewTab(inGroup group: TabGroup) {
         pauseListItemsUpdate = true
         defer {
             pauseListItemsUpdate = false
@@ -631,34 +614,46 @@ extension BrowserTabsManager {
             }
         }
 
-        Self.forcedTabsInGroup[tab.id] = group
+        tabGroupingManager.moveTab(tab, inGroup: group)
+
         state?.startFocusOmnibox(fromTab: true)
         updateListItems()
     }
 
-    func moveTabToGroup(_ tabID: UUID, group toGroup: TabClusteringGroup?) {
-        guard let item = listItems.allItems.first(where: { $0.tab?.id == tabID }) else { return }
-        guard let pageID = item.tab?.browsingTree.current.link else { return }
-        let beWith: [ClusteringManager.PageID] = toGroup?.pageIDs ?? []
-        let beApart: [ClusteringManager.PageID] = item.group?.pageIDs ?? []
+    func moveTabToGroup(_ tabId: BrowserTab.TabID, group toGroup: TabGroup?) {
+        guard let item = listItems.allItems.first(where: { $0.tab?.id == tabId }), let tab = item.tab else { return }
+        guard let pageId = item.tab?.pageId else { return }
+        let beWith: [ClusteringManager.PageID] = toGroup?.pageIds ?? []
+        let beApart: [ClusteringManager.PageID] = item.group?.pageIds ?? []
         pauseListItemsUpdate = true
-        if let toGroup = toGroup {
-            Self.forcedTabsInGroup[tabID] = toGroup
-            Self.forcedTabsOutOfGroup.removeValue(forKey: tabID)
-        } else if let previousGroup = item.group {
-            Self.forcedTabsOutOfGroup[tabID] = previousGroup
-            Self.forcedTabsInGroup.removeValue(forKey: tabID)
+
+        tabGroupingManager.moveTab(tab, inGroup: toGroup, outOfGroup: item.group)
+        tabGroupingManager.pageWasMoved(pageId: pageId, fromGroup: item.group, toGroup: toGroup)
+
+        state?.data.clusteringManager.shouldBeWithAndApart(pageId: pageId, beWith: beWith, beApart: beApart)
+        updateListItems()
+        pauseListItemsUpdate = false
+    }
+
+    func reopenGroup(_ group: TabGroup, withTabs tabs: [BrowserTab]) {
+        pauseListItemsUpdate = true
+        tabs.forEach { tab in
+            tabGroupingManager.moveTab(tab, inGroup: group)
         }
-        state?.data.clusteringManager.shouldBeWithAndApart(pageId: pageID, beWith: beWith, beApart: beApart)
-        // This assumes that clustering will give us new groups right away. It could be delayed so we need to force in and outs in the meantime.
         updateListItems()
         pauseListItemsUpdate = false
     }
 }
 
+extension BrowserTab {
+    var pageId: ClusteringManager.PageID {
+        browsingTree.current.link
+    }
+}
+
 // MARK: - Tests helpers
 extension BrowserTabsManager {
-    internal func _testSetTabsClusteringGroup(_ tabsClusteringGroups: [UUID: TabClusteringGroup]) {
+    internal func _testSetTabsClusteringGroup(_ tabsClusteringGroups: [BrowserTab.TabID: TabGroup]) {
         self.tabsClusteringGroups = tabsClusteringGroups
         self.updateListItems()
     }

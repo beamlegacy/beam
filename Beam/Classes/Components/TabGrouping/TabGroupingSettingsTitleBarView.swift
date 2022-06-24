@@ -26,6 +26,6 @@ struct TabGroupingSettingsTitleBarView: View {
 
 struct TabGroupingTitleBarView_Previews: PreviewProvider {
     static var previews: some View {
-        TabGroupingSettingsTitleBarView(clusteringManager: ClusteringManager(ranker: SessionLinkRanker(), candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: UUID(), activeSources: ActiveSources()))
+        TabGroupingSettingsTitleBarView(clusteringManager: ClusteringManager(ranker: SessionLinkRanker(), candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: UUID(), activeSources: ActiveSources(), tabGroupingManager: nil))
     }
 }
