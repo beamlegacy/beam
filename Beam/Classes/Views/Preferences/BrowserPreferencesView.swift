@@ -154,14 +154,16 @@ struct SearchEngineSection: View {
                 ForEach(SearchEngineProvider.allCases) { engine in
                     Text(engine.name)
                 }
-            }.labelsHidden()
+            }.accessibilityIdentifier("search-engine-selector")
+            .labelsHidden()
             .frame(width: 180, height: 20)
             .onReceive([self.selectedSearchEngine].publisher.first()) { value in
                 PreferencesManager.selectedSearchEngine = value
             }
             Toggle(isOn: $includeSearchEngineSuggestion) {
                 Text("Include search engine suggestions")
-            }.toggleStyle(CheckboxToggleStyle())
+            }.accessibilityIdentifier("search-engine-suggestion")
+            .toggleStyle(CheckboxToggleStyle())
                 .font(BeamFont.regular(size: 13).swiftUI)
                 .foregroundColor(BeamColor.Generic.text.swiftUI)
                 .onReceive([includeSearchEngineSuggestion].publisher.first()) {

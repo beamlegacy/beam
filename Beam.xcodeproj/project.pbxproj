@@ -1003,6 +1003,9 @@
 		A3A89D952837CD2E00A47B2E /* test_SVG.svg in Resources */ = {isa = PBXBuildFile; fileRef = A3A89D942837CD2E00A47B2E /* test_SVG.svg */; };
 		A3B6C9672861C4A900E7F78C /* UITestFrameworkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */; };
 		A3B6C9722861F15600E7F78C /* AccountPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */; };
+		A3B6C97D2862FC0000E7F78C /* BrowserPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */; };
+		A3B6C983286317E300E7F78C /* BrowserPreferencesTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C982286317E200E7F78C /* BrowserPreferencesTestView.swift */; };
+		A3B6C98A2863181F00E7F78C /* BrowserPreferencesViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3B6C9892863181F00E7F78C /* BrowserPreferencesViewLocators.swift */; };
 		A3D2898B280864DD00FA0D3A /* OnboardingLostPKTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */; };
 		A3D289922808715900FA0D3A /* OnboardingLostPKViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */; };
 		A3D421322837B0F0002DB9A4 /* UITests-SVG.html in Resources */ = {isa = PBXBuildFile; fileRef = A3D421312837B0F0002DB9A4 /* UITests-SVG.html */; };
@@ -2882,6 +2885,9 @@
 		A3A89D942837CD2E00A47B2E /* test_SVG.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; path = test_SVG.svg; sourceTree = "<group>"; };
 		A3B6C9662861C4A900E7F78C /* UITestFrameworkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITestFrameworkTests.swift; sourceTree = "<group>"; };
 		A3B6C9712861F15600E7F78C /* AccountPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccountPreferencesTests.swift; sourceTree = "<group>"; };
+		A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPreferencesTests.swift; sourceTree = "<group>"; };
+		A3B6C982286317E200E7F78C /* BrowserPreferencesTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPreferencesTestView.swift; sourceTree = "<group>"; };
+		A3B6C9892863181F00E7F78C /* BrowserPreferencesViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserPreferencesViewLocators.swift; sourceTree = "<group>"; };
 		A3D2898A280864DD00FA0D3A /* OnboardingLostPKTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKTestView.swift; sourceTree = "<group>"; };
 		A3D289912808715900FA0D3A /* OnboardingLostPKViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingLostPKViewLocators.swift; sourceTree = "<group>"; };
 		A3D2BB2D2812F1BD00CCCE40 /* BeamUITests-Thread7.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = "BeamUITests-Thread7.xctestplan"; sourceTree = "<group>"; };
@@ -6859,6 +6865,14 @@
 			path = Account;
 			sourceTree = "<group>";
 		};
+		A3B6C9762862FB6800E7F78C /* Browser */ = {
+			isa = PBXGroup;
+			children = (
+				A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */,
+			);
+			path = Browser;
+			sourceTree = "<group>";
+		};
 		A3E7B4AD27AC16C70074C9BB /* Popups */ = {
 			isa = PBXGroup;
 			children = (
@@ -7572,6 +7586,7 @@
 				D71D747A282ABE2700D8D6F5 /* PrivacyPreferencesTestView.swift */,
 				A3539E2328326EA100035A21 /* CreditCardTestView.swift */,
 				D7858BCC283BC4C700D0336A /* AutoFillCCTestView.swift */,
+				A3B6C982286317E200E7F78C /* BrowserPreferencesTestView.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7587,6 +7602,7 @@
 				D71D7481282ABE8A00D8D6F5 /* PrivacyAllowListPreferencesViewLocators.swift */,
 				D71D7483282ABF7500D8D6F5 /* PrivacyPreferencesViewLocators.swift */,
 				D7858BCE283BC4E000D0336A /* AutoFillCCViewLocators.swift */,
+				A3B6C9892863181F00E7F78C /* BrowserPreferencesViewLocators.swift */,
 			);
 			path = Preferences;
 			sourceTree = "<group>";
@@ -7703,6 +7719,7 @@
 			isa = PBXGroup;
 			children = (
 				A3B6C96B2861F13E00E7F78C /* Account */,
+				A3B6C9762862FB6800E7F78C /* Browser */,
 				D7E38CE6282A93460059F60D /* Privacy */,
 				B52C147627FF04EE00D67EE5 /* About */,
 				A3E7B4BE27AC45FD0074C9BB /* Passwords */,
@@ -9701,6 +9718,7 @@
 				B575361126C0F0EF0053CE2D /* JavascriptNativeInteractionsTests.swift in Sources */,
 				D7858BD3283CBC5A00D0336A /* BaseCreditCardTest.swift in Sources */,
 				B5625CB6271480490074A080 /* BrowserShortcutsTests.swift in Sources */,
+				A3B6C97D2862FC0000E7F78C /* BrowserPreferencesTests.swift in Sources */,
 				B5FAE2FE270ED71700EAC8A3 /* PreferencesBaseView.swift in Sources */,
 				B5BA078926AF3E4700D31FED /* UITestsMenuBar.swift in Sources */,
 				52DF49A625E42110009A651E /* BeamUITestsHelper.swift in Sources */,
@@ -9727,6 +9745,7 @@
 				B507CB34275F8CB800DFF11A /* SlashMenuTests.swift in Sources */,
 				B5DC1FB526B928CA00A4C94B /* DateHelper.swift in Sources */,
 				A307FBE6285A776F001DE30D /* SignOutTests.swift in Sources */,
+				A3B6C98A2863181F00E7F78C /* BrowserPreferencesViewLocators.swift in Sources */,
 				B51DC76C26F44F990074ACCA /* PnSAddToNoteTests.swift in Sources */,
 				D7D6F016284A0A7900C3EE7F /* CookieBannerBlockerTests.swift in Sources */,
 				B557155A26FA259000F6C9D4 /* UpdateViewLocators.swift in Sources */,
@@ -9806,6 +9825,7 @@
 				B5FAE302270EDDF000EAC8A3 /* PreferencesToolbarViewLocators.swift in Sources */,
 				A325D9C4283EA87F0019C5D0 /* AllNotesTableLocators.swift in Sources */,
 				B5E949AE27DA404E001AAA82 /* AlertViewLocators.swift in Sources */,
+				A3B6C983286317E300E7F78C /* BrowserPreferencesTestView.swift in Sources */,
 				8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */,
 				B557156326FAF18200F6C9D4 /* AllNotesViewTests.swift in Sources */,
 				D7C98FD3284F4044001E057C /* TodayNoteTests.swift in Sources */,

@@ -98,6 +98,10 @@ class BaseView {
         return app.windows.menuItems[element]
     }
     
+    func popUpButton(_ element: String) -> XCUIElement {
+        return app.windows.popUpButtons[element]
+    }
+    
     func isSettingEnabled(element: XCUIElement) -> Bool {
         return (element.value as? Int == 1)
     }
