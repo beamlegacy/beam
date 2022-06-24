@@ -214,6 +214,10 @@ class BeamUITestsMenuGenerator {
         }
         appDel.window?.state.objectWillChange.send()
         appDel.data.versionChecker = checker
+
+        Task {
+            await appDel.data.versionChecker.performUpdateIfAvailable()
+        }
     }
 
     private func cleanDownloadFolder() {
