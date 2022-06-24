@@ -8,11 +8,10 @@ import type { ContextMenuUI as ContextMenuUI } from "./ContextMenuUI"
 import { BeamLogger } from "@beam/native-utils"
 
 enum Invocation {
-  Page,
-  TextSelection,
-  Link,
-  Image,
-  LinkPlusImage
+  Page = 1,
+  TextSelection = 2,
+  Link = 4,
+  Image = 8
 }
 
 export class ContextMenu<UI extends ContextMenuUI> {
@@ -46,34 +45,38 @@ export class ContextMenu<UI extends ContextMenuUI> {
   }
   
   menuInvokedMessageForTarget(target: BeamElement) {
-    const [ elements, invocation ] = this.elementsAndInvocationType(target)
+    const [ elements, invocations ] = this.elementsAndInvocationType(target)
 
-    var message: { invocation: Invocation, parameters: any } = {
-      invocation: invocation,
+    var message: { invocations: Invocation, parameters: any } = {
+      invocations: invocations,
       parameters: {}
     }
+
+    var parameters: any = {}
     
-    switch (invocation) {
-      case Invocation.Page:
-        break // no need to add any additional parameters
-      case Invocation.TextSelection:
-        const selection = this.win.document.getSelection().toString()
-        message.parameters = { contents: selection }
-        break
-      case Invocation.Link:
-        message.parameters = { href: elements[0].href }
-        break
-      case Invocation.Image:
-        message.parameters = { src: elements[0].src }
-        break
-      case Invocation.LinkPlusImage:
-        const image = elements[0]
-        const link = elements[1]
-        message.parameters = { href: link.href, src: image.src }
-        break
+    if ((invocations & Invocation.TextSelection) != 0) {
+      parameters = { ...parameters, contents: this.win.document.getSelection().toString() }
+    }
+    if ((invocations & Invocation.Link) != 0) {
+      parameters = { ...parameters, href: elements[0].href ?? elements[1].href }
+    }
+    if ((invocations & Invocation.Image) != 0) {
+      parameters = { ...parameters, src: elements[0].src ?? elements[1].src }
     }
 
+    message.parameters = parameters
+
     return message
+  }
+
+  findLinkWithinParents(element: BeamElement) {
+    var parent = element.parentElement
+    var isLink = parent.tagName == "A"
+    while (!isLink && parent != this.win.document.body) {
+      parent = parent.parentElement
+      isLink = parent.tagName == "A"
+    }
+    return isLink ? parent : null
   }
 
   elementsAndInvocationType(element: BeamElement, invocation?: Invocation): [BeamElement[], Invocation] {
@@ -85,21 +88,22 @@ export class ContextMenu<UI extends ContextMenuUI> {
     }
     if (element.tagName == "IMG") {
       // is this image contained within a link ?
-      var link = element.parentElement
-      var isLink = link.tagName == "A"
-      while (!isLink && link != this.win.document.body) {
-        link = link.parentElement
-        isLink = link.tagName == "A"
-      }
-      if (isLink) {
-        return [[element, link], Invocation.LinkPlusImage]
+      var link = this.findLinkWithinParents(element)
+      if (link) {
+        return [[element, link], Invocation.Link | Invocation.Image]
       } else {
         return [[element], Invocation.Image]
       }
     }
     const selection = this.win.document.getSelection()
     if (selection != null && element.contains(selection.anchorNode) && selection.toString()) {
-      return [[element], Invocation.TextSelection]
+      // does this text selection is surrounded by a link ?
+      var link = this.findLinkWithinParents(element)
+      if (link) {
+        return [[element, link], Invocation.Link | Invocation.TextSelection]
+      } else {
+        return [[element], Invocation.TextSelection]
+      }
     }
     return this.elementsAndInvocationType(element.parentElement, Invocation.Page)
   }
