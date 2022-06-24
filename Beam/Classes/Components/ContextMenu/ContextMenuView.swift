@@ -96,6 +96,7 @@ struct ContextMenuItemView: View {
                             }
                         }
                     }.frame(alignment: .trailing)
+                    .accessibility(identifier: "ContextMenuItem-\(item.title.lowercased())-toggle")
             }
         }
     }
@@ -147,6 +148,7 @@ struct ContextMenuItemView: View {
                             Text(subtitle)
                                 .font(BeamFont.regular(size: 13).swiftUI)
                                 .foregroundColor(BeamColor.AlphaGray.swiftUI)
+                                .accessibility(identifier: "ContextMenuItem-\(item.title.lowercased())-subtitle")
                         }
                         if item.iconPlacement == .trailing {
                             Spacer()
@@ -161,7 +163,7 @@ struct ContextMenuItemView: View {
         }
         .padding(.horizontal, item.allowPadding ? BeamSpacing._50 : 0)
         .frame(maxWidth: .infinity)
-        .accessibilityElement(children: item.customContent != nil ? .contain : .ignore)
+        .accessibilityElement(children: item.customContent != nil || item.type == .itemWithToggle ? .contain : .ignore)
         .accessibility(addTraits: highlight ? [.isSelected, .isStaticText] : .isStaticText)
         .accessibility(identifier: "ContextMenuItem-\(item.title.lowercased())")
     }
