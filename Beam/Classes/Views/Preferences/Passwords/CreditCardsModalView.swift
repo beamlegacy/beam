@@ -116,7 +116,7 @@ struct CreditCardsTableView: View {
     ]
 
     var body: some View {
-        TableView(customRowHeight: 48, hasSeparator: true, hasHeader: false, allowsMultipleSelection: true,
+        TableView(customRowHeight: 48, hasVerticalScroller: true, hasSeparator: true, hasHeader: false, allowsMultipleSelection: true,
                   items: allCreditCards, columns: Self.creditCardsColumns, creationRowTitle: nil, onSelectionChanged: onSelectionChanged, onDoubleTap: onDoubleTap)
         .frame(width: 526)
     }

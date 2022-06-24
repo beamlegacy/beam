@@ -51,9 +51,10 @@ struct TableView: NSViewRepresentable {
     static let headerHeight: CGFloat = 28.0
 
     var customRowHeight: CGFloat?
-    var hasSeparator: Bool = true
-    var hasHeader: Bool = true
-    var allowsMultipleSelection: Bool = true
+    var hasVerticalScroller = false
+    var hasSeparator = true
+    var hasHeader = true
+    var allowsMultipleSelection = true
     var items: [TableViewItem] = []
     var columns: [TableViewColumn] = []
     var creationRowTitle: String?
@@ -109,6 +110,7 @@ struct TableView: NSViewRepresentable {
             view.headerView?.frame = headerFrame
         }
         scrollView.horizontalScrollElasticity = .none
+        scrollView.hasVerticalScroller = hasVerticalScroller
         scrollView.contentView.drawsBackground = false
         scrollView.contentView.postsBoundsChangedNotifications = true
         NotificationCenter.default.addObserver(context.coordinator,
