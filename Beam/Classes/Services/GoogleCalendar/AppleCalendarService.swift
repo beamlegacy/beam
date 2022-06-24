@@ -58,13 +58,21 @@ private extension EKEvent {
         if let url = url {
             return url.absoluteString
         }
-        guard let link = notes?
-            .components(separatedBy: .newlines)
-            .first(where: { $0.hasPrefix("Join: ") })
-        else {
-            return nil
+
+        guard let notes = notes else { return nil }
+        let detector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue)
+        guard let matches = detector?.matches(in: notes, options: [], range: NSRange(location: 0, length: notes.utf16.count)) else { return nil }
+
+        for match in matches {
+            guard let range = Range(match.range, in: notes) else { continue }
+            let url = notes[range]
+            // TODO: Investigate how Zoom and others proceeds for the url in notes
+            if url.contains("meet.google") {
+                return String(url)
+            }
         }
-        return link.dropFirst(6).trimmingCharacters(in: .whitespaces)
+
+        return nil
     }
 }
 
