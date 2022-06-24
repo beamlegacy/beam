@@ -26,7 +26,7 @@ extension AppDelegate {
 
     private func autoShowTabGroupingFeedbackWindow() {
         Self.lastTabGroupingFeedback = BeamDate.now
-        guard self.data.clusteringManager.tabGroupingUpdater.hasPagesGroup && windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
+        guard self.data.clusteringManager.tabGroupingManager?.hasPagesGroup == true && windows.contains(where: { $0.state.browserTabsManager.tabs.count > 0}) else { return }
         tabGroupingFeedbackWindow?.close()
         showTabGroupingFeedbackWindow(self)
     }

@@ -30,6 +30,7 @@ enum BeamObjectObjectType: String {
     case contact
     case noteFrecency = "note_frecency"
     case privateKeySignature
+    case tabGroup
 
     static func fromString(value: String) -> Self? {
         BeamObjectObjectType(rawValue: value)

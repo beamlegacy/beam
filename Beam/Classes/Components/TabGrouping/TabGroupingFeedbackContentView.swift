@@ -82,7 +82,9 @@ private struct TabDropDelegate: DropDelegate {
                 DispatchQueue.main.async {
                     guard let groupIdx = viewModel.remove(tabId: tabItem.tabId) else { return }
                     for group in viewModel.groups where group.id == newGrpId {
-                        group.pageIDs.append(tabItem.tabId)
+                        var newPageIDs = group.pageIds
+                        newPageIDs.append(tabItem.tabId)
+                        group.updatePageIds(newPageIDs)
                         viewModel.updateCorrectedPages(with: tabItem.tabId, in: group.id)
                     }
                     viewModel.remove(group: groupIdx)
@@ -90,8 +92,8 @@ private struct TabDropDelegate: DropDelegate {
             } else {
                 DispatchQueue.main.async {
                     guard let groupIdx = viewModel.remove(tabId: tabItem.tabId) else { return }
-                    let newGroup = TabClusteringGroup(pageIDs: [tabItem.tabId])
-                    newGroup.color = viewModel.getNewColor()
+                    let newGroup = TabGroup(pageIds: [tabItem.tabId])
+                    newGroup.changeColor(viewModel.getNewColor())
                     viewModel.groups.append(newGroup)
                     viewModel.updateCorrectedPages(with: tabItem.tabId, in: newGroup.id)
                     viewModel.remove(group: groupIdx)
@@ -114,15 +116,15 @@ struct TabGroupingFeedbackContentView: View {
             ScrollView {
                 ForEach(viewModel.groups) { tabGroup in
                     VStack {
-                        ForEach(tabGroup.pageIDs, id: \.self) { tabId in
+                        ForEach(tabGroup.pageIds, id: \.self) { tabId in
                             if let url = viewModel.urlFor(pageId: tabId),
-                                let title = viewModel.titleFor(pageId: tabId) {
+                               let title = viewModel.titleFor(pageId: tabId) {
                                 TabGroupingFeedbackTabView(url: url,
-                                                   title: title,
-                                                   color: (tabGroup.color?.mainColor(isDarkMode: false) ?? Color.red).opacity(0.25))
-                                    .onDrag {
-                                        return NSItemProvider(object: TabGroupingFeedbackItem(tabId: tabId))
-                                    }
+                                                           title: title,
+                                                           color: (tabGroup.color?.mainColor?.swiftUI ?? Color.red).opacity(0.25))
+                                .onDrag {
+                                    return NSItemProvider(object: TabGroupingFeedbackItem(tabId: tabId))
+                                }
                             }
                         }
                     }.padding(.vertical, 16)

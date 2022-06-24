@@ -13,13 +13,13 @@ struct TabClusteringGroupCapsuleView: View {
     var title: String
     var color: TabGroupingColor
     private var mainColor: Color {
-        color.mainColor(isDarkMode: colorScheme == .dark)
+        color.mainColor?.swiftUI ?? .clear
     }
     private var borderColor: Color {
         mainColor.opacity(colorScheme == .dark ? 0.24 : 0.2)
     }
     private var textColor: Color {
-        color.textColor(isDarkMode: colorScheme == .dark)
+        color.textColor?.swiftUI ?? .white
     }
 
     private var renderTitle: some View {
@@ -67,7 +67,7 @@ struct TabViewGroupUnderline: View {
     var isEnd: Bool = true
     private let height: CGFloat = 1.5
     var body: some View {
-        let mainColor = color.mainColor(isDarkMode: colorScheme == .dark)
+        let mainColor = color.mainColor?.swiftUI ?? .clear
         HStack(spacing: 0) {
             if isBeginning {
                 Circle().fill(mainColor)
@@ -90,16 +90,16 @@ struct TabViewGroupUnderline: View {
 struct TabClusteringGroupCapsuleView_Previews: PreviewProvider {
     static var previews: some View {
         HStack {
-            TabClusteringGroupCapsuleView(title: "Group", color: TabGroupingColor(userColorIndex: 1))
+            TabClusteringGroupCapsuleView(title: "Group", color: TabGroupingColor(designColor: .yellow))
                 .fixedSize()
                 .overlay(
-                    TabViewGroupUnderline(color: TabGroupingColor(userColorIndex: 1)),
+                    TabViewGroupUnderline(color: TabGroupingColor(designColor: .yellow)),
                     alignment: .bottom
                 )
-            TabClusteringGroupCapsuleView(title: "", color: TabGroupingColor(userColorIndex: 2))
+            TabClusteringGroupCapsuleView(title: "", color: TabGroupingColor(designColor: .green))
                 .fixedSize()
                 .overlay(
-                    TabViewGroupUnderline(color: TabGroupingColor(userColorIndex: 2)),
+                    TabViewGroupUnderline(color: TabGroupingColor(designColor: .green)),
                     alignment: .bottom
                 )
         }

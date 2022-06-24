@@ -10,6 +10,8 @@ import BeamCore
 
 struct AutocompleteItemView: View {
 
+    @Environment(\.colorScheme) var colorScheme
+
     static let defaultHeight: CGFloat = 38
 
     @State var item: AutocompleteResult
@@ -59,7 +61,7 @@ struct AutocompleteItemView: View {
     private var informationColor: Color {
         switch item.source {
         case .history, .url:
-            return subtitleLinkColor
+            return colorPalette.informationLinkColor.swiftUI
         default:
             return colorPalette.informationTextColor.swiftUI
         }
@@ -129,52 +131,83 @@ struct AutocompleteItemView: View {
         return "autocompleteResult\(selected ? "-selected":"")-\(importantText)-\(item.source)"
     }
 
+    @ViewBuilder
+    var iconView: some View {
+        if let icon = favicon {
+            Image(nsImage: icon)
+                .resizable()
+                .scaledToFit()
+                .frame(maxWidth: 16, maxHeight: 16)
+        } else {
+            Icon(name: item.icon, color: secondaryTextColor)
+        }
+    }
+
+    @ViewBuilder
+    var trailingView: some View {
+        if case let .tabGroup(group) = item.source, let group = group {
+            HStack(spacing: BeamSpacing._100) {
+                HStack(spacing: BeamSpacing._20) {
+                    ForEach(group.pageIds, id: \.self) { _ in
+                        Capsule()
+                            .fill(group.color?.mainColor?.swiftUI ?? Color.clear)
+                            .frame(height: 4)
+                    }
+                }
+                .frame(width: 64)
+                Icon(name: "tool-go", width: 12, color: secondaryTextColor)
+                    .padding(3)
+            }
+            .blendModeLightMultiplyDarkScreen()
+        } else if let shortcut = shortcut {
+            ShortcutView(shortcut: shortcut, spacing: 1, withBackground: !selected)
+                .frame(height: 18)
+                .opacity(shortcutShouldBeVisible ? 1 : 0)
+                .blendModeLightMultiplyDarkScreen()
+        } else {
+            EmptyView()
+        }
+    }
+
+    var textContent: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            ZStack {
+                StyledText(verbatim: mainText)
+                    .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges())
+                    .font(BeamFont.regular(size: fontSize).swiftUI)
+                    .foregroundColor(mainTextColor)
+            }
+            .layoutPriority(10)
+            if let info = secondaryText, !info.isEmpty {
+                HStack {
+                    StyledText(verbatim: info)
+                        .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
+                        .font(BeamFont.regular(size: fontSize).swiftUI)
+                        .foregroundColor(informationColor)
+                }
+                .frame(minWidth: info.count > 10 ? 100 : 0)
+                .layoutPriority(0)
+            }
+
+            if PreferencesManager.showOmniboxScoreSection {
+                Spacer()
+                Text(debugString(score: item.weightedScore))
+                    .font(BeamFont.regular(size: fontSize).swiftUI)
+                    .foregroundColor(BeamColor.CharmedGreen.swiftUI)
+                    .layoutPriority(10)
+            }
+        }
+        .blendModeLightMultiplyDarkScreen()
+    }
+
     var body: some View {
         HStack(spacing: BeamSpacing._120) {
             if displayIcon {
-                if let icon = favicon {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(maxWidth: 16, maxHeight: 16)
-                } else {
-                    Icon(name: item.icon, color: secondaryTextColor)
-                }
+                iconView
             }
-            HStack(alignment: .firstTextBaseline, spacing: 0) {
-                ZStack {
-                    StyledText(verbatim: mainText)
-                        .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges())
-                        .font(BeamFont.regular(size: fontSize).swiftUI)
-                        .foregroundColor(mainTextColor)
-                }
-                .layoutPriority(10)
-                if let info = secondaryText {
-                    HStack {
-                        StyledText(verbatim: info)
-                            .style(.font(BeamFont.semibold(size: fontSize).swiftUI), ranges: highlightedTextRanges(secondaryText: true))
-                            .font(BeamFont.regular(size: fontSize).swiftUI)
-                            .foregroundColor(informationColor)
-                    }
-                    .layoutPriority(0)
-                }
-
-                if PreferencesManager.showOmniboxScoreSection {
-                    Spacer()
-                    Text(debugString(score: item.weightedScore))
-                        .font(BeamFont.regular(size: fontSize).swiftUI)
-                        .foregroundColor(BeamColor.CharmedGreen.swiftUI)
-                        .layoutPriority(10)
-                }
-            }
-            .blendModeLightMultiplyDarkScreen()
+            textContent
             Spacer(minLength: 0)
-            if let shortcut = shortcut {
-                ShortcutView(shortcut: shortcut, spacing: 1, withBackground: !selected)
-                    .frame(height: 18)
-                    .opacity(shortcutShouldBeVisible ? 1 : 0)
-                    .blendModeLightMultiplyDarkScreen()
-            }
+            trailingView
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.vertical, BeamSpacing._100)
@@ -215,6 +248,7 @@ struct AutocompleteItemView: View {
 struct AutocompleteItemColorPalette {
     var textColor = BeamColor.Generic.text
     var informationTextColor = BeamColor.Autocomplete.subtitleText
+    var informationLinkColor = BeamColor.Autocomplete.link
     var selectedBackgroundColor = BeamColor.Autocomplete.selectedBackground
     var touchdownBackgroundColor = BeamColor.Autocomplete.clickedBackground
 }
@@ -234,22 +268,39 @@ extension AutocompleteItemView {
         selectedBackgroundColor: BeamColor.Autocomplete.selectedActionBackground,
         touchdownBackgroundColor: BeamColor.Autocomplete.clickedActionBackground
     )
+
+    static func tabGroupColorPalette(for group: TabGroup) -> AutocompleteItemColorPalette {
+        guard let mainColor = group.color?.mainColor else { return defaultColorPalette }
+        return AutocompleteItemColorPalette(
+            informationTextColor: mainColor,
+            informationLinkColor: mainColor,
+            selectedBackgroundColor: mainColor.alpha(0.1),
+            touchdownBackgroundColor: mainColor.alpha(0.16)
+        )
+    }
 }
 
 struct AutocompleteItem_Previews: PreviewProvider {
+    static var tabGroup: TabGroup {
+        let group = TabGroup(pageIds: [UUID(), UUID(), UUID()])
+        group.changeColor(.init())
+        return group
+    }
     static let items = [
         AutocompleteResult(text: "New Note:", source: .createNote, information: "James Dean"),
         AutocompleteResult(text: "James Dean", source: .note, completingText: "Ja"),
         AutocompleteResult(text: "James Dean", source: .searchEngine, information: "Google Search"),
         AutocompleteResult(text: "jamesdean.com", source: .url, urlFields: .text),
-        AutocompleteResult(text: "James Dean", source: .history, information: "https://wikipedia.com/James+Dean")
+        AutocompleteResult(text: "James Dean", source: .history, information: "https://wikipedia.com/James+Dean"),
+        AutocompleteResult(text: "James Dean", source: .tabGroup(group: tabGroup),
+                           information: "Tab Group (3 tabs)")
     ]
-    static let selectedIndex = 3
+    static let selectedIndex = 5
     static var previews: some View {
         VStack(spacing: 0) {
             ForEach(Array(items.enumerated()), id: \.0) { index, item in
-                AutocompleteItemView(item: item, selected: index == selectedIndex)
-                    .frame(width: 300, height: 36)
+                AutocompleteItemView(item: item, selected: index == selectedIndex, colorPalette: AutocompleteListView.colorPalette(for: item))
+                    .frame(width: 400, height: 36)
             }
         }.padding(.vertical)
     }

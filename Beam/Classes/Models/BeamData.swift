@@ -45,6 +45,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
     }()
     var sessionLinkRanker = SessionLinkRanker()
     var clusteringManager: ClusteringManager
+    var tabGroupingManager: TabGroupingManager
     var clusteringOrphanedUrlManager: ClusteringOrphanedUrlManager
     var sessionExporter: ClusteringSessionExporter
     var activeSources = ActiveSources()
@@ -115,7 +116,9 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
         NoteScorer.shared = NoteScorer(dailyStorage: KeychainDailyNoteScoreStore.shared)
         clusteringOrphanedUrlManager = ClusteringOrphanedUrlManager(savePath: Self.orphanedUrlsPath)
         sessionExporter = ClusteringSessionExporter()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId, activeSources: activeSources)
+        tabGroupingManager = TabGroupingManager()
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.3, sessionId: sessionId,
+                                              activeSources: activeSources, tabGroupingManager: tabGroupingManager)
         noteAutoSaveService = NoteAutoSaveService()
         cookieManager = CookiesManager()
         versionChecker = Self.createVersionChecker()
@@ -145,6 +148,7 @@ public class BeamData: NSObject, ObservableObject, WKHTTPCookieStoreObserver {
             return title
         }
 
+        tabGroupingManager.delegate = self
         setupSubscribers()
         resetPinnedTabs()
         configureAutoUpdate()
@@ -592,4 +596,14 @@ extension BeamData {
         }
     }
 
+}
+
+// MARK: - Tab Grouping
+extension BeamData: TabGroupingManagerDelegate {
+    func allOpenTabsForTabGroupingManager(_ tabGroupingManager: TabGroupingManager) -> [BrowserTab] {
+        let tabsManagers = AppDelegate.main.windows.map { $0.state.browserTabsManager }
+        return tabsManagers.reduce(into: [BrowserTab]()) { partialResult, tabsManager in
+            partialResult.append(contentsOf: tabsManager.tabs)
+        }
+    }
 }

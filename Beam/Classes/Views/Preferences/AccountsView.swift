@@ -42,11 +42,10 @@ class AccountsViewModel: ObservableObject {
     }
 }
 
-/*
-The main view of “Accounts” preference pane.
-*/
-// swiftlint:disable:next type_body_length
+/// The main view of “Accounts” preference pane.
 struct AccountsView: View {
+    // swiftlint:disable:next type_body_length
+
     @State private var enableLogging = true
     @State private var errorMessage: Error!
     @State private var loading = false

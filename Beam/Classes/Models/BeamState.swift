@@ -335,9 +335,11 @@ import Sentry
         let origin = BrowsingTreeOrigin.searchBar(query: originalQuery ?? "<???>", referringRootId: browserTabsManager.currentTab?.browsingTree.rootId)
         let tab = addNewTab(origin: origin, setCurrent: setCurrent, note: note, element: rootElement, request: request, webView: webView)
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
-            guard self?.omniboxInfo.isFocused == false, let tab = tab else { return }
-            tab.webviewWindow?.makeFirstResponder(tab.webView)
+        if setCurrent {
+            DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self, weak tab] in
+                guard self?.omniboxInfo.isFocused == false, self?.currentTab  == tab, let tab = tab else { return }
+                tab.webviewWindow?.makeFirstResponder(tab.webView)
+            }
         }
         return tab
     }
@@ -438,6 +440,17 @@ import Sentry
         for tab in browserTabsManager.tabs where tab.errorPageManager?.error == .network {
             tab.reload()
         }
+    }
+
+    func openTabGroup(_ group: TabGroup) {
+        let links = LinkStore.shared.getLinks(for: group.pageIds)
+        let urls = group.pageIds.compactMap({ URL(string: links[$0]?.url ?? "") })
+        let tabs: [BrowserTab] = urls.compactMap { url in
+            if let tab = browserTabsManager.openedTab(for: url) { return tab }
+            return createTab(withURLRequest: URLRequest(url: url))
+        }
+        browserTabsManager.reopenGroup(group, withTabs: tabs)
+        stopFocusOmnibox()
     }
 
     func createNewUntitledNote() -> BeamNote {
@@ -555,7 +568,7 @@ import Sentry
         case .note(let noteId, _):
             navigateToNote(id: noteId ?? result.uuid)
 
-        case .action:
+        case .action, .tabGroup:
             result.handler?(self)
         case .createNote:
             if let noteTitle = result.information {
