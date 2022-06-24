@@ -167,12 +167,15 @@ class DailyUrlScorerTest: XCTestCase {
             func getScores(daysAgo: Int) -> [UUID: DailyURLScore] { scores }
         }
         let urlsAndTitles = [
-            ("https://abc.com/#anchor", "title 1"),
-            ("http://abc.com/", "title 2"),
-            ("https://def.com", "title 3"),
-            ("https://geh.com", "title 4"), //filtered out because pinned
+            ("https://abc.com/page1#anchor", "title 1"),
+            ("http://abc.com/page1", "title 2"),
+            ("https://def.com/page1", "title 3"),
+            ("https://geh.com/page1", "title 4"), //filtered out because pinned
             ("https://www.google.com/search?q=query", "Google - query"), //filtered out because search query
-            ("https://ijk.com", "title 5") //filtered out because low reading time
+            ("https://ijk.com/page1", "title 5"), //filtered out because low reading time
+            ("https://lmn.com/", "title 6"), //filtered out because is a domain
+            ("https://lmn.com/page1", "title 7"), //filtered out because alread pns'd.
+            ("https://lmn.com/page2", "title 8") //filtered out because not enough text
         ]
         BeamDate.freeze("2001-01-01T00:01:00+000")
         let urlIds: [UUID] = urlsAndTitles.map {
@@ -185,15 +188,38 @@ class DailyUrlScorerTest: XCTestCase {
         let score3 = DailyURLScore(urlId: urlIds[3], localDay: "2020-01-01")
         let score4 = DailyURLScore(urlId: urlIds[4], localDay: "2020-01-01")
         let score5 = DailyURLScore(urlId: urlIds[5], localDay: "2020-01-01")
+        let score6 = DailyURLScore(urlId: urlIds[6], localDay: "2020-01-01")
+        let score7 = DailyURLScore(urlId: urlIds[7], localDay: "2020-01-01")
+        let score8 = DailyURLScore(urlId: urlIds[8], localDay: "2020-01-01")
 
         score0.readingTimeToLastEvent = 1.5
+        score0.textAmount = 500
+
         score1.readingTimeToLastEvent = 1.5
+        score1.textAmount = 500
+
         score2.readingTimeToLastEvent = 2
+        score2.textAmount = 500
+
         score3.readingTimeToLastEvent = 10
         score3.isPinned = true
+        score3.textAmount = 500
+
         score4.readingTimeToLastEvent = 100
+        score4.textAmount = 500
+
         score5.readingTimeToLastEvent = 0.5
         score5.textAmount = 10_000
+
+        score6.readingTimeToLastEvent = 10
+        score6.textAmount = 500
+
+        score7.readingTimeToLastEvent = 10
+        score7.textAmount = 500
+        score7.textSelections = 1
+
+        score8.readingTimeToLastEvent = 10_000
+        score8.textAmount = 499
 
         let scores = [
             urlIds[0]: score0,
@@ -201,14 +227,16 @@ class DailyUrlScorerTest: XCTestCase {
             urlIds[2]: score2,
             urlIds[3]: score3,
             urlIds[4]: score4,
-            urlIds[5]: score5
-
+            urlIds[5]: score5,
+            urlIds[6]: score6,
+            urlIds[7]: score7,
+            urlIds[8]: score8
         ]
-        let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores), minReadingTime: 1)
+        let scorer = DailyUrlScorer(store: FakeDailyScoreStore(scores: scores), minReadingTime: 1, minTextAmount: 500)
         let scoredUrls = scorer.getHighScoredUrls(daysAgo: 0, topN: 1)
         XCTAssertEqual(scoredUrls.count, 1)
         //the 2 first url scores got aggregated and title was chosen as most recent.
-        XCTAssertEqual(scoredUrls[0].url.absoluteString, "https://abc.com/")
+        XCTAssertEqual(scoredUrls[0].url.absoluteString, "https://abc.com/page1")
         XCTAssertEqual(scoredUrls[0].title, "title 2")
         //https://geh.com is not displayed as is pinned is true
 
