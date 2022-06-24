@@ -180,6 +180,7 @@ class WebViewController {
         guard let webView = navigationAction.targetFrame?.webView ?? navigationAction.sourceFrame.webView else {
             fatalError("Should emit handleBackForwardAction() from a webview")
         }
+        guard webView.backForwardList.currentItem != currentBackForwardItem else { return }
         let isBack = webView.backForwardList.backList
             .filter { $0 == currentBackForwardItem }
             .count == 0
@@ -279,6 +280,7 @@ extension WebViewController: WebViewNavigationHandler {
     func webView(_ webView: WKWebView, didFinishNavigationToURL url: URL, source: WebViewControllerNavigationSource) {
         // If the webview is loading, we should not index the content.
         // We will be called by the webView delegate at the end of the loading
+        currentBackForwardItem = webView.backForwardList.currentItem
         guard !webView.isLoading else { return }
 
         // Only register navigation if the page was successfully loaded
