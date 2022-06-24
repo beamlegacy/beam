@@ -68,6 +68,13 @@ public struct AggregatedURLScore {
             + log(1 + Float(textAmount))
             + log(1 + Float(textSelections))
     }
+    func isSummaryEligible(minReadingTime: Double, minTextAmount: Int) -> Bool {
+        !(isPinned
+            || readingTimeToLastEvent < minReadingTime
+            || textAmount < minTextAmount
+            || textSelections > 0 // pns'd page are to be displayed in a dedicated section
+        )
+    }
 }
 
 public struct ScoredURL {
@@ -173,13 +180,21 @@ public class UrlGroups {
     }
 }
 
+fileprivate extension URL {
+    var isSummaryEligible: Bool {
+        !(isSearchEngineResultPage || isDomain)
+    }
+}
+
 public class DailyUrlScorer {
     let minReadingTime: Double
+    let minTextAmount: Int
     let store: DailyUrlScoreStoreProtocol
 
-    public init(store: DailyUrlScoreStoreProtocol, minReadingTime: Double = 30) {
+    public init(store: DailyUrlScoreStoreProtocol, minReadingTime: Double = 30, minTextAmount: Int = 500) {
         self.store = store
         self.minReadingTime = minReadingTime
+        self.minTextAmount = minTextAmount
     }
     public func getHighScoredUrls(daysAgo: Int = 1, topN: Int = 5, filtered: Bool = true) -> [ScoredURL] {
         let scores = store.getScores(daysAgo: daysAgo)
@@ -191,7 +206,10 @@ public class DailyUrlScorer {
         let aggregatedScores = schemeGroups.aggregate(scores: scores)
         return Array(
             aggregatedScores
-                .filter { (url, score) in !(score.isPinned || url.isSearchEngineResultPage || score.readingTimeToLastEvent < minReadingTime) || !filtered }
+                .filter { (url, score) in (score.isSummaryEligible(minReadingTime: minReadingTime, minTextAmount: minTextAmount)
+                                           && url.isSummaryEligible)
+                                           || !filtered
+                }
                 .sorted { (lhs, rhs) in lhs.value.score > rhs.value.score }
                 .map { ScoredURL(url: $0.key, title: mostRecentTitle[$0.key], score: $0.value) }
                 .prefix(topN)
