@@ -4,6 +4,7 @@ import {
   BeamWindow,
   MessageHandlers
 } from "@beam/native-beamtypes"
+import {dequal as isDeepEqual} from "dequal"
 
 export class BeamEmbedHelper {
   embedPattern = "__EMBEDPATTERN__"
@@ -58,12 +59,22 @@ export class BeamEmbedHelper {
    * @return {*}  {(string | undefined)}
    * @memberof BeamEmbedHelper
    */
+  getEmbeddableWindowLocationLastUrls: string[]
+  getEmbeddableWindowLocationLastResult: string
   getEmbeddableWindowLocation(): string | undefined {
     const urls = [ this.win.location.href, this.firstLocationLoaded.href ]
-
-    return urls.find(url => {
+    if (isDeepEqual(urls, this.getEmbeddableWindowLocationLastUrls)) {
+      return this.getEmbeddableWindowLocationLastResult
+    }
+    
+    const result = urls.find(url => {
       return this.embedRegex.test(url)
     })
+    
+    this.getEmbeddableWindowLocationLastUrls = urls
+    this.getEmbeddableWindowLocationLastResult = result
+
+    return result
   }
 
   isOnFullEmbeddablePage() {
@@ -82,11 +93,21 @@ export class BeamEmbedHelper {
     return false
   }
 
+  urlMatchesEmbedProviderLastUrls: string[]
+  urlMatchesEmbedProviderLastResult: boolean
   urlMatchesEmbedProvider(urls: string[]): boolean {
-    return urls.some((url) => {
+    if (isDeepEqual(urls, this.urlMatchesEmbedProviderLastUrls)) {
+      return this.urlMatchesEmbedProviderLastResult
+    }
+    const result = urls.some((url) => {
       if (!url) return false
       return this.embedRegex.test(url) || url.includes("youtube.com/embed")
     })
+
+    this.urlMatchesEmbedProviderLastUrls = urls
+    this.urlMatchesEmbedProviderLastResult = result
+
+    return result
   }
 
   /**
@@ -129,7 +150,7 @@ export class BeamEmbedHelper {
         return this.parseYouTubeThumbnailForEmbed(element)
         break
       default:
-        if (this.urlMatchesEmbedProvider([element.src])) {
+        if (element.src && this.urlMatchesEmbedProvider([element.src])) {
           return this.createLinkElement(element.src)
         }
         break
