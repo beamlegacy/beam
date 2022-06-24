@@ -13,9 +13,17 @@ class OmniboxAutocompleteTests: BaseTest {
     let omniboxView = OmniBoxTestView()
     let helper = OmniBoxUITestsHelper(OmniBoxTestView().app)
     let expectedAutocompleteResultsNumber = 8
+    let domainURL = "fr.wikipedia.org"
+    let urlToOpen = "fr.wikipedia.org/wiki/Hello_world"
+    let partiallyTypedSearchText = "fr.wiki"
+    let oneLetterToAdd = "p"
+    let anotherOneLetterToAdd = "a"
 
-    func testAutocompleteSelection() {
+    override func setUp() {
         launchApp()
+    }
+    
+    func testAutocompleteSelection() {
         step("Given I search in Omnibox"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
             omniboxView.searchInOmniBox("everest", false)
@@ -70,24 +78,16 @@ class OmniboxAutocompleteTests: BaseTest {
     }
 
     func testAutoCompleteURLSelection() {
-        launchApp()
-        let domainURL = "fr.wikipedia.org"
-        let urlToOpen = "fr.wikipedia.org/wiki/Hello_world"
-        let expectedIdentifier = "autocompleteResult-selected-" + domainURL
-        let expectedFirstResultURLIdentifier = expectedIdentifier + "-url"
-        let partiallyTypedSearchText = "fr.wiki"
-        let oneLetterToAdd = "p"
-        let anotherOneLetterToAdd = "a"
-        let helper = OmniBoxUITestsHelper(omniboxView.app)
-            var webView: WebTestView?
-
+        
+        let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: domainURL)
+        
         step("Given I open website: \(urlToOpen)"){
             shortcutHelper.shortcutActionInvoke(action: .newTab)
-            webView = omniboxView.searchInOmniBox(urlToOpen, true)
+            omniboxView.searchInOmniBox(urlToOpen, true)
         }
 
         step("Then browser tab bar appears"){
-            XCTAssertTrue(webView!.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+            XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
         }
 
         step("When I type: \(partiallyTypedSearchText)"){
@@ -102,7 +102,7 @@ class OmniboxAutocompleteTests: BaseTest {
         step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(domainURL) search text available"){
             XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, firstResult))
             XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
-            XCTAssertTrue(results.count > 1)
+            XCTAssertGreaterThan(results.count, 1)
         }
 
 
@@ -168,7 +168,6 @@ class OmniboxAutocompleteTests: BaseTest {
         let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-history"
         let deletePressRepeatTimes = 2
     
-        launchApp()
         helper.tapCommand(.omniboxEnableSearchInHistoryContent)
         helper.tapCommand(.omniboxFillHistory)
 
@@ -177,8 +176,7 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
         
-        let results = omniboxView.getAutocompleteResults()
-        let firstResult = results.firstMatch
+        let firstResult = omniboxView.getAutocompleteResults().firstMatch
         let autocompleteSelectedResultQuery = helper.allAutocompleteResults.matching(helper.autocompleteSelectedPredicate)
 
         step("Then search field value is \(expectedSearchFieldText)"){
@@ -237,21 +235,17 @@ class OmniboxAutocompleteTests: BaseTest {
     func testAutoCompleteHistoryFromAliasUrlSelection() {
         let partiallyTypedSearchText = "alter"
         let expectedSearchFieldText = "alternateurl.com"
-        let expectedHistoryIdentifier = "autocompleteResult-selected-\(expectedSearchFieldText)-url"
-    
-        launchApp()
+        let expectedURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: expectedSearchFieldText)
+
         helper.tapCommand(.omniboxFillHistory)
 
         step("When I type: \(partiallyTypedSearchText)"){
             omniboxView.getOmniBoxSearchField().clickOnExistence()
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
-        
-        let results = omniboxView.getAutocompleteResults()
-        let firstResult = results.firstMatch
 
         step("Then search field value is \(expectedSearchFieldText)"){
-            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+            XCTAssertTrue(waitForIdentifierEqual(expectedURLIdentifier, omniboxView.getAutocompleteResults().firstMatch))
         }
     }
 
@@ -269,13 +263,9 @@ class OmniboxAutocompleteTests: BaseTest {
             omniboxView.getOmniBoxSearchField().clickOnExistence()
             omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
         }
-        
-        let results = omniboxView.getAutocompleteResults()
-        let firstResult = results.firstMatch
-
 
         step("Then search field value is \(expectedSearchFieldText)"){
-            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, firstResult))
+            XCTAssertTrue(waitForIdentifierEqual(expectedHistoryIdentifier, omniboxView.getAutocompleteResults().firstMatch))
             XCTAssertTrue(waitForStringValueEqual(expectedSearchFieldText, omniboxView.getOmniBoxSearchField()))
         }
         
@@ -312,6 +302,39 @@ class OmniboxAutocompleteTests: BaseTest {
         step("Then search field value is \(partiallyTypedSearchText)"){
             XCTAssertTrue(waitForStringValueEqual(partiallyTypedSearchText, omniboxView.getOmniBoxSearchField()))
             helper.tapCommand(.omniboxDisableSearchInHistoryContent)
+        }
+    }
+    
+    func testAutoCompleteUrlOmniboxDisappear() { //BE-3733
+        
+        let expectedFirstResultURLIdentifier = omniboxView.getAutocompleteURLIdentifierFor(domainURL: domainURL)
+        
+        step("Given I open website: \(urlToOpen)"){
+            shortcutHelper.shortcutActionInvoke(action: .newTab)
+            omniboxView.searchInOmniBox(urlToOpen, true)
+        }
+
+        step("Then browser tab bar appears"){
+            XCTAssertTrue(webView.getAnyTab().waitForExistence(timeout: BaseTest.implicitWaitTimeout))
+        }
+
+        step("When I type: \(partiallyTypedSearchText)"){
+            shortcutHelper.shortcutActionInvoke(action: .openLocation)
+            _ = omniboxView.getOmniBoxSearchField().waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+            omniboxView.getOmniBoxSearchField().typeText(partiallyTypedSearchText)
+        }
+        
+        step("Then I see \(expectedFirstResultURLIdentifier) identifier and \(domainURL) search text available"){
+            XCTAssertTrue(waitForIdentifierEqual(expectedFirstResultURLIdentifier, omniboxView.getAutocompleteResults().firstMatch))
+            XCTAssertTrue(waitForStringValueEqual(domainURL, omniboxView.getOmniBoxSearchField()))
+        }
+        
+        step("When I validate autocomplete with Enter"){
+            webView.typeKeyboardKey(.enter)
+        }
+        
+        step("Then omnibox disappear"){
+            XCTAssertTrue(waitForDoesntExist(omniboxView.getOmniBoxSearchField()))
         }
     }
 }
