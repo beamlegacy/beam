@@ -66,7 +66,9 @@ struct UpdatePanel: View {
     private var buttons: some View {
         VStack(spacing: 10) {
             ActionableButton(text: loc("Update now"), defaultState: .normal, variant: updateVariant, minWidth: 180) {
-                versionChecker.checkForUpdates(forceInstall: true)
+                Task {
+                    await versionChecker.performUpdateIfAvailable(forceInstall: true)
+                }
                 closeAction()
             }
             Button {
@@ -162,6 +164,6 @@ private struct ReleaseNoteWebView: View, NSViewRepresentable {
 
 struct UpdatePanel_Previews: PreviewProvider {
     static var previews: some View {
-        UpdatePanel(appRelease: AppRelease.mockedReleases()[0], versionChecker: VersionChecker(mockedReleases: AppRelease.mockedReleases()), closeAction: {})
+        UpdatePanel(appRelease: AppRelease.mockedReleases()[3], versionChecker: VersionChecker(mockedReleases: AppRelease.mockedReleases()), closeAction: {})
     }
 }
