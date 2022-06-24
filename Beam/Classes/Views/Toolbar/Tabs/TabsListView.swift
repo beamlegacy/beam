@@ -58,7 +58,7 @@ struct TabsListView: View {
     @Environment(\.isMainWindow) private var isMainWindow
 
     var sections: TabsListItemsSections
-    @Binding var currentTab: BrowserTab?
+    var currentTab: BrowserTab?
     var globalContainerGeometry: GeometryProxy?
 
     @ObservedObject private var dragModel = TabsDragModel()
@@ -159,7 +159,7 @@ struct TabsListView: View {
                                                          removal: .animatableOffset(offset: CGSize(width: 0, height: 40)).animation(BeamAnimation.spring(stiffness: 400, damping: 28))
                                                             .combined(with: .opacity.animation(BeamAnimation.defaultiOSEasing(duration: 0.05))))
 
-    // swiftlint:disable function_body_length
+    // swiftlint:disable:next function_body_length cyclomatic_complexity
     private func renderItem(_ item: TabsListItem, index: Int, selectedIndex: Int, isSingle: Bool,
                             canScroll: Bool, widthProvider: TabsListWidthProvider, centeringAdjustment: CGFloat = 0) -> some View {
         var selected = false
@@ -173,7 +173,14 @@ struct TabsListView: View {
         let group: TabClusteringGroup? = item.group
         let allItems = sections.allItems
         let nextItem: TabsListItem? = index < allItems.count - 1 ? allItems[index + 1] : nil
-        let nextGroup: TabClusteringGroup? = nextItem?.group
+        var nextGroup: TabClusteringGroup? = nextItem?.group
+        if dragModel.draggingOverIndex == index + 1 {
+            if nextGroup == nil && dragModel.draggingOverGroup == group {
+                nextGroup = dragModel.draggingOverGroup
+            } else if nextGroup != nil && dragModel.draggingOverGroup == nil {
+                nextGroup = dragModel.draggingOverGroup
+            }
+        }
         let previousItem: TabsListItem? = index > 0 ? allItems[index - 1] : nil
         let previousGroup: TabClusteringGroup? = previousItem?.group
         let isTabItem = item.tab != nil
@@ -233,13 +240,21 @@ struct TabsListView: View {
         }
         .frame(height: TabView.height)
         .overlay(
-            group == nil ? nil :
+            group == nil || (isTheDraggedTab && dragModel.draggingOverGroup == nil) ? nil :
                 TabViewGroupUnderline(color: group?.color ?? .init(userColorIndex: 0),
                                  isBeginning: previousGroup != group, isEnd: nextGroup != group)
-                .padding(.trailing, nextGroup != group ? 4 : 0)
+                .padding(.trailing, nextGroup != group ? widthProvider.separatorWidth : 0)
                 .padding(.trailing, (!isTheDraggedTab || nextGroup != group) && showTrailingDragSpacer && dragModel.draggingOverGroup == nil ? dragModel.widthForDraggingSpacer : 0)
                 .padding(.leading, (!isTheDraggedTab || nextGroup != group) && showLeadingDragSpacer && dragModel.draggingOverGroup == nil ? dragModel.widthForDraggingSpacer : 0)
             ,
+            alignment: .bottom)
+        .overlay(
+            // We're dragging right the previousItem's group. Showing a target group underline.
+            group == nil && dragModel.draggingOverGroup != nil && dragModel.draggingOverIndex == index ?
+                TabViewGroupUnderline(color: dragModel.draggingOverGroup?.color ?? .init(),
+                                      isBeginning: false, isEnd: true)
+                .padding(.trailing, showLeadingDragSpacer && !isTheDraggedTab ? dragModel.widthForDraggingSpacer : widthProvider.separatorWidth)
+            : nil,
             alignment: .bottom)
         .contentShape(Rectangle())
         .disabled(isDraggingATab && !isTheDraggedTab)
@@ -248,6 +263,24 @@ struct TabsListView: View {
         .accessibilityAddTraits(selected ? .isSelected : [])
         .accessibility(identifier: accessibilityIdentifier(for: item))
         .transition(isAnimatingDrop ? .identity : tabTransition)
+    }
+
+    @ViewBuilder
+    private var draggedItem: some View {
+        if let currentTab = currentTab, isDraggingATab {
+            TabView(tab: currentTab, isSelected: true,
+                    isPinned: dragModel.draggingOverPins,
+                    isSingleTab: !dragModel.draggingOverPins && sections.unpinnedItems.count <= 1,
+                    isDragging: true, disableHovering: externalDragModel.isDroppingAnExternalTab)
+            .frame(width: dragModel.widthForDraggedItem)
+            .transition(.asymmetric(
+                insertion: .identity,
+                removal: .opacity.combined(with: .scale(scale: 0.98)).animation(BeamAnimation.easeInOut(duration: 0.08))
+            ))
+            .offset(x: dragModel.offset.x, y: 0)
+            .opacity(externalDragModel.isDraggingTabOutside ? 0 : 1)
+            .zIndex(10)
+        }
     }
 
     var body: some View {
@@ -321,17 +354,7 @@ struct TabsListView: View {
                     }
                 }
                 // Dragged Tab over
-                if let currentTab = currentTab, isDraggingATab {
-                    TabView(tab: currentTab, isSelected: true,
-                            isPinned: dragModel.draggingOverPins,
-                            isSingleTab: !dragModel.draggingOverPins && sections.unpinnedItems.count <= 1,
-                            isDragging: true, disableHovering: externalDragModel.isDroppingAnExternalTab)
-                        .offset(x: dragModel.offset.x, y: 0)
-                        .frame(width: dragModel.widthForDraggedItem)
-                        .transition(.asymmetric(insertion: .scale(scale: 0.98).animation(BeamAnimation.easeInOut(duration: 0.08)), removal: .opacity.combined(with: .scale(scale: 0.98)).animation(BeamAnimation.easeInOut(duration: 0.08))))
-                        .opacity(externalDragModel.isDraggingTabOutside ? 0 : 1)
-                        .zIndex(10)
-                }
+                draggedItem
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .contentShape(
@@ -726,6 +749,7 @@ extension TabsListView {
         if dragModel.dragStartIndex == nil {
             guard let currentTabIndex = index(of: currentTab) else { return }
 
+            let sections = externalDragModel.isDroppingAnExternalTab ? browserTabsManager.listItems : sections
             viewModel.firstDragGestureValue = gestureValue
             let widthProvider = widthProvider(for: containerGeometry, sections: sections)
             dragModel.prepareForDrag(gestureValue: gestureValue, scrollContentOffset: scrollOffset,
@@ -744,7 +768,7 @@ extension TabsListView {
                     return
                 }
                 viewModel.currentDragDidChangeCurrentTab = true
-                self.currentTab = tab
+                browserTabsManager.setCurrentTab(tab)
                 return
             }
         }
@@ -805,19 +829,20 @@ extension TabsListView: TabsExternalDropDelegateHandler {
             // then ask the dragModel to calculate what would be the actual insert index
             // then move the tab to the correct index and get the starting location
             // then reset the dragModel to be correctly setup in the next drop gesture move.
-            currentTab = tab
+            browserTabsManager.setCurrentTab(tab)
             if !browserTabsManager.tabs.contains(tab) {
                 browserTabsManager.tabs.append(tab)
             }
             let sections = state.browserTabsManager.listItems
             let gestureValue = TabGestureValue(startLocation: startLocation, location: location, time: BeamDate.now)
             let currentTabIndex = index(of: tab) ?? sections.allItems.count
+            let item = sections.allItems.first { $0.tab == tab }
             let widthProvider = widthProvider(for: containerGeometry, sections: sections)
             dragModel.prepareForDrag(gestureValue: gestureValue, scrollContentOffset: scrollOffset,
                                      currentItemIndex: currentTabIndex, sections: sections,
                                      singleTabCenteringAdjustment: viewModel.singleTabCenteringAdjustment, widthProvider: widthProvider)
             let insertIndex = dragModel.dragStartIndex ?? currentTabIndex
-            state.browserTabsManager.tabs.move(fromOffsets: [state.browserTabsManager.tabs.count - 1], toOffset: insertIndex)
+            state.browserTabsManager.moveListItem(atListIndex: currentTabIndex, toListIndex: insertIndex, changeGroup: item?.group)
 
             var startLocation = startLocation
             startLocation.x = dragModel.frameForItemAtIndex(insertIndex).midX
@@ -872,7 +897,7 @@ struct TabsListView_Previews: PreviewProvider {
         return TabsListItemsSections(allItems: items, pinnedItems: [], unpinnedItems: items)
     }
     static var previews: some View {
-        TabsListView(sections: .init(), currentTab: .constant(currentab))
+        TabsListView(sections: .init(), currentTab: currentab)
             .environmentObject(state)
             .frame(width: 500)
     }
