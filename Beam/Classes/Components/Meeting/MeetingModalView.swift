@@ -25,7 +25,8 @@ struct Meeting: Identifiable, Equatable {
     }
 
     static func == (lhs: Meeting, rhs: Meeting) -> Bool {
-        return lhs.name == rhs.name && lhs.startTime == rhs.startTime && lhs.attendees == rhs.attendees
+        return lhs.name == rhs.name && lhs.startTime == rhs.startTime
+        && lhs.endTime == rhs.endTime && lhs.allDayEvent == rhs.allDayEvent && lhs.duration == rhs.duration
     }
 
     class Attendee: Identifiable, Equatable {
