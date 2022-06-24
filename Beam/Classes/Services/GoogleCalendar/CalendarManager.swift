@@ -187,8 +187,29 @@ class CalendarManager: ObservableObject {
                 }
             }
             dispatchGroup.notify(queue: .main) {
-                completionHandler(allMeetings)
+                completionHandler(self.sortAndRemoveDuplicates(meetings: allMeetings))
             }
         }
+    }
+}
+
+// MARK: - Calendar Utilities
+extension CalendarManager {
+    func sortAndRemoveDuplicates(meetings: [Meeting]) -> [Meeting] {
+        var meetingsCopy = meetings
+
+        meetingsCopy.sort { meeting1, meeting2 in
+            meeting1.startTime < meeting2.startTime
+        }
+
+        meetingsCopy = meetingsCopy.reduce([] as [Meeting]) { (res, meeting) -> [Meeting] in
+            var res = res
+            if res.last != meeting {
+                res.append(meeting)
+            }
+            return res
+        }
+
+        return meetingsCopy
     }
 }
