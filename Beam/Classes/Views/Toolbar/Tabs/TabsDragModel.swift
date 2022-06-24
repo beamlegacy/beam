@@ -191,28 +191,36 @@ class TabsDragModel: ObservableObject {
         return (offsetX, isNowOverPins)
     }
 
+    /// This methods determine the targeted Tab Group depending on the location
+    /// Allowing things like moving a tab out of a group by reaching the trailing half of the last tab of the group.
     private func calculateDraggingOverGroup(_ draggingOverIndex: Int, dragStartIndex: Int, offsetX: CGFloat) -> TabClusteringGroup? {
         let itemFrame = frameForItemAtIndex(draggingOverIndex)
         let items = allItems
         guard draggingOverIndex < items.count else { return nil }
         let item = items[draggingOverIndex]
-        guard let group = item.group else { return nil }
+        let previousItem = draggingOverIndex > 0 ? items[draggingOverIndex - 1] : nil
+        let group = item.group
+        guard group != nil || previousItem?.group != nil else { return nil }
+
         guard itemFrame.width > 0 && offsetX < itemFrame.maxX else {
             if item.isAGroupCapsule && offsetX > itemFrame.maxX && draggingOverIndex >= dragStartIndex {
                 return group
             }
             return nil
         }
+
         let percentIn = (offsetX - itemFrame.minX) / itemFrame.width
         if item.isAGroupCapsule && draggingOverIndex < dragStartIndex {
             return nil
         } else if percentIn > 0.5 && draggingOverIndex >= dragStartIndex {
-            if draggingOverIndex == itemsCount - 1 || items[draggingOverIndex + 1].group != group {
+            let nextItem = draggingOverIndex < items.count - 1 ? items[draggingOverIndex + 1] : nil
+            if (nextItem == nil || nextItem?.group != group)
+                && (draggingOverIndex > dragStartIndex || (previousItem?.group == group && previousItem?.isAGroupCapsule != true)) {
                 return nil
             }
-        } else if percentIn < 0.5 && draggingOverIndex < dragStartIndex {
-            if draggingOverIndex == 0 || items[draggingOverIndex - 1].group != group {
-                return nil
+        } else if percentIn < 0.5 && draggingOverIndex <= dragStartIndex {
+            if draggingOverIndex < dragStartIndex || group == nil {
+                return previousItem?.group
             }
         }
         return group
@@ -243,6 +251,7 @@ class TabsDragModel: ObservableObject {
                 } else {
                     newDragIndex = Int((locX / pinnedItemWidth).rounded(.down))
                 }
+                self.draggingOverGroup = nil
             } else {
                 let thresholdMinX = itemMinX(atIndex: draggingOverIndex) // Left
                 let thresholdMaxX = thresholdMinX + activeItemWidth // Right

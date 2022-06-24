@@ -72,7 +72,7 @@ class BrowserTabsManager: ObservableObject {
     /// Groups of tabs by interactions, to help know where to insert new tabs. *Not related to Clustering*
     private var tabsNeighborhoods: [UUID: [UUID]] = [:]
 
-    @Published var currentTab: BrowserTab? {
+    @Published private(set) var currentTab: BrowserTab? {
         didSet {
             if tabsAreVisible {
                 oldValue?.switchToOtherTab()
