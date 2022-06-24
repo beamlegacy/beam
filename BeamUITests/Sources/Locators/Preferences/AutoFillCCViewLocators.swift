@@ -6,6 +6,7 @@
 //
 
 import Foundation
+
 enum AutofillCCViewLocators {
     
     enum Buttons: String, CaseIterable, UIElement {
