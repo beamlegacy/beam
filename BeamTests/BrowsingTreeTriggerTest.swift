@@ -91,7 +91,7 @@ class BrowsingTreeTriggerTests: WebBrowsingBaseTests {
         XCTAssertEqual(tab1.browsingTree.current.events.last?.type, .creation)
 
         //switch to other tab test
-        state.browserTabsManager.currentTab = tab1
+        state.browserTabsManager.setCurrentTab(tab1)
         XCTAssertEqual(tab0.browsingTree.current.events.last?.type, .switchToOtherTab)
         XCTAssertEqual(tab1.browsingTree.current.events.last?.type, .startReading)
 

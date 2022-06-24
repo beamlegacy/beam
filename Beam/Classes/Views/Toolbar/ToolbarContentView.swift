@@ -54,7 +54,7 @@ struct ToolbarContentView<List: DownloadListProtocol & PopoverWindowPresented>: 
     }
 
     private func tabs(containerGeometry: GeometryProxy) -> some View {
-        TabsListView(sections: browserTabsManager.listItems, currentTab: $browserTabsManager.currentTab, globalContainerGeometry: containerGeometry)
+        TabsListView(sections: browserTabsManager.listItems, currentTab: browserTabsManager.currentTab, globalContainerGeometry: containerGeometry)
             .opacity(isMainWindow ? 1 : (colorScheme == .dark ? 0.6 : 0.8))
             .frame(maxHeight: .infinity)
             .transition(.asymmetric(insertion: .opacity.animation(BeamAnimation.easeInOut(duration: 0.12).delay(0.05))
@@ -190,7 +190,7 @@ struct ToolbarContentView_Previews: PreviewProvider {
         focusedState.startFocusOmnibox()
         focusedState.mode = .web
         let origin = BrowsingTreeOrigin.searchBar(query: "query", referringRootId: nil)
-        focusedState.browserTabsManager.currentTab = BrowserTab(state: focusedState, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Note title"))
+        focusedState.browserTabsManager.setCurrentTab(BrowserTab(state: focusedState, browsingTreeOrigin: origin, originMode: .today, note: BeamNote(title: "Note title")))
         return Group {
             ToolbarContentView(downloadList: emptyDownloadList)
                 .environmentObject(state)
