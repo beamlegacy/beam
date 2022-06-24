@@ -76,6 +76,7 @@
         "BrowserHistoryTests",
         "BrowserOpenModalTests",
         "BrowserPinnedTabTests",
+        "BrowserPreferencesTests",
         "BrowserShortcutsTests",
         "BrowserShortcutsTests\/testJumpBetweenWebTabs()",
         "BrowserShortcutsTests\/testReopenTabsCmdT()",
