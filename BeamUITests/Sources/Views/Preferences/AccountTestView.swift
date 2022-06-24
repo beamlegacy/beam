@@ -73,4 +73,8 @@ class AccountTestView: PreferencesBaseView {
     func getEncryptionKeyLabel() -> XCUIElement {
         return button(AccountViewLocators.Buttons.pkLabelButton.accessibilityIdentifier)
     }
+
+    func clickCopyAccountInfos() {
+        button(AccountViewLocators.Buttons.accountInfosButton.accessibilityIdentifier).clickOnExistence()
+    }
 }
