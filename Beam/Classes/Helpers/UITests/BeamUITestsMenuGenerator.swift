@@ -140,6 +140,7 @@ class BeamUITestsMenuGenerator {
         RestoreTabsManager.shared.clearSavedClosedTabs()
         PinnedBrowserTabsManager().savePinnedTabs(tabs: [])
         ContentBlockingManager.shared.radBlockPreferences.removeAllEntries { }
+        TabGroupingStoreManager.shared.clearData()
         try? GRDBDatabase.shared.clear()
         data?.saveData()
     }

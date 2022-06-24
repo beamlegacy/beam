@@ -537,6 +537,9 @@ struct GRDBDatabase {
                 table.add(column: "isPinned", .boolean).defaults(to: false)
             }
         }
+
+        TabGroupsStore.registerMigration(with: &migrator)
+
         #if DEBUG
         // Speed up development by nuking the database when migrations change
         migrator.eraseDatabaseOnSchemaChange = false
@@ -1956,5 +1959,68 @@ extension GRDBDatabase {
             //swiftlint:disable:next print
             print("links: \(links)")
         }
+    }
+}
+
+// MARK: - Tab Group
+// Temporarily here while the "move to GRDB" is ongoing
+extension GRDBDatabase {
+    func getTabGroups(ids: [UUID]) -> [TabGroupBeamObject] {
+        do {
+            return try dbReader.read { db in
+                return try TabGroupBeamObject
+                    .filter(ids.contains(TabGroupBeamObject.Columns.id))
+                    .order(TabGroupBeamObject.Columns.updatedAt.desc)
+                    .fetchAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't fetch tab groups for ids '\(ids)'. \(error)", category: .database)
+            return []
+        }
+    }
+
+    func getTabGroups(matchingTitle title: String) -> [TabGroupBeamObject] {
+        let query = title.lowercased()
+        do {
+            return try dbReader.read { db in
+                return try TabGroupBeamObject
+                    .filter(TabGroupBeamObject.Columns.title.like("%\(query)%"))
+                    .order(TabGroupBeamObject.Columns.updatedAt.desc)
+                    .limit(10)
+                    .fetchAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't fetch tab groups matching '\(query)'. \(error)", category: .database)
+            return []
+        }
+    }
+
+    func saveTabGroups(_ groups: [TabGroupBeamObject]) {
+        do {
+            try dbWriter.write { db in
+                try groups.forEach { group in
+                    var group = group
+                    if group.pages.isEmpty {
+                        try group.delete(db)
+                    } else {
+                        group.updatedAt = BeamDate.now
+                        try group.save(db)
+                    }
+                }
+            }
+        } catch {
+            Logger.shared.logError("Couldn't save tab groups", category: .database)
+        }
+    }
+
+    func deleteAllTabGroups() {
+        do {
+            _ = try dbWriter.write { db in
+                try TabGroupBeamObject.deleteAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't delete all tab groups", category: .database)
+        }
+
     }
 }

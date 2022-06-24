@@ -19,7 +19,7 @@ class TabsDragModel: ObservableObject {
     @Published var offset = CGPoint.zero
     @Published var draggingOverIndex: Int?
     @Published var dragStartIndex: Int?
-    @Published var draggingOverGroup: TabClusteringGroup?
+    @Published var draggingOverGroup: TabGroup?
     @Published var draggingOverPins: Bool = false {
         didSet {
             guard (draggingOverPins != oldValue || activeItemWidth == 0), let widthProvider = widthProvider else { return }
@@ -193,7 +193,7 @@ class TabsDragModel: ObservableObject {
 
     /// This methods determine the targeted Tab Group depending on the location
     /// Allowing things like moving a tab out of a group by reaching the trailing half of the last tab of the group.
-    private func calculateDraggingOverGroup(_ draggingOverIndex: Int, dragStartIndex: Int, offsetX: CGFloat) -> TabClusteringGroup? {
+    private func calculateDraggingOverGroup(_ draggingOverIndex: Int, dragStartIndex: Int, offsetX: CGFloat) -> TabGroup? {
         let itemFrame = frameForItemAtIndex(draggingOverIndex)
         let items = allItems
         guard draggingOverIndex < items.count else { return nil }

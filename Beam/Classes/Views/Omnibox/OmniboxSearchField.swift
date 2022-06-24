@@ -25,10 +25,14 @@ struct OmniboxSearchField: View {
     }
 
     private func placeholder(for mode: AutocompleteManager.Mode) -> String {
-        if mode == .noteCreation {
+        switch mode {
+        case .noteCreation:
             return loc("Create Note")
+        case .tabGroup(let group):
+            return group.title ?? loc("Tab Group")
+        default:
+            return state.isIncognito ? loc("Search the web incognito and your notes") : loc("Search the web and your notes")
         }
-        return state.isIncognito ? loc("Search the web incognito and your notes") : loc("Search the web and your notes")
     }
 
     private func leadingIconName(for mode: AutocompleteManager.Mode) -> String? {
@@ -36,9 +40,11 @@ struct OmniboxSearchField: View {
            state.mode == .web,
            autocompleteManager.searchQuery == url.absoluteString {
             return AutocompleteResult.Source.url.iconName
+        } else if case .tabGroup = mode, selectedAutocompleteResult?.source == .action {
+            return AutocompleteResult.Source.tabGroup(group: nil).iconName
         } else if let autocompleteResult = selectedAutocompleteResult {
             return autocompleteResult.icon
-        } else if mode == .noteCreation {
+        } else if case .noteCreation = mode {
             return AutocompleteResult.Source.createNote.iconName
         }
 
@@ -70,7 +76,7 @@ struct OmniboxSearchField: View {
     }
 
     private var resultSubtitle: String? {
-        guard isEditing, autocompleteManager.mode == .general else { return nil }
+        guard case .general = autocompleteManager.mode, isEditing else { return nil }
         guard let autocompleteResult = selectedAutocompleteResult else { return nil }
         if case .createNote = autocompleteResult.source {
             return loc("Create Note")
@@ -183,7 +189,7 @@ struct OmniboxSearchField: View {
                 return
             }
         }
-        guard !autocompleteManager.searchQuery.isEmpty else { return }
+        guard !autocompleteManager.searchQuery.isEmpty || autocompleteManager.autocompleteSelectedIndex != nil else { return }
         state.startOmniboxQuery()
     }
 

@@ -119,16 +119,13 @@ class AutocompleteManager: ObservableObject {
 
         Logger.shared.logInfo("------------------- ✳️ Start of autocomplete for \(receivedQueryString) -------------------", category: .autocompleteManager)
 
-        Publishers.MergeMany(publishers).collect()
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] publishersResults in
-                defer {
-                    completion?()
-                }
+        Publishers.MergeMany(publishers).collect().receive(on: DispatchQueue.main).sink { [weak self] publishersResults in
+                defer { completion?() }
                 guard let self = self else { return }
                 self.rawAutocompleteResults = publishersResults.compactMap({ $0.results.isEmpty ? nil : $0 })
+                let expectSearchEngineResults = self.mode.displaysSearchEngineResults && !searchText.isEmpty
                 let (finalResults, _) = self.mergeAndSortPublishersResults(publishersResults: publishersResults, for: searchText,
-                                                                           expectSearchEngineResultsLater: self.mode == .general && !searchText.isEmpty)
+                                                                           expectSearchEngineResultsLater: expectSearchEngineResults)
                 self.logAutocompleteResultFinished(for: searchText, finalResults: finalResults, startedAt: startChrono)
                 self.autocompleteResultsAreFromEmptyQuery = searchText.isEmpty
                 self.setAutocompleteResults(finalResults)
@@ -171,7 +168,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private func shouldResetSelectionBeforeNewResults() -> Bool {
-        guard mode != .noteCreation else { return false } // note creation always auto select
+        guard case .general = mode else { return false } // other modes always auto select
         if autocompleteSelectedIndex == 0 && autocompleteResults.first?.source == .searchEngine {
             // selected search enginer result will most likely be auto selected on next input
             return false
@@ -184,12 +181,13 @@ class AutocompleteManager: ObservableObject {
         case .mnemonic: return true // a mnemonic is by definition something that can take over the result
         case .topDomain:
             return result.text.lowercased().starts(with: searchText.lowercased())
-        case .history, .url, .note:
+        case .history, .url, .note, .tabGroup:
             return result.takeOverCandidate
         case .searchEngine:
             return result.takeOverCandidate && result.url != nil || // search engine result found in history 
             (autocompleteResults.count == 2 && !searchQuery.mayBeURL && result.text == searchQuery) // 1 search engine result + 1 create note
-        case .createNote where mode == .noteCreation:
+        case .createNote:
+            guard case .noteCreation = mode else { fallthrough }
             return true
         default:
             return false
@@ -207,9 +205,9 @@ class AutocompleteManager: ObservableObject {
 
     private func updateSearchQueryWhenSelectingAutocomplete(_ selectedIndex: Int?, previousSelectedIndex: Int?) {
         guard let i = selectedIndex, i >= 0, i < autocompleteResults.count else { return }
-        guard mode != .noteCreation else { return }
-
         let result = autocompleteResults[i]
+        guard mode.shouldUpdateSearchQueryOnSelection(for: result) else { return }
+
         let resultText = result.textFieldText
 
         // if the first result is compatible with autoselection, select the added string
@@ -245,7 +243,7 @@ class AutocompleteManager: ObservableObject {
     }
 
     private var canHaveNoSelection: Bool {
-        mode != .noteCreation
+        mode.isGeneral
     }
 
     private func stopCurrentCompletionWork() {
@@ -377,16 +375,6 @@ extension AutocompleteManager {
     }
 
     func isSentence(_ query: String) -> Bool {
-        if query.numberOfWords > 1 {
-            return true
-        }
-        return false
-    }
-}
-
-extension AutocompleteManager {
-    enum Mode {
-        case noteCreation
-        case general
+        query.numberOfWords > 1
     }
 }

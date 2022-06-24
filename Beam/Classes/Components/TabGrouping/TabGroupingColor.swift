@@ -7,16 +7,55 @@
 
 import SwiftUI
 
+/// Describe the color of a Tab Group.
+///
+/// A group color can be either
+/// - one of our designed colors, in that case `TabGroupingColor.designColor` will have a value
+/// - a random color generated with only a hue value, in that case `TabGroupingColor.randomColorHueTint` will have a value (and not designColor)
 struct TabGroupingColor: Identifiable, Hashable {
 
-    static let userColors: [BeamColor] = [
-        .TabGrouping.red, .TabGrouping.yellow, .TabGrouping.green, .TabGrouping.cyan, .TabGrouping.blue,
-        .TabGrouping.pink, .TabGrouping.purple, .TabGrouping.birgit, .TabGrouping.gray
-    ]
-    static let userTextColors: [BeamColor] = [
-        .TabGrouping.redText, .TabGrouping.yellowText, .TabGrouping.greenText, .TabGrouping.cyanText, .TabGrouping.blueText,
-        .TabGrouping.pinkText, .TabGrouping.purpleText, .TabGrouping.birgitText, .TabGrouping.grayText
-    ]
+    enum DesignColor: String, CaseIterable, Identifiable {
+        case red, yellow, green, cyan, blue, pink, purple, birgit, gray
+
+        var id: String {
+            rawValue
+        }
+        var color: BeamColor {
+            guard let c = Self.colors[self] else {
+                fatalError("Missing color for DesignColor value for '\(self)'")
+            }
+            return c
+        }
+        var textColor: BeamColor {
+            guard let c = Self.textColors[self] else {
+                fatalError("Missing text color for DesignColor value for '\(self)'")
+            }
+            return c
+        }
+
+        static var colors: [DesignColor: BeamColor] = [
+            .red: .TabGrouping.red,
+            .yellow: .TabGrouping.yellow,
+            .green: .TabGrouping.green,
+            .cyan: .TabGrouping.cyan,
+            .blue: .TabGrouping.blue,
+            .pink: .TabGrouping.pink,
+            .purple: .TabGrouping.purple,
+            .birgit: .TabGrouping.birgit,
+            .gray: .TabGrouping.gray
+        ]
+        static var textColors: [DesignColor: BeamColor] = [
+            .red: .TabGrouping.redText,
+            .yellow: .TabGrouping.yellowText,
+            .green: .TabGrouping.greenText,
+            .cyan: .TabGrouping.cyanText,
+            .blue: .TabGrouping.blueText,
+            .pink: .TabGrouping.pinkText,
+            .purple: .TabGrouping.purpleText,
+            .birgit: .TabGrouping.birgitText,
+            .gray: .TabGrouping.grayText
+        ]
+    }
 
     static func == (lhs: TabGroupingColor, rhs: TabGroupingColor) -> Bool {
         lhs.id == rhs.id
@@ -26,48 +65,37 @@ struct TabGroupingColor: Identifiable, Hashable {
     }
 
     var id: String {
-        if let userColorIndex = userColorIndex {
-            return "userColor[\(userColorIndex)]"
-        } else if let hueTint = hueTint {
-            return "hueTint[\(hueTint)]"
+        if let designColor = designColor {
+            return "designColor[\(designColor.rawValue)]"
+        } else if let hueTint = randomColorHueTint {
+            return "randomColor[hue:\(hueTint)]"
         }
         return "unknown"
     }
 
-    private(set) var hueTint: Double?
-    private(set) var userColorIndex: Int?
-    private var userColor: BeamColor?
-    private var userTextColor: BeamColor?
+    private(set) var designColor: DesignColor?
+    private(set) var randomColorHueTint: Double?
 
-    internal init(userColorIndex: Int? = nil, hueTint: Double? = nil) {
-        self.userColorIndex = userColorIndex
-        self.hueTint = hueTint
-        if let userColorIndex = userColorIndex {
-            userColor = Self.userColors[userColorIndex]
-            userTextColor = Self.userTextColors[userColorIndex]
+    var mainColor: BeamColor?
+    var textColor: BeamColor?
+
+    internal init(designColor: DesignColor? = nil, randomColorHueTint: Double? = nil) {
+        let designColor = designColor ?? (randomColorHueTint == nil ? DesignColor.allCases.first : nil)
+        self.designColor = designColor
+        self.randomColorHueTint = randomColorHueTint
+        if let designColor = designColor {
+            mainColor = designColor.color
+            textColor = designColor.textColor
+        } else if let hue = randomColorHueTint {
+            let light = BeamColor.From(color: NSColor(hue: hue, saturation: 0.58, brightness: 0.96, alpha: 1))
+            let dark = BeamColor.From(color: NSColor(hue: hue, saturation: 0.58, brightness: 0.86, alpha: 1))
+            mainColor = BeamColor.combining(lightColor: light, darkColor: dark)
+            let lightText = BeamColor.From(color: .white)
+            let darkText = BeamColor.From(color: NSColor(hue: hue, saturation: 0.5, brightness: 0.36, alpha: 1))
+            textColor = BeamColor.combining(lightColor: lightText, darkColor: darkText)
         }
     }
 
-    func mainColor(isDarkMode: Bool) -> SwiftUI.Color {
-        if let userColor = userColor {
-            return userColor.swiftUI
-        } else if let hueTint = hueTint {
-            return Color(hue: hueTint, saturation: 0.58, brightness: isDarkMode ? 0.86 : 0.96)
-        }
-        return .clear
-    }
-
-    func textColor(isDarkMode: Bool) -> SwiftUI.Color {
-        if let userTextColor = userTextColor {
-            return userTextColor.swiftUI
-        } else if let hueTint = hueTint {
-            if !isDarkMode {
-                return .white
-            }
-            return Color(hue: hueTint, saturation: 0.5, brightness: 0.36)
-        }
-        return .clear
-    }
 }
 
 final class TabGroupingColorGenerator {
@@ -76,23 +104,23 @@ final class TabGroupingColorGenerator {
     private var usedColors = Set<TabGroupingColor>()
 
     func generateNewColor() -> TabGroupingColor {
-        let availableUserColorIndexes = Array(0..<TabGroupingColor.userColors.count).filter { idx in
-            !usedColors.contains(where: { $0.userColorIndex == idx })
+        let availableColorNames = TabGroupingColor.DesignColor.allCases.filter { c in
+            !usedColors.contains(where: { $0.designColor == c })
         }
-        guard !availableUserColorIndexes.isEmpty, let userColorIndex = availableUserColorIndexes.randomElement() else {
+        guard !availableColorNames.isEmpty, let designColor = availableColorNames.randomElement() else {
             let hue = hueGenerator.generate()
             hueGenerator.taken.append(hue)
-            let color = TabGroupingColor(hueTint: hue)
+            let color = TabGroupingColor(randomColorHueTint: hue)
             usedColors.insert(color)
             return color
         }
-        let color = TabGroupingColor(userColorIndex: userColorIndex)
+        let color = TabGroupingColor(designColor: designColor)
         usedColors.insert(color)
         return color
     }
 
     func updateUsedColor(_ colors: [TabGroupingColor]) {
         usedColors = Set(colors)
-        hueGenerator.taken = Array(Set(colors.compactMap { $0.hueTint }))
+        hueGenerator.taken = Array(Set(colors.compactMap { $0.randomColorHueTint }))
     }
 }

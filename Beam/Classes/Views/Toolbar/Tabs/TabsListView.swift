@@ -25,7 +25,7 @@ struct TabsListItem: Identifiable, CustomStringConvertible {
         tab?.id.uuidString ?? group?.id.uuidString ?? "unknownItem"
     }
     var tab: BrowserTab?
-    var group: TabClusteringGroup?
+    var group: TabGroup?
 
     var description: String {
         if let tab = tab {
@@ -170,10 +170,10 @@ struct TabsListView: View {
             id = tabViewId(for: tab)
         }
 
-        let group: TabClusteringGroup? = item.group
+        let group: TabGroup? = item.group
         let allItems = sections.allItems
         let nextItem: TabsListItem? = index < allItems.count - 1 ? allItems[index + 1] : nil
-        var nextGroup: TabClusteringGroup? = nextItem?.group
+        var nextGroup: TabGroup? = nextItem?.group
         if dragModel.draggingOverIndex == index + 1 {
             if nextGroup == nil && dragModel.draggingOverGroup == group {
                 nextGroup = dragModel.draggingOverGroup
@@ -182,7 +182,7 @@ struct TabsListView: View {
             }
         }
         let previousItem: TabsListItem? = index > 0 ? allItems[index - 1] : nil
-        let previousGroup: TabClusteringGroup? = previousItem?.group
+        let previousGroup: TabGroup? = previousItem?.group
         let isTabItem = item.tab != nil
         let nextItemIsTab = nextItem?.tab != nil
 
@@ -213,7 +213,7 @@ struct TabsListView: View {
                 } else if let group = item.group, let color = group.color {
                     TabClusteringGroupCapsuleView(title: group.title ?? "", color: color)
                         .overlay(ClickCatchingView(onTap: { _ in
-                            browserTabsManager.toggleGroupCollapse(group.id)
+                            browserTabsManager.toggleGroupCollapse(group)
                         }, onRightTap: { event in
                             showContextMenu(forGroup: group, atLocation: event.locationInWindow)
                         }))
@@ -241,7 +241,7 @@ struct TabsListView: View {
         .frame(height: TabView.height)
         .overlay(
             group == nil || (isTheDraggedTab && dragModel.draggingOverGroup == nil) ? nil :
-                TabViewGroupUnderline(color: group?.color ?? .init(userColorIndex: 0),
+                TabViewGroupUnderline(color: group?.color ?? .init(),
                                  isBeginning: previousGroup != group, isEnd: nextGroup != group)
                 .padding(.trailing, nextGroup != group ? widthProvider.separatorWidth : 0)
                 .padding(.trailing, (!isTheDraggedTab || nextGroup != group) && showTrailingDragSpacer && dragModel.draggingOverGroup == nil ? dragModel.widthForDraggingSpacer : 0)
@@ -664,18 +664,18 @@ extension TabsListView {
         }
     }
 
-    private func showContextMenu(forGroup group: TabClusteringGroup, atLocation location: CGPoint) {
+    private func showContextMenu(forGroup group: TabGroup, atLocation location: CGPoint) {
         let menuKey = "GroupContextMenu"
         let dismiss: () -> Void = {
             CustomPopoverPresenter.shared.dismissPopovers(key: menuKey)
         }
         let nameAndColorView = TabClusteringNameColorPickerView(groupName: group.title ?? "",
-                                                                selectedColorIndex: group.color?.userColorIndex ?? 0, onChange: { [weak state] newValues in
+                                                                selectedColor: group.color?.designColor ?? .red, onChange: { [weak state] newValues in
             if group.title != newValues.name {
-                state?.browserTabsManager.renameGroup(group.id, title: newValues.name)
+                state?.browserTabsManager.renameGroup(group, title: newValues.name)
             }
-            if group.color != newValues.color {
-                state?.browserTabsManager.changeGroupColor(group.id, color: newValues.color)
+            if group.color != newValues.color, let newColor = newValues.color {
+                state?.browserTabsManager.changeGroupColor(group, color: newColor)
             }
         }, onFinish: dismiss)
         weak var state = self.state
@@ -695,7 +695,7 @@ extension TabsListView {
             ContextMenuItem(title: group.collapsed ? "Expand Group" : "Collapse Group",
                             icon: group.collapsed ? "tabs-group_expand" : "tabs-group_collapse") {
                                 dismiss()
-                                state?.browserTabsManager.toggleGroupCollapse(group.id)
+                                state?.browserTabsManager.toggleGroupCollapse(group)
                             },
             ContextMenuItem(title: "Ungroup", icon: "tabs-group_ungroup") {
                 dismiss()
@@ -713,7 +713,7 @@ extension TabsListView {
 
 // MARK: - After Drag methods
 extension TabsListView {
-    private func moveItem(from currentIndex: Int, to newIndex: Int, inGroup group: TabClusteringGroup?) {
+    private func moveItem(from currentIndex: Int, to newIndex: Int, inGroup group: TabGroup?) {
         browserTabsManager.moveListItem(atListIndex: currentIndex, toListIndex: newIndex, changeGroup: group)
     }
 

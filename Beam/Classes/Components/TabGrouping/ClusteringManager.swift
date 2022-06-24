@@ -28,6 +28,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         var pageScore: Float = 0
     }
 
+    /// An UUID generated from a web page URL
     typealias PageID = UUID
     public struct BrowsingTreeOpenInTab {
         weak var browsingTree: BrowsingTree?
@@ -79,7 +80,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     private var cluster: Cluster
     private var scope = Set<AnyCancellable>()
     var suggestedNoteUpdater: SuggestedNoteSourceUpdater
-    var tabGroupingUpdater: TabGroupingUpdater
+    weak private(set) var tabGroupingManager: TabGroupingManager?
     var sessionId: UUID
     var navigationBasedPageGroups = [[UUID]]()
     var similarities = [UUID: [UUID: Double]]()
@@ -92,14 +93,14 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     public var continueToPage: PageID?
 
     // swiftlint:disable:next function_body_length
-    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources) {
+    init(ranker: SessionLinkRanker, candidate: Int, navigation: Double, text: Double, entities: Double, sessionId: UUID, activeSources: ActiveSources, tabGroupingManager: TabGroupingManager?) {
         self.selectedTabGroupingCandidate = candidate
         self.weightNavigation = navigation
         self.weightText = text
         self.weightEntities = entities
         self.activeSources = activeSources
         self.suggestedNoteUpdater = SuggestedNoteSourceUpdater(sessionId: sessionId)
-        self.tabGroupingUpdater = TabGroupingUpdater()
+        self.tabGroupingManager = tabGroupingManager
         self.cluster = Cluster(candidate: candidate, weightNavigation: navigation, weightText: text, weightEntities: entities, noteContentThreshold: 100)
         self.ranker = ranker
         self.sessionId = sessionId
@@ -183,9 +184,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         }.store(in: &scope)
     }
 
-    func findPageGroupForID(pageID: PageID, pageGroups: [[UUID]]) -> Int? {
+    func findPageGroupForID(pageId: PageID, pageGroups: [[UUID]]) -> Int? {
         for pageGroup in pageGroups.enumerated() {
-            if pageGroup.element.contains(pageID) {
+            if pageGroup.element.contains(pageId) {
                 return pageGroup.offset
             }
         }
@@ -252,9 +253,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
         }
         // The following is only here in order to save groups based on navigation, remove before release:
         if let id = id,
-           self.findPageGroupForID(pageID: id, pageGroups: self.navigationBasedPageGroups) == nil {
+           self.findPageGroupForID(pageId: id, pageGroups: self.navigationBasedPageGroups) == nil {
             if let parentId = parentId,
-               let group = self.findPageGroupForID(pageID: parentId, pageGroups: self.navigationBasedPageGroups) {
+               let group = self.findPageGroupForID(pageId: parentId, pageGroups: self.navigationBasedPageGroups) {
                 self.navigationBasedPageGroups[group].append(id)
             } else {
                 self.navigationBasedPageGroups.append([id])
@@ -488,7 +489,9 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     }
 
     private func updateTabGroupsWithOpenPages() {
-        self.tabGroupingUpdater.update(urlGroups: self.clusteredPagesId, openPages: self.openBrowsing.allOpenBrowsingPages)
+        Task { @MainActor in
+            await self.tabGroupingManager?.updateAutomaticClustering(urlGroups: self.clusteredPagesId, openPages: self.openBrowsing.allOpenBrowsingPages)
+        }
     }
 
     private func updateNoteSources() {
@@ -496,10 +499,19 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
     }
 
     private func logForClustering(result: [[UUID]], changeCandidate: Bool) {
+        var resultDescription = "\(result)"
+        #if DEBUG
+        let groupsDescriptions = result.map { group -> String in
+            guard !group.isEmpty else { return "[]" }
+            let links = LinkStore.shared.getLinks(for: group).map { URL(string: $1.url)!.urlStringByRemovingUnnecessaryCharacters }
+            return "\(links)"
+        }
+        resultDescription = "[\(groupsDescriptions.joined(separator: ", "))]"
+        #endif
         if changeCandidate {
-            Logger.shared.logDebug("Result provided by ClusteringFramework from changing to candidate \(self.selectedTabGroupingCandidate) with Nav \(self.weightNavigation), Text \(self.weightText), Entities \(self.weightEntities) for result: \(result)", category: .clustering)
+            Logger.shared.logDebug("Result provided by ClusteringFramework from changing to candidate \(self.selectedTabGroupingCandidate) with Nav \(self.weightNavigation), Text \(self.weightText), Entities \(self.weightEntities) for result: \(resultDescription)", category: .clustering)
         } else {
-            Logger.shared.logDebug("Result provided by ClusteringFramework for adding a page with candidate\(self.selectedTabGroupingCandidate): \(result)", category: .clustering)
+            Logger.shared.logDebug("Result provided by ClusteringFramework for adding a page with candidate\(self.selectedTabGroupingCandidate): \(resultDescription)", category: .clustering)
         }
 
     }
@@ -519,7 +531,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
                 let informationForId = self.cluster.getExportInformationForId(id: urlId)
-                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
+                orphanedUrlManager.addTemporarily(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
     }
@@ -531,7 +543,7 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
             for urlId in group {
                 let url = LinkStore.linkFor(urlId)?.url
                 let informationForId = self.cluster.getExportInformationForId(id: urlId)
-                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
+                orphanedUrlManager.add(orphanedUrl: OrphanedUrl(sessionId: sessionId, url: url, groupId: id, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), savedAt: savedAt, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language))
             }
         }
         orphanedUrlManager.save()
@@ -550,8 +562,8 @@ class ClusteringManager: ObservableObject, ClusteringManagerProtocol {
                 let isOpenAtExport = self.openBrowsing.allOpenBrowsingPages.contains(urlId)
                 let correctionGroupId = correctedPages?[urlId]
 
-                let tabColouringGroupId = self.tabGroupingUpdater.builtPagesGroups[urlId]?.id
-                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageID: urlId, pageGroups: self.navigationBasedPageGroups), tabColouringGroupId: tabColouringGroupId, userCorrectionGroupId: correctionGroupId ?? nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, id: urlId, parentId: informationForId.parentId))
+                let tabColouringGroupId = self.tabGroupingManager?.builtPagesGroups[urlId]?.id
+                sessionExporter.add(anyUrl: AnyUrl(noteName: nil, url: url, groupId: group.offset, navigationGroupId: self.findPageGroupForID(pageId: urlId, pageGroups: self.navigationBasedPageGroups), tabColouringGroupId: tabColouringGroupId, userCorrectionGroupId: correctionGroupId ?? nil, title: informationForId.title, cleanedContent: informationForId.cleanedContent, entities: informationForId.entitiesInText, entitiesInTitle: informationForId.entitiesInTitle, language: informationForId.language, isOpenAtExport: isOpenAtExport, id: urlId, parentId: informationForId.parentId))
             }
         }
 
