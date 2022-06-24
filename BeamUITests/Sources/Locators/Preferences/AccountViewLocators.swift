@@ -19,6 +19,7 @@ enum AccountViewLocators {
         case savePKButton = "Save Private Key..."
         case deleteDBButton = "Delete Database..."
         case pkLabelButton = "pk-label"
+        case accountInfosButton = "account-infos"
     }
     
     enum TextFields: String, CaseIterable, UIElement {

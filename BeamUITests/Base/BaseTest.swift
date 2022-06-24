@@ -39,6 +39,13 @@ class BaseTest: XCTestCase {
     var deletePK = false
     var deleteRemoteAccount = false
 
+    struct AccountInformation {
+        let email: String
+        let username: String
+        let password: String
+        let pk: String
+    }
+
     override func tearDownWithError() throws {
         super.tearDown()
         terminateAppInstance()
@@ -155,5 +162,17 @@ class BaseTest: XCTestCase {
             }
         }
         return journalView
+    }
+
+    func getCredentials() -> AccountInformation? {
+        shortcutHelper.shortcutActionInvoke(action: .openPreferences)
+        PreferencesBaseView().navigateTo(preferenceView: .account)
+        let accountView = AccountTestView()
+        accountView.clickCopyAccountInfos()
+        if let content = NSPasteboard.general.string(forType: .string) {
+            let elements = content.components(separatedBy: "\n")
+            return AccountInformation(email: elements[0], username: elements[1], password: elements[2], pk: elements[3])
+        }
+        return nil
     }
 }
