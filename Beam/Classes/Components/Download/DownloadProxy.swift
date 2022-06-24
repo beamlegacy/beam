@@ -7,6 +7,9 @@ protocol DownloadProxy: AnyObject {
     var progress: Progress { get }
     var delegate: DownloadProxyDelegate? { get set }
 
+    var tentativeFilename: String? { get }
+    var tentativeFileExtension: String? { get }
+
     func startDownload(using request: URLRequest, completionHandler: @escaping (Self) -> Void)
     func resumeDownload(fromResumeData resumeData: Data, completionHandler: @escaping (Self) -> Void)
     func cancel(_ completionHandler: ((Data?) -> Void)?)

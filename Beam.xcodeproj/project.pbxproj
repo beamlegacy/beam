@@ -520,6 +520,7 @@
 		6635D99F2853E8AD00F4B775 /* NSWorkspace+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */; };
 		6635D9A02853E8AD00F4B775 /* Result+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6635D99E2853E8AD00F4B775 /* Result+Beam.swift */; };
 		66D77CA128351612004D03E9 /* NSMenu+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66D77CA028351612004D03E9 /* NSMenu+Beam.swift */; };
+		66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */; };
 		66F9AEBE283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */; };
 		66F9AEBF283E215100C28EE3 /* MouseOverAndSelection_prod.js in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */; };
 		66F9AEC0283E215100C28EE3 /* MouseOverAndSelection.d.ts in Resources */ = {isa = PBXBuildFile; fileRef = 66F9AEA3283E215100C28EE3 /* MouseOverAndSelection.d.ts */; };
@@ -2139,6 +2140,7 @@
 		6635D99D2853E8AD00F4B775 /* NSWorkspace+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "NSWorkspace+Beam.swift"; sourceTree = "<group>"; };
 		6635D99E2853E8AD00F4B775 /* Result+Beam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Result+Beam.swift"; sourceTree = "<group>"; };
 		66D77CA028351612004D03E9 /* NSMenu+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSMenu+Beam.swift"; sourceTree = "<group>"; };
+		66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebKitManualDownloadProxy.swift; sourceTree = "<group>"; };
 		66F9AE9E283E215100C28EE3 /* MouseOverAndSelectionMessageHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MouseOverAndSelectionMessageHandler.swift; sourceTree = "<group>"; };
 		66F9AEA1283E215100C28EE3 /* MouseOverAndSelection_prod.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = MouseOverAndSelection_prod.js; sourceTree = "<group>"; };
 		66F9AEA3283E215100C28EE3 /* MouseOverAndSelection.d.ts */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = MouseOverAndSelection.d.ts; sourceTree = "<group>"; };
@@ -7784,6 +7786,7 @@
 				37B85B7627A2C819003871F9 /* DownloadProxyDelegate.swift */,
 				3330D7CA265E466D008C9E20 /* ToolbarDownloadButton.swift */,
 				37B85B7227A2C817003871F9 /* WebKitDownloadProxy.swift */,
+				66E618E828635B5100D06A15 /* WebKitManualDownloadProxy.swift */,
 			);
 			path = Download;
 			sourceTree = "<group>";
@@ -8938,6 +8941,7 @@
 				9623ABBD26B002DC00309E5E /* Beam3ToBeam4MigrationPolicy.swift in Sources */,
 				523FF66125C31D8800B4BD6E /* Data+String.swift in Sources */,
 				A0AEC25027022ADA00BEE4F3 /* PasswordEditView.swift in Sources */,
+				66E618E928635B5100D06A15 /* WebKitManualDownloadProxy.swift in Sources */,
 				A57BFEBD2615B49C00CFB646 /* TableRowView.swift in Sources */,
 				A5C2024C27623A8C008BB2FB /* TabsListWidthProvider.swift in Sources */,
 				A5EBF15326D7BF8A00597A1C /* BeamTextEdit+Gutter.swift in Sources */,
