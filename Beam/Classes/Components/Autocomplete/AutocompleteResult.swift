@@ -38,6 +38,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
         case topDomain
         case mnemonic
         case action
+        case tabGroup(group: TabGroup?)
 
         var iconName: String {
             switch self {
@@ -51,6 +52,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return "field-card"
             case .action:
                 return "tool-go"
+            case .tabGroup:
+                return "field-tabgroup"
             case .topDomain, .url, .mnemonic:
                 return "field-web"
             }
@@ -69,7 +72,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
                 return 0
             case .url:
                 return 1
-            case .note:
+            case .note, .tabGroup:
                 return 2
             case .searchEngine:
                 return 3
@@ -82,8 +85,8 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
         var shortDescription: String {
             switch self {
-            case .note:
-                return "note"
+            case .note: return "note"
+            case .tabGroup: return "tabGroup"
             default:
                 return String(describing: self)
             }
@@ -126,7 +129,7 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
 
     init(text: String, source: Source, disabled: Bool = false, url: URL? = nil, aliasForDestinationURL: URL? = nil,
          information: String? = nil, customIcon: String? = nil, shortcut: Shortcut? = nil, completingText: String? = nil, additionalSearchTerms: [String]? = nil,
-         uuid: UUID = UUID(), score: Float? = nil, handler: ((BeamState) -> Void)? = nil, urlFields: URLFields = []) {
+         uuid: UUID = UUID(), score: Float? = nil, urlFields: URLFields = [], handler: ((BeamState) -> Void)? = nil) {
         self.text = text
         self.source = source
         self.disabled = disabled
@@ -146,21 +149,24 @@ struct AutocompleteResult: Identifiable, Equatable, Comparable, CustomStringConv
     }
 
     mutating private func computePrefixScores() {
-        let infoResult = Self.boosterScore(prefix: completingText, base: information, source: source,
-                                           isURL: urlFields.contains(.info), hasBothTextAndInfo: true)
-        self.information = infoResult.base
-        rawInfoPrefixScore = infoResult.score
-        infoPrefixScore = infoResult.boostedScore
-        takeOverCandidate = takeOverCandidate || infoResult.takeOverCandidate
+        var prefixScore: Float = 1.0
+        if completingText?.isEmpty == false {
+            let infoResult = Self.boosterScore(prefix: completingText, base: information, source: source,
+                                               isURL: urlFields.contains(.info), hasBothTextAndInfo: true)
+            self.information = infoResult.base
+            rawInfoPrefixScore = infoResult.score
+            infoPrefixScore = infoResult.boostedScore
+            takeOverCandidate = takeOverCandidate || infoResult.takeOverCandidate
 
-        let textResult = Self.boosterScore(prefix: completingText, base: text, source: source,
-                                           isURL: urlFields.contains(.text), hasBothTextAndInfo: infoPrefixScore > 0)
-        self.text = textResult.base ?? text
-        rawTextPrefixScore = textResult.score
-        textPrefixScore = textResult.boostedScore
-        takeOverCandidate = takeOverCandidate || textResult.takeOverCandidate
-
-        prefixScore = 1.0 + textPrefixScore + infoPrefixScore
+            let textResult = Self.boosterScore(prefix: completingText, base: text, source: source,
+                                               isURL: urlFields.contains(.text), hasBothTextAndInfo: infoPrefixScore > 0)
+            self.text = textResult.base ?? text
+            rawTextPrefixScore = textResult.score
+            textPrefixScore = textResult.boostedScore
+            takeOverCandidate = takeOverCandidate || textResult.takeOverCandidate
+            prefixScore += textPrefixScore + infoPrefixScore
+        }
+        self.prefixScore = prefixScore
     }
 
     private struct BoosterResult {

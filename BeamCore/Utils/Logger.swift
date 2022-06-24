@@ -68,6 +68,7 @@ public enum LogCategory: String, CaseIterable {
     case accountManager
     case privateKeySignature
     case tabPinSuggestion
+    case tabGrouping
     case analyticsCollection
 }
 

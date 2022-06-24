@@ -9,7 +9,8 @@ import Promises
 // swiftlint:disable:next type_body_length
 @objc class BrowserTab: NSObject, ObservableObject, Identifiable, Codable, Scorable {
 
-    var id: UUID = UUID()
+    typealias TabID = UUID
+    var id: TabID = TabID()
     override var description: String {
         "BrowserTab(\(!title.isEmpty ? title : (url?.absoluteString ?? super.description)))"
     }

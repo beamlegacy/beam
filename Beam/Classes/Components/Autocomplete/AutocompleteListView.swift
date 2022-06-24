@@ -24,12 +24,18 @@ struct AutocompleteListView: View {
         item.source != .searchEngine || atIndex <= 0 || elements[atIndex-1].information != item.information
     }
 
-    private func colorPalette(for item: AutocompleteResult) -> AutocompleteItemColorPalette {
+    static func colorPalette(for item: AutocompleteResult, mode: AutocompleteManager.Mode = .general) -> AutocompleteItemColorPalette {
+        if case .tabGroup(let group) = mode {
+            return AutocompleteItemView.tabGroupColorPalette(for: group)
+        }
         switch item.source {
         case .action:
             return AutocompleteItemView.actionColorPalette
         case .note:
             return AutocompleteItemView.noteColorPalette
+        case .tabGroup(let group):
+            guard let group = group else { fallthrough }
+            return AutocompleteItemView.tabGroupColorPalette(for: group)
         case .createNote:
             return item.information != nil ? AutocompleteItemView.createNoteColorPalette : AutocompleteItemView.actionColorPalette
         default:
@@ -49,9 +55,9 @@ struct AutocompleteListView: View {
                         .padding(.vertical, BeamSpacing._60)
                 }
                 AutocompleteItemView(item: item, selected: isSelected,
-                                 displaySubtitle: displaySubtitle,
-                                 allowsShortcut: allowsShortcut,
-                                 colorPalette: colorPalette(for: item))
+                                     displaySubtitle: displaySubtitle,
+                                     allowsShortcut: allowsShortcut,
+                                     colorPalette: Self.colorPalette(for: item, mode: state.autocompleteManager.animatingToMode ?? state.autocompleteManager.mode))
                     .padding(.horizontal, BeamSpacing._60)
                     .simultaneousGesture(
                         TapGesture(count: 1).onEnded {
