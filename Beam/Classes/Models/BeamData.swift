@@ -439,10 +439,16 @@ extension BeamData {
             }
         }
 
-        autoUpdateStartupCheck()
+        advertiseUpdateOnStartup()
+
+        if Configuration.env != .test {
+            Task {
+                await versionChecker.performUpdateIfAvailable()
+            }
+        }
     }
 
-    private func autoUpdateStartupCheck() {
+    private func advertiseUpdateOnStartup() {
         // Only trigger the startup alert for the beta builds
         guard Configuration.branchType == .beta else { return }
 
@@ -466,14 +472,16 @@ extension BeamData {
                     break
                 }
             }
-            versionChecker.checkForUpdates()
         }
     }
 
     /// Check for updates right away.
     func checkForUpdate() {
-        versionChecker.areAnyUpdatesAvailable { checkResult in
-            self.showUpdateAlert(onStartUp: false, availableRelease: checkResult)
+        Task {
+            let checkResult = await versionChecker.checkForUpdates()
+            await MainActor.run {
+                self.showUpdateAlert(onStartUp: false, availableRelease: checkResult)
+            }
         }
     }
 
