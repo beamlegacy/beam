@@ -107,15 +107,22 @@ struct OmniboxContainer: View {
 
     private let boxMinWidth: CGFloat = 600
     private let boxDefaultWidth: CGFloat = 680
-    private let boxMinX: CGFloat = 100
+    private let boxMinX: CGFloat = 20
     private var boxMinXInToolBar: CGFloat {
         state.useSidebar ? 117 : 87
     }
-    private let boxMaxX: CGFloat = 100
+    private let boxMaxX: CGFloat = 20
     private let boxMaxXInToolBar: CGFloat = 11
     private let boxMinY: CGFloat = 11
-    private var boxWidth: CGFloat {
-        boxDefaultWidth
+    private let editorLeadingPercentage = PreferencesManager.editorLeadingPercentage
+    private var boxIdealWidth: CGFloat {
+        if boxIsInsideNote {
+            let container = containerGeometry.size
+            let editorWidth = BeamTextEdit.textNodeWidth(for: container)
+            let editorLeading = (container.width - editorWidth) * (editorLeadingPercentage / 100)
+            return (container.width - (editorLeading * 2)).clamp(boxMinWidth, 800)
+        }
+        return boxDefaultWidth
         // uncomment this when the sidebar is not an overlay
         // state.showSidebar ? boxMinWidth : boxDefaultWidth
     }
@@ -151,9 +158,9 @@ struct OmniboxContainer: View {
         if boxIsInsideNote || state.omniboxInfo.wasFocusedFromJournalTop {
             offset.height = Self.topOffsetForJournal(height: containerGeometry.size.height)
         } else if boxIsInsideToolbar, let currentTabUIFrame = browserTabsManager.currentTabUIFrame {
-            var x = max(boxMinXInToolBar, currentTabUIFrame.midX - boxWidth / 2)
-            if (x + boxWidth + boxMaxXInToolBar) > containerGeometry.size.width {
-                x = max(boxMinXInToolBar, containerGeometry.size.width - boxWidth - boxMaxXInToolBar)
+            var x = max(boxMinXInToolBar, currentTabUIFrame.midX - boxIdealWidth / 2)
+            if (x + boxIdealWidth + boxMaxXInToolBar) > containerGeometry.size.width {
+                x = max(boxMinXInToolBar, containerGeometry.size.width - boxIdealWidth - boxMaxXInToolBar)
             }
             offset = CGSize(width: x, height: boxMinY)
         }
@@ -180,6 +187,7 @@ struct OmniboxContainer: View {
         VStack(spacing: 0) {
             let offset = boxOffset
             let boxIsInsideToolbar = boxIsInsideToolbar
+            let boxWidth = boxIdealWidth
             Spacer(minLength: boxMinY)
                 .frame(maxHeight: offset.height)
             HStack(spacing: 0) {
@@ -188,7 +196,7 @@ struct OmniboxContainer: View {
                         $0.frame(maxWidth: offset.width)
                     }
                 Omnibox(isInsideNote: boxIsInsideNote)
-                    .frame(minWidth: boxMinWidth, idealWidth: boxWidth, maxWidth: boxDefaultWidth)
+                    .frame(minWidth: boxMinWidth, idealWidth: boxWidth, maxWidth: boxWidth)
                     .layoutPriority(boxIsInsideToolbar ? 1 : 0)
                 Spacer(minLength: boxIsInsideToolbar ? boxMaxXInToolBar : boxMaxX)
             }
