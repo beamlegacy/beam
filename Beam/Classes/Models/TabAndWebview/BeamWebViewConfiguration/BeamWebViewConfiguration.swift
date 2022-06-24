@@ -55,6 +55,10 @@ class BeamWebViewConfigurationBase: WKWebViewConfiguration, BeamWebViewConfigura
             addJS(source: windowCleanupSource, when: .atDocumentEnd)
         }
 
+        if let safariRemoteNotificationSource = loadFile(from: "SafariRemoteNotification", fileType: "js") {
+            addJS(source: safariRemoteNotificationSource, when: .atDocumentEnd)
+        }
+
         if isIncognito {
             websiteDataStore = WKWebsiteDataStore.nonPersistent()
         }

@@ -639,6 +639,7 @@
 		8A5EDB1A278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */; };
 		8A5EDB21278C584E007C0C59 /* BrowserTabTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */; };
 		8A68F4652671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */; };
+		8A7601472860D03B00FB9265 /* SafariRemoteNotification.js in Resources */ = {isa = PBXBuildFile; fileRef = 8A7601412860D03B00FB9265 /* SafariRemoteNotification.js */; };
 		8A78699C264C7E4500F769D2 /* XCUIElementQuery+Beam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */; };
 		8A7920F02680AA1E00F74A75 /* URL+BeamTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */; };
 		8A7C80F526F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8A7C80F426F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift */; };
@@ -2470,6 +2471,7 @@
 		8A5EDB19278C4DBF007C0C59 /* WebNoteControllerTest+BrowsingCollect.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "WebNoteControllerTest+BrowsingCollect.swift"; sourceTree = "<group>"; };
 		8A5EDB20278C584E007C0C59 /* BrowserTabTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabTests.swift; sourceTree = "<group>"; };
 		8A68F4642671159D00B0C022 /* WebPositionsMessageHandlerFrameBoundsTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebPositionsMessageHandlerFrameBoundsTest.swift; sourceTree = "<group>"; };
+		8A7601412860D03B00FB9265 /* SafariRemoteNotification.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; path = SafariRemoteNotification.js; sourceTree = "<group>"; };
 		8A78699B264C7E4500F769D2 /* XCUIElementQuery+Beam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIElementQuery+Beam.swift"; sourceTree = "<group>"; };
 		8A7920EF2680AA1E00F74A75 /* URL+BeamTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+BeamTest.swift"; sourceTree = "<group>"; };
 		8A7C80F426F9E04000D3BA72 /* DestinationNoteAutocompleteListTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DestinationNoteAutocompleteListTests.swift; sourceTree = "<group>"; };
@@ -5357,6 +5359,7 @@
 		8A035C5B27E9F2CE007CA0FB /* BeamWebViewConfiguration */ = {
 			isa = PBXGroup;
 			children = (
+				8A7601412860D03B00FB9265 /* SafariRemoteNotification.js */,
 				8A4723BC27C539E100E76893 /* WindowCleanup.js */,
 				BAA67765B4D27F2D4F2B8562 /* BeamWebViewConfiguration.swift */,
 			);
@@ -8360,6 +8363,7 @@
 				A03B909827BEA5EA001FBE64 /* htb-2.png in Resources */,
 				5224CD6A2685FFD100D4179E /* beam_object.graphql in Resources */,
 				A03B909327BE9A4E001FBE64 /* htb-1.gif in Resources */,
+				8A7601472860D03B00FB9265 /* SafariRemoteNotification.js in Resources */,
 				051710E527EAF93500E3C7A2 /* page_info_fragment.graphql in Resources */,
 				051710DE27EAE9AE00E3C7A2 /* paginated_beam_objects.graphql in Resources */,
 				52EA56D9274F8FFD00F092C8 /* subscription_beam_object_updated_data_url.graphql in Resources */,
