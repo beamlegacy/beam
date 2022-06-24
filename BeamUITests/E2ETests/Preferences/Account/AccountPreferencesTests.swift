@@ -62,7 +62,7 @@ class AccountPreferencesTests: BaseTest {
             shortcutHelper.shortcutActionInvoke(action: .close)
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             AllNotesTestView().waitForAllNotesViewToLoad()
-            XCTAssertEqual(AllNotesTestTable().numberOfVisibleItems, 14)
+            XCTAssertGreaterThan(AllNotesTestTable().numberOfVisibleItems, 10)
         }
         
         step ("WHEN I confirm Deletion of the DB") {
