@@ -32,17 +32,24 @@ extension AutocompleteManager {
         if !additionalSearchEngineResults.isEmpty {
             autocompleteResults[.searchEngine, default: []].insert(contentsOf: additionalSearchEngineResults.sorted(by: >), at: 0)
         }
+        let otherResults = autocompleteResults[.action] ?? []
 
+        var defaultLimit = Self.resultsLimit
+        if case .tabGroup = mode {
+            defaultLimit = 40
+        }
+        let limit = limit ?? defaultLimit
         let finalResults = sortResults(notesResults: autocompleteResults[.note, default: []],
                                        historyResults: autocompleteResults[.history] ?? [],
                                        urlResults: autocompleteResults[.url] ?? [],
                                        topDomainResults: autocompleteResults[.topDomain] ?? [],
                                        mnemonicResults: autocompleteResults[.mnemonic] ?? [],
+                                       tabGroupsResults: autocompleteResults[.tabGroup(group: nil)] ?? [],
                                        searchEngineResults: autocompleteResults[.searchEngine] ?? [],
                                        expectSearchEngineResultsLater: expectSearchEngineResultsLater,
-                                       actionsResults: autocompleteResults[.action] ?? [],
+                                       otherResults: otherResults,
                                        createCardResults: autocompleteResults[.createNote] ?? [],
-                                       limit: limit ?? Self.resultsLimit)
+                                       limit: limit)
 
         let canCreateNote = autocompleteResults[.createNote]?.isEmpty == false
         return (results: finalResults, canCreateNote: canCreateNote)
@@ -54,9 +61,10 @@ extension AutocompleteManager {
                              urlResults: [AutocompleteResult],
                              topDomainResults: [AutocompleteResult],
                              mnemonicResults: [AutocompleteResult],
+                             tabGroupsResults: [AutocompleteResult],
                              searchEngineResults: [AutocompleteResult],
                              expectSearchEngineResultsLater: Bool,
-                             actionsResults: [AutocompleteResult],
+                             otherResults: [AutocompleteResult],
                              createCardResults: [AutocompleteResult],
                              limit: Int) -> [AutocompleteResult] {
         let start = DispatchTime.now()
@@ -71,6 +79,7 @@ extension AutocompleteManager {
         self.rawSortedURLResults = uniqueURLs
         sortableResults.append(contentsOf: uniqueURLs)
         sortableResults.append(contentsOf: notesResultsTruncated)
+        sortableResults.append(contentsOf: tabGroupsResults)
 
         sortableResults.sort(by: >)
         Self.logIntermediate(step: "SortableResults", stepShortName: "SR", results: sortableResults, startedAt: start)
@@ -83,7 +92,7 @@ extension AutocompleteManager {
 
         let results = merge(sortableResults: sortableResults,
                             searchEngineResults: filteredSearchEngineResults,
-                            actionsResults: actionsResults,
+                            otherResults: otherResults,
                             createCardResults: createCardResults,
                             limit: limit,
                             expectSearchEngineResultsLater: expectSearchEngineResultsLater)
@@ -106,7 +115,7 @@ extension AutocompleteManager {
 
     private func merge(sortableResults: [AutocompleteResult],
                        searchEngineResults: [AutocompleteResult],
-                       actionsResults: [AutocompleteResult],
+                       otherResults: [AutocompleteResult],
                        createCardResults: [AutocompleteResult],
                        limit: Int,
                        expectSearchEngineResultsLater: Bool) -> [AutocompleteResult] {
@@ -116,14 +125,14 @@ extension AutocompleteManager {
         if !searchEngineResults.isEmpty || expectSearchEngineResultsLater {
             searchEngineSpace = searchEngineResults.count > 0 ? min(2, searchEngineResults.count) : 2
         }
-        let truncateLength = limit - searchEngineSpace - (hasCreateCard ? 1 : 0) - actionsResults.count
+        let truncateLength = limit - searchEngineSpace - (hasCreateCard ? 1 : 0) - otherResults.count
 
         var results = truncateSortablesKeepingImportantNotes(sortableResults, limit: truncateLength)
 
         let searchEngineMax = truncateLength - results.count + searchEngineSpace
         results.insert(contentsOf: searchEngineResults.prefix(searchEngineMax), at: sortableResults.isEmpty ? 0 : 1)
-        results.append(contentsOf: actionsResults)
-        if mode == .noteCreation {
+        results.append(contentsOf: otherResults)
+        if case .noteCreation = mode {
             results.insert(contentsOf: createCardResults, at: 0)
         } else {
             results.append(contentsOf: createCardResults)

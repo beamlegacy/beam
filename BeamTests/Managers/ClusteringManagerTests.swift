@@ -10,6 +10,7 @@ class ClusteringManagerTests: XCTestCase {
     var documentManager: DocumentManager!
     var sessionLinkRanker: SessionLinkRanker!
     var activeSources: ActiveSources!
+    var tabGroupingManager: TabGroupingManager!
     var clusteringManager: ClusteringManager!
 
     var pageIDs: [UUID] = []
@@ -21,7 +22,9 @@ class ClusteringManagerTests: XCTestCase {
         documentManager = DocumentManager()
         sessionLinkRanker = SessionLinkRanker()
         activeSources = ActiveSources()
-        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources)
+        tabGroupingManager = TabGroupingManager()
+        clusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4,
+                                              sessionId: UUID(), activeSources: activeSources, tabGroupingManager: tabGroupingManager)
 
         for _ in 0...3 {
             pageIDs.append(UUID())
@@ -218,7 +221,7 @@ class ClusteringManagerTests: XCTestCase {
            let jsonString = String(data: jsonData, encoding: .utf8) {
             Persistence.ContinueTo.summary = jsonString
         }
-        let otherClusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources)
+        let otherClusteringManager = ClusteringManager(ranker: sessionLinkRanker, candidate: 2, navigation: 0.5, text: 0.9, entities: 0.4, sessionId: UUID(), activeSources: activeSources, tabGroupingManager: tabGroupingManager)
         expect(Set(otherClusteringManager.continueToNotes)) == Set([notes[0].id, notes[2].id])
         expect(otherClusteringManager.continueToPage!) == pageIDs[0]
         

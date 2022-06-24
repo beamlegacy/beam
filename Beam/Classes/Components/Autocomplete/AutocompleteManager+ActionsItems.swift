@@ -1,5 +1,5 @@
 //
-//  AutocompleteManager+DefaultActions.swift
+//  AutocompleteManager+ActionsItems.swift
 //  Beam
 //
 //  Created by Remi Santos on 15/02/2022.
@@ -67,7 +67,9 @@ extension AutocompleteManager {
         static func createNoteResult(for noteTitle: String?, mode: AutocompleteManager.Mode, asAction: Bool = true, completingText: String? = nil) -> AutocompleteResult {
             let hasNoteTitle = noteTitle?.isEmpty == false
             var shortcut: Shortcut?
-            if mode != .noteCreation {
+            if case .noteCreation = mode {
+                // no shortcut
+            } else {
                 if !hasNoteTitle && asAction {
                     shortcut = Shortcut(modifiers: [], keys: [.string("@")])
                 } else {
