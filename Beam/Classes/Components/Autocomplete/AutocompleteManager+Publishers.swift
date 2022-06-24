@@ -3,7 +3,7 @@
 //  Beam
 //
 //  Created by Remi Santos on 16/07/2021.
-//
+//  swiftlint:disable file_length
 
 import Foundation
 import Combine
@@ -21,21 +21,32 @@ extension AutocompleteManager {
     }
 
     func getDefaultSuggestionsPublishers() -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
-        guard mode == .general else { return [] }
-        return [
-            futureToPublisher(defaultSuggestionsNotesResults(), source: .note),
-            futureToPublisher(defaultActionsResults(), source: .action)
-        ]
+        let mode = self.animatingToMode ?? self.mode
+        switch mode {
+        case .noteCreation:
+            return []
+        case .tabGroup(let group):
+            return [futureToPublisher(autocompleteTabGroupingResultsInTabGroupMode(for: "", inGroup: group), source: .tabGroup(group: nil))]
+        case .general:
+            return [
+                futureToPublisher(defaultSuggestionsNotesResults(), source: .note),
+                futureToPublisher(defaultActionsResults(), source: .action)
+            ]
+        }
     }
 
     func getAutocompletePublishers(for searchText: String) -> [AnyPublisher<AutocompletePublisherSourceResults, Never>] {
+        if case .tabGroup(let group) = mode {
+            return [futureToPublisher(autocompleteTabGroupingResultsInTabGroupMode(for: searchText, inGroup: group), source: .tabGroup(group: nil))]
+        }
+
         let notesPublishers = [
             futureToPublisher(autocompleteNotesResults(for: searchText), source: .note),
             futureToPublisher(autocompleteNotesContentsResults(for: searchText), source: .note),
             getCreateNotePublisher(for: searchText)
         ]
 
-        if mode == .noteCreation {
+        if case .noteCreation = mode {
             return notesPublishers
         }
 
@@ -43,7 +54,8 @@ extension AutocompleteManager {
             futureToPublisher(autocompleteTopDomainResults(for: searchText), source: .topDomain),
             futureToPublisher(autocompleteMnemonicResults(for: searchText), source: .mnemonic),
             futureToPublisher(autocompleteHistoryResults(for: searchText), source: .history),
-            futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url)
+            futureToPublisher(autocompleteLinkStoreResults(for: searchText), source: .url),
+            futureToPublisher(autocompleteTabGroupingResults(for: searchText), source: .tabGroup(group: nil))
         ]
 
         if let state = beamState, !state.isIncognito {
@@ -88,6 +100,7 @@ extension AutocompleteManager {
             .eraseToAnyPublisher()
     }
 
+    // MARK: - Notes
     private func autocompleteNotesResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
             let start = DispatchTime.now()
@@ -132,6 +145,22 @@ extension AutocompleteManager {
         }
     }
 
+    private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
+        Future { promise in
+            let documentManager = DocumentManager()
+            documentManager.loadDocumentByTitle(title: query) { result in
+                switch result {
+                case .failure(let error):
+                    promise(.failure(error))
+                case .success(let documentStruct):
+                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil && query.containsCharacters
+                    promise(.success(canCreateNote))
+                }
+            }
+        }
+    }
+
+    // MARK: - URLs
     private func urlStringToDisplay(from url: URL) -> String {
         let result = url.urlStringByRemovingUnnecessaryCharacters
         return result.removingPercentEncoding ?? result
@@ -201,21 +230,6 @@ extension AutocompleteManager {
         }
     }
 
-    private func autocompleteCanCreateNoteResult(for query: String) -> Future<Bool, Error> {
-        Future { promise in
-            let documentManager = DocumentManager()
-            documentManager.loadDocumentByTitle(title: query) { result in
-                switch result {
-                case .failure(let error):
-                    promise(.failure(error))
-                case .success(let documentStruct):
-                    let canCreateNote = documentStruct == nil && URL(string: query)?.scheme == nil && query.containsCharacters
-                    promise(.success(canCreateNote))
-                }
-            }
-        }
-    }
-
     private func autocompleteTopDomainResults(for query: String) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
@@ -266,6 +280,7 @@ extension AutocompleteManager {
         }
     }
 
+    // MARK: - Search Engine
     private func autocompleteSearchEngineResults(for searchText: String, searchEngine: SearchEngineAutocompleter) -> Future<[AutocompleteResult], Error> {
         Future { promise in
             let start = DispatchTime.now()
@@ -298,7 +313,65 @@ extension AutocompleteManager {
         self.setAutocompleteResults(insertSearchEngineResults(results, in: autocompleteResults))
     }
 
-    // MARK: - Empty Query Suggestions
+    // MARK: - Tab Grouping
+    private func autocompleteTabGroupingResultsInTabGroupMode(for query: String, inGroup group: TabGroup) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            let start = DispatchTime.now()
+            var results = [AutocompleteResult]()
+            let links = LinkStore.shared.getLinks(for: group.pageIds)
+            if query.isEmpty {
+                results.append(
+                    AutocompleteResult(text: loc("Open All Tabs"), source: .action, customIcon: "field-web", score: .greatestFiniteMagnitude,
+                                       handler: { beamState in
+                                           beamState.openTabGroup(group)
+                                       })
+                )
+            }
+
+            let queryLowercase = query.lowercased()
+            results.append(contentsOf: links.compactMap({ (_, link) in
+                guard query.isEmpty || link.title?.lowercased().contains(queryLowercase) == true || link.url.contains(queryLowercase) else {
+                    return nil
+                }
+
+                let hasTitle = link.title?.isEmpty == false
+                let title = link.title ?? ""
+                let url = URL(string: link.url)
+                let urlString = url?.urlStringByRemovingUnnecessaryCharacters ?? link.url
+                return AutocompleteResult(text: hasTitle ? title : urlString, source: .url, url: url,
+                                          information: hasTitle ? urlString : nil, completingText: query,
+                                          uuid: link.id, score: link.frecencyVisitSortScore, urlFields: hasTitle ? .info : .text,
+                                          handler: { state in
+                    guard let url = url else { return }
+                    state.createTab(withURLRequest: URLRequest(url: url))
+                })
+            }))
+
+            self.logIntermediate(step: "TabGroupingInMode", stepShortName: "TG", results: results, startedAt: start)
+
+            promise(.success(results))
+        }
+    }
+
+    private func autocompleteTabGroupingResults(for query: String) -> Future<[AutocompleteResult], Error> {
+        Future { promise in
+            let start = DispatchTime.now()
+            var results = [AutocompleteResult]()
+            if let group = TabGroupingStoreManager.shared.searchGroups(forText: query).first {
+                let scores = LinkStore.shared.getLinks(for: group.pageIds).compactMap { $1.frecencyVisitSortScore }
+                let bestScore = scores.max()
+                results.append(AutocompleteResult(text: group.title ?? "Tab Group (\(group.pageIds.count) tabs)",
+                                                  source: .tabGroup(group: group), completingText: query, uuid: group.id, score: bestScore, handler: { state in
+                    state.autocompleteManager.animateToMode(.tabGroup(group: group), updateResults: true)
+                }))
+            }
+            self.logIntermediate(step: "TabGrouping", stepShortName: "TG", results: results, startedAt: start)
+
+            promise(.success(results))
+        }
+    }
+
+    // MARK: - Actions Suggestions
     private func defaultSuggestionsNotesResults() -> Future<[AutocompleteResult], Error> {
         Future { [weak self] promise in
             guard let beamState = self?.beamState, !beamState.omniboxInfo.wasFocusedFromTab else {

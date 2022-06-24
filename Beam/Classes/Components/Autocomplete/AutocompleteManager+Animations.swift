@@ -25,7 +25,7 @@ extension AutocompleteManager {
     }
 
     /// Moves omnibox down and up and switch search to the corresponding mode
-    func animateToMode(_ mode: AutocompleteManager.Mode) {
+    func animateToMode(_ mode: AutocompleteManager.Mode, updateResults: Bool = false) {
         let animationIn = BeamAnimation.spring(stiffness: 420, damping: 24)
         let animationOut = BeamAnimation.spring(stiffness: 420, damping: 34)
         withAnimation(animationIn) {
@@ -34,8 +34,12 @@ extension AutocompleteManager {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(200)) { [weak self] in
             self?.animatingToMode = mode
             withAnimation(BeamAnimation.easeInOut(duration: 0.05)) {
-                self?.setQuery("", updateAutocompleteResults: false)
-                self?.setAutocompleteResults([], animated: false)
+                self?.setQuery("", updateAutocompleteResults: updateResults)
+                if updateResults {
+                    self?.autocompleteSelectedIndex = 0
+                } else {
+                    self?.setAutocompleteResults([], animated: false)
+                }
             }
             withAnimation(animationOut) {
                 self?.isPreparingForAnimatingToMode = false
@@ -43,6 +47,7 @@ extension AutocompleteManager {
             DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300)) { [weak self] in
                 self?.mode = mode
                 self?.animatingToMode = nil
+                self?.setQuery("", updateAutocompleteResults: true)
             }
         }
     }

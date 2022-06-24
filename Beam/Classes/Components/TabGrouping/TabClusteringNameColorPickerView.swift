@@ -9,7 +9,7 @@ import SwiftUI
 
 struct TabClusteringNameColorPickerView: View {
     @State var groupName: String = ""
-    @State var selectedColorIndex: Int = 0 {
+    @State var selectedColor: TabGroupingColor.DesignColor = .red {
         didSet {
             onChange?((groupName, selectedTabGroupingColor))
         }
@@ -20,13 +20,9 @@ struct TabClusteringNameColorPickerView: View {
     @State private var isEditing = false
     @State private var isPickingColor = false
 
-    private let colors = TabGroupingColor.userColors
+    private let colors = TabGroupingColor.DesignColor.allCases
     private var selectedTabGroupingColor: TabGroupingColor? {
-        TabGroupingColor(userColorIndex: selectedColorIndex)
-    }
-    private var selectedColor: BeamColor? {
-        guard selectedColorIndex < colors.count else { return nil }
-        return colors[selectedColorIndex]
+        TabGroupingColor(designColor: selectedColor)
     }
 
     private struct ColorPickerItem: View {
@@ -51,14 +47,15 @@ struct TabClusteringNameColorPickerView: View {
 
     private var colorPicker: some View {
         HStack(spacing: 0) {
-            ForEach(Array(colors.enumerated()), id: \.0) { (index, color) in
-                if isPickingColor || index == selectedColorIndex {
+            ForEach(colors) { color in
+                let selected = color == selectedColor
+                if isPickingColor || selected {
                     ZStack {
-                        ColorPickerItem(color: color.swiftUI, selected: index == selectedColorIndex && isPickingColor)
+                        ColorPickerItem(color: color.color.swiftUI, selected: selected && isPickingColor)
                     }
                     .frame(maxWidth: .infinity)
                     .onTapGesture {
-                        selectedColorIndex = index
+                        selectedColor = color
                         isPickingColor.toggle()
                     }
                 }
@@ -70,14 +67,14 @@ struct TabClusteringNameColorPickerView: View {
     var body: some View {
         HStack {
             if !isPickingColor {
-                let selectedColor = selectedColor?.nsColor
+                let nscolor = selectedColor.color.nsColor
                 BeamTextField(text: $groupName, isEditing: $isEditing,
                               placeholder: "Name this group",
                               font: BeamFont.regular(size: 13).nsFont,
                               textColor: BeamColor.Generic.text.nsColor,
                               placeholderColor: BeamColor.Generic.placeholder.nsColor,
-                              selectedRangeColor: selectedColor,
-                              caretColor: selectedColor,
+                              selectedRangeColor: nscolor,
+                              caretColor: nscolor,
                               onCommit: { _ in
                     onChange?((groupName, selectedTabGroupingColor))
                     onFinish?()
