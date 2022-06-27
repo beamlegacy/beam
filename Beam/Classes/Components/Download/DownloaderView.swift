@@ -84,7 +84,7 @@ struct DownloaderView<List: DownloadListProtocol>: View {
                     ForEach(downloadList.downloads) { download in
                         ZStack {
                             DownloadCell(download: download, from: downloadList, isSelected: selectedDownloads.contains(download), onDeleteKeyDownAction: backspaceTappedInCell)
-                            ClickCatchingView(onTap: { event in
+                            ClickCatchingView(onTapStarted: { event in
                                 if event.modifierFlags.contains(.command) {
                                     if selectedDownloads.contains(download) {
                                         selectedDownloads.remove(download)
