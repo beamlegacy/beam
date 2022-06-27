@@ -137,4 +137,28 @@ class UITestsMenuBar: BaseMenuBar {
         beeper.beep(identifier: UITestMenuAvailableCommands.resizeSquare1000.rawValue)
         return self
     }
+    
+    @discardableResult
+    func loadUITestPage4() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage4.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestPage3() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage3.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestPage2() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage2.rawValue)
+        return self
+    }
+    
+    @discardableResult
+    func loadUITestPage1() -> UITestsMenuBar {
+        beeper.beep(identifier: UITestMenuAvailableCommands.loadUITestPage1.rawValue)
+        return self
+    }
 }
