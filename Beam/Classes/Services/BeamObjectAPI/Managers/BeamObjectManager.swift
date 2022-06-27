@@ -199,6 +199,7 @@ class BeamObjectManager {
         DatabaseManager().registerOnBeamObjectManager()
         PasswordManager.shared.registerOnBeamObjectManager()
         BeamFileDBManager.shared.registerOnBeamObjectManager()
+        TabGroupingStoreManager.shared.registerOnBeamObjectManager()
         if treeSyncEnabled {
             BrowsingTreeStoreManager.shared.registerOnBeamObjectManager()
         }
@@ -213,7 +214,7 @@ class BeamObjectManager {
 
          We should use that order when sending objects to the API, and when receiving new objects.
          */
-        managerOrder = [.privateKeySignature, .database, .contact, .file, .document, .password, .link, .noteFrecency]
+        managerOrder = [.privateKeySignature, .database, .contact, .file, .document, .password, .link, .noteFrecency, .tabGroup]
         if treeSyncEnabled {
             managerOrder.append(.browsingTree)
         }

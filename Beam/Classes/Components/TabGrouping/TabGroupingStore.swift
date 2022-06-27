@@ -12,7 +12,7 @@ import GRDB
 /// Database representation of a Tab Group (aka `Beam.TabGroup`), conforming to BeamObjectProtocol.
 struct TabGroupBeamObject {
 
-    var id: UUID
+    var id: UUID = .null
     var title: String?
     var color: TabGroupingColor?
     var pages: [PageInfo] = []
@@ -47,12 +47,20 @@ class TabGroupsStore {
         db.saveTabGroups([group])
     }
 
+    func save(groups: [TabGroupBeamObject]) {
+        db.saveTabGroups(groups)
+    }
+
     func fetch(byIds ids: [UUID]) -> [TabGroupBeamObject] {
         db.getTabGroups(ids: ids)
     }
 
     func fetch(byTitle title: String) -> [TabGroupBeamObject] {
         db.getTabGroups(matchingTitle: title)
+    }
+
+    func allRecords(_ updatedSince: Date? = nil) -> [TabGroupBeamObject] {
+        db.getTabGroups(updatedSince: updatedSince)
     }
 
     func cleanup() {
@@ -80,7 +88,6 @@ extension TabGroupBeamObject: BeamObjectProtocol {
     }
 
     enum CodingKeys: String, CodingKey {
-        case id
         case title
         case color
         case pages
@@ -97,7 +104,6 @@ extension TabGroupBeamObject: BeamObjectProtocol {
 
     public init(from decoder: Decoder) throws {
         let values = try decoder.container(keyedBy: CodingKeys.self)
-        id = try values.decode(UUID.self, forKey: .id)
         createdAt = try values.decode(Date.self, forKey: .createdAt)
         updatedAt = try values.decode(Date.self, forKey: .updatedAt)
         deletedAt = try values.decodeIfPresent(Date.self, forKey: .deletedAt)
@@ -110,7 +116,6 @@ extension TabGroupBeamObject: BeamObjectProtocol {
 
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(id, forKey: .id)
         try container.encode(title, forKey: .title)
         try container.encode(CodableColor(colorName: color?.designColor?.rawValue, hueTint: color?.randomColorHueTint), forKey: .color)
         try container.encode(pages, forKey: .pages)

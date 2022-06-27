@@ -1995,6 +1995,20 @@ extension GRDBDatabase {
         }
     }
 
+    func getTabGroups(updatedSince: Date? = nil) -> [TabGroupBeamObject] {
+        do {
+            return try dbReader.read { db in
+                if let updatedSince = updatedSince {
+                    return try TabGroupBeamObject.filter(TabGroupBeamObject.Columns.updatedAt >= updatedSince).fetchAll(db)
+                }
+                return try TabGroupBeamObject.fetchAll(db)
+            }
+        } catch {
+            Logger.shared.logError("Couldn't fetch tab groups for updatedSince '\(String(describing: updatedSince))'. \(error)", category: .database)
+            return []
+        }
+    }
+
     func saveTabGroups(_ groups: [TabGroupBeamObject]) {
         do {
             try dbWriter.write { db in
