@@ -52,7 +52,7 @@ final class TabsListWidthProvider {
     }
 
     private var minimumGroupItemWidth: CGFloat {
-        12
+        22
     }
 
     var separatorWidth: CGFloat {
@@ -75,8 +75,15 @@ final class TabsListWidthProvider {
         items.allItems.forEach { item in
             if let group = item.group, item.tab == nil {
                 var width: CGFloat = minimumGroupItemWidth
-                if let title = group.title, !title.isEmpty {
-                    let hPadding: CGFloat = 8
+                let hPadding: CGFloat = 8
+                let title = group.title
+                if title?.isEmpty != false && group.collapsed {
+                    if group.pageIds.count >= 1000 {
+                        width = 12 + (hPadding*2)
+                    } else {
+                        width = max(width, widthForText("\(group.pageIds.count)") + (hPadding*2))
+                    }
+                } else if let title = title, !title.isEmpty {
                     width = max(width, widthForText(title) + (hPadding*2))
                 }
                 customWidths[item.id] = width
