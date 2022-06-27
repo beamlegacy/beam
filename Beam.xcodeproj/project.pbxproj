@@ -996,6 +996,7 @@
 		A3539E2428326EA100035A21 /* CreditCardTestView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A3539E2328326EA100035A21 /* CreditCardTestView.swift */; };
 		A35DE6882847808100C697D9 /* BaseRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35DE6872847808100C697D9 /* BaseRow.swift */; };
 		A35F9C4927973C5C00B4DE5F /* OmniboxViewLocators.swift in Sources */ = {isa = PBXBuildFile; fileRef = A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */; };
+		A36F2A342864A0F500B0F971 /* BrowserTabsPreferencesTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A36F2A332864A0F500B0F971 /* BrowserTabsPreferencesTests.swift */; };
 		A388B449280D7547008D2247 /* CaptureCopyShareTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */; };
 		A388B452280DE43F008D2247 /* PDFFilesBrowserViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */; };
 		A38D1A25284A10DC007EBB25 /* RowCreditCardsTestTable.swift in Sources */ = {isa = PBXBuildFile; fileRef = A38D1A24284A10DC007EBB25 /* RowCreditCardsTestTable.swift */; };
@@ -2885,6 +2886,7 @@
 		A3539E2328326EA100035A21 /* CreditCardTestView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreditCardTestView.swift; sourceTree = "<group>"; };
 		A35DE6872847808100C697D9 /* BaseRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BaseRow.swift; sourceTree = "<group>"; };
 		A35F9C4827973C5C00B4DE5F /* OmniboxViewLocators.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OmniboxViewLocators.swift; sourceTree = "<group>"; };
+		A36F2A332864A0F500B0F971 /* BrowserTabsPreferencesTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrowserTabsPreferencesTests.swift; sourceTree = "<group>"; };
 		A388B448280D7547008D2247 /* CaptureCopyShareTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureCopyShareTests.swift; sourceTree = "<group>"; };
 		A388B451280DE43F008D2247 /* PDFFilesBrowserViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PDFFilesBrowserViewTests.swift; sourceTree = "<group>"; };
 		A38D1A24284A10DC007EBB25 /* RowCreditCardsTestTable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RowCreditCardsTestTable.swift; sourceTree = "<group>"; };
@@ -6885,6 +6887,7 @@
 			isa = PBXGroup;
 			children = (
 				A3B6C97C2862FC0000E7F78C /* BrowserPreferencesTests.swift */,
+				A36F2A332864A0F500B0F971 /* BrowserTabsPreferencesTests.swift */,
 			);
 			path = Browser;
 			sourceTree = "<group>";
@@ -9828,6 +9831,7 @@
 				D71D7491282BBF9200D8D6F5 /* AdvancedSignUpPasswordAutofillTests.swift in Sources */,
 				B52C147D27FF051800D67EE5 /* ReportBugFeatureTests.swift in Sources */,
 				B5FB3A2027E8C32800037FD5 /* OnboardingImportDataViewLocators.swift in Sources */,
+				A36F2A342864A0F500B0F971 /* BrowserTabsPreferencesTests.swift in Sources */,
 				375D83CB278D6AE80064C246 /* BrowserStatusBarTests.swift in Sources */,
 				B551F3BF26BD0EBF00B72D27 /* WebsiteAuthTest.swift in Sources */,
 				B575360526BDA6260053CE2D /* LoginTest.swift in Sources */,

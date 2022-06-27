@@ -14,6 +14,7 @@ enum BrowserPreferencesViewLocators {
         case downloadFolderButton = "preferences-folder-icon"
         case setDefaultButton = "Set Default..."
         case searchEngine = "search-engine-selector"
+        case clearCacheButton = "clear-cache-button"
     }
 
     enum StaticTexts: String, CaseIterable, UIElement {
@@ -33,5 +34,9 @@ enum BrowserPreferencesViewLocators {
     
     enum Checkboxes: String, CaseIterable, UIElement {
         case searchEngine = "search-engine-suggestion"
+        case cmdClick = "cmd-click-checkbox"
+        case switchTabs = "switch-tabs-checkbox"
+        case restoreTabs = "restore-tabs-checkbox"
+        case captureSounds = "capture-sounds-checkbox"
     }
 }

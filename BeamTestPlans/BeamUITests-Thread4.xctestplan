@@ -87,6 +87,7 @@
         "BrowserShortcutsTests\/testWebTabsJumpOpenCloseReopen()",
         "BrowserStatusBarTests",
         "BrowserTabViewTests",
+        "BrowserTabsPreferencesTests",
         "CaptureCopyShareTests",
         "CardCreationTests",
         "CardEditTests",
