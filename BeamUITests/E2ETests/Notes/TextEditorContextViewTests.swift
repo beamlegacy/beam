@@ -105,8 +105,8 @@ class TextEditorContextViewTests: BaseTest {
         }
         
         step("Then I see hyperlink creation pop-up appeared"){
-            XCTAssertEqual(noteView!.getElementStringValue(element:  textEditorContext.getLinkTitleTextFieldElement()), linkTitle)
-            XCTAssertEqual(noteView!.getElementStringValue(element:  textEditorContext.getLinkURLTextFieldElement()), emptyString)
+            XCTAssertEqual(textEditorContext.getLinkTitleTextFieldElement().getStringValue(), linkTitle)
+            XCTAssertEqual(textEditorContext.getLinkURLTextFieldElement().getStringValue(), emptyString)
         }
       
         step("When I a hyperlink to: \(linkURL)"){

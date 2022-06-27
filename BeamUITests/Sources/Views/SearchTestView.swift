@@ -54,7 +54,7 @@ class SearchTestView: BaseView {
     }
     
     func getSearchFieldValue(isWebSearch: Bool) -> String {
-        return getElementStringValue(element: self.getSearchFieldElement())
+        return self.getSearchFieldElement().getStringValue()
     }
     
     func assertResultsCounterNumber(_ expectedValue: String) -> Bool {

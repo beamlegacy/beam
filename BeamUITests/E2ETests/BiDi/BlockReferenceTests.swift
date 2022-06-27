@@ -25,7 +25,7 @@ class BlockReferenceTests: BaseTest {
 
         step("Then it has correct number and content"){
             XCTAssertEqual(noteView.getNumberOfBlockRefs(), 1)
-            XCTAssertEqual(noteView.getElementStringValue(element:  noteView.getBlockRefByIndex(0)), noteForReference!)
+            XCTAssertEqual(noteView.getBlockRefByIndex(0).getStringValue(), noteForReference!)
         }
 
     }
@@ -53,9 +53,9 @@ class BlockReferenceTests: BaseTest {
             blockRef.tapInTheMiddle()
             XCTAssertTrue(waitForKeyboardFocus(blockRef))
             blockRef.typeText("\(textToAdd)\r")
-            XCTAssertEqual(noteView.getElementStringValue(element: blockRef), noteForReference! + textToAdd)
+            XCTAssertEqual(blockRef.getStringValue(), noteForReference! + textToAdd)
             noteView.typeKeyboardKey(.delete, textToAdd.count)
-            XCTAssertEqual(noteView.getElementStringValue(element: blockRef), noteForReference!)
+            XCTAssertEqual(blockRef.getStringValue(), noteForReference!)
         }
     }
     
@@ -89,7 +89,7 @@ class BlockReferenceTests: BaseTest {
 
         step("Then removing block reference doesn't remove the source text"){
             journalView.openNoteFromAllNotesList(noteTitleToOpen: noteName2)
-            let currentSourceNote = noteView.getElementStringValue(element:  noteView.getNoteNodesForVisiblePart()[1])
+            let currentSourceNote = noteView.getNoteNodesForVisiblePart()[1].getStringValue()
             XCTAssertEqual(currentSourceNote, noteForReference!)
         }
 
@@ -102,7 +102,7 @@ class BlockReferenceTests: BaseTest {
         let helper = BeamUITestsHelper(view.app)
         helper.tapCommand(.insertTextInCurrentNote)
         
-        let noteForReference = noteView.getElementStringValue(element:noteView.getNoteNodesForVisiblePart()[1])
+        let noteForReference = noteView.getNoteNodesForVisiblePart()[1].getStringValue()
         let referencePart = (noteForReference.substring(from: 0, to: 6))
         
         view.openRecentNoteByName(noteName1)

@@ -79,7 +79,7 @@ class BrowserPreferencesTests: BaseTest {
         step("THEN engine suggestion checkbox exists and is enabled by default") {
             XCTAssertTrue(browserPref.getSuggestionEngineCheckbox().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertEqual(browserPref.getSuggestionEngineCheckbox().title, "Include search engine suggestions")
-            XCTAssertTrue(browserPref.isSettingEnabled(element: browserPref.getSuggestionEngineCheckbox()))
+            XCTAssertTrue(browserPref.getSuggestionEngineCheckbox().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .close)
         }
         

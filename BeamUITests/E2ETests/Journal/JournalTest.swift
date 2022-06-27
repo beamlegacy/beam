@@ -36,7 +36,7 @@ class JournalTest: BaseTest {
         step("When the journal is first loaded the note is empty by default"){
             journalView.waitForJournalViewToLoad()
             let beforeNoteNodes = noteView.getNoteNodesForVisiblePart()
-            XCTAssertEqual(noteView.getElementStringValue(element: beforeNoteNodes[0]), emptyString)
+            XCTAssertEqual(beforeNoteNodes[0].getStringValue(), emptyString)
         }
     }
 }

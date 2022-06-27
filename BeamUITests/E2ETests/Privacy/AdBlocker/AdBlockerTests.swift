@@ -30,8 +30,8 @@ class AdBlockerTests: BaseTest {
             XCTAssertTrue(adBlockerPage.isWebsiteBlocked())
             helper.moveMouseOutOfTheWay() // move mouse to not be on tab title
             XCTAssertEqual(webView.getBrowserTabTitleValueByIndex(index: index), tabTitleOfAdBlocker)
-            XCTAssertEqual(webView.getElementStringValue(element: adBlockerPage.getBlockedUrlElement()), "The site “\(url)”")
-            XCTAssertEqual(webView.getElementStringValue(element: adBlockerPage.getBlockedHostElement()), "Disable blocking for \(hostUrl)")
+            XCTAssertEqual(adBlockerPage.getBlockedUrlElement().getStringValue(), "The site “\(url)”")
+            XCTAssertEqual(adBlockerPage.getBlockedHostElement().getStringValue(), "Disable blocking for \(hostUrl)")
         }
     }
     
@@ -146,7 +146,7 @@ class AdBlockerTests: BaseTest {
         }
         
         step("Then host \(hostUrl) is correctly added") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
         }
     }
     

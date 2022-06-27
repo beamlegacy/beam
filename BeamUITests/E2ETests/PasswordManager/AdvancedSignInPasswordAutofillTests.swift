@@ -38,16 +38,16 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
             passwordManagerHelper.clickPopupLoginText(login: loginUsername)
         }
         step("Then the credentials are successfully populated") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Current Username: ")), loginUsername)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(title: "Current Password: ")), securedAutoCompletedPassword)
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: "Current Username: ").getStringValue(), loginUsername)
+            XCTAssertEqual(mockPage.getPasswordFieldElement(title: "Current Password: ").getStringValue(), securedAutoCompletedPassword)
         }
 
         step("When I click on sign up link") {
             mockPage.getLinkElement("Sign Up").clickOnExistence()
         }
         step("Then the credentials are empty") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "New Username: ")), "")
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(title: "New Password: ")), "")
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: "New Username: ").getStringValue(), "")
+            XCTAssertEqual(mockPage.getPasswordFieldElement(title: "New Password: ").getStringValue(), "")
         }
 
         step("When I submit the form") {
@@ -90,8 +90,8 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then the credentials are successfully populated") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Email: ")), login)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(title: "Password: ")), securedAutoCompletedPassword)
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: "Email: ").getStringValue(), login)
+            XCTAssertEqual(mockPage.getPasswordFieldElement(title: "Password: ").getStringValue(), securedAutoCompletedPassword)
         }
         
         step("When I submit the form") {
@@ -121,7 +121,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then the login is successfully populated") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Email: ")), login)
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: "Email: ").getStringValue(), login)
         }
         
         step("When I submit the form") {
@@ -147,7 +147,7 @@ class AdvancedSignInPasswordAutofillTests: BaseTest {
         }
         
         step("Then the password is successfully populated") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(title: "Password: ")), securedAutoCompletedPassword)
+            XCTAssertEqual(mockPage.getPasswordFieldElement(title: "Password: ").getStringValue(), securedAutoCompletedPassword)
         }
         
         step("When I submit the form") {

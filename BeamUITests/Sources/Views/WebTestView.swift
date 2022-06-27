@@ -21,11 +21,11 @@ class WebTestView: BaseView {
     }
     
     func getDestinationNoteTitle() -> String {
-        return getElementStringValue(element: getDestinationNoteElement())
+        return getDestinationNoteElement().getStringValue()
     }
     
     func getBrowserTabTitleValueByIndex(index: Int) -> String {
-        return getElementStringValue(element: getBrowserTabTitleElements()[index])
+        return getBrowserTabTitleElements()[index].getStringValue()
     }
     
     func getBrowserTabTitleElements() -> [XCUIElement] {
@@ -93,7 +93,7 @@ class WebTestView: BaseView {
         _ = AlertTestView().isAlertDialogDisplayed()
         let element = app.staticTexts.element(matching: NSPredicate(format: "value BEGINSWITH 'WebViews alives:'")).firstMatch
         var intValue: Int?
-        if let value = self.getElementStringValue(element: element).split(separator: ":").last {
+        if let value = element.getStringValue().split(separator: ":").last {
             intValue = Int(value)
         }
         app.dialogs.buttons.firstMatch.clickOnExistence()
@@ -132,7 +132,7 @@ class WebTestView: BaseView {
     }
 
     func getTabUrlAtIndex(index: Int) -> String {
-        return self.getElementStringValue(element:  getTabURLElementByIndex(index: index))
+        return getTabURLElementByIndex(index: index).getStringValue()
     }
     
     func waitForTabUrlAtIndexToEqual(index: Int, expectedString: String) -> Bool {
@@ -241,7 +241,7 @@ class WebTestView: BaseView {
     }
     
     func getCurrentPDFZoomRatio() -> String {
-        return getElementStringValue(element: staticText(WebViewLocators.PDFElements.zoomRatio.accessibilityIdentifier).firstMatch)
+        return staticText(WebViewLocators.PDFElements.zoomRatio.accessibilityIdentifier).firstMatch.getStringValue()
     }
     
     func browseHistoryForwardButtonClick() -> WebTestView {

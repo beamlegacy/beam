@@ -47,7 +47,7 @@ class CaptureCopyShareTests: BaseTest {
         
         step ("Then I see text is pasted correctly") {
             self.switchToJournalAndPasteToFirstNode()
-            let actualText = journalView.getElementStringValue(element: journalView.getNoteByIndex(1))
+            let actualText = journalView.getNoteByIndex(1).getStringValue()
             XCTAssertTrue(actualText.contains(textToCapture), "Actual text pasted is \(actualText)") //on some CI machines a backspace is added by some reason*/
         }
     }

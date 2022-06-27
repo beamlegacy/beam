@@ -17,7 +17,7 @@ class AccountTestView: PreferencesBaseView {
     }
     
     func getLoginFieldValue() -> String {
-        return getElementStringValue(element: getLoginFieldElement())
+        return getLoginFieldElement().getStringValue()
     }
     
     func getPasswordFieldElement() -> XCUIElement {
@@ -26,7 +26,7 @@ class AccountTestView: PreferencesBaseView {
     }
     
     func getPasswordFieldValue() -> String {
-        return getElementStringValue(element: getPasswordFieldElement())
+        return getPasswordFieldElement().getStringValue()
     }
     
     func signIn() -> Bool {
