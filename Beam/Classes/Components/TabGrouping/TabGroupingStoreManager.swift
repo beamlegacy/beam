@@ -52,6 +52,13 @@ class TabGroupingStoreManager {
         let object = convertGroupToBeamObject(group, pages: pages)
         Logger.shared.logInfo("Saving Tab Group '\(object.title ?? "untitled")' (\(pages.count) pages)", category: .tabGrouping)
         store.save(object)
+        if AuthenticationManager.shared.isAuthenticated {
+            do {
+                try self.saveOnNetwork(object)
+            } catch {
+                Logger.shared.logError("Cannot send '\(object.title ?? "untitled")' (\(pages.count) pages): \(error)", category: .tabGrouping)
+            }
+        }
         return true
     }
 }
@@ -71,5 +78,54 @@ extension TabGroupingStoreManager {
     func searchGroups(forText searchTerm: String) -> [TabGroup] {
         let objects = store.fetch(byTitle: searchTerm)
         return objects.map { convertBeamObjectToGroup($0) }
+    }
+}
+
+// MARK: - Synchronisation
+extension TabGroupingStoreManager: BeamObjectManagerDelegate {
+    static var conflictPolicy: BeamObjectConflictResolution = .replace
+    internal static var backgroundQueue = DispatchQueue(label: "TabGroupingStoreManager BeamObjectManager backgroundQueue", qos: .userInitiated)
+    func willSaveAllOnBeamObjectApi() {}
+
+    func manageConflict(_ object: TabGroupBeamObject, _ remoteObject: TabGroupBeamObject) throws -> TabGroupBeamObject {
+        fatalError("Managed by BeamObjectManager")
+    }
+
+    func saveObjectsAfterConflict(_ groups: [TabGroupBeamObject]) throws {
+        self.store.save(groups: groups)
+    }
+
+    func receivedObjects(_ groups: [TabGroupBeamObject]) throws {
+        self.store.save(groups: groups)
+    }
+
+    func allObjects(updatedSince: Date?) throws -> [TabGroupBeamObject] {
+        self.store.allRecords(updatedSince)
+    }
+
+    func saveAllOnNetwork(_ groups: [TabGroupBeamObject], _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        Task.detached(priority: .userInitiated) { [weak self] in
+            do {
+                try await self?.saveOnBeamObjectsAPI(groups)
+                Logger.shared.logDebug("Saved tab groups on the BeamObject API", category: .tabGrouping)
+                networkCompletion?(.success(true))
+            } catch {
+                Logger.shared.logDebug("Error when saving the tab groups on the BeamObject API", category: .tabGrouping)
+                networkCompletion?(.failure(error))
+            }
+        }
+    }
+
+    private func saveOnNetwork(_ group: TabGroupBeamObject, _ networkCompletion: ((Result<Bool, Error>) -> Void)? = nil) throws {
+        Task.detached(priority: .userInitiated) { [weak self] in
+            do {
+                try await self?.saveOnBeamObjectAPI(group)
+                Logger.shared.logDebug("Saved tab group on the BeamObject API", category: .tabGrouping)
+                networkCompletion?(.success(true))
+            } catch {
+                Logger.shared.logDebug("Error when saving the tab group on the BeamObject API with error: \(error.localizedDescription)", category: .tabGrouping)
+                networkCompletion?(.failure(error))
+            }
+        }
     }
 }
