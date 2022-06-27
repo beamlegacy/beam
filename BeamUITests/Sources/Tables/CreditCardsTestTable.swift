@@ -19,12 +19,12 @@ class CreditCardsTestTable: BaseView, Rowable {
     }
     
     private func getTextFieldValueByRow(rowNumber: Int, field:  CreditCardTableLocators.TextFields) -> String {
-        return getElementStringValue(element:app.tables.containing(.tableColumn, identifier: CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).textFields[field.accessibilityIdentifier])
+        return app.tables.containing(.tableColumn, identifier: CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).textFields[field.accessibilityIdentifier].getStringValue()
     }
     
     func getVisibleRow(_ rowNumber: Int) -> RowCreditCardsTestTable {
         //To be replaced once https://gitlab.com/beamgroup/beam/-/merge_requests/2840 is merged
-        let description = getElementStringValue(element:app.tables.containing(.tableColumn, identifier:CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:CreditCardTableLocators.Images.cardIcon.accessibilityIdentifier).children(matching: .textField).element)
+        let description = app.tables.containing(.tableColumn, identifier:CreditCardTableLocators.TextFields.cardDescription.accessibilityIdentifier).children(matching: .tableRow).element(boundBy: rowNumber).cells.containing(.image, identifier:CreditCardTableLocators.Images.cardIcon.accessibilityIdentifier).children(matching: .textField).element.getStringValue()
         let cardHolder = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardHolderTextField)
         let cardNumber = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardNumberTextField)
         let expirationDate = getTextFieldValueByRow(rowNumber: rowNumber, field: .cardDateTextField)
@@ -51,7 +51,7 @@ class CreditCardsTestTable: BaseView, Rowable {
     }
     
     func openEditCardView(index: Int) -> CreditCardsTestTable {
-        getCardIconElement(index: index).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
+        _ = getCardIconElement(index: index).waitForExistence(timeout: BaseTest.implicitWaitTimeout)
         getCardIconElement(index: index).doubleTapInTheMiddle()
         return self
     }

@@ -28,11 +28,11 @@ class AddLinkView: BaseView {
     }
     
     func getLink() -> String {
-        return getElementStringValue(element: getLinkElement())
+        return getLinkElement().getStringValue()
     }
     
     func getTitle() -> String {
-        return getElementStringValue(element: getTitleElement())
+        return getTitleElement().getStringValue()
     }
     
     func clickOnTitleCell(title: String) -> XCUIElement {

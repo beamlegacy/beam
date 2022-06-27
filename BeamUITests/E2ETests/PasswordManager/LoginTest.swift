@@ -50,9 +50,9 @@ class LoginTest: BaseTest {
             XCTAssertEqual(passwordsWindow.getNumberOfEntries(),1)
             passwordsWindow.selectPassword(testUrl)
             passwordsWindow.clickDetails()
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.site)), testUrl)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.username)), email)
-            XCTAssertEqual(passwordsWindow.getElementStringValue(element: passwordsWindow.getPasswordFieldToFill(.password)), password)
+            XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.site).getStringValue(), testUrl)
+            XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.username).getStringValue(), email)
+            XCTAssertEqual(passwordsWindow.getPasswordFieldToFill(.password).getStringValue(), password)
         }
     }
     

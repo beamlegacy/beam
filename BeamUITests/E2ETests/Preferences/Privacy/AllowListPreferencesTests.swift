@@ -36,19 +36,19 @@ class AllowListPreferencesTests: BaseTest {
         allowUrl(hostUrl: hostUrl)
         
         step("Then host \(hostUrl) is correctly added") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
             privacyWindow.saveAllowList()
             privacyWindow.accessAllowList()
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
         }
         
         allowUrl(hostUrl: hostUrlGoogle)
         
         step("Then host \(hostUrlGoogle) is correctly added") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(1)), hostUrlGoogle)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(1).getStringValue(), hostUrlGoogle)
             privacyWindow.saveAllowList()
             privacyWindow.accessAllowList()
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(1)), hostUrlGoogle)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(1).getStringValue(), hostUrlGoogle)
         }
         
     }
@@ -78,9 +78,9 @@ class AllowListPreferencesTests: BaseTest {
         allowUrl(hostUrl: hostUrlFacebook)
         
         step("Then hosts are not sorted") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(1)), hostUrlGoogle)
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(2)), hostUrlFacebook)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(1).getStringValue(), hostUrlGoogle)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(2).getStringValue(), hostUrlFacebook)
         }
         
         step("When I sort host URLs") {
@@ -88,9 +88,9 @@ class AllowListPreferencesTests: BaseTest {
         }
         
         step("Then hosts are sorted reverse alphabetical order") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrlGoogle)
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(1)), hostUrlFacebook)
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(2)), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrlGoogle)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(1).getStringValue(), hostUrlFacebook)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(2).getStringValue(), hostUrl)
         }
         
         step("When I sort host URLs") {
@@ -98,9 +98,9 @@ class AllowListPreferencesTests: BaseTest {
         }
         
         step("Then hosts are sorted alphabetical order") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(1)), hostUrlFacebook)
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(2)), hostUrlGoogle)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(1).getStringValue(), hostUrlFacebook)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(2).getStringValue(), hostUrlGoogle)
         }
     }
     
@@ -108,7 +108,7 @@ class AllowListPreferencesTests: BaseTest {
         allowUrl(hostUrl: hostUrl)
         
         step("Then host \(hostUrl) is correctly added") {
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
         }
         
         step("When I cancel the action") {
@@ -131,7 +131,7 @@ class AllowListPreferencesTests: BaseTest {
         
         step("Then host \(hostUrl) is displayed") {
             XCTAssertTrue(privacyWindow.isAllowedUrlDisplayedBy(hostUrl))
-            XCTAssertEqual(privacyWindow.getElementStringValue(element: privacyWindow.getAllowListUrlByIndex(0)), hostUrl)
+            XCTAssertEqual(privacyWindow.getAllowListUrlByIndex(0).getStringValue(), hostUrl)
         }
         
         step("And host \(hostUrlGoogle) is not displayed") {
