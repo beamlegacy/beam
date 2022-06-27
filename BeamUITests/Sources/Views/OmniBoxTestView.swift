@@ -38,7 +38,7 @@ class OmniBoxTestView: BaseView {
     }
     
     func getSearchFieldValue() -> String {
-        return self.getElementStringValue(element: getOmniBoxSearchField())
+        return getOmniBoxSearchField().getStringValue()
     }
     
     func waitForSearchFieldValueToEqual(expectedValue: String) -> Bool {

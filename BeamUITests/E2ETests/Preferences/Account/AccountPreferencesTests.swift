@@ -38,7 +38,7 @@ class AccountPreferencesTests: BaseTest {
         
         step ("WHEN I see native Save dialog opened with \(expectedPKName)") {
             XCTAssertTrue(accountView.app.dialogs[dialogueTitle].waitForExistence(timeout: BaseTest.implicitWaitTimeout))
-            XCTAssertEqual(accountView.getElementStringValue(element:  accountView.app.dialogs[dialogueTitle].textFields["saveAsNameTextField"].firstMatch), expectedPKName)
+            XCTAssertEqual(accountView.app.dialogs[dialogueTitle].textFields["saveAsNameTextField"].firstMatch.getStringValue(), expectedPKName)
         }
     }
     

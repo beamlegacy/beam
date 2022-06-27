@@ -51,7 +51,7 @@ class TextEditorContextTestView: BaseView {
     }
     
     func getNoteNodeValueByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element:  getNoteNodeElementByIndex(index))
+        return getNoteNodeElementByIndex(index).getStringValue()
     }
     
     func getNoteNodeElementByIndex(_ index: Int) -> XCUIElement {

@@ -17,7 +17,6 @@ class BaseView {
     /// 2 seconds
     let minimumWaitTimeout = TimeInterval(2)
     let defaultPressDurationSeconds = 1.5
-    let errorFetchStringValue = "ERROR:failed to fetch string value from "
     let shortcutHelper = ShortcutsHelper()
     let uiMenu = UITestsMenuBar()
 
@@ -102,10 +101,6 @@ class BaseView {
         return app.windows.popUpButtons[element]
     }
     
-    func isSettingEnabled(element: XCUIElement) -> Bool {
-        return (element.value as? Int == 1)
-    }
-    
     func typeKeyboardKey(_ key: XCUIKeyboardKey, _ numberOfTimes: Int = 1) {
         for _ in 1...numberOfTimes {
             self.app.typeKey(key, modifierFlags: [])
@@ -129,10 +124,6 @@ class BaseView {
             _ = WebTestView().waitForWebViewToLoad()
         }
         return WebTestView()
-    }
-    
-    func getElementStringValue(element: XCUIElement) -> String {        
-        return element.value as? String ?? errorFetchStringValue + element.identifier
     }
         
     @discardableResult

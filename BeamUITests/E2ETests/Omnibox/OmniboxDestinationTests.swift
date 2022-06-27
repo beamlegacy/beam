@@ -47,7 +47,7 @@ class OmniboxDestinationTests: BaseTest {
         step("Then destination note has a focus, empty search field and a note name"){
             _ = destinationNoteSearchField.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             XCTAssertTrue(omniboxView.inputHasFocus(destinationNoteSearchField))
-            XCTAssertEqual(journalView.getElementStringValue(element: destinationNoteSearchField), emptyString)
+            XCTAssertEqual(destinationNoteSearchField.getStringValue(), emptyString)
             XCTAssertTrue(destinationNoteSearchField.placeholderValue == todayNoteNameTitleViewFormat || destinationNoteSearchField.placeholderValue == todayNoteNameCreationViewFormat || destinationNoteSearchField.placeholderValue == todayNoteNameCreationViewFormatWithout0InDays,
                           "Actual note name is \(String(describing: destinationNoteSearchField.placeholderValue))")
         }
@@ -81,7 +81,7 @@ class OmniboxDestinationTests: BaseTest {
         }
 
         step("Then I see \(noteNameToBeCreated) in search results"){
-            XCTAssertEqual(journalView.getElementStringValue(element: destinationNoteTitle), noteNameToBeCreated)
+            XCTAssertEqual(destinationNoteTitle.getStringValue(), noteNameToBeCreated)
         }
         
         step("When I click escape button"){
@@ -99,7 +99,7 @@ class OmniboxDestinationTests: BaseTest {
         }
 
         step("Then I see \(noteNameToBeCreated) as destination note"){
-            XCTAssertEqual(journalView.getElementStringValue(element: destinationNoteTitle), noteNameToBeCreated)
+            XCTAssertEqual(destinationNoteTitle.getStringValue(), noteNameToBeCreated)
         }
     }
     
@@ -121,7 +121,7 @@ class OmniboxDestinationTests: BaseTest {
         step("Then destination note has a focus, empty search field and a note name"){
             _ = destinationNoteSearchField.waitForExistence(timeout: BaseTest.implicitWaitTimeout)
             XCTAssertTrue(omniboxView.inputHasFocus(destinationNoteSearchField))
-            XCTAssertEqual(journalView.getElementStringValue(element: destinationNoteSearchField), emptyString)
+            XCTAssertEqual(destinationNoteSearchField.getStringValue(), emptyString)
             XCTAssertTrue(destinationNoteSearchField.placeholderValue == todayNoteNameTitleViewFormat || destinationNoteSearchField.placeholderValue == todayNoteNameCreationViewFormat ||
                 destinationNoteSearchField.placeholderValue == todayNoteNameCreationViewFormatWithout0InDays,
                           "Actual note name is \(String(describing: destinationNoteSearchField.placeholderValue))")
