@@ -10,7 +10,7 @@ import XCTest
 
 class BrowserPreferencesTests: BaseTest {
     
-    var browserPref = BrowserPreferencesTestView()
+    let browserPref = BrowserPreferencesTestView()
     let searchWord = "beam"
     
     override func setUpWithError() throws {
@@ -59,6 +59,22 @@ class BrowserPreferencesTests: BaseTest {
         step("THEN Set default browser button exists and is hittable") {
             XCTAssertTrue(browserPref.getSetDefaultButton().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
             XCTAssertTrue(browserPref.getSetDefaultButton().isHittable)
+        }
+    }
+    
+    func testClearCacheButton() {
+        step("THEN Set default browser button exists and is hittable") {
+            XCTAssertTrue(browserPref.getClearCacheButtonButton().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(browserPref.getClearCacheButtonButton().isHittable)
+        }
+        //To be expanded after https://linear.app/beamapp/issue/BE-4545/uitest-menu-to-populate-browser-cache and 
+    }
+    
+    func testEnableCaptureSoundsCheckbox() {
+        //scenario is quite primitive due to impossibility to assert sounds existence
+        step("THEN Enable Capture Sounds Checkbox exists and is enabled") {
+            XCTAssertTrue(browserPref.getCaptureSoundsCheckbox().waitForExistence(timeout: BaseTest.minimumWaitTimeout))
+            XCTAssertTrue(browserPref.getCaptureSoundsCheckbox().isSettingEnabled())
         }
     }
     

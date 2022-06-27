@@ -18,8 +18,28 @@ class BrowserPreferencesTestView: PreferencesBaseView {
         return button(BrowserPreferencesViewLocators.Buttons.setDefaultButton.accessibilityIdentifier)
     }
     
+    func getClearCacheButtonButton() -> XCUIElement {
+        return button(BrowserPreferencesViewLocators.Buttons.clearCacheButton.accessibilityIdentifier)
+    }
+    
+    func getCaptureSoundsCheckbox() -> XCUIElement {
+        return checkBox(BrowserPreferencesViewLocators.Checkboxes.captureSounds.accessibilityIdentifier)
+    }
+    
     func getSuggestionEngineCheckbox() -> XCUIElement {
         return checkBox(BrowserPreferencesViewLocators.Checkboxes.searchEngine.accessibilityIdentifier)
+    }
+    
+    func getCMDClickCheckbox() -> XCUIElement {
+        return checkBox(BrowserPreferencesViewLocators.Checkboxes.cmdClick.accessibilityIdentifier)
+    }
+    
+    func getSwitchTabsCheckbox() -> XCUIElement {
+        return checkBox(BrowserPreferencesViewLocators.Checkboxes.switchTabs.accessibilityIdentifier)
+    }
+    
+    func getRestoreTabsCheckbox() -> XCUIElement {
+        return checkBox(BrowserPreferencesViewLocators.Checkboxes.restoreTabs.accessibilityIdentifier)
     }
     
     @discardableResult
