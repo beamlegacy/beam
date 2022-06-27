@@ -211,12 +211,14 @@ struct TabsListView: View {
                             onClose: { onItemClose(at: index) }, onCopy: { onItemCopy(at: index)},
                             onToggleMute: { onTabToggleMute(at: index) })
                 } else if let group = item.group, let color = group.color {
-                    TabClusteringGroupCapsuleView(title: group.title ?? "", color: color)
-                        .overlay(ClickCatchingView(onTap: { _ in
+                    TabClusteringGroupCapsuleView(title: group.title ?? "", color: color, collapsed: group.collapsed, itemsCount: group.pageIds.count,
+                                                  onTap: { (isRightMouse, event) in
+                        if isRightMouse {
+                            showContextMenu(forGroup: group, atLocation: event?.locationInWindow ?? .zero)
+                        } else {
                             browserTabsManager.toggleGroupCollapse(group)
-                        }, onRightTap: { event in
-                            showContextMenu(forGroup: group, atLocation: event.locationInWindow)
-                        }))
+                        }
+                    })
                 }
             }
             .frame(width: isTheDraggedTab ? 0 : max(0, widthProvider.width(forItem: item, selected: selected, pinned: isPinned) - centeringAdjustment))

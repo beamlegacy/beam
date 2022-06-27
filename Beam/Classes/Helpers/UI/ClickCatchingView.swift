@@ -9,8 +9,16 @@ import SwiftUI
 
 struct ClickCatchingView: NSViewRepresentable {
 
+    /// sent on mouse up
     var onTap: ((NSEvent) -> Void)?
+
+    /// sent on mouse down
+    var onTapStarted: ((NSEvent) -> Void)?
+
+    /// sent on right mouse up, or on control+mouse down
     var onRightTap: ((NSEvent) -> Void)?
+
+    /// sent on 2nd click mouse up
     var onDoubleTap: ((NSEvent) -> Void)?
 
     func makeCoordinator() -> Coordinator {
@@ -30,18 +38,27 @@ struct ClickCatchingView: NSViewRepresentable {
 
         override func mouseDown(with event: NSEvent) {
             super.mouseDown(with: event)
-            if event.clickCount == 2 {
-                delegate?.viewDidClick(ofType: .doubleClick, withEvent: event)
-            } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control {
-                delegate?.viewDidClick(ofType: .rightClick, withEvent: event)
+            if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control {
+                delegate?.viewDidClick(ofType: .rightClickUp, withEvent: event)
             } else {
-                delegate?.viewDidClick(ofType: .click, withEvent: event)
+                delegate?.viewDidClick(ofType: .clickDown, withEvent: event)
             }
         }
 
-        override func rightMouseDown(with event: NSEvent) {
-            super.rightMouseDown(with: event)
-            delegate?.viewDidClick(ofType: .rightClick, withEvent: event)
+        override func mouseUp(with event: NSEvent) {
+            super.mouseUp(with: event)
+            if event.clickCount == 2 {
+                delegate?.viewDidClick(ofType: .doubleClickUp, withEvent: event)
+            } else if event.modifierFlags.intersection(.deviceIndependentFlagsMask) == .control {
+                // event sent on mouse down
+            } else {
+                delegate?.viewDidClick(ofType: .clickUp, withEvent: event)
+            }
+        }
+
+        override func rightMouseUp(with event: NSEvent) {
+            super.rightMouseUp(with: event)
+            delegate?.viewDidClick(ofType: .rightClickUp, withEvent: event)
         }
     }
 
@@ -53,11 +70,13 @@ struct ClickCatchingView: NSViewRepresentable {
 
         fileprivate func viewDidClick(ofType type: ClickType, withEvent event: NSEvent) {
             switch type {
-            case .click:
+            case .clickDown:
+                parent.onTapStarted?(event)
+            case .clickUp:
                 parent.onTap?(event)
-            case .doubleClick:
+            case .doubleClickUp:
                 parent.onDoubleTap?(event)
-            case .rightClick:
+            case .rightClickDown, .rightClickUp:
                 parent.onRightTap?(event)
             }
         }
@@ -65,7 +84,7 @@ struct ClickCatchingView: NSViewRepresentable {
 }
 
 private enum ClickType {
-    case click, doubleClick, rightClick
+    case clickDown, clickUp, doubleClickUp, rightClickDown, rightClickUp
 }
 
 private protocol ClickCatchingNSViewDelegate: AnyObject {
