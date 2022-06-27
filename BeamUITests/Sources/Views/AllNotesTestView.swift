@@ -92,7 +92,7 @@ class AllNotesTestView: BaseView {
     }
     
     func getNoteNameValueByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element: getNotesNamesElements()[index])
+        return getNotesNamesElements()[index].getStringValue()
     }
     
     func getNumberOfNotes() -> Int {
@@ -121,7 +121,7 @@ class AllNotesTestView: BaseView {
         let notes = getNotesNamesElements()
         var i = notes.count
         repeat {
-            let noteInList = self.getElementStringValue(element: notes[i - 1])
+            let noteInList = notes[i - 1].getStringValue()
             if noteInList == noteName {
                 return true
             }
@@ -140,7 +140,7 @@ class AllNotesTestView: BaseView {
     func openNoteByName(noteTitle: String) -> NoteTestView {
         var elementFound = false
         mainLoop: for element in self.getNotesNamesElements(){
-            if getElementStringValue(element: element) == noteTitle {
+            if element.getStringValue() == noteTitle {
                 element.coordinate(withNormalizedOffset: CGVector(dx: 0.015, dy: 0.9)).tap()
                 elementFound = true
                 break mainLoop
@@ -178,7 +178,7 @@ class AllNotesTestView: BaseView {
     func getViewCountValue() -> Int {
         let predicate = NSPredicate(format: "value BEGINSWITH 'All (' OR value BEGINSWITH 'Private (' OR value BEGINSWITH 'Published (' OR value BEGINSWITH 'On Profile ('")
         let viewCounterElement = app.windows.staticTexts.matching(predicate).firstMatch
-        let viewStringValue = getElementStringValue(element: viewCounterElement).slice(from: "(", to: ")")!
+        let viewStringValue = viewCounterElement.getStringValue().slice(from: "(", to: ")")!
         return Int(viewStringValue) ?? 0
     }
     

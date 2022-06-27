@@ -30,9 +30,9 @@ class PasswordPreferencesTests: BaseTest {
     
     func verifyPasswordPopUpDisplay(_ siteValue: String, _ usernameValue: String, _ passwordValue: String, _ update: Bool = false) {
         XCTAssertTrue(passwordPreferencesView.isFormToFillPasswordDisplayed(update))
-        XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordFieldToFill(.site)), siteValue)
-        XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordFieldToFill(.username)), usernameValue)
-        XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordFieldToFill(.password)), passwordValue)
+        XCTAssertEqual(passwordPreferencesView.getPasswordFieldToFill(.site).getStringValue(), siteValue)
+        XCTAssertEqual(passwordPreferencesView.getPasswordFieldToFill(.username).getStringValue(), usernameValue)
+        XCTAssertEqual(passwordPreferencesView.getPasswordFieldToFill(.password).getStringValue(), passwordValue)
     }
     
     func addPassword(_ siteValue: String, _ usernameValue: String, _ passwordValue: String) {
@@ -240,11 +240,11 @@ class PasswordPreferencesTests: BaseTest {
         }
 
         step ("THEN password entries are correctly sorted"){
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(0)), hostnameLvh)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(1)), hostnameLvh)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(2)), hostnameLvh)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(3)), hostnameFacebook)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(4)), hostnameApple)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(0).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(1).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(2).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(3).getStringValue(), hostnameFacebook)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(4).getStringValue(), hostnameApple)
         }
         
         
@@ -253,11 +253,11 @@ class PasswordPreferencesTests: BaseTest {
         }
 
         step ("THEN password entries are correctly sorted"){
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(0)), hostnameApple)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(1)), hostnameFacebook)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(2)), hostnameLvh)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(3)), hostnameLvh)
-            XCTAssertEqual(passwordPreferencesView.getElementStringValue(element: passwordPreferencesView.getPasswordByIndex(4)), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(0).getStringValue(), hostnameApple)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(1).getStringValue(), hostnameFacebook)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(2).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(3).getStringValue(), hostnameLvh)
+            XCTAssertEqual(passwordPreferencesView.getPasswordByIndex(4).getStringValue(), hostnameLvh)
         }
         
     }
@@ -274,10 +274,10 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN Autofill password settings is enabled"){
-            if (!passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillPasswordSettingElement())) {
+            if !passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled() {
                 passwordPreferencesView.clickAutofillPassword()
             }
-            XCTAssertTrue(passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillPasswordSettingElement()))
+            XCTAssertTrue(passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled())
         }
         
         
@@ -298,7 +298,7 @@ class PasswordPreferencesTests: BaseTest {
         }
         
         step ("THEN Autofill password settings is disabled"){
-            XCTAssertFalse(passwordPreferencesView.isSettingEnabled(element: passwordPreferencesView.getAutofillPasswordSettingElement()))
+            XCTAssertFalse(passwordPreferencesView.getAutofillPasswordSettingElement().isSettingEnabled())
             XCUIApplication().windows["Passwords"].buttons[XCUIIdentifierCloseWindow].clickOnExistence()
         }
 

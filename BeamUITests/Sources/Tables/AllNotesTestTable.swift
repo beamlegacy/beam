@@ -19,7 +19,7 @@ class AllNotesTestTable: BaseView, Rowable {
     }
     
     private func getTextFieldValueByRow(_ rowNumber: Int,_ sortColumn: AllNotesTableLocators.SortButtons) -> String {
-        return getElementStringValue(element: app.windows[OmniboxLocators.Labels.allNotes.accessibilityIdentifier].tables.children(matching: .tableRow).element(boundBy: rowNumber).staticTexts[sortColumn.accessibilityIdentifier])
+        return app.windows[OmniboxLocators.Labels.allNotes.accessibilityIdentifier].tables.children(matching: .tableRow).element(boundBy: rowNumber).staticTexts[sortColumn.accessibilityIdentifier].getStringValue()
     }
     
     func getVisibleRow(_ rowNumber: Int) -> RowAllNotesTestTable {

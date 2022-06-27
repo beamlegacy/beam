@@ -23,12 +23,13 @@ class SignOutTests: BaseTest {
     }
     
     func testDeleteAllOnSignOut() {
-        var defaultNotes: AllNotesTestTable!
+        //To be fixed with https://linear.app/beamapp/issue/BE-4520/getting-the-rows-for-all-notes-table-fix
+        //var defaultNotes: AllNotesTestTable!
         
         step("GIVEN I get the list of newly created notes 10 random notes") {
             shortcutHelper.shortcutActionInvoke(action: .showAllNotes)
             allNotes.waitForAllNotesViewToLoad()
-            defaultNotes = AllNotesTestTable()
+            //defaultNotes = AllNotesTestTable()
             shortcutHelper.shortcutActionInvoke(action: .showJournal)
             uiMenu.create10Notes()
         }
@@ -41,7 +42,7 @@ class SignOutTests: BaseTest {
         
         step("THEN I see correct allert pop-up") {
             XCTAssertTrue(alertView.staticText(AlertViewLocators.StaticTexts.signOutConfirmation.accessibilityIdentifier).waitForExistence(timeout: BaseTest.minimumWaitTimeout))
-            XCTAssertTrue(alertView.isSettingEnabled(element: alertView.getDeleteAllCheckbox()))
+            XCTAssertTrue(alertView.getDeleteAllCheckbox().isSettingEnabled())
         }
          
         step("WHEN I click cancel button") {

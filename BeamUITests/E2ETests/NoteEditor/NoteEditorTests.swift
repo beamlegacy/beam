@@ -40,26 +40,26 @@ class NoteEditorTests: BaseTest {
         step("Then note displays typed text correctly"){
             noteTestView.getNoteNodesForVisiblePart().first?.clickOnExistence()
             journalView.app.typeText(texts[0])
-            XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[0])
+            XCTAssertEqual(firstJournalEntry.getStringValue(), texts[0])
         }
 
         step("Then note displays typed text from the beginning of the note correctly"){
             shortcutHelper.shortcutActionInvoke(action: .beginOfNote)
             journalView.app.typeText(texts[1])
-            XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[1] + texts[0])
+            XCTAssertEqual(firstJournalEntry.getStringValue(), texts[1] + texts[0])
         }
 
         
         step("Then note displays replaced typed text correctly"){
             shortcutHelper.shortcutActionInvoke(action: .selectAll)
             journalView.app.typeText(texts[2])
-            XCTAssertEqual(journalView.getElementStringValue(element:firstJournalEntry), texts[2])
+            XCTAssertEqual(firstJournalEntry.getStringValue(), texts[2])
         }
 
         step("Then second note displays changed text correctly"){
             journalView.typeKeyboardKey(.enter)
             let expectedResult = BeamUITestsHelper(journalView.app).typeAndEditHardcodedText(journalView)
-            XCTAssertEqual(journalView.getElementStringValue(element:journalView.getNoteByIndex(2)), expectedResult)
+            XCTAssertEqual(journalView.getNoteByIndex(2).getStringValue(), expectedResult)
         }
 
     }

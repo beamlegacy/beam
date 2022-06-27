@@ -23,7 +23,7 @@ class BrowserStatusBarTests: BaseTest {
             link.hover()
         }
 
-        let statusText = webView.getElementStringValue(element:  webView.statusText)
+        let statusText = webView.statusText.getStringValue()
 
         step("Then the status bar must appear"){
             XCTAssertTrue(webView.statusText.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
@@ -50,7 +50,7 @@ class BrowserStatusBarTests: BaseTest {
             link.hover()
         }
 
-        let statusText = webView.getElementStringValue(element:  webView.statusText)
+        let statusText = webView.statusText.getStringValue()
 
         step("Then the status bar must appear") {
             XCTAssertTrue(webView.statusText.waitForExistence(timeout: BaseTest.implicitWaitTimeout))
