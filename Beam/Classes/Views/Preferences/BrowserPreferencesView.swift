@@ -139,6 +139,7 @@ struct ClearCachesSection: View {
             WKWebsiteDataStore.default().removeData(ofTypes: [WKWebsiteDataTypeDiskCache, WKWebsiteDataTypeMemoryCache], modifiedSince: Date(timeIntervalSince1970: 0), completionHandler: { })
         } label: {
             Text("Clear All Web Caches")
+                .accessibilityIdentifier("clear-cache-button")
                 .font(BeamFont.regular(size: 13).swiftUI)
         }
     }
@@ -285,7 +286,8 @@ struct TabsSection: View {
     var body: some View {
         Toggle(isOn: $cmdClickOpenTab) {
             Text("⌘-click opens a link in a new tab")
-        }.toggleStyle(CheckboxToggleStyle())
+        }.accessibilityIdentifier("cmd-click-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([cmdClickOpenTab].publisher.first()) {
@@ -299,7 +301,8 @@ struct TabsSection: View {
 
         Toggle(isOn: $cmdNumberSwitchTabs) {
             Text("Use ⌘1 to ⌘9 to switch tabs")
-        }.toggleStyle(CheckboxToggleStyle())
+        }.accessibilityIdentifier("switch-tabs-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([cmdNumberSwitchTabs].publisher.first()) {
@@ -313,7 +316,8 @@ struct TabsSection: View {
 
         Toggle(isOn: $restoreLastBeamSession) {
             Text("Restore all tabs from last session")
-        }.toggleStyle(CheckboxToggleStyle())
+        }.accessibilityIdentifier("restore-tabs-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([restoreLastBeamSession].publisher.first()) {
@@ -328,7 +332,8 @@ struct SoundsSection: View {
     var body: some View {
         Toggle(isOn: $isCollectSoundsEnabled) {
             Text("Enable Capture sounds")
-        }.toggleStyle(CheckboxToggleStyle())
+        }.accessibilityIdentifier("capture-sounds-checkbox")
+            .toggleStyle(CheckboxToggleStyle())
             .font(BeamFont.regular(size: 13).swiftUI)
             .foregroundColor(BeamColor.Generic.text.swiftUI)
             .onReceive([isCollectSoundsEnabled].publisher.first()) {
