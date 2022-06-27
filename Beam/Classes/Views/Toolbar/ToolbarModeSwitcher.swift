@@ -67,16 +67,15 @@ struct ToolbarModeSwitcher: View {
                     } else if modeWeb {
                         lottieView(name: "nav-pivot_card")
                             .opacity(bouncingCount != nil ? 0 : 1)
-                            if bouncingCount != nil {
-                                lottieView(name: "nav-pivot_tab_increment")
-                            }
+                        if bouncingCount != nil {
+                            lottieView(name: "nav-pivot_tab_increment")
+                        }
                         if tabsCount >= 100 {
                             Icon(name: "nav-pivot-infinite", size: CGSize(width: 12, height: 6), color: foregroundColor.swiftUI)
                                 .transition(textTransition)
                         } else {
                             ZStack(alignment: .center) {
                                 Text("\(tabsCount)")
-                                    .transition(textTransition)
                                     .offset(x: 0, y: bouncingCount != nil ? -3 : 0)
                                     .opacity(bouncingCount != nil ? 0 : 1)
                                     .animation(bouncingCount != nil ? nil : BeamAnimation.easeInOut(duration: 0.1).delay(0.1), value: bouncingCount)
@@ -85,6 +84,7 @@ struct ToolbarModeSwitcher: View {
                                         .transition(bouncingTextTransition)
                                 }
                             }
+                            .transition(textTransition)
                             .offset(x: 0, y: -0.5)
                             .font(BeamFont.semibold(size: 9).swiftUI)
                             .foregroundColor(foregroundColor.swiftUI)
@@ -101,7 +101,6 @@ struct ToolbarModeSwitcher: View {
                             Icon(name: modeWeb ? "nav-pivot_incognito" : "nav-pivot_incognito", width: 24, color: foregroundColor.swiftUI)
                         } else {
                             Icon(name: modeWeb ? "nav-pivot_web" : "nav-pivot_card", width: 24, color: foregroundColor.swiftUI)
-
                         }
                     }
                 }
