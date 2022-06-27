@@ -38,7 +38,7 @@ class UITestPagePasswordManager: BaseView {
     
     func getInputValue(_ formLabel: FormInputs) -> String {
         let parent = app.webViews.containing(.staticText, identifier: formLabel.rawValue).element
-        let value = formLabel == FormInputs.username ? getElementStringValue(element: parent.textFields.firstMatch) : getElementStringValue(element: parent.secureTextFields.firstMatch)
+        let value = formLabel == FormInputs.username ? parent.textFields.firstMatch.getStringValue() : parent.secureTextFields.firstMatch.getStringValue()
         return value
     }
     

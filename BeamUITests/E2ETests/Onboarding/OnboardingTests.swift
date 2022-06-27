@@ -111,8 +111,7 @@ class OnboardingTests: BaseTest {
         
         step("Then I can successfully edit email field and move to next view") {
             XCTAssertFalse(onboardingView.isContinueWithEmailButtonActivated())
-            XCTAssertEqual(emptyString, onboardingView.getElementStringValue(element:  onboardingView.getEmailTextField()))
-
+            XCTAssertEqual(emptyString, onboardingView.getEmailTextField().getStringValue())
             onboardingView.getEmailTextField().tapInTheMiddle()
             onboardingView.getEmailTextField().typeText("abc")
             onboardingView.typeKeyboardKey(.delete, 3)

@@ -78,13 +78,13 @@ class BaseCreditCardTest: BaseTest {
     
     func verifyCCIsPopulated(number: String, expDate: String, ownerName: String, secCode: String, secCodeIsPassword: Bool = false, inView: String = "Payment") {
         step("Then CC is succesfully populated") {
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: number, inView: inView)), johnCCNumber)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: expDate, inView: inView)), johnCCExpDate)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: ownerName, inView: inView)), johnCCOwnerName)
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: number, inView: inView).getStringValue(), johnCCNumber)
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: expDate, inView: inView).getStringValue(), johnCCExpDate)
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: ownerName, inView: inView).getStringValue(), johnCCOwnerName)
             if secCodeIsPassword {
-                XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(title: secCode, inView: inView)), emptyString)
+                XCTAssertEqual(mockPage.getPasswordFieldElement(title: secCode, inView: inView).getStringValue(), emptyString)
             } else {
-                XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: secCode, inView: inView)), emptyString)
+                XCTAssertEqual(mockPage.getUsernameFieldElement(title: secCode, inView: inView).getStringValue(), emptyString)
             }
         }
     }

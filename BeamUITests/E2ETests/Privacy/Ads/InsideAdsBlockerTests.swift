@@ -28,10 +28,10 @@ class InsideAdsBlockerTests: BaseTest {
     func testDisabledInsideAdsBlocker(){
         
         step ("Given ads blocking setting is disabled"){
-            if (privacyWindow.isSettingEnabled(element: privacyWindow.getInsideAdBlockerSettingElement())) {
+            if privacyWindow.getInsideAdBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideAdBlockerSetting()
             }
-            XCTAssertFalse(privacyWindow.isSettingEnabled(element: privacyWindow.getInsideAdBlockerSettingElement()))
+            XCTAssertFalse(privacyWindow.getInsideAdBlockerSettingElement().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
@@ -47,10 +47,10 @@ class InsideAdsBlockerTests: BaseTest {
     func testEnabledInsideAdsBlocker(){
         
         step ("Given ads blocking setting is enabled"){
-            if (!privacyWindow.isSettingEnabled(element: privacyWindow.getInsideAdBlockerSettingElement())) {
+            if !privacyWindow.getInsideAdBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideAdBlockerSetting()
             }
-            XCTAssertTrue(privacyWindow.isSettingEnabled(element: privacyWindow.getInsideAdBlockerSettingElement()))
+            XCTAssertTrue(privacyWindow.getInsideAdBlockerSettingElement().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         

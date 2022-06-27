@@ -55,10 +55,10 @@ class TrackersBlockerTests: BaseTest {
     func testEnabledTrackersBlocker(){
         
         step ("Given social media button blocker setting is disabled"){
-            if (!privacyWindow.isSettingEnabled(element: privacyWindow.getSocialMediaButtonBlockerSettingElement())) {
+            if !privacyWindow.getSocialMediaButtonBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideSocialMediaButtonBlockerSetting()
             }
-            XCTAssertTrue(privacyWindow.isSettingEnabled(element: privacyWindow.getSocialMediaButtonBlockerSettingElement()))
+            XCTAssertTrue(privacyWindow.getSocialMediaButtonBlockerSettingElement().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
@@ -74,10 +74,10 @@ class TrackersBlockerTests: BaseTest {
     func testDisabledTrackersBlocker(){
         
         step ("Given social media button blocker setting is disabled"){
-            if (privacyWindow.isSettingEnabled(element: privacyWindow.getSocialMediaButtonBlockerSettingElement())) {
+            if privacyWindow.getSocialMediaButtonBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickInsideSocialMediaButtonBlockerSetting()
             }
-            XCTAssertFalse(privacyWindow.isSettingEnabled(element: privacyWindow.getSocialMediaButtonBlockerSettingElement()))
+            XCTAssertFalse(privacyWindow.getSocialMediaButtonBlockerSettingElement().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
