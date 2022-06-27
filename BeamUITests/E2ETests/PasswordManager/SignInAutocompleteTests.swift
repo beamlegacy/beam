@@ -16,8 +16,8 @@ class SignInAutocompleteTests: BaseTest {
     private func credentialsAutocompleteAssertion(login: String) {
         step("THEN after clicking on pop-up login text the credentials are successfully populated"){
             passwordManagerHelper.clickPopupLoginText(login: login)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getUsernameFieldElement(title: "Username: ")), login)
-            XCTAssertEqual(mockPage.getElementStringValue(element: mockPage.getPasswordFieldElement(false)), "••••••••••")
+            XCTAssertEqual(mockPage.getUsernameFieldElement(title: "Username: ").getStringValue(), login)
+            XCTAssertEqual(mockPage.getPasswordFieldElement(false).getStringValue(), "••••••••••")
         }
     }
     

@@ -37,10 +37,10 @@ class CookieBannerBlockerTests: BaseTest {
     func testEnabledCookieBannerBlocker(){
         
         step ("Given Hide Cookie Banner blocker setting is enabled"){
-            if (!privacyWindow.isSettingEnabled(element: privacyWindow.getCookieBannerBlockerSettingElement())) {
+            if !privacyWindow.getCookieBannerBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickCookieBannerBlockerSetting()
             }
-            XCTAssertTrue(privacyWindow.isSettingEnabled(element: privacyWindow.getCookieBannerBlockerSettingElement()))
+            XCTAssertTrue(privacyWindow.getCookieBannerBlockerSettingElement().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         
@@ -56,10 +56,10 @@ class CookieBannerBlockerTests: BaseTest {
     func testDisabledCookieBannerBlocker(){
         
         step ("Given Hide Cookie Banner button blocker setting is disabled"){
-            if (privacyWindow.isSettingEnabled(element: privacyWindow.getCookieBannerBlockerSettingElement())) {
+            if privacyWindow.getCookieBannerBlockerSettingElement().isSettingEnabled() {
                 privacyWindow.clickCookieBannerBlockerSetting()
             }
-            XCTAssertFalse(privacyWindow.isSettingEnabled(element: privacyWindow.getCookieBannerBlockerSettingElement()))
+            XCTAssertFalse(privacyWindow.getCookieBannerBlockerSettingElement().isSettingEnabled())
             shortcutHelper.shortcutActionInvoke(action: .closeTab)
         }
         

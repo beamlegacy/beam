@@ -59,7 +59,7 @@ class MockHTTPWebPages: BaseView {
         let staticTexts = app.windows.webViews["Mock Form Server"].groups.containing(.staticText, identifier: label).children(matching: .staticText)
         guard staticTexts.count > 2 else { return nil }
         let element = staticTexts.element(boundBy: 2)
-        return getElementStringValue(element: element)
+        return element.getStringValue()
     }
     
     enum MockPageLink: String, CaseIterable {

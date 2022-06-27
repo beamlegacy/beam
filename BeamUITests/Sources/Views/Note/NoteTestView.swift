@@ -50,11 +50,11 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getNoteTitle() -> String {
-        return self.getElementStringValue(element: noteTitle)
+        return noteTitle.getStringValue()
     }
     
     func getNoteStaticTitle() -> String {
-        return self.getElementStringValue(element: noteTitleStatic)
+        return noteTitleStatic.getStringValue()
     }
     
     func getDeleteNoteButton() -> XCUIElement {
@@ -129,7 +129,7 @@ class NoteTestView: TextEditorContextTestView {
         let notesElements = getNoteNodesForVisiblePart()
         var names = [String]()
         for elem in notesElements {
-            names.append(getElementStringValue(element: elem))
+            names.append(elem.getStringValue())
         }
         return names
     }
@@ -224,7 +224,7 @@ class NoteTestView: TextEditorContextTestView {
     }
     
     func getLinkContentByIndex(_ index: Int) -> String {
-        return self.getElementStringValue(element: getLinksContentElement()[index])
+        return getLinksContentElement()[index].getStringValue()
     }
     
     func getLinkContentElementByIndex(_ index: Int) -> XCUIElement {

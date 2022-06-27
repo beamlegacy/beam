@@ -127,4 +127,12 @@ extension XCUIElement: WaitHelper {
     public func getSize() -> (width: CGFloat, height: CGFloat) {
         return (self.frame.size.width, self.frame.size.height)
     }
+    
+    public func isSettingEnabled() -> Bool {
+        return (self.value as? Int == 1)
+    }
+    
+    public func getStringValue() -> String {
+        return self.value as? String ?? "ERROR:failed to fetch string value from " + self.identifier
+    }
 }

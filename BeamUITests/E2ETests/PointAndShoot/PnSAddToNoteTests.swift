@@ -50,8 +50,8 @@ class PnSAddToNoteTests: BaseTest {
         
         step("Then \(expectedItemText1) and \(expectedItemText2) items are displayed in the note"){
             XCTAssertEqual(noteNodes.count, 2)
-            XCTAssertEqual(pnsView.getElementStringValue(element:  noteNodes[0]), expectedItemText1)
-            XCTAssertEqual(pnsView.getElementStringValue(element:noteNodes[1]), expectedItemText2)
+            XCTAssertEqual(noteNodes[0].getStringValue(), expectedItemText1)
+            XCTAssertEqual(noteNodes[1].getStringValue(), expectedItemText2)
         }
 
     }
@@ -75,7 +75,7 @@ class PnSAddToNoteTests: BaseTest {
         
         step("Then 2 non-empty notes are added"){
             XCTAssertEqual(noteNodes.count, 2)
-            XCTAssertNotEqual(noteView.getElementStringValue(element: noteNodes[0]), emptyString, "note added is an empty string")
+            XCTAssertNotEqual(noteNodes[0].getStringValue(), emptyString, "note added is an empty string")
         }
 
     }
@@ -104,12 +104,12 @@ class PnSAddToNoteTests: BaseTest {
         step("Then 2 non-empty notes are added to an empty first one?"){
             XCTAssertTrue(noteNodes.count == 2 || noteNodes.count == 3) //CI specific issue handling
             if noteNodes.count == 2 {
-                XCTAssertEqual(noteView.getElementStringValue(element: noteNodes[0]), "Point And Shoot Test Fixture Cursor")
-                XCTAssertEqual(noteView.getElementStringValue(element: noteNodes[1]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+                XCTAssertEqual(noteNodes[0].getStringValue(), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(noteNodes[1].getStringValue(), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
             } else {
-                XCTAssertEqual(noteView.getElementStringValue(element: noteNodes[0]), emptyString)
-                XCTAssertEqual(noteView.getElementStringValue(element: noteNodes[1]), "Point And Shoot Test Fixture Cursor")
-                XCTAssertEqual(noteView.getElementStringValue(element: noteNodes[2]), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
+                XCTAssertEqual(noteNodes[0].getStringValue(), emptyString)
+                XCTAssertEqual(noteNodes[1].getStringValue(), "Point And Shoot Test Fixture Cursor")
+                XCTAssertEqual(noteNodes[2].getStringValue(), "The pointer hotspot is the active pixel of the pointer, used to target a click or drag. The hotspot is normally along the pointer edges or in its center, though it may reside at any location in the pointer.[9][10][11]")
             }
         }
         
@@ -181,13 +181,11 @@ class PnSAddToNoteTests: BaseTest {
         }
 
         step ("Then the note contains video link"){
+            let expectedContent = "Beam.app/Contents/Resources/video.mov"
             noteNodes = noteView.getNoteNodesForVisiblePart()
             XCTAssertEqual(noteNodes.count, 2)
-            if let videoNote = noteView?.getElementStringValue(element:  noteNodes[1]) {
-                XCTAssertTrue(videoNote.contains("Beam.app/Contents/Resources/video.mov"))
-            } else {
-                XCTFail("expected noteNode[0].value to be a string")
-            }
+            let videoNote = noteNodes[1].getStringValue()
+            XCTAssertTrue(videoNote.contains(expectedContent), "'\(videoNote)' note doesn't contain:\(expectedContent)")
         }
     }
     
@@ -229,7 +227,7 @@ class PnSAddToNoteTests: BaseTest {
             noteView = NoteTestView()
             let beforeNoteNodes = noteView.getNoteNodesForVisiblePart()
             XCTAssertEqual(beforeNoteNodes.count, 1)
-            XCTAssertEqual(noteView.getElementStringValue(element: beforeNoteNodes[0]), emptyString)
+            XCTAssertEqual(beforeNoteNodes[0].getStringValue(), emptyString)
             helper.openTestPage(page: .media)
             let itemToCollect = pnsView.app.windows.groups["Audio Controls"].children(matching: .group).element(boundBy: 1).children(matching: .slider).element
             pnsView.addToTodayNote(itemToCollect)
@@ -247,7 +245,7 @@ class PnSAddToNoteTests: BaseTest {
         step ("Then the note is still empty"){
             noteNodes = NoteTestView().getNoteNodesForVisiblePart()
             XCTAssertEqual(noteNodes.count, 1)
-            XCTAssertTrue(noteView.getElementStringValue(element: noteNodes[0]) == emptyString || noteView.getElementStringValue(element: noteNodes[0]) == "Media Player Test Page") //CI specific issue handling
+            XCTAssertTrue(noteNodes[0].getStringValue() == emptyString || noteNodes[0].getStringValue() == "Media Player Test Page") //CI specific issue handling
         }
 
     }
@@ -274,7 +272,7 @@ class PnSAddToNoteTests: BaseTest {
             noteNodes = noteView.getNoteNodesForVisiblePart()
             //To be refactored once BE-2117 merged
             XCTAssertEqual(noteNodes.count, 1)
-            XCTAssertEqual(noteView.getElementStringValue(element: noteNodes[0]), expectedNoteText)
+            XCTAssertEqual(noteNodes[0].getStringValue(), expectedNoteText)
         }
 
     }
