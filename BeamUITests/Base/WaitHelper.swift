@@ -17,6 +17,7 @@ enum PredicateFormat: String {
     case isDisabled = "isEnabled == false"
     case isHittable = "isHittable == true"
     case isNotHittable = "isHittable == false"
+    case isSelected = "isSelected == true"
     case exists = "exists == true"
     case notExists = "exists == false"
     case identifierEquals = "identifier == "

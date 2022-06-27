@@ -10,7 +10,7 @@ import XCTest
 
 class ShortcutsHelper {
     
-    private func invokeCMDKey(_ key: String) {
+    public func invokeCMDKey(_ key: String) {
         XCUIApplication().typeKey(key, modifierFlags: .command)
     }
     
